@@ -2101,6 +2101,66 @@
    "urlChecks": {
     "https://quran.com/2/63": 200
    }
+  },
+  {
+   "sourceId": "quran:2:64",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/64",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:64?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:64",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "ثُمَّ تَوَلَّيْتُم مِّنۢ بَعْدِ ذَٰلِكَ ۖ فَلَوْلَا فَضْلُ ٱللَّهِ عَلَيْكُمْ وَرَحْمَتُهُۥ لَكُنتُم مِّنَ ٱلْخَـٰسِرِينَ",
+    "translation": "Dann kehrtet ihr euch nach alledem ab. Aber wenn nicht Allahs Huld gegen euch und Sein Erbarmen gewesen wären, gehörtet ihr wahrlich zu den Verlierern.",
+    "tafsir_muyassar": "ثم خالفتم وعصيتم مرة أخرى، بعد أَخْذِ الميثاق ورَفْع الجبل كشأنكم دائمًا. فلولا فَضْلُ الله عليكم ورحمته بالتوبة، والتجاوز عن خطاياكم، لصرتم من الخاسرين في الدنيا والآخرة.",
+    "tafsir_ibnkathir": "<h2>Taking the Covenant from the Jews</h2><p>Allah reminded the Children of Israel of the pledges, covenants and promises that He took from them to believe in Him alone, without a partner, and follow His Messengers. Allah stated that when He took their pledge from them, He raised the mountain above their heads, so that they affirm the pledge that they gave Allah and abide by it with sincerity and seriousness. Hence, Allah's statement, </p><div class=\"arabic uthmani\">وَإِذ نَتَقْنَا الْجَبَلَ فَوْقَهُمْ كَأَنَّهُ ظُلَّةٌ وَظَنُّواْ أَنَّهُ وَاقِعٌ بِهِمْ خُذُواْ مَآ ءَاتَيْنَاكُم بِقُوَّةٍ وَاذْكُرُواْ مَا فِيهِ لَعَلَّكُمْ تَتَّقُونَ </div><p>(And (remember) when We raised the mountain over them as if it had been a canopy, and they thought that it was going to fall on them. (We said): \"Hold firmly to what We have given you (Tawrah), and remember that which is therein (act on its commandments), so that you may fear Allah and obey Him.\") (7:171). </p><p>The mount mentioned here is At-Tur, just as it was explained in Surat Al-A`raf, according to the Tafsir of Ibn `Abbas, Mujahid, `Ata', `Ikrimah, Al-Hasan, Ad-Dahhak, Ar-Rabi` bin Anas and others. This is more obvious. There is another report from Ibn `Abbas saying; `The Tur is a type of mountain that vegetation grows on, if no vegetation grows on it, it is not called Tur.' And in the Hadith about the trials, Ibn `Abbas said; \"When they (the Jews) refused to obey, Allah raised the mountain above their heads so that they would listen.\" </p><p>Al-Hasan said that Allah's statement, </p><div class=\"arabic uthmani\">خُذُواْ مَآ ءَاتَيْنَـكُم بِقُوَّةٍ</div><p>(Hold fast to that which We have given you) means, the Tawrah. Mujahid said that the Ayah commanded, \"Strictly adhere to it.\" Abu Al-`Aliyah and Ar-Rabi` said that, </p><div class=\"arabic uthmani\">وَاذْكُرُواْ مَا فِيهِ</div><p>(and remember that which is therein) means, \"Read the Tawrah and implement it.\" Allah's statement, </p><div class=\"arabic uthmani\">ثُمَّ تَوَلَّيْتُم مِّن بَعْدِ ذلِكَ فَلَوْلاَ فَضْلُ اللَّهِ</div><p>(Then after that you turned away. Had it not been for the grace of Allah) means, \"Yet, after the firm pledge that you gave, you still deviated and broke your pledge\"; </p><div class=\"arabic uthmani\">فَلَوْلاَ فَضْلُ اللَّهِ عَلَيْكُمْ وَرَحْمَتُهُ</div><p>(Had it not been for the grace and mercy of Allah upon you), meaning, by forgiving you and by sending the Prophets and Messengers to you, </p><div class=\"arabic uthmani\">لَكُنتُم مِّنَ الْخَـسِرِينَ</div><p>(Indeed you would have been among the losers) meaning, in this life and the Hereafter due to their breach of the covenant. </p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:64"
+   },
+   "fetchedAt": "2026-10-23T04:36:30.570Z",
+   "urlChecks": {
+    "https://quran.com/2/64": 200
+   }
+  },
+  {
+   "sourceId": "quran:2:65",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/65",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:65?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:65",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "وَلَقَدْ عَلِمْتُمُ ٱلَّذِينَ ٱعْتَدَوْا۟ مِنكُمْ فِى ٱلسَّبْتِ فَقُلْنَا لَهُمْ كُونُوا۟ قِرَدَةً خَـٰسِـِٔينَ",
+    "translation": "Und ihr kennt doch diejenigen von euch, die den Sabbat übertraten. Da sagten Wir zu ihnen: „Werdet verstoßene Affen!",
+    "tafsir_muyassar": "ولقد علمتم -يا معشر اليهود- ما حلَّ من البأس بأسلافكم من أهل القرية التي عصت الله، فيما أخذه عليهم من تعظيم السبت، فاحتالوا لاصطياد السمك في يوم السبت، بوضع الشِّباك وحفر البِرَك، ثم اصطادوا السمك يوم الأحد حيلة إلى المحرم، فلما فعلوا ذلك، مسخهم الله قردة منبوذين.",
+    "tafsir_ibnkathir": "<h2>The Jews breach the Sanctity of the Sabbath</h2><p>Allah said,</p><p>وَلَقَدْ عَلِمْتُمُ</p><p>(And indeed you knew). This Ayah means, O Jews! Remember that Allah sent His torment on the village that disobeyed Him and broke their pledge and their covenant to observe the sanctity of the Sabbath. They began using deceitful means to avoid honoring the Sabbath by placing nets, ropes and artificial pools of water for the purpose of fishing before the Sabbath. When the fish came in abundance on Saturday as usual, they were caught in the ropes and nets for the rest of Saturday. During the night, the Jews collected the fish after the Sabbath ended. When they did that, Allah changed them from humans into monkeys, the animals having the form closest to humans. Their evil deeds and deceit appeared lawful on the surface, but they were in reality wicked. This is why their punishment was compatible with their crime. This story is explained in detail in Surat Al-A`raf, where Allah said (7:163),</p><p>وَسْئَلْهُمْ عَنِ الْقَرْيَةِ الَّتِى كَانَتْ حَاضِرَةَ الْبَحْرِ إِذْ يَعْدُونَ فِى السَّبْتِ إِذْ تَأْتِيهِمْ حِيتَانُهُمْ يَوْمَ سَبْتِهِمْ شُرَّعًا وَيَوْمَ لاَ يَسْبِتُونَ لاَ تَأْتِيهِمْ كَذَلِكَ نَبْلُوهُم بِمَا كَانُوا يَفْسُقُونَ</p><p>(And ask them (O Muhammad ) about the town that was by the sea; when they transgressed in the matter of the Sabbath (i.e. Saturday): when their fish came to them openly on the Sabbath day, and did not come to them on the day they had no Sabbath. Thus We made a trial of them, for they used to rebel (disobey Allah).)(7:163)</p><p>In his Tafsir, Al-`Awfi reported from Ibn `Abbas that he said,</p><p>فَقُلْنَا لَهُمْ كُونُواْ قِرَدَةً خَـسِئِينَ</p><p>(We said to them: \"Be you monkeys, despised and rejected\") means, \"Allah changed their bodies into those of monkeys and swines. The young people turned into monkeys while the old people turned into swine.\" Shayban An-Nahwi reported that Qatadah commented on,</p><p>فَقُلْنَا لَهُمْ كُونُواْ قِرَدَةً خَـسِئِينَ</p><p>(We said to them: \"Be you monkeys, despised and rejected\"), \"These people were turned into howling monkeys with tails, after being men and women.\"</p><h2>The Monkeys and Swine that exist now are not the Descendants of Those that were transformed</h2><p>Ibn Abi Hatim recorded that Ibn `Abbas said, \"Those who violated the sanctity of the Sabbath were turned into monkeys, then they perished without offspring.\" Ad-Dahhak said that Ibn `Abbas said, \"Allah turned them into monkeys because of their sins. They only lived on the earth for three days, for no transformed person ever lives more than three days. They did not eat, drink or have offspring. Allah transformed their shapes into monkeys, and He does what He wills, with whom He wills and He changes the shape of whomever He wills. On the other hand, Allah created the monkeys, swines and the rest of the creation in the six days (of creation) that He mentioned in His Book.\"</p><p>Allah's statement,</p><p>فَجَعَلْنَـهَا نَكَـلاً</p><p>(So We made this punishment an example) means, Allah made the people of this village, who violated the sanctity of the Sabbath,</p><p>نَكَـلاً</p><p>(an example) via the way they were punished. Similarly, Allah said about Pharaoh,</p><p>فَأَخَذَهُ اللَّهُ نَكَالَ الاٌّخِرَةِ وَالاٍّوْلَى</p><p>(So Allah, seized him with punishing example for his last and first transgression) (79:25). nAllah's statement,</p><p>لِّمَا بَيْنَ يَدَيْهَا وَمَا خَلْفَهَا</p><p>(for those in front of it and those behind it) meaning, for the other villages. Ibn `Abbas commented, \"Meaning, `We made this village an example for the villages around it by the manner in which We punished its people.\"' Similarly, Allah said,</p><p>وَلَقَدْ أَهْلَكْنَا مَا حَوْلَكُمْ مِّنَ الْقُرَى وَصَرَّفْنَا الاٌّيَـتِ لَعَلَّهُمْ يَرْجِعُونَ</p><p>(And indeed We have destroyed towns (populations) round about you, and We have (repeatedly) shown (them) the Ayat (proofs, evidences, verses, lessons, signs, revelations, etc.) in various ways that they might return (to the truth and believe in the Oneness of Allah ـ Islamic Monotheism)).(46:27)</p><p>Therefore, Allah made them an example for those who lived during their time as well as a reminder for those to come, by preserving their story. This is why Allah said,</p><p>وَمَوْعِظَةً لِّلْمُتَّقِينَ</p><p>(and a lesson for Al-Muttaqin (the pious)), meaning, a reminder. This Ayah means, \"The torment and punishment that this village suffered was a result of indulging in Allah's prohibitions and their deceit. Hence, those who have Taqwa should be aware of their evil behavior, so that what occurred to this village does not befall them as well.\" Also, Imam Abu `Abdullah bin Battah reported that Abu Hurayrah said that the Messenger of Allah ﷺ said,</p><p>«لَا تَرْتَكِبُوا مَا ارْتَكَبَتِ الْيَهُودُ فَتَسْتَحِلُّوا مَحَارِمَ اللهِ بِأَدْنَى الْحِيَل»</p><p>(Do not commit what the Jews committed, breaching what Allah has forbidden, by resorting to the lowest types of deceit.)</p><p>This Hadith has a good (Jayid) chain of narration. Allah knows best.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:65"
+   },
+   "fetchedAt": "2026-10-23T04:36:30.570Z",
+   "urlChecks": {
+    "https://quran.com/2/65": 200
+   }
   }
  ]
 }

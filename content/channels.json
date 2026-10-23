@@ -12,7 +12,8 @@
    "resolvedTitle": "Yaqeen Institute",
    "verified": true,
    "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (48))",
-   "status": "inactive"
+   "status": "active",
+   "lastShort": "2026-10-22"
   },
   {
    "name": "Omar Suleiman",
@@ -23,8 +24,9 @@
    "channelId": "UCtm8rtofLSnaIBi3noB0INg",
    "resolvedBy": "https://www.youtube.com/c/OmarSuleimanOfficial",
    "resolvedTitle": "Omar Suleiman Personal",
-   "status": "inactive",
-   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (48))"
+   "status": "active",
+   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (48))",
+   "lastShort": "2026-10-22"
   },
   {
    "name": "Nouman Ali Khan / Bayyinah",
@@ -36,8 +38,9 @@
    "resolvedBy": "search:Nouman Ali Khan",
    "resolvedTitle": "Nouman Ali Khan",
    "verified": false,
-   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (20))",
-   "status": "inactive"
+   "note": "kein neues Short seit 2022-03-25",
+   "status": "inactive",
+   "lastShort": "2022-03-25"
   },
   {
    "name": "Yasir Qadhi",
@@ -50,7 +53,8 @@
    "resolvedTitle": "Yasir Qadhi",
    "verified": true,
    "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (48))",
-   "status": "inactive"
+   "status": "active",
+   "lastShort": "2026-10-13"
   },
   {
    "name": "Mufti Menk",
@@ -63,7 +67,8 @@
    "resolvedTitle": "Mufti Menk",
    "verified": true,
    "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (39))",
-   "status": "inactive"
+   "status": "active",
+   "lastShort": "2026-10-22"
   },
   {
    "name": "Ahmad Al Shugairi",
@@ -89,7 +94,8 @@
    "resolvedTitle": "عمر عبد الكافي",
    "verified": true,
    "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (48))",
-   "status": "inactive"
+   "status": "active",
+   "lastShort": "2026-10-20"
   },
   {
    "name": "Jeff Nippard",
@@ -100,8 +106,9 @@
    "channelId": "UC68TLK0mAEzUyHx5x5k-S1Q",
    "resolvedBy": "https://www.youtube.com/@JeffNippard",
    "resolvedTitle": "Jeff Nippard",
-   "status": "inactive",
-   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (48))"
+   "status": "active",
+   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (48))",
+   "lastShort": "2026-10-17"
   },
   {
    "name": "Stronger By Science",
@@ -113,8 +120,9 @@
    "resolvedBy": "search:Stronger By Science",
    "resolvedTitle": "Stronger By Science",
    "verified": false,
-   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (47))",
-   "status": "inactive"
+   "note": "kein neues Short seit 2025-02-28",
+   "status": "inactive",
+   "lastShort": "2025-02-28"
   },
   {
    "name": "Renaissance Periodization",
@@ -126,7 +134,7 @@
    "resolvedBy": "search:Renaissance Periodization",
    "resolvedTitle": "Renaissance Periodization",
    "verified": true,
-   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (48))",
+   "note": "keine Shorts gefunden (UUSH 404, channel-feed 200, shorts-tab 200 (48))",
    "status": "inactive"
   },
   {
@@ -139,8 +147,9 @@
    "resolvedBy": "search:Jeremy Ethier",
    "resolvedTitle": "Jeremy Ethier",
    "verified": true,
-   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (26))",
-   "status": "inactive"
+   "note": "kein neues Short seit 2026-03-15",
+   "status": "inactive",
+   "lastShort": "2026-03-15"
   },
   {
    "name": "Layne Norton",
@@ -153,7 +162,8 @@
    "resolvedTitle": "Dr. Layne Norton",
    "verified": true,
    "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (48))",
-   "status": "inactive"
+   "status": "active",
+   "lastShort": "2026-10-09"
   },
   {
    "name": "Peter Attia MD",
@@ -161,9 +171,13 @@
    "area": "body",
    "topic": "ausdauer",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UC8kGsMa0LygSX9nkBcBH1Sg",
+   "resolvedBy": "search:Peter Attia MD",
+   "resolvedTitle": "Peter Attia MD",
+   "verified": true,
+   "note": "@PeterAttiaMD",
+   "lastShort": "2026-09-28",
+   "status": "active"
   },
   {
    "name": "Squat University",
@@ -171,9 +185,13 @@
    "area": "body",
    "topic": "recovery",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCyPYQTT20IgzVw92LDvtClw",
+   "resolvedBy": "search:Squat University",
+   "resolvedTitle": "Squat University",
+   "verified": true,
+   "note": "@SquatUniversity",
+   "lastShort": "2026-10-22",
+   "status": "active"
   },
   {
    "name": "Andy Galpin",
@@ -181,9 +199,13 @@
    "area": "body",
    "topic": "recovery",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCe3R2e3zYxWwIhMKV36Qhkw",
+   "resolvedBy": "search:Andy Galpin",
+   "resolvedTitle": "Andy Galpin",
+   "verified": true,
+   "note": "kein neues Short seit 2026-07-10",
+   "lastShort": "2026-07-10",
+   "status": "inactive"
   },
   {
    "name": "Cataract Coach",
@@ -193,7 +215,7 @@
    "lang": "en",
    "channelId": null,
    "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "note": "Suche HTTP 200, Treffer: Uday Devgan | MYLearning"
   },
   {
    "name": "American Academy of Ophthalmology",
@@ -204,8 +226,9 @@
    "channelId": "UCy0K_Rd-grmLTT7dVGfF1Sg",
    "resolvedBy": "https://www.youtube.com/user/AAOtv",
    "resolvedTitle": "American Academy of Ophthalmology",
-   "status": "inactive",
-   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (16))"
+   "status": "active",
+   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (16))",
+   "lastShort": "2026-10-07"
   },
   {
    "name": "Shannon Wong MD",
@@ -217,7 +240,8 @@
    "resolvedBy": "https://www.youtube.com/c/ShannonWongMD",
    "resolvedTitle": "Shannon Wong, MD",
    "status": "inactive",
-   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (7))"
+   "note": "kein neues Short seit 2026-02-28",
+   "lastShort": "2026-02-28"
   },
   {
    "name": "glaucomavids",
@@ -225,9 +249,13 @@
    "area": "brain",
    "topic": "augen",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCw-BGyzWl8KF_M1yEI5B5eQ",
+   "resolvedBy": "search:glaucomavids",
+   "resolvedTitle": "glaucomavids",
+   "verified": false,
+   "note": "kein neues Short seit 2024-06-27",
+   "lastShort": "2024-06-27",
+   "status": "inactive"
   },
   {
    "name": "Ophthalminute",
@@ -235,9 +263,13 @@
    "area": "brain",
    "topic": "augen",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCwbXawhzN7jJmUylOe8kV5w",
+   "resolvedBy": "search:Ophthalminute",
+   "resolvedTitle": "Ophthalminute",
+   "verified": false,
+   "note": "@Ophthalminute",
+   "lastShort": "2026-10-19",
+   "status": "active"
   },
   {
    "name": "Two Minute Papers",
@@ -245,9 +277,13 @@
    "area": "brain",
    "topic": "ki",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCbfYPyITQ-7l4upoX8nvctg",
+   "resolvedBy": "search:Two Minute Papers",
+   "resolvedTitle": "Two Minute Papers",
+   "verified": true,
+   "note": "kein neues Short seit 2026-06-05",
+   "lastShort": "2026-06-05",
+   "status": "inactive"
   },
   {
    "name": "AI Explained",
@@ -255,9 +291,12 @@
    "area": "brain",
    "topic": "ki",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCNJ1Ymd5yFuUPtn21xtRbbw",
+   "resolvedBy": "search:AI Explained",
+   "resolvedTitle": "AI Explained",
+   "verified": true,
+   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (0))",
+   "status": "inactive"
   },
   {
    "name": "Anthropic",
@@ -265,9 +304,13 @@
    "area": "brain",
    "topic": "ki",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCrDwWp7EBBv4NwvScIpBDOA",
+   "resolvedBy": "search:Anthropic",
+   "resolvedTitle": "Anthropic",
+   "verified": false,
+   "note": "@anthropic-ai",
+   "lastShort": "2026-09-01",
+   "status": "active"
   },
   {
    "name": "Dwarkesh Patel",
@@ -275,9 +318,13 @@
    "area": "brain",
    "topic": "ki",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCXl4i9dYBrFOabk0xGmbkRA",
+   "resolvedBy": "search:Dwarkesh Patel",
+   "resolvedTitle": "Dwarkesh Patel",
+   "verified": true,
+   "note": "@DwarkeshPatel",
+   "lastShort": "2026-10-22",
+   "status": "active"
   },
   {
    "name": "Fireship",
@@ -285,9 +332,13 @@
    "area": "brain",
    "topic": "ki",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCsBjURrPoezykLs9EqgamOA",
+   "resolvedBy": "search:Fireship",
+   "resolvedTitle": "Fireship",
+   "verified": true,
+   "note": "kein neues Short seit 2024-09-21",
+   "lastShort": "2024-09-21",
+   "status": "inactive"
   },
   {
    "name": "3Blue1Brown",
@@ -295,9 +346,13 @@
    "area": "brain",
    "topic": "ki",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCYO_jab_esuFRV4b17AJtAw",
+   "resolvedBy": "search:3Blue1Brown",
+   "resolvedTitle": "3Blue1Brown",
+   "verified": true,
+   "note": "@3blue1brown",
+   "lastShort": "2026-09-25",
+   "status": "active"
   },
   {
    "name": "Chris Voss",
@@ -305,9 +360,13 @@
    "area": "brain",
    "topic": "business",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCk7jHqdlFFDBhC1QIFqi54w",
+   "resolvedBy": "search:Chris Voss Black Swan",
+   "resolvedTitle": "Chris Voss & The Black Swan Group",
+   "verified": false,
+   "note": "@NegotiationMastery",
+   "lastShort": "2026-10-22",
+   "status": "active"
   },
   {
    "name": "Big Think",
@@ -318,8 +377,9 @@
    "channelId": "UCvQECJukTDE2i6aCoMnS-Vg",
    "resolvedBy": "channel-url",
    "resolvedTitle": "Big Think",
-   "status": "inactive",
-   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (48))"
+   "status": "active",
+   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (48))",
+   "lastShort": "2026-10-21"
   },
   {
    "name": "Y Combinator",
@@ -327,9 +387,13 @@
    "area": "brain",
    "topic": "business",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCcefcZRL2oaA_uBNeo5UOWg",
+   "resolvedBy": "search:Y Combinator",
+   "resolvedTitle": "Y Combinator",
+   "verified": true,
+   "note": "@ycombinator",
+   "lastShort": "2026-10-16",
+   "status": "active"
   },
   {
    "name": "Alex Hormozi",
@@ -337,9 +401,13 @@
    "area": "brain",
    "topic": "business",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCUyDOdBWhC1MCxEjC46d-zw",
+   "resolvedBy": "search:Alex Hormozi",
+   "resolvedTitle": "Alex Hormozi",
+   "verified": true,
+   "note": "@AlexHormozi",
+   "lastShort": "2026-10-22",
+   "status": "active"
   },
   {
    "name": "Lenny's Podcast",
@@ -347,9 +415,12 @@
    "area": "brain",
    "topic": "business",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UC6t1O76G0jYXOAoYCm153dA",
+   "resolvedBy": "search:Lenny's Podcast",
+   "resolvedTitle": "Lenny's Podcast",
+   "verified": true,
+   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (48))",
+   "status": "inactive"
   },
   {
    "name": "Harvard Business Review",
@@ -357,9 +428,12 @@
    "area": "brain",
    "topic": "business",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCWo4IA01TXzBeGJJKWHOG9g",
+   "resolvedBy": "search:Harvard Business Review",
+   "resolvedTitle": "Harvard Business Review",
+   "verified": true,
+   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (48))",
+   "status": "inactive"
   },
   {
    "name": "Veritasium",
@@ -367,9 +441,12 @@
    "area": "brain",
    "topic": "varia",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCHnyfMqiRRG1u-2MsSQLbXA",
+   "resolvedBy": "search:Veritasium",
+   "resolvedTitle": "Veritasium",
+   "verified": true,
+   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (48))",
+   "status": "inactive"
   },
   {
    "name": "Dinge Erklärt, Kurzgesagt",
@@ -377,9 +454,12 @@
    "area": "brain",
    "topic": "varia",
    "lang": "de",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCwRH985XgMYXQ6NxXDo8npw",
+   "resolvedBy": "search:Dinge Erklärt Kurzgesagt",
+   "resolvedTitle": "Dinge Erklärt – Kurzgesagt",
+   "verified": true,
+   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (0))",
+   "status": "inactive"
   },
   {
    "name": "Kurzgesagt",
@@ -387,9 +467,12 @@
    "area": "brain",
    "topic": "varia",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCsXVk37bltHxD1rDPwtNM8Q",
+   "resolvedBy": "search:Kurzgesagt In a Nutshell",
+   "resolvedTitle": "Kurzgesagt – In a Nutshell",
+   "verified": true,
+   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (48))",
+   "status": "inactive"
   },
   {
    "name": "TED-Ed",
@@ -397,9 +480,12 @@
    "area": "brain",
    "topic": "varia",
    "lang": "en",
-   "channelId": null,
-   "status": "unresolved",
-   "note": "Suche HTTP 0, Treffer: keine"
+   "channelId": "UCsooa4yRKGN_zEE8iknghZA",
+   "resolvedBy": "search:TED-Ed",
+   "resolvedTitle": "TED-Ed",
+   "verified": true,
+   "note": "keine Shorts gefunden (UUSH 404, channel-feed 404, shorts-tab 200 (24))",
+   "status": "inactive"
   }
  ]
 }
