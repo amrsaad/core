@@ -31,7 +31,10 @@ async function main() {
   const candidates: Card[] = [];
   const skipped: { id: string; reason: string }[] = [];
   const blocked = readJson<{ ids: Record<string, string> }>(join(ROOT, 'content', 'blocklist.json'), { ids: {} }).ids;
+  const published = knownSourceIds();
   for (const r of raws) {
+    // Rohdaten desselben Tages aus einem früheren Lauf, die schon Karte sind: kein neuer Kandidat
+    if (published.has(r.sourceId)) continue;
     if (blocked[r.sourceId]) {
       skipped.push({ id: r.sourceId, reason: `Sperrliste: ${blocked[r.sourceId]}` });
       continue;
@@ -74,7 +77,7 @@ async function main() {
   for (const r of raws) bySource.set(r.source, [...(bySource.get(r.source) ?? []), r]);
   for (const [src, recs] of bySource) writeRaw(src, date, recs);
 
-  const { accepted, rejected } = validateCards(candidates, rawById, knownSourceIds());
+  const { accepted, rejected } = validateCards(candidates, rawById, published);
   const passRate = candidates.length ? accepted.length / candidates.length : 0;
 
   const shares = interests.areas;
