@@ -45,3 +45,13 @@ describe('Kartenbildung', () => {
     expect(parseAtom(xml)[0]).toMatchObject({ id: '2510.01234', title: 'A Title', summary: 'Text & more.', abs: 'https://arxiv.org/abs/2510.01234' });
   });
 });
+
+describe('Beat-Auszug', () => {
+  it('kürzt al-Muyassar wörtlich am arabischen Komma', async () => {
+    const { clausePrefix } = await import('../pipeline/cards');
+    const t = `${'كلمة '.repeat(50)}، ${'نص '.repeat(80)}`;
+    const p = clausePrefix(t, 400);
+    expect(p.endsWith('،')).toBe(true);
+    expect(t.includes(p)).toBe(true);
+  });
+});

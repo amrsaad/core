@@ -78,7 +78,7 @@ export function CardView({ card }: { card: Card }) {
         </div>
       )}
       <div className="flex flex-col gap-1">
-        {verse && <span className="t-meta text-muted">Tafsir al-Muyassar</span>}
+        {verse && <span className="t-meta text-muted">{isArabic(card.source.excerpt) ? 'Tafsir al-Muyassar' : 'Tafsir Ibn Kathir'}</span>}
         <Excerpt text={card.source.excerpt} />
       </div>
       <SourceLine card={card} />

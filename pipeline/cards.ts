@@ -77,13 +77,20 @@ function wikiCard(r: RawRecord, createdAt: string): BuildResult {
   return { card: base(r, 'fact', headline, excerpt, createdAt) };
 }
 
+/** Wörtlicher Anfang bis zum letzten arabischen oder lateinischen Komma vor max. */
+export function clausePrefix(text: string, max: number): string {
+  const cut = text.slice(0, max);
+  const i = Math.max(cut.lastIndexOf('،'), cut.lastIndexOf(','), cut.lastIndexOf('؛'), cut.lastIndexOf(';'));
+  return i > max * 0.4 ? cut.slice(0, i + 1).trim() : '';
+}
+
 function verseCard(r: RawRecord, createdAt: string): BuildResult {
   const arabic = plainContent(r, 'arabic');
   const translation = plainContent(r, 'translation');
   const muyassar = plainContent(r, 'tafsir_muyassar');
   const ibnKathir = plainContent(r, 'tafsir_ibnkathir');
   if (!arabic || !translation) return { skip: 'Vers oder Übersetzung fehlt' };
-  let excerpt = muyassar.length <= LIMITS.excerpt ? muyassar : takeSentences(sentences(muyassar), LIMITS.excerpt);
+  let excerpt = muyassar.length <= LIMITS.excerpt ? muyassar : takeSentences(sentences(muyassar), LIMITS.excerpt) || clausePrefix(muyassar, LIMITS.excerpt);
   let usedIbnKathir = false;
   if (!excerpt) {
     excerpt = takeSentences(sentences(ibnKathir), LIMITS.excerpt);

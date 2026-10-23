@@ -56,7 +56,8 @@ interface EpmcResponse {
 }
 
 function buildUrl(q: string, cursor = '*', pageSize = 50): string {
-  const p = new URLSearchParams({ query: q, format: 'json', resultType: 'core', pageSize: String(pageSize), sort: 'FIRST_PDATE_D', cursorMark: cursor });
+  // Kein sort-Parameter: Europe PMC antwortet darauf mit HTTP 503 (getestet 2026-10-23). Aktualität kommt über FIRST_PDATE.
+  const p = new URLSearchParams({ query: q, format: 'json', resultType: 'core', pageSize: String(pageSize), cursorMark: cursor });
   return `${BASE}?${p}`;
 }
 

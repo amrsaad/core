@@ -65,7 +65,8 @@ jobs:
           path: pipeline/out
       - name: Commit nur bei neuen Karten
         run: |
-          if git diff --quiet -- public/cards && [ -z "$(git ls-files --others --exclude-standard public/cards)" ]; then
+          # index.json ändert updatedAt bei jedem Lauf, zählt daher nicht als neue Karte
+          if git diff --quiet -- public/cards ':!public/cards/index.json' && [ -z "$(git ls-files --others --exclude-standard public/cards)" ]; then
             echo "Keine neuen Karten."
             exit 0
           fi

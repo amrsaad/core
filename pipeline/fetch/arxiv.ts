@@ -22,8 +22,13 @@ export async function fetchArxiv(ctx: FetchContext): Promise<RawRecord[]> {
   const out: RawRecord[] = [];
   const pages = ctx.seed ? 2 : 1;
   for (let p = 0; p < pages; p++) {
-    const url = `http://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=${p * 30}&max_results=30`;
-    const res = await get(url, { accept: 'application/atom+xml' });
+    const url = `https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=${p * 30}&max_results=30`;
+    let res = await get(url, { accept: 'application/atom+xml' });
+    // arXiv drosselt geteilte Runner-IPs: bei 429 zweimal mit langer Pause erneut
+    for (let i = 0; res.status === 429 && i < 2; i++) {
+      await sleep(20_000);
+      res = await get(url, { accept: 'application/atom+xml', retries: 0 });
+    }
     const entries = res.status === 200 ? parseAtom(res.text) : [];
     console.log(`  arxiv p${p + 1}: HTTP ${res.status}, ${entries.length} Einträge`);
     for (const e of entries) {
