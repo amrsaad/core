@@ -55,12 +55,18 @@ jobs:
             python3 - "$OUT" <<'PY'
           import json,os,shutil,sys
           out=sys.argv[1]; m=os.path.join(out,"manifest.json")
+          import re
+          keep=set()
           if os.path.exists(m):
               for test in json.load(open(m)):
                   for a in test.get("attachments",[]):
-                      src=os.path.join(out,a["exportedFileName"]); name=a.get("suggestedHumanReadableName") or a["exportedFileName"]
-                      if not name.endswith(".png"): name+=".png"
-                      if os.path.exists(src): shutil.move(src, os.path.join(out,name))
+                      src=os.path.join(out,a["exportedFileName"]); name=a.get("suggestedHumanReadableName") or ""
+                      name=re.sub(r"_0_[0-9A-F-]{36}","",name)
+                      if re.match(r"^\d\d-[a-z0-9-]+$", name) and os.path.exists(src):
+                          dst=os.path.join(out,name+".png"); shutil.move(src,dst); keep.add(dst)
+          for f in os.listdir(out):
+              p=os.path.join(out,f)
+              if p not in keep and f!="manifest.json": os.remove(p)
           print(sorted(os.listdir(out)))
           PY
           fi

@@ -382,6 +382,7 @@ struct MomentPage: View {
                 if let url = moment.fullURL { openURL(url) }
             }
             ActionButton(icon: "ellipsis", label: "More") { showMenu = true }
+                .accessibilityIdentifier("menuButton")
         }
         .frame(width: 64)
     }
@@ -437,6 +438,7 @@ struct MomentPage: View {
         .foregroundStyle(.white)
         .padding(.horizontal, 16)
         .padding(.top, 20)
+        .accessibilityIdentifier("menuSheet")
         .presentationDetents([.medium])
         .presentationBackground(Palette.surface)
         .presentationDragIndicator(.visible)
