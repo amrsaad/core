@@ -70,10 +70,12 @@ struct FeedView: View {
     @ObservedObject var feed: FeedModel
     @EnvironmentObject var store: Store
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
     @State private var currentID: String?
     @State private var lastID: String?
     @State private var forYou: Moment?
     @State private var flash: String?
+    @State private var menuFor: Moment?
     @State private var feedSeconds: Double = 0
     private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -109,7 +111,8 @@ struct FeedView: View {
                         playback: feed.playback(for: m),
                         isActive: currentID == m.id,
                         flash: $flash,
-                        onMenuAction: { action in menu(action, m) }
+                        onMenuAction: { action in menu(action, m) },
+                        onMenu: { menuFor = m }
                     )
                     .containerRelativeFrame([.horizontal, .vertical])
                     .id(m.id)
@@ -130,6 +133,18 @@ struct FeedView: View {
                     .padding(.horizontal, 16).padding(.vertical, 8)
                     .background(.black.opacity(0.8), in: Capsule())
                     .transition(.opacity)
+            }
+        }
+        .sheet(item: $menuFor) { m in
+            MenuSheet(moment: m, captions: Binding(get: { store.state.captions }, set: { store.state.captions = $0 })) { action in
+                menuFor = nil
+                switch action {
+                case .full:
+                    feed.playback(for: m).pause()
+                    if let url = m.fullURL { openURL(url) }
+                case .more, .known, .weak, .wrong, .mute:
+                    menu(action, m)
+                }
             }
         }
         .onAppear {
@@ -221,6 +236,8 @@ struct FeedView: View {
             if let i = index(of: m.id) { feed.removeUpcoming(channel: m.channel, after: i) }
             show("\(m.speakerLine) muted")
             advance()
+        case .full:
+            break
         }
     }
 
@@ -239,7 +256,7 @@ struct FeedView: View {
     }
 }
 
-enum MenuAction: String { case more, known, weak, wrong, mute }
+enum MenuAction: String { case more, known, weak, wrong, mute, full }
 
 // MARK: One moment
 
@@ -249,10 +266,10 @@ struct MomentPage: View {
     let isActive: Bool
     @Binding var flash: String?
     let onMenuAction: (MenuAction) -> Void
+    let onMenu: () -> Void
     @EnvironmentObject var store: Store
     @State private var fast = false
     @State private var pressing = false
-    @State private var showMenu = false
     @Environment(\.openURL) private var openURL
 
     var body: some View {
@@ -321,7 +338,6 @@ struct MomentPage: View {
             .foregroundStyle(.white)
         }
         .onAppear { playback.prepare() }
-        .sheet(isPresented: $showMenu) { menuSheet }
     }
 
     @ViewBuilder
@@ -381,7 +397,7 @@ struct MomentPage: View {
                 playback.pause()
                 if let url = moment.fullURL { openURL(url) }
             }
-            ActionButton(icon: "ellipsis", label: "More") { showMenu = true }
+            ActionButton(icon: "ellipsis", label: "More") { onMenu() }
                 .accessibilityIdentifier("menuButton")
         }
         .frame(width: 64)
@@ -409,7 +425,20 @@ struct MomentPage: View {
             })
     }
 
-    private var menuSheet: some View {
+    private func flashText(_ t: String) {
+        withAnimation { flash = t }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { withAnimation { flash = nil } }
+    }
+}
+
+/// Menu of one moment. Lives at feed level, because one sheet per page does not work in SwiftUI.
+struct MenuSheet: View {
+    let moment: Moment
+    @Binding var captions: Bool
+    let onAction: (MenuAction) -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
                 Circle().fill(moment.area.color).frame(width: 8, height: 8)
@@ -417,19 +446,16 @@ struct MomentPage: View {
             }
             .font(.system(size: 13))
             .padding(.bottom, 8)
-            sheetRow("More like this") { onMenuAction(.more) }
-            sheetRow("Already know this") { onMenuAction(.known) }
-            sheetRow("Weak") { onMenuAction(.weak) }
-            sheetRow("Wrong") { onMenuAction(.wrong) }
-            sheetRow(moment.isAudio ? "Open full episode" : "Open full video") {
-                playback.pause()
-                if let url = moment.fullURL { openURL(url) }
-            }
-            sheetRow("Mute this channel") { onMenuAction(.mute) }
-            Toggle("Captions", isOn: Binding(get: { store.state.captions }, set: { store.state.captions = $0 }))
+            row("More like this", .more)
+            row("Already know this", .known)
+            row("Weak", .weak)
+            row("Wrong", .wrong)
+            row(moment.isAudio ? "Open full episode" : "Open full video", .full)
+            row("Mute this channel", .mute)
+            Toggle("Captions", isOn: $captions)
                 .font(.system(size: 17))
                 .frame(height: 52)
-            Button { showMenu = false } label: {
+            Button { dismiss() } label: {
                 Text("Cancel").font(.system(size: 17, weight: .semibold)).frame(maxWidth: .infinity, minHeight: 52)
             }
             .background(Palette.button, in: RoundedRectangle(cornerRadius: 12))
@@ -444,19 +470,11 @@ struct MomentPage: View {
         .presentationDragIndicator(.visible)
     }
 
-    private func sheetRow(_ title: String, action: @escaping () -> Void) -> some View {
-        Button {
-            showMenu = false
-            action()
-        } label: {
+    private func row(_ title: String, _ action: MenuAction) -> some View {
+        Button { onAction(action) } label: {
             Text(title).font(.system(size: 17)).frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
         }
         .overlay(alignment: .bottom) { Rectangle().fill(Palette.line).frame(height: 1) }
-    }
-
-    private func flashText(_ t: String) {
-        withAnimation { flash = t }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { withAnimation { flash = nil } }
     }
 }
 
