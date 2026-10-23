@@ -1,17 +1,17 @@
 {
  "date": "2026-10-23",
- "seed": true,
- "candidates": 909,
- "accepted": 909,
+ "seed": false,
+ "candidates": 723,
+ "accepted": 723,
  "rejectedCount": 0,
  "passRate": 1,
- "selected": 331,
+ "selected": 22,
  "selectedByArea": {
-  "brain": 182,
-  "body": 83,
-  "beat": 66
+  "brain": 14,
+  "body": 6,
+  "beat": 2
  },
- "total": 331,
+ "total": 353,
  "rejected": [],
  "skippedByBuilder": [
   {
@@ -2179,6 +2179,278 @@
    "reason": "Titel zu lang für Headline"
   },
   {
+   "id": "pmid:36503723",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:35370083",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:34902546",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:35331686",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41232611",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41672364",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:35067608",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42462962",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42674265",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
+  },
+  {
+   "id": "pmid:40846266",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40020909",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39961453",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39672501",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41110679",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:38878904",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36055924",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36394836",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36336073",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36326768",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:35994582",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41655403",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41588994",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42285048",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42871270",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41290429",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42492219",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42133917",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42787062",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42886644",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41388186",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41276709",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42625144",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41702474",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41907624",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42221128",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41616232",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41234118",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42819259",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42825414",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42730431",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41884142",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42625220",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42294322",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42435426",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42739564",
+   "reason": "kein Conclusion-Satz unter 400 Zeichen"
+  },
+  {
+   "id": "pmid:42851485",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42245726",
+   "reason": "kein Conclusion-Satz unter 400 Zeichen"
+  },
+  {
+   "id": "pmid:35510888",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36113973",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39808810",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36930882",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36287182",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:38015740",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39209526",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36752769",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:38088908",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:35522254",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39652738",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36593092",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:35859145",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:37793699",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39332845",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:34815223",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:37752006",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:37752002",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:37235209",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36623867",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:35700439",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
    "id": "wiki:de:Alberto Santos Dumont",
    "reason": "Extract zu kurz oder erster Satz zu lang"
   },
@@ -2201,42 +2473,6 @@
   {
    "id": "wiki:de:Oriana Fallaci",
    "reason": "Extract zu kurz oder erster Satz zu lang"
-  },
-  {
-   "id": "pmid:37099305",
-   "reason": "offline: URL noch nicht in der Pipeline geprüft"
-  },
-  {
-   "id": "pmid:41748309",
-   "reason": "offline: URL noch nicht in der Pipeline geprüft"
-  },
-  {
-   "id": "pmid:42323844",
-   "reason": "offline: URL noch nicht in der Pipeline geprüft"
-  },
-  {
-   "id": "pmid:37498180",
-   "reason": "offline: URL noch nicht in der Pipeline geprüft"
-  },
-  {
-   "id": "pmid:41032459",
-   "reason": "offline: URL noch nicht in der Pipeline geprüft"
-  },
-  {
-   "id": "pmid:42868132",
-   "reason": "offline: URL noch nicht in der Pipeline geprüft"
-  },
-  {
-   "id": "pmid:42228847",
-   "reason": "offline: URL noch nicht in der Pipeline geprüft"
-  },
-  {
-   "id": "pmid:42651272",
-   "reason": "offline: URL noch nicht in der Pipeline geprüft"
-  },
-  {
-   "id": "pmid:42800653",
-   "reason": "offline: URL noch nicht in der Pipeline geprüft"
   }
  ]
 }
