@@ -41,7 +41,13 @@ GitHub Actions, täglich 03:00 UTC (.github/workflows/daily.yml)
 GitHub Pages: statische PWA (Vite, React, TypeScript), rankt lokal, Fortschritt in IndexedDB
 ```
 
-Abgelehnte Karten stehen mit Grund in `pipeline/out/rejected-<datum>.json`. Der Lauf bricht ab, wenn weniger als 80 % der Kandidaten bestehen. Das deutet auf einen kaputten Fetcher hin.
+Abgelehnte Karten stehen mit Grund in `pipeline/out/rejected-<datum>.json`, Karten, die der Builder gar nicht erst bildet (z.B. Titel zu lang, nur Förderhinweis), unter `skippedByBuilder`.
+
+Regel 1 (Quelle erreichbar): Die Karte verlinkt PubMed. PubMed und Verlagsseiten blocken Bots oft (403, 203, 429). Dann zählt nur, wenn die Europe-PMC-API genau diesen Datensatz (gleiche PMID) mit HTTP 200 liefert. Beide Status stehen in `urlChecks` der Rohdaten.
+
+`content/blocklist.json`: Karten, die das Gate formal bestehen, aber inhaltlich leer sind (nur Ausblick, nur Protokoll). Mit Grund, der Builder überspringt sie.
+
+`npm run verify` prüft den gesamten Bestand erneut durch das Gate, auch nach Enrichment. Läuft täglich mit. Der Lauf bricht ab, wenn weniger als 80 % der Kandidaten bestehen. Das deutet auf einen kaputten Fetcher hin.
 
 Manuell starten: Actions, dann **daily**, dann **Run workflow** (mit `seed` für den Erstbestand). Per CLI: `gh workflow run daily.yml`. Alternativ ein Commit mit `[pipeline]` (oder `[seed]`) in der Nachricht.
 
