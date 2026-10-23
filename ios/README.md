@@ -28,3 +28,4 @@ GitHub builds the app on a Mac, runs the unit tests (`CoreTests`: mix, decryptio
 - `Core/Store.swift`: everything stored on the phone
 - `Core/Diag.swift`: test mode (environment), diagnostics log, build info
 - `install.sh`: build and install from the Mac
+
