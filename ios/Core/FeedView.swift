@@ -106,6 +106,9 @@ struct FeedView: View {
     /// otherwise paging and page size drift apart by the tab bar height.
     private var pager: some View {
         GeometryReader { geo in
+            // geo respects the safe area, so its insets are real; the scroll view and pages take the full screen
+            let full = CGSize(width: geo.size.width + geo.safeAreaInsets.leading + geo.safeAreaInsets.trailing,
+                              height: geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom)
             ScrollView(.vertical, showsIndicators: false) {
                 LazyVStack(spacing: 0) {
                     ForEach(feed.queue) { m in
@@ -118,7 +121,7 @@ struct FeedView: View {
                             onMenuAction: { action in menu(action, m) },
                             onMenu: { Diag.log("menu open \(m.id)"); menuFor = m }
                         )
-                        .frame(width: geo.size.width, height: geo.size.height)
+                        .frame(width: full.width, height: full.height)
                         .id(m.id)
                     }
                 }
@@ -128,7 +131,6 @@ struct FeedView: View {
             .scrollPosition(id: $currentID)
             .ignoresSafeArea()
         }
-        .ignoresSafeArea()
         .overlay {
             if let m = forYou { ForYouOverlay(moment: m) { advance() } }
         }
