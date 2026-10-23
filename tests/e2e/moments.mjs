@@ -89,6 +89,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     for (let i = 1; i <= 5; i++) await page.mouse.move(vp.width / 2, vp.height * (0.7 - 0.09 * i));
     await page.mouse.up();
     c.swipeNext = await waitFor(page, (b) => window.__core.idx() === b + 1, before);
+    // Gedrückt halten: 2x, Loslassen: normal
+    await page.mouse.move(vp.width / 2, vp.height * 0.5);
+    await page.mouse.down();
+    c.holdFast = await waitFor(page, () => [...document.querySelectorAll("span")].some((s) => s.textContent === "2x"));
+    await page.mouse.up();
+    c.releaseNormal = await waitFor(page, () => ![...document.querySelectorAll("span")].some((s) => s.textContent === "2x"));
 
     // Doppeltipp speichert (für den Wochenrückblick)
     await page.mouse.dblclick(vp.width / 2, vp.height / 2);

@@ -112,6 +112,11 @@ export function Settings({ state, update, replace, moments }: { state: AppState;
       </section>
 
       <section className={row}>
+        <span className="text-[17px]">Zeit in Core</span>
+        <CoreTime feedTime={state.feedTime} />
+      </section>
+
+      <section className={row}>
         <span className="text-[17px]">Player</span>
         <label className="flex items-center justify-between gap-3 text-[16px]">
           <span>Untertitel im Bild</span>
@@ -160,6 +165,27 @@ function Learned({ weights }: { weights: { channel: Record<string, number>; topi
       <span className="text-[16px]">Gelernt</span>
       {up.length > 0 && <span>Mehr: {up.map(([k, v]) => `${k} ${fmt(v)}`).join(', ')}</span>}
       {down.length > 0 && <span className="text-muted">Weniger: {down.map(([k, v]) => `${k} ${fmt(v)}`).join(', ')}</span>}
+    </div>
+  );
+}
+
+/** Minuten in Core an den letzten 7 Tagen, heute zuletzt */
+function CoreTime({ feedTime }: { feedTime: Record<string, number> }) {
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = now();
+    d.setDate(d.getDate() - (6 - i));
+    return { label: d.toLocaleDateString('de-DE', { weekday: 'short' }), min: Math.round((feedTime[dayKey(d)] ?? 0) / 60000) };
+  });
+  const max = Math.max(1, ...days.map((d) => d.min));
+  return (
+    <div className="flex items-end gap-2" aria-label="Minuten pro Tag">
+      {days.map((d, i) => (
+        <div key={i} className="flex flex-1 flex-col items-center gap-1">
+          <span className="t-meta">{d.min}</span>
+          <div className="w-full rounded bg-[var(--text)] opacity-80" style={{ height: `${Math.max(2, (d.min / max) * 60)}px` }} />
+          <span className="t-meta text-muted">{d.label}</span>
+        </div>
+      ))}
     </div>
   );
 }

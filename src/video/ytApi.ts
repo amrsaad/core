@@ -13,6 +13,7 @@ export interface YTPlayer {
   getCurrentTime(): number;
   getDuration(): number;
   getPlayerState(): number;
+  setPlaybackRate(rate: number): void;
   destroy(): void;
 }
 
@@ -189,6 +190,14 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     getCurrentTime: () => (mode === 'hls' ? video.currentTime : yt.getCurrentTime()),
     getDuration: () => (mode === 'hls' ? video.duration || 0 : yt.getDuration()),
     getPlayerState: () => (mode === 'hls' ? hlsState : yt.getPlayerState()),
+    setPlaybackRate: (rate: number) => {
+      video.playbackRate = rate;
+      try {
+        yt.setPlaybackRate(rate);
+      } catch {
+        /* noch nicht bereit */
+      }
+    },
     destroy: () => {
       video.pause();
       video.removeAttribute('src');

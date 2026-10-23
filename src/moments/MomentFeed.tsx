@@ -63,6 +63,11 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
   const [hint, setHint] = useState(true);
   const [paused, setPaused] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [fast, setFast] = useState(false);
+  const endFast = () => {
+    for (const sl of slots.current) sl.player?.setPlaybackRate(1);
+    setFast(false);
+  };
   const [forYou, setForYou] = useState<Moment | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -164,6 +169,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       const backM = queue.current[next];
       if (next < prev && backM) update((s) => ({ ...s, momentWeights: applySignal(s.momentWeights, backM, SIGNAL.back) }));
       setCaption('');
+      endFast();
       if (prevM && endedAt.current !== prev) log(prevM, {});
       current().player?.pauseVideo();
       idxRef.current = next;
@@ -375,7 +381,8 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
     r.long = window.setTimeout(() => {
       r.fired = true;
       navigator.vibrate?.(10);
-      setMenu(true);
+      current().player?.setPlaybackRate(2);
+      setFast(true);
     }, LONG_MS);
   };
   const onMove = (e: React.PointerEvent) => {
@@ -396,7 +403,12 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
     window.clearTimeout(r.long);
     const wasDown = r.t;
     r.t = 0;
-    if (!wasDown || r.fired) return;
+    if (r.fired) {
+      r.fired = false;
+      endFast();
+      return;
+    }
+    if (!wasDown) return;
     if (r.moved) {
       setDrag(0);
       if (r.dy < -SWIPE_PX) goTo(idxRef.current + 1);
@@ -490,6 +502,8 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
         onPointerMove={onMove}
         onPointerUp={onUp}
         onPointerCancel={() => {
+          if (g.current.fired) endFast();
+          g.current.fired = false;
           g.current.t = 0;
           setDrag(0);
           window.clearTimeout(g.current.long);
@@ -530,6 +544,9 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
           <ActionButton label={m?.audio ? 'Ganze Folge' : 'Ganzes Video'} onClick={openFull}>
             <path d="M7 17 17 7M9 7h8v8" />
           </ActionButton>
+          <ActionButton label="Mehr" onClick={() => setMenu(true)}>
+            <path d="M5 12h.01M12 12h.01M19 12h.01" strokeWidth="3.2" />
+          </ActionButton>
         </div>
       )}
 
@@ -542,6 +559,12 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
         >
           <div className="foryou-label">FÜR DICH</div>
           <p className="foryou-text">{forYou.forYou}</p>
+        </div>
+      )}
+
+      {fast && (
+        <div className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+16px)] z-30 flex justify-center">
+          <span className="rounded-full bg-black/70 px-3 py-1 text-[14px] font-semibold text-white">2x</span>
         </div>
       )}
 
