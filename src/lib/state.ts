@@ -23,6 +23,8 @@ export interface Settings {
   areaShares: Record<Area, number>;
   /** 'slots': 3 recycelte Player. 'single': ein Player, loadVideoById in der Wischgeste (iOS-Fallback) */
   playerMode: 'slots' | 'single';
+  /** Untertitel im Bild */
+  captions: boolean;
 }
 
 export interface SavedMoment {
@@ -75,6 +77,7 @@ export const DEFAULT_SETTINGS: Settings = {
   dailyRoundLimit: 5,
   areaShares: { brain: 0.55, body: 0.25, beat: 0.2 },
   playerMode: 'slots',
+  captions: true,
 };
 
 export function emptyState(): AppState {

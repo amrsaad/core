@@ -37,7 +37,16 @@ export const W_MIN = 0.2;
 export const W_MAX = 3;
 export const clampW = (w: number) => Math.min(W_MAX, Math.max(W_MIN, Number(w.toFixed(4))));
 
-export const SIGNAL = { ended: 1.1, skip: 0.9, more: 1.3, save: 1.1, negative: 0.7 } as const;
+export const SIGNAL = { ended: 1.1, skip: 0.9, early: 0.95, mostly: 1.05, back: 1.1, more: 1.3, save: 1.1, negative: 0.7 } as const;
+
+/** Signal beim Weiterwischen nach Anteil des geschauten Moments. null = neutral. */
+export function leaveSignal(watchedSec: number, durationSec: number): number | null {
+  if (watchedSec < 5) return SIGNAL.skip;
+  const f = watchedSec / Math.max(1, durationSec);
+  if (f < 0.3) return SIGNAL.early;
+  if (f >= 0.8) return SIGNAL.mostly;
+  return null;
+}
 
 /** Wirkt ein Signal auf Kanal, Topic und (abgeschwächt) Bereich */
 export function applySignal(w: Weights, m: Pick<Moment, 'channel' | 'topic' | 'area'>, factor: number, opts: { area?: boolean } = {}): Weights {

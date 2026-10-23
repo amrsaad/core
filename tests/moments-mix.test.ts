@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { applySignal, effectiveShares, newMomentCursor, nextMomentBlock, SIGNAL, type MomentPrefs } from '../src/moments/mix';
+import { leaveSignal } from '../src/moments/mix';
 import type { Moment } from '../src/moments/types';
 import type { Area } from '../src/types';
 
@@ -77,5 +78,14 @@ describe('Momente-Mix', () => {
     const fromFav = brain.filter((m) => m.channel === 'brain-0' || m.topic === 'augen').length / brain.length;
     expect(fromFav).toBeGreaterThan(0.5);
     expect(fromFav).toBeLessThan(0.95);
+  });
+});
+
+describe('leaveSignal', () => {
+  it('bewertet nach geschautem Anteil', () => {
+    expect(leaveSignal(3, 100)).toBe(SIGNAL.skip);
+    expect(leaveSignal(20, 100)).toBe(SIGNAL.early);
+    expect(leaveSignal(50, 100)).toBeNull();
+    expect(leaveSignal(85, 100)).toBe(SIGNAL.mostly);
   });
 });

@@ -3,7 +3,7 @@ import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { createPlayer, loadYT, STATE, type YTPlayer } from '../video/ytApi';
-import { applySignal, newMomentCursor, nextMomentBlock, SIGNAL, type MomentCursor } from './mix';
+import { applySignal, leaveSignal, newMomentCursor, nextMomentBlock, SIGNAL, type MomentCursor } from './mix';
 import { fullVideoUrl, thumbOf, type Feedback, type Moment } from './types';
 
 interface Props {
@@ -25,7 +25,6 @@ interface Slot {
 }
 
 const END_GUARD = 0.3;
-const SKIP_MS = 5000;
 const FOR_YOU_MS = 6000;
 const POLL_MS = 150;
 const SWIPE_PX = 60;
@@ -67,6 +66,8 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
   const [forYou, setForYou] = useState<Moment | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [caption, setCaption] = useState('');
+  const captionsOn = state.settings.captions !== false;
 
   const today = dayKey(clockNow());
   const show = (t: string) => {
@@ -154,10 +155,15 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       if (next >= queue.current.length) return;
       const prev = idxRef.current;
       const prevM = queue.current[prev];
-      // Unter 5 s weitergewischt: leichtes Minus für Kanal und Topic
-      if (next > prev && prevM && endedAt.current !== prev && Date.now() - since.current < SKIP_MS) {
-        update((s) => ({ ...s, momentWeights: applySignal(s.momentWeights, prevM, SIGNAL.skip) }));
+      // Weitergewischt: Signal nach geschautem Anteil (unter 5 s Minus, fast ganz geschaut leichtes Plus)
+      if (next > prev && prevM && endedAt.current !== prev) {
+        const f = leaveSignal((Date.now() - since.current) / 1000, prevM.end - prevM.start);
+        if (f) update((s) => ({ ...s, momentWeights: applySignal(s.momentWeights, prevM, f) }));
       }
+      // Zurückgewischt, um etwas nochmal zu sehen: Plus für den Zielmoment
+      const backM = queue.current[next];
+      if (next < prev && backM) update((s) => ({ ...s, momentWeights: applySignal(s.momentWeights, backM, SIGNAL.back) }));
+      setCaption('');
       if (prevM && endedAt.current !== prev) log(prevM, {});
       current().player?.pauseVideo();
       idxRef.current = next;
@@ -259,7 +265,13 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       const m = queue.current[idxRef.current];
       if (!p || !sl.ready || !m || forYouRef.current) return;
       const c = p.getCurrentTime?.() ?? 0;
-      if (sl.st === STATE.PLAYING || sl.st === STATE.PAUSED) setProgress(Math.min(1, Math.max(0, (c - m.start) / (m.end - m.start))));
+      if (sl.st === STATE.PLAYING || sl.st === STATE.PAUSED) {
+        setProgress(Math.min(1, Math.max(0, (c - m.start) / (m.end - m.start))));
+        const rel = c - m.start;
+        let cue = '';
+        if (m.cues) for (const [t, text] of m.cues) if (t <= rel + 0.1) cue = text; else break;
+        setCaption(cue);
+      }
       if (sl.st === STATE.PLAYING && c >= m.end - END_GUARD) finish();
       if (sl.st === STATE.PLAYING && document.visibilityState === 'visible') {
         feedMs.current += POLL_MS;
@@ -485,6 +497,12 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
         </div>
       )}
 
+      {captionsOn && caption && !forYou && (
+        <div className="vcaption pointer-events-none" data-testid="caption">
+          <span>{caption}</span>
+        </div>
+      )}
+
       {m && !forYou && (
         <div className="vinfo pointer-events-none">
           <div className="vchannel">
@@ -539,6 +557,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
                 ['Falsch', () => feedback('falsch')],
                 ['Ganzes Video öffnen', openFull],
                 ['Kanal stummschalten', muteChannel],
+                [captionsOn ? 'Untertitel aus' : 'Untertitel an', () => { setMenu(false); update((s) => ({ ...s, settings: { ...s.settings, captions: !captionsOn } })); }],
                 ['Abbrechen', () => setMenu(false)],
               ] as [string, () => void][]
             ).map(([label, fn]) => (

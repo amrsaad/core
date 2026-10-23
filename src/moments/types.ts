@@ -21,6 +21,8 @@ export interface Moment {
   hls?: string;
   thumb?: string;
   url?: string;
+  /** Untertitel [Sekunden ab start, Text] */
+  cues?: [number, string][];
 }
 
 export interface MomentPool {

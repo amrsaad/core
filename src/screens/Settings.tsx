@@ -105,6 +105,7 @@ export function Settings({ state, update, replace, moments }: { state: AppState;
             </button>
           </div>
         ))}
+        <Learned weights={state.momentWeights} />
         <button className={btn} onClick={() => { update((st) => ({ ...st, momentWeights: { area: {}, channel: {}, topic: {} } })); setMsg('Gelernte Gewichte zurückgesetzt.'); }}>
           Gelernte Gewichte zurücksetzen
         </button>
@@ -112,6 +113,14 @@ export function Settings({ state, update, replace, moments }: { state: AppState;
 
       <section className={row}>
         <span className="text-[17px]">Player</span>
+        <label className="flex items-center justify-between gap-3 text-[16px]">
+          <span>Untertitel im Bild</span>
+          <input
+            type="checkbox"
+            checked={s.captions !== false}
+            onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, captions: e.target.checked } }))}
+          />
+        </label>
         <label className="flex items-center justify-between gap-3 text-[16px]">
           <span>Ein-Player-Modus (falls iOS beim Wischen den Ton wieder ausschaltet)</span>
           <input
@@ -135,6 +144,22 @@ export function Settings({ state, update, replace, moments }: { state: AppState;
         <span>Momente gespeichert {Object.keys(state.savedMoments).length} · gesehen {Object.keys(state.momentSeen).length} · heute {Math.round((state.feedTime[dayKey(now())] ?? 0) / 60000)} Min</span>
         {isTimeShifted() && <span>Testzeit aktiv: {now().toLocaleString('de-DE')}</span>}
       </section>
+    </div>
+  );
+}
+
+/** Was der Feed bisher gelernt hat: stärkste und schwächste Themen und Sprecher */
+function Learned({ weights }: { weights: { channel: Record<string, number>; topic: Record<string, number> } }) {
+  const all = [...Object.entries(weights.topic).map(([k, v]) => [k, v] as const), ...Object.entries(weights.channel).map(([k, v]) => [k, v] as const)];
+  if (!all.length) return <p className="t-meta m-0 text-muted">Noch nichts gelernt. Der Feed lernt aus Zuschauen, Wischen, Speichern und Mehr davon.</p>;
+  const up = all.filter(([, v]) => v > 1.001).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const down = all.filter(([, v]) => v < 0.999).sort((a, b) => a[1] - b[1]).slice(0, 5);
+  const fmt = (v: number) => `${v > 1 ? '+' : ''}${Math.round((v - 1) * 100)} %`;
+  return (
+    <div className="t-meta flex flex-col gap-1">
+      <span className="text-[16px]">Gelernt</span>
+      {up.length > 0 && <span>Mehr: {up.map(([k, v]) => `${k} ${fmt(v)}`).join(', ')}</span>}
+      {down.length > 0 && <span className="text-muted">Weniger: {down.map(([k, v]) => `${k} ${fmt(v)}`).join(', ')}</span>}
     </div>
   );
 }
