@@ -49,6 +49,8 @@ export function VideoFeed({ pool, state, update, active, onPausedChange }: Props
   const endedAt = useRef(-1);
   const feedMs = useRef(0);
   const dragEl = useRef<HTMLDivElement>(null);
+  /** Diagnose für Tests: Zustandswechsel und Fehlercodes des Players */
+  const diag = useRef<string[]>([]);
 
   const [idx, setIdx] = useState(0);
   const [, setTick] = useState(0);
@@ -180,6 +182,7 @@ export function VideoFeed({ pool, state, update, active, onPausedChange }: Props
               rerender();
             },
             onState: (st) => {
+              diag.current.push(`slot${s} ${slot.vid} state ${st}`);
               slot.st = st;
               if (st === STATE.ENDED && slot.index === idxRef.current && endedAt.current !== idxRef.current) {
                 endedAt.current = idxRef.current;
@@ -189,7 +192,8 @@ export function VideoFeed({ pool, state, update, active, onPausedChange }: Props
               if (st === STATE.PLAYING && slot.index !== idxRef.current) slot.player?.pauseVideo();
               rerender();
             },
-            onError: () => {
+            onError: (code) => {
+              diag.current.push(`slot${s} ${slot.vid} error ${code}`);
               if (slot.index === idxRef.current) goTo(idxRef.current + 1);
             },
           });
@@ -400,8 +404,11 @@ export function VideoFeed({ pool, state, update, active, onPausedChange }: Props
       time: () => [current().player?.getCurrentTime?.() ?? 0, current().player?.getDuration?.() ?? 0],
       seek: (s: number) => (current().player as unknown as { seekTo?: (s: number, a: boolean) => void })?.seekTo?.(s, true),
       next: () => goTo(idxRef.current + 1),
+      diag: () => diag.current.slice(-40),
     };
   });
+
+  if (pool.length && !queue.current.length) ensureQueue(6);
 
   if (!pool.length) return <Empty text="Noch keine Videos im Pool. Der tägliche Lauf füllt ihn." />;
   if (error) return <Empty text={`${error}. Videos brauchen Internet.`} />;

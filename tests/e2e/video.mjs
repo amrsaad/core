@@ -44,6 +44,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     run.steps.loadToPlayingMs = run.steps.firstPlayingMs >= 0 ? Date.now() - t0 : -1;
     await page.waitForTimeout(1500);
     await page.screenshot({ path: `${out}/${name}-1-erstes-video.png` });
+    // Ohne Vorschaubild: zeigt, was der YouTube-Player selbst gerade anzeigt
+    await page.addStyleTag({ content: '.vposter{display:none!important}' });
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: `${out}/${name}-1b-player-ohne-poster.png` });
+    await page.addStyleTag({ content: '.vposter{display:block!important}' });
+    run.steps.diagStart = await page.evaluate(() => window.__core?.diag?.());
 
     // Wischen: Wechsel bis PLAYING des nächsten Videos
     const before = await page.evaluate(() => window.__core.idx());
@@ -82,9 +88,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     await page.screenshot({ path: `${out}/${name}-6-nach-ended.png` });
 
     run.steps.pageErrors = errors;
+    run.steps.diagEnd = await page.evaluate(() => window.__core?.diag?.());
     run.ok = run.steps.firstPlayingMs >= 0 && run.steps.swipeToPlayingMs >= 0 && run.steps.swipeToPlayingMs < 1000 && run.steps.autoNextAfterEndMs >= 0 && run.steps.endedJumpMs >= 0;
   } catch (e) {
     run.error = String(e);
+    try { run.steps.diagEnd = await (await browser.contexts()[0].pages()[0]).evaluate(() => window.__core?.diag?.()); } catch {}
   }
   await browser.close();
   console.log(JSON.stringify(run));
