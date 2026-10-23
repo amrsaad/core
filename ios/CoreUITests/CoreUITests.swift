@@ -81,12 +81,29 @@ final class CoreUITests: XCTestCase {
         XCTAssertNotNil(menuButton, "no visible menu button")
         menuButton?.tap()
         let mute = app.buttons["Mute this channel"]
-        let opened = mute.waitForExistence(timeout: 5)
+        var opened = mute.waitForExistence(timeout: 5)
         wait(0.6)
         shot("16-menu")
-        if !opened {
+        if !opened, let b = menuButton {
+            // probe: coordinate tap on the same button, then the Save button
+            b.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+            opened = mute.waitForExistence(timeout: 5)
+            shot("17-menu-coordinate-tap")
+            if !opened {
+                let save = app.buttons.matching(NSPredicate(format: "label == 'Save' OR label == 'Saved'")).allElementsBoundByIndex
+                    .first { $0.frame.height > 0 && screen.contains($0.frame) }
+                save?.tap()
+                wait(0.4)
+                shot("18-save-button-tap")
+            }
             let t = XCTAttachment(string: app.debugDescription)
             t.name = "16-menu-hierarchy"
+            t.lifetime = .keepAlways
+            add(t)
+        }
+        if let log = try? String(contentsOf: stateDir.appendingPathComponent("diag.log"), encoding: .utf8) {
+            let t = XCTAttachment(string: log)
+            t.name = "19-diag-log"
             t.lifetime = .keepAlways
             add(t)
         }

@@ -112,7 +112,7 @@ struct FeedView: View {
                         isActive: currentID == m.id,
                         flash: $flash,
                         onMenuAction: { action in menu(action, m) },
-                        onMenu: { menuFor = m }
+                        onMenu: { Diag.log("menu open \(m.id)"); menuFor = m }
                     )
                     .containerRelativeFrame([.horizontal, .vertical])
                     .id(m.id)
@@ -390,6 +390,7 @@ struct MomentPage: View {
         let saved = store.isSaved(moment)
         return VStack(spacing: 20) {
             ActionButton(icon: saved ? "bookmark.fill" : "bookmark", label: saved ? "Saved" : "Save") {
+                Diag.log("save button \(moment.id)")
                 if saved { store.unsave(moment); flashText("Removed") } else { store.save(moment); flashText("Saved") }
             }
             ActionButton(icon: "plus", label: "More like this") { onMenuAction(.more) }
