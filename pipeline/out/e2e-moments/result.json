@@ -1,0 +1,113 @@
+{
+ "at": "2026-10-23T09:33:29.280Z",
+ "runs": [
+  {
+   "browser": "webkit",
+   "checks": {
+    "lockedWithoutKey": true,
+    "feedAfterDecrypt": true,
+    "fragmentRemoved": true,
+    "firstArea": "beat",
+    "firstPlaying": true,
+    "soundOn": true,
+    "forYouExactlyWhenSet": true,
+    "sawBothKinds": true,
+    "stoppedAtEnd": true,
+    "autoNext": true,
+    "swipeNext": true,
+    "posterWheneverNotPlaying": true,
+    "weeklyReviewOnSunday": true,
+    "reviewListsSaved": true,
+    "feedAfterReview": true,
+    "reviewOnlyOnce": true,
+    "pageErrors": 0
+   },
+   "sequence": [
+    {
+     "id": "test0000000:100",
+     "has": true,
+     "fy": true,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000007:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000011:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000024:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    }
+   ],
+   "posterCheck": {
+    "checksDone": 843,
+    "violations": 0,
+    "endedSeen": 0
+   },
+   "ok": true
+  },
+  {
+   "browser": "chromium",
+   "checks": {
+    "lockedWithoutKey": true,
+    "feedAfterDecrypt": true,
+    "fragmentRemoved": true,
+    "firstArea": "beat",
+    "firstPlaying": true,
+    "soundOn": true,
+    "forYouExactlyWhenSet": true,
+    "sawBothKinds": true,
+    "stoppedAtEnd": true,
+    "autoNext": true,
+    "swipeNext": true,
+    "posterWheneverNotPlaying": true,
+    "weeklyReviewOnSunday": true,
+    "reviewListsSaved": true,
+    "feedAfterReview": true,
+    "reviewOnlyOnce": true,
+    "pageErrors": 0
+   },
+   "sequence": [
+    {
+     "id": "test0000002:100",
+     "has": true,
+     "fy": true,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000001:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000004:100",
+     "has": true,
+     "fy": true,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000021:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    }
+   ],
+   "posterCheck": {
+    "checksDone": 873,
+    "violations": 0,
+    "endedSeen": 0
+   },
+   "ok": true
+  }
+ ]
+}
