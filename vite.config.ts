@@ -40,6 +40,12 @@ export default defineConfig({
             options: { cacheName: 'cards-index', networkTimeoutSeconds: 3 },
           },
           {
+            // Momente-Pool (verschlüsselt): frisch aus dem Netz, offline der letzte Stand
+            urlPattern: ({ url }) => url.pathname.endsWith('/moments/pool.enc'),
+            handler: 'NetworkFirst',
+            options: { cacheName: 'moments', networkTimeoutSeconds: 3 },
+          },
+          {
             // Video-Pool: frisch aus dem Netz, offline der letzte Stand (Videos selbst brauchen Internet)
             urlPattern: ({ url }) => url.pathname.endsWith('/videos/pool.json'),
             handler: 'NetworkFirst',

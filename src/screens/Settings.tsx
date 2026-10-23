@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
-import type { Area, CardIndex } from '../types';
-import type { VideoPool } from '../videoTypes';
+import type { Area } from '../types';
+import type { MomentPool } from '../moments/types';
 import { exportJson, parseImport } from '../lib/db';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
@@ -24,7 +24,8 @@ export function rebalance(shares: Record<Area, number>, area: Area, value: numbe
   return out;
 }
 
-export function Settings({ state, update, replace, index, pool }: { state: AppState; update: (fn: (s: AppState) => AppState) => void; replace: (s: AppState) => void; index: CardIndex | null; pool: VideoPool }) {
+export function Settings({ state, update, replace, moments }: { state: AppState; update: (fn: (s: AppState) => AppState) => void; replace: (s: AppState) => void; moments: MomentPool | null }) {
+  const list = moments?.moments ?? [];
   const file = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const s = state.settings;
@@ -55,14 +56,6 @@ export function Settings({ state, update, replace, index, pool }: { state: AppSt
       <h1 className="t-headline m-0">Einstellungen</h1>
 
       <section className={row}>
-        <div className="flex items-center justify-between">
-          <span className="text-[17px]">Karten-Runden pro Tag</span>
-          <span className="text-[17px] font-semibold">{s.dailyRoundLimit} Runden</span>
-        </div>
-        <input type="range" min={1} max={10} value={s.dailyRoundLimit} onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, dailyRoundLimit: Number(e.target.value) } }))} />
-      </section>
-
-      <section className={row}>
         <span className="text-[17px]">Bereichsanteile</span>
         {AREAS.map((a) => (
           <label key={a} className="flex flex-col gap-1">
@@ -80,27 +73,27 @@ export function Settings({ state, update, replace, index, pool }: { state: AppSt
             />
           </label>
         ))}
-        <p className="t-meta m-0 text-muted">Gilt für Videos und Karten. Videos kommen in Blöcken à 3 gleichen Bereichs.</p>
+        <p className="t-meta m-0 text-muted">Startwerte. Der Feed lernt aus deinem Verhalten, jeder Bereich bleibt bei mindestens 10 %. Momente kommen in Blöcken à 3 gleichen Bereichs.</p>
       </section>
 
       <section className={row}>
-        <span className="text-[17px]">Video-Pool</span>
+        <span className="text-[17px]">Momente</span>
         <div className="grid grid-cols-3 gap-2 text-center">
           {AREAS.map((a) => (
             <div key={a} className="rounded-lg border border-[var(--line)] py-2">
-              <div className="text-[20px] font-semibold">{pool.videos.filter((v) => v.area === a).length}</div>
+              <div className="text-[20px] font-semibold">{list.filter((m) => m.area === a).length}</div>
               <div className="t-meta" style={{ color: AREA_COLOR[a] }}>{AREA_LABEL[a]}</div>
             </div>
           ))}
         </div>
         <p className="t-meta m-0 text-muted">
-          {pool.videos.length} Videos · ungesehen {pool.videos.filter((v) => !state.videoSeen[v.id] && !state.mutedChannels[v.channelId]).length} · letztes Update {pool.updatedAt ? new Date(pool.updatedAt).toLocaleString('de-DE') : 'unbekannt'}
+          {list.length} Momente · ungesehen {list.filter((m) => !state.momentSeen[m.id] && !state.mutedChannels[m.channel]).length} · letzter Wochenlauf {moments?.lastRun ? new Date(moments.lastRun).toLocaleDateString('de-DE') : 'noch keiner'}
         </p>
       </section>
 
       <section className={row}>
         <span className="text-[17px]">Stummgeschaltete Kanäle</span>
-        {Object.keys(state.mutedChannels).length === 0 && <p className="t-meta m-0 text-muted">Keine. Langes Drücken auf ein Video, dann Kanal stummschalten.</p>}
+        {Object.keys(state.mutedChannels).length === 0 && <p className="t-meta m-0 text-muted">Keine. Langes Drücken auf einen Moment, dann Kanal stummschalten.</p>}
         {Object.entries(state.mutedChannels).map(([id, name]) => (
           <div key={id} className="flex items-center justify-between">
             <span className="text-[16px]">{name}</span>
@@ -112,8 +105,8 @@ export function Settings({ state, update, replace, index, pool }: { state: AppSt
             </button>
           </div>
         ))}
-        <button className={btn} onClick={() => { update((st) => ({ ...st, channelWeights: {} })); setMsg('Kanal-Gewichte zurückgesetzt.'); }}>
-          Kanal-Gewichte zurücksetzen
+        <button className={btn} onClick={() => { update((st) => ({ ...st, momentWeights: { area: {}, channel: {}, topic: {} } })); setMsg('Gelernte Gewichte zurückgesetzt.'); }}>
+          Gelernte Gewichte zurücksetzen
         </button>
       </section>
 
@@ -130,9 +123,6 @@ export function Settings({ state, update, replace, index, pool }: { state: AppSt
       </section>
 
       <section className={row}>
-        <button className={btn} onClick={() => { update((st) => ({ ...st, topicWeights: {} })); setMsg('Topic-Gewichte zurückgesetzt.'); }}>
-          Topic-Gewichte zurücksetzen
-        </button>
         <button className={btn} onClick={doExport}>Export als JSON</button>
         <button className={btn} onClick={() => file.current?.click()}>Import aus JSON</button>
         <input ref={file} type="file" accept="application/json,.json" hidden onChange={(e) => e.target.files?.[0] && doImport(e.target.files[0])} />
@@ -141,9 +131,8 @@ export function Settings({ state, update, replace, index, pool }: { state: AppSt
 
       <section className="t-meta flex flex-col gap-1 text-muted">
         <span>Version {__APP_VERSION__}</span>
-        <span>Karten {index?.total ?? 0} · letztes Update {index ? new Date(index.updatedAt).toLocaleString('de-DE') : 'unbekannt'}</span>
-        <span>Karten gespeichert {Object.keys(state.saved).length} · gesehen {Object.keys(state.seen).length}</span>
-        <span>Videos gespeichert {Object.keys(state.savedVideos).length} · gesehen {Object.keys(state.videoSeen).length} · heute {Math.round((state.feedTime[dayKey(now())] ?? 0) / 60000)} Min</span>
+        <span>Pool aktualisiert {moments?.updatedAt ? new Date(moments.updatedAt).toLocaleString('de-DE') : 'unbekannt'}</span>
+        <span>Momente gespeichert {Object.keys(state.savedMoments).length} · gesehen {Object.keys(state.momentSeen).length} · heute {Math.round((state.feedTime[dayKey(now())] ?? 0) / 60000)} Min</span>
         {isTimeShifted() && <span>Testzeit aktiv: {now().toLocaleString('de-DE')}</span>}
       </section>
     </div>

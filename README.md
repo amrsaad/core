@@ -1,6 +1,10 @@
 # core
 
-Persönlicher Feed statt Instagram Reels. **Startscreen: vertikaler Vollbild-Video-Feed** aus YouTube Shorts, ausschließlich von freigegebenen Kanälen (`content/channels.json`). Kein fremder Algorithmus, keine Empfehlungen, keine Kommentare. Dazu der Karten-Feed aus v1 (geprüfte Textkarten mit wörtlichem Quellenauszug).
+Persönlicher Feed statt Instagram Reels. **v4, Startscreen: Experten-Momente**, 60 bis 120 Sekunden lange Ausschnitte aus langen Fachvideos freigegebener Kanäle, per YouTube-Einbettung exakt von Start bis Ende. Danach optional ein Bildschirm "Für dich". Kein fremder Algorithmus, keine Empfehlungen, keine Kommentare.
+
+Der Pool entsteht im privaten Repo `amrsaad/core-content` (Transkripte über den Browser auf Max' Mac, Qualitäts-Gate, Wochenlauf) und wird hier nur verschlüsselt veröffentlicht (`public/moments/pool.enc`, AES-GCM 256). Den Schlüssel bekommt das iPhone einmalig über den Freischalt-Link aus `core-content/ACCESS.md`.
+
+v1 (Textkarten) und v2 (Shorts) sind nicht mehr in der Navigation, ihr Code bleibt im Repo.
 
 - **Beat**: Koran, Spiritualität
 - **Body**: Training, Ernährung, Recovery

@@ -149,3 +149,19 @@ body {
   display: flex; flex-direction: column; gap: 22px; transition: bottom 200ms;
 }
 .vlabel { font-size: 11px; line-height: 13px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
+
+/* ---------- Für dich (v4) ---------- */
+.foryou {
+  position: absolute; inset: 0; z-index: 35; background: #000; color: #fff;
+  display: flex; flex-direction: column; justify-content: center; gap: 14px;
+  padding: calc(env(safe-area-inset-top) + 24px) calc(env(safe-area-inset-right) + 28px) calc(env(safe-area-inset-bottom) + 96px) calc(env(safe-area-inset-left) + 28px);
+}
+.foryou-label {
+  font-size: 12px; line-height: 16px; letter-spacing: 0.08em; font-weight: 600; color: var(--area);
+  padding-left: 16px; border-left: 3px solid var(--area);
+}
+.foryou-text {
+  margin: 0; padding-left: 16px; border-left: 3px solid var(--area);
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-weight: 600; font-size: 26px; line-height: 32px;
+}

@@ -1,5 +1,7 @@
 import type { Area, Card } from '../types';
 import type { Video } from '../videoTypes';
+import type { Moment, MomentLogEntry } from '../moments/types';
+import type { Weights } from '../moments/mix';
 
 export interface SavedItem {
   card: Card;
@@ -21,6 +23,13 @@ export interface Settings {
   areaShares: Record<Area, number>;
   /** 'slots': 3 recycelte Player. 'single': ein Player, loadVideoById in der Wischgeste (iOS-Fallback) */
   playerMode: 'slots' | 'single';
+}
+
+export interface SavedMoment {
+  moment: Moment;
+  savedAt: string;
+  /** im Wochenrückblick als umgesetzt markiert */
+  done?: boolean;
 }
 
 export interface SavedVideo {
@@ -51,6 +60,15 @@ export interface AppState {
   limitShown: Record<string, boolean>;
   /** Letzter Tag mit Video-Feed, für "erster Block des Tages = Beat" */
   videoDay?: string;
+  // Experten-Momente (v4)
+  momentSeen: Record<string, number>;
+  momentWeights: Weights;
+  savedMoments: Record<string, SavedMoment>;
+  /** letzte Wiedergaben für Signale und Wochenrückblick */
+  momentLog: MomentLogEntry[];
+  momentDay?: string;
+  /** Wochen (Montag als YYYY-MM-DD), in denen der Rückblick schon kam */
+  weekReviewShown: Record<string, boolean>;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -60,7 +78,7 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 
 export function emptyState(): AppState {
-  return { version: 1, seen: {}, topicWeights: {}, saved: {}, reviews: [], rounds: {}, roundsTotal: 0, settings: structuredClone(DEFAULT_SETTINGS), videoSeen: {}, channelWeights: {}, mutedChannels: {}, savedVideos: {}, feedTime: {}, limitShown: {} };
+  return { version: 1, seen: {}, topicWeights: {}, saved: {}, reviews: [], rounds: {}, roundsTotal: 0, settings: structuredClone(DEFAULT_SETTINGS), videoSeen: {}, channelWeights: {}, mutedChannels: {}, savedVideos: {}, feedTime: {}, limitShown: {}, momentSeen: {}, momentWeights: { area: {}, channel: {}, topic: {} }, savedMoments: {}, momentLog: [], weekReviewShown: {} };
 }
 
 export const WEIGHT_MIN = 0.3;

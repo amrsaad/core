@@ -1,8 +1,10 @@
 // YouTube IFrame Player API, Einbettung über youtube-nocookie.com. Kein API-Key.
 
+export type YTLoad = string | { videoId: string; startSeconds?: number; endSeconds?: number };
+
 export interface YTPlayer {
-  loadVideoById(id: string): void;
-  cueVideoById(id: string): void;
+  loadVideoById(arg: YTLoad): void;
+  cueVideoById(arg: YTLoad): void;
   playVideo(): void;
   pauseVideo(): void;
   mute(): void;

@@ -130,12 +130,12 @@ export function VideoFeed({ pool, state, update, active, onPausedChange }: Props
     (next: number) => {
       if (next < 0 || next === idxRef.current) return;
       // Ausgefallene Videos aus dem Rest der Warteschlange nehmen
-      const cut = idxRef.current + 1;
-      const rest = queue.current.slice(cut);
+      const from = idxRef.current + 1;
+      const rest = queue.current.slice(from);
       const clean = rest.filter((x) => !bad.current.has(x.id));
       if (clean.length !== rest.length) {
-        queue.current = [...queue.current.slice(0, cut), ...clean];
-        for (const sl of slots.current) if (sl.index >= cut) sl.index = -1;
+        queue.current = [...queue.current.slice(0, from), ...clean];
+        for (const sl of slots.current) if (sl.index >= from) sl.index = -1;
       }
       ensureQueue(next + 4);
       if (next >= queue.current.length) return;
