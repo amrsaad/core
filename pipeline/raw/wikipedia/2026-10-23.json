@@ -1999,6 +1999,30 @@
    "urlChecks": {
     "https://de.wikipedia.org/wiki/Neue_Saline": 200
    }
+  },
+  {
+   "sourceId": "wiki:de:Geschichte des Frauenwahlrechts in den USA",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Geschichte_des_Frauenwahlrechts_in_den_USA",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/23",
+    "status": 200
+   },
+   "title": "Geschichte des Frauenwahlrechts in den USA",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Frauenwahlrecht in den Vereinigten Staaten von Amerika \n– oder besser Geschichte der Frauenwahlrechtsbewegung in den Vereinigten Staaten – beschreibt den langwierigen Prozess bis zur gesetzlichen Zulassung von Frauen zu politischen Wahlen. Das Frauenwahlrecht wurde innerhalb eines Zeitraums von über einem halben Jahrhundert eingeführt, zuerst in einzelnen Staaten und Kommunen und manchmal nur auf begrenzter Basis. 1920, erst nach dem Ersten Weltkrieg, gab es durch den 19. Zusatzartikel zur Verfassung Wahlrecht für Frauen auch auf nationaler Ebene."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-23T15:17:49.778Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Geschichte_des_Frauenwahlrechts_in_den_USA": 200
+   }
   }
  ]
 }
