@@ -20,6 +20,10 @@ export interface RawRecord {
   url: string;
   /** HTTP-Status beim Abruf von url in der Pipeline */
   urlStatus: number;
+  /** Weitere menschenlesbare Links, falls url nicht 200 liefert (z.B. PubMed, DOI) */
+  altUrls?: string[];
+  /** Status aller geprüften Links */
+  urlChecks?: Record<string, number>;
   /** API-Endpunkt und Status, aus dem der Datensatz stammt */
   api: { url: string; status: number };
   title: string;

@@ -74,6 +74,7 @@ function toRecord(r: EpmcResult, def: QueryDef, kind: 'fact' | 'fresh', api: { u
     topic: def.topic,
     url,
     urlStatus: 0,
+    altUrls: [r.pmid && `https://pubmed.ncbi.nlm.nih.gov/${r.pmid}/`, r.doi && `https://doi.org/${r.doi}`].filter((u): u is string => !!u && u !== url),
     api,
     title: r.title,
     publisher: r.journalInfo?.journal?.title ?? 'Europe PMC',

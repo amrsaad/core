@@ -39,8 +39,27 @@ async function main() {
   const toCheck = candidates.map((c) => rawById.get(c.source.id)!).filter((r) => r.urlStatus !== 200);
   console.log(`URL-Prüfung: ${toCheck.length}`);
   await pool(toCheck, 4, async (r) => {
-    r.urlStatus = await checkUrl(r.url);
+    r.urlChecks ??= {};
+    for (const u of [r.url, ...(r.altUrls ?? [])]) {
+      const st = await checkUrl(u);
+      r.urlChecks[u] = st;
+      if (st === 200) {
+        r.url = u;
+        break;
+      }
+    }
+    r.urlStatus = r.urlChecks[r.url] ?? 0;
   }, 150);
+  // Karte zeigt auf den Link, der in der Pipeline 200 geliefert hat
+  for (const c of candidates) c.source.url = rawById.get(c.source.id)!.url;
+  const hosts = new Map<string, Record<number, number>>();
+  for (const r of toCheck) for (const [u, st] of Object.entries(r.urlChecks ?? {})) {
+    const h = new URL(u).host;
+    const m = hosts.get(h) ?? {};
+    m[st] = (m[st] ?? 0) + 1;
+    hosts.set(h, m);
+  }
+  console.log('URL-Status je Host:', JSON.stringify(Object.fromEntries(hosts)));
   const bySource = new Map<SourceName, RawRecord[]>();
   for (const r of raws) bySource.set(r.source, [...(bySource.get(r.source) ?? []), r]);
   for (const [src, recs] of bySource) writeRaw(src, date, recs);
@@ -76,6 +95,12 @@ async function main() {
   writeJson(join(OUT_DIR, `rejected-${date}.json`), report);
   console.log(JSON.stringify({ ...report, rejected: undefined, skippedByBuilder: skipped.length }, null, 1));
 
+  const why = new Map<string, number>();
+  for (const r of rejected) {
+    const k = `R${r.rule} ${r.reason.replace(/[\d.,]+/g, '#').slice(0, 60)}`;
+    why.set(k, (why.get(k) ?? 0) + 1);
+  }
+  console.log('Ablehnungsgründe:', JSON.stringify([...why].sort((a, b) => b[1] - a[1]).slice(0, 15)));
   if (failed) {
     console.error(`Abbruch: nur ${(passRate * 100).toFixed(1)} % der Kandidaten bestehen (< 80 %). Ein Fetcher ist vermutlich kaputt.`);
     process.exit(1);
