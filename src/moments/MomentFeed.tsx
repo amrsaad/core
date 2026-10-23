@@ -355,6 +355,19 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
     }
   };
 
+  /** Knopf: Speichern und wieder Entfernen. Doppeltipp speichert nur, wie bei Reels. */
+  const toggleSave = () => {
+    const m = queue.current[idxRef.current];
+    if (!m) return;
+    if (!stateRef.current.savedMoments[m.id]) return save();
+    update((s) => {
+      const x = { ...s.savedMoments };
+      delete x[m.id];
+      return { ...s, savedMoments: x };
+    });
+    show('Entfernt');
+  };
+
   const save = () => {
     const m = queue.current[idxRef.current];
     if (!m) return;
@@ -491,7 +504,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
   const saved = m && !!state.savedMoments[m.id];
 
   return (
-    <div className="vfeed" ref={dragEl}>
+    <div className="vfeed" ref={dragEl} style={{ ['--area' as string]: m ? AREA_COLOR[m.area] : '#fff' }}>
       {slots.current.slice(0, SLOTS).map((slot, s) => {
         const j = slot.index;
         const mm = queue.current[j];
@@ -519,6 +532,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
         );
       })}
 
+      <div className="vtrack" />
       <div className="vprogress" style={{ transform: `scaleX(${progress})` }} />
       {loading && !forYou && <div className="vloading" aria-label="Lädt" />}
 
@@ -552,8 +566,9 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       {m && !forYou && (
         <div className="vinfo pointer-events-none">
           <div className="vchannel">
+            <span className="vdot" aria-hidden="true" />
             <span style={{ color: AREA_COLOR[m.area] }}>{AREA_LABEL[m.area]}</span>
-            <span className="text-[#B3B3B3]"> · {m.channel}</span>
+            <span className="vspeaker">{speakerLine(m.channel)}</span>
           </div>
           <div className="vtitle">{m.hook}</div>
         </div>
@@ -561,7 +576,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
 
       {!forYou && (
         <div className="vactions">
-          <ActionButton label={saved ? 'Gespeichert' : 'Speichern'} onClick={save} active={saved}>
+          <ActionButton label={saved ? 'Gespeichert' : 'Speichern'} onClick={toggleSave} active={saved}>
             <path d="M7 4h10v16l-5-4-5 4z" />
           </ActionButton>
           <ActionButton label="Mehr davon" onClick={() => feedback('mehr')}>
@@ -585,6 +600,10 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
         >
           <div className="foryou-label">FÜR DICH</div>
           <p className="foryou-text">{forYou.forYou}</p>
+          <div className="foryou-foot">
+            <span>Tippen für weiter</span>
+            <span>6 s</span>
+          </div>
         </div>
       )}
 
@@ -602,24 +621,38 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
 
       {menu && m && (
         <div className="absolute inset-0 z-40 flex items-end bg-black/60" onClick={(e) => e.target === e.currentTarget && setMenu(false)}>
-          <div className="pad w-full rounded-t-2xl bg-[#121212] text-white">
-            <div className="t-meta mb-2 text-[#B3B3B3]">{m.channel}</div>
+          <div className="w-full rounded-t-2xl bg-[#121212] px-4 pt-2 text-white" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
+            <div className="mx-auto mb-3 h-1 w-9 rounded-full bg-[#3A3D45]" aria-hidden="true" />
+            <div className="mb-2 flex items-center gap-2 text-[13px] leading-[18px] text-[#B3B3B3]">
+              <span className="h-2 w-2 rounded-full" style={{ background: AREA_COLOR[m.area] }} aria-hidden="true" />
+              {speakerLine(m.channel)}
+            </div>
             {(
               [
                 ['Mehr davon', () => feedback('mehr')],
                 ['Kenne ich', () => feedback('kenne')],
                 ['Schwach', () => feedback('schwach')],
                 ['Falsch', () => feedback('falsch')],
-                ['Ganzes Video öffnen', openFull],
+                [m.audio ? 'Ganze Folge öffnen' : 'Ganzes Video öffnen', openFull],
                 ['Kanal stummschalten', muteChannel],
-                [captionsOn ? 'Untertitel aus' : 'Untertitel an', () => { setMenu(false); update((s) => ({ ...s, settings: { ...s.settings, captions: !captionsOn } })); }],
-                ['Abbrechen', () => setMenu(false)],
               ] as [string, () => void][]
             ).map(([label, fn]) => (
-              <button key={label} onClick={fn} className="block w-full border-b border-[#2a2a2a] py-4 text-left text-[17px] last:border-0">
+              <button key={label} onClick={fn} className="block h-[52px] w-full border-b border-[#262931] text-left text-[17px]">
                 {label}
               </button>
             ))}
+            <label className="flex h-[52px] items-center justify-between text-[17px]">
+              <span>Untertitel</span>
+              <input
+                type="checkbox"
+                checked={captionsOn}
+                onChange={() => update((s) => ({ ...s, settings: { ...s.settings, captions: !captionsOn } }))}
+                className="h-[22px] w-[22px] accent-white"
+              />
+            </label>
+            <button onClick={() => setMenu(false)} className="mt-2 h-[52px] w-full rounded-xl bg-[#1E2026] text-[17px] font-semibold">
+              Abbrechen
+            </button>
           </div>
         </div>
       )}
@@ -629,8 +662,8 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
 
 function ActionButton({ label, onClick, active, children }: { label: string; onClick: () => void; active?: boolean; children: React.ReactNode }) {
   return (
-    <button aria-label={label} onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()} onClick={onClick} className="flex flex-col items-center gap-1 text-white">
-      <svg width="30" height="30" viewBox="0 0 24 24" fill={active ? '#fff' : 'none'} stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,.6))' }}>
+    <button aria-label={label} onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()} onClick={onClick} className="flex min-h-[44px] flex-col items-center gap-1 text-white">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill={active ? '#fff' : 'none'} stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,.6))' }}>
         {children}
       </svg>
       <span className="vlabel">{label}</span>
@@ -640,4 +673,10 @@ function ActionButton({ label, onClick, active, children }: { label: string; onC
 
 function Empty({ text }: { text: string }) {
   return <div className="pad flex h-[100dvh] items-center bg-black text-[17px] leading-[25px] text-[#B3B3B3]">{text}</div>;
+}
+
+/** "Sigma Nutrition (Prof. Grant Tinsley)" wird zu "Sigma Nutrition · Prof. Grant Tinsley" */
+function speakerLine(channel: string) {
+  const m = channel.match(/^(.*?)\s*\((.+)\)$/);
+  return m ? `${m[1]} · ${m[2]}` : channel;
 }

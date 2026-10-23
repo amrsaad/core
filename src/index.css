@@ -121,8 +121,8 @@ body {
 /* Bildfläche 16:9 in Bildschirmbreite, mittig. YouTube-Iframe 35 % größer und beschnitten,
    damit Titelzeile, Logo und Videovorschläge außerhalb des sichtbaren Bereichs liegen. */
 .vframe > div {
-  position: absolute; left: 50%; top: 50%; width: 100vw; height: calc(100vw * 9 / 16);
-  transform: translate(-50%, -50%); overflow: hidden;
+  position: absolute; left: 50%; top: 31%; width: 100vw; height: calc(100vw * 9 / 16);
+  transform: translateX(-50%); overflow: hidden;
 }
 .vframe iframe {
   position: absolute; left: 50%; top: 50%; width: 135%; height: 135%; transform: translate(-50%, -50%);
@@ -130,19 +130,21 @@ body {
 }
 .vposter {
   object-fit: cover; z-index: 1;
-  width: 100vw; height: calc(100vw * 9 / 16); background: #000;
+  width: 100vw; height: calc(100vw * 9 / 16); background: #1a1d24;
+  top: 31%; transform: translateX(-50%);
 }
 .vplay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; opacity: 0.85; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6)); }
 .vgesture { position: absolute; inset: 0; z-index: 10; }
+.vtrack { position: absolute; left: 0; right: 0; top: env(safe-area-inset-top); height: 2px; z-index: 19; background: rgba(255, 255, 255, 0.18); }
 .vprogress {
   position: absolute; left: 0; right: 0; top: env(safe-area-inset-top); height: 2px; z-index: 20;
-  background: #fff; transform-origin: left center;
+  background: var(--area, #fff); transform-origin: left center;
 }
 .vloading {
   position: absolute; left: 0; right: 0; top: env(safe-area-inset-top); height: 2px; z-index: 21; overflow: hidden;
 }
 .vloading::after {
-  content: ''; position: absolute; top: 0; bottom: 0; width: 30%; background: rgba(255, 255, 255, 0.85);
+  content: ''; position: absolute; top: 0; bottom: 0; width: 30%; background: var(--area, #fff);
   animation: vload 0.9s ease-in-out infinite;
 }
 @keyframes vload { from { left: -30%; } to { left: 100%; } }
@@ -153,13 +155,13 @@ body {
   background: rgba(0, 0, 0, 0.75); border-radius: 999px; padding: 14px 22px; font-size: 17px; font-weight: 600;
 }
 .vinfo {
-  position: absolute; left: calc(env(safe-area-inset-left) + 16px); right: 96px; z-index: 20;
-  bottom: calc(env(safe-area-inset-bottom) + var(--nav-h, 0px) + 20px);
+  position: absolute; left: calc(env(safe-area-inset-left) + 16px); right: 88px; z-index: 20;
+  bottom: calc(env(safe-area-inset-bottom) + var(--nav-h, 0px) + 24px);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); transition: bottom 200ms;
 }
 .vcaption {
-  position: absolute; left: calc(env(safe-area-inset-left) + 16px); right: 96px; z-index: 18; display: flex; justify-content: flex-start;
-  bottom: calc(env(safe-area-inset-bottom) + var(--nav-h, 0px) + 112px); transition: bottom 200ms;
+  position: absolute; left: calc(env(safe-area-inset-left) + 16px); right: 88px; z-index: 18; display: flex; justify-content: flex-start;
+  top: calc(31% + 100vw * 9 / 16 + 16px);
 }
 .vcaption span {
   background: rgba(0, 0, 0, 0.72); color: #fff; border-radius: 8px; padding: 6px 10px;
@@ -167,22 +169,25 @@ body {
   -webkit-box-decoration-break: clone; box-decoration-break: clone;
 }
 .vaudio { position: absolute; inset: 0; z-index: 1; background: #000; }
-.vaudio-bg { position: absolute; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); object-fit: cover; filter: blur(30px) brightness(0.35); }
+.vaudio-bg { display: none; }
 .vaudio-art {
-  position: absolute; left: 50%; top: calc(env(safe-area-inset-top) + 18%); transform: translateX(-50%);
-  width: min(56vw, 260px); aspect-ratio: 1; object-fit: cover; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  position: absolute; left: 50%; top: 16.5%; transform: translateX(-50%);
+  width: min(62vw, 240px); aspect-ratio: 1; object-fit: cover; border-radius: 12px; background: #20242c;
 }
-.vcaption-audio { top: 60%; bottom: auto; right: 24px; left: 24px; justify-content: center; text-align: center; }
+.vcaption-audio { top: 52%; bottom: auto; right: 24px; left: 24px; justify-content: center; text-align: center; }
 .vcaption-audio span { font-size: 24px; line-height: 32px; background: transparent; padding: 0; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8); }
-.vchannel { font-size: 13px; line-height: 18px; margin-bottom: 4px; }
+.vchannel { display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 18px; font-weight: 600; margin-bottom: 6px; }
+.vdot { width: 8px; height: 8px; border-radius: 4px; background: var(--area); flex-shrink: 0; }
+.vspeaker { color: #b3b3b3; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .vtitle {
-  font-size: 15px; line-height: 20px; font-weight: 600;
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 17px; line-height: 22px; font-weight: 600;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 .vactions {
-  position: absolute; right: calc(env(safe-area-inset-right) + 12px); z-index: 20;
+  position: absolute; right: calc(env(safe-area-inset-right) + 12px); z-index: 20; width: 56px;
   bottom: calc(env(safe-area-inset-bottom) + var(--nav-h, 0px) + 24px);
-  display: flex; flex-direction: column; gap: 22px; transition: bottom 200ms;
+  display: flex; flex-direction: column; align-items: center; gap: 20px; transition: bottom 200ms;
 }
 .vlabel { font-size: 11px; line-height: 13px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
 
@@ -193,11 +198,17 @@ body {
   padding: calc(env(safe-area-inset-top) + 24px) calc(env(safe-area-inset-right) + 28px) calc(env(safe-area-inset-bottom) + 96px) calc(env(safe-area-inset-left) + 28px);
 }
 .foryou-label {
+  display: flex; align-items: center; gap: 8px;
   font-size: 12px; line-height: 16px; letter-spacing: 0.08em; font-weight: 600; color: var(--area);
-  padding-left: 16px; border-left: 3px solid var(--area);
 }
+.foryou-label::before { content: ''; width: 8px; height: 8px; border-radius: 4px; background: var(--area); }
 .foryou-text {
-  margin: 0; padding-left: 16px; border-left: 3px solid var(--area);
+  margin: 0;
   font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  font-weight: 600; font-size: 26px; line-height: 32px;
+  font-weight: 500; font-size: 26px; line-height: 34px;
+}
+.foryou-foot {
+  position: absolute; left: calc(env(safe-area-inset-left) + 28px); right: calc(env(safe-area-inset-right) + 28px);
+  bottom: calc(env(safe-area-inset-bottom) + 24px); display: flex; justify-content: space-between;
+  font-size: 13px; line-height: 18px; color: #8a8f98;
 }
