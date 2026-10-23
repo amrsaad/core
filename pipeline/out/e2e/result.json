@@ -1,0 +1,40 @@
+{
+ "url": "http://127.0.0.1:4173/core/",
+ "at": "2026-10-23T05:01:41.337Z",
+ "runs": [
+  {
+   "browser": "webkit",
+   "ok": false,
+   "steps": {
+    "feedReady": 185,
+    "firstVideo": "bzr8becykRo",
+    "firstPlayingMs": -1,
+    "loadToPlayingMs": -1,
+    "swipeIdxMs": -1,
+    "swipeToPlayingMs": -1,
+    "duration": 0,
+    "autoNextAfterEndMs": -1,
+    "nextPlaying": false,
+    "endedJumpMs": -1,
+    "pageErrors": []
+   }
+  },
+  {
+   "browser": "chromium",
+   "ok": false,
+   "steps": {
+    "feedReady": 64,
+    "firstVideo": "bzr8becykRo",
+    "firstPlayingMs": -1,
+    "loadToPlayingMs": -1,
+    "swipeIdxMs": 1,
+    "swipeToPlayingMs": -1,
+    "duration": 36,
+    "autoNextAfterEndMs": -1,
+    "nextPlaying": false,
+    "endedJumpMs": -1,
+    "pageErrors": []
+   }
+  }
+ ]
+}
