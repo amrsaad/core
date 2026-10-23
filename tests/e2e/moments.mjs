@@ -10,7 +10,7 @@ mkdirSync(out, { recursive: true });
 const FAKE = readFileSync(new URL('./fakeyt.js', import.meta.url), 'utf8');
 
 // Testpool: erster Block Beat (mit und ohne forYou), dann Brain und Body
-const mk = (i, area, topic, forYou) => ({ id: `test${String(i).padStart(7, '0')}:${100}`, videoId: `test${String(i).padStart(7, '0')}`, start: 100, end: 160 + (i % 3) * 20, channel: `Kanal ${area} ${i % 4}`, videoTitle: 'Testvideo', area, topic, hook: `Testmoment ${i} ${area}`, forYou, kind: 'regel', createdAt: '2026-10-20T00:00:00Z', cues: [[0, 'Untertitel eins'], [2, 'Untertitel zwei']] });
+const mk = (i, area, topic, forYou) => ({ id: `test${String(i).padStart(7, '0')}:${100}`, videoId: `test${String(i).padStart(7, '0')}`, start: 100, end: 160 + (i % 3) * 20, channel: `Kanal ${area} ${i % 4}`, videoTitle: 'Testvideo', area, topic, hook: `Testmoment ${i} ${area}`, forYou, kind: 'regel', createdAt: '2026-10-20T00:00:00Z', cues: [[0, 'Untertitel eins, If Apple were like everyone else, a marketing message'] , [2, 'Untertitel zwei']] });
 const moments = [];
 for (let i = 0; i < 12; i++) moments.push(mk(i, 'beat', 'islam', i % 2 === 0 ? 'Testzeile für dich' : undefined));
 for (let i = 12; i < 40; i++) moments.push(mk(i, 'brain', 'augen'));

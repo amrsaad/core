@@ -91,6 +91,11 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   video.setAttribute('webkit-playsinline', '');
   Object.assign(video.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', objectFit: 'contain', background: '#000', display: 'none', pointerEvents: 'none' });
   host.appendChild(video);
+  const hideNativeCaptions = () => {
+    for (let i = 0; i < video.textTracks.length; i++) video.textTracks[i].mode = 'disabled';
+  };
+  video.textTracks.addEventListener?.('addtrack', hideNativeCaptions);
+  video.addEventListener('loadedmetadata', hideNativeCaptions);
 
   let mode: 'yt' | 'hls' = HLS.has(videoId) ? 'hls' : 'yt';
   let hlsState: number = STATE.UNSTARTED;
