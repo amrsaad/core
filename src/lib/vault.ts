@@ -20,16 +20,20 @@ async function idb<T>(mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRe
   });
 }
 
+/** Speichert den Schlüssel aus einem Text, der den Freischalt-Link enthält (Adresse oder eingefügter Link). */
+export async function storeKeyFrom(text: string): Promise<boolean> {
+  const m = text.match(/k=([A-Za-z0-9_-]{40,})/);
+  if (!m) return false;
+  const key = await crypto.subtle.importKey('raw', b64u(m[1]), 'AES-GCM', false, ['decrypt']);
+  await idb('readwrite', (s) => {
+    s.put(key, 'main');
+  });
+  return true;
+}
+
 /** Liest einen neuen Schlüssel aus dem Fragment (falls vorhanden) und liefert den gespeicherten. */
 export async function unlockKey(): Promise<CryptoKey | null> {
-  const m = location.hash.match(/k=([A-Za-z0-9_-]{40,})/);
-  if (m) {
-    const key = await crypto.subtle.importKey('raw', b64u(m[1]), 'AES-GCM', false, ['decrypt']);
-    await idb('readwrite', (s) => {
-      s.put(key, 'main');
-    });
-    history.replaceState(null, '', location.pathname + location.search);
-  }
+  if (await storeKeyFrom(location.hash)) history.replaceState(null, '', location.pathname + location.search);
   return (await idb<CryptoKey>('readonly', (s) => s.get('main'))) ?? null;
 }
 

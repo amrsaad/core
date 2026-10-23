@@ -2,7 +2,7 @@ import { registerHls } from './video/ytApi';
 import { useCallback, useEffect, useState } from 'react';
 import { now as clockNow } from './lib/clock';
 import { useAppState } from './lib/useAppState';
-import { decryptJson, unlockKey } from './lib/vault';
+import { decryptJson, storeKeyFrom, unlockKey } from './lib/vault';
 import { MomentFeed } from './moments/MomentFeed';
 import { isReviewDue } from './moments/review';
 import { SavedMoments } from './moments/SavedMoments';
@@ -52,7 +52,7 @@ export default function App() {
   const onPausedChange = useCallback((p: boolean) => setPaused(p), []);
 
   if (!state || vault.status === 'loading' || review === null) return <div className="h-[100dvh] bg-black" />;
-  if (vault.status === 'locked') return <Locked text="Core ist gesperrt. Öffne einmal deinen Freischalt-Link auf diesem Gerät." />;
+  if (vault.status === 'locked') return <Unlock />;
   if (vault.status === 'error') return <Locked text={`Pool konnte nicht geladen werden (${vault.message}). Beim ersten Start ist Internet nötig.`} />;
   if (review) return <WeeklyReview state={state} update={update} now={clockNow()} onDone={() => setReview(false)} />;
 
@@ -82,6 +82,43 @@ export default function App() {
           </button>
         ))}
       </nav>
+    </div>
+  );
+}
+
+/** Home-Bildschirm-Apps auf iOS haben eigenen Speicher. Daher Freischalten per eingefügtem Link direkt in der App. */
+function Unlock() {
+  const [text, setText] = useState('');
+  const [msg, setMsg] = useState('');
+  const tryText = async (t: string) => {
+    if (await storeKeyFrom(t)) location.reload();
+    else setMsg('Kein gültiger Freischalt-Link. Bitte den ganzen Link einfügen.');
+  };
+  const paste = async () => {
+    try {
+      await tryText(await navigator.clipboard.readText());
+    } catch {
+      setMsg('Einfügen nicht erlaubt. Link unten ins Feld einfügen.');
+    }
+  };
+  return (
+    <div className="pad flex h-[100dvh] flex-col justify-center gap-4 bg-black text-[17px] leading-[25px] text-[#B3B3B3]">
+      <p>Core ist auf diesem Gerät noch nicht freigeschaltet. Freischalt-Link kopieren, dann hier einfügen.</p>
+      <button onClick={paste} className="rounded-xl bg-white py-3 font-semibold text-black">Link einfügen</button>
+      <input
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onPaste={(e) => {
+          const t = e.clipboardData.getData('text');
+          if (t) void tryText(t);
+        }}
+        placeholder="oder hier einfügen"
+        autoCapitalize="off"
+        autoCorrect="off"
+        className="rounded-xl border border-[#333] bg-[#111] px-3 py-3 text-white"
+      />
+      {text && <button onClick={() => tryText(text)} className="rounded-xl border border-[#555] py-3 text-white">Freischalten</button>}
+      {msg && <p className="text-[15px] text-[#E07B7B]">{msg}</p>}
     </div>
   );
 }
