@@ -17,6 +17,10 @@ export interface Moment {
   kind: Kind;
   top?: boolean;
   createdAt: string;
+  /** Eigener Stream statt YouTube (z.B. TED), Vorschaubild und Originalseite */
+  hls?: string;
+  thumb?: string;
+  url?: string;
 }
 
 export interface MomentPool {
@@ -37,5 +41,5 @@ export interface MomentLogEntry {
   feedback?: Feedback;
 }
 
-export const thumbOf = (m: { videoId: string }) => `https://i.ytimg.com/vi/${m.videoId}/hqdefault.jpg`;
-export const fullVideoUrl = (m: { videoId: string; start: number }) => `https://www.youtube.com/watch?v=${m.videoId}&t=${m.start}`;
+export const thumbOf = (m: { videoId: string; thumb?: string }) => m.thumb ?? `https://i.ytimg.com/vi/${m.videoId}/hqdefault.jpg`;
+export const fullVideoUrl = (m: { videoId: string; start: number; url?: string }) => m.url ?? `https://www.youtube.com/watch?v=${m.videoId}&t=${m.start}`;

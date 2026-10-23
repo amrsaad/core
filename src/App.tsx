@@ -1,3 +1,4 @@
+import { registerHls } from './video/ytApi';
 import { useCallback, useEffect, useState } from 'react';
 import { now as clockNow } from './lib/clock';
 import { useAppState } from './lib/useAppState';
@@ -35,6 +36,7 @@ export default function App() {
         const key = await unlockKey();
         if (!key) return setVault({ status: 'locked' });
         const pool = await decryptJson<MomentPool>(key, `${import.meta.env.BASE_URL}moments/pool.enc`);
+        if (pool) registerHls(pool.moments);
         setVault({ status: 'open', pool: pool ?? { updatedAt: '', lastRun: null, moments: [] } });
       } catch (e) {
         setVault({ status: 'error', message: e instanceof Error ? e.message : String(e) });
