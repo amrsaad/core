@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>core crypto spike</title>
+<style>body{background:#000;color:#fff;font:16px -apple-system,system-ui,sans-serif;padding:20px}pre{white-space:pre-wrap}</style>
+</head>
+<body>
+<p id="status">lade</p>
+<pre id="out"></pre>
+<script>
+// Schlüssel einmalig aus #k=..., in IndexedDB speichern, Fragment entfernen, Datei entschlüsseln.
+const b64u = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)), (c) => c.charCodeAt(0));
+function db() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('core-key', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('k');
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function idb(mode, fn) {
+  const d = await db();
+  return new Promise((res, rej) => {
+    const t = d.transaction('k', mode);
+    const q = fn(t.objectStore('k'));
+    t.oncomplete = () => res(q && q.result);
+    t.onerror = () => rej(t.error);
+  });
+}
+async function main() {
+  const status = document.getElementById('status');
+  const m = location.hash.match(/k=([A-Za-z0-9_-]+)/);
+  if (m) {
+    // Nicht extrahierbarer CryptoKey: der Rohschlüssel ist danach im Browser nicht mehr lesbar
+    const key = await crypto.subtle.importKey('raw', b64u(m[1]), 'AES-GCM', false, ['decrypt']);
+    await idb('readwrite', (s) => s.put(key, 'main'));
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+  const key = await idb('readonly', (s) => s.get('main'));
+  if (!key) { status.textContent = 'kein Schlüssel'; return; }
+  const enc = await (await fetch('data.enc.json', { cache: 'no-cache' })).json();
+  try {
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64u(enc.iv) }, key, b64u(enc.ct));
+    const data = JSON.parse(new TextDecoder().decode(plain));
+    status.textContent = 'entschlüsselt';
+    document.getElementById('out').textContent = JSON.stringify(data, null, 1);
+    window.__result = { ok: true, data, hash: location.hash };
+  } catch (e) {
+    status.textContent = 'Entschlüsseln fehlgeschlagen';
+    window.__result = { ok: false, error: String(e) };
+  }
+}
+main().catch((e) => { document.getElementById('status').textContent = String(e); window.__result = { ok: false, error: String(e) }; });
+</script>
+</body>
+</html>
