@@ -1,0 +1,42 @@
+{
+ "date": "2026-10-23",
+ "seed": true,
+ "candidates": 144,
+ "accepted": 144,
+ "rejectedCount": 0,
+ "passRate": 1,
+ "selected": 0,
+ "selectedByArea": {
+  "brain": 0,
+  "body": 0,
+  "beat": 0
+ },
+ "total": 0,
+ "rejected": [],
+ "skippedByBuilder": [
+  {
+   "id": "wiki:de:Alberto Santos Dumont",
+   "reason": "Extract zu kurz oder erster Satz zu lang"
+  },
+  {
+   "id": "wiki:de:Anicka Yi",
+   "reason": "Extract zu kurz oder erster Satz zu lang"
+  },
+  {
+   "id": "wiki:de:Brigitte Hamann",
+   "reason": "Extract zu kurz oder erster Satz zu lang"
+  },
+  {
+   "id": "wiki:de:Nürnberger Prozess gegen die Hauptkriegsverbrecher",
+   "reason": "Extract zu kurz oder erster Satz zu lang"
+  },
+  {
+   "id": "wiki:de:Wilhelm Kamlah",
+   "reason": "Extract zu kurz oder erster Satz zu lang"
+  },
+  {
+   "id": "wiki:de:Oriana Fallaci",
+   "reason": "Extract zu kurz oder erster Satz zu lang"
+  }
+ ]
+}
