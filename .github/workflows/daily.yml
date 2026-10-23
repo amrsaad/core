@@ -122,13 +122,12 @@ jobs:
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - run: npm ci
       - run: npm run build
-      - name: Vorschau starten
-        run: |
-          npx vite preview --port 4173 --strictPort &
-          node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://localhost:4173/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
       - name: Video-Feed testen
-        timeout-minutes: 10
-        run: npm run e2e -- http://localhost:4173/core/ pipeline/out/e2e
+        timeout-minutes: 12
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4173 --strictPort &
+          node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4173/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
+          npm run e2e -- http://127.0.0.1:4173/core/ pipeline/out/e2e
       - name: Ergebnisse committen
         if: always()
         run: |
