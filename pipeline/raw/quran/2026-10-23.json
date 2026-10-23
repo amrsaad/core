@@ -2581,6 +2581,66 @@
    "urlChecks": {
     "https://quran.com/2/79": 200
    }
+  },
+  {
+   "sourceId": "quran:2:80",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/80",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:80?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:80",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "وَقَالُوا۟ لَن تَمَسَّنَا ٱلنَّارُ إِلَّآ أَيَّامًا مَّعْدُودَةً ۚ قُلْ أَتَّخَذْتُمْ عِندَ ٱللَّهِ عَهْدًا فَلَن يُخْلِفَ ٱللَّهُ عَهْدَهُۥٓ ۖ أَمْ تَقُولُونَ عَلَى ٱللَّهِ مَا لَا تَعْلَمُونَ",
+    "translation": "Und sie sagen: „Das (Höllen)feuer wird uns nur für gezählte Tage berühren. Sag: Habt ihr mit Allah einen Bund geschlossen? Dann wird Allah Seinen Bund nicht brechen. Oder wollt ihr von Allah etwas sagen, was ihr nicht wißt?",
+    "tafsir_muyassar": "<span class=\"blue\">وقال بنو إسرائيل:</span> لن تصيبنا النار في الآخرة إلا أيامًا قليلة العدد. قل لهم -أيها الرسول مبطلا دعواهم-: أعندكم عهد من الله بهذا، فإن الله لا يخلف عهده؟ بل إنكم تقولون على الله ما لا تعلمون بافترائكم الكذب.",
+    "tafsir_ibnkathir": "<h2>The Jews hope They will only remain in the Fire for a Few Days</h2><p>Allah mentioned the claim of the Jews, that the Fire will only touch them for a few days, and then they will be saved from it. Allah refuted this claim by saying,</p><p>قُلْ أَتَّخَذْتُمْ عِندَ اللَّهِ عَهْدًا</p><p>(Say (O Muhammad to them): \"Have you taken a covenant from Allah'). Hence, the Ayah proclaims, `if you had a promise from Allah for that, then Allah will never break His promise. However, such promise never existed. Rather, what you say, about Allah, you have no knowledge of and you thus utter a lie about Him.' Al-`Awfi said that Ibn `Abbas said about the Ayah,</p><p>وَقَالُواْ لَن تَمَسَّنَا النَّارُ إِلاَّ أَيَّامًا مَّعْدُودَةً</p><p>(And they (Jews) say, \"The Fire shall not touch us but for a few numbered days.\"). \"The Jews said, `The Fire will only touch us for forty days.\"' Others added that this was the period during which the Jews worshipped the calf.</p><p>(When Khaybar was conquered, a roasted poisoned sheep was presented to the Prophet as a gift (by the Jews). The Messenger of Allah ﷺ ordered, `Assemble before me all the Jews who were here.' The Jews were summoned and the Prophet said (to them), `Who is your father' They replied, `So-and-so.' He said, `You have lied; your father is so-and-so.' They said, `You have uttered the truth.' He said, `Will you now tell me the truth, if I ask you about something' They replied, `Yes, O Abul-Qasim; and if we should tell a lie, you will know our lie as you have about our fathers.' On that he asked, `Who are the people of the (Hell) Fire' They said, `We shall remain in the (Hell) Fire for a short period, and after that you will replace us in it.' The Prophet said, `May you be cursed and humiliated in it! By Allah, we shall never replace you in it.' Then he asked, `Will you tell me the truth if I ask you a question' They said, `Yes, O Abul-Qasim.' He asked, `Have you poisoned this sheep' They said, `Yes.' He asked, `What made you do so' They said, `We wanted to know if you were a liar, in which case we would get rid of you, and if you were a Prophet then the poison would not harm you.') Imam Ahmad, Al-Bukhari and An-Nasa'i recorded similarly.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:80"
+   },
+   "fetchedAt": "2026-10-23T11:15:39.167Z",
+   "urlChecks": {
+    "https://quran.com/2/80": 200
+   }
+  },
+  {
+   "sourceId": "quran:2:81",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/81",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:81?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:81",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "بَلَىٰ مَن كَسَبَ سَيِّئَةً وَأَحَـٰطَتْ بِهِۦ خَطِيٓـَٔتُهُۥ فَأُو۟لَـٰٓئِكَ أَصْحَـٰبُ ٱلنَّارِ ۖ هُمْ فِيهَا خَـٰلِدُونَ",
+    "translation": "Aber nein! Wer eine böse Tat begangen hat, und wen seine Verfehlung umfangen hält, das sind Insassen des (Höllen)feuers. Ewig werden sie darin bleiben.",
+    "tafsir_muyassar": "<span class=\"blue\">فحُكْمُ الله ثابت:</span> أن من ارتكب الآثام حتى جَرَّته إلى الكفر، واستولت عليه ذنوبه مِن جميع جوانبه -وهذا لا يكون إلا فيمن أشرك بالله- فأولئك هم المشركون والكفار هم الذين يلازمون نار جهنم ملازمة دائمةً لا تنقطع.",
+    "tafsir_ibnkathir": "<p>Allah says, the matter is not as you have wished and hoped it to be. Rather, whoever does an evil deed and abides purposefully in his error, coming on the Day of Resurrection with no good deeds, only evil deeds, then he will be among the people of the Fire.</p><p>وَالَّذِينَ ءَامَنُواْ وَعَمِلُواْ الصَّـلِحَاتِ</p><p>(And those who believe and do righteous good deeds) meaning, \"They believe in Allah and His Messenger and perform the good deeds that conform with the Islamic Law. They shall be among the people of Paradise.\" Allah said in a similar statement,</p><p>لَّيْسَ بِأَمَـنِيِّكُمْ وَلا أَمَانِىِّ أَهْلِ الْكِتَـبِ مَن يَعْمَلْ سُوءًا يُجْزَ بِهِ وَلاَ يَجِدْ لَهُ مِن دُونِ اللَّهِ وَلِيّاً وَلاَ نَصِيراً - وَمَن يَعْمَلْ مِنَ الصَّـلِحَـتَ مِن ذَكَرٍ أَوْ أُنثَى وَهُوَ مُؤْمِنٌ فَأُوْلَـئِكَ يَدْخُلُونَ الْجَنَّةَ وَلاَ يُظْلَمُونَ نَقِيراً</p><p>(It will not be in accordance with your desires (Muslims), nor those of the People of the Scripture (Jews and Christians), whosoever works evil, will have the recompense thereof, and he will not find any protector or helper besides Allah. And whoever does righteous good deeds, male or female, and is a (true) believer in the Oneness of Allah (Muslim), such will enter Paradise and not the least injustice, even the size of a Naqira (speck on the back of a date stone), will be done to them) (4: 123-124).</p><p>Also, Abu Hurayrah, Abu Wa'il, `Ata', and Al-Hasan said that,</p><p>وَأَحَـطَتْ بِهِ خَطِيـَـتُهُ</p><p>(And his sin has surrounded him) means, \"His Shirk (polytheism) has surrounded him.\" Also, Al-A`mash reported from Abu Razin that Ar-Rabi` bin Khuthaym said,</p><p>وَأَحَـطَتْ بِهِ خَطِيـَـتُهُ</p><p>(And his sin has surrounded him), \"Whoever dies before repenting from his wrongs.\" As-Suddi and Abu Razin said similarly. Abu Al-`Aliyah, Mujahid, Al-Hasan, Qatadah and Ar-Rabi` bin Anas said that,</p><p>وَأَحَـطَتْ بِهِ خَطِيـَـتُهُ</p><p>(And his sin has surrounded him) refers to major sins. All of these statements carry similar meanings, and Allah knows best.</p><h2>When Small Sins gather, They bring about Destruction</h2><p>Here we should mention the Hadith that Imam Ahmad recorded, in which `Abdullah bin Mas`ud said that the Messenger of Allah ﷺ said,</p><p>«إِيَّاكُمْ وَمُحَقَّرَاتِ الذُّنُوبِ فَإِنَّهُنَّ يَجْتَمِعْنَ عَلَى الرَّجُلِ حَتّى يُهْلِكْنَه»</p><p>(Beware of the belittled sins, because they gather on a person until they destroy him.)</p><p>He then said that the Messenger of Allah ﷺ gave them an example,</p><p>«كَمَثَلٍ قَوْمٍ نَزَلُوا بِأَرْضِ فَلَاةٍ، فَحَضَرَ صَنِيعُ الْقَوْمِ فَجَعَلَ الرَّجُلُ يَنْطَلِقُ فَيَجِيءُ بِالْعُودِ وَالرَّجُلُ يَجِيءُ بِالْعُودِ، حَتّى جَمَعُوا سَوَادًا وَأَجَّجُوا نَارًا فَأَنْضَجُوا مَا قَذَفُوا فِيهَا»</p><p>(This is the example of people who set up camp on a flat land, and then their servants came. One of them collected some wood and another man collected some wood until they collected a great deal. They then started a fire and cooked what they put on it.)</p><p>Muhammad bin Ishaq reported that Ibn `Abbas said that,</p><p>وَالَّذِينَ ءَامَنُواْ وَعَمِلُواْ الصَّـلِحَاتِ أُوْلَـئِكَ أَصْحَـبُ الْجَنَّةِ هُمْ فِيهَا خَـلِدُونَ</p><p>(And those who believe and do righteous good deeds, they are dwellers of Paradise, they will dwell therein forever) \"Whoever believes in what you (Jews) did not believe in and implements what you refrained from implementing of Muhammad's ﷺ religion, shall acquire Paradise for eternity. Allah stated that the recompense for good or evil works shall remain with its people for eternity. \"</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:81"
+   },
+   "fetchedAt": "2026-10-23T11:15:39.167Z",
+   "urlChecks": {
+    "https://quran.com/2/81": 200
+   }
   }
  ]
 }
