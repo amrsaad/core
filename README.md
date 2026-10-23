@@ -43,7 +43,7 @@ GitHub Pages: statische PWA (Vite, React, TypeScript), rankt lokal, Fortschritt 
 
 Abgelehnte Karten stehen mit Grund in `pipeline/out/rejected-<datum>.json`. Der Lauf bricht ab, wenn weniger als 80 % der Kandidaten bestehen. Das deutet auf einen kaputten Fetcher hin.
 
-Manuell starten: Actions, dann **daily**, dann **Run workflow** (mit `seed` für den Erstbestand). Per CLI: `gh workflow run daily.yml`.
+Manuell starten: Actions, dann **daily**, dann **Run workflow** (mit `seed` für den Erstbestand). Per CLI: `gh workflow run daily.yml`. Alternativ ein Commit mit `[pipeline]` (oder `[seed]`) in der Nachricht.
 
 ## Buch-Highlights (Business)
 

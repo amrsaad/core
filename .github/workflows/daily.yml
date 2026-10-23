@@ -36,7 +36,14 @@ jobs:
 
   pipeline:
     needs: test
-    if: github.event_name != 'push' && github.ref_name == github.event.repository.default_branch
+    # Push startet die Pipeline nur mit [seed] oder [pipeline] in der Commit-Nachricht
+    if: >-
+      github.ref_name == github.event.repository.default_branch && (
+        github.event_name != 'push' ||
+        contains(github.event.head_commit.message, '[seed]') ||
+        contains(github.event.head_commit.message, '[pipeline]'))
+    env:
+      SEED: ${{ (inputs.seed || contains(github.event.head_commit.message, '[seed]')) && '--seed' || '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -47,9 +54,9 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Fetch
-        run: npx tsx pipeline/fetch/all.ts ${{ inputs.seed && '--seed' || '' }}
+        run: npx tsx pipeline/fetch/all.ts $SEED
       - name: Karten bauen und prüfen
-        run: npx tsx pipeline/build.ts ${{ inputs.seed && '--seed' || '' }}
+        run: npx tsx pipeline/build.ts $SEED
       - name: Rejected-Log bei Fehler sichern
         if: failure()
         uses: actions/upload-artifact@v4
