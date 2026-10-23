@@ -138,6 +138,14 @@ body {
   position: absolute; left: 0; right: 0; top: env(safe-area-inset-top); height: 2px; z-index: 20;
   background: #fff; transform-origin: left center;
 }
+.vloading {
+  position: absolute; left: 0; right: 0; top: env(safe-area-inset-top); height: 2px; z-index: 21; overflow: hidden;
+}
+.vloading::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 30%; background: rgba(255, 255, 255, 0.85);
+  animation: vload 0.9s ease-in-out infinite;
+}
+@keyframes vload { from { left: -30%; } to { left: 100%; } }
 .vhint {
   position: absolute; inset: 0; z-index: 15; display: flex; align-items: center; justify-content: center;
 }

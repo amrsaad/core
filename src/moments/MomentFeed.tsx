@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
-import { createPlayer, loadYT, STATE, type YTPlayer } from '../video/ytApi';
+import { createPlayer, HLS, loadYT, STATE, type YTPlayer } from '../video/ytApi';
 import { applySignal, leaveSignal, newMomentCursor, nextMomentBlock, SIGNAL, type MomentCursor } from './mix';
 import { fullVideoUrl, thumbOf, type Feedback, type Moment } from './types';
 
@@ -72,6 +72,8 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
   const [flash, setFlash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [caption, setCaption] = useState('');
+  const [loading, setLoading] = useState(false);
+  const waitSince = useRef(0);
   const captionsOn = state.settings.captions !== false;
 
   const today = dayKey(clockNow());
@@ -101,11 +103,15 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
     const m = queue.current[j];
     slot.index = j;
     if (!m || !slot.player || !slot.ready) return;
-    applySound(slot.player);
+    // Vorladen ohne Ton, der aktuelle Moment bekommt den gewählten Ton
+    if (play) applySound(slot.player);
+    else slot.player.mute();
     if (slot.mid !== m.id) {
       slot.mid = m.id;
       slot.st = STATE.UNSTARTED;
       if (play) slot.player.loadVideoById(load(m));
+      // YouTube lädt bei cue nur das Vorschaubild. Darum stumm laden, der Player hält beim ersten Bild an (siehe onState).
+      else if (!HLS.has(m.videoId)) slot.player.loadVideoById(load(m));
       else slot.player.cueVideoById(load(m));
     } else if (play) slot.player.playVideo();
     else slot.player.pauseVideo();
@@ -170,6 +176,8 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       if (next < prev && backM) update((s) => ({ ...s, momentWeights: applySignal(s.momentWeights, backM, SIGNAL.back) }));
       setCaption('');
       endFast();
+      waitSince.current = 0;
+      setLoading(false);
       if (prevM && endedAt.current !== prev) log(prevM, {});
       current().player?.pauseVideo();
       idxRef.current = next;
@@ -271,6 +279,23 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       const m = queue.current[idxRef.current];
       if (!p || !sl.ready || !m || forYouRef.current) return;
       const c = p.getCurrentTime?.() ?? 0;
+      // Laden sichtbar machen, hängende Momente überspringen
+      if (sl.st === STATE.PLAYING || userPaused.current) {
+        waitSince.current = 0;
+        setLoading(false);
+      } else {
+        waitSince.current ||= Date.now();
+        const waited = Date.now() - waitSince.current;
+        setLoading(waited > 400);
+        // Nur wenn in dieser Sitzung schon etwas lief (sonst blockiert z.B. der Stromsparmodus Autoplay und alles würde übersprungen)
+        if (everPlayed.current && waited > 12_000 && c < m.start + 1) {
+          diag.current.push(`watchdog ${m.id}`);
+          bad.current.add(m.videoId);
+          waitSince.current = 0;
+          goTo(idxRef.current + 1);
+          return;
+        }
+      }
       if (sl.st === STATE.PLAYING || sl.st === STATE.PAUSED) {
         setProgress(Math.min(1, Math.max(0, (c - m.start) / (m.end - m.start))));
         const rel = c - m.start;
@@ -495,6 +520,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       })}
 
       <div className="vprogress" style={{ transform: `scaleX(${progress})` }} />
+      {loading && !forYou && <div className="vloading" aria-label="Lädt" />}
 
       <div
         className="vgesture no-callout"
