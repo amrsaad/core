@@ -111,27 +111,28 @@ jobs:
     needs: [test, pipeline]
     if: always() && needs.test.result == 'success' && github.event_name == 'push' && contains(github.event.head_commit.message, '[e2e]')
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
+    # Offizielles Image: Browser und Systempakete sind vorinstalliert (apt-Installation hing im Runner)
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - run: npm ci
-      - run: npx playwright install --with-deps chromium webkit
       - run: npm run build
       - name: Vorschau starten
         run: |
           npx vite preview --port 4173 --strictPort &
-          for i in $(seq 1 30); do curl -sf http://localhost:4173/core/ >/dev/null && break; sleep 1; done
+          node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://localhost:4173/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
       - name: Video-Feed testen
+        timeout-minutes: 10
         run: npm run e2e -- http://localhost:4173/core/ pipeline/out/e2e
       - name: Ergebnisse committen
         if: always()
         run: |
+          [ -d pipeline/out/e2e ] || { echo "Keine E2E-Ergebnisse."; exit 0; }
           git config user.name "core-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add pipeline/out/e2e

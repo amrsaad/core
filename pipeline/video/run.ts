@@ -111,8 +111,19 @@ async function main() {
     const dates = [...shorts.map((e) => e.published), ...poolFile.videos.filter((v) => v.channelId === c.channelId).map((v) => v.published ?? '')].filter(Boolean).sort();
     if (dates.length) c.lastShort = dates[dates.length - 1].slice(0, 10);
     const ageDays = c.lastShort ? (Date.now() - Date.parse(c.lastShort)) / 86_400_000 : Infinity;
-    c.status = ageDays > INACTIVE_DAYS ? 'inactive' : 'active';
-    if (c.status === 'inactive') c.note = c.lastShort ? `kein neues Short seit ${c.lastShort}` : `keine Shorts gefunden (${via})`;
+    const inPool = poolFile.videos.some((v) => v.channelId === c.channelId) || added.some((v) => v.channelId === c.channelId);
+    delete c.note;
+    if (c.lastShort) {
+      c.status = ageDays > INACTIVE_DAYS ? 'inactive' : 'active';
+      if (c.status === 'inactive') c.note = `kein neues Short seit ${c.lastShort}`;
+    } else if (inPool) {
+      // Shorts vorhanden, aber Datum nicht lesbar: nicht als inaktiv werten
+      c.status = 'active';
+      c.note = 'Datum des neuesten Shorts nicht ermittelbar';
+    } else {
+      c.status = 'inactive';
+      c.note = `keine Shorts gefunden (${via})`;
+    }
     const line = `${c.name}: ${via}, ${fresh.length} neu geprüft, ${shorts.length} Shorts, letztes ${c.lastShort ?? 'unbekannt'}, ${c.status}`;
     console.log(line);
     report.push(line);
