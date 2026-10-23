@@ -1,0 +1,95 @@
+name: daily
+
+# Läuft immer auf dem Default-Branch des Repos (Name egal).
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: 'Seed-Lauf (5 Jahre fact, 30 Tage fresh, 66 Verse)'
+        type: boolean
+        default: false
+  push:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: daily
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+  pipeline:
+    needs: test
+    if: github.event_name != 'push' && github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Fetch
+        run: npx tsx pipeline/fetch/all.ts ${{ inputs.seed && '--seed' || '' }}
+      - name: Karten bauen und prüfen
+        run: npx tsx pipeline/build.ts ${{ inputs.seed && '--seed' || '' }}
+      - name: Rejected-Log bei Fehler sichern
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-out
+          path: pipeline/out
+      - name: Commit nur bei neuen Karten
+        run: |
+          if git diff --quiet -- public/cards && [ -z "$(git ls-files --others --exclude-standard public/cards)" ]; then
+            echo "Keine neuen Karten."
+            exit 0
+          fi
+          git config user.name "core-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/cards pipeline/raw pipeline/out pipeline/state.json
+          git commit -m "cards: $(date -u +%F) ($(node -p "require('./public/cards/index.json').total") gesamt)"
+          git push origin "HEAD:${{ github.ref_name }}"
+
+  deploy:
+    needs: [test, pipeline]
+    if: always() && needs.test.result == 'success' && (needs.pipeline.result == 'success' || needs.pipeline.result == 'skipped') && github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - id: deployment
+        uses: actions/deploy-pages@v4

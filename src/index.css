@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0e0f12;
+  --surface: #17191e;
+  --fg: #f2f2f2;
+  --muted: #9aa0a6;
+  --line: #262931;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f6f6f4;
+    --surface: #ffffff;
+    --fg: #15171b;
+    --muted: #5f6368;
+    --line: #e2e2de;
+    color-scheme: light;
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.feed {
+  height: 100dvh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+.feed::-webkit-scrollbar {
+  display: none;
+}
+.slide {
+  height: 100dvh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  overflow: hidden;
+}
+
+.pad {
+  padding-top: calc(env(safe-area-inset-top) + 20px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
+  padding-left: calc(env(safe-area-inset-left) + 20px);
+  padding-right: calc(env(safe-area-inset-right) + 20px);
+}
+
+.no-callout {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.t-headline { font-size: 26px; line-height: 32px; font-weight: 600; }
+.t-body { font-size: 18px; line-height: 27px; font-weight: 400; }
+.t-excerpt { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 15px; line-height: 22px; }
+.t-meta { font-size: 12px; line-height: 16px; text-transform: uppercase; letter-spacing: 0.08em; }
+.t-arabic { font-family: 'Amiri Quran', 'Noto Naskh Arabic', serif; font-size: 28px; line-height: 1.9; }
+.t-arabic-sm { font-family: 'Noto Naskh Arabic', 'Amiri Quran', serif; font-style: normal; font-size: 17px; line-height: 1.8; }
+
+.flash { animation: flash 900ms ease-out forwards; }
+@keyframes flash {
+  0% { opacity: 0; transform: translateY(6px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Platz für die Tab-Leiste */
+.pad.pad-nav {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 96px);
+}
