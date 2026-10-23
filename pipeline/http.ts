@@ -38,6 +38,13 @@ export async function checkUrl(url: string): Promise<number> {
   return r.status;
 }
 
+/** Status 200 nur, wenn die Antwort 200 ist und den erwarteten Inhalt enthält. */
+export async function checkContains(url: string, needle: string): Promise<number> {
+  const r = await get(url, { retries: 1, timeoutMs: 20_000 });
+  if (r.status !== 200) return r.status;
+  return r.text.replace(/\s/g, '').includes(needle.replace(/\s/g, '')) ? 200 : 404;
+}
+
 /** Führt fn für alle Elemente mit begrenzter Parallelität aus. */
 export async function pool<T, R>(items: T[], limit: number, fn: (x: T) => Promise<R>, delayMs = 0): Promise<R[]> {
   const out: R[] = new Array(items.length);

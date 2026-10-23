@@ -5,7 +5,7 @@ import type { Area, Card, CardFile, Interests } from '../src/types';
 import { writeIndex } from './cards-index';
 import { applyQuota, buildCard } from './cards';
 import { knownSourceIds } from './fetch/context';
-import { checkUrl, pool } from './http';
+import { checkContains, checkUrl, pool } from './http';
 import { CARDS_DIR, OUT_DIR, readJson, readRaw, ROOT, writeJson, writeRaw, type RawRecord, type SourceName } from './raw';
 import { today } from './text';
 import { validateCards } from './validate';
@@ -39,19 +39,14 @@ async function main() {
   const toCheck = candidates.map((c) => rawById.get(c.source.id)!).filter((r) => r.urlStatus !== 200);
   console.log(`URL-Prüfung: ${toCheck.length}`);
   await pool(toCheck, 4, async (r) => {
-    r.urlChecks ??= {};
-    for (const u of [r.url, ...(r.altUrls ?? [])]) {
-      const st = await checkUrl(u);
-      r.urlChecks[u] = st;
-      if (st === 200) {
-        r.url = u;
-        break;
-      }
+    r.urlChecks = { [r.url]: await checkUrl(r.url) };
+    r.urlStatus = r.urlChecks[r.url];
+    if (r.urlStatus !== 200 && r.verify) {
+      const st = await checkContains(r.verify.url, r.verify.mustContain);
+      r.urlChecks[r.verify.url] = st;
+      if (st === 200) r.urlStatus = 200;
     }
-    r.urlStatus = r.urlChecks[r.url] ?? 0;
   }, 150);
-  // Karte zeigt auf den Link, der in der Pipeline 200 geliefert hat
-  for (const c of candidates) c.source.url = rawById.get(c.source.id)!.url;
   const hosts = new Map<string, Record<number, number>>();
   for (const r of toCheck) for (const [u, st] of Object.entries(r.urlChecks ?? {})) {
     const h = new URL(u).host;

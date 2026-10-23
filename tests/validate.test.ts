@@ -56,6 +56,7 @@ describe('Verifikations-Gate', () => {
     expect(checkCard(card(), raw({ urlStatus: 404 }), none)?.rule).toBe(1);
     expect(checkCard(card({}, { url: '' }), raw(), none)?.rule).toBe(1);
     expect(checkCard(card(), undefined, none)?.rule).toBe(1);
+    expect(checkCard(card({}, { url: 'https://example.org/anders' }), raw(), none)?.rule).toBe(1);
   });
 
   it('Regel 2: Excerpt, der kein exakter Substring ist, fliegt raus', () => {

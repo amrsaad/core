@@ -29,6 +29,7 @@ export function checkCard(card: Card, raw: RawRecord | undefined, seen: Set<stri
   if (!card.source?.url) return rej(1, 'source.url fehlt');
   if (!raw) return rej(1, `keine Rohdaten für ${card.source.id}`);
   if (raw.urlStatus !== 200) return rej(1, `source.url lieferte HTTP ${raw.urlStatus}`);
+  if (raw.url !== card.source.url) return rej(1, 'source.url weicht vom geprüften Link ab');
   if (raw.api.status !== 200) return rej(1, `API lieferte HTTP ${raw.api.status}`);
 
   // 2. Excerpt ist exakter Substring des Rohtexts

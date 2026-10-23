@@ -66,7 +66,9 @@ function toRecord(r: EpmcResult, def: QueryDef, kind: 'fact' | 'fresh', api: { u
   const types = (r.pubTypeList?.pubType ?? []).map((t) => t.toLowerCase());
   if (types.some((t) => t.includes('retract') || t.includes('erratum') || t.includes('comment') || t.includes('editorial') || t.includes('letter'))) return null;
   const sourceId = r.pmid ? `pmid:${r.pmid}` : r.doi ? `doi:${r.doi.toLowerCase()}` : `epmc:${r.source}:${r.id}`;
-  const url = r.pmid ? `https://europepmc.org/article/MED/${r.pmid}` : r.doi ? `https://doi.org/${r.doi}` : `https://europepmc.org/article/${r.source}/${r.id}`;
+  const url = r.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${r.pmid}/` : r.doi ? `https://doi.org/${r.doi}` : `https://europepmc.org/article/${r.source}/${r.id}`;
+  const verifyQuery = r.pmid ? `EXT_ID:${r.pmid} AND SRC:MED` : r.doi ? `DOI:"${r.doi}"` : `EXT_ID:${r.id} AND SRC:${r.source}`;
+  const verify = { url: `${BASE}?${new URLSearchParams({ query: verifyQuery, format: 'json', resultType: 'idlist' })}`, mustContain: r.pmid ? `"pmid":"${r.pmid}"` : `"id":"${r.id}"` };
   return {
     sourceId,
     source: 'europepmc',
@@ -74,7 +76,7 @@ function toRecord(r: EpmcResult, def: QueryDef, kind: 'fact' | 'fresh', api: { u
     topic: def.topic,
     url,
     urlStatus: 0,
-    altUrls: [r.pmid && `https://pubmed.ncbi.nlm.nih.gov/${r.pmid}/`, r.doi && `https://doi.org/${r.doi}`].filter((u): u is string => !!u && u !== url),
+    verify,
     api,
     title: r.title,
     publisher: r.journalInfo?.journal?.title ?? 'Europe PMC',

@@ -20,8 +20,11 @@ export interface RawRecord {
   url: string;
   /** HTTP-Status beim Abruf von url in der Pipeline */
   urlStatus: number;
-  /** Weitere menschenlesbare Links, falls url nicht 200 liefert (z.B. PubMed, DOI) */
-  altUrls?: string[];
+  /**
+   * Maschinen-Endpunkt für denselben Datensatz. Wird geprüft, wenn url den Pipeline-Bot blockt
+   * (z.B. PubMed 203/429, Verlage 403). Zählt nur, wenn er HTTP 200 liefert UND genau diese ID enthält.
+   */
+  verify?: { url: string; mustContain: string };
   /** Status aller geprüften Links */
   urlChecks?: Record<string, number>;
   /** API-Endpunkt und Status, aus dem der Datensatz stammt */
