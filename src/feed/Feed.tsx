@@ -73,7 +73,7 @@ function Slide({ item, state, update, onToggleChrome }: { item: RoundItem } & Om
         </div>
       )}
       {menu && (
-        <div className="absolute inset-0 z-20 flex items-end bg-black/50" onPointerUp={(e) => e.target === e.currentTarget && setMenu(false)}>
+        <div className="absolute inset-0 z-20 flex items-end bg-black/50" onClick={(e) => e.target === e.currentTarget && setMenu(false)}>
           <div className="pad w-full rounded-t-2xl bg-surface" onPointerUp={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
             {[
               ['Mehr davon', () => feedback(FEEDBACK.more, 'Mehr davon')],

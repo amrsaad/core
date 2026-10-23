@@ -5,7 +5,7 @@ import { AREA_COLOR, AREA_LABEL, topicLabel } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { Excerpt, SourceLine } from '../feed/CardView';
 
-export function Saved({ state, update }: { state: AppState; update: (fn: (s: AppState) => AppState) => void }) {
+export function SavedCards({ state, update }: { state: AppState; update: (fn: (s: AppState) => AppState) => void }) {
   const [area, setArea] = useState<Area | 'all'>('all');
   const [topic, setTopic] = useState<string>('all');
   const [q, setQ] = useState('');
@@ -22,8 +22,7 @@ export function Saved({ state, update }: { state: AppState; update: (fn: (s: App
   const chip = (active: boolean) => `t-meta shrink-0 rounded-full border px-3 py-2 ${active ? 'border-[var(--fg)] text-[var(--fg)]' : 'border-[var(--line)] text-muted'}`;
 
   return (
-    <div className="pad pad-nav flex h-[100dvh] flex-col gap-4 overflow-y-auto">
-      <h1 className="t-headline m-0">Gespeichert</h1>
+    <div className="flex flex-col gap-4">
       <input
         type="search"
         value={q}

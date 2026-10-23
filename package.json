@@ -19,7 +19,8 @@
     "enrich": "tsx pipeline/enrich.ts",
     "sample": "tsx pipeline/sample.ts",
     "icons": "node scripts/icons.mjs",
-    "verify": "tsx pipeline/verify.ts"
+    "verify": "tsx pipeline/verify.ts",
+    "e2e": "node tests/e2e/video.mjs"
   },
   "dependencies": {
     "idb": "^8.0.4",
@@ -34,6 +35,7 @@
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.6.1",
     "fake-indexeddb": "^6.2.6",
+    "playwright": "1.56.1",
     "postcss": "^8.5.31",
     "tailwindcss": "^3.4.19",
     "tsx": "^4.23.15",

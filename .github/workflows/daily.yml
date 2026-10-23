@@ -106,6 +106,39 @@ jobs:
           echo "::error::Teilfehler: videos=${{ steps.videos.outcome }} fetch=${{ steps.fetch.outcome }} cards=${{ steps.cards.outcome }} verify=${{ steps.verify.outcome }}"
           exit 1
 
+  # E2E gegen echtes YouTube (nur mit [e2e] in der Commit-Nachricht). Ergebnisse und Screenshots werden committet.
+  e2e:
+    needs: [test, pipeline]
+    if: always() && needs.test.result == 'success' && github.event_name == 'push' && contains(github.event.head_commit.message, '[e2e]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run build
+      - name: Vorschau starten
+        run: |
+          npx vite preview --port 4173 --strictPort &
+          for i in $(seq 1 30); do curl -sf http://localhost:4173/core/ >/dev/null && break; sleep 1; done
+      - name: Video-Feed testen
+        run: npm run e2e -- http://localhost:4173/core/ pipeline/out/e2e
+      - name: Ergebnisse committen
+        if: always()
+        run: |
+          git config user.name "core-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pipeline/out/e2e
+          git diff --cached --quiet && exit 0
+          git commit -m "e2e: Video-Feed $(date -u +%FT%H:%M)"
+          for i in 1 2 3; do git pull --rebase -q origin "${{ github.ref_name }}" && git push origin "HEAD:${{ github.ref_name }}" && break; sleep 5; done
+
   deploy:
     needs: [test, pipeline]
     # Auch nach Teilfehler deployen: committet wird nur, was bestanden hat

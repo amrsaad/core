@@ -44,5 +44,5 @@ export function exportJson(s: AppState): string {
 export function parseImport(text: string): AppState {
   const data = JSON.parse(text) as { app?: string; state?: AppState };
   if (data.app !== 'core' || !data.state || data.state.version !== 1) throw new Error('Keine gültige Core-Sicherung');
-  return { ...emptyState(), ...data.state };
+  return { ...emptyState(), ...data.state, settings: { ...emptyState().settings, ...data.state.settings } };
 }

@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
 import type { Area, CardIndex } from '../types';
+import type { VideoPool } from '../videoTypes';
 import { exportJson, parseImport } from '../lib/db';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
-import { isTimeShifted, now } from '../lib/clock';
+import { dayKey, isTimeShifted, now } from '../lib/clock';
 
 const AREAS: Area[] = ['brain', 'body', 'beat'];
 
@@ -23,7 +24,7 @@ export function rebalance(shares: Record<Area, number>, area: Area, value: numbe
   return out;
 }
 
-export function Settings({ state, update, replace, index }: { state: AppState; update: (fn: (s: AppState) => AppState) => void; replace: (s: AppState) => void; index: CardIndex | null }) {
+export function Settings({ state, update, replace, index, pool }: { state: AppState; update: (fn: (s: AppState) => AppState) => void; replace: (s: AppState) => void; index: CardIndex | null; pool: VideoPool }) {
   const file = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const s = state.settings;
@@ -55,7 +56,7 @@ export function Settings({ state, update, replace, index }: { state: AppState; u
 
       <section className={row}>
         <div className="flex items-center justify-between">
-          <span className="text-[17px]">Tageslimit</span>
+          <span className="text-[17px]">Karten-Runden pro Tag</span>
           <span className="text-[17px] font-semibold">{s.dailyRoundLimit} Runden</span>
         </div>
         <input type="range" min={1} max={10} value={s.dailyRoundLimit} onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, dailyRoundLimit: Number(e.target.value) } }))} />
@@ -79,7 +80,53 @@ export function Settings({ state, update, replace, index }: { state: AppState; u
             />
           </label>
         ))}
-        <p className="t-meta m-0 text-muted">Eine Runde hat 4 Blöcke. Die Anteile werden auf Blöcke gerundet.</p>
+        <p className="t-meta m-0 text-muted">Gilt für Videos und Karten. Videos kommen in Blöcken à 3 gleichen Bereichs.</p>
+      </section>
+
+      <section className={row}>
+        <span className="text-[17px]">Video-Pool</span>
+        <div className="grid grid-cols-3 gap-2 text-center">
+          {AREAS.map((a) => (
+            <div key={a} className="rounded-lg border border-[var(--line)] py-2">
+              <div className="text-[20px] font-semibold">{pool.videos.filter((v) => v.area === a).length}</div>
+              <div className="t-meta" style={{ color: AREA_COLOR[a] }}>{AREA_LABEL[a]}</div>
+            </div>
+          ))}
+        </div>
+        <p className="t-meta m-0 text-muted">
+          {pool.videos.length} Videos · ungesehen {pool.videos.filter((v) => !state.videoSeen[v.id] && !state.mutedChannels[v.channelId]).length} · letztes Update {pool.updatedAt ? new Date(pool.updatedAt).toLocaleString('de-DE') : 'unbekannt'}
+        </p>
+      </section>
+
+      <section className={row}>
+        <span className="text-[17px]">Stummgeschaltete Kanäle</span>
+        {Object.keys(state.mutedChannels).length === 0 && <p className="t-meta m-0 text-muted">Keine. Langes Drücken auf ein Video, dann Kanal stummschalten.</p>}
+        {Object.entries(state.mutedChannels).map(([id, name]) => (
+          <div key={id} className="flex items-center justify-between">
+            <span className="text-[16px]">{name}</span>
+            <button
+              className="t-meta rounded-lg border border-[var(--line)] px-3 py-2"
+              onClick={() => update((st) => { const m = { ...st.mutedChannels }; delete m[id]; return { ...st, mutedChannels: m }; })}
+            >
+              Wieder zeigen
+            </button>
+          </div>
+        ))}
+        <button className={btn} onClick={() => { update((st) => ({ ...st, channelWeights: {} })); setMsg('Kanal-Gewichte zurückgesetzt.'); }}>
+          Kanal-Gewichte zurücksetzen
+        </button>
+      </section>
+
+      <section className={row}>
+        <span className="text-[17px]">Player</span>
+        <label className="flex items-center justify-between gap-3 text-[16px]">
+          <span>Ein-Player-Modus (falls iOS beim Wischen den Ton wieder ausschaltet)</span>
+          <input
+            type="checkbox"
+            checked={s.playerMode === 'single'}
+            onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, playerMode: e.target.checked ? 'single' : 'slots' } }))}
+          />
+        </label>
       </section>
 
       <section className={row}>
@@ -95,7 +142,8 @@ export function Settings({ state, update, replace, index }: { state: AppState; u
       <section className="t-meta flex flex-col gap-1 text-muted">
         <span>Version {__APP_VERSION__}</span>
         <span>Karten {index?.total ?? 0} · letztes Update {index ? new Date(index.updatedAt).toLocaleString('de-DE') : 'unbekannt'}</span>
-        <span>Gespeichert {Object.keys(state.saved).length} · gesehen {Object.keys(state.seen).length}</span>
+        <span>Karten gespeichert {Object.keys(state.saved).length} · gesehen {Object.keys(state.seen).length}</span>
+        <span>Videos gespeichert {Object.keys(state.savedVideos).length} · gesehen {Object.keys(state.videoSeen).length} · heute {Math.round((state.feedTime[dayKey(now())] ?? 0) / 60000)} Min</span>
         {isTimeShifted() && <span>Testzeit aktiv: {now().toLocaleString('de-DE')}</span>}
       </section>
     </div>

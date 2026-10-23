@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import type { Channel, Video, VideoPool } from '../../src/videoTypes';
 import { pool as runPool, sleep } from '../http';
 import { readJson, ROOT, writeJson } from '../raw';
-import { channelHits, channelIdFromPage, isChannelId, isShort, nameMatches, norm, oembed, parseFeed, shortsTabIds, ytGet, type FeedEntry } from './yt';
+import { channelHits, channelIdFromPage, isChannelId, isShort, nameMatches, norm, oembed, parseFeed, shortPublished, shortsTabIds, ytGet, type FeedEntry } from './yt';
 
 const CHANNELS = join(ROOT, 'content', 'channels.json');
 const POOL = join(ROOT, 'public', 'videos', 'pool.json');
@@ -34,7 +34,7 @@ async function resolve(c: Channel): Promise<void> {
   const exact = (h: (typeof hits)[number]) => `${c.name}/${q}`.split(/[\/,]/).some((p) => norm(p) === norm(h.title));
   const best = ok.find((h) => exact(h) && h.verified) ?? ok.find(exact) ?? ok.find((h) => h.verified) ?? ok[0];
   if (best) Object.assign(c, { channelId: best.channelId, resolvedBy: `search:${q}`, resolvedTitle: best.title, verified: best.verified, note: best.handle });
-  else Object.assign(c, { status: 'unresolved', note: `Suche HTTP ${r.status}, Treffer: ${hits.slice(0, 3).map((h) => h.title).join(' | ') || 'keine'}` });
+  else Object.assign(c, { status: 'unresolved', note: `Suche HTTP ${r.status}${r.status ? '' : ` (${r.text.slice(0, 120)})`}, Treffer: ${hits.slice(0, 3).map((h) => h.title).join(' | ') || 'keine'}` });
 }
 
 function pageTitle(html: string): string | undefined {
@@ -50,16 +50,17 @@ async function main() {
   const file = readJson<{ _info?: string; channels: Channel[] }>(CHANNELS, { channels: [] });
   const poolFile = readJson<VideoPool>(POOL, { updatedAt: '', videos: [] });
   const known = new Set(poolFile.videos.map((v) => v.id));
-  // Seed: erster Lauf (leerer Pool) oder ausdrücklich angefordert. Holt zusätzlich den Shorts-Tab.
-  const seed = process.argv.includes('--seed') || poolFile.videos.length === 0;
   const added: Video[] = [];
   const report: string[] = [];
 
   for (const c of file.channels) {
-    if (!c.channelId && c.status !== 'unresolved') {
+    // Nicht aufgelöste Kanäle bei jedem Lauf erneut versuchen
+    if (!c.channelId) {
+      delete c.status;
+      delete c.note;
       await resolve(c);
       console.log(`resolve ${c.name}: ${c.channelId ?? 'UNRESOLVED'} ${c.resolvedTitle ?? ''} ${c.verified ? '(verifiziert)' : ''} ${c.note ?? ''}`);
-      await sleep(400);
+      await sleep(2500);
     }
   }
 
@@ -74,10 +75,13 @@ async function main() {
       via += `, channel-feed ${all.status}`;
     }
     const byId = new Map(entries.map((e) => [e.id, e]));
-    if (seed) {
+    // Die RSS-Feeds liefern derzeit oft 404: der öffentliche Shorts-Tab ist deshalb immer dabei (neueste zuerst)
+    let newestTabId: string | undefined;
+    {
       const tab = await ytGet(`https://www.youtube.com/channel/${c.channelId}/shorts`);
       const ids = tab.status === 200 ? shortsTabIds(tab.text) : [];
       via += `, shorts-tab ${tab.status} (${ids.length})`;
+      newestTabId = ids[0];
       for (const id of ids) if (!byId.has(id)) byId.set(id, { id, title: '', published: '', thumb: '' });
     }
     const fresh = [...byId.values()].filter((e) => !known.has(e.id));
@@ -92,6 +96,16 @@ async function main() {
       if (!e.title) continue;
       known.add(e.id);
       added.push({ id: e.id, channelId: c.channelId, channelName: c.name, area: c.area, topic: c.topic, lang: c.lang, title: e.title, published: e.published || null, thumb: e.thumb || `https://i.ytimg.com/vi/${e.id}/hqdefault.jpg` });
+    }
+    // Datum des neuesten Shorts aus dem Tab, falls der Feed keines lieferte
+    if (newestTabId && !entries.some((e) => e.id === newestTabId)) {
+      const pub = await shortPublished(newestTabId);
+      if (pub) {
+        const v = added.find((x) => x.id === newestTabId) ?? poolFile.videos.find((x) => x.id === newestTabId);
+        if (v && !v.published) v.published = pub;
+        shorts.filter((e) => e.id === newestTabId).forEach((e) => (e.published = pub));
+        if (!shorts.some((e) => e.id === newestTabId)) shorts.push({ id: newestTabId, title: '', published: pub, thumb: '' });
+      }
     }
     // Aktivität: jüngstes bestätigtes Short mit Datum (Feed) oder bisheriger Stand
     const dates = [...shorts.map((e) => e.published), ...poolFile.videos.filter((v) => v.channelId === c.channelId).map((v) => v.published ?? '')].filter(Boolean).sort();

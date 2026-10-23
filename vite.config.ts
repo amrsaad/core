@@ -40,6 +40,17 @@ export default defineConfig({
             options: { cacheName: 'cards-index', networkTimeoutSeconds: 3 },
           },
           {
+            // Video-Pool: frisch aus dem Netz, offline der letzte Stand (Videos selbst brauchen Internet)
+            urlPattern: ({ url }) => url.pathname.endsWith('/videos/pool.json'),
+            handler: 'NetworkFirst',
+            options: { cacheName: 'video-pool', networkTimeoutSeconds: 3 },
+          },
+          {
+            urlPattern: ({ url }) => url.hostname === 'i.ytimg.com',
+            handler: 'CacheFirst',
+            options: { cacheName: 'thumbs', expiration: { maxEntries: 300, maxAgeSeconds: 30 * 86400 } },
+          },
+          {
             // Tagesdateien ändern sich nach dem Commit nicht mehr
             urlPattern: ({ url }) => url.pathname.includes('/cards/') && url.pathname.endsWith('.json'),
             handler: 'StaleWhileRevalidate',

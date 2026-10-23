@@ -88,3 +88,64 @@ body {
 .pad.pad-nav {
   padding-bottom: calc(env(safe-area-inset-bottom) + 96px);
 }
+
+/* ---------- Video-Feed (v2) ---------- */
+.vfeed {
+  position: relative;
+  height: 100dvh;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  touch-action: none;
+  --drag: 0px;
+}
+.vslot {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #000;
+  transform: translateY(calc(var(--off) * 100% + var(--drag)));
+}
+.vslot-anim { transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+.vfeed[data-drag='1'] .vslot { transition: none; }
+/* 9:16-Rahmen, füllt den Bildschirm wie Reels (Ränder werden beschnitten) */
+.vframe,
+.vposter {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100vw, calc(100dvh * 9 / 16));
+  height: max(100dvh, calc(100vw * 16 / 9));
+  transform: translate(-50%, -50%);
+}
+.vframe > div, .vframe iframe { width: 100%; height: 100%; border: 0; }
+.vframe iframe { pointer-events: none; }
+.vposter { object-fit: cover; z-index: 1; }
+.vplay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; opacity: 0.85; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6)); }
+.vgesture { position: absolute; inset: 0; z-index: 10; }
+.vprogress {
+  position: absolute; left: 0; right: 0; top: env(safe-area-inset-top); height: 2px; z-index: 20;
+  background: #fff; transform-origin: left center;
+}
+.vhint {
+  position: absolute; inset: 0; z-index: 15; display: flex; align-items: center; justify-content: center;
+}
+.vhint span {
+  background: rgba(0, 0, 0, 0.75); border-radius: 999px; padding: 14px 22px; font-size: 17px; font-weight: 600;
+}
+.vinfo {
+  position: absolute; left: calc(env(safe-area-inset-left) + 16px); right: 96px; z-index: 20;
+  bottom: calc(env(safe-area-inset-bottom) + var(--nav-h, 0px) + 20px);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); transition: bottom 200ms;
+}
+.vchannel { font-size: 13px; line-height: 18px; margin-bottom: 4px; }
+.vtitle {
+  font-size: 15px; line-height: 20px; font-weight: 600;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.vactions {
+  position: absolute; right: calc(env(safe-area-inset-right) + 12px); z-index: 20;
+  bottom: calc(env(safe-area-inset-bottom) + var(--nav-h, 0px) + 24px);
+  display: flex; flex-direction: column; gap: 22px; transition: bottom 200ms;
+}
+.vlabel { font-size: 11px; line-height: 13px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }

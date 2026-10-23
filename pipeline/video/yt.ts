@@ -20,8 +20,9 @@ export async function ytGet(url: string, opts: { redirect?: RequestRedirect; met
       }
       return { status: res.status, text, location: res.headers.get('location') ?? undefined };
     } catch (e) {
-      if (i === 2) return { status: 0, text: String(e) };
-      await sleep(2000);
+      const cause = (e as { cause?: { code?: string; message?: string } }).cause;
+      if (i === 2) return { status: 0, text: `${String(e)} ${cause?.code ?? ''} ${cause?.message ?? ''}`.trim() };
+      await sleep(4000 * (i + 1));
     }
   }
   return { status: 429, text: '' };
@@ -100,6 +101,13 @@ export async function oembed(id: string): Promise<{ title: string; author: strin
   } catch {
     return null;
   }
+}
+
+/** Veröffentlichungsdatum aus der Seite eines Shorts (für den Aktivitätscheck) */
+export async function shortPublished(id: string): Promise<string | null> {
+  const r = await ytGet(`https://www.youtube.com/shorts/${id}`);
+  if (r.status !== 200) return null;
+  return r.text.match(/"publishDate":"([^"]+)"/)?.[1] ?? r.text.match(/itemprop="datePublished" content="([^"]+)"/)?.[1] ?? r.text.match(/"uploadDate":"([^"]+)"/)?.[1] ?? null;
 }
 
 export const isChannelId = (s: string) => CHANNEL_ID.test(s);

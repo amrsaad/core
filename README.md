@@ -1,14 +1,14 @@
 # core
 
-Persönlicher Wissens-Feed statt Instagram. Vertikal wischen, Vollbild-Karte, sofort die nächste. Jede Karte ist ein wörtlicher Auszug aus einer echten Quelle, mit Link.
+Persönlicher Feed statt Instagram Reels. **Startscreen: vertikaler Vollbild-Video-Feed** aus YouTube Shorts, ausschließlich von freigegebenen Kanälen (`content/channels.json`). Kein fremder Algorithmus, keine Empfehlungen, keine Kommentare. Dazu der Karten-Feed aus v1 (geprüfte Textkarten mit wörtlichem Quellenauszug).
 
-- **Beat**: Koran, Vers für Vers ab 1:1, mit Tafsir (al-Muyassar, Ibn Kathir)
-- **Body**: Training, Ernährung, Recovery, Schlaf (Reviews, Metaanalysen, Position Stands)
-- **Brain**: Augenheilkunde, KI, Business (Buch-Highlights), Varia (Wikipedia)
+- **Beat**: Koran, Spiritualität
+- **Body**: Training, Ernährung, Recovery
+- **Brain**: Augenheilkunde, KI, Business, Varia
 
 App: **https://amrsaad.github.io/core/**
 
-Kein Login, kein Server, keine Analytics, laufende Kosten 0.
+Kein Login, kein Server, keine Analytics, laufende Kosten 0, kein API-Key.
 
 ## Auf dem iPhone installieren
 
@@ -19,7 +19,23 @@ Kein Login, kein Server, keine Analytics, laufende Kosten 0.
 
 Wichtig: Nur die Homescreen-App ist von Safaris 7-Tage-Löschung ausgenommen. Zusätzlich unter Einstellungen ab und zu **Export als JSON** sichern (z.B. in iCloud Drive).
 
-## Bedienung
+## Bedienung Video-Feed
+
+| Geste | Wirkung |
+|---|---|
+| Wischen nach oben / unten | nächstes / vorheriges Video |
+| Erster Tipp | Ton an (bleibt für die Sitzung an) |
+| Tipp | Pause / weiter (bei Pause erscheint die Tab-Leiste) |
+| Doppeltipp | speichern |
+| Langes Drücken | Mehr davon / Weniger / Kanal stummschalten |
+
+Videos kommen in Blöcken à 3 gleichen Bereichs (Brain 55, Body 25, Beat 20), der erste Block des Tages ist Beat. Gesehene Videos kommen nicht wieder. Nach 30 Minuten am Tag kommt einmal der Hinweis "30 Minuten heute".
+
+Endscreen-Schutz: Bei Ende (`ENDED`) und zusätzlich per Polling ab 0,4 s vor Schluss springt der Feed weiter. Solange ein Video nicht läuft (Laden, Pause, Ende), liegt das Vorschaubild über dem Player, YouTube-Oberfläche ist dann nie sichtbar.
+
+Falls iOS beim Wischen den Ton wieder ausschaltet: Einstellungen, **Ein-Player-Modus** einschalten (ein Player, das nächste Video wird direkt in der Wischgeste geladen).
+
+## Bedienung Karten-Feed (v1)
 
 | Geste | Wirkung |
 |---|---|
@@ -30,6 +46,22 @@ Wichtig: Nur die Homescreen-App ist von Safaris 7-Tage-Löschung ausgenommen. Zu
 | Tipp | Tab-Leiste ein- und ausblenden |
 
 Eine Runde hat 12 Karten in 4 Blöcken à 3 Karten gleichen Themas. Position 4, 8 und 12 sind Abruf-Karten, wenn gespeicherte Karten fällig sind. Danach kommen ein Abschluss-Screen mit 3 Fragen und ein Tageslimit (Default 5 Runden).
+
+## Wie Videos in den Pool kommen
+
+```
+GitHub Actions, täglich 03:00 UTC, vor der Karten-Pipeline
+  pipeline/video/run.ts
+    1. channelId auflösen (Kanalseite oder Kanalsuche, verifizierte Kanäle bevorzugt), Ergebnis in content/channels.json
+    2. Shorts-Feed (UUSH-Playlist), sonst Kanal-Feed; beim ersten Lauf zusätzlich der öffentliche Shorts-Tab
+    3. jede ID per /shorts/<id> (redirect manual) bestätigt: 200 = Short
+    4. public/videos/pool.json wächst nur (nie löschen), Duplikate über id
+    5. Kanal ohne neues Short seit 60 Tagen: status inactive (alte Videos bleiben)
+```
+
+Nur Einbettung über youtube-nocookie.com, kein Download, kein Re-Hosting. Kanal hinzufügen: Eintrag in `content/channels.json` mit `"channelId": null`, der nächste Lauf löst ihn auf.
+
+Test gegen echtes YouTube (Playwright, iPhone 15, WebKit und Chromium): Commit mit `[e2e]` in der Nachricht. Ergebnis und Screenshots landen in `pipeline/out/e2e/`.
 
 ## Wie Karten entstehen
 

@@ -1,4 +1,5 @@
 import type { Area, Card } from '../types';
+import type { Video } from '../videoTypes';
 
 export interface SavedItem {
   card: Card;
@@ -18,6 +19,13 @@ export interface Review {
 export interface Settings {
   dailyRoundLimit: number;
   areaShares: Record<Area, number>;
+  /** 'slots': 3 recycelte Player. 'single': ein Player, loadVideoById in der Wischgeste (iOS-Fallback) */
+  playerMode: 'slots' | 'single';
+}
+
+export interface SavedVideo {
+  video: Video;
+  savedAt: string;
 }
 
 export interface AppState {
@@ -31,15 +39,28 @@ export interface AppState {
   /** Gesamtzahl abgeschlossener Runden, steuert die Brain-Rotation */
   roundsTotal: number;
   settings: Settings;
+  // Video-Feed (v2)
+  videoSeen: Record<string, number>;
+  channelWeights: Record<string, number>;
+  /** channelId -> Kanalname */
+  mutedChannels: Record<string, string>;
+  savedVideos: Record<string, SavedVideo>;
+  /** Feed-Zeit in ms pro lokalem Tag */
+  feedTime: Record<string, number>;
+  /** Tage, an denen der 30-Minuten-Hinweis schon kam */
+  limitShown: Record<string, boolean>;
+  /** Letzter Tag mit Video-Feed, für "erster Block des Tages = Beat" */
+  videoDay?: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   dailyRoundLimit: 5,
   areaShares: { brain: 0.55, body: 0.25, beat: 0.2 },
+  playerMode: 'slots',
 };
 
 export function emptyState(): AppState {
-  return { version: 1, seen: {}, topicWeights: {}, saved: {}, reviews: [], rounds: {}, roundsTotal: 0, settings: structuredClone(DEFAULT_SETTINGS) };
+  return { version: 1, seen: {}, topicWeights: {}, saved: {}, reviews: [], rounds: {}, roundsTotal: 0, settings: structuredClone(DEFAULT_SETTINGS), videoSeen: {}, channelWeights: {}, mutedChannels: {}, savedVideos: {}, feedTime: {}, limitShown: {} };
 }
 
 export const WEIGHT_MIN = 0.3;
