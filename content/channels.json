@@ -1,0 +1,293 @@
+{
+ "_info": "Whitelist. Nur diese Kanäle erscheinen im Video-Feed. Nicht aufnehmen: Huberman Lab, Diary of a CEO.",
+ "channels": [
+  {
+   "name": "Yaqeen Institute",
+   "query": "Yaqeen Institute",
+   "area": "beat",
+   "topic": "islam",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Omar Suleiman",
+   "query": "https://www.youtube.com/c/OmarSuleimanOfficial",
+   "area": "beat",
+   "topic": "islam",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Nouman Ali Khan / Bayyinah",
+   "query": "Nouman Ali Khan",
+   "area": "beat",
+   "topic": "koran",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Yasir Qadhi",
+   "query": "Yasir Qadhi",
+   "area": "beat",
+   "topic": "islam",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Mufti Menk",
+   "query": "Mufti Menk",
+   "area": "beat",
+   "topic": "islam",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Ahmad Al Shugairi",
+   "query": "أحمد الشقيري",
+   "area": "beat",
+   "topic": "islam",
+   "lang": "ar",
+   "channelId": null
+  },
+  {
+   "name": "Omar Abdelkafy",
+   "query": "عمر عبد الكافي",
+   "area": "beat",
+   "topic": "islam",
+   "lang": "ar",
+   "channelId": null
+  },
+  {
+   "name": "Jeff Nippard",
+   "query": "@JeffNippard",
+   "area": "body",
+   "topic": "kraft",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Stronger By Science",
+   "query": "Stronger By Science",
+   "area": "body",
+   "topic": "kraft",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Renaissance Periodization",
+   "query": "Renaissance Periodization",
+   "area": "body",
+   "topic": "kraft",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Jeremy Ethier",
+   "query": "Jeremy Ethier",
+   "area": "body",
+   "topic": "kraft",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Layne Norton",
+   "query": "Layne Norton biolayne",
+   "area": "body",
+   "topic": "ernaehrung",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Peter Attia MD",
+   "query": "Peter Attia MD",
+   "area": "body",
+   "topic": "ausdauer",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Squat University",
+   "query": "Squat University",
+   "area": "body",
+   "topic": "recovery",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Andy Galpin",
+   "query": "Andy Galpin",
+   "area": "body",
+   "topic": "recovery",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Cataract Coach",
+   "query": "Cataract Coach Devgan",
+   "area": "brain",
+   "topic": "augen",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "American Academy of Ophthalmology",
+   "query": "https://www.youtube.com/user/AAOtv",
+   "area": "brain",
+   "topic": "augen",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Shannon Wong MD",
+   "query": "https://www.youtube.com/c/ShannonWongMD",
+   "area": "brain",
+   "topic": "augen",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "glaucomavids",
+   "query": "glaucomavids",
+   "area": "brain",
+   "topic": "augen",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Ophthalminute",
+   "query": "Ophthalminute",
+   "area": "brain",
+   "topic": "augen",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Two Minute Papers",
+   "query": "Two Minute Papers",
+   "area": "brain",
+   "topic": "ki",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "AI Explained",
+   "query": "AI Explained",
+   "area": "brain",
+   "topic": "ki",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Anthropic",
+   "query": "Anthropic",
+   "area": "brain",
+   "topic": "ki",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Dwarkesh Patel",
+   "query": "Dwarkesh Patel",
+   "area": "brain",
+   "topic": "ki",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Fireship",
+   "query": "Fireship",
+   "area": "brain",
+   "topic": "ki",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "3Blue1Brown",
+   "query": "3Blue1Brown",
+   "area": "brain",
+   "topic": "ki",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Chris Voss",
+   "query": "Chris Voss Black Swan",
+   "area": "brain",
+   "topic": "business",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Big Think",
+   "query": "https://www.youtube.com/channel/UCvQECJukTDE2i6aCoMnS-Vg",
+   "area": "brain",
+   "topic": "business",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Y Combinator",
+   "query": "Y Combinator",
+   "area": "brain",
+   "topic": "business",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Alex Hormozi",
+   "query": "Alex Hormozi",
+   "area": "brain",
+   "topic": "business",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Lenny's Podcast",
+   "query": "Lenny's Podcast",
+   "area": "brain",
+   "topic": "business",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Harvard Business Review",
+   "query": "Harvard Business Review",
+   "area": "brain",
+   "topic": "business",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Veritasium",
+   "query": "Veritasium",
+   "area": "brain",
+   "topic": "varia",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "Dinge Erklärt, Kurzgesagt",
+   "query": "Dinge Erklärt Kurzgesagt",
+   "area": "brain",
+   "topic": "varia",
+   "lang": "de",
+   "channelId": null
+  },
+  {
+   "name": "Kurzgesagt",
+   "query": "Kurzgesagt In a Nutshell",
+   "area": "brain",
+   "topic": "varia",
+   "lang": "en",
+   "channelId": null
+  },
+  {
+   "name": "TED-Ed",
+   "query": "TED-Ed",
+   "area": "brain",
+   "topic": "varia",
+   "lang": "en",
+   "channelId": null
+  }
+ ]
+}

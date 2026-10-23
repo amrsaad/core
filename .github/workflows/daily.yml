@@ -36,12 +36,13 @@ jobs:
 
   pipeline:
     needs: test
-    # Push startet die Pipeline nur mit [seed] oder [pipeline] in der Commit-Nachricht
+    # Push startet die Pipeline nur mit [seed], [pipeline] oder [video-seed] in der Commit-Nachricht
     if: >-
       github.ref_name == github.event.repository.default_branch && (
         github.event_name != 'push' ||
         contains(github.event.head_commit.message, '[seed]') ||
-        contains(github.event.head_commit.message, '[pipeline]'))
+        contains(github.event.head_commit.message, '[pipeline]') ||
+        contains(github.event.head_commit.message, '[video-seed]'))
     env:
       SEED: ${{ (inputs.seed || contains(github.event.head_commit.message, '[seed]')) && '--seed' || '' }}
     runs-on: ubuntu-latest
@@ -53,34 +54,62 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Fetch
+      # Video-Pipeline zuerst. Fehler in einem Teil verhindern nicht den Commit des anderen.
+      - name: Videos (Kanäle auflösen, Shorts holen, Pool ergänzen)
+        id: videos
+        continue-on-error: true
+        run: npx tsx pipeline/video/run.ts ${{ contains(github.event.head_commit.message, '[video-seed]') && '--seed' || '' }}
+      - name: Karten holen
+        id: fetch
+        continue-on-error: true
         run: npx tsx pipeline/fetch/all.ts $SEED
       - name: Karten bauen und prüfen
+        id: cards
+        if: steps.fetch.outcome == 'success'
+        continue-on-error: true
         run: npx tsx pipeline/build.ts $SEED
       - name: Gesamtbestand erneut prüfen
+        id: verify
+        if: steps.cards.outcome == 'success'
+        continue-on-error: true
         run: npm run verify
       - name: Rejected-Log bei Fehler sichern
-        if: failure()
+        if: steps.cards.outcome == 'failure' || steps.verify.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: pipeline-out
           path: pipeline/out
-      - name: Commit nur bei neuen Karten
+      - name: Ein Commit für neue Videos und Karten
         run: |
-          # index.json ändert updatedAt bei jedem Lauf, zählt daher nicht als neue Karte
-          if git diff --quiet -- public/cards ':!public/cards/index.json' && [ -z "$(git ls-files --others --exclude-standard public/cards)" ]; then
-            echo "Keine neuen Karten."
-            exit 0
-          fi
           git config user.name "core-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/cards pipeline/raw pipeline/out pipeline/state.json
-          git commit -m "cards: $(date -u +%F) ($(node -p "require('./public/cards/index.json').total") gesamt)"
+          if [ "${{ steps.cards.outcome }}" = "success" ] && [ "${{ steps.verify.outcome }}" = "success" ]; then
+            # index.json ändert updatedAt bei jedem Lauf, zählt daher nicht als neue Karte
+            if ! git diff --quiet -- public/cards ':!public/cards/index.json' || [ -n "$(git ls-files --others --exclude-standard public/cards)" ]; then
+              git add public/cards pipeline/raw pipeline/out pipeline/state.json
+            fi
+          fi
+          if [ "${{ steps.videos.outcome }}" = "success" ]; then
+            git add public/videos content/channels.json
+          fi
+          if git diff --cached --quiet; then
+            echo "Nichts Neues."
+            exit 0
+          fi
+          videos=$(node -p "require('./public/videos/pool.json').videos.length" 2>/dev/null || echo 0)
+          cards=$(node -p "require('./public/cards/index.json').total")
+          git commit -m "content: $(date -u +%F) (${videos} Videos, ${cards} Karten)"
           git push origin "HEAD:${{ github.ref_name }}"
+      - name: Teilfehler melden
+        if: steps.videos.outcome == 'failure' || steps.fetch.outcome == 'failure' || steps.cards.outcome == 'failure' || steps.verify.outcome == 'failure'
+        run: |
+          echo "::error::Teilfehler: videos=${{ steps.videos.outcome }} fetch=${{ steps.fetch.outcome }} cards=${{ steps.cards.outcome }} verify=${{ steps.verify.outcome }}"
+          exit 1
 
   deploy:
     needs: [test, pipeline]
-    if: always() && needs.test.result == 'success' && (needs.pipeline.result == 'success' || needs.pipeline.result == 'skipped') && github.ref_name == github.event.repository.default_branch
+    # Auch nach Teilfehler deployen: committet wird nur, was bestanden hat
+    if: always() && needs.test.result == 'success' && needs.pipeline.result != 'cancelled' && github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
     environment:
       name: github-pages
