@@ -18,7 +18,7 @@ const ICONS: Record<Tab, JSX.Element> = {
   saved: <path d="M7 4h10v16l-5-4-5 4z" />,
   settings: <path d="M4 7h10M18 7h2M4 17h4M12 17h8M16 5v4M10 15v4" />,
 };
-const NAMES: Record<Tab, string> = { feed: 'Feed', saved: 'Gespeichert', settings: 'Einstellungen' };
+const NAMES: Record<Tab, string> = { feed: 'Feed', saved: 'Saved', settings: 'Settings' };
 const NAV_H = 56;
 
 type Vault = { status: 'loading' } | { status: 'locked' } | { status: 'error'; message: string } | { status: 'open'; pool: MomentPool };
@@ -53,7 +53,7 @@ export default function App() {
 
   if (!state || vault.status === 'loading' || review === null) return <div className="h-[100dvh] bg-black" />;
   if (vault.status === 'locked') return <Unlock />;
-  if (vault.status === 'error') return <Locked text={`Pool konnte nicht geladen werden (${vault.message}). Beim ersten Start ist Internet nötig.`} />;
+  if (vault.status === 'error') return <Locked text={`Could not load the pool (${vault.message}). The first start needs internet.`} />;
   if (review) return <WeeklyReview state={state} update={update} now={clockNow()} onDone={() => setReview(false)} />;
 
   const showBar = tab === 'feed' ? paused : true;
@@ -92,19 +92,19 @@ function Unlock() {
   const [msg, setMsg] = useState('');
   const tryText = async (t: string) => {
     if (await storeKeyFrom(t)) location.reload();
-    else setMsg('Kein gültiger Freischalt-Link. Bitte den ganzen Link einfügen.');
+    else setMsg('That is not a valid unlock link. Please paste the whole link.');
   };
   const paste = async () => {
     try {
       await tryText(await navigator.clipboard.readText());
     } catch {
-      setMsg('Einfügen nicht erlaubt. Link unten ins Feld einfügen.');
+      setMsg('Pasting is blocked. Paste the link into the field below.');
     }
   };
   return (
     <div className="pad flex h-[100dvh] flex-col justify-center gap-4 bg-black text-[17px] leading-[25px] text-[#B3B3B3]">
-      <p>Core ist auf diesem Gerät noch nicht freigeschaltet. Freischalt-Link kopieren, dann hier einfügen.</p>
-      <button onClick={paste} className="rounded-xl bg-white py-3 font-semibold text-black">Link einfügen</button>
+      <p>Core is not unlocked on this device yet. Copy your unlock link, then paste it here.</p>
+      <button onClick={paste} className="rounded-xl bg-white py-3 font-semibold text-black">Paste link</button>
       <input
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -112,12 +112,12 @@ function Unlock() {
           const t = e.clipboardData.getData('text');
           if (t) void tryText(t);
         }}
-        placeholder="oder hier einfügen"
+        placeholder="or paste it here"
         autoCapitalize="off"
         autoCorrect="off"
         className="rounded-xl border border-[#333] bg-[#111] px-3 py-3 text-white"
       />
-      {text && <button onClick={() => tryText(text)} className="rounded-xl border border-[#555] py-3 text-white">Freischalten</button>}
+      {text && <button onClick={() => tryText(text)} className="rounded-xl border border-[#555] py-3 text-white">Unlock</button>}
       {msg && <p className="text-[15px] text-[#E07B7B]">{msg}</p>}
     </div>
   );

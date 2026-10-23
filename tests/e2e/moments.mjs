@@ -45,7 +45,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
 
     // Ohne Schlüssel gesperrt
     await page.goto(url + '?now=2026-10-23');
-    c.lockedWithoutKey = await waitFor(page, () => document.body.innerText.includes('nicht freigeschaltet'));
+    c.lockedWithoutKey = await waitFor(page, () => document.body.innerText.includes('not unlocked'));
 
     // Freischalten über #k=, Fragment wird entfernt
     await page.goto('about:blank');
@@ -129,7 +129,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.weeklyReviewOnSunday = await waitFor(p2, () => !!document.querySelector('[data-testid="weekly-review"]'));
     c.reviewListsSaved = await p2.evaluate(() => document.querySelectorAll('[data-testid="weekly-review"] li').length >= 1);
     await p2.screenshot({ path: `${out}/${name}-4-wochenrueckblick.png` });
-    await p2.click('text=Weiter zum Feed');
+    await p2.click('text=Continue to feed');
     c.feedAfterReview = await waitFor(p2, () => !!window.__core?.moment());
     await p2.waitForTimeout(800); // Zustand wird verzögert gespeichert
     await p2.close();

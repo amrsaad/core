@@ -365,16 +365,16 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       delete x[m.id];
       return { ...s, savedMoments: x };
     });
-    show('Entfernt');
+    show('Removed');
   };
 
   const save = () => {
     const m = queue.current[idxRef.current];
     if (!m) return;
-    if (stateRef.current.savedMoments[m.id]) return show('Schon gespeichert');
+    if (stateRef.current.savedMoments[m.id]) return show('Already saved');
     navigator.vibrate?.(15);
     update((s) => ({ ...s, savedMoments: { ...s.savedMoments, [m.id]: { moment: m, savedAt: new Date().toISOString() } }, momentWeights: applySignal(s.momentWeights, m, SIGNAL.save) }));
-    show('Gespeichert');
+    show('Saved');
   };
 
   const feedback = (fb: Feedback) => {
@@ -384,7 +384,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
     const factor = fb === 'mehr' ? SIGNAL.more : SIGNAL.negative;
     update((s) => ({ ...s, momentWeights: applySignal(s.momentWeights, m, factor) }));
     log(m, { feedback: fb });
-    show({ mehr: 'Mehr davon', kenne: 'Kenne ich', schwach: 'Schwach', falsch: 'Falsch' }[fb]);
+    show({ mehr: 'More like this', kenne: 'Already known', schwach: 'Weak', falsch: 'Wrong' }[fb]);
     if (fb !== 'mehr') goTo(idxRef.current + 1);
   };
 
@@ -397,7 +397,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
     const keep = queue.current.slice(0, idxRef.current + 1);
     queue.current = [...keep, ...queue.current.slice(idxRef.current + 1).filter((x) => x.channel !== m.channel)];
     for (const sl of slots.current) if (sl.index > idxRef.current) sl.index = -1;
-    show(`${m.channel} stumm`);
+    show(`${speakerLine(m.channel)} muted`);
     goTo(idxRef.current + 1);
   };
 
@@ -496,9 +496,9 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
 
   if (pool.length && !queue.current.length) ensureQueue(6);
 
-  if (!pool.length) return <Empty text="Noch keine Momente im Pool. Der Wochenlauf füllt ihn." />;
-  if (error) return <Empty text={`${error}. Momente brauchen Internet.`} />;
-  if (!queue.current.length) return <Empty text="Alle Momente gesehen. Neue kommen mit dem nächsten Wochenlauf." />;
+  if (!pool.length) return <Empty text="No moments in the pool yet. The daily run fills it." />;
+  if (error) return <Empty text={`${error}. Moments need internet.`} />;
+  if (!queue.current.length) return <Empty text="You have seen every moment. New ones arrive with the next daily run." />;
 
   const m = queue.current[idx];
   const saved = m && !!state.savedMoments[m.id];
@@ -534,7 +534,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
 
       <div className="vtrack" />
       <div className="vprogress" style={{ transform: `scaleX(${progress})` }} />
-      {loading && !forYou && <div className="vloading" aria-label="Lädt" />}
+      {loading && !forYou && <div className="vloading" aria-label="Loading" />}
 
       <div
         className="vgesture no-callout"
@@ -553,7 +553,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
 
       {hint && !forYou && (
         <div className="vhint pointer-events-none">
-          <span>Tippen für Ton</span>
+          <span>Tap for sound</span>
         </div>
       )}
 
@@ -576,16 +576,16 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
 
       {!forYou && (
         <div className="vactions">
-          <ActionButton label={saved ? 'Gespeichert' : 'Speichern'} onClick={toggleSave} active={saved}>
+          <ActionButton label={saved ? 'Saved' : 'Save'} onClick={toggleSave} active={saved}>
             <path d="M7 4h10v16l-5-4-5 4z" />
           </ActionButton>
-          <ActionButton label="Mehr davon" onClick={() => feedback('mehr')}>
+          <ActionButton label="More like this" onClick={() => feedback('mehr')}>
             <path d="M12 5v14M5 12h14" />
           </ActionButton>
-          <ActionButton label={m?.audio ? 'Ganze Folge' : 'Ganzes Video'} onClick={openFull}>
+          <ActionButton label={m?.audio ? 'Full episode' : 'Full video'} onClick={openFull}>
             <path d="M7 17 17 7M9 7h8v8" />
           </ActionButton>
-          <ActionButton label="Mehr" onClick={() => setMenu(true)}>
+          <ActionButton label="More" onClick={() => setMenu(true)}>
             <path d="M5 12h.01M12 12h.01M19 12h.01" strokeWidth="3.2" />
           </ActionButton>
         </div>
@@ -598,10 +598,10 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
           onPointerUp={() => goTo(idxRef.current + 1)}
           style={{ ['--area' as string]: AREA_COLOR[forYou.area] }}
         >
-          <div className="foryou-label">FÜR DICH</div>
+          <div className="foryou-label">FOR YOU</div>
           <p className="foryou-text">{forYou.forYou}</p>
           <div className="foryou-foot">
-            <span>Tippen für weiter</span>
+            <span>Tap to continue</span>
             <span>6 s</span>
           </div>
         </div>
@@ -629,12 +629,12 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
             </div>
             {(
               [
-                ['Mehr davon', () => feedback('mehr')],
-                ['Kenne ich', () => feedback('kenne')],
-                ['Schwach', () => feedback('schwach')],
-                ['Falsch', () => feedback('falsch')],
-                [m.audio ? 'Ganze Folge öffnen' : 'Ganzes Video öffnen', openFull],
-                ['Kanal stummschalten', muteChannel],
+                ['More like this', () => feedback('mehr')],
+                ['Already know this', () => feedback('kenne')],
+                ['Weak', () => feedback('schwach')],
+                ['Wrong', () => feedback('falsch')],
+                [m.audio ? 'Open full episode' : 'Open full video', openFull],
+                ['Mute this channel', muteChannel],
               ] as [string, () => void][]
             ).map(([label, fn]) => (
               <button key={label} onClick={fn} className="block h-[52px] w-full border-b border-[#262931] text-left text-[17px]">
@@ -642,7 +642,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
               </button>
             ))}
             <label className="flex h-[52px] items-center justify-between text-[17px]">
-              <span>Untertitel</span>
+              <span>Captions</span>
               <input
                 type="checkbox"
                 checked={captionsOn}
@@ -651,7 +651,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
               />
             </label>
             <button onClick={() => setMenu(false)} className="mt-2 h-[52px] w-full rounded-xl bg-[#1E2026] text-[17px] font-semibold">
-              Abbrechen
+              Cancel
             </button>
           </div>
         </div>

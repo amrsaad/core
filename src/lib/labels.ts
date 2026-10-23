@@ -6,7 +6,7 @@ export const TYPE_LABEL: Record<CardType, string> = { fact: 'Wissen', fresh: 'Ne
 export const TOPIC_LABEL: Record<string, string> = {
   glaukom: 'Glaukom', retina: 'Retina', katarakt: 'Katarakt', refraktiv: 'Refraktiv', cornea: 'Cornea', allgemein: 'Augen allgemein',
   'ki-medizin': 'KI Medizin', 'ki-regulierung': 'KI Regulierung', 'ki-allgemein': 'KI', verhandlung: 'Verhandlung', strategie: 'Strategie',
-  startup: 'Startup', varia: 'Varia', kraft: 'Kraft', ausdauer: 'Ausdauer', ernaehrung: 'Ernährung', recovery: 'Recovery', schlaf: 'Schlaf', koran: 'Koran',
+  startup: 'Startup', varia: 'Varia', kraft: 'Strength', ausdauer: 'Endurance', ernaehrung: 'Nutrition', recovery: 'Recovery', schlaf: 'Sleep', koran: 'Quran',
 };
 export const topicLabel = (t: string) => TOPIC_LABEL[t] ?? t;
 export const isArabic = (s: string) => /[؀-ۿ]/.test(s);

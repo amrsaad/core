@@ -212,3 +212,7 @@ body {
   bottom: calc(env(safe-area-inset-bottom) + 24px); display: flex; justify-content: space-between;
   font-size: 13px; line-height: 18px; color: #8a8f98;
 }
+
+/* No browser menu on long press (save image, open link). Holding belongs to the app (2x). */
+.vfeed, .vfeed * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.vfeed img, .vfeed video, .vfeed iframe { pointer-events: none; }

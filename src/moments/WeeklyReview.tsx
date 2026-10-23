@@ -4,12 +4,12 @@ import { weekKey, weekStats } from './review';
 
 export function WeeklyReview({ state, update, now, onDone }: { state: AppState; update: (fn: (s: AppState) => AppState) => void; now: Date; onDone: () => void }) {
   const st = weekStats(state, now);
-  const pct = (v: number | null) => (v === null ? 'k. A.' : `${v} %`);
+  const pct = (v: number | null) => (v === null ? 'n/a' : `${v} %`);
   return (
     <div className="pad pad-nav flex h-[100dvh] flex-col gap-5 overflow-y-auto bg-black text-white" data-testid="weekly-review">
-      <h1 className="t-headline m-0">Deine Woche</h1>
-      <p className="m-0 text-[15px] leading-[22px] text-[#B3B3B3]">Gespeicherte Momente. Hak ab, was du umgesetzt hast.</p>
-      {!st.saved.length && <p className="m-0 text-[17px] text-[#B3B3B3]">Diese Woche nichts gespeichert.</p>}
+      <h1 className="t-headline m-0">Your week</h1>
+      <p className="m-0 text-[15px] leading-[22px] text-[#B3B3B3]">Saved moments. Check off what you applied.</p>
+      {!st.saved.length && <p className="m-0 text-[17px] text-[#B3B3B3]">Nothing saved this week.</p>}
       <ul className="m-0 flex list-none flex-col gap-2 p-0">
         {st.saved.map(({ moment: m, done }) => (
           <li key={m.id}>
@@ -32,9 +32,9 @@ export function WeeklyReview({ state, update, now, onDone }: { state: AppState; 
       </ul>
       <dl className="grid grid-cols-3 gap-2 text-center">
         {[
-          ['Minuten', String(st.minutes)],
-          ['Bis zum Ende', pct(st.ended)],
-          ['Schwach oder falsch', pct(st.weak)],
+          ['Minutes', String(st.minutes)],
+          ['Watched to the end', pct(st.ended)],
+          ['Weak or wrong', pct(st.weak)],
         ].map(([k, v]) => (
           <div key={k} className="rounded-xl bg-[#121212] px-2 py-3">
             <dd className="m-0 text-[22px] font-semibold">{v}</dd>
@@ -49,7 +49,7 @@ export function WeeklyReview({ state, update, now, onDone }: { state: AppState; 
           onDone();
         }}
       >
-        Weiter zum Feed
+        Continue to feed
       </button>
     </div>
   );
