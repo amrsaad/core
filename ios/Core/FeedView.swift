@@ -416,32 +416,39 @@ struct MomentPage: View {
     }
 
     /// Tap: pause and play. Double tap: save. Hold: 2x speed.
-    @ViewBuilder
+    /// Tap: pause and play. Double tap: save. Hold: 2x speed.
+    /// The surface leaves out the action column, otherwise its tap gestures swallow the buttons' taps.
     private var gestureLayer: some View {
-        let base = Color.black.contentShape(Rectangle())
-        switch Env.testGestures {
-        case "off":
-            base
-        case "nolong":
-            base
-                .onTapGesture(count: 2) { saveByTap() }
-                .onTapGesture { playback.togglePlay() }
-        default:
-            base
-                .onTapGesture(count: 2) { saveByTap() }
-                .onTapGesture { playback.togglePlay() }
-                .onLongPressGesture(minimumDuration: 0.35, maximumDistance: 12, perform: {}, onPressingChanged: { down in
-                    pressing = down
-                    if down {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                            if pressing { fast = true; playback.setRate(2) }
-                        }
-                    } else if fast {
-                        fast = false
-                        playback.setRate(1)
-                    }
-                })
+        HStack(spacing: 0) {
+            gestureSurface
+            VStack(spacing: 0) {
+                gestureSurface
+                Color.black
+                    .frame(height: actionsHeight + insets.bottom + 12)
+                    .allowsHitTesting(false)
+            }
+            .frame(width: 88)
         }
+    }
+
+    private var actionsHeight: CGFloat { 4 * 47 + 3 * 20 + 16 }
+
+    private var gestureSurface: some View {
+        Color.black
+            .contentShape(Rectangle())
+            .onTapGesture(count: 2) { saveByTap() }
+            .onTapGesture { playback.togglePlay() }
+            .onLongPressGesture(minimumDuration: 0.35, maximumDistance: 12, perform: {}, onPressingChanged: { down in
+                pressing = down
+                if down {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        if pressing { fast = true; playback.setRate(2) }
+                    }
+                } else if fast {
+                    fast = false
+                    playback.setRate(1)
+                }
+            })
     }
 
     private func saveByTap() {

@@ -9,8 +9,6 @@ enum Env {
     static var isTest: Bool { testPoolFile != nil }
     static var testUnlocked: Bool { values["CORE_TEST_UNLOCKED"] == "1" }
     static var testReview: Bool { values["CORE_TEST_REVIEW"] == "1" }
-    /// experiment switch for the UI tests: "off" removes all page gestures, "nolong" only the long press
-    static var testGestures: String { values["CORE_TEST_GESTURES"] ?? "" }
     static var stateDir: URL {
         if let d = values["CORE_STATE_DIR"] { return URL(fileURLWithPath: d, isDirectory: true) }
         return FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]

@@ -96,22 +96,6 @@ final class CoreUITests: XCTestCase {
         if copy.exists { copy.tap(); wait(0.3); shot("32-settings-copied") }
     }
 
-    func test02bMenuNoLongPress() {
-        app.launchEnvironment["CORE_TEST_GESTURES"] = "nolong"
-        launch()
-        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15))
-        wait(1.5)
-        openMenu(tag: "16b-nolong")
-    }
-
-    func test02cMenuNoGestures() {
-        app.launchEnvironment["CORE_TEST_GESTURES"] = "off"
-        launch()
-        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15))
-        wait(1.5)
-        openMenu(tag: "16c-off")
-    }
-
     /// Taps the visible page's menu button and expects the sheet. Attaches hierarchy and app log when it fails.
     private func openMenu(tag: String) {
         let screen = app.frame
