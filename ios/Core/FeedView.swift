@@ -102,27 +102,33 @@ struct FeedView: View {
         }
     }
 
+    /// Pages are exactly as tall as the scroll view (full screen, under status bar and tab bar),
+    /// otherwise paging and page size drift apart by the tab bar height.
     private var pager: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            LazyVStack(spacing: 0) {
-                ForEach(feed.queue) { m in
-                    MomentPage(
-                        moment: m,
-                        playback: feed.playback(for: m),
-                        isActive: currentID == m.id,
-                        flash: $flash,
-                        onMenuAction: { action in menu(action, m) },
-                        onMenu: { Diag.log("menu open \(m.id)"); menuFor = m }
-                    )
-                    .containerRelativeFrame([.horizontal, .vertical])
-                    .id(m.id)
+        GeometryReader { geo in
+            ScrollView(.vertical, showsIndicators: false) {
+                LazyVStack(spacing: 0) {
+                    ForEach(feed.queue) { m in
+                        MomentPage(
+                            moment: m,
+                            playback: feed.playback(for: m),
+                            isActive: currentID == m.id,
+                            insets: geo.safeAreaInsets,
+                            flash: $flash,
+                            onMenuAction: { action in menu(action, m) },
+                            onMenu: { Diag.log("menu open \(m.id)"); menuFor = m }
+                        )
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .id(m.id)
+                    }
                 }
+                .scrollTargetLayout()
             }
-            .scrollTargetLayout()
+            .scrollTargetBehavior(.paging)
+            .scrollPosition(id: $currentID)
+            .ignoresSafeArea()
         }
-        .scrollTargetBehavior(.paging)
-        .scrollPosition(id: $currentID)
-        .ignoresSafeArea(edges: .top)
+        .ignoresSafeArea()
         .overlay {
             if let m = forYou { ForYouOverlay(moment: m) { advance() } }
         }
@@ -264,6 +270,7 @@ struct MomentPage: View {
     let moment: Moment
     @ObservedObject var playback: Playback
     let isActive: Bool
+    let insets: EdgeInsets
     @Binding var flash: String?
     let onMenuAction: (MenuAction) -> Void
     let onMenu: () -> Void
@@ -279,18 +286,20 @@ struct MomentPage: View {
             let bandH = w * 9 / 16
             let bandY = h * 0.31
             ZStack(alignment: .topLeading) {
-                Color.black
+                gestureLayer
 
                 if moment.isAudio {
                     AsyncImage(url: moment.thumbURL) { img in img.resizable().scaledToFill() } placeholder: { Palette.band }
                         .frame(width: min(w * 0.62, 240), height: min(w * 0.62, 240))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .position(x: w / 2, y: h * 0.165 + min(w * 0.62, 240) / 2)
+                        .allowsHitTesting(false)
                 } else {
                     media(width: w, height: bandH)
                         .frame(width: w, height: bandH)
                         .clipped()
                         .offset(y: bandY)
+                        .allowsHitTesting(false)
                 }
 
                 if store.state.captions && !playback.caption.isEmpty {
@@ -301,6 +310,7 @@ struct MomentPage: View {
                             .shadow(color: .black.opacity(0.8), radius: 3, y: 1)
                             .frame(width: w - 48)
                             .position(x: w / 2, y: h * 0.56)
+                            .allowsHitTesting(false)
                     } else {
                         Text(playback.caption)
                             .font(.system(size: 17, weight: .semibold))
@@ -308,10 +318,9 @@ struct MomentPage: View {
                             .background(.black.opacity(0.72), in: RoundedRectangle(cornerRadius: 8))
                             .frame(maxWidth: w - 104, alignment: .leading)
                             .offset(x: 16, y: bandY + bandH + 16)
+                            .allowsHitTesting(false)
                     }
                 }
-
-                gestureLayer
 
                 VStack(spacing: 0) {
                     progressLine
@@ -323,16 +332,16 @@ struct MomentPage: View {
                     }
                     .padding(.leading, 16)
                     .padding(.trailing, 12)
-                    .padding(.bottom, 24)
+                    .padding(.bottom, insets.bottom + 12)
                 }
-                .padding(.top, Device.topInset)
+                .padding(.top, insets.top)
 
                 if fast {
                     Text("2x")
                         .font(.system(size: 14, weight: .semibold))
                         .padding(.horizontal, 12).padding(.vertical, 4)
                         .background(.black.opacity(0.7), in: Capsule())
-                        .position(x: w / 2, y: Device.topInset + 28)
+                        .position(x: w / 2, y: insets.top + 28)
                 }
             }
             .foregroundStyle(.white)
@@ -406,7 +415,7 @@ struct MomentPage: View {
 
     /// Tap: pause and play. Double tap: save. Hold: 2x speed.
     private var gestureLayer: some View {
-        Color.clear
+        Color.black
             .contentShape(Rectangle())
             .onTapGesture(count: 2) {
                 if !store.isSaved(moment) { store.save(moment) }

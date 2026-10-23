@@ -147,9 +147,9 @@ final class CoreUITests: XCTestCase {
         let thumb = bundle.url(forResource: "thumb", withExtension: "png")!.absoluteString
         func m(_ id: String, _ area: String, _ topic: String, _ channel: String, _ hook: String, forYou: String? = nil, audio: Bool = false, youTube: Bool = false) -> [String: Any] {
             var d: [String: Any] = [
-                "id": id, "videoId": id, "start": 1, "end": 11, "channel": channel, "area": area, "topic": topic, "hook": hook,
+                "id": id, "videoId": id, "start": 1, "end": 41, "channel": channel, "area": area, "topic": topic, "hook": hook,
                 "kind": "story", "thumb": thumb,
-                "cues": [[0, "This is the first caption line of the sample stream."], [3, "It changes every few seconds, like a real moment."], [6, "Captions sit under the video band in design A."], [9, "The end comes at eleven seconds."]],
+                "cues": [[0, "This is the first caption line of the sample stream."], [3, "It changes every few seconds, like a real moment."], [6, "Captions sit under the video band in design A."], [9, "The end comes at forty-one seconds."]],
             ]
             if !youTube { d["hls"] = video; d["url"] = "https://example.com/full" }
             if audio { d["audio"] = true }
