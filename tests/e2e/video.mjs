@@ -40,7 +40,8 @@ const targets = (process.env.E2E_BROWSERS ?? 'webkit,chromium').split(',');
 for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter(([n]) => targets.includes(n))) {
   const run = { browser: name, ok: false, steps: {} };
   results.runs.push(run);
-  const browser = await type.launch(name === 'chromium' ? { args: ['--autoplay-policy=no-user-gesture-required'] } : {});
+  const headed = process.env.E2E_HEADED === '1';
+  const browser = await type.launch(name === 'chromium' ? { headless: !headed, args: ['--autoplay-policy=no-user-gesture-required', '--disable-blink-features=AutomationControlled'] } : { headless: !headed });
   try {
     const ctx = await browser.newContext({ ...devices['iPhone 15'], hasTouch: false });
     const page = await ctx.newPage();

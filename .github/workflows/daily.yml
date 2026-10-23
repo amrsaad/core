@@ -130,6 +130,8 @@ jobs:
           npm run e2e -- http://127.0.0.1:4173/core/ pipeline/out/e2e
           # Gegenprobe gegen die echte Pages-URL (echte https-Herkunft statt 127.0.0.1)
           E2E_BROWSERS=chromium npm run e2e -- https://amrsaad.github.io/core/ pipeline/out/e2e/live || true
+          # Sichtbarer Browser unter xvfb, ohne Automatisierungs-Kennung
+          E2E_HEADED=1 E2E_BROWSERS=chromium xvfb-run -a npm run e2e -- http://127.0.0.1:4173/core/ pipeline/out/e2e/headed || true
       - name: Ergebnisse committen
         if: always()
         run: |
