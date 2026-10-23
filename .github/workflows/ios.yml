@@ -1,0 +1,22 @@
+name: ios-build
+
+# Prüft, ob die iPhone-App kompiliert (ohne Signatur). Kein Deploy.
+on:
+  push:
+    paths:
+      - 'ios/**'
+      - '.github/workflows/ios.yml'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode-Version
+        run: xcodebuild -version
+      - name: Build für Simulator
+        run: |
+          cd ios
+          xcodebuild -project Core.xcodeproj -scheme Core -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build 2>&1 | tee build.log | grep -E "error:|warning:|BUILD" || true
+          grep -q "BUILD SUCCEEDED" build.log
