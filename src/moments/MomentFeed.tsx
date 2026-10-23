@@ -460,13 +460,19 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
         const mm = queue.current[j];
         const offset = single ? 0 : j - idx;
         const isCur = offset === 0;
-        const showPoster = !isCur || slot.st !== STATE.PLAYING || !!forYou;
+        const showPoster = !isCur || slot.st !== STATE.PLAYING || !!forYou || !!mm?.audio;
         return (
           <div key={s} className={`vslot ${Math.abs(offset) <= 1 ? 'vslot-anim' : ''}`} style={{ ['--off' as string]: offset }} aria-hidden={!isCur}>
             <div className="vframe">
               <div ref={(el) => (slot.host = el)} />
             </div>
-            {mm && showPoster && <img className="vposter" src={thumbOf(mm)} alt="" draggable={false} />}
+            {mm && showPoster && !mm.audio && <img className="vposter" src={thumbOf(mm)} alt="" draggable={false} />}
+            {mm?.audio && (
+              <div className="vaudio">
+                <img className="vaudio-bg" src={thumbOf(mm)} alt="" draggable={false} />
+                <img className="vaudio-art" src={thumbOf(mm)} alt="" draggable={false} />
+              </div>
+            )}
             {isCur && paused && !forYou && (
               <svg className="vplay" width="72" height="72" viewBox="0 0 24 24" fill="#fff" aria-label="Pausiert">
                 <path d="M8 5v14l11-7z" />
@@ -498,7 +504,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       )}
 
       {captionsOn && caption && !forYou && (
-        <div className="vcaption pointer-events-none" data-testid="caption">
+        <div className={`vcaption pointer-events-none ${m?.audio ? 'vcaption-audio' : ''}`} data-testid="caption">
           <span>{caption}</span>
         </div>
       )}
@@ -521,7 +527,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
           <ActionButton label="Mehr davon" onClick={() => feedback('mehr')}>
             <path d="M12 5v14M5 12h14" />
           </ActionButton>
-          <ActionButton label="Ganzes Video" onClick={openFull}>
+          <ActionButton label={m?.audio ? 'Ganze Folge' : 'Ganzes Video'} onClick={openFull}>
             <path d="M7 17 17 7M9 7h8v8" />
           </ActionButton>
         </div>

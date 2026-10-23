@@ -147,6 +147,14 @@ body {
   font-size: 17px; line-height: 23px; font-weight: 600; max-width: 100%;
   -webkit-box-decoration-break: clone; box-decoration-break: clone;
 }
+.vaudio { position: absolute; inset: 0; z-index: 1; background: #000; }
+.vaudio-bg { position: absolute; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); object-fit: cover; filter: blur(30px) brightness(0.35); }
+.vaudio-art {
+  position: absolute; left: 50%; top: calc(env(safe-area-inset-top) + 18%); transform: translateX(-50%);
+  width: min(56vw, 260px); aspect-ratio: 1; object-fit: cover; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+}
+.vcaption-audio { top: 60%; bottom: auto; right: 24px; left: 24px; justify-content: center; text-align: center; }
+.vcaption-audio span { font-size: 24px; line-height: 32px; background: transparent; padding: 0; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8); }
 .vchannel { font-size: 13px; line-height: 18px; margin-bottom: 4px; }
 .vtitle {
   font-size: 15px; line-height: 20px; font-weight: 600;

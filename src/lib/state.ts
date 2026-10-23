@@ -75,7 +75,7 @@ export interface AppState {
 
 export const DEFAULT_SETTINGS: Settings = {
   dailyRoundLimit: 5,
-  areaShares: { brain: 0.55, body: 0.25, beat: 0.2 },
+  areaShares: { brain: 1 / 3, body: 1 / 3, beat: 1 / 3 },
   playerMode: 'slots',
   captions: true,
 };

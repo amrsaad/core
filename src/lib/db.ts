@@ -18,7 +18,12 @@ function db() {
 export async function loadState(): Promise<AppState> {
   try {
     const s = (await (await db()).get(STORE, KEY)) as AppState | undefined;
-    return s ? { ...emptyState(), ...s, settings: { ...emptyState().settings, ...s.settings } } : emptyState();
+    if (!s) return emptyState();
+    const settings = { ...emptyState().settings, ...s.settings };
+    // Alter Standard 55/25/20 wurde am 23.10.2026 durch Gleichverteilung ersetzt (Themenplan mit Max)
+    const a = settings.areaShares;
+    if (a && a.brain === 0.55 && a.body === 0.25 && a.beat === 0.2) settings.areaShares = { ...emptyState().settings.areaShares };
+    return { ...emptyState(), ...s, settings };
   } catch {
     return emptyState();
   }
