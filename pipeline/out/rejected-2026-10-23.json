@@ -1,8 +1,8 @@
 {
  "date": "2026-10-23",
  "seed": false,
- "candidates": 924,
- "accepted": 924,
+ "candidates": 985,
+ "accepted": 985,
  "rejectedCount": 0,
  "passRate": 1,
  "selected": 22,
@@ -11,7 +11,7 @@
   "body": 6,
   "beat": 2
  },
- "total": 441,
+ "total": 463,
  "rejected": [],
  "skippedByBuilder": [
   {
@@ -3133,6 +3133,130 @@
   {
    "id": "pmid:42523574",
    "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:37406879",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:35063409",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36096933",
+   "reason": "kein Conclusion-Satz unter 400 Zeichen"
+  },
+  {
+   "id": "pmid:40591951",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42125505",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42436515",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42715525",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42563154",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42872226",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42780335",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41404064",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42214390",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42688049",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
+  },
+  {
+   "id": "pmid:42086349",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42780706",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41219882",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42368773",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42798580",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42827735",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42693958",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42807348",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42428916",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41924717",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42656268",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42528864",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42694493",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42099707",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42819227",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41974984",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42608811",
+   "reason": "kein Conclusion-Satz unter 400 Zeichen"
+  },
+  {
+   "id": "pmid:42626510",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
   },
   {
    "id": "wiki:de:Alberto Santos Dumont",
