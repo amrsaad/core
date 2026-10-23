@@ -1,8 +1,8 @@
 {
  "date": "2026-10-23",
  "seed": false,
- "candidates": 1226,
- "accepted": 1226,
+ "candidates": 1252,
+ "accepted": 1252,
  "rejectedCount": 0,
  "passRate": 1,
  "selected": 22,
@@ -11,7 +11,7 @@
   "body": 6,
   "beat": 2
  },
- "total": 639,
+ "total": 661,
  "rejected": [],
  "skippedByBuilder": [
   {
@@ -4328,6 +4328,110 @@
   },
   {
    "id": "pmid:41451100",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42051660",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42855343",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42058786",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
+  },
+  {
+   "id": "pmid:41505041",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42346871",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42500681",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42625665",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41508653",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42588239",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42718525",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42728887",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42393928",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42769491",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42706091",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42358682",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41644780",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42748669",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42611056",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42494916",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42694617",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
+  },
+  {
+   "id": "pmid:42492464",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42780342",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42148069",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42511308",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42787368",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42609350",
    "reason": "Titel zu lang für Headline"
   },
   {

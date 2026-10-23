@@ -2821,6 +2821,66 @@
    "urlChecks": {
     "https://quran.com/2/87": 200
    }
+  },
+  {
+   "sourceId": "quran:2:88",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/88",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:88?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:88",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "وَقَالُوا۟ قُلُوبُنَا غُلْفٌۢ ۚ بَل لَّعَنَهُمُ ٱللَّهُ بِكُفْرِهِمْ فَقَلِيلًا مَّا يُؤْمِنُونَ",
+    "translation": "Und sie sagen: „Unsere Herzen sind verhüllt. Nein! Vielmehr hat Allah sie für ihren Unglauben verflucht. Wie wenig sie glauben!",
+    "tafsir_muyassar": "<span class=\"blue\">وقال بنو إسرائيل لنبي الله ورسوله محمد صلى الله عليه وسلم:</span> قلوبنا مغطاة، لا يَنْفُذ إليها قولك. وليس الأمر كما ادَّعَوْا، بل قلوبهم ملعونة، مطبوع عليها، وهم مطرودون من رحمة الله بسبب جحودهم، فلا يؤمنون إلا إيمانًا قليلا لا ينفعهم.",
+    "tafsir_ibnkathir": "<p>Muhammad bin Ishaq reported that Ibn `Abbas said that, </p><div class=\"arabic uthmani\">وَقَالُواْ قُلُوبُنَا غُلْفٌ</div><p>(And they say, \"Our hearts are Ghulf.\"), means, \"Our hearts are screened.\" Mujahid also said that, </p><div class=\"arabic uthmani\">وَقَالُواْ قُلُوبُنَا غُلْفٌ</div><p>(And they say, \"Our hearts are Ghulf.\"), means, \"They are covered.\"`Ikrimah said, \"There is a stamp on them.\" Abu Al-`Aliyah said, \"They do not comprehend.\" Mujahid and Qatadah said that Ibn `Abbas read the Ayah in a way that means, \"Our hearts contain every type of knowledge and do not need the knowledge that you (O Muhammad) have.\" This is the opinion of `Ata' and Ibn `Abbas. </p><div class=\"arabic uthmani\">بَل لَّعَنَهُمُ اللَّهُ بِكُفْرِهِمْ</div><p>(Nay, Allah has cursed them for their disbelief) meaning, \"Allah expelled them and deprived them of every type of righteousness.\" Qatadah said that the Ayah, </p><div class=\"arabic uthmani\">فَقَلِيلاً مَّا يُؤْمِنُونَ</div><p>(So little is that which they believe.) means, \"Only a few of them believe.\" Allah's statement, </p><div class=\"arabic uthmani\">وَقَالُواْ قُلُوبُنَا غُلْفٌ</div><p>(And they say, \"Our hearts are Ghulf.\") is similar to His statement, </p><div class=\"arabic uthmani\">وَقَالُواْ قُلُوبُنَا فِى أَكِنَّةٍ مِمَّا تَدْعُونَا إِلَيْهِ</div><p>(And they say: \"Our hearts are under coverings (screened) from that to which you invite us) (41:5). </p><p>This is why Allah said here, </p><div class=\"arabic uthmani\">بَل لَّعَنَهُمُ اللَّهُ بِكُفْرِهِمْ فَقَلِيلاً مَّا يُؤْمِنُونَ</div><p>(Nay, Allah has cursed them for their disbelief, so little is that which they believe.) meaning, \"It is not as they claim. Rather, their hearts are cursed and stamped,\" just as Allah said in Surat An-Nisa' (4:155), </p><div class=\"arabic uthmani\">وَقَوْلِهِمْ قُلُوبُنَا غُلْفٌ بَلْ طَبَعَ اللَّهُ عَلَيْهَا بِكُفْرِهِمْ فَلاَ يُؤْمِنُونَ إِلاَّ قَلِيلاً</div><p>(And of their saying: \"Our hearts are wrapped (with coverings, i.e. we do not understand what the Messengers say) ـ nay, Allah has set a seal upon their hearts because of their disbelief, so they believe not but a little.) </p><p>There is a difference of opinion regarding the meaning of Allah's statement, </p><div class=\"arabic uthmani\">فَقَلِيلاً مَّا يُؤْمِنُونَ</div><p>(So little is that which they believe.) and His statement, </p><div class=\"arabic uthmani\">فَلاَ يُؤْمِنُونَ إِلاَّ قَلِيلاً</div><p>(So they believe not except a few). Some scholars said that the Ayat indicate that a few of them would believe, or that their faith is minute, because they believe in Resurrection and in Allah's reward and punishment that Musa foretold. Yet, this faith will not benefit them since it is overshadowed by their disbelief in what Muhammad brought them. Some scholars said that the Jews did not actually believe in anything and that Allah said, </p><div class=\"arabic uthmani\">فَقَلِيلاً مَّا يُؤْمِنُونَ</div><p>(So little is that which they believe), meaning, they do not believe. This meaning is similar to the Arabic expression, \"Hardly have I seen anything like this,\" meaning, \"I have never seen anything like this.\" </p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:88"
+   },
+   "fetchedAt": "2026-10-23T14:24:05.079Z",
+   "urlChecks": {
+    "https://quran.com/2/88": 200
+   }
+  },
+  {
+   "sourceId": "quran:2:89",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/89",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:89?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:89",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "وَلَمَّا جَآءَهُمْ كِتَـٰبٌ مِّنْ عِندِ ٱللَّهِ مُصَدِّقٌ لِّمَا مَعَهُمْ وَكَانُوا۟ مِن قَبْلُ يَسْتَفْتِحُونَ عَلَى ٱلَّذِينَ كَفَرُوا۟ فَلَمَّا جَآءَهُم مَّا عَرَفُوا۟ كَفَرُوا۟ بِهِۦ ۚ فَلَعْنَةُ ٱللَّهِ عَلَى ٱلْكَـٰفِرِينَ",
+    "translation": "Und als von Allah ein Buch zu ihnen kam, das bestätigend, was ihnen bereits vorlag - und zuvor hatten sie um einen entscheidenden Sieg über diejenigen, die ungläubig waren, angerufen -, als nun das zu ihnen kam, was sie kannten, verleugneten sie es. Darum Allahs Fluch über die Ungläubigen!",
+    "tafsir_muyassar": "وحين جاءهم القرآن من عند الله مصدقا لما معهم من التوراة جحدوه، وأنكروا نبوة محمد صلى الله عليه وسلم، وكانوا قبل بعثته يستنصرون به على مشركي العرب،<span class=\"blue\"> ويقولون:</span> قَرُبَ مبعث نبيِّ آخرِ الزمان، وسنتبعه ونقاتلكم معه. فلمَّا جاءهم الرسول الذي عرفوا صفاتِه وصِدْقَه كفروا به وكذبوه. فلعنةُ الله على كل مَن كفر بنبي الله ورسوله محمد صلى الله عليه وسلم، وكتابه الذي أوحاه الله إليه.",
+    "tafsir_ibnkathir": "<h2>The Jews were awaiting the Prophet's coming, but They disbelieved in Him when He was sent</h2><p>Allah said,</p><p>وَلَمَّا جَآءَهُمُ</p><p>(And when there came to them) meaning, the Jews,</p><p>كِتَـبٌ مِّنْ عِندِ اللَّهِ</p><p>(a Book from Allah) meaning, the Qur'an that Allah sent down to Muhammad,</p><p>مُصَدِّقٌ لِّمَا مَعَهُمْ</p><p>(confirming what is with them) meaning, the Tawrah. Further, Allah said,</p><p>وَكَانُواْ مِن قَبْلُ يَسْتَفْتِحُونَ عَلَى الَّذِينَ كَفَرُواْ</p><p>(although aforetime they had invoked Allah (for coming of Muhammad ) in order to gain victory over those who disbelieved) meaning, before this Messenger came to them, they used to ask Allah to aid them by his arrival, against their polytheistic enemies in war. They used to say to the polytheists, \"A Prophet shall be sent just before the end of this world and we, along with him, shall exterminate you, just as the nations of `Ad and Iram were exterminated.\" Also, Muhammad bin Ishaq narrated that Ibn `Abbas said, \"The Jews used to invoke Allah (for the coming of Muhammad ) in order to gain victory over the Aws and Khazraj, before the Prophet was sent. When Allah sent him to the Arabs, they rejected him and denied what they used to say about him. Hence, Mu`adh bin Jabal and Bishr bin Al-Bara' bin Ma`rur, from Bani Salamah, said to them, `O Jews! Fear Allah and embrace Islam. You used to invoke Allah for the coming of Muhammad when we were still disbelievers and you used to tell us that he would come and describe him to us,' Salam bin Mushkim from Bani An-Nadir replied, `He did not bring anything that we recognize. He is not the Prophet we told you about.' Allah then revealed this Ayah about their statement,</p><p>وَلَمَّا جَآءَهُمْ كِتَـبٌ مِّنْ عِندِ اللَّهِ مُصَدِّقٌ لِّمَا مَعَهُمْ</p><p>(And when there came to them (the Jews), a Book (this Qur'an) from Allah confirming what is with them (the Tawrah) and the Injil (Gospel)).\"'</p><p>Abu Al-`Aliyah said, \"The Jews used to ask Allah to send Muhammad so that they would gain victory over the Arab disbelievers. They used to say, `O Allah! Send the Prophet that we read about - in the Tawrah - so that we can torment and kill the disbelievers alongside him.' When Allah sent Muhammad and they saw that he was not one of them, they rejected him and envied the Arabs, even though they knew that he was the Messenger of Allah ﷺ. Hence, Allah said,</p><p>فَلَمَّا جَآءَهُم مَّا عَرَفُواْ كَفَرُواْ بِهِ فَلَعْنَةُ اللَّهِ عَلَى الْكَـفِرِينَ</p><p>(Then when there came to them that which they had recognized, they disbelieved in it. So let the curse of Allah be on the disbelievers). \"</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:89"
+   },
+   "fetchedAt": "2026-10-23T14:24:05.079Z",
+   "urlChecks": {
+    "https://quran.com/2/89": 200
+   }
   }
  ]
 }
