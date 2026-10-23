@@ -10,6 +10,7 @@ enum Vault {
     // MARK: Keychain
 
     static func loadKey() -> Data? {
+        if Env.isTest { return Env.testUnlocked ? Data(repeating: 7, count: 32) : nil }
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: account,
@@ -52,7 +53,7 @@ enum Vault {
         let ct: String
     }
 
-    enum VaultError: LocalizedError {
+    enum VaultError: LocalizedError, Equatable {
         case badFormat, wrongKey, http(Int)
         var errorDescription: String? {
             switch self {
@@ -78,23 +79,30 @@ enum Vault {
     }
 
     private static var cacheFile: URL {
-        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("pool.enc")
+        Env.stateDir.appendingPathComponent("pool.enc")
     }
 
     /// Loads the newest pool. Offline it falls back to the last downloaded file.
     static func fetchPool(key: Data) async throws -> Pool {
+        if let path = Env.testPoolFile {
+            let data = try Data(contentsOf: URL(fileURLWithPath: path))
+            return try JSONDecoder().decode(Pool.self, from: data)
+        }
         do {
             var request = URLRequest(url: poolURL)
             request.cachePolicy = .reloadIgnoringLocalCacheData
             let (data, response) = try await URLSession.shared.data(for: request)
             if let http = response as? HTTPURLResponse, http.statusCode != 200 { throw VaultError.http(http.statusCode) }
             let pool = try decrypt(data, key: key)
+            Diag.log("pool loaded: \(pool.moments.count) moments, \(data.count) bytes")
             try? FileManager.default.createDirectory(at: cacheFile.deletingLastPathComponent(), withIntermediateDirectories: true)
             try? data.write(to: cacheFile)
             return pool
         } catch VaultError.wrongKey {
+            Diag.log("pool: wrong key")
             throw VaultError.wrongKey
         } catch {
+            Diag.log("pool download failed: \(error.localizedDescription)")
             if let cached = try? Data(contentsOf: cacheFile), let pool = try? decrypt(cached, key: key) { return pool }
             throw error
         }

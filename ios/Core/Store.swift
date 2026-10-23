@@ -62,7 +62,7 @@ final class Store: ObservableObject {
     }
 
     private static var file: URL {
-        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("state.json")
+        Env.stateDir.appendingPathComponent("state.json")
     }
 
     init() {
@@ -136,6 +136,7 @@ final class Store: ObservableObject {
     /// Sunday, first open, not shown this week yet
     var reviewDue: Bool {
         let cal = Calendar(identifier: .gregorian)
+        if Env.testReview { return true }
         return cal.component(.weekday, from: Date()) == 1 && state.weekReviewShown[Day.weekKey()] != true
     }
 }

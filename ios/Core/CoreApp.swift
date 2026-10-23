@@ -7,6 +7,8 @@ struct CoreApp: App {
     @StateObject private var feed = FeedModel()
 
     init() {
+        Diag.installCrashHandler()
+        Diag.log("start \(Diag.version) \(Diag.commit)")
         // Sound like Reels: plays with the silent switch on and keeps playing with the screen locked
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
         try? AVAudioSession.sharedInstance().setActive(true)

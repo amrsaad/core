@@ -196,6 +196,24 @@ struct SettingsView: View {
                         .foregroundStyle(Palette.secondary)
                 }
 
+                card {
+                    Text("This build").font(.system(size: 17, weight: .semibold))
+                    Text("Version \(Diag.version), commit \(Diag.commit)")
+                        .font(.system(size: 13)).foregroundStyle(Palette.secondary)
+                    if let until = Diag.expiresAt {
+                        let days = max(0, Int(ceil(until.timeIntervalSinceNow / 86400)))
+                        Text(days == 0 ? "Expired. Reinstall from the Mac." : "Works for \(days) more \(days == 1 ? "day" : "days"), then reinstall from the Mac.")
+                            .font(.system(size: 13)).foregroundStyle(days <= 1 ? Color(hex: 0xE07B7B) : Palette.secondary)
+                    }
+                    Button("Copy diagnostics") {
+                        UIPasteboard.general.string = Diag.text(poolCount: feed.pool.count, poolUpdated: feed.updatedAt, state: store.state)
+                        note = "Copied. Paste it into the chat."
+                    }
+                    .font(.system(size: 13))
+                    .foregroundStyle(Area.brain.color)
+                    .accessibilityIdentifier("copyDiagnostics")
+                }
+
                 if let note { Text(note).font(.system(size: 13)).foregroundStyle(Palette.tertiary) }
             }
             .padding(16)

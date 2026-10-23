@@ -21,6 +21,7 @@ final class Playback: ObservableObject {
     private(set) var web: WKWebView?
     private var timeObserver: Any?
     private var statusObserver: NSKeyValueObservation?
+    private var itemObserver: NSKeyValueObservation?
     private var wantsPlay = false
     private var rate: Float = 1
     private var lastTime: Double?
@@ -40,6 +41,11 @@ final class Playback: ObservableObject {
         guard let s = moment.hls, let url = URL(string: s) else { return }
         let item = AVPlayerItem(url: url)
         item.preferredForwardBufferDuration = 20
+        itemObserver = item.observe(\.status, options: [.new]) { [weak self] item, _ in
+            guard item.status == .failed else { return }
+            let msg = item.error?.localizedDescription ?? "unknown"
+            DispatchQueue.main.async { Diag.log("stream failed \(self?.moment.id ?? "?"): \(msg)") }
+        }
         let p = AVPlayer(playerItem: item)
         p.automaticallyWaitsToMinimizeStalling = true
         p.seek(to: CMTime(seconds: moment.start, preferredTimescale: 600), toleranceBefore: .zero, toleranceAfter: .zero)
@@ -113,6 +119,7 @@ final class Playback: ObservableObject {
         if let timeObserver { player?.removeTimeObserver(timeObserver) }
         timeObserver = nil
         statusObserver = nil
+        itemObserver = nil
         player?.replaceCurrentItem(with: nil)
         player = nil
         web?.configuration.userContentController.removeScriptMessageHandler(forName: "core")
@@ -146,6 +153,9 @@ final class Playback: ObservableObject {
         if message == "ready" {
             buffering = false
             if wantsPlay { js("play()") }
+        } else if message.hasPrefix("error:") {
+            Diag.log("youtube error \(moment.videoId): \(message.dropFirst(6))")
+            buffering = false
         } else if message.hasPrefix("state:") {
             let st = Int(message.dropFirst(6)) ?? -1
             playing = st == 1
@@ -170,7 +180,8 @@ final class Playback: ObservableObject {
           player=new YT.Player('p',{videoId:'\(id)',host:'https://www.youtube-nocookie.com',
             playerVars:{playsinline:1,controls:0,rel:0,modestbranding:1,iv_load_policy:3,fs:0,disablekb:1,start:Math.floor(START),end:Math.ceil(END),autoplay:0},
             events:{onReady:function(){player.seekTo(START,true);player.pauseVideo();post('ready');if(want)play()},
-                    onStateChange:function(e){post('state:'+e.data)}}});
+                    onStateChange:function(e){post('state:'+e.data)},
+                    onError:function(e){post('error:'+e.data)}}});
         }
         function play(){want=true;if(player&&player.playVideo){player.setPlaybackRate(r);player.playVideo()}}
         function pause(){want=false;if(player&&player.pauseVideo)player.pauseVideo()}

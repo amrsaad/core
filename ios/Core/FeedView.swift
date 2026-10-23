@@ -25,6 +25,7 @@ final class FeedModel: ObservableObject {
             ensure(upTo: 6, store: store)
             status = .ready
         } catch {
+            Diag.log("feed load error: \(error.localizedDescription)")
             status = .error(error.localizedDescription)
         }
     }
