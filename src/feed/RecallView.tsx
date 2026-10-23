@@ -10,7 +10,7 @@ export function RecallView({ item, onGrade }: { item: SavedItem; onGrade: (r: Gr
   const [done, setDone] = useState(false);
   const { q, a } = recallFor(item.card);
   return (
-    <div className="pad flex h-full flex-col justify-center gap-6">
+    <div className="pad pad-nav flex h-full flex-col justify-center gap-6">
       <MetaLine card={item.card} extra="Abruf" />
       <h2 className="t-headline m-0">{q}</h2>
       {!shown ? (

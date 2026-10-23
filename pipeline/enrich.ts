@@ -38,6 +38,9 @@ function apply() {
   const patches = new Map<string, Patch>();
   const doneFiles = readdirSync(DIR).filter((f) => /^done-.*\.json$/.test(f));
   for (const f of doneFiles) for (const p of readJson<Patch[]>(join(DIR, f), [])) patches.set(p.id, p);
+  // Excerpt, für den das Enrichment geschrieben wurde (aus todo*.json). Hat sich der Excerpt seitdem geändert, wird es verworfen.
+  const writtenFor = new Map<string, string>();
+  for (const f of readdirSync(DIR).filter((n) => /^todo.*\.json$/.test(n))) for (const t of readJson<{ id: string; excerpt: string }[]>(join(DIR, f), [])) writtenFor.set(t.id, t.excerpt);
   const raws = readAllRaw();
   let ok = 0;
   const failed: { id: string; reason: string }[] = [];
@@ -48,6 +51,10 @@ function apply() {
     file.cards = file.cards.map((c): Card => {
       const p = patches.get(c.id);
       if (!p) return c;
+      if (writtenFor.get(c.id) !== c.source.excerpt) {
+        failed.push({ id: c.id, reason: 'Excerpt hat sich seit dem Enrichment geändert' });
+        return c;
+      }
       const next: Card = { ...c };
       if (c.area === 'beat') {
         if (p.reflection) next.reflection = p.reflection.trim();

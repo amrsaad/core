@@ -57,6 +57,8 @@ jobs:
         run: npx tsx pipeline/fetch/all.ts $SEED
       - name: Karten bauen und prüfen
         run: npx tsx pipeline/build.ts $SEED
+      - name: Gesamtbestand erneut prüfen
+        run: npm run verify
       - name: Rejected-Log bei Fehler sichern
         if: failure()
         uses: actions/upload-artifact@v4

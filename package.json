@@ -18,7 +18,8 @@
     "seed": "tsx pipeline/fetch/all.ts --seed && tsx pipeline/build.ts",
     "enrich": "tsx pipeline/enrich.ts",
     "sample": "tsx pipeline/sample.ts",
-    "icons": "node scripts/icons.mjs"
+    "icons": "node scripts/icons.mjs",
+    "verify": "tsx pipeline/verify.ts"
   },
   "dependencies": {
     "idb": "^8.0.4",

@@ -19,6 +19,21 @@ describe('Kartenbildung', () => {
     expect(headlineFromTitle('Efficacy of faricimab in neovascular AMD: a systematic review and meta-analysis of randomized controlled trials across all regions')).toBe('Efficacy of faricimab in neovascular AMD');
   });
 
+  it('nimmt nie einen reinen Studientyp als Headline', () => {
+    expect(headlineFromTitle('Trabeculectomy versus glaucoma drainage devices in uveitic glaucoma patients across many centres worldwide: A Systematic Review and Meta-Analysis')).toBeNull();
+    expect(headlineFromTitle('A Systematic Review and Meta-Analysis')).toBeNull();
+  });
+
+  it('nimmt keine Förder- oder Registrierungsnotiz als Excerpt', () => {
+    const t = htmlToText('<h4>Conclusions</h4>Creatine improved sprint performance in trained adults over time. <h4>Funding</h4>This study was funded by X.');
+    expect(conclusionExcerpt(t)).toBe('Creatine improved sprint performance in trained adults over time.');
+    expect(conclusionExcerpt('We reviewed sixty trials on hydration in athletes. Systematic review registration: PROSPERO CRD42023456789.')).toBeNull();
+  });
+
+  it('verwirft inhaltsleere Schlusssätze', () => {
+    expect(conclusionExcerpt('We propose a model of aqueous regulation in detail here. We conclude by specifying the experiments that would confirm or refute it.')).toBeNull();
+  });
+
   it('trennt Sätze nicht an Dezimalzahlen oder e.g.', () => {
     expect(sentences('IOP fell 3.5 mmHg, e.g. in POAG. Next sentence here.')).toHaveLength(2);
   });

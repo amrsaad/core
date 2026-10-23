@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import type { Area } from '../src/types';
 import { htmlToText, normalizeWs } from './text';
@@ -82,6 +82,7 @@ export function readAllRaw(): Map<string, RawRecord> {
   const map = new Map<string, RawRecord>();
   if (!existsSync(RAW_DIR)) return map;
   for (const src of readdirSync(RAW_DIR)) {
+    if (!statSync(join(RAW_DIR, src)).isDirectory()) continue;
     for (const f of readdirSync(join(RAW_DIR, src)).filter((n) => n.endsWith('.json')).sort()) {
       for (const r of readJson<RawFile>(join(RAW_DIR, src, f), { source: src as SourceName, date: '', records: [] }).records) {
         map.set(r.sourceId, r);

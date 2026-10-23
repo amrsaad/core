@@ -79,7 +79,7 @@ function toRecord(r: EpmcResult, def: QueryDef, kind: 'fact' | 'fresh', api: { u
     verify,
     api,
     title: r.title,
-    publisher: r.journalInfo?.journal?.title ?? 'Europe PMC',
+    publisher: r.source === 'PPR' || /^10\.(21203|1101)\//.test(r.doi ?? '') ? `${r.journalInfo?.journal?.title ?? 'Europe PMC'} (Preprint)` : (r.journalInfo?.journal?.title ?? 'Europe PMC'),
     year: Number(r.pubYear ?? r.journalInfo?.yearOfPublication) || undefined,
     content: { title: r.title, abstract: r.abstractText },
     meta: { kind, pubTypes: r.pubTypeList?.pubType ?? [], firstPublicationDate: r.firstPublicationDate, doi: r.doi },

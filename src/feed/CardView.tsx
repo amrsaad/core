@@ -51,7 +51,7 @@ export function SourceLine({ card }: { card: Card }) {
 export function CardView({ card }: { card: Card }) {
   const verse = card.area === 'beat';
   return (
-    <div className="pad relative flex h-full flex-col justify-center gap-5 overflow-y-auto">
+    <div className="pad pad-nav relative flex h-full flex-col justify-[safe_center] gap-5 overflow-y-auto">
       <MetaLine card={card} extra={verse ? `${TYPE_LABEL[card.type]} ${card.id.replace('quran:', '')}` : undefined} />
       {card.arabic && (
         <p dir="rtl" lang="ar" className="t-arabic m-0">

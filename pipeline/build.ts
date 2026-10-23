@@ -16,6 +16,8 @@ const DAILY_CAP: Record<Area, number> = { brain: 14, body: 6, beat: 4 };
 
 async function main() {
   const seed = process.argv.includes('--seed');
+  // --offline: Neuaufbau aus committeten Rohdaten ohne Netz. Nur Datensätze mit bereits geprüfter URL zählen.
+  const offline = process.argv.includes('--offline');
   const date = process.env.CORE_DATE ?? today();
   const interests = readJson<Interests>(join(ROOT, 'content', 'interests.json'), {} as Interests);
   const raws = readRaw(date);
@@ -28,7 +30,12 @@ async function main() {
 
   const candidates: Card[] = [];
   const skipped: { id: string; reason: string }[] = [];
+  const blocked = readJson<{ ids: Record<string, string> }>(join(ROOT, 'content', 'blocklist.json'), { ids: {} }).ids;
   for (const r of raws) {
+    if (blocked[r.sourceId]) {
+      skipped.push({ id: r.sourceId, reason: `Sperrliste: ${blocked[r.sourceId]}` });
+      continue;
+    }
     const res = buildCard(r, createdAt);
     if ('card' in res) candidates.push(res.card);
     else skipped.push({ id: r.sourceId, reason: res.skip });
@@ -36,6 +43,14 @@ async function main() {
 
   // Regel 1: Quell-URLs in der Pipeline abrufen, Status in den Rohdaten cachen
   const rawById = new Map<string, RawRecord>(raws.map((r) => [r.sourceId, r]));
+  if (offline) {
+    for (let i = candidates.length - 1; i >= 0; i--) {
+      if (rawById.get(candidates[i].source.id)!.urlStatus !== 200) {
+        skipped.push({ id: candidates[i].id, reason: 'offline: URL noch nicht in der Pipeline geprüft' });
+        candidates.splice(i, 1);
+      }
+    }
+  }
   const toCheck = candidates.map((c) => rawById.get(c.source.id)!).filter((r) => r.urlStatus !== 200);
   console.log(`URL-Prüfung: ${toCheck.length}`);
   await pool(toCheck, 4, async (r) => {

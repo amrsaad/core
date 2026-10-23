@@ -11,35 +11,47 @@ export type BuildResult = { card: Card } | { skip: string };
 const CONCLUSION = /\b(conclusions? and relevance|conclusions?|interpretation|clinical relevance|significance|implications)\s*:\s*/gi;
 const APPLY = /\b(recommend|recommended|should|we suggest|is advised|practitioners|coaches|athletes may|can be used to)\b/i;
 
-/** Titel als Headline: ganz, sonst Haupt- oder Untertitel. */
+/** Reine Studientyp-Angaben taugen nicht als Kernaussage */
+const GENERIC = /^(a |an |the )?(systematic review|meta-analysis|review|narrative review|scoping review|umbrella review|randomi[sz]ed (controlled )?trial|cohort study|cross-sectional study|case series|a (systematic )?review|position stand|consensus statement|update|study protocol)([ ,&]+(and )?(a )?(systematic review|meta-analysis|network meta-analysis|meta-regression|review))*\.?$/i;
+
+/** Titel als Headline: ganz, sonst nur der Haupttitel vor dem Doppelpunkt. */
 export function headlineFromTitle(title: string): string | null {
   const t = normalizeWs(htmlToText(title)).replace(/\.$/, '');
-  if (t.length <= LIMITS.headline) return t;
-  for (const part of t.split(/:\s+/)) {
-    const p = part.trim().replace(/\.$/, '');
-    if (p.length >= 25 && p.length <= LIMITS.headline) return p;
-  }
-  return null;
+  const main = t.split(/:\s+/)[0].trim().replace(/\.$/, '');
+  const pick = t.length <= LIMITS.headline ? t : main;
+  if (pick.length < 20 || pick.length > LIMITS.headline || GENERIC.test(main)) return null;
+  return pick;
 }
 
+/** Auszüge ohne Inhalt (Ausblick, Methodik, Förderung, Registrierung, Abkürzungen) aussortieren */
+const WEAK = /^(funding|financial disclosure|trial registration|registration|abbreviations?|conflicts? of interest|disclosures?|clinicaltrials\.gov|prospero|systematic review registration|other information|keywords?|this (trial|study|work) (was|is) (funded|supported|registered)|the (protocol|study) (is|was) registered|findings will be disseminated|this (\w+ ){0,2}(aims|seeks|attempts|intends) to|the result is a |clinicians will play|results will be (disseminated|published)|to (answer|address) (these|this|the) questions?|we (conducted|performed|searched|reviewed) |we conclude by|future (research|studies|work)|further (research|studies|work)|more (research|studies)|this (review|paper|article|study) (describes|discusses|outlines|summari[sz]es)|in this (review|paper|article))/i;
+
 /** Excerpt: Conclusion-Abschnitt (falls strukturiert), sonst letzter Satz. Immer ganze Sätze, wörtlich. */
+const NOTE = /\b(PROSPERO|CRD4\d+|NCT\d{6,}|funded by|no funding|grant (no|number)|protocol (can be found|is available)|osf\.io)\b/i;
+
 export function conclusionExcerpt(abstractPlain: string): string | null {
+  const ok = (x: string) => x.length >= 60 && x.length <= LIMITS.excerpt && !WEAK.test(x) && !NOTE.test(x) && !/\?["')]?$/.test(x);
   const marks = [...abstractPlain.matchAll(CONCLUSION)];
   if (marks.length) {
     const m = marks[marks.length - 1];
-    const after = abstractPlain.slice(m.index! + m[0].length);
-    const ex = takeSentences(sentences(after), LIMITS.excerpt);
-    if (ex) return ex;
+    const sents = sentences(abstractPlain.slice(m.index! + m[0].length));
+    // Führende Ausblick-Sätze überspringen, danach zusammenhängend nehmen
+    const start = sents.findIndex((x) => !WEAK.test(x));
+    // Bis zum nächsten inhaltsleeren Satz (z.B. folgender Abschnitt "Funding:")
+    const rest = start >= 0 ? sents.slice(start) : [];
+    const stop = rest.findIndex((x, i) => i > 0 && (WEAK.test(x) || NOTE.test(x)));
+    const ex = takeSentences(stop > 0 ? rest.slice(0, stop) : rest, LIMITS.excerpt);
+    if (ok(ex)) return ex;
   }
   const s = sentences(abstractPlain);
+  while (s.length && (WEAK.test(s[s.length - 1]) || NOTE.test(s[s.length - 1]))) s.pop();
+  if (s.length < 2) return null; // nur ein Satz übrig: kein Schluss erkennbar
   for (let n = 1; n <= Math.min(3, s.length); n++) {
-    const tail = s.slice(-n);
-    const ex = tail.join(' ');
-    if (ex.length <= LIMITS.excerpt && ex.length >= 60) return ex;
+    const ex = s.slice(-n).join(' ');
     if (ex.length > LIMITS.excerpt) break;
+    if (ok(ex)) return ex;
   }
-  const last = s[s.length - 1];
-  return last && last.length <= LIMITS.excerpt ? last : null;
+  return null;
 }
 
 function base(r: RawRecord, type: CardType, headline: string, excerpt: string, createdAt: string): Card {
@@ -55,6 +67,7 @@ function base(r: RawRecord, type: CardType, headline: string, excerpt: string, c
 }
 
 function paperCard(r: RawRecord, createdAt: string): BuildResult {
+  if (/\b(study|review|trial) protocol\b|\bprotocol for\b|: protocol\b/i.test(r.title)) return { skip: 'Studienprotokoll ohne Ergebnisse' };
   const headline = headlineFromTitle(r.title);
   if (!headline) return { skip: 'Titel zu lang für Headline' };
   const excerpt = conclusionExcerpt(plainContent(r, 'abstract'));
