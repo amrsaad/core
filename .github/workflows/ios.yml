@@ -61,9 +61,12 @@ jobs:
               for test in json.load(open(m)):
                   for a in test.get("attachments",[]):
                       src=os.path.join(out,a["exportedFileName"]); name=a.get("suggestedHumanReadableName") or ""
+                      print("attachment:", a.get("suggestedHumanReadableName"), a["exportedFileName"])
                       name=re.sub(r"_0_[0-9A-F-]{36}","",name)
-                      if re.match(r"^\d\d-[a-z0-9-]+$", name) and os.path.exists(src):
-                          dst=os.path.join(out,name+".png"); shutil.move(src,dst); keep.add(dst)
+                      mm=re.match(r"^(\d\d-[a-z0-9-]+)(\.\w+)?$", name)
+                      if mm and os.path.exists(src):
+                          ext=".txt" if a["exportedFileName"].endswith(".txt") or "hierarchy" in name else ".png"
+                          dst=os.path.join(out,mm.group(1)+ext); shutil.move(src,dst); keep.add(dst)
           for f in os.listdir(out):
               p=os.path.join(out,f)
               if p not in keep and f!="manifest.json": os.remove(p)

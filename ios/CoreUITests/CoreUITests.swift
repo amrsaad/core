@@ -75,13 +75,22 @@ final class CoreUITests: XCTestCase {
         shot("15-feed-third")
 
         // menu sheet
-        let menuButton = app.buttons.matching(identifier: "menuButton").allElementsBoundByIndex.first { $0.isHittable }
+        let screen = app.frame
+        let menuButton = app.buttons.matching(identifier: "menuButton").allElementsBoundByIndex
+            .first { $0.frame.height > 0 && screen.contains($0.frame) }
         XCTAssertNotNil(menuButton, "no visible menu button")
         menuButton?.tap()
         let mute = app.buttons["Mute this channel"]
-        XCTAssertTrue(mute.waitForExistence(timeout: 5), "menu sheet did not open")
+        let opened = mute.waitForExistence(timeout: 5)
         wait(0.6)
         shot("16-menu")
+        if !opened {
+            let t = XCTAttachment(string: app.debugDescription)
+            t.name = "16-menu-hierarchy"
+            t.lifetime = .keepAlways
+            add(t)
+        }
+        XCTAssertTrue(opened, "menu sheet did not open")
         if app.buttons["Cancel"].exists { app.buttons["Cancel"].tap() } else { app.swipeDown() }
         wait(0.5)
 
