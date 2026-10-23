@@ -128,6 +128,8 @@ jobs:
           npx vite preview --host 127.0.0.1 --port 4173 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4173/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           npm run e2e -- http://127.0.0.1:4173/core/ pipeline/out/e2e
+          # Gegenprobe gegen die echte Pages-URL (echte https-Herkunft statt 127.0.0.1)
+          E2E_BROWSERS=chromium npm run e2e -- https://amrsaad.github.io/core/ pipeline/out/e2e/live || true
       - name: Ergebnisse committen
         if: always()
         run: |

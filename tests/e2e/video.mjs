@@ -27,7 +27,17 @@ async function swipeUp(page) {
   await page.mouse.up();
 }
 
-for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
+// Einbettbarkeit laut oEmbed (401 = Einbettung gesperrt), getrennt vom Player-Verhalten im Runner
+const pool = await (await fetch(new URL('videos/pool.json', url))).json();
+results.oembed = {};
+for (const v of pool.videos.slice(0, 8)) {
+  const r = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent('https://www.youtube.com/shorts/' + v.id)}&format=json`);
+  results.oembed[v.id] = r.status;
+}
+console.log('oEmbed', JSON.stringify(results.oembed));
+
+const targets = (process.env.E2E_BROWSERS ?? 'webkit,chromium').split(',');
+for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter(([n]) => targets.includes(n))) {
   const run = { browser: name, ok: false, steps: {} };
   results.runs.push(run);
   const browser = await type.launch(name === 'chromium' ? { args: ['--autoplay-policy=no-user-gesture-required'] } : {});

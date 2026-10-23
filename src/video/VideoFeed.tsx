@@ -51,6 +51,9 @@ export function VideoFeed({ pool, state, update, active, onPausedChange }: Props
   const dragEl = useRef<HTMLDivElement>(null);
   /** Diagnose für Tests: Zustandswechsel und Fehlercodes des Players */
   const diag = useRef<string[]>([]);
+  /** Videos, die in dieser Sitzung mit Player-Fehler ausfielen (z.B. Einbettung gesperrt) */
+  const bad = useRef(new Set<string>());
+  const everPlayed = useRef(false);
 
   const [idx, setIdx] = useState(0);
   const [, setTick] = useState(0);
@@ -126,6 +129,14 @@ export function VideoFeed({ pool, state, update, active, onPausedChange }: Props
   const goTo = useCallback(
     (next: number) => {
       if (next < 0 || next === idxRef.current) return;
+      // Ausgefallene Videos aus dem Rest der Warteschlange nehmen
+      const cut = idxRef.current + 1;
+      const rest = queue.current.slice(cut);
+      const clean = rest.filter((x) => !bad.current.has(x.id));
+      if (clean.length !== rest.length) {
+        queue.current = [...queue.current.slice(0, cut), ...clean];
+        for (const sl of slots.current) if (sl.index >= cut) sl.index = -1;
+      }
       ensureQueue(next + 4);
       if (next >= queue.current.length) return;
       const prev = idxRef.current;
@@ -184,6 +195,7 @@ export function VideoFeed({ pool, state, update, active, onPausedChange }: Props
             onState: (st) => {
               diag.current.push(`slot${s} ${slot.vid} state ${st}`);
               slot.st = st;
+              if (st === STATE.PLAYING) everPlayed.current = true;
               if (st === STATE.ENDED && slot.index === idxRef.current && endedAt.current !== idxRef.current) {
                 endedAt.current = idxRef.current;
                 goTo(idxRef.current + 1);
@@ -194,7 +206,10 @@ export function VideoFeed({ pool, state, update, active, onPausedChange }: Props
             },
             onError: (code) => {
               diag.current.push(`slot${s} ${slot.vid} error ${code}`);
-              if (slot.index === idxRef.current) goTo(idxRef.current + 1);
+              bad.current.add(slot.vid);
+              // Spielt YouTube gar nichts ab (alle Versuche Fehler), nicht endlos weiterspringen
+              if (!everPlayed.current && bad.current.size >= 8) setError(`YouTube spielt gerade keine Videos ab (Fehler ${code})`);
+              else if (slot.index === idxRef.current) goTo(idxRef.current + 1);
             },
           });
         }
