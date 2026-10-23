@@ -63,7 +63,7 @@ jobs:
                       src=os.path.join(out,a["exportedFileName"]); name=a.get("suggestedHumanReadableName") or ""
                       print("attachment:", a.get("suggestedHumanReadableName"), a["exportedFileName"])
                       name=re.sub(r"_0_[0-9A-F-]{36}","",name)
-                      mm=re.match(r"^(\d\d-[a-z0-9-]+)(\.\w+)?$", name)
+                      mm=re.match(r"^(\d\d[a-z]?-[a-z0-9-]+)(\.\w+)?$", name)
                       if mm and os.path.exists(src):
                           ext=".txt" if a["exportedFileName"].endswith(".txt") or "hierarchy" in name or "log" in name else ".png"
                           dst=os.path.join(out,mm.group(1)+ext); shutil.move(src,dst); keep.add(dst)

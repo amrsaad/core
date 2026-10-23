@@ -74,40 +74,7 @@ final class CoreUITests: XCTestCase {
         wait(2.0)
         shot("15-feed-third")
 
-        // menu sheet
-        let screen = app.frame
-        let menuButton = app.buttons.matching(identifier: "menuButton").allElementsBoundByIndex
-            .first { $0.frame.height > 0 && screen.contains($0.frame) }
-        XCTAssertNotNil(menuButton, "no visible menu button")
-        menuButton?.tap()
-        let mute = app.buttons["Mute this channel"]
-        var opened = mute.waitForExistence(timeout: 5)
-        wait(0.6)
-        shot("16-menu")
-        if !opened, let b = menuButton {
-            // probe: coordinate tap on the same button, then the Save button
-            b.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
-            opened = mute.waitForExistence(timeout: 5)
-            shot("17-menu-coordinate-tap")
-            if !opened {
-                let save = app.buttons.matching(NSPredicate(format: "label == 'Save' OR label == 'Saved'")).allElementsBoundByIndex
-                    .first { $0.frame.height > 0 && screen.contains($0.frame) }
-                save?.tap()
-                wait(0.4)
-                shot("18-save-button-tap")
-            }
-            let t = XCTAttachment(string: app.debugDescription)
-            t.name = "16-menu-hierarchy"
-            t.lifetime = .keepAlways
-            add(t)
-        }
-        if let log = try? String(contentsOf: stateDir.appendingPathComponent("diag.log"), encoding: .utf8) {
-            let t = XCTAttachment(string: log)
-            t.name = "19-diag-log"
-            t.lifetime = .keepAlways
-            add(t)
-        }
-        XCTAssertTrue(opened, "menu sheet did not open")
+        openMenu(tag: "16")
         if app.buttons["Cancel"].exists { app.buttons["Cancel"].tap() } else { app.swipeDown() }
         wait(0.5)
 
@@ -127,6 +94,48 @@ final class CoreUITests: XCTestCase {
         shot("31-settings-bottom")
         let copy = app.buttons["copyDiagnostics"]
         if copy.exists { copy.tap(); wait(0.3); shot("32-settings-copied") }
+    }
+
+    func test02bMenuNoLongPress() {
+        app.launchEnvironment["CORE_TEST_GESTURES"] = "nolong"
+        launch()
+        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15))
+        wait(1.5)
+        openMenu(tag: "16b-nolong")
+    }
+
+    func test02cMenuNoGestures() {
+        app.launchEnvironment["CORE_TEST_GESTURES"] = "off"
+        launch()
+        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15))
+        wait(1.5)
+        openMenu(tag: "16c-off")
+    }
+
+    /// Taps the visible page's menu button and expects the sheet. Attaches hierarchy and app log when it fails.
+    private func openMenu(tag: String) {
+        let screen = app.frame
+        let menuButton = app.buttons.matching(identifier: "menuButton").allElementsBoundByIndex
+            .first { $0.frame.height > 0 && screen.contains($0.frame) }
+        XCTAssertNotNil(menuButton, "no visible menu button")
+        menuButton?.tap()
+        let mute = app.buttons["Mute this channel"]
+        let opened = mute.waitForExistence(timeout: 5)
+        wait(0.6)
+        shot("\(tag)-menu")
+        if !opened {
+            let t = XCTAttachment(string: app.debugDescription)
+            t.name = "\(tag)-menu-hierarchy"
+            t.lifetime = .keepAlways
+            add(t)
+        }
+        if let log = try? String(contentsOf: stateDir.appendingPathComponent("diag.log"), encoding: .utf8) {
+            let t = XCTAttachment(string: log)
+            t.name = "\(tag)-diag-log"
+            t.lifetime = .keepAlways
+            add(t)
+        }
+        XCTAssertTrue(opened, "\(tag): menu sheet did not open")
     }
 
     func test03WeeklyReview() {
