@@ -78,7 +78,7 @@ on run argv
     set dest to missing value
     repeat 30 times
       try
-        set dest to first run destination of ws whose platform is "iphoneos"
+        set dest to first run destination of ws whose platform is "iphoneos" and name does not contain "Mac" and name does not contain "Any iOS"
         exit repeat
       end try
       delay 1
@@ -99,7 +99,12 @@ APPLESCRIPT
 RESULT=$(osascript "$SCPT" "$DIR/ios/Core.xcodeproj" 2>&1) || true
 case "$RESULT" in
   OK*) echo "Xcode hat gebaut und installiert." ;;
-  *) printf '%s\n' "$RESULT" | grep -E "error:|ERROR|rror" | head -12; fail "Bauen über Xcode fehlgeschlagen. Beim ersten Lauf fragt macOS, ob Terminal Xcode steuern darf, das muss erlaubt sein." ;;
+  *)
+    printf '%s\n' "$RESULT" | grep -E "error:|ERROR|rror" | head -12
+    if printf '%s' "$RESULT" | grep -q "No Account for Team"; then
+      fail "Xcode ist nicht mehr bei Apple angemeldet. Xcode, Settings, Apple Accounts, neu anmelden. Danach noch einmal starten."
+    fi
+    fail "Bauen über Xcode fehlgeschlagen. Beim ersten Lauf fragt macOS, ob Terminal Xcode steuern darf, das muss erlaubt sein." ;;
 esac
 
 say "5/5 Fertig"
