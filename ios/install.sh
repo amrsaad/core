@@ -45,23 +45,64 @@ if [ -z "$UDID" ]; then
 fi
 echo "iPhone $UDID"
 
-say "4/5 Bauen (1 bis 3 Minuten)"
-LOG="$DIR/ios/install.log"
-xcodebuild -project ios/Core.xcodeproj -scheme Core \
-  -destination "platform=iOS,id=$UDID" \
-  -derivedDataPath "$DIR/ios/build" \
-  -allowProvisioningUpdates -allowProvisioningDeviceRegistration \
-  DEVELOPMENT_TEAM="$TEAM" \
-  CURRENT_PROJECT_VERSION="$COUNT" \
-  INFOPLIST_KEY_CoreCommit="$COMMIT" \
-  build >"$LOG" 2>&1 || { grep -E "error:" "$LOG" | head -20; fail "Build fehlgeschlagen. Log: $LOG"; }
-APP=$(find "$DIR/ios/build/Build/Products" -maxdepth 2 -name "Core.app" -path "*iphoneos*" | head -1)
-[ -n "$APP" ] || fail "Core.app nicht gefunden"
+say "4/5 Bauen und installieren (1 bis 3 Minuten)"
+# Ein kostenloses Apple-Konto signiert nur in Xcode selbst, nicht über xcodebuild. Deshalb steuert das Skript Xcode.
+# Team, Build-Nummer und Commit kommen in die lokale Projektdatei (git setzt sie beim nächsten Lauf zurück und neu).
+python3 - "$DIR/ios/Core.xcodeproj/project.pbxproj" "$TEAM" "$COUNT" "$COMMIT" <<'PY'
+import sys
+p, team, count, commit = sys.argv[1:]
+s = open(p).read()
+s = s.replace('DEVELOPMENT_TEAM = "";', f'DEVELOPMENT_TEAM = {team};')
+s = s.replace('CURRENT_PROJECT_VERSION = 1;', f'CURRENT_PROJECT_VERSION = {count};')
+s = s.replace('INFOPLIST_KEY_CFBundleDisplayName = Core;', f'INFOPLIST_KEY_CFBundleDisplayName = Core;\n\t\t\t\tINFOPLIST_KEY_CoreCommit = {commit};')
+open(p, 'w').write(s)
+PY
 
-say "5/5 Installieren und starten"
-xcrun devicectl device install app --device "$UDID" "$APP" >/dev/null
-xcrun devicectl device process launch --device "$UDID" "$BUNDLE" >/dev/null 2>&1 || true
+SCPT="$DIR/ios/build/run.applescript"
+mkdir -p "$DIR/ios/build"
+cat > "$SCPT" <<'APPLESCRIPT'
+on run argv
+  set projPath to item 1 of argv
+  tell application "Xcode"
+    activate
+    open (POSIX file projPath)
+    set ws to missing value
+    repeat 60 times
+      try
+        set ws to first workspace document whose path is projPath
+        if loaded of ws then exit repeat
+      end try
+      delay 1
+    end repeat
+    if ws is missing value then return "ERROR Xcode hat das Projekt nicht geöffnet"
+    set dest to missing value
+    repeat 30 times
+      try
+        set dest to first run destination of ws whose platform is "iphoneos"
+        exit repeat
+      end try
+      delay 1
+    end repeat
+    if dest is missing value then return "ERROR Kein iPhone als Ziel gefunden. Kabel prüfen, iPhone entsperren."
+    set active run destination of ws to dest
+    set r to run ws
+    repeat 180 times
+      delay 2
+      set st to status of r
+      if st is succeeded or st is running then return "OK"
+      if st is failed or st is error occurred or st is cancelled then return "ERROR " & (build log of r)
+    end repeat
+    return "ERROR Zeitüberschreitung beim Bauen"
+  end tell
+end run
+APPLESCRIPT
+RESULT=$(osascript "$SCPT" "$DIR/ios/Core.xcodeproj" 2>&1) || true
+case "$RESULT" in
+  OK*) echo "Xcode hat gebaut und installiert." ;;
+  *) printf '%s\n' "$RESULT" | grep -E "error:|ERROR|rror" | head -12; fail "Bauen über Xcode fehlgeschlagen. Beim ersten Lauf fragt macOS, ob Terminal Xcode steuern darf, das muss erlaubt sein." ;;
+esac
 
+say "5/5 Fertig"
 if [ ! -f "$CMD" ]; then
   printf '#!/bin/bash\n"%s/ios/install.sh"\n' "$DIR" > "$CMD"
   chmod +x "$CMD"
