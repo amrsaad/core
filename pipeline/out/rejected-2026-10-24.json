@@ -1,17 +1,17 @@
 {
  "date": "2026-10-24",
  "seed": false,
- "candidates": 90,
- "accepted": 90,
+ "candidates": 73,
+ "accepted": 73,
  "rejectedCount": 0,
  "passRate": 1,
- "selected": 19,
+ "selected": 16,
  "selectedByArea": {
   "brain": 14,
-  "body": 3,
+  "body": 0,
   "beat": 2
  },
- "total": 768,
+ "total": 784,
  "rejected": [],
  "skippedByBuilder": [
   {
