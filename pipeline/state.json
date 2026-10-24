@@ -1,8 +1,22 @@
 {
  "quran": {
   "surah": 2,
-  "ayah": 102
+  "ayah": 104
  },
- "cursors": {},
- "lastRun": "2026-10-24T08:07:40.748Z"
+ "cursors": {
+  "fact:glaukom": "AoIIQK69NSg1MjM1NjE4NA==",
+  "fact:retina": "AoIIQP6wsSg1NjIxMjgwMA==",
+  "fact:katarakt": "AoIIQML2Dig1NTc5Nzg3Nw==",
+  "fact:refraktiv": "AoIIQK+8oig0NzI2ODY0MA==",
+  "fact:cornea": "AoIIQMUtnSg1MTk2Mzk4NQ==",
+  "fact:allgemein": "AoIIQKlc8yg1MzQ1ODA2MQ==",
+  "fact:ki-medizin": "AoIIQR9hwyg1NjY0OTA5NA==",
+  "fact:ki-regulierung": "AoIIQRHdByg1NTcwNDE5OA==",
+  "fact:kraft": "AoIIQNpY1ig1MzMxNTc3MA==",
+  "fact:ausdauer": "AoIIQN+4dig1NDkxMjU5OA==",
+  "fact:ernaehrung": "AoIIQOc8Vig1MjI0ODc4Mw==",
+  "fact:recovery": "AoIIQIeaDCg0ODUxODU2OQ==",
+  "fact:schlaf": "AoIIQDnnrCg1MzE1NDEyOQ=="
+ },
+ "lastRun": "2026-10-24T17:16:59.922Z"
 }
