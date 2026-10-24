@@ -85,12 +85,12 @@ on run argv
     end repeat
     if dest is missing value then return "ERROR Kein iPhone als Ziel gefunden. Kabel prüfen, iPhone entsperren."
     set active run destination of ws to dest
-    set r to run ws
+    set actionResult to run ws
     repeat 180 times
       delay 2
-      set st to status of r
-      if st is succeeded or st is running then return "OK"
-      if st is failed or st is error occurred or st is cancelled then return "ERROR " & (build log of r)
+      set theStatus to ((status of actionResult) as text)
+      if theStatus is "succeeded" or theStatus is "running" then return "OK"
+      if theStatus is "failed" or theStatus is "error occurred" or theStatus is "cancelled" then return "ERROR " & (build log of actionResult)
     end repeat
     return "ERROR Zeitüberschreitung beim Bauen"
   end tell
