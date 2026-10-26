@@ -841,6 +841,66 @@
    "urlChecks": {
     "https://quran.com/2/145": 200
    }
+  },
+  {
+   "sourceId": "quran:2:146",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/146",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:146?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:146",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "ٱلَّذِينَ ءَاتَيْنَـٰهُمُ ٱلْكِتَـٰبَ يَعْرِفُونَهُۥ كَمَا يَعْرِفُونَ أَبْنَآءَهُمْ ۖ وَإِنَّ فَرِيقًا مِّنْهُمْ لَيَكْتُمُونَ ٱلْحَقَّ وَهُمْ يَعْلَمُونَ",
+    "translation": "Diejenigen, denen Wir die Schrift gegeben haben, kennen es, wie sie ihre Söhne kennen. Aber ein Teil von ihnen verheimlicht wahrlich die Wahrheit, obwohl sie (sie) wissen.",
+    "tafsir_muyassar": "الذين أعطيناهم التوراة والإنجيل من أحبار اليهود وعلماء النصارى يعرفون أنَّ محمدًا صلى الله عليه وسلم رسول الله بأوصافه المذكورة في كتبهم، مثل معرفتهم أبنائهم. وإن فريقًا منهم ليكتمون الحق وهم يعلمون صِدْقه، وثبوت أوصافه.",
+    "tafsir_ibnkathir": "<h2>The Jews know that the Prophet is True, but they hide the Truth</h2><p>Allah states that the scholars of the People of the Scripture know the truth of what Allah's Messenger ﷺ  was sent with, just as one of them knows his own child, which is a parable that the Arabs use to describe what is very apparent. Similarly, in a Hadith, Allah's Messenger ﷺ said to a man who had a youngster with him:</p><p>«ابْنُكَ هَذَا»</p><p>؟ قَالَ: نَعَمْ يَا رَسُولَ اللهِ أَشْهَدُ بِهِ</p><p>(Is this your son) He said, \"Yes, O Messenger of Allah ﷺ! I testify to this fact.\" Allah's Messenger ﷺ said:</p><p>«أَمَا إِنَّهُ لَا يَجْنِي عَلَيْكَ وَلَا تَجْنِي عَلَيْه»</p><p>(Well, you would not transgress against him nor would he transgress against you.)</p><p>According to Al-Qurtubi, it was narrated that `Umar said to `Abdullah bin Salam (an Israelite scholar who became a Muslim), \"Do you recognize Muhammad ﷺ as you recognize your own son\" He replied, \"Yes, and even more. The Honest One descended from heaven on the Honest One on the earth with his (i.e., Muhammad's) description and I recognized him, although I do not know anything about his mother's story.\"</p><p>Allah states next that although they had knowledge and certainty in the Prophet , they still:</p><p>لَيَكْتُمُونَ الْحَقَّ</p><p>(conceal the truth.)</p><p>The Ayah indicates that they hide the truth from the people, about the Prophet , that they find in their Books,</p><p>وَهُمْ يَعْلَمُونَ</p><p>(while they know it. ) Allah then strengthens the resolve of His Prophet and the believers and affirms that what the Prophet came with is the truth without doubt, saying:</p><p>الْحَقُّ مِن رَّبِّكَ فَلاَ تَكُونَنَّ مِنَ الْمُمْتَرِينَ</p><p>((This is) the truth from your Lord. So be you not one of those who doubt.)</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:146"
+   },
+   "fetchedAt": "2026-10-26T10:51:39.317Z",
+   "urlChecks": {
+    "https://quran.com/2/146": 200
+   }
+  },
+  {
+   "sourceId": "quran:2:147",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/147",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:147?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:147",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "ٱلْحَقُّ مِن رَّبِّكَ ۖ فَلَا تَكُونَنَّ مِنَ ٱلْمُمْتَرِينَ",
+    "translation": "(Es ist) die Wahrheit von deinem Herrn, gehöre daher nicht zu den Zweiflern!",
+    "tafsir_muyassar": "الذي أنزل إليك -أيها النبي- هو الحق من ربك، فلا تكونن من الشاكين فيه. وهذا وإن كان خطابا للرسول صلى الله عليه وسلم فهو موجه للأمة.",
+    "tafsir_ibnkathir": "<h2>The Jews know that the Prophet is True, but they hide the Truth</h2><p>Allah states that the scholars of the People of the Scripture know the truth of what Allah's Messenger ﷺ  was sent with, just as one of them knows his own child, which is a parable that the Arabs use to describe what is very apparent. Similarly, in a Hadith, Allah's Messenger ﷺ said to a man who had a youngster with him:</p><p>«ابْنُكَ هَذَا»</p><p>؟ قَالَ: نَعَمْ يَا رَسُولَ اللهِ أَشْهَدُ بِهِ</p><p>(Is this your son) He said, \"Yes, O Messenger of Allah ﷺ! I testify to this fact.\" Allah's Messenger ﷺ said:</p><p>«أَمَا إِنَّهُ لَا يَجْنِي عَلَيْكَ وَلَا تَجْنِي عَلَيْه»</p><p>(Well, you would not transgress against him nor would he transgress against you.)</p><p>According to Al-Qurtubi, it was narrated that `Umar said to `Abdullah bin Salam (an Israelite scholar who became a Muslim), \"Do you recognize Muhammad ﷺ as you recognize your own son\" He replied, \"Yes, and even more. The Honest One descended from heaven on the Honest One on the earth with his (i.e., Muhammad's) description and I recognized him, although I do not know anything about his mother's story.\"</p><p>Allah states next that although they had knowledge and certainty in the Prophet , they still:</p><p>لَيَكْتُمُونَ الْحَقَّ</p><p>(conceal the truth.)</p><p>The Ayah indicates that they hide the truth from the people, about the Prophet , that they find in their Books,</p><p>وَهُمْ يَعْلَمُونَ</p><p>(while they know it. ) Allah then strengthens the resolve of His Prophet and the believers and affirms that what the Prophet came with is the truth without doubt, saying:</p><p>الْحَقُّ مِن رَّبِّكَ فَلاَ تَكُونَنَّ مِنَ الْمُمْتَرِينَ</p><p>((This is) the truth from your Lord. So be you not one of those who doubt.)</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:147"
+   },
+   "fetchedAt": "2026-10-26T10:51:39.317Z",
+   "urlChecks": {
+    "https://quran.com/2/147": 200
+   }
   }
  ]
 }
