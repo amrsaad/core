@@ -1,5 +1,5 @@
 {
- "at": "2026-10-26T16:42:22.956Z",
+ "at": "2026-10-26T16:59:58.145Z",
  "runs": [
   {
    "browser": "webkit",
@@ -12,7 +12,7 @@
     "firstPlaying": true,
     "soundOn": true,
     "forYouExactlyWhenSet": true,
-    "sawBothKinds": true,
+    "sawBothKinds": false,
     "stoppedAtEnd": true,
     "autoNext": true,
     "recallAfter4": true,
@@ -51,6 +51,27 @@
     "audioNeverVideo": true,
     "videoBack": true,
     "videoNeverAudio": true,
+    "pausedForCheck": true,
+    "heartShown": true,
+    "heartAtTap": true,
+    "heartGoneAfter400": true,
+    "doubleTapLikes": true,
+    "doubleTapDoesNotSave": true,
+    "doubleTapKeepsLike": true,
+    "likeButtonUndoes": true,
+    "likeButtonFills": true,
+    "saveFills": true,
+    "columnOrder": true,
+    "columnTargets48": true,
+    "columnSpacing": true,
+    "columnLabels": true,
+    "menuItems": true,
+    "fillImmediate": true,
+    "fillUnder100": true,
+    "tapRecorded": true,
+    "knownNoToast": true,
+    "wrongToast": true,
+    "muteToast": true,
     "posterWheneverNotPlaying": true,
     "latencyMeasured": true,
     "bufferedUnder300": true,
@@ -58,6 +79,7 @@
     "unlockQr": true,
     "keyBackupsBoth": true,
     "speedOptions": true,
+    "tapInSettings": true,
     "latencyInSettings": true,
     "weeklyReviewOnSunday": true,
     "reviewListsSaved": true,
@@ -78,11 +100,11 @@
    },
    "recall": [
     {
-     "id": "test0000015:100",
-     "due": 1793361605181,
+     "id": "test0000012:100",
+     "due": 1793361604336,
      "results": [
       {
-       "at": 1792756805181,
+       "at": 1792756804336,
        "got": true
       }
      ]
@@ -98,18 +120,18 @@
      "align": "right"
     },
     {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
+     "ar": true,
+     "shown": true,
+     "rtl": true,
+     "size": 21,
+     "align": "right"
     },
     {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
+     "ar": true,
+     "shown": true,
+     "rtl": true,
+     "size": 21,
+     "align": "right"
     },
     {
      "ar": false,
@@ -121,25 +143,25 @@
    ],
    "sequence": [
     {
-     "id": "test0000003:100",
+     "id": "test0000009:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000002:100",
-     "has": true,
-     "fy": true,
+     "id": "test0000011:100",
+     "has": false,
+     "fy": false,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000008:100",
-     "has": true,
-     "fy": true,
+     "id": "test0000001:100",
+     "has": false,
+     "fy": false,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000015:100",
+     "id": "test0000012:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -158,18 +180,22 @@
     1.5,
     2
    ],
+   "tapToFill": {
+    "measured": 28,
+    "recorded": 28
+   },
    "posterCheck": {
-    "checksDone": 843,
+    "checksDone": 867,
     "violations": 0,
-    "endedSeen": 0
+    "endedSeen": 227
    },
    "latency": {
-    "n": 28,
-    "buffered": 28,
+    "n": 31,
+    "buffered": 31,
     "median": 0
    },
    "errors": [],
-   "ok": true
+   "ok": false
   },
   {
    "browser": "chromium",
@@ -221,6 +247,27 @@
     "audioNeverVideo": true,
     "videoBack": true,
     "videoNeverAudio": true,
+    "pausedForCheck": true,
+    "heartShown": true,
+    "heartAtTap": true,
+    "heartGoneAfter400": true,
+    "doubleTapLikes": true,
+    "doubleTapDoesNotSave": true,
+    "doubleTapKeepsLike": true,
+    "likeButtonUndoes": true,
+    "likeButtonFills": true,
+    "saveFills": true,
+    "columnOrder": true,
+    "columnTargets48": true,
+    "columnSpacing": true,
+    "columnLabels": true,
+    "menuItems": true,
+    "fillImmediate": true,
+    "fillUnder100": true,
+    "tapRecorded": true,
+    "knownNoToast": true,
+    "wrongToast": true,
+    "muteToast": true,
     "posterWheneverNotPlaying": true,
     "latencyMeasured": true,
     "bufferedUnder300": true,
@@ -228,6 +275,7 @@
     "unlockQr": true,
     "keyBackupsBoth": true,
     "speedOptions": true,
+    "tapInSettings": true,
     "latencyInSettings": true,
     "weeklyReviewOnSunday": true,
     "reviewListsSaved": true,
@@ -248,11 +296,11 @@
    },
    "recall": [
     {
-     "id": "test0000012:100",
-     "due": 1793361603335,
+     "id": "test0000029:100",
+     "due": 1793361604102,
      "results": [
       {
-       "at": 1792756803335,
+       "at": 1792756804102,
        "got": true
       }
      ]
@@ -261,11 +309,11 @@
    "today": "today 5 seen, 1 got it",
    "captions": [
     {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
+     "ar": false,
+     "shown": false,
+     "rtl": false,
+     "size": 0,
+     "align": ""
     },
     {
      "ar": true,
@@ -291,25 +339,25 @@
    ],
    "sequence": [
     {
-     "id": "test0000001:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000007:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000000:100",
+     "id": "test0000006:100",
      "has": true,
      "fy": true,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000012:100",
+     "id": "test0000005:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000008:100",
+     "has": true,
+     "fy": true,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000029:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -328,14 +376,18 @@
     1.5,
     2
    ],
+   "tapToFill": {
+    "measured": 31.89999999999418,
+    "recorded": 32
+   },
    "posterCheck": {
-    "checksDone": 849,
+    "checksDone": 867,
     "violations": 0,
-    "endedSeen": 0
+    "endedSeen": 144
    },
    "latency": {
-    "n": 27,
-    "buffered": 27,
+    "n": 31,
+    "buffered": 31,
     "median": 0
    },
    "errors": [],
