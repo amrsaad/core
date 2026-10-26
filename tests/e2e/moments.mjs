@@ -10,9 +10,11 @@ mkdirSync(out, { recursive: true });
 const FAKE = readFileSync(new URL('./fakeyt.js', import.meta.url), 'utf8');
 
 // Testpool: erster Block Beat (mit und ohne forYou), dann Brain und Body
+const AR = [[0, 'وما من قلب إلا وهو بين إصبعين من أصابع الرحمن'], [2, 'إن شاء أقامه وإن شاء أزاغه']];
 const mk = (i, area, topic, forYou) => ({ id: `test${String(i).padStart(7, '0')}:${100}`, videoId: `test${String(i).padStart(7, '0')}`, start: 100, end: 160 + (i % 3) * 20, channel: `Kanal ${area} ${i % 4}`, videoTitle: 'Testvideo', area, topic, hook: `Testmoment ${i} ${area}`, forYou, kind: 'regel', createdAt: '2026-10-20T00:00:00Z', cues: [[0, 'Untertitel eins, If Apple were like everyone else, a marketing message'] , [2, 'Untertitel zwei']] });
 const moments = [];
-for (let i = 0; i < 12; i++) moments.push(mk(i, 'beat', 'islam', i % 2 === 0 ? 'Testzeile für dich' : undefined));
+// Beat: die Hälfte mit arabischen Untertiteln (Punkt 4: auto zeigt Arabisch, nicht Englisch)
+for (let i = 0; i < 12; i++) moments.push({ ...mk(i, 'beat', 'islam', i % 2 === 0 ? 'Testzeile für dich' : undefined), ...(i % 2 === 1 ? { cues: AR } : {}) });
 for (let i = 12; i < 40; i++) moments.push(mk(i, 'brain', 'augen'));
 for (let i = 40; i < 55; i++) moments.push(mk(i, 'body', 'kraft'));
 const raw = crypto.getRandomValues(new Uint8Array(32));
@@ -54,7 +56,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.fragmentRemoved = !page.url().includes('#k=');
     c.firstArea = await page.evaluate(() => window.__core.moment().area);
     c.firstPlaying = await waitFor(page, () => window.__core.state() === 1);
-    c.captionShown = await waitFor(page, () => !!document.querySelector('[data-testid=caption]')?.textContent?.startsWith('Untertitel'));
+    const capState = () => page.evaluate(() => {
+      const m = window.__core.moment();
+      const el = document.querySelector('[data-testid=caption] span');
+      return { ar: /[\u0600-\u06FF]/.test(JSON.stringify(m.cues ?? [])), shown: !!el?.textContent, rtl: el?.getAttribute('dir') === 'rtl', size: el ? parseFloat(getComputedStyle(el).fontSize) : 0, align: el ? getComputedStyle(el).textAlign : '' };
+    });
+    const capLog = [];
     await page.screenshot({ path: `${out}/${name}-1-start.png` });
 
     // Tipp: Ton an
@@ -66,6 +73,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const seen = [];
     for (let i = 0; i < 4; i++) {
       const m = await page.evaluate(() => ({ ...window.__core.moment(), idx: window.__core.idx() }));
+      await page.waitForTimeout(250);
+      const cs = await capState();
+      capLog.push(cs);
+      if (cs.ar && cs.shown && !capLog.slice(0, -1).some((x) => x.ar && x.shown)) await page.screenshot({ path: `${out}/${name}-6-arabisch.png` });
       await waitFor(page, (j) => window.__core.forYou() || window.__core.idx() !== j, m.idx, 15000);
       const fy = await page.evaluate(() => window.__core.forYou());
       const t = await page.evaluate(() => window.__core.time());
@@ -80,6 +91,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.sawBothKinds = seen.some((x) => x.has) && seen.some((x) => !x.has);
     c.stoppedAtEnd = seen.every((x) => x.stoppedAtEnd);
     c.autoNext = seen.length === 4;
+    // Punkt 4: auto heißt Englisch aus, Arabisch an, rechtsläufig, mindestens 20 px
+    r.captions = capLog;
+    c.captionsAutoRule = capLog.every((x) => x.shown === x.ar);
+    c.captionsArabicRtl = capLog.filter((x) => x.ar).every((x) => x.rtl && x.align === 'right' && x.size >= 20);
     r.sequence = seen;
 
     // Wischen wechselt
@@ -89,6 +104,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     for (let i = 1; i <= 5; i++) await page.mouse.move(vp.width / 2, vp.height * (0.7 - 0.09 * i));
     await page.mouse.up();
     c.swipeNext = await waitFor(page, (b) => window.__core.idx() === b + 1, before);
+    // Menü: Captions an, dann gilt immer an (auch Englisch)
+    await page.click('[aria-label=More]');
+    await page.click('text=Captions');
+    await page.click('text=Cancel');
+    c.captionsMenuOn = await waitFor(page, () => !!document.querySelector('[data-testid=caption] span')?.textContent);
+    await page.screenshot({ path: `${out}/${name}-7-untertitel-an.png` });
     // Gedrückt halten: 2x, Loslassen: normal
     await page.mouse.move(vp.width / 2, vp.height * 0.5);
     await page.mouse.down();

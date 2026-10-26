@@ -6,6 +6,7 @@ import { createPlayer, HLS, loadYT, STATE, type YTPlayer } from '../video/ytApi'
 import { applySignal, leaveSignal, newMomentCursor, nextMomentBlock, SIGNAL, type MomentCursor } from './mix';
 import { clampRate, DEFAULT_SPEED, HOLD_SPEED, speedOf } from '../lib/state';
 import { addSample } from './latency';
+import { captionsShown } from './captions';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
 interface Props {
@@ -83,7 +84,6 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
   const [caption, setCaption] = useState('');
   const [loading, setLoading] = useState(false);
   const waitSince = useRef(0);
-  const captionsOn = state.settings.captions !== false;
   rateRef.current = speedOf(state.settings);
 
   const today = dayKey(clockNow());
@@ -530,6 +530,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
 
   const m = queue.current[idx];
   const saved = m && !!state.savedMoments[m.id];
+  const captionsOn = !!m && captionsShown(state.settings.captionMode, m);
 
   return (
     <div className="vfeed" ref={dragEl} style={{ ['--area' as string]: m ? AREA_COLOR[m.area] : '#fff' }}>
@@ -673,7 +674,8 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
               <input
                 type="checkbox"
                 checked={captionsOn}
-                onChange={() => update((s) => ({ ...s, settings: { ...s.settings, captions: !captionsOn } }))}
+                disabled={!m.cues?.length}
+                onChange={() => update((s) => ({ ...s, settings: { ...s.settings, captionMode: captionsOn ? 'off' : 'on' } }))}
                 className="h-[22px] w-[22px] accent-white"
               />
             </label>

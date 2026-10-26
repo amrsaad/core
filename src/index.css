@@ -171,7 +171,7 @@ body {
   -webkit-box-decoration-break: clone; box-decoration-break: clone;
 }
 .vcaption-rtl { justify-content: flex-end; }
-.vcaption-rtl span { direction: rtl; unicode-bidi: plaintext; text-align: right; font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', 'Segoe UI', sans-serif; font-size: 19px; line-height: 29px; }
+.vcaption-rtl span { direction: rtl; unicode-bidi: plaintext; text-align: right; font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', 'Segoe UI', sans-serif; font-size: 21px; line-height: 32px; }
 .vcaption-audio.vcaption-rtl { justify-content: center; }
 .vcaption-audio.vcaption-rtl span { text-align: center; font-size: 26px; line-height: 38px; }
 .vaudio { position: absolute; inset: 0; z-index: 1; background: #000; }

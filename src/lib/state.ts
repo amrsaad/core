@@ -3,6 +3,7 @@ import type { Video } from '../videoTypes';
 import type { Moment, MomentLogEntry } from '../moments/types';
 import type { Weights } from '../moments/mix';
 import type { LatencySample } from '../moments/latency';
+import type { CaptionMode } from '../moments/captions';
 
 export interface SavedItem {
   card: Card;
@@ -24,8 +25,10 @@ export interface Settings {
   areaShares: Record<Area, number>;
   /** 'slots': 3 recycelte Player. 'single': ein Player, loadVideoById in der Wischgeste (iOS-Fallback) */
   playerMode: 'slots' | 'single';
-  /** Untertitel im Bild */
+  /** Untertitel im Bild (alter Video-Feed v2) */
   captions: boolean;
+  /** Untertitel der Momente: auto (Regel Punkt 4), immer an, immer aus. Fehlt in alten Ständen, dann auto */
+  captionMode?: CaptionMode;
   /** Wiedergabetempo (Fundament-Regel 11: Standard 1,5x, Option 2x, nie 2,5x). Fehlt in alten Ständen, dann gilt DEFAULT_SPEED */
   playbackSpeed?: 1 | 1.5 | 2;
 }
@@ -94,6 +97,7 @@ export const DEFAULT_SETTINGS: Settings = {
   areaShares: { brain: 1 / 3, body: 1 / 3, beat: 1 / 3 },
   playerMode: 'slots',
   captions: true,
+  captionMode: 'auto',
   playbackSpeed: DEFAULT_SPEED,
 };
 

@@ -5,6 +5,7 @@ import { exportJson, parseImport } from '../lib/db';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import { SPEED_OPTIONS, speedOf, type AppState, type Speed } from '../lib/state';
 import { dayKey, isTimeShifted, now } from '../lib/clock';
+import type { CaptionMode } from '../moments/captions';
 import { LATENCY_TARGET_MS, latencyStats, type LatencySample } from '../moments/latency';
 
 const AREAS: Area[] = ['brain', 'body', 'beat'];
@@ -121,12 +122,17 @@ export function Settings({ state, update, replace, moments }: { state: AppState;
         <span className="text-[17px]">Player</span>
         <label className="flex items-center justify-between gap-3 text-[16px]">
           <span>Captions</span>
-          <input
-            type="checkbox"
-            checked={s.captions !== false}
-            onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, captions: e.target.checked } }))}
-          />
+          <select
+            data-testid="captions"
+            value={s.captionMode ?? 'auto'}
+            onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, captionMode: e.target.value as CaptionMode } }))}
+          >
+            <option value="auto">Auto</option>
+            <option value="on">Always on</option>
+            <option value="off">Always off</option>
+          </select>
         </label>
+        <p className="t-meta m-0 text-muted">Auto: on for audio and Arabic moments, off for English video.</p>
         <label className="flex items-center justify-between gap-3 text-[16px]">
           <span>Playback speed</span>
           <select
