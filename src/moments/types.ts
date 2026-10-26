@@ -2,7 +2,7 @@ import type { Area } from '../types';
 
 export type Kind = 'story' | 'regel' | 'entscheidung' | 'mechanismus' | 'zahl';
 
-/** Veröffentlichte Felder eines Moments (excerpt und Belege bleiben im privaten Repo) */
+/** Veröffentlichte Felder eines Moments (Belege bleiben im privaten Repo) */
 export interface Moment {
   id: string;
   videoId: string;
@@ -25,6 +25,8 @@ export interface Moment {
   audio?: boolean;
   /** Untertitel [Sekunden ab start, Text] */
   cues?: [number, string][];
+  /** Ausschnitt als Text für die Textform, Satzgrenzen (Arabisch: Sprechpausen) als Zeilenumbruch */
+  excerpt?: string;
 }
 
 export interface MomentPool {
