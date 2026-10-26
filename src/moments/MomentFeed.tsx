@@ -8,6 +8,7 @@ import { clampRate, DEFAULT_SPEED, HOLD_SPEED, speedOf } from '../lib/state';
 import { addSample } from './latency';
 import { captionsShown } from './captions';
 import { countSeen, todayLine } from './today';
+import { FORM_LABEL, FORMS, momentText, textEndReached, type Form } from './form';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
 interface Props {
@@ -45,6 +46,12 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
   const SLOTS = single ? 1 : 3;
   const stateRef = useRef(state);
   stateRef.current = state;
+  const form: Form = state.settings.form ?? 'video';
+  const textRef = useRef(form === 'text');
+  textRef.current = form === 'text';
+  /** Im Textmodus: Textende des aktuellen Moments war sichtbar */
+  const textSeen = useRef(-1);
+  const textBox = useRef<HTMLDivElement>(null);
 
   const queue = useRef<Moment[]>([]);
   const cursor = useRef<MomentCursor | null>(null);
@@ -178,7 +185,8 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       const prev = idxRef.current;
       const prevM = queue.current[prev];
       // Weitergewischt: Signal nach geschautem Anteil (unter 5 s Minus, fast ganz geschaut leichtes Plus)
-      if (next > prev && prevM && endedAt.current !== prev) {
+      // Im Textmodus gibt es keine Wiedergabezeit, darum kein Zeitsignal (Lernen bleibt sonst gleich)
+      if (next > prev && prevM && endedAt.current !== prev && !textRef.current) {
         const f = leaveSignal((Date.now() - since.current) / 1000, prevM.end - prevM.start);
         if (f) update((s) => ({ ...s, momentWeights: applySignal(s.momentWeights, prevM, f) }));
       }
@@ -201,13 +209,16 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       const nm = queue.current[next];
       // Gepuffert heißt: der Vorlade-Player hält genau diesen Moment schon angehalten am Start
       swipe.current = { j: next, t0: performance.now(), buffered: !single && !!nm && target.ready && target.mid === nm.id && target.st === STATE.PAUSED };
-      if (single) assign(slots.current[0], next, true);
+      const play = !textRef.current;
+      if (single) assign(slots.current[0], next, play);
       else {
-        assign(slotFor(next), next, true);
+        assign(slotFor(next), next, play);
         for (const j of [next + 1, next + 2]) if (slotFor(j).index !== j) assign(slotFor(j), j, false);
       }
-      markSeen(queue.current[next]);
-      soundGuard(next);
+      if (!textRef.current) markSeen(queue.current[next]);
+      textSeen.current = -1;
+      if (textBox.current) textBox.current.scrollTop = 0;
+      if (!textRef.current) soundGuard(next);
       setIdx(next);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -252,8 +263,8 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
             onReady: () => {
               slot.ready = true;
               slot.player!.mute();
-              assign(slot, slot.index, slot.index === idxRef.current);
-              if (slot.index === idxRef.current) markSeen(queue.current[slot.index]);
+              assign(slot, slot.index, slot.index === idxRef.current && !textRef.current);
+              if (slot.index === idxRef.current && !textRef.current) markSeen(queue.current[slot.index]);
               rerender();
             },
             onState: (st) => {
@@ -272,7 +283,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
               // Standardtempo nach Fundament-Regel 11 (1,5x), gehaltenes 2x bleibt bis zum Loslassen
               if (st === STATE.PLAYING && !fastRef.current) slot.player?.setPlaybackRate(clampRate(rateRef.current));
               if (st === STATE.ENDED && slot.index === idxRef.current) finish();
-              if (st === STATE.PLAYING && (slot.index !== idxRef.current || forYouRef.current)) slot.player?.pauseVideo();
+              if (st === STATE.PLAYING && (slot.index !== idxRef.current || forYouRef.current || textRef.current)) slot.player?.pauseVideo();
               rerender();
             },
             onError: (code) => {
@@ -304,7 +315,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       const sl = current();
       const p = sl.player;
       const m = queue.current[idxRef.current];
-      if (!p || !sl.ready || !m || forYouRef.current) return;
+      if (!p || !sl.ready || !m || forYouRef.current || textRef.current) return;
       const c = p.getCurrentTime?.() ?? 0;
       // Laden sichtbar machen, hängende Momente überspringen
       if (sl.st === STATE.PLAYING || userPaused.current) {
@@ -346,11 +357,45 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
 
   useEffect(() => {
     if (!active) current().player?.pauseVideo();
-    else if (!userPaused.current && !forYouRef.current) current().player?.playVideo();
+    else if (!userPaused.current && !forYouRef.current && !textRef.current) current().player?.playVideo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
   useEffect(() => onPausedChange(paused), [paused, onPausedChange]);
+
+  // Formwechsel: Text hält den Player an, Video und Audio spielen weiter
+  useEffect(() => {
+    const p = current().player;
+    if (form === 'text') {
+      p?.pauseVideo();
+      setCaption('');
+      checkTextEnd();
+    } else if (active && !userPaused.current && !forYouRef.current) {
+      p?.playVideo();
+      markSeen(queue.current[idxRef.current]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form]);
+
+  /** Textmodus: gesehen erst, wenn das Ende des Textes sichtbar ist */
+  const checkTextEnd = () => {
+    const el = textBox.current;
+    if (!textRef.current || !el || textSeen.current === idxRef.current) return;
+    if (textEndReached(el.scrollTop, el.clientHeight, el.scrollHeight)) {
+      textSeen.current = idxRef.current;
+      markSeen(queue.current[idxRef.current]);
+    }
+  };
+  useEffect(() => {
+    if (form !== 'text') return;
+    const t = window.setTimeout(checkTextEnd, 50);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx, form]);
+
+  const setForm = (f: Form) => update((s) => ({ ...s, settings: { ...s.settings, form: f } }));
+  // Text: Wischen wechselt erst am Textende (oben am Anfang zurück), sonst scrollt der Text
+  const tt = useRef({ y: 0, top: false, end: false });
 
   // ---- Gesten ----
   const g = useRef({ x: 0, y: 0, t: 0, moved: false, long: 0, fired: false, tap: 0, lastUp: 0, dy: 0 });
@@ -360,6 +405,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
   };
 
   const togglePlay = () => {
+    if (textRef.current) return;
     const p = current().player;
     if (!p) return;
     if (!soundOn.current) {
@@ -520,6 +566,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       diag: () => diag.current.slice(-40),
       slots: () => slots.current.slice(0, SLOTS).map((x) => ({ st: x.st, index: x.index })),
       latency: () => stateRef.current.playLatency ?? [],
+      seen: (id: string) => !!stateRef.current.momentSeen[id],
     };
   });
 
@@ -531,7 +578,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
 
   const m = queue.current[idx];
   const saved = m && !!state.savedMoments[m.id];
-  const captionsOn = !!m && captionsShown(state.settings.captionMode, m);
+  const captionsOn = !!m && form !== 'text' && captionsShown(form === 'audio' ? 'on' : state.settings.captionMode, m);
 
   return (
     <div className="vfeed" ref={dragEl} style={{ ['--area' as string]: m ? AREA_COLOR[m.area] : '#fff' }}>
@@ -562,6 +609,48 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       })}
 
       <div className="vtrack" />
+      <div className="vform" role="radiogroup" aria-label="Form" data-testid="form-switch" onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
+        {FORMS.map((f) => (
+          <button key={f} role="radio" aria-checked={form === f} className={form === f ? 'on' : ''} onClick={() => setForm(f)}>
+            {FORM_LABEL[f]}
+          </button>
+        ))}
+      </div>
+      {form === 'text' && m && !forYou && (
+        <div
+          ref={textBox}
+          className="vtext no-callout"
+          data-testid="text-view"
+          onScroll={checkTextEnd}
+          onTouchStart={(e) => {
+            const el = e.currentTarget;
+            tt.current = { y: e.touches[0].clientY, top: el.scrollTop <= 0, end: textEndReached(el.scrollTop, el.clientHeight, el.scrollHeight) };
+          }}
+          onTouchEnd={(e) => {
+            const dy = e.changedTouches[0].clientY - tt.current.y;
+            if (dy < -SWIPE_PX && tt.current.end) goTo(idxRef.current + 1);
+            else if (dy > SWIPE_PX && tt.current.top) goTo(idxRef.current - 1);
+          }}
+          onDoubleClick={save}
+        >
+          <div className="vchannel">
+            <span className="vdot" aria-hidden="true" />
+            <span style={{ color: AREA_COLOR[m.area] }}>{AREA_LABEL[m.area]}</span>
+            <span className="vspeaker">{speakerLine(m.channel)}</span>
+          </div>
+          <h2 className="vtext-hook">{m.hook}</h2>
+          {(() => {
+            const t = momentText(m);
+            const ar = isArabic(t);
+            return t ? (
+              <p className={`vtext-body ${ar ? 'vtext-rtl' : ''}`} dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'}>{t}</p>
+            ) : (
+              <p className="vtext-body text-[#B3B3B3]">No text for this moment yet.</p>
+            );
+          })()}
+          <div className="vtext-end" aria-hidden="true">Swipe up for the next moment</div>
+        </div>
+      )}
       {!forYou && (
         <div className="vtoday pointer-events-none" data-testid="today">
           {todayLine(state.dayCount?.[today], false)}
@@ -592,12 +681,12 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       )}
 
       {captionsOn && caption && !forYou && (
-        <div className={`vcaption pointer-events-none ${m?.audio ? 'vcaption-audio' : ''} ${isArabic(caption) ? 'vcaption-rtl' : ''}`} data-testid="caption">
+        <div className={`vcaption pointer-events-none ${m?.audio ? 'vcaption-audio' : form === 'audio' ? 'vcaption-big' : ''} ${isArabic(caption) ? 'vcaption-rtl' : ''}`} data-testid="caption">
           <span dir={isArabic(caption) ? 'rtl' : 'ltr'} lang={isArabic(caption) ? 'ar' : 'en'}>{caption}</span>
         </div>
       )}
 
-      {m && !forYou && (
+      {m && !forYou && form !== 'text' && (
         <div className="vinfo pointer-events-none">
           <div className="vchannel">
             <span className="vdot" aria-hidden="true" />

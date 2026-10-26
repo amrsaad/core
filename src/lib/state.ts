@@ -5,6 +5,7 @@ import type { Weights } from '../moments/mix';
 import type { LatencySample } from '../moments/latency';
 import type { CaptionMode } from '../moments/captions';
 import type { DayCount } from '../moments/today';
+import type { Form } from '../moments/form';
 
 export interface SavedItem {
   card: Card;
@@ -30,6 +31,8 @@ export interface Settings {
   captions: boolean;
   /** Untertitel der Momente: auto (Regel Punkt 4), immer an, immer aus. Fehlt in alten Ständen, dann auto */
   captionMode?: CaptionMode;
+  /** Darreichungsform im Feed (Punkt 3). Fehlt in alten Ständen, dann video */
+  form?: Form;
   /** Wiedergabetempo (Fundament-Regel 11: Standard 1,5x, Option 2x, nie 2,5x). Fehlt in alten Ständen, dann gilt DEFAULT_SPEED */
   playbackSpeed?: 1 | 1.5 | 2;
 }

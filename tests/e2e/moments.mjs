@@ -12,11 +12,13 @@ const FAKE = readFileSync(new URL('./fakeyt.js', import.meta.url), 'utf8');
 // Testpool: erster Block Beat (mit und ohne forYou), dann Brain und Body
 const AR = [[0, 'وما من قلب إلا وهو بين إصبعين من أصابع الرحمن'], [2, 'إن شاء أقامه وإن شاء أزاغه']];
 const mk = (i, area, topic, forYou) => ({ id: `test${String(i).padStart(7, '0')}:${100}`, videoId: `test${String(i).padStart(7, '0')}`, start: 100, end: 160 + (i % 3) * 20, channel: `Kanal ${area} ${i % 4}`, videoTitle: 'Testvideo', area, topic, hook: `Testmoment ${i} ${area}`, forYou, kind: 'regel', createdAt: '2026-10-20T00:00:00Z', cues: [[0, 'Untertitel eins, If Apple were like everyone else, a marketing message'] , [2, 'Untertitel zwei']] });
+const EX = Array.from({ length: 14 }, (_, i) => `Sentence ${i + 1} of the checked excerpt, long enough to need scrolling on a phone screen.`).join('\n');
 const moments = [];
 // Beat: die Hälfte mit arabischen Untertiteln (Punkt 4: auto zeigt Arabisch, nicht Englisch)
 for (let i = 0; i < 12; i++) moments.push({ ...mk(i, 'beat', 'islam', i % 2 === 0 ? 'Testzeile für dich' : undefined), ...(i % 2 === 1 ? { cues: AR } : {}) });
 for (let i = 12; i < 40; i++) moments.push(mk(i, 'brain', 'augen'));
 for (let i = 40; i < 55; i++) moments.push(mk(i, 'body', 'kraft'));
+for (const m of moments) m.excerpt = EX;
 const raw = crypto.getRandomValues(new Uint8Array(32));
 const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt']);
 const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -130,6 +132,25 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.speedNeverAbove2 = rates.length > 0 && rates.every((x) => x <= 2);
     c.speedBackAfterRelease = rates.lastIndexOf(1.5) > rates.indexOf(2);
 
+    // Punkt 3: Formwahl. Text hält den Player an, "gesehen" erst am Textende, Wahl bleibt gespeichert
+    await page.click('[data-testid=form-switch] >> text=Text');
+    c.textView = await waitFor(page, () => !!document.querySelector('[data-testid=text-view]')?.textContent?.includes('Sentence 14'));
+    c.textPaused = await waitFor(page, () => window.__core.state() !== 1);
+    await page.keyboard.press('j');
+    await page.waitForTimeout(300);
+    const tid = await page.evaluate(() => window.__core.moment().id);
+    c.textNotSeenBeforeEnd = !(await page.evaluate((id) => window.__core.seen(id), tid));
+    await page.screenshot({ path: `${out}/${name}-9-text.png` });
+    await page.evaluate(() => { const el = document.querySelector('[data-testid=text-view]'); el.scrollTop = el.scrollHeight; el.dispatchEvent(new Event('scroll')); });
+    c.textSeenAtEnd = await waitFor(page, (id) => window.__core.seen(id), tid);
+    c.textStillPaused = await page.evaluate(() => window.__core.state() !== 1);
+    await page.click('[data-testid=form-switch] >> text=Audio');
+    c.audioPlays = await waitFor(page, () => window.__core.state() === 1);
+    c.audioBigCaption = await waitFor(page, () => { const el = document.querySelector('[data-testid=caption] span'); return !!el?.textContent && parseFloat(getComputedStyle(el).fontSize) >= 22; });
+    await page.screenshot({ path: `${out}/${name}-10-audio.png` });
+    await page.click('[data-testid=form-switch] >> text=Video');
+    c.videoBack = await waitFor(page, () => window.__core.state() === 1 && !document.querySelector('[data-testid=text-view]'));
+
     // Doppeltipp speichert (für den Wochenrückblick)
     await page.mouse.dblclick(vp.width / 2, vp.height / 2);
     await page.waitForTimeout(400);
@@ -195,9 +216,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await p3.close();
     const p4 = await ctx.newPage();
     await p4.goto(url + 'icon.svg');
-    await p4.evaluate(() => new Promise((res) => { const q = indexedDB.deleteDatabase('core-key'); q.onsuccess = q.onerror = q.onblocked = () => res(0); }));
+    await p4.evaluate(() => new Promise((res) => { const q = indexedDB.deleteDatabase('core-key'); q.onsuccess = () => res('ok'); q.onerror = () => res('err'); q.onblocked = () => res('blocked'); })).then((x) => (r.deleteDb = x));
     await p4.goto(url + '?now=2026-10-25');
-    c.keyRestoredFromCache = await waitFor(p4, () => !!window.__core?.moment());
+    c.keyRestoredFromCache = await waitFor(p4, () => !document.body.innerText.includes('not unlocked') && (!!window.__core?.moment() || !!document.querySelector('[data-testid="weekly-review"]')));
+    if (!c.keyRestoredFromCache) r.restoreBody = (await p4.innerText('body')).slice(0, 120);
     c.pageErrors = errors.length;
     r.errors = errors.slice(0, 3);
   } catch (e) {
