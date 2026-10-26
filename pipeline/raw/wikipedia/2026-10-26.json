@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-10-26",
+ "records": [
+  {
+   "sourceId": "wiki:de:Ballon d’Or",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Ballon_d%E2%80%99Or",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/26",
+    "status": 200
+   },
+   "title": "Ballon d’Or",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Der Ballon d’Or ist ein seit 1956 von der französischen Fußball-Fachzeitschrift France Football vergebener Preis an die besten Fußballspieler des jeweiligen Kalenderjahres bzw. seit 2022 der vorherigen Saison. Ursprünglich nur für europäische Spieler von europäischen Vereinen vorgesehen, öffnete sich der Preis ab 1995 für alle Spieler, die in Europa spielten. Daher wurden die Gewinner auch als „Europas Fußballer des Jahres“ bezeichnet. Da seit 2007 alle Spieler weltweit gewählt werden können, prämiert die Auszeichnung mittlerweile in Konkurrenz zum 1991 eingeführten FIFA-Weltfußballer des Jahres den „Weltfußballer des Jahres“. Von 2010 bis 2015 wurde der Preis nicht mehr in der traditionellen Form vergeben, sondern France Football und die FIFA kooperierten und schufen die gemeinsame Auszeichnung FIFA Ballon d’Or; seit 2016 organisiert die französische Zeitschrift die Vergabe des Ballon d’Or wieder in alleiniger Regie. Der Ballon d’Or gilt als prestigeträchtiger als die Wahl zum FIFA-Weltfußballer und ist die wichtigste individuelle Auszeichnung für einen Fußballspieler. Rekordgewinner ist der Argentinier Lionel Messi, der von 2009 bis 2023 acht Mal ausgezeichnet wurde. Seit 2018 wird der Ballon d’Or – unter dem Namen Ballon d’Or féminin – auch an Frauen verliehen."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-10-26T00:06:00.694Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Ballon_d%E2%80%99Or": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Florence Kasumba",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Florence_Kasumba",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/26",
+    "status": 200
+   },
+   "title": "Florence Kasumba",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Florence Kasumba ist eine deutsche Schauspielerin, Musicaldarstellerin und Synchronsprecherin. Im deutschen Fernsehen absolvierte sie zahlreiche Gastrollen, bis sie 2018 durchgängig in der Serie Deutschland 86 zu sehen war und von 2019 bis 2024 als Tatort-Kommissarin Anaïs Schmitz des NDR an der Seite von Maria Furtwängler agierte. International wurde sie insbesondere durch das Marvel Cinematic Universe, in dem sie in The First Avenger: Civil War, Black Panther, Avengers: Infinity War, The Falcon and the Winter Soldier und Black Panther: Wakanda Forever einen Auftritt hat, und durch Wonder Woman bekannt."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-26T00:06:00.694Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Florence_Kasumba": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Transkei Constitution Act",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Transkei_Constitution_Act",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/26",
+    "status": 200
+   },
+   "title": "Transkei Constitution Act",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Der Transkei Constitution Act ist ein Gesetz, das die Homelandpolitik Südafrikas grundsätzlich prägte. Es wurde vom Parlament der Republik Südafrika beschlossen, um die Gebiete der Transkei mit ihrem bisherigen Status als Reservat in ein Territorium der „Selbstverwaltung“ umzuwandeln. Der Transkei Constitution Act war ein Bestandteil der südafrikanischen Apartheidgesetzgebung. Die Transkei diente auf diese Weise als Modellfall für die beabsichtigte Unabhängigkeit weiterer Homelands."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-26T00:06:00.694Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Transkei_Constitution_Act": 200
+   }
+  }
+ ]
+}
