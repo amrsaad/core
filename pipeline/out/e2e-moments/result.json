@@ -1,5 +1,5 @@
 {
- "at": "2026-10-26T11:56:02.290Z",
+ "at": "2026-10-26T12:11:53.790Z",
  "runs": [
   {
    "browser": "webkit",
@@ -30,7 +30,7 @@
     "captionsMenuOn": true,
     "holdFast": true,
     "releaseNormal": true,
-    "embedNoZoom": false,
+    "embedNoZoom": true,
     "embed16by9FullWidth": true,
     "speedDefault15": true,
     "speedHold2": true,
@@ -66,11 +66,11 @@
    },
    "recall": [
     {
-     "id": "test0000012:100",
-     "due": 1793361604141,
+     "id": "test0000029:100",
+     "due": 1793361604259,
      "results": [
       {
-       "at": 1792756804141,
+       "at": 1792756804259,
        "got": true
       }
      ]
@@ -78,6 +78,13 @@
    ],
    "today": "today 5 seen, 1 got it",
    "captions": [
+    {
+     "ar": true,
+     "shown": true,
+     "rtl": true,
+     "size": 21,
+     "align": "right"
+    },
     {
      "ar": true,
      "shown": true,
@@ -98,18 +105,17 @@
      "rtl": false,
      "size": 0,
      "align": ""
-    },
-    {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
     }
    ],
    "sequence": [
     {
-     "id": "test0000001:100",
+     "id": "test0000009:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000007:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -121,13 +127,7 @@
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000000:100",
-     "has": true,
-     "fy": true,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000012:100",
+     "id": "test0000029:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -135,11 +135,11 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06253051757812,
+    "bh": 221.0625,
     "fw": 393,
-    "fh": 221.06246948242188,
+    "fh": 221.0625,
     "dx": 0,
-    "dy": -4.33685302734375,
+    "dy": 0,
     "vw": 393
    },
    "rates": [
@@ -147,7 +147,7 @@
     2
    ],
    "posterCheck": {
-    "checksDone": 867,
+    "checksDone": 855,
     "violations": 0,
     "endedSeen": 0
    },
@@ -157,7 +157,7 @@
     "median": 0
    },
    "errors": [],
-   "ok": false
+   "ok": true
   },
   {
    "browser": "chromium",
@@ -224,11 +224,11 @@
    },
    "recall": [
     {
-     "id": "test0000022:100",
-     "due": 1793361604103,
+     "id": "test0000026:100",
+     "due": 1793361603940,
      "results": [
       {
-       "at": 1792756804103,
+       "at": 1792756803940,
        "got": true
       }
      ]
@@ -267,7 +267,7 @@
    ],
    "sequence": [
     {
-     "id": "test0000008:100",
+     "id": "test0000000:100",
      "has": true,
      "fy": true,
      "stoppedAtEnd": true
@@ -285,7 +285,7 @@
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000022:100",
+     "id": "test0000026:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -293,9 +293,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06248474121094,
+    "bh": 221.0625,
     "fw": 393,
-    "fh": 221.06248474121094,
+    "fh": 221.0625,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -305,7 +305,7 @@
     2
    ],
    "posterCheck": {
-    "checksDone": 870,
+    "checksDone": 876,
     "violations": 0,
     "endedSeen": 0
    },
