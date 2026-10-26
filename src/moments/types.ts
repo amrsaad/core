@@ -3,6 +3,15 @@ import type { Area } from '../types';
 export type Kind = 'story' | 'regel' | 'entscheidung' | 'mechanismus' | 'zahl';
 
 /** Veröffentlichte Felder eines Moments (Belege bleiben im privaten Repo) */
+/** Abfragefrage zum Ausschnitt (Max, 26.10.): Anwendungsfrage, drei Antworten, eine richtig. Arabische Momente: Frage und Antworten auf Arabisch. */
+export interface Recall {
+  question: string;
+  options: [string, string, string];
+  /** Index 0 bis 2 in options */
+  correct: 0 | 1 | 2;
+  why: string;
+}
+
 export interface Moment {
   id: string;
   videoId: string;
@@ -15,6 +24,9 @@ export interface Moment {
   hook: string;
   forYou?: string;
   kind: Kind;
+  recall?: Recall;
+  /** Inhaltsstrom: video, audio oder text. Erbt von der Quelle in registry.json. */
+  form?: 'video' | 'audio' | 'text';
   top?: boolean;
   createdAt: string;
   /** Eigener Stream statt YouTube (z.B. TED), Vorschaubild und Originalseite */
