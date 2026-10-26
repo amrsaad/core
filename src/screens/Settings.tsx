@@ -3,7 +3,7 @@ import type { Area } from '../types';
 import type { MomentPool } from '../moments/types';
 import { exportJson, parseImport } from '../lib/db';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
-import { DEFAULT_SPEED, type AppState } from '../lib/state';
+import { SPEED_OPTIONS, speedOf, type AppState, type Speed } from '../lib/state';
 import { dayKey, isTimeShifted, now } from '../lib/clock';
 import { LATENCY_TARGET_MS, latencyStats, type LatencySample } from '../moments/latency';
 
@@ -131,14 +131,15 @@ export function Settings({ state, update, replace, moments }: { state: AppState;
           <span>Playback speed</span>
           <select
             data-testid="speed"
-            value={s.playbackSpeed ?? DEFAULT_SPEED}
-            onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, playbackSpeed: Number(e.target.value) as 1 | 1.5 | 2 } }))}
+            value={speedOf(s)}
+            onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, playbackSpeed: Number(e.target.value) as Speed } }))}
           >
-            <option value={1}>1x</option>
-            <option value={1.5}>1.5x</option>
-            <option value={2}>2x</option>
+            {SPEED_OPTIONS.map((v) => (
+              <option key={v} value={v}>{v}x</option>
+            ))}
           </select>
         </label>
+        <p className="t-meta m-0 text-muted">Hold the video for 2x. Never faster than 2x.</p>
         <label className="flex items-center justify-between gap-3 text-[16px]">
           <span>Single player mode (if iOS turns the sound off when swiping)</span>
           <input

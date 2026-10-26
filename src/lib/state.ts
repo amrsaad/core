@@ -79,6 +79,15 @@ export interface AppState {
 }
 
 export const DEFAULT_SPEED = 1.5;
+/** Gedrückt halten (wie Reels). Nie schneller als 2x (Fundament-Regel 11, Murphy et al. 2022) */
+export const HOLD_SPEED = 2;
+export const MAX_SPEED = 2;
+/** Einstellbar laut Bauliste Runde 1, Punkt 2: 1x und 1,5x. 2x nur per Halten */
+export const SPEED_OPTIONS = [1, 1.5] as const;
+export type Speed = (typeof SPEED_OPTIONS)[number];
+/** Gespeichertes Tempo, alte Stände (2x aus dem Zwischenstand vom 26.10.) fallen auf den Standard zurück */
+export const speedOf = (s: Pick<Settings, 'playbackSpeed'>): Speed => ((SPEED_OPTIONS as readonly number[]).includes(s.playbackSpeed ?? -1) ? (s.playbackSpeed as Speed) : DEFAULT_SPEED);
+export const clampRate = (r: number) => Math.min(MAX_SPEED, Math.max(0.25, r));
 
 export const DEFAULT_SETTINGS: Settings = {
   dailyRoundLimit: 5,

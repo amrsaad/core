@@ -15,7 +15,7 @@ window.YT = { PlayerState: { ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED
   this.playVideo = () => play();
   this.pauseVideo = () => { clearInterval(timer); if (st === 1) set(2); };
   this.mute = () => { muted = true; paint(); }; this.unMute = () => { muted = false; window.__ytlog.push('unmute'); paint(); }; this.isMuted = () => muted;
-  this.getCurrentTime = () => t; this.getDuration = () => 600; this.getPlayerState = () => st; this.seekTo = (s) => { t = s; }; this.setPlaybackRate = () => {};
+  this.getCurrentTime = () => t; this.getDuration = () => 600; this.getPlayerState = () => st; this.seekTo = (s) => { t = s; }; this.setPlaybackRate = (r) => { window.__ytlog.push('rate ' + r); };
   this.destroy = () => clearInterval(timer);
   setTimeout(() => ev.onReady && ev.onReady(), 30);
 }};

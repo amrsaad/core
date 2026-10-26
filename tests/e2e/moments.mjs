@@ -95,6 +95,13 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.holdFast = await waitFor(page, () => [...document.querySelectorAll("span")].some((s) => s.textContent === "2x"));
     await page.mouse.up();
     c.releaseNormal = await waitFor(page, () => ![...document.querySelectorAll("span")].some((s) => s.textContent === "2x"));
+    // Punkt 2: Standard 1,5x, Halten 2x, nie über 2x
+    const rates = await page.evaluate(() => window.__ytlog.filter((x) => x.startsWith('rate ')).map((x) => Number(x.slice(5))));
+    r.rates = [...new Set(rates)];
+    c.speedDefault15 = rates.includes(1.5);
+    c.speedHold2 = rates.includes(2);
+    c.speedNeverAbove2 = rates.length > 0 && rates.every((x) => x <= 2);
+    c.speedBackAfterRelease = rates.lastIndexOf(1.5) > rates.indexOf(2);
 
     // Doppeltipp speichert (für den Wochenrückblick)
     await page.mouse.dblclick(vp.width / 2, vp.height / 2);
@@ -130,6 +137,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // In den Einstellungen sichtbar
     await page.keyboard.press(' ');
     await page.click('nav [aria-label=Settings]');
+    c.speedOptions = await page.evaluate(() => [...document.querySelectorAll('[data-testid=speed] option')].map((o) => o.value).join(',') === '1,1.5');
     c.latencyInSettings = await waitFor(page, () => /Preloaded: median \d+ ms/.test(document.querySelector('[data-testid=latency]')?.textContent ?? ''));
     await page.locator('[data-testid=latency]').scrollIntoViewIfNeeded();
     await page.screenshot({ path: `${out}/${name}-5-einstellungen.png` });

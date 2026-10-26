@@ -4,7 +4,7 @@ import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { createPlayer, HLS, loadYT, STATE, type YTPlayer } from '../video/ytApi';
 import { applySignal, leaveSignal, newMomentCursor, nextMomentBlock, SIGNAL, type MomentCursor } from './mix';
-import { DEFAULT_SPEED } from '../lib/state';
+import { clampRate, DEFAULT_SPEED, HOLD_SPEED, speedOf } from '../lib/state';
 import { addSample } from './latency';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
@@ -74,7 +74,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
   const fastRef = useRef(false);
   const endFast = () => {
     fastRef.current = false;
-    for (const sl of slots.current) sl.player?.setPlaybackRate(rateRef.current);
+    for (const sl of slots.current) sl.player?.setPlaybackRate(clampRate(rateRef.current));
     setFast(false);
   };
   const [forYou, setForYou] = useState<Moment | null>(null);
@@ -84,7 +84,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
   const [loading, setLoading] = useState(false);
   const waitSince = useRef(0);
   const captionsOn = state.settings.captions !== false;
-  rateRef.current = state.settings.playbackSpeed ?? DEFAULT_SPEED;
+  rateRef.current = speedOf(state.settings);
 
   const today = dayKey(clockNow());
   const show = (t: string) => {
@@ -269,7 +269,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
                 update((x) => ({ ...x, playLatency: addSample(x.playLatency, { ms, buffered: sw.buffered, at: Date.now() }) }));
               }
               // Standardtempo nach Fundament-Regel 11 (1,5x), gehaltenes 2x bleibt bis zum Loslassen
-              if (st === STATE.PLAYING && !fastRef.current) slot.player?.setPlaybackRate(rateRef.current);
+              if (st === STATE.PLAYING && !fastRef.current) slot.player?.setPlaybackRate(clampRate(rateRef.current));
               if (st === STATE.ENDED && slot.index === idxRef.current) finish();
               if (st === STATE.PLAYING && (slot.index !== idxRef.current || forYouRef.current)) slot.player?.pauseVideo();
               rerender();
@@ -445,7 +445,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
     r.long = window.setTimeout(() => {
       r.fired = true;
       navigator.vibrate?.(10);
-      current().player?.setPlaybackRate(2);
+      current().player?.setPlaybackRate(clampRate(HOLD_SPEED));
       fastRef.current = true;
       setFast(true);
     }, LONG_MS);
