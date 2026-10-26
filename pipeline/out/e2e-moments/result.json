@@ -1,5 +1,5 @@
 {
- "at": "2026-10-26T12:11:53.790Z",
+ "at": "2026-10-26T12:14:53.692Z",
  "runs": [
   {
    "browser": "webkit",
@@ -66,11 +66,11 @@
    },
    "recall": [
     {
-     "id": "test0000029:100",
-     "due": 1793361604259,
+     "id": "test0000035:100",
+     "due": 1793361604982,
      "results": [
       {
-       "at": 1792756804259,
+       "at": 1792756804982,
        "got": true
       }
      ]
@@ -79,25 +79,25 @@
    "today": "today 5 seen, 1 got it",
    "captions": [
     {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
-    },
-    {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
-    },
-    {
      "ar": false,
      "shown": false,
      "rtl": false,
      "size": 0,
      "align": ""
+    },
+    {
+     "ar": true,
+     "shown": true,
+     "rtl": true,
+     "size": 21,
+     "align": "right"
+    },
+    {
+     "ar": true,
+     "shown": true,
+     "rtl": true,
+     "size": 21,
+     "align": "right"
     },
     {
      "ar": false,
@@ -109,25 +109,25 @@
    ],
    "sequence": [
     {
-     "id": "test0000009:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000007:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000006:100",
+     "id": "test0000010:100",
      "has": true,
      "fy": true,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000029:100",
+     "id": "test0000003:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000001:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000035:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -147,7 +147,7 @@
     2
    ],
    "posterCheck": {
-    "checksDone": 855,
+    "checksDone": 861,
     "violations": 0,
     "endedSeen": 0
    },
@@ -224,11 +224,11 @@
    },
    "recall": [
     {
-     "id": "test0000026:100",
-     "due": 1793361603940,
+     "id": "test0000023:100",
+     "due": 1793361603271,
      "results": [
       {
-       "at": 1792756803940,
+       "at": 1792756803271,
        "got": true
       }
      ]
@@ -236,6 +236,13 @@
    ],
    "today": "today 5 seen, 1 got it",
    "captions": [
+    {
+     "ar": true,
+     "shown": true,
+     "rtl": true,
+     "size": 21,
+     "align": "right"
+    },
     {
      "ar": false,
      "shown": false,
@@ -256,16 +263,15 @@
      "rtl": false,
      "size": 0,
      "align": ""
-    },
-    {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
     }
    ],
    "sequence": [
+    {
+     "id": "test0000003:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    },
     {
      "id": "test0000000:100",
      "has": true,
@@ -273,19 +279,13 @@
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000005:100",
+     "id": "test0000009:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000010:100",
-     "has": true,
-     "fy": true,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000026:100",
+     "id": "test0000023:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -305,7 +305,7 @@
     2
    ],
    "posterCheck": {
-    "checksDone": 876,
+    "checksDone": 867,
     "violations": 0,
     "endedSeen": 0
    },
