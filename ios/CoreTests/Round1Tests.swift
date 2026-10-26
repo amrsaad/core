@@ -62,6 +62,16 @@ final class Round1Tests: XCTestCase {
     }
 
     // Punkt 3
+    func testFormFilter() {
+        XCTAssertTrue(FormFilter.includes(audio: false, .video))
+        XCTAssertFalse(FormFilter.includes(audio: true, .video))
+        XCTAssertTrue(FormFilter.includes(audio: true, .audio))
+        XCTAssertFalse(FormFilter.includes(audio: false, .audio))
+        XCTAssertTrue(FormFilter.includes(audio: false, .text) && FormFilter.includes(audio: true, .text))
+        XCTAssertEqual(FormFilter.emptyLine(.video), "No video moments yet")
+        XCTAssertEqual(FormFilter.emptyLine(.audio), "No audio moments yet")
+    }
+
     func testForm() {
         XCTAssertEqual(FeedForm.allCases, [.video, .audio, .text])
         XCTAssertEqual(FormText.text(excerpt: " Satz eins.\nSatz zwei. ", cues: ["x"]), "Satz eins.\nSatz zwei.")

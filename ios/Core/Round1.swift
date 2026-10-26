@@ -147,6 +147,20 @@ enum FeedForm: String, Codable, CaseIterable {
     }
 }
 
+/// Die Wahl ist ein Filter, keine Darstellung. Gleiche Regel wie src/moments/form.ts (inForm, emptyFormLine).
+/// Video: nur Momente ohne audio. Audio: nur Podcast-Momente. Text: alle.
+enum FormFilter {
+    static func includes(audio: Bool, _ f: FeedForm) -> Bool {
+        switch f {
+        case .video: return !audio
+        case .audio: return audio
+        case .text: return true
+        }
+    }
+
+    static func emptyLine(_ f: FeedForm) -> String { "No \(f.rawValue) moments yet" }
+}
+
 enum FormText {
     /// Der geprüfte Ausschnitt (Zeilenumbrüche bleiben), ohne Ausschnitt die Untertitel als Fließtext
     static func text(excerpt: String?, cues: [String]) -> String {

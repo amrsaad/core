@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
@@ -10,7 +10,7 @@ import { captionsShown } from './captions';
 import { countGotIt, countSeen, todayLine } from './today';
 import { answer, cardDue, pickRecall, type Recent } from './recall';
 import { RecallCard } from './RecallCard';
-import { FORM_LABEL, FORMS, momentText, textEndReached, type Form } from './form';
+import { emptyFormLine, filterPool, FORM_LABEL, FORMS, momentText, textEndReached, type Form } from './form';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
 interface Props {
@@ -43,12 +43,13 @@ const LOG_MAX = 3000;
 
 const load = (m: Moment) => ({ videoId: m.videoId, startSeconds: m.start, endSeconds: m.end });
 
-export function MomentFeed({ pool, state, update, active, onPausedChange }: Props) {
+export function MomentFeed({ pool: allPool, state, update, active, onPausedChange }: Props) {
   const single = state.settings.playerMode === 'single';
   const SLOTS = single ? 1 : 3;
   const stateRef = useRef(state);
   stateRef.current = state;
   const form: Form = state.settings.form ?? 'video';
+  const pool = useMemo(() => filterPool(allPool, form), [allPool, form]);
   const textRef = useRef(form === 'text');
   textRef.current = form === 'text';
   /** Im Textmodus: Textende des aktuellen Moments war sichtbar */
@@ -614,7 +615,14 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
 
   if (pool.length && !queue.current.length) ensureQueue(6);
 
-  if (!pool.length) return <Empty text="No moments in the pool yet. The daily run fills it." />;
+  if (!allPool.length) return <Empty text="No moments in the pool yet. The daily run fills it." />;
+  if (!pool.length)
+    return (
+      <div className="vfeed" ref={dragEl}>
+        <FormSwitch form={form} setForm={setForm} />
+        <Empty text={emptyFormLine(form)} />
+      </div>
+    );
   if (error) return <Empty text={`${error}. Moments need internet.`} />;
   if (!queue.current.length) return <Empty text="You have seen every moment. New ones arrive with the next daily run." />;
 
@@ -651,13 +659,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       })}
 
       <div className="vtrack" />
-      <div className="vform" role="radiogroup" aria-label="Form" data-testid="form-switch" onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
-        {FORMS.map((f) => (
-          <button key={f} role="radio" aria-checked={form === f} className={form === f ? 'on' : ''} onClick={() => setForm(f)}>
-            {FORM_LABEL[f]}
-          </button>
-        ))}
-      </div>
+      <FormSwitch form={form} setForm={setForm} />
       {form === 'text' && m && !forYou && (
         <div
           ref={textBox}
@@ -836,6 +838,18 @@ function ActionButton({ label, onClick, active, children }: { label: string; onC
       </svg>
       <span className="vlabel">{label}</span>
     </button>
+  );
+}
+
+function FormSwitch({ form, setForm }: { form: Form; setForm: (f: Form) => void }) {
+  return (
+    <div className="vform" role="radiogroup" aria-label="Form" data-testid="form-switch" onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
+        {FORMS.map((f) => (
+          <button key={f} role="radio" aria-checked={form === f} className={form === f ? 'on' : ''} onClick={() => setForm(f)}>
+            {FORM_LABEL[f]}
+          </button>
+        ))}
+    </div>
   );
 }
 

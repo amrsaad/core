@@ -61,7 +61,7 @@ export default function App() {
   return (
     <div className="relative h-[100dvh] overflow-hidden" style={{ ['--nav-h' as string]: tab === 'feed' && showBar ? `${NAV_H}px` : '0px' }}>
       <div className={tab === 'feed' ? '' : 'hidden'}>
-        <MomentFeed pool={vault.pool.moments} state={state} update={update} active={tab === 'feed'} onPausedChange={onPausedChange} />
+        <MomentFeed key={state.settings.form ?? 'video'} pool={vault.pool.moments} state={state} update={update} active={tab === 'feed'} onPausedChange={onPausedChange} />
       </div>
       {tab === 'saved' && <SavedMoments state={state} update={update} />}
       {tab === 'settings' && <Settings state={state} update={update} replace={replace} moments={vault.pool} />}

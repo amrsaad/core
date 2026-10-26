@@ -8,17 +8,34 @@ final class FeedModel: ObservableObject {
 
     @Published var status: Status = .loading
     @Published private(set) var queue: [Moment] = []
+    /// Der ganze Pool. Gespielt wird nur der Teil, den der Filter durchlässt (formPool).
     private(set) var pool: [Moment] = []
+    private(set) var form: FeedForm = .video
     private(set) var updatedAt: String?
     private var cursor: Mix.Cursor?
     /// not published on purpose: created while views build
     private var playbacks: [String: Playback] = [:]
+
+    var formPool: [Moment] { pool.filter { FormFilter.includes(audio: $0.isAudio, form) } }
+    var formPoolEmpty: Bool { status == .ready && formPool.isEmpty && !pool.isEmpty }
+
+    /// Filterwechsel: Spieler abbauen, Warteschlange aus dem gefilterten Pool neu mischen. Gewichte und Gesehenes bleiben im Store.
+    func applyForm(_ f: FeedForm, store: Store) {
+        guard f != form else { return }
+        form = f
+        for p in playbacks.values { p.teardown() }
+        playbacks = [:]
+        queue = []
+        cursor = nil
+        ensure(upTo: 6, store: store)
+    }
 
     func load(key: Data, store: Store) async {
         status = .loading
         do {
             let p = try await Vault.fetchPool(key: key)
             pool = p.moments
+            form = store.state.currentForm
             updatedAt = p.updatedAt
             queue = []
             cursor = nil
@@ -35,7 +52,7 @@ final class FeedModel: ObservableObject {
         var added: [Moment] = []
         var c = cursor ?? Mix.Cursor(firstOfDay: false)
         while queue.count + added.count < n {
-            guard let block = Mix.nextBlock(pool: pool, state: store.state, cursor: &c), !block.isEmpty else { break }
+            guard let block = Mix.nextBlock(pool: formPool, state: store.state, cursor: &c), !block.isEmpty else { break }
             added += block
         }
         cursor = c
@@ -94,7 +111,10 @@ struct FeedView: View {
             case .error(let msg):
                 message("\(msg) The first start needs internet.")
             case .ready:
-                if feed.queue.isEmpty {
+                if feed.formPoolEmpty {
+                    message(FormFilter.emptyLine(feed.form))
+                        .overlay(alignment: .top) { FeedTopBar().padding(.top, 6) }
+                } else if feed.queue.isEmpty {
                     message("You have seen every moment. New ones arrive with the next daily run.")
                 } else {
                     pager
@@ -182,11 +202,11 @@ struct FeedView: View {
             activate(new, measure: true)
         }
         .onChange(of: store.state.form) { _, _ in
-            // Formwechsel: Text hält an, Video und Audio spielen weiter
-            guard let id = currentID, let i = index(of: id) else { return }
-            let m = feed.queue[i]
-            let p = feed.playback(for: m)
-            if store.state.currentForm == .text { p.pause() } else if forYou == nil && recallCard == nil { p.play(); store.markSeen(m) }
+            // Filterwechsel: neue Warteschlange nur aus passenden Momenten, Wiedergabe beginnt beim ersten
+            forYou = nil
+            feed.applyForm(store.state.currentForm, store: store)
+            let first = feed.queue.first?.id
+            if first == currentID { activate(first) } else { currentID = first }
         }
     }
 

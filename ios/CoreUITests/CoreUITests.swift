@@ -163,10 +163,20 @@ final class CoreUITests: XCTestCase {
         // die anderen haben einen eigenen Stream und werden vorgeladen
         for _ in 0..<4 { app.swipeUp(velocity: .fast); wait(2.5) }
         shot("53-feed-after-swipes")
-        // Audioform auf einem Moment mit eigenem Stream: Untertitel immer an und groß
+        // Filter: Video zeigt keine Podcast-Momente
+        XCTAssertFalse(app.staticTexts["Do not compare body fat across measuring devices."].exists, "audio moment in video filter")
+        XCTAssertFalse(app.staticTexts["Reader studies might favor computer aid. Connie showed real-life harm."].exists, "audio moment in video filter")
+        // Audio: nur Podcast-Momente, Untertitel immer an und groß
         app.buttons["form-Audio"].tap()
         wait(3)
+        let audioHooks = ["Do not compare body fat across measuring devices.", "Reader studies might favor computer aid. Connie showed real-life harm."]
+        XCTAssertTrue(audioHooks.contains { app.staticTexts[$0].exists }, "no audio moment in audio filter")
+        XCTAssertFalse(app.staticTexts["Rest two minutes between heavy sets."].exists, "video moment in audio filter")
         shot("52-form-audio")
+        // Text: alle Momente
+        app.buttons["form-Text"].tap()
+        wait(1)
+        shot("56-form-text-all")
         app.buttons["form-Video"].tap()
         app.tabBars.buttons["Settings"].tap()
         XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 5))
@@ -186,6 +196,21 @@ final class CoreUITests: XCTestCase {
         XCTAssertEqual(app.staticTexts["keyBackups"].label, "Key saved in Keychain yes · in file copy yes")
         app.swipeUp(); wait(0.5)
         shot("55-settings-unlock-device")
+    }
+
+    /// Leerer Filter: eine Zeile statt leerem Feed, Schalter bleibt, Rückkehr zu Video geht
+    func test07EmptyFilter() throws {
+        try Self.testPool(withAudio: false).write(to: stateDir.appendingPathComponent("pool.json"))
+        launch()
+        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15), "feed did not appear")
+        app.buttons["form-Audio"].tap()
+        XCTAssertTrue(app.staticTexts["No audio moments yet"].waitForExistence(timeout: 5), "empty line missing")
+        XCTAssertTrue(app.buttons["form-Video"].exists, "switch must stay")
+        wait(0.5)
+        shot("57-filter-empty")
+        app.buttons["form-Video"].tap()
+        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 10), "video feed did not come back")
+        XCTAssertFalse(app.staticTexts["No audio moments yet"].exists)
     }
 
     /// Punkt 5: kurze Momente laufen von selbst durch, nach dem 4. kommt die Abrufkarte
@@ -256,8 +281,8 @@ final class CoreUITests: XCTestCase {
 
     // MARK: Fixture
 
-    /// Six moments, two per area. Streams are the bundled sample video, so playback really runs in the simulator.
-    private static func testPool(short: Bool = false) throws -> Data {
+    /// Eight moments (two of them audio), at least two per area. Streams are the bundled sample video, so playback really runs in the simulator.
+    private static func testPool(short: Bool = false, withAudio: Bool = true) throws -> Data {
         let bundle = Bundle(for: CoreUITests.self)
         let video = bundle.url(forResource: "sample", withExtension: "mp4")!.absoluteString
         let thumb = bundle.url(forResource: "thumb", withExtension: "png")!.absoluteString
@@ -282,7 +307,9 @@ final class CoreUITests: XCTestCase {
                 m("body2", "body", "strength", "Stronger By Science", "Three hard sets beat ten easy ones for strength."),
                 m("brain1", "brain", "eyes", "Cybersight (Dr. Daniel Neely)", "A relative afferent pupillary defect is never caused by a cataract."),
                 m("brain2", "brain", "ai", "NEJM AI Grand Rounds", "Reader studies might favor computer aid. Connie showed real-life harm.", audio: true),
-            ],
+                m("body3", "body", "strength", "Stronger By Science", "Rest two minutes between heavy sets."),
+                m("brain3", "brain", "eyes", "Cybersight (Dr. Daniel Neely)", "Check the pupils before you order imaging."),
+            ].filter { withAudio || $0["audio"] == nil },
         ]
         return try JSONSerialization.data(withJSONObject: pool, options: [.prettyPrinted])
     }
