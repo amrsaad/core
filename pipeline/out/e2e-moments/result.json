@@ -1,5 +1,5 @@
 {
- "at": "2026-10-26T12:14:53.692Z",
+ "at": "2026-10-26T16:17:39.057Z",
  "runs": [
   {
    "browser": "webkit",
@@ -41,9 +41,14 @@
     "textNotSeenBeforeEnd": true,
     "textSeenAtEnd": true,
     "textStillPaused": true,
+    "textShowsAllKinds": true,
+    "audioOnlyAudio": true,
     "audioPlays": true,
+    "audioCoverShown": true,
     "audioBigCaption": true,
+    "audioNeverVideo": true,
     "videoBack": true,
+    "videoNeverAudio": true,
     "posterWheneverNotPlaying": true,
     "latencyMeasured": true,
     "bufferedUnder300": true,
@@ -62,15 +67,19 @@
     "prevPlanShown": true,
     "prevPlanAnswered": true,
     "skipWorks": true,
+    "p6Feed": true,
+    "emptyAudioLine": true,
+    "emptyKeepsSwitch": true,
+    "emptyBackToVideo": true,
     "pageErrors": 0
    },
    "recall": [
     {
-     "id": "test0000035:100",
-     "due": 1793361604982,
+     "id": "test0000014:100",
+     "due": 1793361605036,
      "results": [
       {
-       "at": 1792756804982,
+       "at": 1792756805036,
        "got": true
       }
      ]
@@ -79,25 +88,25 @@
    "today": "today 5 seen, 1 got it",
    "captions": [
     {
+     "ar": true,
+     "shown": true,
+     "rtl": true,
+     "size": 21,
+     "align": "right"
+    },
+    {
+     "ar": true,
+     "shown": true,
+     "rtl": true,
+     "size": 21,
+     "align": "right"
+    },
+    {
      "ar": false,
      "shown": false,
      "rtl": false,
      "size": 0,
      "align": ""
-    },
-    {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
-    },
-    {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
     },
     {
      "ar": false,
@@ -109,25 +118,25 @@
    ],
    "sequence": [
     {
-     "id": "test0000010:100",
+     "id": "test0000011:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000009:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000008:100",
      "has": true,
      "fy": true,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000003:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000001:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000035:100",
+     "id": "test0000014:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -147,13 +156,13 @@
     2
    ],
    "posterCheck": {
-    "checksDone": 861,
+    "checksDone": 852,
     "violations": 0,
     "endedSeen": 0
    },
    "latency": {
-    "n": 8,
-    "buffered": 8,
+    "n": 29,
+    "buffered": 28,
     "median": 0
    },
    "errors": [],
@@ -199,9 +208,14 @@
     "textNotSeenBeforeEnd": true,
     "textSeenAtEnd": true,
     "textStillPaused": true,
+    "textShowsAllKinds": true,
+    "audioOnlyAudio": true,
     "audioPlays": true,
+    "audioCoverShown": true,
     "audioBigCaption": true,
+    "audioNeverVideo": true,
     "videoBack": true,
+    "videoNeverAudio": true,
     "posterWheneverNotPlaying": true,
     "latencyMeasured": true,
     "bufferedUnder300": true,
@@ -220,15 +234,19 @@
     "prevPlanShown": true,
     "prevPlanAnswered": true,
     "skipWorks": true,
+    "p6Feed": true,
+    "emptyAudioLine": true,
+    "emptyKeepsSwitch": true,
+    "emptyBackToVideo": true,
     "pageErrors": 0
    },
    "recall": [
     {
-     "id": "test0000023:100",
-     "due": 1793361603271,
+     "id": "test0000019:100",
+     "due": 1793361603247,
      "results": [
       {
-       "at": 1792756803271,
+       "at": 1792756803247,
        "got": true
       }
      ]
@@ -237,18 +255,18 @@
    "today": "today 5 seen, 1 got it",
    "captions": [
     {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
-    },
-    {
      "ar": false,
      "shown": false,
      "rtl": false,
      "size": 0,
      "align": ""
+    },
+    {
+     "ar": true,
+     "shown": true,
+     "rtl": true,
+     "size": 21,
+     "align": "right"
     },
     {
      "ar": true,
@@ -267,13 +285,7 @@
    ],
    "sequence": [
     {
-     "id": "test0000003:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000000:100",
+     "id": "test0000004:100",
      "has": true,
      "fy": true,
      "stoppedAtEnd": true
@@ -285,7 +297,13 @@
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000023:100",
+     "id": "test0000003:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000019:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -305,13 +323,13 @@
     2
    ],
    "posterCheck": {
-    "checksDone": 867,
+    "checksDone": 861,
     "violations": 0,
     "endedSeen": 0
    },
    "latency": {
-    "n": 8,
-    "buffered": 8,
+    "n": 29,
+    "buffered": 28,
     "median": 0
    },
    "errors": [],
