@@ -16,7 +16,7 @@ final class FeedModel: ObservableObject {
     /// not published on purpose: created while views build
     private var playbacks: [String: Playback] = [:]
 
-    var formPool: [Moment] { pool.filter { FormFilter.includes(audio: $0.isAudio, form) } }
+    var formPool: [Moment] { pool.filter { $0.feedForm == form } }
     var formPoolEmpty: Bool { status == .ready && formPool.isEmpty && !pool.isEmpty }
 
     /// Filterwechsel: Spieler abbauen, Warteschlange aus dem gefilterten Pool neu mischen. Gewichte und Gesehenes bleiben im Store.

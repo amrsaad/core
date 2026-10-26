@@ -21,6 +21,8 @@ export interface Moment {
   hls?: string;
   thumb?: string;
   url?: string;
+  /** Form des Moments. Fehlt das Feld: audio true heißt audio, sonst video. Text-Momente haben keinen Player. */
+  form?: 'video' | 'audio' | 'text';
   /** Nur Ton (Podcast): Bild bleibt stehen, Untertitel groß in der Mitte */
   audio?: boolean;
   /** Untertitel [Sekunden ab start, Text] */

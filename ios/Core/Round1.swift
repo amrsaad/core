@@ -147,18 +147,17 @@ enum FeedForm: String, Codable, CaseIterable {
     }
 }
 
-/// Die Wahl ist ein Filter, keine Darstellung. Gleiche Regel wie src/moments/form.ts (inForm, emptyFormLine).
-/// Video: nur Momente ohne audio. Audio: nur Podcast-Momente. Text: alle.
+/// Die Wahl ist ein Filter, keine Darstellung. Sie trennt nach dem Feld form des Moments.
+/// Bis das Feld im Pool ist: audio true heißt audio, sonst video. Text gibt es nur mit form text.
+/// Gleiche Regel wie src/moments/form.ts (formOf, inForm, emptyFormLine).
 enum FormFilter {
-    static func includes(audio: Bool, _ f: FeedForm) -> Bool {
-        switch f {
-        case .video: return !audio
-        case .audio: return audio
-        case .text: return true
-        }
+    static func of(form: String?, audio: Bool) -> FeedForm {
+        form.flatMap(FeedForm.init(rawValue:)) ?? (audio ? .audio : .video)
     }
 
-    static func emptyLine(_ f: FeedForm) -> String { "No \(f.rawValue) moments yet" }
+    static func includes(form: String?, audio: Bool, _ f: FeedForm) -> Bool { of(form: form, audio: audio) == f }
+
+    static func emptyLine(_ f: FeedForm) -> String { f == .text ? "Text sources coming" : "No \(f.rawValue) moments yet" }
 }
 
 enum FormText {

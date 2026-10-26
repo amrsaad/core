@@ -20,7 +20,11 @@ for (let i = 12; i < 40; i++) moments.push(mk(i, 'brain', 'augen'));
 for (let i = 40; i < 55; i++) moments.push(mk(i, 'body', 'kraft'));
 for (const m of moments) m.excerpt = EX;
 // Podcast-Momente (nur Ton) für den Audio-Filter
-for (const m of moments.slice(30, 40)) m.audio = true;
+// Fallback ohne Feld form: audio true heißt audio. Die anderen fünf tragen das Feld.
+for (const m of moments.slice(30, 35)) m.audio = true;
+for (const m of moments.slice(35, 40)) Object.assign(m, { audio: true, form: 'audio' });
+// Text-Momente: eigenes Feld form text, kein Player (die Video-ID dient nur dem Nachweis, dass nie geladen wird)
+for (const m of moments.slice(40, 46)) Object.assign(m, { form: 'text', videoId: m.videoId.replace('test', 'texto') });
 const raw = crypto.getRandomValues(new Uint8Array(32));
 const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt']);
 const encPool = async (list) => {
@@ -30,7 +34,7 @@ const encPool = async (list) => {
 };
 mkdirSync('dist/moments', { recursive: true });
 writeFileSync('dist/moments/pool.enc', await encPool(moments));
-const poolWithoutAudio = await encPool(moments.filter((m) => !m.audio));
+const poolVideoOnly = await encPool(moments.filter((m) => !m.audio && m.form !== 'text'));
 const k = Buffer.from(raw).toString('base64url');
 
 const results = { at: new Date().toISOString(), runs: [] };
@@ -191,12 +195,13 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.textSeenAtEnd = await waitFor(page, (id) => window.__core.seen(id), tid);
     c.textStillPaused = await page.evaluate(() => window.__core.state() !== 1);
     await skipRecall(page);
-    // Filter, keine Darstellung: Audio zeigt nur Podcast-Momente mit Cover und Ton, Video nur Momente ohne audio, Text alle
-    c.textShowsAllKinds = await page.evaluate(async () => {
-      const seen = new Set();
-      for (let i = 0; i < 40 && seen.size < 2; i++) { seen.add(!!window.__core.moment().audio); window.__core.next(); await new Promise((r) => setTimeout(r, 30)); }
-      return seen.size === 2;
+    // Filter nach Feld form: Text zeigt nur Text-Momente, ohne Player
+    c.textOnlyTextMoments = await page.evaluate(async () => {
+      for (let i = 0; i < 5; i++) { if (window.__core.moment()?.form !== 'text') return false; window.__core.next(); await new Promise((r) => setTimeout(r, 40)); }
+      return true;
     });
+    c.textHookShown = await page.evaluate(() => { const m = window.__core.moment(); const t = document.querySelector('[data-testid=text-view]')?.textContent ?? ''; return t.includes(m.hook) && t.includes('Sentence 1 '); });
+    c.textNeverLoadsPlayer = await page.evaluate(() => !window.__ytlog.some((x) => x.includes('texto')));
     await skipRecall(page);
     await page.click('[data-testid=form-switch] >> text=Audio');
     c.audioOnlyAudio = await waitFor(page, () => window.__core.moment()?.audio === true && !document.querySelector('[data-testid=text-view]'));
@@ -212,7 +217,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.click('[data-testid=form-switch] >> text=Video');
     c.videoBack = await waitFor(page, () => window.__core.state() === 1 && !document.querySelector('[data-testid=text-view]') && !window.__core.moment()?.audio);
     c.videoNeverAudio = await page.evaluate(async () => {
-      for (let i = 0; i < 12; i++) { if (window.__core.moment()?.audio) return false; window.__core.next(); await new Promise((r) => setTimeout(r, 40)); }
+      for (let i = 0; i < 12; i++) { const mm = window.__core.moment(); if (mm?.audio || mm?.form === 'text') return false; window.__core.next(); await new Promise((r) => setTimeout(r, 40)); }
       return true;
     });
 
@@ -299,13 +304,17 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // Leerer Filter: eine Zeile statt leerem Feed, Schalter bleibt bedienbar
     await p5.close();
     const p6 = await ctx.newPage();
-    await p6.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolWithoutAudio }));
+    await p6.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolVideoOnly }));
     await p6.goto(url + '?now=2026-10-23');
     c.p6Feed = await waitFor(p6, () => !!window.__core?.moment());
     await p6.click('[data-testid=form-switch] >> text=Audio');
     c.emptyAudioLine = await waitFor(p6, () => document.body.innerText.includes('No audio moments yet'));
     c.emptyKeepsSwitch = !!(await p6.$('[data-testid=form-switch]'));
     await p6.screenshot({ path: `${out}/${name}-14-filter-leer.png` });
+    await p6.click('[data-testid=form-switch] >> text=Video');
+    await p6.click('[data-testid=form-switch] >> text=Text');
+    c.emptyTextLine = await waitFor(p6, () => document.body.innerText.includes('Text sources coming'));
+    await p6.screenshot({ path: `${out}/${name}-15-text-leer.png` });
     await p6.click('[data-testid=form-switch] >> text=Video');
     c.emptyBackToVideo = await waitFor(p6, () => !!window.__core?.moment() && !document.body.innerText.includes('No audio moments yet'));
     c.pageErrors = errors.length;

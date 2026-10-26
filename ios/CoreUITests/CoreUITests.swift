@@ -155,6 +155,8 @@ final class CoreUITests: XCTestCase {
         shot("50-feed-top-bar")
         app.buttons["form-Text"].tap()
         XCTAssertTrue(app.otherElements["textView"].waitForExistence(timeout: 5) || app.scrollViews["textView"].waitForExistence(timeout: 2), "text view missing")
+        XCTAssertTrue(app.staticTexts["Written source: how to document a pupil exam."].exists || app.staticTexts["Written source: how to read a body fat report."].exists, "text moment hook missing")
+        XCTAssertFalse(app.staticTexts["Rest two minutes between heavy sets."].exists, "video moment in text filter")
         wait(0.5)
         shot("51-form-text")
         app.buttons["form-Video"].tap()
@@ -164,6 +166,7 @@ final class CoreUITests: XCTestCase {
         for _ in 0..<4 { app.swipeUp(velocity: .fast); wait(2.5) }
         shot("53-feed-after-swipes")
         // Filter: Video zeigt keine Podcast-Momente
+        XCTAssertFalse(app.staticTexts["Written source: how to document a pupil exam."].exists, "text moment in video filter")
         XCTAssertFalse(app.staticTexts["Do not compare body fat across measuring devices."].exists, "audio moment in video filter")
         XCTAssertFalse(app.staticTexts["Reader studies might favor computer aid. Connie showed real-life harm."].exists, "audio moment in video filter")
         // Audio: nur Podcast-Momente, Untertitel immer an und groß
@@ -173,10 +176,6 @@ final class CoreUITests: XCTestCase {
         XCTAssertTrue(audioHooks.contains { app.staticTexts[$0].exists }, "no audio moment in audio filter")
         XCTAssertFalse(app.staticTexts["Rest two minutes between heavy sets."].exists, "video moment in audio filter")
         shot("52-form-audio")
-        // Text: alle Momente
-        app.buttons["form-Text"].tap()
-        wait(1)
-        shot("56-form-text-all")
         app.buttons["form-Video"].tap()
         app.tabBars.buttons["Settings"].tap()
         XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 5))
@@ -208,9 +207,13 @@ final class CoreUITests: XCTestCase {
         XCTAssertTrue(app.buttons["form-Video"].exists, "switch must stay")
         wait(0.5)
         shot("57-filter-empty")
+        app.buttons["form-Text"].tap()
+        XCTAssertTrue(app.staticTexts["Text sources coming"].waitForExistence(timeout: 5), "text empty line missing")
+        shot("58-text-empty")
         app.buttons["form-Video"].tap()
         XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 10), "video feed did not come back")
         XCTAssertFalse(app.staticTexts["No audio moments yet"].exists)
+        XCTAssertFalse(app.staticTexts["Text sources coming"].exists)
     }
 
     /// Punkt 5: kurze Momente laufen von selbst durch, nach dem 4. kommt die Abrufkarte
@@ -281,19 +284,20 @@ final class CoreUITests: XCTestCase {
 
     // MARK: Fixture
 
-    /// Eight moments (two of them audio), at least two per area. Streams are the bundled sample video, so playback really runs in the simulator.
+    /// Ten moments: six video, two audio (audio true), two text (form text). Streams are the bundled sample video, so playback really runs in the simulator.
     private static func testPool(short: Bool = false, withAudio: Bool = true) throws -> Data {
         let bundle = Bundle(for: CoreUITests.self)
         let video = bundle.url(forResource: "sample", withExtension: "mp4")!.absoluteString
         let thumb = bundle.url(forResource: "thumb", withExtension: "png")!.absoluteString
-        func m(_ id: String, _ area: String, _ topic: String, _ channel: String, _ hook: String, forYou: String? = nil, audio: Bool = false, youTube: Bool = false) -> [String: Any] {
+        func m(_ id: String, _ area: String, _ topic: String, _ channel: String, _ hook: String, forYou: String? = nil, audio: Bool = false, youTube: Bool = false, text: Bool = false) -> [String: Any] {
             var d: [String: Any] = [
                 "id": id, "videoId": id, "start": 1, "end": short ? 6 : 41, "channel": channel, "area": area, "topic": topic, "hook": hook,
                 "kind": "story", "thumb": thumb,
                 "excerpt": "This is the checked excerpt of the moment, shown as text.\nIt keeps its line breaks at sentence ends.\nThe text form counts a moment as seen only once its end was on screen.",
                 "cues": [[0, "This is the first caption line of the sample stream."], [3, "It changes every few seconds, like a real moment."], [6, "Captions sit under the video band in design A."], [9, "The end comes at forty-one seconds."]],
             ]
-            if !youTube || short { d["hls"] = video; d["url"] = "https://example.com/full" }
+            if (!youTube || short) && !text { d["hls"] = video; d["url"] = "https://example.com/full" }
+            if text { d["form"] = "text" }
             if audio { d["audio"] = true }
             if let f = forYou { d["forYou"] = f }
             return d
@@ -309,7 +313,9 @@ final class CoreUITests: XCTestCase {
                 m("brain2", "brain", "ai", "NEJM AI Grand Rounds", "Reader studies might favor computer aid. Connie showed real-life harm.", audio: true),
                 m("body3", "body", "strength", "Stronger By Science", "Rest two minutes between heavy sets."),
                 m("brain3", "brain", "eyes", "Cybersight (Dr. Daniel Neely)", "Check the pupils before you order imaging."),
-            ].filter { withAudio || $0["audio"] == nil },
+                m("text1", "brain", "eyes", "Cybersight (Dr. Daniel Neely)", "Written source: how to document a pupil exam.", text: true),
+                m("text2", "body", "nutrition", "Sigma Nutrition (Prof. Grant Tinsley)", "Written source: how to read a body fat report.", text: true),
+            ].filter { withAudio || ($0["audio"] == nil && $0["form"] == nil) },
         ]
         return try JSONSerialization.data(withJSONObject: pool, options: [.prettyPrinted])
     }

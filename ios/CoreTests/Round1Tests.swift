@@ -63,13 +63,21 @@ final class Round1Tests: XCTestCase {
 
     // Punkt 3
     func testFormFilter() {
-        XCTAssertTrue(FormFilter.includes(audio: false, .video))
-        XCTAssertFalse(FormFilter.includes(audio: true, .video))
-        XCTAssertTrue(FormFilter.includes(audio: true, .audio))
-        XCTAssertFalse(FormFilter.includes(audio: false, .audio))
-        XCTAssertTrue(FormFilter.includes(audio: false, .text) && FormFilter.includes(audio: true, .text))
+        // ohne Feld form: audio true heißt audio, sonst video
+        XCTAssertEqual(FormFilter.of(form: nil, audio: false), .video)
+        XCTAssertEqual(FormFilter.of(form: nil, audio: true), .audio)
+        // das Feld schlägt audio
+        XCTAssertEqual(FormFilter.of(form: "video", audio: true), .video)
+        XCTAssertEqual(FormFilter.of(form: "audio", audio: false), .audio)
+        XCTAssertEqual(FormFilter.of(form: "text", audio: false), .text)
+        XCTAssertEqual(FormFilter.of(form: "unknown", audio: true), .audio)
+        // Text gibt es nur mit form text
+        XCTAssertFalse(FormFilter.includes(form: nil, audio: false, .text))
+        XCTAssertTrue(FormFilter.includes(form: "text", audio: false, .text))
+        XCTAssertFalse(FormFilter.includes(form: "text", audio: false, .video))
         XCTAssertEqual(FormFilter.emptyLine(.video), "No video moments yet")
         XCTAssertEqual(FormFilter.emptyLine(.audio), "No audio moments yet")
+        XCTAssertEqual(FormFilter.emptyLine(.text), "Text sources coming")
     }
 
     func testForm() {

@@ -128,7 +128,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const assign = useCallback((slot: Slot, j: number, play: boolean) => {
     const m = queue.current[j];
     slot.index = j;
-    if (!m || !slot.player || !slot.ready) return;
+    // Text-Momente haben keinen Player
+    if (!m || m.form === 'text' || !slot.player || !slot.ready) return;
     // Vorladen ohne Ton, der aktuelle Moment bekommt den gewählten Ton
     if (play) applySound(slot.player);
     else slot.player.mute();
@@ -642,8 +643,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
             <div className="vframe">
               <div ref={(el) => (slot.host = el)} />
             </div>
-            {mm && !mm.audio && <img className="vposter" src={thumbOf(mm)} alt="" draggable={false} />}
-            {mm?.audio && (
+            {mm && mm.form !== 'text' && !mm.audio && <img className="vposter" src={thumbOf(mm)} alt="" draggable={false} />}
+            {mm && mm.form !== 'text' && mm.audio && (
               <div className="vaudio">
                 <img className="vaudio-bg" src={thumbOf(mm)} alt="" draggable={false} />
                 <img className="vaudio-art" src={thumbOf(mm)} alt="" draggable={false} />

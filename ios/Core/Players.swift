@@ -58,7 +58,8 @@ final class Playback: ObservableObject {
     // MARK: Setup
 
     func prepare() {
-        guard player == nil && web == nil else { return }
+        // Text-Momente haben keinen Player
+        guard moment.feedForm != .text, player == nil && web == nil else { return }
         if moment.isYouTube { makeWeb() } else { makePlayer() }
     }
 

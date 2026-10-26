@@ -60,6 +60,8 @@ struct Moment: Codable, Identifiable, Hashable {
     let cues: [Cue]?
     /// Geprüfter Ausschnitt als Lesetext (Formwahl Text). var mit Standardwert, damit alte Pools und Tests weiter passen
     var excerpt: String? = nil
+    /// Form des Moments (video, audio, text). Fehlt im Pool, dann gilt audio true als audio, sonst video. Text-Momente haben keinen Player.
+    var form: String? = nil
 
     var cueTexts: [String] { (cues ?? []).map(\.text) }
     var readingText: String { FormText.text(excerpt: excerpt, cues: cueTexts) }
@@ -67,6 +69,7 @@ struct Moment: Codable, Identifiable, Hashable {
     /// No own stream means the moment plays through YouTube.
     var isYouTube: Bool { hls == nil }
     var isAudio: Bool { audio == true }
+    var feedForm: FeedForm { FormFilter.of(form: form, audio: isAudio) }
     var duration: Double { max(1, end - start) }
 
     var thumbURL: URL? {
