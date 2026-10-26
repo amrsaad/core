@@ -322,7 +322,6 @@ struct FeedView: View {
             advance()
         }
     }
-    }
 
     private func show(_ text: String) {
         withAnimation { flash = text }
