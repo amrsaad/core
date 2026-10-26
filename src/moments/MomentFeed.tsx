@@ -4,7 +4,8 @@ import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { createPlayer, HLS, loadYT, STATE, type YTPlayer } from '../video/ytApi';
 import { applySignal, leaveSignal, newMomentCursor, nextMomentBlock, SIGNAL, type MomentCursor } from './mix';
-import { fullVideoUrl, thumbOf, type Feedback, type Moment } from './types';
+import { DEFAULT_SPEED } from '../lib/state';
+import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
 interface Props {
   pool: Moment[];
@@ -64,8 +65,11 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
   const [paused, setPaused] = useState(false);
   const [menu, setMenu] = useState(false);
   const [fast, setFast] = useState(false);
+  const rateRef = useRef(DEFAULT_SPEED);
+  const fastRef = useRef(false);
   const endFast = () => {
-    for (const sl of slots.current) sl.player?.setPlaybackRate(1);
+    fastRef.current = false;
+    for (const sl of slots.current) sl.player?.setPlaybackRate(rateRef.current);
     setFast(false);
   };
   const [forYou, setForYou] = useState<Moment | null>(null);
@@ -75,6 +79,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
   const [loading, setLoading] = useState(false);
   const waitSince = useRef(0);
   const captionsOn = state.settings.captions !== false;
+  rateRef.current = state.settings.playbackSpeed ?? DEFAULT_SPEED;
 
   const today = dayKey(clockNow());
   const show = (t: string) => {
@@ -245,6 +250,8 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
               diag.current.push(`slot${s} ${slot.mid} state ${st}`);
               slot.st = st;
               if (st === STATE.PLAYING) everPlayed.current = true;
+              // Standardtempo nach Fundament-Regel 11 (1,5x), gehaltenes 2x bleibt bis zum Loslassen
+              if (st === STATE.PLAYING && !fastRef.current) slot.player?.setPlaybackRate(rateRef.current);
               if (st === STATE.ENDED && slot.index === idxRef.current) finish();
               if (st === STATE.PLAYING && (slot.index !== idxRef.current || forYouRef.current)) slot.player?.pauseVideo();
               rerender();
@@ -420,6 +427,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       r.fired = true;
       navigator.vibrate?.(10);
       current().player?.setPlaybackRate(2);
+      fastRef.current = true;
       setFast(true);
     }, LONG_MS);
   };
@@ -558,8 +566,8 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       )}
 
       {captionsOn && caption && !forYou && (
-        <div className={`vcaption pointer-events-none ${m?.audio ? 'vcaption-audio' : ''}`} data-testid="caption">
-          <span>{caption}</span>
+        <div className={`vcaption pointer-events-none ${m?.audio ? 'vcaption-audio' : ''} ${isArabic(caption) ? 'vcaption-rtl' : ''}`} data-testid="caption">
+          <span dir={isArabic(caption) ? 'rtl' : 'ltr'} lang={isArabic(caption) ? 'ar' : 'en'}>{caption}</span>
         </div>
       )}
 

@@ -3,7 +3,7 @@ import type { Area } from '../types';
 import type { MomentPool } from '../moments/types';
 import { exportJson, parseImport } from '../lib/db';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
-import type { AppState } from '../lib/state';
+import { DEFAULT_SPEED, type AppState } from '../lib/state';
 import { dayKey, isTimeShifted, now } from '../lib/clock';
 
 const AREAS: Area[] = ['brain', 'body', 'beat'];
@@ -125,6 +125,18 @@ export function Settings({ state, update, replace, moments }: { state: AppState;
             checked={s.captions !== false}
             onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, captions: e.target.checked } }))}
           />
+        </label>
+        <label className="flex items-center justify-between gap-3 text-[16px]">
+          <span>Playback speed</span>
+          <select
+            data-testid="speed"
+            value={s.playbackSpeed ?? DEFAULT_SPEED}
+            onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, playbackSpeed: Number(e.target.value) as 1 | 1.5 | 2 } }))}
+          >
+            <option value={1}>1x</option>
+            <option value={1.5}>1.5x</option>
+            <option value={2}>2x</option>
+          </select>
         </label>
         <label className="flex items-center justify-between gap-3 text-[16px]">
           <span>Single player mode (if iOS turns the sound off when swiping)</span>

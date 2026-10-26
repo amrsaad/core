@@ -25,6 +25,8 @@ export interface Settings {
   playerMode: 'slots' | 'single';
   /** Untertitel im Bild */
   captions: boolean;
+  /** Wiedergabetempo (Fundament-Regel 11: Standard 1,5x, Option 2x, nie 2,5x). Fehlt in alten Ständen, dann gilt DEFAULT_SPEED */
+  playbackSpeed?: 1 | 1.5 | 2;
 }
 
 export interface SavedMoment {
@@ -73,11 +75,14 @@ export interface AppState {
   weekReviewShown: Record<string, boolean>;
 }
 
+export const DEFAULT_SPEED = 1.5;
+
 export const DEFAULT_SETTINGS: Settings = {
   dailyRoundLimit: 5,
   areaShares: { brain: 1 / 3, body: 1 / 3, beat: 1 / 3 },
   playerMode: 'slots',
   captions: true,
+  playbackSpeed: DEFAULT_SPEED,
 };
 
 export function emptyState(): AppState {

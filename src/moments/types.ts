@@ -47,3 +47,6 @@ export interface MomentLogEntry {
 
 export const thumbOf = (m: { videoId: string; thumb?: string }) => m.thumb ?? `https://i.ytimg.com/vi/${m.videoId}/hqdefault.jpg`;
 export const fullVideoUrl = (m: { videoId: string; start: number; url?: string }) => m.url ?? `https://www.youtube.com/watch?v=${m.videoId}&t=${m.start}`;
+
+/** Untertitel in arabischer Schrift werden rechtsläufig gesetzt */
+export const isArabic = (s: string) => /[\u0600-\u06FF]/.test(s);
