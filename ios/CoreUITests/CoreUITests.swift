@@ -208,19 +208,23 @@ final class CoreUITests: XCTestCase {
 
     /// Schlüsselsicherung: Dateikopie gelöscht, die App trägt sie beim Start aus dem Keychain nach (und umgekehrt)
     func test06KeyRestore() throws {
+        // Entsperrt heißt: der Feed mit Formschalter ist da (welcher Bereich zuerst kommt, hängt vom Tag ab)
+        let unlocked = { self.app.buttons["form-Video"].waitForExistence(timeout: 15) }
         launch()
-        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15))
+        XCTAssertTrue(unlocked())
         app.terminate()
         let file = stateDir.appendingPathComponent("key.bin"), chain = stateDir.appendingPathComponent("keychain-test.bin")
         XCTAssertTrue(FileManager.default.fileExists(atPath: file.path))
         try FileManager.default.removeItem(at: file)
         launch()
-        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15), "not unlocked after file copy was deleted")
+        XCTAssertTrue(unlocked(), "not unlocked after file copy was deleted")
+        shot("70-key-restored-from-keychain")
         app.terminate()
         XCTAssertTrue(FileManager.default.fileExists(atPath: file.path), "file copy not restored")
         try FileManager.default.removeItem(at: chain)
         launch()
-        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15), "not unlocked after keychain copy was deleted")
+        XCTAssertTrue(unlocked(), "not unlocked after keychain copy was deleted")
+        shot("71-key-restored-from-file")
         app.terminate()
         XCTAssertTrue(FileManager.default.fileExists(atPath: chain.path), "keychain copy not restored")
     }
