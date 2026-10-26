@@ -1,0 +1,189 @@
+name: refine
+# Verfeinert ausgewählte Fenster parallel (small bzw. large-v3-turbo bei de/ar). Auftrag in jobs/refine.json:
+# [{"id":"<videoId>","audio":"<url>","lang":"en|de|ar","windows":[[start,end],...]}]
+# Ergebnis je Video als Artefakt "refine-<id>" mit <id>.json (events nur in den Fenstern, Feld refined) und stats.json.
+on:
+  push:
+    branches: [claude/compute]
+    paths: ['jobs/refine.json']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: m
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          jobs = json.load(open('jobs/refine.json'))
+          print('matrix=' + json.dumps({'include': [{'id': j['id'], 'audio': j['audio'], 'lang': j.get('lang') or 'en', 'windows': json.dumps(j['windows'])} for j in jobs]}))
+          PY
+
+  run:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Skript
+        run: |
+          mkdir -p pipeline/sources
+          cat > pipeline/sources/transcribe.py <<'PYEOF'
+          #!/usr/bin/env python3
+          """Eigene Transkription mit faster-whisper (kostenlos, läuft lokal auf der CPU).
+
+          scan:   ganze Datei mit dem schnellen Modell "base", für die Auswahl der Stellen
+                  python3 transcribe.py scan <audio> <out.json> [sprache]
+                  Nur einen Abschnitt: Umgebungsvariablen SCAN_START und SCAN_END (Sekunden).
+          refine: Fenster [start, end] genauer neu transkribieren (small, bei de/ar large-v3-turbo) und in out.json ersetzen
+                  python3 transcribe.py refine <audio> <out.json> <start> <end> [sprache]
+          check:  prüft ein fertiges Transkript aus dem Feed gegen die geladene Datei an zwei Stellen (Wortüberlappung)
+                  python3 transcribe.py check <audio> <out.json>    Exit 0, wenn beide Stellen passen
+
+          out.json hat das Transkript-Format von core-content (events [{start, dur, text}]).
+          Benötigt: pip install faster-whisper, ffmpeg.
+          """
+          import json
+          import os
+          import re
+          import subprocess
+          import sys
+
+          import numpy as np
+          from faster_whisper import WhisperModel
+
+          SR = 16000
+
+
+          def load(path, start=None, end=None):
+              cmd = ['ffmpeg', '-loglevel', 'error']
+              if start is not None:
+                  cmd += ['-ss', str(start)]
+              cmd += ['-i', path]
+              if end is not None:
+                  cmd += ['-t', str(end - (start or 0))]
+              cmd += ['-ac', '1', '-ar', str(SR), '-f', 'f32le', '-']
+              return np.frombuffer(subprocess.run(cmd, capture_output=True, check=True).stdout, np.float32)
+
+
+          def run(model, audio, lang, offset=0.0):
+              # Arabisch liefert kaum Satzzeichen: dann an Sprechpausen gruppieren (PAUSE in validate.ts zaehlt ab 0,3 s)
+              pause_split = lang == 'ar'
+              m = WhisperModel(model, device='cpu', compute_type='int8')
+              fine = model != 'base'
+              segs, info = m.transcribe(audio, language=lang, vad_filter=True, beam_size=5 if fine else 1, word_timestamps=fine)
+              segs = list(segs)
+              if not fine:
+                  ev = [{'start': round(s.start + offset, 2), 'dur': round(s.end - s.start, 2), 'text': s.text.strip()} for s in segs if s.text.strip()]
+                  return ev, info.language
+              # Genaue Fassung: Wörter zu Sätzen neu gruppieren, damit Segmente an Satzgrenzen beginnen und enden
+              ev, cur = [], []
+              def flush():
+                  if cur:
+                      text = ''.join(w.word for w in cur).strip()
+                      if text:
+                          ev.append({'start': round(cur[0].start + offset, 2), 'dur': round(cur[-1].end - cur[0].start, 2), 'text': text})
+                      cur.clear()
+              for s in segs:
+                  for w in s.words or []:
+                      if pause_split and cur and w.start - cur[-1].end >= 0.5:
+                          flush()
+                      cur.append(w)
+                      if re.search(r'[.!?؟…]["\'”)]?$', w.word.strip()) or (cur and cur[-1].end - cur[0].start > 25):
+                          flush()
+              flush()
+              return ev, info.language
+
+
+          def main():
+              mode, audio_path, out = sys.argv[1:4]
+              if mode == 'scan':
+                  lang = sys.argv[4] if len(sys.argv) > 4 else None
+                  s0 = float(os.environ['SCAN_START']) if os.environ.get('SCAN_START') else None
+                  s1 = float(os.environ['SCAN_END']) if os.environ.get('SCAN_END') else None
+                  ev, detected = run('base', load(audio_path, s0, s1), lang, offset=s0 or 0.0)
+                  try:
+                      data = json.load(open(out))
+                  except FileNotFoundError:
+                      data = {}
+                  data.update({'events': ev, 'lang': lang or detected, 'model': 'base'})
+                  json.dump(data, open(out, 'w'), ensure_ascii=False)
+                  print(f'{out}: {len(ev)} Segmente, Sprache {lang or detected}')
+              elif mode == 'refine':
+                  start, end = float(sys.argv[4]), float(sys.argv[5])
+                  data = json.load(open(out))
+                  lang = sys.argv[6] if len(sys.argv) > 6 else data.get('lang')
+                  a, b = max(0.0, start - 8), end + 8
+                  # Deutsch und Arabisch: large-v3-turbo (deutlich genauer, etwa 1,5x Echtzeit), sonst small. Überschreibbar mit REFINE_MODEL.
+                  model = os.environ.get('REFINE_MODEL') or ('large-v3-turbo' if lang in ('de', 'ar') else 'small')
+                  ev, _ = run(model, load(audio_path, a, b), lang, offset=a)
+                  # Alte Segmente im Fenster ersetzen
+                  keep = [e for e in data['events'] if e['start'] + e['dur'] <= a or e['start'] >= b]
+                  data['events'] = sorted(keep + ev, key=lambda e: e['start'])
+                  data.setdefault('refined', []).append([a, b, model])
+                  json.dump(data, open(out, 'w'), ensure_ascii=False)
+                  print(f'{out}: Fenster {a:.0f} bis {b:.0f} s neu, {len(ev)} Segmente')
+              elif mode == 'check':
+                  data = json.load(open(out))
+                  ev = data['events']
+                  length = ev[-1]['start'] if ev else 0
+                  words = lambda t: set(re.findall(r"\w+", t.lower()))
+                  m = WhisperModel('tiny', device='cpu', compute_type='int8')
+                  ok = True
+                  for frac in (0.3, 0.7):
+                      t = round(length * frac)
+                      segs, _ = m.transcribe(load(audio_path, t, t + 25), language=data.get('lang'), vad_filter=True)
+                      heard = words(' '.join(x.text for x in segs))
+                      ref = words(' '.join(e['text'] for e in ev if t - 2 <= e['start'] <= t + 25))
+                      score = len(heard & ref) / max(1, len(heard | ref))
+                      print(f'Stelle {t} s: Überlappung {score:.2f}')
+                      ok = ok and score >= 0.35
+                  sys.exit(0 if ok else 1)
+              else:
+                  raise SystemExit(__doc__)
+
+
+          if __name__ == '__main__':
+              main()
+          PYEOF
+      - name: Werkzeuge
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          pip install -q faster-whisper numpy
+      - name: Fenster verfeinern
+        env:
+          LANG_HINT: ${{ matrix.lang }}
+          WINDOWS: ${{ matrix.windows }}
+        run: |
+          set -e
+          mkdir -p work
+          OUT="work/${{ matrix.id }}.json"
+          echo "{\"events\": [], \"lang\": \"$LANG_HINT\"}" > "$OUT"
+          python3 - <<'PY'
+          import json, os, subprocess, sys
+          out = 'work/${{ matrix.id }}.json'
+          for s, e in json.loads(os.environ['WINDOWS']):
+              r = subprocess.run(['python3', 'pipeline/sources/transcribe.py', 'refine', '${{ matrix.audio }}', out, str(s), str(e), os.environ['LANG_HINT']], capture_output=True, text=True)
+              print(s, e, r.returncode, r.stdout.strip()[-120:], r.stderr.strip()[-200:] if r.returncode else '')
+          PY
+          python3 -c "import json;t=json.load(open('$OUT'));print(len(t['events']),'Segmente',t.get('refined'))"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: refine-${{ matrix.id }}
+          path: work/*.json
+          retention-days: 3
