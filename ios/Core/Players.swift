@@ -27,8 +27,13 @@ final class Playback: ObservableObject {
     private var measureT0: CFTimeInterval?
     private var measureBuffered = false
 
-    /// Geladen und angehalten bereit, also gepuffert im Sinne der Messung
-    var isPreloaded: Bool { (player != nil || web != nil) && !buffering }
+    /// Geladen und angehalten bereit, also gepuffert im Sinne der Messung.
+    /// Eigener Stream: das Item ist abspielbereit. YouTube: der Player hat "ready" gemeldet.
+    var isPreloaded: Bool {
+        if let player { return player.currentItem?.status == .readyToPlay }
+        return web != nil && webReady
+    }
+    private var webReady = false
 
     func startMeasure(buffered: Bool) {
         measureT0 = CACurrentMediaTime()
@@ -173,6 +178,7 @@ final class Playback: ObservableObject {
 
     fileprivate func handle(_ message: String) {
         if message == "ready" {
+            webReady = true
             buffering = false
             if wantsPlay { js("play()") }
         } else if message.hasPrefix("error:") {

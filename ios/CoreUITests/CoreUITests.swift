@@ -157,15 +157,17 @@ final class CoreUITests: XCTestCase {
         XCTAssertTrue(app.otherElements["textView"].waitForExistence(timeout: 5) || app.scrollViews["textView"].waitForExistence(timeout: 2), "text view missing")
         wait(0.5)
         shot("51-form-text")
-        app.buttons["form-Audio"].tap()
-        wait(2.5)
-        shot("52-form-audio")
         app.buttons["form-Video"].tap()
         wait(1)
-        // zwei Wischer, damit die Messung Werte hat
-        app.swipeUp(velocity: .fast); wait(2)
-        app.swipeUp(velocity: .fast); wait(2)
+        // Wischer, damit die Messung Werte hat. Die Beat-Momente laufen über YouTube und spielen im Simulator nicht,
+        // die anderen haben einen eigenen Stream und werden vorgeladen
+        for _ in 0..<4 { app.swipeUp(velocity: .fast); wait(2.5) }
         shot("53-feed-after-swipes")
+        // Audioform auf einem Moment mit eigenem Stream: Untertitel immer an und groß
+        app.buttons["form-Audio"].tap()
+        wait(3)
+        shot("52-form-audio")
+        app.buttons["form-Video"].tap()
         app.tabBars.buttons["Settings"].tap()
         XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 5))
         let lat = app.staticTexts["latencyPreloaded"]
