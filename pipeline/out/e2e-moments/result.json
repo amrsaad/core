@@ -1,5 +1,5 @@
 {
- "at": "2026-10-26T10:47:31.920Z",
+ "at": "2026-10-26T10:52:51.710Z",
  "runs": [
   {
    "browser": "webkit",
@@ -15,6 +15,14 @@
     "sawBothKinds": true,
     "stoppedAtEnd": true,
     "autoNext": true,
+    "recallAfter4": true,
+    "recallPlayerStopped": true,
+    "recallHookHidden": true,
+    "recallShowsHook": true,
+    "recallClosed": true,
+    "recallPlaysAgain": true,
+    "recallScheduled7d": true,
+    "todayGotIt": true,
     "todayCount": true,
     "captionsAutoRule": true,
     "captionsArabicRtl": true,
@@ -48,8 +56,27 @@
     "reviewOnlyOnce": true,
     "pageErrors": 0
    },
-   "today": "today 5 seen",
+   "recall": [
+    {
+     "id": "test0000032:100",
+     "due": 1793361604821,
+     "results": [
+      {
+       "at": 1792756804821,
+       "got": true
+      }
+     ]
+    }
+   ],
+   "today": "today 5 seen, 1 got it",
    "captions": [
+    {
+     "ar": true,
+     "shown": true,
+     "rtl": true,
+     "size": 21,
+     "align": "right"
+    },
     {
      "ar": false,
      "shown": false,
@@ -63,6 +90,140 @@
      "rtl": true,
      "size": 21,
      "align": "right"
+    },
+    {
+     "ar": false,
+     "shown": false,
+     "rtl": false,
+     "size": 0,
+     "align": ""
+    }
+   ],
+   "sequence": [
+    {
+     "id": "test0000003:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000002:100",
+     "has": true,
+     "fy": true,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000005:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000032:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    }
+   ],
+   "rates": [
+    1.5,
+    2
+   ],
+   "posterCheck": {
+    "checksDone": 867,
+    "violations": 0,
+    "endedSeen": 0
+   },
+   "latency": {
+    "n": 8,
+    "buffered": 8,
+    "median": 0
+   },
+   "errors": [],
+   "ok": true
+  },
+  {
+   "browser": "chromium",
+   "checks": {
+    "lockedWithoutKey": true,
+    "feedAfterDecrypt": true,
+    "fragmentRemoved": true,
+    "keyInCache": true,
+    "firstArea": "beat",
+    "firstPlaying": true,
+    "soundOn": true,
+    "forYouExactlyWhenSet": true,
+    "sawBothKinds": true,
+    "stoppedAtEnd": true,
+    "autoNext": true,
+    "recallAfter4": true,
+    "recallPlayerStopped": true,
+    "recallHookHidden": true,
+    "recallShowsHook": true,
+    "recallClosed": true,
+    "recallPlaysAgain": true,
+    "recallScheduled7d": true,
+    "todayGotIt": true,
+    "todayCount": true,
+    "captionsAutoRule": true,
+    "captionsArabicRtl": true,
+    "swipeNext": true,
+    "captionsMenuOn": true,
+    "holdFast": true,
+    "releaseNormal": true,
+    "speedDefault15": true,
+    "speedHold2": true,
+    "speedNeverAbove2": true,
+    "speedBackAfterRelease": true,
+    "textView": true,
+    "textPaused": true,
+    "textNotSeenBeforeEnd": true,
+    "textSeenAtEnd": true,
+    "textStillPaused": true,
+    "audioPlays": true,
+    "audioBigCaption": true,
+    "videoBack": true,
+    "posterWheneverNotPlaying": true,
+    "latencyMeasured": true,
+    "bufferedUnder300": true,
+    "latencyInDiag": true,
+    "unlockQr": true,
+    "keyBackupsBoth": true,
+    "speedOptions": true,
+    "latencyInSettings": true,
+    "weeklyReviewOnSunday": true,
+    "reviewListsSaved": true,
+    "feedAfterReview": true,
+    "reviewOnlyOnce": true,
+    "pageErrors": 0
+   },
+   "recall": [
+    {
+     "id": "test0000018:100",
+     "due": 1793361603493,
+     "results": [
+      {
+       "at": 1792756803493,
+       "got": true
+      }
+     ]
+    }
+   ],
+   "today": "today 5 seen, 1 got it",
+   "captions": [
+    {
+     "ar": false,
+     "shown": false,
+     "rtl": false,
+     "size": 0,
+     "align": ""
+    },
+    {
+     "ar": false,
+     "shown": false,
+     "rtl": false,
+     "size": 0,
+     "align": ""
     },
     {
      "ar": true,
@@ -87,128 +248,7 @@
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000003:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000009:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000031:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    }
-   ],
-   "rates": [
-    1.5,
-    2
-   ],
-   "posterCheck": {
-    "checksDone": 855,
-    "violations": 0,
-    "endedSeen": 145
-   },
-   "latency": {
-    "n": 14,
-    "buffered": 14,
-    "median": 0
-   },
-   "errors": [],
-   "ok": true
-  },
-  {
-   "browser": "chromium",
-   "checks": {
-    "lockedWithoutKey": true,
-    "feedAfterDecrypt": true,
-    "fragmentRemoved": true,
-    "keyInCache": true,
-    "firstArea": "beat",
-    "firstPlaying": true,
-    "soundOn": true,
-    "forYouExactlyWhenSet": true,
-    "sawBothKinds": true,
-    "stoppedAtEnd": true,
-    "autoNext": true,
-    "todayCount": true,
-    "captionsAutoRule": true,
-    "captionsArabicRtl": true,
-    "swipeNext": true,
-    "captionsMenuOn": true,
-    "holdFast": true,
-    "releaseNormal": true,
-    "speedDefault15": true,
-    "speedHold2": true,
-    "speedNeverAbove2": true,
-    "speedBackAfterRelease": true,
-    "textView": true,
-    "textPaused": true,
-    "textNotSeenBeforeEnd": true,
-    "textSeenAtEnd": true,
-    "textStillPaused": true,
-    "audioPlays": true,
-    "audioBigCaption": true,
-    "videoBack": true,
-    "posterWheneverNotPlaying": true,
-    "latencyMeasured": true,
-    "bufferedUnder300": true,
-    "latencyInDiag": true,
-    "unlockQr": true,
-    "keyBackupsBoth": true,
-    "speedOptions": true,
-    "latencyInSettings": true,
-    "weeklyReviewOnSunday": true,
-    "reviewListsSaved": true,
-    "feedAfterReview": true,
-    "reviewOnlyOnce": true,
-    "pageErrors": 0
-   },
-   "today": "today 5 seen",
-   "captions": [
-    {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
-    },
-    {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
-    },
-    {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
-    },
-    {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
-    }
-   ],
-   "sequence": [
-    {
-     "id": "test0000006:100",
-     "has": true,
-     "fy": true,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000010:100",
+     "id": "test0000002:100",
      "has": true,
      "fy": true,
      "stoppedAtEnd": true
@@ -220,7 +260,7 @@
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000038:100",
+     "id": "test0000018:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -231,13 +271,13 @@
     2
    ],
    "posterCheck": {
-    "checksDone": 894,
+    "checksDone": 867,
     "violations": 0,
-    "endedSeen": 149
+    "endedSeen": 0
    },
    "latency": {
-    "n": 14,
-    "buffered": 14,
+    "n": 8,
+    "buffered": 8,
     "median": 0
    },
    "errors": [],
