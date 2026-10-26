@@ -3,6 +3,7 @@ import type { Video } from '../videoTypes';
 import type { Moment, MomentLogEntry } from '../moments/types';
 import type { Weights } from '../moments/mix';
 import type { LatencySample } from '../moments/latency';
+import type { TapSample } from '../moments/actions';
 import type { CaptionMode } from '../moments/captions';
 import type { DayCount } from '../moments/today';
 import type { Form } from '../moments/form';
@@ -85,6 +86,10 @@ export interface AppState {
   weekReviewShown: Record<string, boolean>;
   /** Diagnose: Wisch bis erstes Bild, letzte Messungen (Bauliste Runde 1, Punkt 1) */
   playLatency?: LatencySample[];
+  /** Tipp bis Füllung am Knopf, letzte Messungen (Aufgabe 3) */
+  tapMs?: TapSample[];
+  /** Momente mit gefülltem Herz (More like this) */
+  momentLiked?: Record<string, number>;
   /** Tageszahl pro lokalem Tag (Punkt 6) */
   dayCount?: Record<string, DayCount>;
   /** Abrufkarten: Ergebnisse und Wiedervorlage (Punkt 5) */

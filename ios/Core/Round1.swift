@@ -293,3 +293,55 @@ enum KeyBackup {
     /// Freischalt-Link für ein weiteres Gerät, wie in der Web-App
     static func link(_ key: Data) -> String { "https://amrsaad.github.io/core/#k=\(base64url(key))" }
 }
+
+
+// MARK: Aufgabe 3, Bedienung (gleiche Regeln wie src/moments/actions.ts)
+
+enum Actions {
+    static let heartSeconds = 0.4
+    static let confirmSeconds = 0.15
+    /// Ziel: Tipp bis Füllung unter 100 ms
+    static let targetMs = 100
+    static let maxTaps = 60
+    /// Zielgröße der Knöpfe in Punkt
+    static let targetPt = 48.0
+
+    enum Kind { case more, save, source, known, weak, wrong, mute, captions }
+
+    /// Toast nur bei Mute und Wrong, alles andere bestätigt sich am Knopf
+    static func toast(_ k: Kind) -> Bool { k == .mute || k == .wrong }
+
+    /// Doppeltipp setzt nur (bleibt gefüllt), der Knopf schaltet um
+    static func nextLiked(_ liked: Bool, double: Bool) -> Bool { double ? true : !liked }
+
+    struct Tap: Codable, Equatable {
+        var ms: Int
+        var at: Date
+    }
+
+    struct Stats: Equatable {
+        var n: Int
+        var median: Int?
+        var p90: Int?
+        var underTarget: Double?
+    }
+
+    static func add(_ list: [Tap], _ t: Tap) -> [Tap] { Array((list + [t]).suffix(maxTaps)) }
+
+    private static func quantile(_ sorted: [Int], _ q: Double) -> Int {
+        let i = Int((q * Double(sorted.count)).rounded(.up)) - 1
+        return sorted[min(sorted.count - 1, max(0, i))]
+    }
+
+    static func stats(_ list: [Tap]) -> Stats {
+        let ms = list.map(\.ms).sorted()
+        guard !ms.isEmpty else { return Stats(n: 0, median: nil, p90: nil, underTarget: nil) }
+        return Stats(n: ms.count, median: quantile(ms, 0.5), p90: quantile(ms, 0.9),
+                     underTarget: Double(ms.filter { $0 < targetMs }.count) / Double(ms.count))
+    }
+
+    static func line(_ s: Stats) -> String {
+        guard let median = s.median, let p90 = s.p90, let under = s.underTarget else { return "no taps measured yet" }
+        return "Median \(median) ms, 90 % within \(p90) ms, \(Int((under * 100).rounded())) % under \(targetMs) ms (\(s.n) taps)"
+    }
+}

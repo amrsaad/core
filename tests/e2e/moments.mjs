@@ -149,7 +149,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.swipeNext = await waitFor(page, (b) => window.__core.idx() === b + 1, before);
     // Menü: Captions an, dann gilt immer an (auch Englisch)
     await skipRecall(page);
-    await page.click('[aria-label=More]');
+    await page.click('[data-testid=options]');
     await page.click('text=Captions');
     await page.click('text=Cancel');
     c.captionsMenuOn = await waitFor(page, () => !!document.querySelector('[data-testid=caption] span')?.textContent);
@@ -221,10 +221,82 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       return true;
     });
 
-    // Doppeltipp speichert (für den Wochenrückblick)
+    // Aufgabe 3: Bedienung. Doppeltipp = More like this mit Herz an der Tippstelle, Save nur über die Spalte
     await skipRecall(page);
-    await page.mouse.dblclick(vp.width / 2, vp.height / 2);
-    await page.waitForTimeout(400);
+    // anhalten (der erste Leertaste-Druck schaltet nur den Ton ein), damit der Moment während der Prüfung nicht weiterläuft
+    for (let i = 0; i < 3 && (await page.evaluate(() => window.__core.state())) === 1; i++) { await page.keyboard.press(' '); await page.waitForTimeout(300); }
+    const op = await page.evaluate(() => ({ id: window.__core.moment().id }));
+    c.pausedForCheck = (await page.evaluate(() => window.__core.state())) !== 1;
+    const tapX = vp.width * 0.4, tapY = vp.height * 0.45;
+    await page.mouse.dblclick(tapX, tapY);
+    c.heartShown = await waitFor(page, () => !!document.querySelector('[data-testid=heart-burst]'));
+    const hb = await page.evaluate(() => { const r = document.querySelector('[data-testid=heart-burst]')?.getBoundingClientRect(); return r ? { cx: r.left + r.width / 2, cy: r.top + r.height / 2 } : null; });
+    c.heartAtTap = !!hb && Math.abs(hb.cx - tapX) < 24 && Math.abs(hb.cy - tapY) < 24;
+    c.heartGoneAfter400 = await waitFor(page, () => !document.querySelector('[data-testid=heart-burst]'), undefined, 1500);
+    c.doubleTapLikes = await page.evaluate((id) => window.__core.liked(id) && document.querySelector('[data-testid=like]').getAttribute('aria-pressed') === 'true', op.id);
+    c.doubleTapDoesNotSave = await page.evaluate((id) => !window.__core.saved(id), op.id);
+    await page.mouse.dblclick(tapX, tapY);
+    await page.waitForTimeout(150);
+    c.doubleTapKeepsLike = await page.evaluate((id) => window.__core.liked(id), op.id);
+    await page.click('[data-testid=like]');
+    c.likeButtonUndoes = await page.evaluate((id) => !window.__core.liked(id) && document.querySelector('[data-testid=like]').getAttribute('aria-pressed') === 'false', op.id);
+    await page.click('[data-testid=like]');
+    c.likeButtonFills = await page.evaluate((id) => window.__core.liked(id), op.id);
+    await page.click('[data-testid=save]');
+    c.saveFills = await page.evaluate((id) => window.__core.saved(id) && document.querySelector('[data-testid=save]').getAttribute('aria-pressed') === 'true', op.id);
+    // Spalte: vier Knöpfe, Ziele mindestens 48 pt, Abstände, Beschriftung
+    const col = await page.evaluate(() => [...document.querySelectorAll('.vactions button')].map((b) => { const r = b.getBoundingClientRect(); return { id: b.dataset.testid, w: r.width, h: r.height, top: r.top, bottom: r.bottom, text: b.textContent }; }));
+    c.columnOrder = col.map((x) => x.id).join() === 'like,save,source,options';
+    c.columnTargets48 = col.every((x) => x.w >= 48 && x.h >= 48);
+    c.columnSpacing = col.slice(1).every((x, i) => x.top - col[i].bottom >= 16);
+    c.columnLabels = col.map((x) => x.text).join('|') === 'More|Save|Source|';
+    // Menü: Known, Weak, Wrong, Mute speaker, Captions
+    await page.click('[data-testid=options]');
+    const items = await page.evaluate(() => [...document.querySelectorAll('.vfeed .z-40 button, .vfeed .z-40 label')].map((x) => x.textContent.trim()).filter((t) => t && t !== 'Cancel'));
+    c.menuItems = items.join() === 'Known,Weak,Wrong,Mute speaker,Captions';
+    await page.screenshot({ path: `${out}/${name}-11-menue.png` });
+    await page.click('text=Cancel');
+    await page.screenshot({ path: `${out}/${name}-12-spalte.png` });
+    // Tipp bis Füllung: im Test gemessen (App-Messung und unabhängige Messung), Ziel unter 100 ms
+    const fills = [];
+    for (let i = 0; i < 6; i++) {
+      fills.push(await page.evaluate(() => new Promise((res) => {
+        const b = document.querySelector('[data-testid=like]');
+        const was = b.getAttribute('aria-pressed') === 'true';
+        const t0 = performance.now();
+        b.click();
+        // React schreibt das Ergebnis eines Klicks spätestens am Ende des Ereignisses (Microtask) ins DOM
+        queueMicrotask(() => {
+          const changedNow = (b.getAttribute('aria-pressed') === 'true') !== was;
+          requestAnimationFrame(() => requestAnimationFrame(() => res({ ms: performance.now() - t0, changedNow })));
+        });
+      })));
+    }
+    const med = (a) => [...a].sort((x, y) => x - y)[Math.floor((a.length - 1) / 2)];
+    r.tapToFill = { measured: med(fills.map((x) => x.ms)), recorded: null };
+    c.fillImmediate = fills.every((x) => x.changedNow);
+    c.fillUnder100 = r.tapToFill.measured < 100;
+    await page.waitForTimeout(300);
+    const rec = await page.evaluate(() => window.__core.tapMs().map((x) => x.ms));
+    r.tapToFill.recorded = med(rec);
+    c.tapRecorded = rec.length >= 6 && r.tapToFill.recorded < 100;
+    // Known: kein Toast. Wrong und Mute: Toast
+    await skipRecall(page);
+    await page.click('[data-testid=options]');
+    await page.click('.vfeed .z-40 >> text=Known');
+    await page.waitForTimeout(350);
+    c.knownNoToast = await page.evaluate(() => !document.querySelector('.flash'));
+    await skipRecall(page);
+    await page.click('[data-testid=options]');
+    await page.click('.vfeed .z-40 >> text=Wrong');
+    c.wrongToast = await waitFor(page, () => document.querySelector('.flash')?.textContent === 'Wrong');
+    await page.waitForTimeout(1000);
+    await skipRecall(page);
+    await page.click('[data-testid=options]');
+    await page.click('.vfeed .z-40 >> text=Mute speaker');
+    c.muteToast = await waitFor(page, () => /muted$/.test(document.querySelector('.flash')?.textContent ?? ''));
+    await page.waitForTimeout(1000);
+    await skipRecall(page);
 
     // Endscreen-Schutz: über jedem Player, der nicht gerade abspielt (also auch nach ENDED), liegt das Vorschaubild
     let checksDone = 0, violations = 0, endedSeen = 0;
@@ -263,6 +335,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.keyBackupsBoth = await waitFor(page, () => /IndexedDB yes .* offline cache yes/.test(document.querySelector('[data-testid=key-backups]')?.textContent ?? ''));
     await page.screenshot({ path: `${out}/${name}-8-geraet-freischalten.png` });
     c.speedOptions = await page.evaluate(() => [...document.querySelectorAll('[data-testid=speed] option')].map((o) => o.value).join(',') === '1,1.5');
+    c.tapInSettings = await waitFor(page, () => /Median \d+ ms/.test(document.querySelector('[data-testid=tap-reaction]')?.textContent ?? ''));
     c.latencyInSettings = await waitFor(page, () => /Preloaded: median \d+ ms/.test(document.querySelector('[data-testid=latency]')?.textContent ?? ''));
     await page.locator('[data-testid=latency]').scrollIntoViewIfNeeded();
     await page.screenshot({ path: `${out}/${name}-5-einstellungen.png` });

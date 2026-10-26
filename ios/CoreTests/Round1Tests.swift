@@ -62,6 +62,29 @@ final class Round1Tests: XCTestCase {
     }
 
     // Punkt 3
+    func testActions() {
+        XCTAssertEqual(Actions.heartSeconds, 0.4)
+        XCTAssertEqual(Actions.confirmSeconds, 0.15)
+        XCTAssertEqual(Actions.targetPt, 48)
+        // Toast nur bei Mute und Wrong
+        for k in [Actions.Kind.more, .save, .source, .known, .weak, .captions] { XCTAssertFalse(Actions.toast(k)) }
+        XCTAssertTrue(Actions.toast(.mute) && Actions.toast(.wrong))
+        // Doppeltipp setzt nur, der Knopf schaltet um
+        XCTAssertTrue(Actions.nextLiked(false, double: true))
+        XCTAssertTrue(Actions.nextLiked(true, double: true))
+        XCTAssertTrue(Actions.nextLiked(false, double: false))
+        XCTAssertFalse(Actions.nextLiked(true, double: false))
+        // Reaktionszeit
+        XCTAssertEqual(Actions.stats([]).n, 0)
+        var l: [Actions.Tap] = []
+        for ms in [20, 30, 40, 50, 150] { l = Actions.add(l, .init(ms: ms, at: Date(timeIntervalSince1970: 0))) }
+        let x = Actions.stats(l)
+        XCTAssertEqual(x, Actions.Stats(n: 5, median: 40, p90: 150, underTarget: 0.8))
+        for i in 0..<(Actions.maxTaps + 10) { l = Actions.add(l, .init(ms: i, at: Date(timeIntervalSince1970: 0))) }
+        XCTAssertEqual(l.count, Actions.maxTaps)
+        XCTAssertEqual(Actions.line(Actions.stats([])), "no taps measured yet")
+    }
+
     func testFormFilter() {
         // ohne Feld form: audio true heißt audio, sonst video
         XCTAssertEqual(FormFilter.of(form: nil, audio: false), .video)

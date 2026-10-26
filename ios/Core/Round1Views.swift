@@ -254,3 +254,40 @@ struct LatencyView: View {
         .font(.system(size: 13))
     }
 }
+
+
+/// Tipp bis Füllung: vom Tipp bis zum nächsten Bildaufbau, Ziel unter 100 ms (Anzeige in Settings unter Player)
+@MainActor
+final class NextFrame: NSObject {
+    private var link: CADisplayLink?
+    private var done: (@MainActor (CFTimeInterval) -> Void)?
+    private static var live: [NextFrame] = []
+
+    static func after(_ done: @escaping @MainActor (CFTimeInterval) -> Void) {
+        let n = NextFrame()
+        n.done = done
+        n.link = CADisplayLink(target: n, selector: #selector(tick(_:)))
+        n.link?.add(to: .main, forMode: .common)
+        live.append(n)
+    }
+
+    @objc private func tick(_ l: CADisplayLink) {
+        l.invalidate()
+        let t = l.targetTimestamp
+        done?(t)
+        NextFrame.live.removeAll { $0 === self }
+    }
+}
+
+struct TapReactionView: View {
+    let samples: [Actions.Tap]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Tap to fill").font(.system(size: 15, weight: .semibold))
+            Text(Actions.line(Actions.stats(samples))).foregroundStyle(Palette.secondary)
+                .accessibilityIdentifier("tapReaction")
+        }
+        .font(.system(size: 13))
+    }
+}

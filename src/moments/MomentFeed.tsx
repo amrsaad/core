@@ -10,6 +10,7 @@ import { captionsShown } from './captions';
 import { countGotIt, countSeen, todayLine } from './today';
 import { answer, cardDue, pickRecall, type Recent } from './recall';
 import { RecallCard } from './RecallCard';
+import { addTap, CONFIRM_MS, HEART_MS, nextLiked } from './actions';
 import { emptyFormLine, filterPool, FORM_LABEL, FORMS, momentText, textEndReached, type Form } from './form';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
@@ -95,6 +96,11 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     setFast(false);
   };
   const [forYou, setForYou] = useState<Moment | null>(null);
+  /** Herz an der Tippstelle (400 ms) und kurze Bestätigung am Knopf (150 ms) */
+  const [heart, setHeart] = useState<{ x: number; y: number; k: number } | null>(null);
+  const heartTimer = useRef(0);
+  const [pulse, setPulse] = useState('');
+  const pulseTimer = useRef(0);
   const [flash, setFlash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [caption, setCaption] = useState('');
@@ -471,37 +477,74 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     }
   };
 
-  /** Knopf: Speichern und wieder Entfernen. Doppeltipp speichert nur, wie bei Reels. */
+  const confirm = (name: string) => {
+    setPulse(name);
+    window.clearTimeout(pulseTimer.current);
+    pulseTimer.current = window.setTimeout(() => setPulse(''), CONFIRM_MS);
+  };
+
+  /** Tipp bis Füllung: vom Ereignis bis zum ersten Bild nach dem Umschalten, Anzeige in Settings unter Player */
+  const recordTap = (t0: number) =>
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const ms = Math.max(0, Math.round(performance.now() - t0));
+        update((s) => ({ ...s, tapMs: addTap(s.tapMs, { ms, at: Date.now() }) }));
+      }),
+    );
+
+  const showHeart = (x: number, y: number) => {
+    window.clearTimeout(heartTimer.current);
+    setHeart({ x, y, k: Date.now() });
+    heartTimer.current = window.setTimeout(() => setHeart(null), HEART_MS);
+  };
+
+  /** More like this: Doppeltipp (Herz an der Tippstelle) und Knopf haben dieselbe Wirkung. Der Knopf schaltet um. */
+  const like = (via: 'double' | 'button', at?: { x: number; y: number }) => {
+    const m = queue.current[idxRef.current];
+    if (!m) return;
+    const was = !!stateRef.current.momentLiked?.[m.id];
+    const on = nextLiked(was, via);
+    if (at) showHeart(at.x, at.y);
+    if (on === was) return;
+    navigator.vibrate?.(on ? 15 : 8);
+    update((s) => {
+      const liked = { ...(s.momentLiked ?? {}) };
+      if (on) liked[m.id] = Date.now();
+      else delete liked[m.id];
+      return { ...s, momentLiked: liked, momentWeights: applySignal(s.momentWeights, m, on ? SIGNAL.more : 1 / SIGNAL.more) };
+    });
+    if (on) log(m, { feedback: 'mehr' });
+  };
+  const likeAt = (clientX: number, clientY: number) => {
+    const r = dragEl.current?.getBoundingClientRect();
+    like('double', { x: clientX - (r?.left ?? 0), y: clientY - (r?.top ?? 0) });
+  };
+
+  /** Save nur über die Spalte. Der Knopf füllt sich, ein zweiter Tipp nimmt zurück. */
   const toggleSave = () => {
     const m = queue.current[idxRef.current];
     if (!m) return;
-    if (!stateRef.current.savedMoments[m.id]) return save();
+    navigator.vibrate?.(10);
+    if (!stateRef.current.savedMoments[m.id]) {
+      update((s) => ({ ...s, savedMoments: { ...s.savedMoments, [m.id]: { moment: m, savedAt: new Date().toISOString() } }, momentWeights: applySignal(s.momentWeights, m, SIGNAL.save) }));
+      return;
+    }
     update((s) => {
       const x = { ...s.savedMoments };
       delete x[m.id];
       return { ...s, savedMoments: x };
     });
-    show('Removed');
   };
 
-  const save = () => {
-    const m = queue.current[idxRef.current];
-    if (!m) return;
-    if (stateRef.current.savedMoments[m.id]) return show('Already saved');
-    navigator.vibrate?.(15);
-    update((s) => ({ ...s, savedMoments: { ...s.savedMoments, [m.id]: { moment: m, savedAt: new Date().toISOString() } }, momentWeights: applySignal(s.momentWeights, m, SIGNAL.save) }));
-    show('Saved');
-  };
-
+  /** Known und Weak bestätigen sich durch das Schließen des Menüs, Wrong und Mute zusätzlich mit Toast */
   const feedback = (fb: Feedback) => {
     const m = queue.current[idxRef.current];
     setMenu(false);
     if (!m) return;
-    const factor = fb === 'mehr' ? SIGNAL.more : SIGNAL.negative;
-    update((s) => ({ ...s, momentWeights: applySignal(s.momentWeights, m, factor) }));
+    update((s) => ({ ...s, momentWeights: applySignal(s.momentWeights, m, SIGNAL.negative) }));
     log(m, { feedback: fb });
-    show({ mehr: 'More like this', kenne: 'Already known', schwach: 'Weak', falsch: 'Wrong' }[fb]);
-    if (fb !== 'mehr') goTo(idxRef.current + 1);
+    if (fb === 'falsch') show('Wrong');
+    goTo(idxRef.current + 1);
   };
 
   const muteChannel = () => {
@@ -521,6 +564,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     const m = queue.current[idxRef.current];
     setMenu(false);
     if (!m) return;
+    confirm('source');
     current().player?.pauseVideo();
     userPaused.current = true;
     setPaused(true);
@@ -574,7 +618,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (t - r.lastUp < TAP_MS) {
       window.clearTimeout(r.tap);
       r.lastUp = 0;
-      save();
+      likeAt(r.x, r.y);
       return;
     }
     r.lastUp = t;
@@ -610,6 +654,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       slots: () => slots.current.slice(0, SLOTS).map((x) => ({ st: x.st, index: x.index })),
       latency: () => stateRef.current.playLatency ?? [],
       seen: (id: string) => !!stateRef.current.momentSeen[id],
+      liked: (id: string) => !!stateRef.current.momentLiked?.[id],
+      saved: (id: string) => !!stateRef.current.savedMoments[id],
+      tapMs: () => stateRef.current.tapMs ?? [],
       recall: () => ({ open: recallRef.current, state: stateRef.current.recall ?? {}, sessionSeen: sessionSeen.current }),
     };
   });
@@ -629,6 +676,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   const m = queue.current[idx];
   const saved = m && !!state.savedMoments[m.id];
+  const liked = !!m && !!state.momentLiked?.[m.id];
   const captionsOn = !!m && form !== 'text' && captionsShown(form === 'audio' ? 'on' : state.settings.captionMode, m);
 
   return (
@@ -676,7 +724,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
             if (dy < -SWIPE_PX && tt.current.end) goTo(idxRef.current + 1);
             else if (dy > SWIPE_PX && tt.current.top) goTo(idxRef.current - 1);
           }}
-          onDoubleClick={save}
+          onDoubleClick={(e) => likeAt(e.clientX, e.clientY)}
         >
           <div className="vchannel">
             <span className="vdot" aria-hidden="true" />
@@ -742,18 +790,24 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </div>
       )}
 
+      {heart && (
+        <svg key={heart.k} className="vheart pointer-events-none" data-testid="heart-burst" style={{ left: heart.x - 48, top: heart.y - 48 }} width="96" height="96" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+          <path d={HEART} />
+        </svg>
+      )}
+
       {!forYou && (
         <div className="vactions">
-          <ActionButton label={saved ? 'Saved' : 'Save'} onClick={toggleSave} active={saved}>
+          <ActionButton testid="like" label="More" on={liked} onClick={(e) => { const t0 = e.timeStamp; like('button'); recordTap(t0); }}>
+            <path d={HEART} />
+          </ActionButton>
+          <ActionButton testid="save" label="Save" on={saved} onClick={(e) => { const t0 = e.timeStamp; toggleSave(); recordTap(t0); }}>
             <path d="M7 4h10v16l-5-4-5 4z" />
           </ActionButton>
-          <ActionButton label="More like this" onClick={() => feedback('mehr')}>
-            <path d="M12 5v14M5 12h14" />
-          </ActionButton>
-          <ActionButton label={m?.audio ? 'Full episode' : 'Full video'} onClick={openFull}>
+          <ActionButton testid="source" label="Source" on={pulse === 'source'} fill={false} onClick={openFull}>
             <path d="M7 17 17 7M9 7h8v8" />
           </ActionButton>
-          <ActionButton label="More" onClick={() => setMenu(true)}>
+          <ActionButton testid="options" label="" aria="Options" onClick={() => setMenu(true)}>
             <path d="M5 12h.01M12 12h.01M19 12h.01" strokeWidth="3.2" />
           </ActionButton>
         </div>
@@ -799,12 +853,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
             </div>
             {(
               [
-                ['More like this', () => feedback('mehr')],
-                ['Already know this', () => feedback('kenne')],
+                ['Known', () => feedback('kenne')],
                 ['Weak', () => feedback('schwach')],
                 ['Wrong', () => feedback('falsch')],
-                [m.audio ? 'Open full episode' : 'Open full video', openFull],
-                ['Mute this channel', muteChannel],
+                ['Mute speaker', muteChannel],
               ] as [string, () => void][]
             ).map(([label, fn]) => (
               <button key={label} onClick={fn} className="block h-[52px] w-full border-b border-[#262931] text-left text-[17px]">
@@ -831,13 +883,25 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   );
 }
 
-function ActionButton({ label, onClick, active, children }: { label: string; onClick: () => void; active?: boolean; children: React.ReactNode }) {
+const HEART = 'M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z';
+
+/** Ziel 48 pt, Bestätigung am Knopf (Füllung ohne Verzögerung, Pop 150 ms) */
+function ActionButton({ label, aria, testid, onClick, on, fill = true, children }: { label: string; aria?: string; testid: string; onClick: (e: React.MouseEvent) => void; on?: boolean; fill?: boolean; children: React.ReactNode }) {
   return (
-    <button aria-label={label} onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()} onClick={onClick} className="flex min-h-[44px] flex-col items-center gap-1 text-white">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill={active ? '#fff' : 'none'} stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,.6))' }}>
+    <button
+      aria-label={aria ?? label}
+      aria-pressed={on === undefined || !fill ? undefined : on}
+      data-testid={testid}
+      data-on={on ? '1' : undefined}
+      onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
+      onClick={onClick}
+      className="vbtn flex min-h-[48px] min-w-[48px] flex-col items-center justify-center gap-0.5 text-white"
+    >
+      <svg width="28" height="28" viewBox="0 0 24 24" fill={on && fill ? '#fff' : 'none'} stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,.6))' }}>
         {children}
       </svg>
-      <span className="vlabel">{label}</span>
+      {label && <span className="vlabel">{label}</span>}
     </button>
   );
 }

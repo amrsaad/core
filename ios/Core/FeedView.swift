@@ -1,5 +1,6 @@
 import Combine
 import SwiftUI
+import UIKit
 
 /// Loads the pool and builds the endless queue.
 @MainActor
@@ -127,6 +128,13 @@ struct FeedView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase != .active { feed.current(currentID)?.pause() } else if forYou == nil && recallCard == nil && store.state.currentForm != .text { feed.current(currentID)?.play() }
         }
+        .onChange(of: store.state.form) { _, _ in
+            // Filterwechsel: neue Warteschlange nur aus passenden Momenten, Wiedergabe beginnt beim ersten
+            forYou = nil
+            feed.applyForm(store.state.currentForm, store: store)
+            let first = feed.queue.first?.id
+            if first == currentID { activate(first) } else { currentID = first }
+        }
     }
 
     /// Pages are exactly as tall as the scroll view (full screen, under status bar and tab bar),
@@ -145,7 +153,6 @@ struct FeedView: View {
                             isActive: currentID == m.id,
                             insets: geo.safeAreaInsets,
                             flash: $flash,
-                            onMenuAction: { action in menu(action, m) },
                             onMenu: { Diag.log("menu open \(m.id)"); menuFor = m },
                             onTextEnd: { textEnd(m) },
                             onNext: { advance() }
@@ -184,13 +191,7 @@ struct FeedView: View {
         .sheet(item: $menuFor) { m in
             MenuSheet(moment: m, captions: Binding(get: { store.captionsShown(m) }, set: { store.state.captionMode = $0 ? .on : .off })) { action in
                 menuFor = nil
-                switch action {
-                case .full:
-                    feed.playback(for: m).pause()
-                    if let url = m.fullURL { openURL(url) }
-                case .more, .known, .weak, .wrong, .mute:
-                    menu(action, m)
-                }
+                menu(action, m)
             }
         }
         .onAppear {
@@ -200,13 +201,6 @@ struct FeedView: View {
         .onChange(of: currentID) { old, new in
             leave(old, to: new)
             activate(new, measure: true)
-        }
-        .onChange(of: store.state.form) { _, _ in
-            // Filterwechsel: neue Warteschlange nur aus passenden Momenten, Wiedergabe beginnt beim ersten
-            forYou = nil
-            feed.applyForm(store.state.currentForm, store: store)
-            let first = feed.queue.first?.id
-            if first == currentID { activate(first) } else { currentID = first }
         }
     }
 
@@ -312,25 +306,22 @@ struct FeedView: View {
         withAnimation(.easeInOut(duration: 0.25)) { currentID = feed.queue[i + 1].id }
     }
 
+    /// Known und Weak bestätigen sich durch das Schließen des Menüs, Wrong und Mute zusätzlich mit Toast
     private func menu(_ action: MenuAction, _ m: Moment) {
         switch action {
-        case .more:
-            store.signal(m, Mix.Signal.more)
-            store.log(m, watched: feed.playback(for: m).watched, feedback: "more")
-            show("More like this")
         case .known, .weak, .wrong:
             store.signal(m, Mix.Signal.negative)
             store.log(m, watched: feed.playback(for: m).watched, feedback: action.rawValue)
-            show(action == .known ? "Already known" : action == .weak ? "Weak" : "Wrong")
+            let kind: Actions.Kind = action == .wrong ? .wrong : action == .weak ? .weak : .known
+            if Actions.toast(kind) { show("Wrong") }
             advance()
         case .mute:
             store.mute(m)
             if let i = index(of: m.id) { feed.removeUpcoming(channel: m.channel, after: i) }
-            show("\(m.speakerLine) muted")
+            if Actions.toast(.mute) { show("\(m.speakerLine) muted") }
             advance()
-        case .full:
-            break
         }
+    }
     }
 
     private func show(_ text: String) {
@@ -348,7 +339,7 @@ struct FeedView: View {
     }
 }
 
-enum MenuAction: String { case more, known, weak, wrong, mute, full }
+enum MenuAction: String { case known, weak, wrong, mute }
 
 // MARK: One moment
 
@@ -358,13 +349,16 @@ struct MomentPage: View {
     let isActive: Bool
     let insets: EdgeInsets
     @Binding var flash: String?
-    let onMenuAction: (MenuAction) -> Void
     let onMenu: () -> Void
     let onTextEnd: () -> Void
     let onNext: () -> Void
     @EnvironmentObject var store: Store
     @State private var fast = false
     @State private var pressing = false
+    /// Herz an der Tippstelle (400 ms) und Bestätigung der Quelle am Knopf (150 ms)
+    @State private var heart: (point: CGPoint, id: Int)?
+    @State private var heartVisible = false
+    @State private var sourceBounce = 0
     @Environment(\.openURL) private var openURL
 
     var body: some View {
@@ -428,6 +422,20 @@ struct MomentPage: View {
                 }
                 .padding(.top, insets.top)
 
+                if let heart {
+                    Image(systemName: "heart.fill")
+                        .font(.system(size: 96))
+                        .foregroundStyle(.white)
+                        .shadow(color: .black.opacity(0.5), radius: 8, y: 2)
+                        .scaleEffect(heartVisible ? 1.0 : 0.5)
+                        .opacity(heartVisible ? 1 : 0)
+                        .position(heart.point)
+                        .id(heart.id)
+                        .allowsHitTesting(false)
+                        .accessibilityIdentifier("heartBurst")
+                        .onAppear { withAnimation(.easeOut(duration: 0.12)) { heartVisible = true } }
+                }
+
                 if fast {
                     Text("2x")
                         .font(.system(size: 14, weight: .semibold))
@@ -437,6 +445,7 @@ struct MomentPage: View {
                 }
             }
             .foregroundStyle(.white)
+            .coordinateSpace(name: "page")
         }
         .onAppear { playback.prepare() }
     }
@@ -489,24 +498,58 @@ struct MomentPage: View {
 
     private var actions: some View {
         let saved = store.isSaved(moment)
-        return VStack(spacing: 20) {
-            ActionButton(icon: saved ? "bookmark.fill" : "bookmark", label: saved ? "Saved" : "Save") {
-                Diag.log("save button \(moment.id)")
-                if saved { store.unsave(moment); flashText("Removed") } else { store.save(moment); flashText("Saved") }
+        let liked = store.isLiked(moment)
+        return VStack(spacing: 22) {
+            ActionButton(icon: liked ? "heart.fill" : "heart", label: "More", bounce: liked ? 1 : 0, id: "like", value: liked ? "on" : "off") {
+                let t0 = CACurrentMediaTime()
+                like(double: false)
+                measure(since: t0)
             }
-            ActionButton(icon: "plus", label: "More like this") { onMenuAction(.more) }
-            ActionButton(icon: "arrow.up.right", label: moment.isAudio ? "Full episode" : "Full video") {
+            ActionButton(icon: saved ? "bookmark.fill" : "bookmark", label: "Save", bounce: saved ? 1 : 0, id: "save", value: saved ? "on" : "off") {
+                let t0 = CACurrentMediaTime()
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                Diag.log("save button \(moment.id)")
+                if saved { store.unsave(moment) } else { store.save(moment) }
+                measure(since: t0)
+            }
+            ActionButton(icon: "arrow.up.right", label: "Source", bounce: sourceBounce, id: "source") {
+                sourceBounce += 1
                 playback.pause()
                 if let url = moment.fullURL { openURL(url) }
             }
-            ActionButton(icon: "ellipsis", label: "More") { onMenu() }
-                .accessibilityIdentifier("menuButton")
+            ActionButton(icon: "ellipsis", label: "", bounce: 0, id: "menuButton", accessibility: "Options") { onMenu() }
         }
         .frame(width: 64)
     }
 
-    /// Tap: pause and play. Double tap: save. Hold: 2x speed.
-    /// Tap: pause and play. Double tap: save. Hold: 2x speed.
+    /// More like this. Doppeltipp setzt nur (Herz an der Tippstelle), der Knopf schaltet um.
+    private func like(double: Bool, at point: CGPoint? = nil) {
+        let was = store.isLiked(moment)
+        let on = Actions.nextLiked(was, double: double)
+        if let point { showHeart(point) }
+        guard on != was else { return }
+        UIImpactFeedbackGenerator(style: on ? .medium : .light).impactOccurred()
+        store.setLiked(moment, on)
+        if on { store.log(moment, watched: playback.watched, feedback: "more") }
+    }
+
+    private func showHeart(_ p: CGPoint) {
+        let id = (heart?.id ?? 0) + 1
+        heart = (p, id)
+        heartVisible = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + Actions.heartSeconds) {
+            if heart?.id == id { withAnimation(.easeOut(duration: 0.1)) { heartVisible = false }; heart = nil }
+        }
+    }
+
+    /// Tipp bis Füllung: bis zum nächsten Bildaufbau, Anzeige in Settings unter Player
+    private func measure(since t0: CFTimeInterval) {
+        NextFrame.after { shown in
+            store.addTap(ms: max(0, Int(((shown - t0) * 1000).rounded())))
+        }
+    }
+
+    /// Tap: pause and play. Double tap: More like this with a heart. Hold: 2x speed.
     /// The surface leaves out the action column, otherwise its tap gestures swallow the buttons' taps.
     private var gestureLayer: some View {
         HStack(spacing: 0) {
@@ -521,12 +564,12 @@ struct MomentPage: View {
         }
     }
 
-    private var actionsHeight: CGFloat { 4 * 47 + 3 * 20 + 16 }
+    private var actionsHeight: CGFloat { 4 * 48 + 3 * 22 + 16 }
 
     private var gestureSurface: some View {
         Color.black
             .contentShape(Rectangle())
-            .onTapGesture(count: 2) { saveByTap() }
+            .gesture(SpatialTapGesture(count: 2, coordinateSpace: .named("page")).onEnded { v in like(double: true, at: v.location) })
             .onTapGesture { playback.togglePlay() }
             .onLongPressGesture(minimumDuration: 0.35, maximumDistance: 12, perform: {}, onPressingChanged: { down in
                 pressing = down
@@ -539,11 +582,6 @@ struct MomentPage: View {
                     playback.setRate(Float(store.state.speed))
                 }
             })
-    }
-
-    private func saveByTap() {
-        if !store.isSaved(moment) { store.save(moment) }
-        flashText("Saved")
     }
 
     private func flashText(_ t: String) {
@@ -567,12 +605,10 @@ struct MenuSheet: View {
             }
             .font(.system(size: 13))
             .padding(.bottom, 8)
-            row("More like this", .more)
-            row("Already know this", .known)
+            row("Known", .known)
             row("Weak", .weak)
             row("Wrong", .wrong)
-            row(moment.isAudio ? "Open full episode" : "Open full video", .full)
-            row("Mute this channel", .mute)
+            row("Mute speaker", .mute)
             Toggle("Captions", isOn: $captions)
                 .font(.system(size: 17))
                 .frame(height: 52)
@@ -599,22 +635,33 @@ struct MenuSheet: View {
     }
 }
 
+/// Ziel 48 pt. Die Füllung wechselt ohne Verzögerung, der Sprung dauert etwa 150 ms.
 struct ActionButton: View {
     let icon: String
     let label: String
+    var bounce: Int = 0
+    var id: String = ""
+    var accessibility: String? = nil
+    var value: String? = nil
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 4) {
-                Image(systemName: icon).font(.system(size: 26, weight: .regular)).frame(height: 30)
-                Text(label).font(.system(size: 11)).lineLimit(1).minimumScaleFactor(0.8)
+            VStack(spacing: 2) {
+                Image(systemName: icon)
+                    .font(.system(size: 26, weight: .regular))
+                    .frame(height: 30)
+                    .symbolEffect(.bounce, options: .speed(3), value: bounce)
+                if !label.isEmpty { Text(label).font(.system(size: 11)).lineLimit(1).minimumScaleFactor(0.8) }
             }
-            .frame(minWidth: 56, minHeight: 44)
+            .frame(minWidth: Actions.targetPt, minHeight: Actions.targetPt)
+            .contentShape(Rectangle())
             .shadow(color: .black.opacity(0.6), radius: 2, y: 1)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(label)
+        .accessibilityLabel(accessibility ?? label)
+        .accessibilityValue(value ?? "")
+        .accessibilityIdentifier(id)
     }
 }
 

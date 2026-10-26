@@ -61,10 +61,15 @@ final class CoreUITests: XCTestCase {
         shot("12-feed-paused")
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
 
-        // double tap saves
+        // double tap is More like this with a heart, saving only works through the column
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).doubleTap()
+        wait(0.2)
+        shot("13-feed-liked-heart")
+        XCTAssertEqual(visible("like")?.value as? String, "on", "double tap must fill the heart")
+        XCTAssertEqual(visible("save")?.value as? String, "off", "double tap must not save")
+        visible("save")?.tap()
         wait(0.3)
-        shot("13-feed-saved-flash")
+        XCTAssertEqual(visible("save")?.value as? String, "on", "save button must fill")
 
         // swipe to next
         app.swipeUp(velocity: .fast)
@@ -96,6 +101,12 @@ final class CoreUITests: XCTestCase {
         if copy.exists { copy.tap(); wait(0.3); shot("32-settings-copied") }
     }
 
+    /// The button with this identifier on the visible page (pages are stacked in a lazy list)
+    private func visible(_ id: String) -> XCUIElement? {
+        let screen = app.frame
+        return app.buttons.matching(identifier: id).allElementsBoundByIndex.first { $0.frame.height > 0 && screen.contains($0.frame) }
+    }
+
     /// Taps the visible page's menu button and expects the sheet. Attaches hierarchy and app log when it fails.
     private func openMenu(tag: String) {
         let screen = app.frame
@@ -103,7 +114,7 @@ final class CoreUITests: XCTestCase {
             .first { $0.frame.height > 0 && screen.contains($0.frame) }
         XCTAssertNotNil(menuButton, "no visible menu button")
         menuButton?.tap()
-        let mute = app.buttons["Mute this channel"]
+        let mute = app.buttons["Mute speaker"]
         let opened = mute.waitForExistence(timeout: 5)
         wait(0.6)
         shot("\(tag)-menu")
@@ -195,6 +206,60 @@ final class CoreUITests: XCTestCase {
         XCTAssertEqual(app.staticTexts["keyBackups"].label, "Key saved in Keychain yes · in file copy yes")
         app.swipeUp(); wait(0.5)
         shot("55-settings-unlock-device")
+    }
+
+    /// Aufgabe 3: Spalte, Doppeltipp, Menü, Messung
+    func test08Actions() {
+        launch()
+        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15), "feed did not appear")
+        wait(1)
+        for id in ["like", "save", "source", "menuButton"] {
+            let b = visible(id)
+            XCTAssertNotNil(b, "\(id) missing")
+            XCTAssertGreaterThanOrEqual(b?.frame.width ?? 0, 48, "\(id) narrower than 48 pt")
+            XCTAssertGreaterThanOrEqual(b?.frame.height ?? 0, 48, "\(id) lower than 48 pt")
+        }
+        shot("80-column")
+        // button fills at once and undoes on the second tap
+        visible("like")?.tap()
+        XCTAssertEqual(visible("like")?.value as? String, "on")
+        visible("like")?.tap()
+        XCTAssertEqual(visible("like")?.value as? String, "off")
+        visible("save")?.tap()
+        XCTAssertEqual(visible("save")?.value as? String, "on")
+        visible("save")?.tap()
+        XCTAssertEqual(visible("save")?.value as? String, "off")
+        // double tap: heart at the tap point, liked, not saved
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.4, dy: 0.45)).doubleTap()
+        XCTAssertTrue(app.descendants(matching: .any)["heartBurst"].waitForExistence(timeout: 1), "heart missing")
+        shot("81-double-tap-heart")
+        XCTAssertEqual(visible("like")?.value as? String, "on")
+        XCTAssertEqual(visible("save")?.value as? String, "off")
+        // menu entries
+        visible("menuButton")?.tap()
+        XCTAssertTrue(app.buttons["Mute speaker"].waitForExistence(timeout: 5))
+        for t in ["Known", "Weak", "Wrong", "Mute speaker"] { XCTAssertTrue(app.buttons[t].exists, "\(t) missing") }
+        XCTAssertFalse(app.buttons["More like this"].exists, "More like this belongs to the column")
+        shot("82-menu")
+        app.buttons["Known"].tap()
+        wait(0.4)
+        XCTAssertFalse(app.staticTexts["Already known"].exists, "no toast for Known")
+        // Wrong: toast
+        visible("menuButton")?.tap()
+        XCTAssertTrue(app.buttons["Wrong"].waitForExistence(timeout: 5))
+        app.buttons["Wrong"].tap()
+        XCTAssertTrue(app.staticTexts["Wrong"].waitForExistence(timeout: 2), "toast for Wrong missing")
+        // measurement in settings under Player
+        app.tabBars.buttons["Settings"].tap()
+        XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 5))
+        let tap = app.staticTexts["tapReaction"]
+        for _ in 0..<4 where !tap.isHittable { app.swipeUp(); wait(0.3) }
+        XCTAssertTrue(tap.label.contains("Median"), "no tap measured: \(tap.label)")
+        let m = XCTAttachment(string: tap.label)
+        m.name = "83-tap-to-fill"
+        m.lifetime = .keepAlways
+        add(m)
+        shot("84-settings-tap-reaction")
     }
 
     /// Leerer Filter: eine Zeile statt leerem Feed, Schalter bleibt, Rückkehr zu Video geht

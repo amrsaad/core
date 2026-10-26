@@ -7,6 +7,7 @@ import { SPEED_OPTIONS, speedOf, type AppState, type Speed } from '../lib/state'
 import { dayKey, isTimeShifted, now } from '../lib/clock';
 import type { CaptionMode } from '../moments/captions';
 import { UnlockDevice } from './UnlockDevice';
+import { tapStats, TAP_TARGET_MS, type TapSample } from '../moments/actions';
 import { LATENCY_TARGET_MS, latencyStats, type LatencySample } from '../moments/latency';
 
 const AREAS: Area[] = ['brain', 'body', 'beat'];
@@ -156,6 +157,7 @@ export function Settings({ state, update, replace, moments }: { state: AppState;
           />
         </label>
         <Latency samples={state.playLatency} />
+        <TapReaction samples={state.tapMs} />
       </section>
 
       <UnlockDevice />
@@ -230,6 +232,23 @@ function Latency({ samples }: { samples?: LatencySample[] }) {
       <span className="text-[16px]">Swipe to first frame</span>
       {line('Preloaded', true)}
       <span className="text-muted">{line('Not preloaded', false)}</span>
+    </div>
+  );
+}
+
+/** Tipp bis Füllung am Knopf (More und Save). Ziel unter 100 ms. */
+function TapReaction({ samples }: { samples?: TapSample[] }) {
+  const x = tapStats(samples);
+  return (
+    <div className="t-meta flex flex-col gap-1" data-testid="tap-reaction">
+      <span className="text-[16px]">Tap to fill</span>
+      {x.n ? (
+        <span>
+          Median {x.median} ms, 90 % within {x.p90} ms, {Math.round((x.underTarget ?? 0) * 100)} % under {TAP_TARGET_MS} ms ({x.n} taps)
+        </span>
+      ) : (
+        <span>no taps measured yet</span>
+      )}
     </div>
   );
 }

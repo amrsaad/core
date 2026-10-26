@@ -189,6 +189,7 @@ struct SettingsView: View {
                     }
                     Text("Hold the video for 2x. Never faster than 2x.").font(.system(size: 13)).foregroundStyle(Palette.tertiary)
                     LatencyView(samples: store.state.playLatency ?? [])
+                    TapReactionView(samples: store.state.tapMs ?? [])
                 }
 
                 card { UnlockDeviceCard(key: Vault.loadKey()) }

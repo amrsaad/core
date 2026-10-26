@@ -39,6 +39,9 @@ struct AppState: Codable, Equatable {
     var playbackSpeed: Double?
     var captionMode: CaptionMode?
     var form: FeedForm?
+    /// Aufgabe 3: Momente mit gefülltem Herz (More like this) und Tipp bis Füllung am Knopf
+    var liked: [String: Date]?
+    var tapMs: [Actions.Tap]?
     var playLatency: [Latency.Sample]?
     var dayCount: [String: DayCount]?
     var recall: Recall.State?
@@ -143,6 +146,20 @@ final class Store: ObservableObject {
     }
 
     func isSaved(_ m: Moment) -> Bool { state.saved[m.id] != nil }
+    func isLiked(_ m: Moment) -> Bool { state.liked?[m.id] != nil }
+
+    /// More like this: Herz setzen oder zurücknehmen, mit dem Gegen-Signal beim Zurücknehmen
+    func setLiked(_ m: Moment, _ on: Bool) {
+        var l = state.liked ?? [:]
+        if on { l[m.id] = Date() } else { l[m.id] = nil }
+        state.liked = l
+        signal(m, on ? Mix.Signal.more : 1 / Mix.Signal.more)
+    }
+
+    func addTap(ms: Int) {
+        state.tapMs = Actions.add(state.tapMs ?? [], .init(ms: ms, at: Date()))
+        Diag.log("tap-to-fill \(ms)ms")
+    }
 
     func save(_ m: Moment) {
         guard state.saved[m.id] == nil else { return }
