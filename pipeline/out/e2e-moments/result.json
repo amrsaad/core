@@ -1,5 +1,5 @@
 {
- "at": "2026-10-26T16:59:58.145Z",
+ "at": "2026-10-26T17:08:09.832Z",
  "runs": [
   {
    "browser": "webkit",
@@ -12,7 +12,7 @@
     "firstPlaying": true,
     "soundOn": true,
     "forYouExactlyWhenSet": true,
-    "sawBothKinds": false,
+    "sawBothKinds": true,
     "stoppedAtEnd": true,
     "autoNext": true,
     "recallAfter4": true,
@@ -100,11 +100,11 @@
    },
    "recall": [
     {
-     "id": "test0000012:100",
-     "due": 1793361604336,
+     "id": "test0000018:100",
+     "due": 1793361605169,
      "results": [
       {
-       "at": 1792756804336,
+       "at": 1792756805169,
        "got": true
       }
      ]
@@ -120,11 +120,11 @@
      "align": "right"
     },
     {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
+     "ar": false,
+     "shown": false,
+     "rtl": false,
+     "size": 0,
+     "align": ""
     },
     {
      "ar": true,
@@ -143,9 +143,15 @@
    ],
    "sequence": [
     {
-     "id": "test0000009:100",
+     "id": "test0000005:100",
      "has": false,
      "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000006:100",
+     "has": true,
+     "fy": true,
      "stoppedAtEnd": true
     },
     {
@@ -155,13 +161,7 @@
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000001:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000012:100",
+     "id": "test0000018:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -181,21 +181,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 28,
-    "recorded": 28
+    "measured": 30,
+    "recorded": 30
    },
    "posterCheck": {
-    "checksDone": 867,
+    "checksDone": 870,
     "violations": 0,
-    "endedSeen": 227
+    "endedSeen": 214
    },
    "latency": {
-    "n": 31,
-    "buffered": 31,
+    "n": 30,
+    "buffered": 30,
     "median": 0
    },
    "errors": [],
-   "ok": false
+   "ok": true
   },
   {
    "browser": "chromium",
@@ -297,10 +297,10 @@
    "recall": [
     {
      "id": "test0000029:100",
-     "due": 1793361604102,
+     "due": 1793361603969,
      "results": [
       {
-       "at": 1792756804102,
+       "at": 1792756803969,
        "got": true
       }
      ]
@@ -323,11 +323,11 @@
      "align": "right"
     },
     {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
+     "ar": true,
+     "shown": true,
+     "rtl": true,
+     "size": 21,
+     "align": "right"
     },
     {
      "ar": false,
@@ -339,21 +339,21 @@
    ],
    "sequence": [
     {
-     "id": "test0000006:100",
+     "id": "test0000000:100",
      "has": true,
      "fy": true,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000005:100",
+     "id": "test0000001:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000008:100",
-     "has": true,
-     "fy": true,
+     "id": "test0000011:100",
+     "has": false,
+     "fy": false,
      "stoppedAtEnd": true
     },
     {
@@ -377,17 +377,17 @@
     2
    ],
    "tapToFill": {
-    "measured": 31.89999999999418,
+    "measured": 31.800000000017462,
     "recorded": 32
    },
    "posterCheck": {
-    "checksDone": 867,
+    "checksDone": 864,
     "violations": 0,
     "endedSeen": 144
    },
    "latency": {
-    "n": 31,
-    "buffered": 31,
+    "n": 32,
+    "buffered": 32,
     "median": 0
    },
    "errors": [],
