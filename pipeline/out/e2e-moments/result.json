@@ -1,5 +1,5 @@
 {
- "at": "2026-10-26T10:52:51.710Z",
+ "at": "2026-10-26T11:00:05.596Z",
  "runs": [
   {
    "browser": "webkit",
@@ -30,6 +30,8 @@
     "captionsMenuOn": true,
     "holdFast": true,
     "releaseNormal": true,
+    "embedNoZoom": true,
+    "embed16by9FullWidth": true,
     "speedDefault15": true,
     "speedHold2": true,
     "speedNeverAbove2": true,
@@ -52,17 +54,23 @@
     "latencyInSettings": true,
     "weeklyReviewOnSunday": true,
     "reviewListsSaved": true,
+    "reviewWeekLine": true,
+    "reviewNoPercent": true,
+    "reviewSaveNeedsPlan": true,
     "feedAfterReview": true,
     "reviewOnlyOnce": true,
+    "prevPlanShown": true,
+    "prevPlanAnswered": true,
+    "skipWorks": true,
     "pageErrors": 0
    },
    "recall": [
     {
-     "id": "test0000032:100",
-     "due": 1793361604821,
+     "id": "test0000012:100",
+     "due": 1793361604630,
      "results": [
       {
-       "at": 1792756804821,
+       "at": 1792756804630,
        "got": true
       }
      ]
@@ -85,11 +93,11 @@
      "align": ""
     },
     {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
+     "ar": false,
+     "shown": false,
+     "rtl": false,
+     "size": 0,
+     "align": ""
     },
     {
      "ar": false,
@@ -101,7 +109,7 @@
    ],
    "sequence": [
     {
-     "id": "test0000003:100",
+     "id": "test0000001:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -113,24 +121,33 @@
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000005:100",
-     "has": false,
-     "fy": false,
+     "id": "test0000000:100",
+     "has": true,
+     "fy": true,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000032:100",
+     "id": "test0000012:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
     }
    ],
+   "band": {
+    "bw": 393,
+    "bh": 221.0625,
+    "fw": 393,
+    "fh": 221.0625,
+    "dx": 0,
+    "dy": 0,
+    "vw": 393
+   },
    "rates": [
     1.5,
     2
    ],
    "posterCheck": {
-    "checksDone": 867,
+    "checksDone": 858,
     "violations": 0,
     "endedSeen": 0
    },
@@ -171,6 +188,8 @@
     "captionsMenuOn": true,
     "holdFast": true,
     "releaseNormal": true,
+    "embedNoZoom": true,
+    "embed16by9FullWidth": true,
     "speedDefault15": true,
     "speedHold2": true,
     "speedNeverAbove2": true,
@@ -193,17 +212,23 @@
     "latencyInSettings": true,
     "weeklyReviewOnSunday": true,
     "reviewListsSaved": true,
+    "reviewWeekLine": true,
+    "reviewNoPercent": true,
+    "reviewSaveNeedsPlan": true,
     "feedAfterReview": true,
     "reviewOnlyOnce": true,
+    "prevPlanShown": true,
+    "prevPlanAnswered": true,
+    "skipWorks": true,
     "pageErrors": 0
    },
    "recall": [
     {
-     "id": "test0000018:100",
-     "due": 1793361603493,
+     "id": "test0000029:100",
+     "due": 1793361603873,
      "results": [
       {
-       "at": 1792756803493,
+       "at": 1792756803873,
        "got": true
       }
      ]
@@ -219,11 +244,11 @@
      "align": ""
     },
     {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
+     "ar": true,
+     "shown": true,
+     "rtl": true,
+     "size": 21,
+     "align": "right"
     },
     {
      "ar": true,
@@ -242,15 +267,15 @@
    ],
    "sequence": [
     {
-     "id": "test0000004:100",
+     "id": "test0000010:100",
      "has": true,
      "fy": true,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000002:100",
-     "has": true,
-     "fy": true,
+     "id": "test0000005:100",
+     "has": false,
+     "fy": false,
      "stoppedAtEnd": true
     },
     {
@@ -260,18 +285,27 @@
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000018:100",
+     "id": "test0000029:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
     }
    ],
+   "band": {
+    "bw": 393,
+    "bh": 221.0625,
+    "fw": 393,
+    "fh": 221.0625,
+    "dx": 0,
+    "dy": 0,
+    "vw": 393
+   },
    "rates": [
     1.5,
     2
    ],
    "posterCheck": {
-    "checksDone": 867,
+    "checksDone": 870,
     "violations": 0,
     "endedSeen": 0
    },
