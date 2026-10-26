@@ -121,6 +121,66 @@
    "urlChecks": {
     "https://quran.com/2/121": 200
    }
+  },
+  {
+   "sourceId": "quran:2:122",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/122",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:122?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:122",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "يَـٰبَنِىٓ إِسْرَٰٓءِيلَ ٱذْكُرُوا۟ نِعْمَتِىَ ٱلَّتِىٓ أَنْعَمْتُ عَلَيْكُمْ وَأَنِّى فَضَّلْتُكُمْ عَلَى ٱلْعَـٰلَمِينَ",
+    "translation": "O Kinder Isra’ils, gedenkt Meiner Gunst, die Ich euch erwiesen habe, und daß Ich euch vor den (anderen) Weltenbewohnern bevorzugt habe.",
+    "tafsir_muyassar": "يا ذرية يعقوب اذكروا نعمي الكثيرة عليكم، وأني فَضَّلتكم على عالَمي زمانكم بكثرة أنبيائكم، وما أُنزل عليهم من الكتب.",
+    "tafsir_ibnkathir": "<p>We mentioned a similar Ayah at the beginning of this Surah, and it is mentioned here to emphisize the importance of following the Ummi Prophet and Messenger, who is described for the People of the Scriptures in their Books by his characteristics, name, the good news about him and the description of his Ummah. Allah warned them against concealing this information, which is among the favors that Allah granted them. Allah also commanded them to remember their daily life and their religious affairs and how He blessed them. They should not envy their cousins, the Arabs, for what Allah has given them, the Final Messenger of Allah ﷺ being an Arab. Envy should not incite them to oppose or deny the Prophet or refrain from following him, may Allah's peace and blessings be upon him until the Day of Judgment.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:122"
+   },
+   "fetchedAt": "2026-10-26T06:39:36.762Z",
+   "urlChecks": {
+    "https://quran.com/2/122": 200
+   }
+  },
+  {
+   "sourceId": "quran:2:123",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/123",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:123?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:123",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "وَٱتَّقُوا۟ يَوْمًا لَّا تَجْزِى نَفْسٌ عَن نَّفْسٍ شَيْـًٔا وَلَا يُقْبَلُ مِنْهَا عَدْلٌ وَلَا تَنفَعُهَا شَفَـٰعَةٌ وَلَا هُمْ يُنصَرُونَ",
+    "translation": "Und hütet euch vor einem Tag, an dem keine Seele etwas anstelle einer anderen leisten kann und von ihr keine Ersatz(leistung) angenommen wird, noch Fürsprache ihr nützt; und (an dem) ihnen keine Hilfe zuteil wird.",
+    "tafsir_muyassar": "وخافوا أهوال يوم الحساب إذ لا تغني نفس عن نفس شيئًا، ولا يقبل الله منها فدية تنجيها من العذاب، ولا تنفعها وساطة، ولا أحد ينصرها.",
+    "tafsir_ibnkathir": "<p>We mentioned a similar Ayah at the beginning of this Surah, and it is mentioned here to emphisize the importance of following the Ummi Prophet and Messenger, who is described for the People of the Scriptures in their Books by his characteristics, name, the good news about him and the description of his Ummah. Allah warned them against concealing this information, which is among the favors that Allah granted them. Allah also commanded them to remember their daily life and their religious affairs and how He blessed them. They should not envy their cousins, the Arabs, for what Allah has given them, the Final Messenger of Allah ﷺ being an Arab. Envy should not incite them to oppose or deny the Prophet or refrain from following him, may Allah's peace and blessings be upon him until the Day of Judgment.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:123"
+   },
+   "fetchedAt": "2026-10-26T06:39:36.762Z",
+   "urlChecks": {
+    "https://quran.com/2/123": 200
+   }
   }
  ]
 }
