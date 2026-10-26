@@ -150,6 +150,18 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.holdFast = await waitFor(page, () => [...document.querySelectorAll("span")].some((s) => s.textContent === "2x"));
     await page.mouse.up();
     c.releaseNormal = await waitFor(page, () => ![...document.querySelectorAll("span")].some((s) => s.textContent === "2x"));
+    // Punkt 8: YouTube-Iframe füllt genau das 16:9-Band, ohne Zoom und ohne Beschnitt
+    r.band = await page.evaluate(() => {
+      const band = document.querySelector('.vframe > div');
+      const f = document.createElement('iframe');
+      band.appendChild(f);
+      const a = band.getBoundingClientRect(), b = f.getBoundingClientRect();
+      f.remove();
+      return { bw: a.width, bh: a.height, fw: b.width, fh: b.height, dx: b.left - a.left, dy: b.top - a.top, vw: innerWidth };
+    });
+    c.embedNoZoom = Math.abs(r.band.fw - r.band.bw) < 1 && Math.abs(r.band.fh - r.band.bh) < 1 && Math.abs(r.band.dx) < 1 && Math.abs(r.band.dy) < 1;
+    c.embed16by9FullWidth = Math.abs(r.band.bw - r.band.vw) < 1 && Math.abs(r.band.bh - (r.band.vw * 9) / 16) < 1;
+
     // Punkt 2: Standard 1,5x, Halten 2x, nie über 2x
     const rates = await page.evaluate(() => window.__ytlog.filter((x) => x.startsWith('rate ')).map((x) => Number(x.slice(5))));
     r.rates = [...new Set(rates)];

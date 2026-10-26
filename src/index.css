@@ -118,14 +118,14 @@ body {
   height: max(100dvh, calc(100vw * 16 / 9));
   transform: translate(-50%, -50%);
 }
-/* Bildfläche 16:9 in Bildschirmbreite, mittig. YouTube-Iframe 35 % größer und beschnitten,
-   damit Titelzeile, Logo und Videovorschläge außerhalb des sichtbaren Bereichs liegen. */
+/* Bildfläche 16:9 in Bildschirmbreite, mittig. Ohne Zoom (E3, Max 26.10.2026): das ganze Bild ist zu sehen,
+   YouTube-Titelzeile zu Beginn und Logo bleiben sichtbar und werden nicht kaschiert. */
 .vframe > div {
   position: absolute; left: 50%; top: 31%; width: 100vw; height: calc(100vw * 9 / 16);
   transform: translateX(-50%); overflow: hidden;
 }
 .vframe iframe {
-  position: absolute; left: 50%; top: 50%; width: 135%; height: 135%; transform: translate(-50%, -50%);
+  position: absolute; inset: 0; width: 100%; height: 100%;
   border: 0; pointer-events: none;
 }
 .vposter {
