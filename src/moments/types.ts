@@ -25,7 +25,7 @@ export interface Moment {
   forYou?: string;
   kind: Kind;
   recall?: Recall;
-  /** Inhaltsstrom: video, audio oder text. Erbt von der Quelle in registry.json. */
+  /** Inhaltsstrom: video, audio oder text. Erbt von der Quelle in registry.json. Fehlt das Feld: audio true heißt audio, sonst video. Text-Momente haben keinen Player. */
   form?: 'video' | 'audio' | 'text';
   top?: boolean;
   createdAt: string;
@@ -33,8 +33,6 @@ export interface Moment {
   hls?: string;
   thumb?: string;
   url?: string;
-  /** Form des Moments. Fehlt das Feld: audio true heißt audio, sonst video. Text-Momente haben keinen Player. */
-  form?: 'video' | 'audio' | 'text';
   /** Nur Ton (Podcast): Bild bleibt stehen, Untertitel groß in der Mitte */
   audio?: boolean;
   /** Untertitel [Sekunden ab start, Text] */
