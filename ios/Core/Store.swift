@@ -35,6 +35,17 @@ struct AppState: Codable, Equatable {
     var weekReviewShown: [String: Bool] = [:]
     var captions: Bool = true
     var areaShares: [String: Double] = ["brain": 1.0 / 3, "body": 1.0 / 3, "beat": 1.0 / 3]
+    // App Runde 1. Alle optional, damit ein gespeicherter Stand von vorher weiter geladen wird
+    var playbackSpeed: Double?
+    var captionMode: CaptionMode?
+    var form: FeedForm?
+    var playLatency: [Latency.Sample]?
+    var dayCount: [String: DayCount]?
+    var recall: Recall.State?
+    var plans: [String: WeekPlan]?
+
+    var speed: Double { Speed.of(playbackSpeed) }
+    var currentForm: FeedForm { form ?? .video }
 }
 
 enum Day {
@@ -97,8 +108,38 @@ final class Store: ObservableObject {
     }
 
     func markSeen(_ m: Moment) {
-        if state.seen[m.id] == nil { state.seen[m.id] = Date() }
+        if state.seen[m.id] == nil {
+            state.seen[m.id] = Date()
+            state.dayCount = Today.countSeen(state.dayCount ?? [:], Day.key())
+        }
         state.momentDay = Day.key()
+    }
+
+    func addLatency(ms: Int, buffered: Bool) {
+        state.playLatency = Latency.add(state.playLatency ?? [], .init(ms: ms, buffered: buffered, at: Date()))
+        Diag.log("first-frame \(ms)ms \(buffered ? "buffered" : "cold")")
+    }
+
+    func answerRecall(_ m: Moment, got: Bool) {
+        state.recall = Recall.answer(state.recall ?? [:], id: m.id, got: got, now: Date(), saved: isSaved(m))
+        if got { state.dayCount = Today.countGotIt(state.dayCount ?? [:], Day.key()) }
+    }
+
+    func captionsShown(_ m: Moment) -> Bool {
+        let form = state.currentForm
+        return form != .text && Captions.shown(form == .audio ? .on : state.captionMode, texts: m.cueTexts, audio: m.isAudio)
+    }
+
+    /// Monday of last week, for the plan of the previous week
+    static func prevWeekKey(_ date: Date = Date()) -> String {
+        Day.weekKey(date.addingTimeInterval(-7 * 86_400))
+    }
+
+    func weekTask(now: Date = Date()) -> (seen: Int, gotIt: Int, applied: Int) {
+        let days = (0..<7).map { Day.key(Calendar.current.date(byAdding: .day, value: -$0, to: now) ?? now) }
+        let since = now.addingTimeInterval(-7 * 86_400)
+        let applied = state.saved.values.filter { $0.done && $0.savedAt >= since }.count
+        return WeekReview.task(dayCount: state.dayCount ?? [:], days: days, applied: applied)
     }
 
     func isSaved(_ m: Moment) -> Bool { state.saved[m.id] != nil }

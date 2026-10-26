@@ -77,6 +77,13 @@ struct FeedView: View {
     @State private var flash: String?
     @State private var menuFor: Moment?
     @State private var feedSeconds: Double = 0
+    // Punkt 5: Abrufkarte nach jedem 4. Moment
+    @State private var recallCard: (moment: Moment, review: Bool)?
+    @State private var sessionSeen = 0
+    @State private var counted: Set<String> = []
+    @State private var recent: [Recall.Recent] = []
+    /// Punkt 3: Textende erreicht (dann erst "gesehen")
+    @State private var textSeen: Set<String> = []
     private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -98,7 +105,7 @@ struct FeedView: View {
         .onReceive(ticker) { _ in countTime() }
         .onDisappear { feed.current(currentID)?.pause() }
         .onChange(of: scenePhase) { _, phase in
-            if phase != .active { feed.current(currentID)?.pause() } else if forYou == nil { feed.current(currentID)?.play() }
+            if phase != .active { feed.current(currentID)?.pause() } else if forYou == nil && recallCard == nil && store.state.currentForm != .text { feed.current(currentID)?.play() }
         }
     }
 
@@ -119,7 +126,9 @@ struct FeedView: View {
                             insets: geo.safeAreaInsets,
                             flash: $flash,
                             onMenuAction: { action in menu(action, m) },
-                            onMenu: { Diag.log("menu open \(m.id)"); menuFor = m }
+                            onMenu: { Diag.log("menu open \(m.id)"); menuFor = m },
+                            onTextEnd: { textEnd(m) },
+                            onNext: { advance() }
                         )
                         .frame(width: full.width, height: full.height)
                         .id(m.id)
@@ -131,8 +140,17 @@ struct FeedView: View {
             .scrollPosition(id: $currentID)
             .ignoresSafeArea()
         }
+        .overlay(alignment: .top) {
+            if forYou == nil && recallCard == nil { FeedTopBar().padding(.top, 6) }
+        }
         .overlay {
             if let m = forYou { ForYouOverlay(moment: m) { advance() } }
+        }
+        .overlay {
+            if let r = recallCard {
+                RecallCardView(moment: r.moment, review: r.review) { got in closeRecall(r.moment, got) }
+                    .id(r.moment.id + String(r.review))
+            }
         }
         .overlay(alignment: .center) {
             if let flash {
@@ -144,7 +162,7 @@ struct FeedView: View {
             }
         }
         .sheet(item: $menuFor) { m in
-            MenuSheet(moment: m, captions: Binding(get: { store.state.captions }, set: { store.state.captions = $0 })) { action in
+            MenuSheet(moment: m, captions: Binding(get: { store.captionsShown(m) }, set: { store.state.captionMode = $0 ? .on : .off })) { action in
                 menuFor = nil
                 switch action {
                 case .full:
@@ -161,7 +179,14 @@ struct FeedView: View {
         }
         .onChange(of: currentID) { old, new in
             leave(old, to: new)
-            activate(new)
+            activate(new, measure: true)
+        }
+        .onChange(of: store.state.form) { _, _ in
+            // Formwechsel: Text hält an, Video und Audio spielen weiter
+            guard let id = currentID, let i = index(of: id) else { return }
+            let m = feed.queue[i]
+            let p = feed.playback(for: m)
+            if store.state.currentForm == .text { p.pause() } else if forYou == nil && recallCard == nil { p.play(); store.markSeen(m) }
         }
     }
 
@@ -178,16 +203,25 @@ struct FeedView: View {
 
     private func index(of id: String?) -> Int? { id.flatMap { i in feed.queue.firstIndex { $0.id == i } } }
 
-    private func activate(_ id: String?) {
+    private func activate(_ id: String?, measure: Bool = false) {
         guard let id, let i = index(of: id) else { return }
         forYou = nil
         let m = feed.queue[i]
         let p = feed.playback(for: m)
+        let preloaded = p.isPreloaded
         p.prepare()
         p.onEnded = { finished(m) }
+        p.onFirstFrame = { ms, buffered in store.addLatency(ms: ms, buffered: buffered) }
         if p.ended { p.restart() }
-        p.play()
-        store.markSeen(m)
+        p.setRate(Float(store.state.speed))
+        let text = store.state.currentForm == .text
+        if text || recallCard != nil {
+            p.pause()
+        } else {
+            if measure { p.startMeasure(buffered: preloaded) }
+            p.play()
+        }
+        if !text { store.markSeen(m) }
         feed.ensure(upTo: i + 5, store: store)
         for j in [i + 1, i + 2] where j < feed.queue.count { feed.playback(for: feed.queue[j]).prepare() }
         feed.prune(around: i)
@@ -199,15 +233,45 @@ struct FeedView: View {
         let m = feed.queue[oi]
         let p = feed.playback(for: m)
         p.pause()
-        p.setRate(1)
+        p.setRate(Float(store.state.speed))
         let ni = index(of: new) ?? oi
-        if ni > oi && !p.ended {
+        let text = store.state.currentForm == .text
+        // Im Textmodus gibt es keine Wiedergabezeit, darum kein Zeitsignal
+        if ni > oi && !p.ended && !text {
             if let f = Mix.leaveSignal(watched: p.watched, duration: m.duration) { store.signal(m, f) }
             store.log(m, watched: p.watched)
+        }
+        // Punkt 5: geschauter Anteil des verlassenen Moments, Karte nach jedem 4.
+        if ni > oi && !counted.contains(m.id) {
+            counted.insert(m.id)
+            let watched = p.ended ? 1 : text ? (textSeen.contains(m.id) ? 1 : 0) : min(1, max(0, p.watched / m.duration))
+            recent = Array((recent + [Recall.Recent(id: m.id, watched: watched)]).suffix(8))
+            sessionSeen += 1
+            if Recall.cardDue(sessionSeen),
+               let pick = Recall.pick(store.state.recall ?? [:], recent: recent, now: Date(), available: { findMoment($0) != nil }),
+               let rm = findMoment(pick.id) {
+                recallCard = (rm, pick.review)
+            }
         }
         if ni < oi, let new, let target = feed.queue.first(where: { $0.id == new }) {
             store.signal(target, Mix.Signal.back)
         }
+    }
+
+    private func findMoment(_ id: String) -> Moment? {
+        store.state.saved[id]?.moment ?? feed.pool.first { $0.id == id }
+    }
+
+    private func closeRecall(_ m: Moment, _ got: Bool?) {
+        if let got { store.answerRecall(m, got: got) }
+        recallCard = nil
+        if store.state.currentForm != .text, scenePhase == .active { feed.current(currentID)?.play() }
+    }
+
+    private func textEnd(_ m: Moment) {
+        guard currentID == m.id, store.state.currentForm == .text, !textSeen.contains(m.id) else { return }
+        textSeen.insert(m.id)
+        store.markSeen(m)
     }
 
     private func finished(_ m: Moment) {
@@ -276,6 +340,8 @@ struct MomentPage: View {
     @Binding var flash: String?
     let onMenuAction: (MenuAction) -> Void
     let onMenu: () -> Void
+    let onTextEnd: () -> Void
+    let onNext: () -> Void
     @EnvironmentObject var store: Store
     @State private var fast = false
     @State private var pressing = false
@@ -304,31 +370,35 @@ struct MomentPage: View {
                         .allowsHitTesting(false)
                 }
 
-                if store.state.captions && !playback.caption.isEmpty {
+                if store.captionsShown(moment) && !playback.caption.isEmpty {
+                    let ar = Captions.isArabic(playback.caption)
                     if moment.isAudio {
-                        Text(playback.caption)
-                            .font(.system(size: 24, weight: .semibold))
+                        CaptionText(text: playback.caption, big: true)
                             .multilineTextAlignment(.center)
                             .shadow(color: .black.opacity(0.8), radius: 3, y: 1)
                             .frame(width: w - 48)
                             .position(x: w / 2, y: h * 0.56)
                             .allowsHitTesting(false)
                     } else {
-                        Text(playback.caption)
-                            .font(.system(size: 17, weight: .semibold))
+                        CaptionText(text: playback.caption, big: store.state.currentForm == .audio)
                             .padding(.horizontal, 10).padding(.vertical, 6)
                             .background(.black.opacity(0.72), in: RoundedRectangle(cornerRadius: 8))
-                            .frame(maxWidth: w - 104, alignment: .leading)
+                            .frame(width: w - 104, alignment: ar ? .trailing : .leading)
                             .offset(x: 16, y: bandY + bandH + 16)
                             .allowsHitTesting(false)
                     }
+                }
+
+                if isActive && store.state.currentForm == .text {
+                    TextPanel(moment: moment, insets: insets, onEnd: onTextEnd, onNext: onNext)
+                        .frame(width: w, height: h)
                 }
 
                 VStack(spacing: 0) {
                     progressLine
                     Spacer()
                     HStack(alignment: .bottom, spacing: 0) {
-                        info
+                        if store.state.currentForm != .text { info }
                         Spacer(minLength: 16)
                         actions
                     }
@@ -442,11 +512,11 @@ struct MomentPage: View {
                 pressing = down
                 if down {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                        if pressing { fast = true; playback.setRate(2) }
+                        if pressing { fast = true; playback.setRate(Float(Speed.hold)) }
                     }
                 } else if fast {
                     fast = false
-                    playback.setRate(1)
+                    playback.setRate(Float(store.state.speed))
                 }
             })
     }

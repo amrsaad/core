@@ -9,8 +9,43 @@ enum Vault {
 
     // MARK: Keychain
 
+    /// Schlüsselsicherung (Max, 26.10.2026): Schlüssel im Keychain und als zweite Kopie in einer geschützten Datei.
+    /// Fehlt eine Kopie, stellt die andere sie beim Start wieder her (gleiche Regel wie die Web-App, KeyBackup.plan).
     static func loadKey() -> Data? {
-        if Env.isTest { return Env.testUnlocked ? Data(repeating: 7, count: 32) : nil }
+        if Env.isTest && Env.testUnlocked && keychainRead() == nil && fileRead() == nil { _ = saveKey(Data(repeating: 7, count: 32)) }
+        if Env.isTest && !Env.testUnlocked { return nil }
+        let plan = KeyBackup.plan(keychain: keychainRead(), file: fileRead())
+        if let key = plan.key {
+            if plan.writeKeychain { keychainWrite(key); Diag.log("key restored into keychain from file copy") }
+            if plan.writeFile { fileWrite(key); Diag.log("key file copy written") }
+        }
+        return plan.key
+    }
+
+    /// Wo der Schlüssel liegt, für Settings
+    static func backups() -> (keychain: Bool, file: Bool) {
+        (keychainRead()?.count == 32, fileRead()?.count == 32)
+    }
+
+    @discardableResult
+    static func saveKey(_ key: Data) -> Bool {
+        fileWrite(key)
+        return keychainWrite(key)
+    }
+
+    private static var keyFile: URL { Env.stateDir.appendingPathComponent("key.bin") }
+    /// In UI-Tests steht eine Datei für den Keychain, damit die echte Wiederherstellung läuft, ohne den Keychain des Simulators zu benutzen
+    private static var testKeychainFile: URL { Env.stateDir.appendingPathComponent("keychain-test.bin") }
+
+    private static func fileRead() -> Data? { try? Data(contentsOf: keyFile) }
+
+    private static func fileWrite(_ key: Data) {
+        try? FileManager.default.createDirectory(at: keyFile.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try? key.write(to: keyFile, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+    }
+
+    private static func keychainRead() -> Data? {
+        if Env.isTest { return try? Data(contentsOf: testKeychainFile) }
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: account,
@@ -23,7 +58,11 @@ enum Vault {
     }
 
     @discardableResult
-    static func saveKey(_ key: Data) -> Bool {
+    private static func keychainWrite(_ key: Data) -> Bool {
+        if Env.isTest {
+            try? FileManager.default.createDirectory(at: testKeychainFile.deletingLastPathComponent(), withIntermediateDirectories: true)
+            return (try? key.write(to: testKeychainFile)) != nil
+        }
         let base: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrAccount as String: account]
         SecItemDelete(base as CFDictionary)
         var add = base

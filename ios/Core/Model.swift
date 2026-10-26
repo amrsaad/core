@@ -58,6 +58,11 @@ struct Moment: Codable, Identifiable, Hashable {
     let url: String?
     let audio: Bool?
     let cues: [Cue]?
+    /// Geprüfter Ausschnitt als Lesetext (Formwahl Text). var mit Standardwert, damit alte Pools und Tests weiter passen
+    var excerpt: String? = nil
+
+    var cueTexts: [String] { (cues ?? []).map(\.text) }
+    var readingText: String { FormText.text(excerpt: excerpt, cues: cueTexts) }
 
     /// No own stream means the moment plays through YouTube.
     var isYouTube: Bool { hls == nil }

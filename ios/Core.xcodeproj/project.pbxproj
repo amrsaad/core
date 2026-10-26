@@ -18,6 +18,9 @@
 		C0DE00000000000000000109 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000011 /* Assets.xcassets */; };
 		C0DE00000000000000000110 /* Diag.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000012 /* Diag.swift */; };
 		C0DE00000000000000000111 /* CoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000013 /* CoreTests.swift */; };
+		C0DE00000000000000000115 /* Round1.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000019 /* Round1.swift */; };
+		C0DE00000000000000000116 /* Round1Views.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000020 /* Round1Views.swift */; };
+		C0DE00000000000000000117 /* Round1Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000021 /* Round1Tests.swift */; };
 		C0DE00000000000000000112 /* CoreUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000014 /* CoreUITests.swift */; };
 		C0DE00000000000000000113 /* sample.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000015 /* sample.mp4 */; };
 		C0DE00000000000000000114 /* thumb.png in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000016 /* thumb.png */; };
@@ -37,6 +40,9 @@
 		C0DE00000000000000000011 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C0DE00000000000000000012 /* Diag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diag.swift; sourceTree = "<group>"; };
 		C0DE00000000000000000013 /* CoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreTests.swift; sourceTree = "<group>"; };
+		C0DE00000000000000000019 /* Round1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Round1.swift; sourceTree = "<group>"; };
+		C0DE00000000000000000020 /* Round1Views.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Round1Views.swift; sourceTree = "<group>"; };
+		C0DE00000000000000000021 /* Round1Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Round1Tests.swift; sourceTree = "<group>"; };
 		C0DE00000000000000000014 /* CoreUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreUITests.swift; sourceTree = "<group>"; };
 		C0DE00000000000000000015 /* sample.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = sample.mp4; sourceTree = "<group>"; };
 		C0DE00000000000000000016 /* thumb.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = thumb.png; sourceTree = "<group>"; };
@@ -108,6 +114,8 @@
 				C0DE00000000000000000007 /* FeedView.swift */,
 				C0DE00000000000000000008 /* Screens.swift */,
 				C0DE00000000000000000012 /* Diag.swift */,
+				C0DE00000000000000000019 /* Round1.swift */,
+				C0DE00000000000000000020 /* Round1Views.swift */,
 				C0DE00000000000000000011 /* Assets.xcassets */,
 				C0DE00000000000000000009 /* Info.plist */,
 			);
@@ -128,6 +136,7 @@
 			isa = PBXGroup;
 			children = (
 				C0DE00000000000000000013 /* CoreTests.swift */,
+				C0DE00000000000000000021 /* Round1Tests.swift */,
 			);
 			path = CoreTests;
 			sourceTree = "<group>";
@@ -295,6 +304,8 @@
 				C0DE00000000000000000107 /* FeedView.swift in Sources */,
 				C0DE00000000000000000108 /* Screens.swift in Sources */,
 				C0DE00000000000000000110 /* Diag.swift in Sources */,
+				C0DE00000000000000000115 /* Round1.swift in Sources */,
+				C0DE00000000000000000116 /* Round1Views.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -303,6 +314,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C0DE00000000000000000111 /* CoreTests.swift in Sources */,
+				C0DE00000000000000000117 /* Round1Tests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

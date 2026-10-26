@@ -1,4 +1,5 @@
 import AVFoundation
+import QuartzCore
 import SwiftUI
 import WebKit
 
@@ -7,13 +8,32 @@ import WebKit
 @MainActor
 final class Playback: ObservableObject {
     let moment: Moment
-    @Published private(set) var playing = false
+    @Published private(set) var playing = false {
+        didSet {
+            // Punkt 1: Wisch bis erstes Bild, gemessen bis zum ersten Abspielen nach dem Wisch
+            if playing, !oldValue, let t0 = measureT0 {
+                measureT0 = nil
+                onFirstFrame?(Int(((CACurrentMediaTime() - t0) * 1000).rounded()), measureBuffered)
+            }
+        }
+    }
     @Published private(set) var buffering = true
     @Published private(set) var progress: Double = 0
     @Published private(set) var caption = ""
     @Published private(set) var ended = false
 
     var onEnded: (() -> Void)?
+    var onFirstFrame: ((Int, Bool) -> Void)?
+    private var measureT0: CFTimeInterval?
+    private var measureBuffered = false
+
+    /// Geladen und angehalten bereit, also gepuffert im Sinne der Messung
+    var isPreloaded: Bool { (player != nil || web != nil) && !buffering }
+
+    func startMeasure(buffered: Bool) {
+        measureT0 = CACurrentMediaTime()
+        measureBuffered = buffered
+    }
     /// seconds of this moment actually played (for learning and feed time)
     private(set) var watched: Double = 0
 
@@ -102,6 +122,8 @@ final class Playback: ObservableObject {
     var isPlayingWanted: Bool { wantsPlay }
 
     func setRate(_ r: Float) {
+        // nie schneller als 2x (Fundament-Regel 11)
+        let r = Float(Speed.clamp(Double(r)))
         rate = r
         if let player, wantsPlay { player.rate = r }
         js("rate(\(r))")
@@ -171,14 +193,14 @@ final class Playback: ObservableObject {
         <!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">
         <style>html,body{margin:0;background:#000;overflow:hidden;height:100%}
         #wrap{position:absolute;inset:0;overflow:hidden}
-        #p{position:absolute;left:50%;top:50%;width:135%;height:135%;transform:translate(-50%,-50%)}</style></head>
+        #p{position:absolute;inset:0;width:100%;height:100%}</style></head>
         <body><div id="wrap"><div id="p"></div></div>
         <script>
         var player=null,want=false,r=1,START=\(m.start),END=\(m.end);
         function post(x){try{window.webkit.messageHandlers.core.postMessage(x)}catch(e){}}
         function onYouTubeIframeAPIReady(){
           player=new YT.Player('p',{videoId:'\(id)',host:'https://www.youtube-nocookie.com',
-            playerVars:{playsinline:1,controls:0,rel:0,modestbranding:1,iv_load_policy:3,fs:0,disablekb:1,start:Math.floor(START),end:Math.ceil(END),autoplay:0},
+            playerVars:{playsinline:1,controls:0,rel:0,modestbranding:1,iv_load_policy:3,fs:0,disablekb:1,cc_load_policy:0,start:Math.floor(START),end:Math.ceil(END),autoplay:0},
             events:{onReady:function(){player.seekTo(START,true);player.pauseVideo();post('ready');if(want)play()},
                     onStateChange:function(e){post('state:'+e.data)},
                     onError:function(e){post('error:'+e.data)}}});

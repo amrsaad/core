@@ -90,6 +90,8 @@ enum Diag {
         pool \(poolCount) moments, updated \(poolUpdated ?? "?")
         seen \(state.seen.count), saved \(state.saved.count), muted \(state.muted.count), log \(state.log.count)
         feed time today \(Int(state.feedTime[Day.key()] ?? 0)) s
+        \(Latency.line("swipe preloaded", Latency.stats(state.playLatency ?? [], buffered: true)))
+        \(Latency.line("swipe not preloaded", Latency.stats(state.playLatency ?? [], buffered: false)))
 
         """
         out += (try? String(contentsOf: file, encoding: .utf8)) ?? "(no log)"

@@ -169,9 +169,29 @@ struct SettingsView: View {
                 }
 
                 card {
-                    Toggle("Captions", isOn: Binding(get: { store.state.captions }, set: { store.state.captions = $0 }))
-                        .font(.system(size: 17))
+                    Text("Player").font(.system(size: 17, weight: .semibold))
+                    HStack {
+                        Text("Captions").font(.system(size: 17))
+                        Spacer()
+                        Picker("Captions", selection: Binding(get: { store.state.captionMode ?? .auto }, set: { store.state.captionMode = $0 })) {
+                            ForEach(CaptionMode.allCases, id: \.self) { Text($0.label).tag($0) }
+                        }
+                        .accessibilityIdentifier("captionMode")
+                    }
+                    Text("Auto: on for audio and Arabic moments, off for English video.").font(.system(size: 13)).foregroundStyle(Palette.tertiary)
+                    HStack {
+                        Text("Playback speed").font(.system(size: 17))
+                        Spacer()
+                        Picker("Playback speed", selection: Binding(get: { store.state.speed }, set: { store.state.playbackSpeed = $0 })) {
+                            ForEach(Speed.options, id: \.self) { v in Text(v == 1 ? "1x" : "1.5x").tag(v) }
+                        }
+                        .accessibilityIdentifier("speed")
+                    }
+                    Text("Hold the video for 2x. Never faster than 2x.").font(.system(size: 13)).foregroundStyle(Palette.tertiary)
+                    LatencyView(samples: store.state.playLatency ?? [])
                 }
+
+                card { UnlockDeviceCard(key: Vault.loadKey()) }
 
                 if !store.state.muted.isEmpty {
                     card {
@@ -279,61 +299,133 @@ struct LearnedView: View {
     }
 }
 
-// MARK: Weekly review
+// MARK: Weekly review (Punkt 7, R13, R14, R16)
 
+/// Feste Reihenfolge: Plan der Vorwoche mit "Did it happen?", gespeicherte Momente abhaken, Zahlen zur Aufgabe,
+/// genau ein Plan "When …, I will …". "Skip this week" geht immer. Kein Lob, kein Vergleich.
 struct WeeklyReviewView: View {
     @EnvironmentObject var store: Store
     let onDone: () -> Void
+    @State private var when = ""
+    @State private var will = ""
 
     var body: some View {
-        let weekStart = Calendar(identifier: .iso8601).date(from: Calendar(identifier: .iso8601).dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) ?? Date()
-        let items = store.state.saved.values.filter { $0.savedAt >= weekStart }.sorted { $0.savedAt > $1.savedAt }
-        let minutes = Int(((0..<7).compactMap { i -> Double? in
-            let d = Calendar.current.date(byAdding: .day, value: -i, to: Date()) ?? Date()
-            return store.state.feedTime[Day.key(d)]
-        }.reduce(0, +) / 60).rounded())
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Sunday · this week").font(.system(size: 13)).foregroundStyle(Palette.tertiary).padding(.top, 24)
-            Text("What did you apply?").font(.system(size: 28, weight: .bold))
-            Text("Check off what you used this week.").font(.system(size: 15)).foregroundStyle(Palette.secondary)
-            ScrollView {
-                VStack(spacing: 8) {
-                    if items.isEmpty { Text("Nothing saved this week.").foregroundStyle(Palette.secondary) }
-                    ForEach(items) { s in
-                        Button {
-                            store.state.saved[s.id]?.done.toggle()
-                        } label: {
-                            HStack(alignment: .top, spacing: 12) {
-                                Image(systemName: s.done ? "checkmark.square.fill" : "square").font(.system(size: 22))
-                                VStack(alignment: .leading, spacing: 4) {
-                                    HStack(spacing: 6) {
-                                        Circle().fill(s.moment.area.color).frame(width: 6, height: 6)
-                                        Text(s.moment.area.label).foregroundStyle(s.moment.area.color).fontWeight(.semibold)
-                                    }
-                                    .font(.system(size: 12))
-                                    Text(s.moment.hook).font(.system(size: 15, weight: .semibold)).multilineTextAlignment(.leading)
-                                }
-                                Spacer()
-                            }
-                            .padding(14)
-                            .background(Palette.surface, in: RoundedRectangle(cornerRadius: 12))
+        let since = Date().addingTimeInterval(-7 * 86_400)
+        let items = store.state.saved.values.filter { $0.savedAt >= since }.sorted { $0.savedAt < $1.savedAt }
+        let prevKey = Store.prevWeekKey()
+        let prev = store.state.plans?[prevKey]
+        let task = store.weekTask()
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Your week").font(.system(size: 28, weight: .bold)).padding(.top, 24)
+
+                if let prev {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("LAST WEEK'S PLAN").font(.system(size: 12)).tracking(1).foregroundStyle(Palette.tertiary)
+                        Text("When \(prev.when), I will \(prev.will).").font(.system(size: 17)).fixedSize(horizontal: false, vertical: true)
+                        Text("Did it happen?").font(.system(size: 15)).foregroundStyle(Palette.secondary)
+                        HStack(spacing: 8) {
+                            answer("Yes", true, prev, prevKey)
+                            answer("No", false, prev, prevKey)
                         }
-                        .buttonStyle(.plain)
                     }
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Palette.surface, in: RoundedRectangle(cornerRadius: 12))
+                    .accessibilityIdentifier("prevPlan")
                 }
+
+                Text("Saved moments. Check off what you applied.").font(.system(size: 15)).foregroundStyle(Palette.secondary)
+                if items.isEmpty { Text("Nothing saved this week.").foregroundStyle(Palette.secondary) }
+                ForEach(items) { s in
+                    Button {
+                        store.state.saved[s.id]?.done.toggle()
+                    } label: {
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: s.done ? "checkmark.square.fill" : "square").font(.system(size: 22))
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack(spacing: 6) {
+                                    Circle().fill(s.moment.area.color).frame(width: 6, height: 6)
+                                    Text(s.moment.area.label).foregroundStyle(s.moment.area.color).fontWeight(.semibold)
+                                }
+                                .font(.system(size: 12))
+                                Text(s.moment.hook).font(.system(size: 15, weight: .semibold)).multilineTextAlignment(.leading)
+                            }
+                            Spacer()
+                        }
+                        .padding(14)
+                        .background(Palette.surface, in: RoundedRectangle(cornerRadius: 12))
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                Text("This week: \(WeekReview.line(seen: task.seen, gotIt: task.gotIt, applied: task.applied))")
+                    .font(.system(size: 17))
+                    .accessibilityIdentifier("weekLine")
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("ONE PLAN FOR NEXT WEEK").font(.system(size: 12)).tracking(1).foregroundStyle(Palette.tertiary)
+                    Text("When …").font(.system(size: 15)).foregroundStyle(Palette.secondary)
+                    field("I finish the OCT clinic on Tuesday", $when, id: "planWhen")
+                    Text("I will …").font(.system(size: 15)).foregroundStyle(Palette.secondary)
+                    field("explain one saved moment to a colleague", $will, id: "planWill")
+                }
+                .padding(16)
+                .background(Palette.surface, in: RoundedRectangle(cornerRadius: 12))
+
+                Button { close(save: true) } label: {
+                    Text("Save plan and continue").font(.system(size: 17, weight: .semibold)).foregroundStyle(.black).frame(maxWidth: .infinity, minHeight: 52)
+                }
+                .background(Color.white.opacity(WeekReview.planComplete(when: when, will: will) ? 1 : 0.4), in: RoundedRectangle(cornerRadius: 12))
+                .disabled(!WeekReview.planComplete(when: when, will: will))
+                .accessibilityIdentifier("savePlan")
+                Button("Skip this week") { close(save: false) }
+                    .font(.system(size: 15)).foregroundStyle(Palette.secondary).frame(maxWidth: .infinity, minHeight: 44)
             }
-            Text("Time in Core this week: \(minutes) min").font(.system(size: 13)).foregroundStyle(Palette.tertiary).frame(maxWidth: .infinity)
-            Button {
-                store.state.weekReviewShown[Day.weekKey()] = true
-                onDone()
-            } label: {
-                Text("Continue to feed").font(.system(size: 17, weight: .semibold)).frame(maxWidth: .infinity, minHeight: 52)
-            }
-            .background(Palette.button, in: RoundedRectangle(cornerRadius: 12))
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
         }
         .foregroundStyle(.white)
-        .padding(.horizontal, 16)
-        .padding(.bottom, 16)
         .background(Color.black.ignoresSafeArea())
+        .onAppear {
+            let mine = store.state.plans?[Day.weekKey()]
+            when = mine?.when ?? ""
+            will = mine?.will ?? ""
+        }
+    }
+
+    private func field(_ placeholder: String, _ text: Binding<String>, id: String) -> some View {
+        TextField(placeholder, text: text)
+            .textInputAutocapitalization(.never)
+            .font(.system(size: 17))
+            .padding(.horizontal, 12)
+            .frame(minHeight: 48)
+            .background(Color(hex: 0x111111), in: RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(hex: 0x333333)))
+            .accessibilityIdentifier(id)
+    }
+
+    private func answer(_ title: String, _ value: Bool, _ prev: WeekPlan, _ key: String) -> some View {
+        let on = prev.happened == value
+        return Button {
+            var p = prev
+            p.happened = value
+            store.state.plans?[key] = p
+        } label: {
+            Text(title).font(.system(size: 17, weight: .semibold)).foregroundStyle(on ? Color.black : Color.white).frame(maxWidth: .infinity, minHeight: 48)
+        }
+        .background(on ? Color.white : Color.clear, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(on ? Color.white : Color(hex: 0x3A3D45)))
+        .accessibilityAddTraits(on ? .isSelected : [])
+    }
+
+    private func close(save: Bool) {
+        store.state.weekReviewShown[Day.weekKey()] = true
+        if save {
+            var plans = store.state.plans ?? [:]
+            plans[Day.weekKey()] = WeekPlan(when: when.trimmingCharacters(in: .whitespaces), will: will.trimmingCharacters(in: .whitespaces))
+            store.state.plans = plans
+        }
+        onDone()
     }
 }

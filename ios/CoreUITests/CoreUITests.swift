@@ -122,29 +122,147 @@ final class CoreUITests: XCTestCase {
         XCTAssertTrue(opened, "\(tag): menu sheet did not open")
     }
 
-    func test03WeeklyReview() {
+    /// Punkt 7: Plan der Vorwoche (vorab in state.json gelegt), Zahlenzeile, genau ein Plan, Speichern erst mit Plan
+    func test03WeeklyReview() throws {
+        try seedState(plans: [Self.prevWeekKey(): ["when": "I finish the OCT clinic on Tuesday", "will": "explain one saved moment to a colleague"]])
         launch(review: true)
-        XCTAssertTrue(app.staticTexts["What did you apply?"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.staticTexts["Your week"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.staticTexts["When I finish the OCT clinic on Tuesday, I will explain one saved moment to a colleague."].exists)
+        XCTAssertTrue(app.staticTexts["weekLine"].label.hasPrefix("This week: "))
+        XCTAssertFalse(app.buttons["savePlan"].isEnabled, "save needs a plan")
+        app.buttons["Yes"].tap()
         wait(0.5)
-        shot("40-weekly-review")
-        app.buttons["Continue to feed"].tap()
+        shot("40-weekly-review-last-week")
+        let when = app.textFields["planWhen"]
+        when.tap(); when.typeText("I finish the OCT clinic on Tuesday")
+        let will = app.textFields["planWill"]
+        will.tap(); will.typeText("explain one saved moment to a colleague")
+        app.swipeUp()
+        wait(0.5)
+        shot("41-weekly-review-plan")
+        XCTAssertTrue(app.buttons["savePlan"].isEnabled)
+        app.buttons["savePlan"].tap()
         XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15))
+    }
+
+    /// Punkte 1, 2, 3, 4, 6 und Schlüsselsicherung: Kopfzeile, Textform, Audioform, Settings mit Messung, Tempo, Untertitel, QR-Code
+    func test04Round1FeedAndSettings() {
+        launch()
+        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15), "feed did not appear")
+        XCTAssertTrue(app.buttons["form-Video"].waitForExistence(timeout: 5), "form switch missing")
+        XCTAssertTrue(app.staticTexts["todayLine"].label.hasPrefix("today "), "day count missing")
+        wait(2)
+        shot("50-feed-top-bar")
+        app.buttons["form-Text"].tap()
+        XCTAssertTrue(app.otherElements["textView"].waitForExistence(timeout: 5) || app.scrollViews["textView"].waitForExistence(timeout: 2), "text view missing")
+        wait(0.5)
+        shot("51-form-text")
+        app.buttons["form-Audio"].tap()
+        wait(2.5)
+        shot("52-form-audio")
+        app.buttons["form-Video"].tap()
+        wait(1)
+        // zwei Wischer, damit die Messung Werte hat
+        app.swipeUp(velocity: .fast); wait(2)
+        app.swipeUp(velocity: .fast); wait(2)
+        shot("53-feed-after-swipes")
+        app.tabBars.buttons["Settings"].tap()
+        XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 5))
+        let lat = app.staticTexts["latencyPreloaded"]
+        for _ in 0..<4 where !lat.isHittable { app.swipeUp(); wait(0.3) }
+        let cold = app.staticTexts["latencyCold"]
+        XCTAssertTrue(lat.label.contains("median") || cold.label.contains("median"), "no swipe measured: \(lat.label) / \(cold.label)")
+        let m = XCTAttachment(string: lat.label + "\n" + cold.label)
+        m.name = "54-latency-values"
+        m.lifetime = .keepAlways
+        add(m)
+        shot("54-settings-player")
+        let qr = app.buttons["showQR"]
+        for _ in 0..<4 where !qr.isHittable { app.swipeUp(); wait(0.3) }
+        qr.tap()
+        XCTAssertTrue(app.images["unlockQR"].waitForExistence(timeout: 5), "QR missing")
+        XCTAssertEqual(app.staticTexts["keyBackups"].label, "Key saved in Keychain yes · in file copy yes")
+        app.swipeUp(); wait(0.5)
+        shot("55-settings-unlock-device")
+    }
+
+    /// Punkt 5: kurze Momente laufen von selbst durch, nach dem 4. kommt die Abrufkarte
+    func test05RecallCard() throws {
+        try Self.testPool(short: true).write(to: stateDir.appendingPathComponent("pool.json"))
+        launch()
+        XCTAssertTrue(app.staticTexts["What was the point?"].waitForExistence(timeout: 90), "no recall card after 4 moments")
+        XCTAssertFalse(app.otherElements["recallAnswer"].exists, "hook must stay hidden before the attempt")
+        wait(0.5)
+        shot("60-recall-question")
+        let input = app.textFields["recallInput"].exists ? app.textFields["recallInput"] : app.textViews["recallInput"]
+        input.tap(); input.typeText("Test sentence from memory.")
+        app.buttons["Show answer"].tap()
+        wait(0.5)
+        shot("61-recall-answer")
+        app.buttons["Got it"].tap()
+        XCTAssertTrue(app.staticTexts["todayLine"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["todayLine"].label.hasSuffix(", 1 got it"), app.staticTexts["todayLine"].label)
+        wait(0.5)
+        shot("62-after-recall")
+    }
+
+    /// Schlüsselsicherung: Dateikopie gelöscht, die App trägt sie beim Start aus dem Keychain nach (und umgekehrt)
+    func test06KeyRestore() throws {
+        launch()
+        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15))
+        app.terminate()
+        let file = stateDir.appendingPathComponent("key.bin"), chain = stateDir.appendingPathComponent("keychain-test.bin")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: file.path))
+        try FileManager.default.removeItem(at: file)
+        launch()
+        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15), "not unlocked after file copy was deleted")
+        app.terminate()
+        XCTAssertTrue(FileManager.default.fileExists(atPath: file.path), "file copy not restored")
+        try FileManager.default.removeItem(at: chain)
+        launch()
+        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15), "not unlocked after keychain copy was deleted")
+        app.terminate()
+        XCTAssertTrue(FileManager.default.fileExists(atPath: chain.path), "keychain copy not restored")
+    }
+
+    // MARK: State fixture
+
+    /// Montag der Vorwoche wie Store.prevWeekKey
+    static func prevWeekKey() -> String {
+        var cal = Calendar(identifier: .iso8601)
+        cal.timeZone = .current
+        let d = Date().addingTimeInterval(-7 * 86_400)
+        let monday = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: d)) ?? d
+        let f = DateFormatter()
+        f.calendar = Calendar(identifier: .gregorian)
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: monday)
+    }
+
+    private func seedState(plans: [String: [String: String]]) throws {
+        let s: [String: Any] = [
+            "seen": [:], "weights": ["area": [:], "channel": [:], "topic": [:]], "saved": [:], "muted": [:], "feedTime": [:], "log": [],
+            "weekReviewShown": [:], "captions": true, "areaShares": ["brain": 0.34, "body": 0.33, "beat": 0.33], "plans": plans,
+        ]
+        try JSONSerialization.data(withJSONObject: s).write(to: stateDir.appendingPathComponent("state.json"))
     }
 
     // MARK: Fixture
 
     /// Six moments, two per area. Streams are the bundled sample video, so playback really runs in the simulator.
-    private static func testPool() throws -> Data {
+    private static func testPool(short: Bool = false) throws -> Data {
         let bundle = Bundle(for: CoreUITests.self)
         let video = bundle.url(forResource: "sample", withExtension: "mp4")!.absoluteString
         let thumb = bundle.url(forResource: "thumb", withExtension: "png")!.absoluteString
         func m(_ id: String, _ area: String, _ topic: String, _ channel: String, _ hook: String, forYou: String? = nil, audio: Bool = false, youTube: Bool = false) -> [String: Any] {
             var d: [String: Any] = [
-                "id": id, "videoId": id, "start": 1, "end": 41, "channel": channel, "area": area, "topic": topic, "hook": hook,
+                "id": id, "videoId": id, "start": 1, "end": short ? 6 : 41, "channel": channel, "area": area, "topic": topic, "hook": hook,
                 "kind": "story", "thumb": thumb,
+                "excerpt": "This is the checked excerpt of the moment, shown as text.\nIt keeps its line breaks at sentence ends.\nThe text form counts a moment as seen only once its end was on screen.",
                 "cues": [[0, "This is the first caption line of the sample stream."], [3, "It changes every few seconds, like a real moment."], [6, "Captions sit under the video band in design A."], [9, "The end comes at forty-one seconds."]],
             ]
-            if !youTube { d["hls"] = video; d["url"] = "https://example.com/full" }
+            if !youTube || short { d["hls"] = video; d["url"] = "https://example.com/full" }
             if audio { d["audio"] = true }
             if let f = forYou { d["forYou"] = f }
             return d
@@ -154,7 +272,7 @@ final class CoreUITests: XCTestCase {
             "moments": [
                 m("beat1", "beat", "islam", "Yaqeen Institute (Dr. Omar Suleiman)", "The Prophet ﷺ asks for her hand, but for Julaybib.", youTube: true),
                 m("beat2", "beat", "islam", "Alalwani Tadabbur", "One verse, read slowly, changes how you pray.", youTube: true),
-                m("body1", "body", "nutrition", "Sigma Nutrition (Prof. Grant Tinsley)", "Do not compare body fat across measuring devices.", forYou: "You measure with the Navy method. If you switch devices, the first new reading is your new baseline.", audio: true),
+                m("body1", "body", "nutrition", "Sigma Nutrition (Prof. Grant Tinsley)", "Do not compare body fat across measuring devices.", forYou: short ? nil : "You measure with the Navy method. If you switch devices, the first new reading is your new baseline.", audio: true),
                 m("body2", "body", "strength", "Stronger By Science", "Three hard sets beat ten easy ones for strength."),
                 m("brain1", "brain", "eyes", "Cybersight (Dr. Daniel Neely)", "A relative afferent pupillary defect is never caused by a cataract."),
                 m("brain2", "brain", "ai", "NEJM AI Grand Rounds", "Reader studies might favor computer aid. Connie showed real-life harm.", audio: true),
