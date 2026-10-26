@@ -7,6 +7,7 @@ import { applySignal, leaveSignal, newMomentCursor, nextMomentBlock, SIGNAL, typ
 import { clampRate, DEFAULT_SPEED, HOLD_SPEED, speedOf } from '../lib/state';
 import { addSample } from './latency';
 import { captionsShown } from './captions';
+import { countSeen, todayLine } from './today';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
 interface Props {
@@ -139,7 +140,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
 
   const markSeen = (m: Moment | undefined) => {
     if (!m) return;
-    update((s) => ({ ...s, momentDay: today, momentSeen: s.momentSeen[m.id] ? s.momentSeen : { ...s.momentSeen, [m.id]: Date.now() } }));
+    update((s) => (s.momentSeen[m.id] ? { ...s, momentDay: today } : { ...s, momentDay: today, momentSeen: { ...s.momentSeen, [m.id]: Date.now() }, dayCount: countSeen(s.dayCount, today) }));
   };
 
   const soundGuard = (j: number) => {
@@ -561,6 +562,11 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       })}
 
       <div className="vtrack" />
+      {!forYou && (
+        <div className="vtoday pointer-events-none" data-testid="today">
+          {todayLine(state.dayCount?.[today], false)}
+        </div>
+      )}
       <div className="vprogress" style={{ transform: `scaleX(${progress})` }} />
       {loading && !forYou && <div className="vloading" aria-label="Loading" />}
 

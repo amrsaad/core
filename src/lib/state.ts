@@ -4,6 +4,7 @@ import type { Moment, MomentLogEntry } from '../moments/types';
 import type { Weights } from '../moments/mix';
 import type { LatencySample } from '../moments/latency';
 import type { CaptionMode } from '../moments/captions';
+import type { DayCount } from '../moments/today';
 
 export interface SavedItem {
   card: Card;
@@ -79,6 +80,8 @@ export interface AppState {
   weekReviewShown: Record<string, boolean>;
   /** Diagnose: Wisch bis erstes Bild, letzte Messungen (Bauliste Runde 1, Punkt 1) */
   playLatency?: LatencySample[];
+  /** Tageszahl pro lokalem Tag (Punkt 6) */
+  dayCount?: Record<string, DayCount>;
 }
 
 export const DEFAULT_SPEED = 1.5;

@@ -91,6 +91,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.sawBothKinds = seen.some((x) => x.has) && seen.some((x) => !x.has);
     c.stoppedAtEnd = seen.every((x) => x.stoppedAtEnd);
     c.autoNext = seen.length === 4;
+    // Punkt 6: Tageszahl oben, zählt jeden neu gezeigten Moment, kein Stopp
+    const todayTxt = await page.evaluate(() => document.querySelector('[data-testid=today]')?.textContent ?? '');
+    r.today = todayTxt;
+    c.todayCount = /^today ([5-9]|\d\d) seen$/.test(todayTxt);
     // Punkt 4: auto heißt Englisch aus, Arabisch an, rechtsläufig, mindestens 20 px
     r.captions = capLog;
     c.captionsAutoRule = capLog.every((x) => x.shown === x.ar);
