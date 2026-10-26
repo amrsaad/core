@@ -7,6 +7,7 @@ import type { CaptionMode } from '../moments/captions';
 import type { DayCount } from '../moments/today';
 import type { Form } from '../moments/form';
 import type { RecallState } from '../moments/recall';
+import type { WeekPlan } from '../moments/review';
 
 export interface SavedItem {
   card: Card;
@@ -88,6 +89,8 @@ export interface AppState {
   dayCount?: Record<string, DayCount>;
   /** Abrufkarten: Ergebnisse und Wiedervorlage (Punkt 5) */
   recall?: RecallState;
+  /** Wenn-dann-Plan pro Woche (Montag als YYYY-MM-DD), Punkt 7 */
+  plans?: Record<string, WeekPlan>;
 }
 
 export const DEFAULT_SPEED = 1.5;

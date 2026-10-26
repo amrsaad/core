@@ -30,3 +30,40 @@ export function weekStats(s: AppState, now: Date) {
   const saved = Object.values(s.savedMoments).filter((x) => Date.parse(x.savedAt) >= since).sort((a, b) => a.savedAt.localeCompare(b.savedAt));
   return { minutes, ended, weak, saved, count: log.length };
 }
+
+/**
+ * Wochenrückblick Runde 1, Punkt 7 (R13, R14, R16). Freigabe Max 26.10.: Plan der Vorwoche mit "Did it happen?",
+ * genau ein Plan "When ..., I will ...", Zahlen nur zur Aufgabe, "Skip this week" bleibt.
+ * Gleiche Regeln für ios/Core.
+ */
+export interface WeekPlan {
+  when: string;
+  will: string;
+  /** in der Folgewoche beantwortet */
+  happened?: boolean;
+}
+
+export const prevWeekKey = (now: Date) => {
+  const d = new Date(now);
+  d.setDate(d.getDate() - 7);
+  return weekKey(d);
+};
+
+/** Ein Plan zählt erst mit beiden Teilen, jeder mindestens 3 Zeichen */
+export const planComplete = (when: string, will: string) => when.trim().length >= 3 && will.trim().length >= 3;
+
+export function weekTask(s: AppState, now: Date) {
+  const days = lastDays(now, 7);
+  let seen = 0;
+  let gotIt = 0;
+  for (const d of days) {
+    seen += s.dayCount?.[d]?.seen ?? 0;
+    gotIt += s.dayCount?.[d]?.gotIt ?? 0;
+  }
+  const since = now.getTime() - 7 * 86_400_000;
+  const applied = Object.values(s.savedMoments).filter((x) => x.done && Date.parse(x.savedAt) >= since).length;
+  return { seen, gotIt, applied };
+}
+
+/** "14 seen, 9 got it, 3 applied", nur Zahlen zur Aufgabe, keine Wertung */
+export const weekLine = (t: { seen: number; gotIt: number; applied: number }) => `${t.seen} seen, ${t.gotIt} got it, ${t.applied} applied`;

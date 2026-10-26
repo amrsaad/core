@@ -28,6 +28,13 @@ writeFileSync('dist/moments/pool.enc', JSON.stringify({ v: 1, iv: Buffer.from(iv
 const k = Buffer.from(raw).toString('base64url');
 
 const results = { at: new Date().toISOString(), runs: [] };
+// Abrufkarte kommt nach jedem 4. Moment. Wo der Test etwas anderes prüft, wird sie ohne Wertung übersprungen.
+const skipRecall = async (page) => {
+  if (await page.$('[data-testid=recall-card]')) {
+    await page.click('[data-testid=recall-card] >> text=Skip');
+    await page.waitForFunction(() => !document.querySelector('[data-testid=recall-card]'));
+  }
+};
 const waitFor = async (page, fn, arg, timeout = 8000) => {
   try { await page.waitForFunction(fn, arg, { timeout }); return true; } catch { return false; }
 };
@@ -131,6 +138,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.mouse.up();
     c.swipeNext = await waitFor(page, (b) => window.__core.idx() === b + 1, before);
     // Menü: Captions an, dann gilt immer an (auch Englisch)
+    await skipRecall(page);
     await page.click('[aria-label=More]');
     await page.click('text=Captions');
     await page.click('text=Cancel');
@@ -151,25 +159,30 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.speedBackAfterRelease = rates.lastIndexOf(1.5) > rates.indexOf(2);
 
     // Punkt 3: Formwahl. Text hält den Player an, "gesehen" erst am Textende, Wahl bleibt gespeichert
+    await skipRecall(page);
     await page.click('[data-testid=form-switch] >> text=Text');
     c.textView = await waitFor(page, () => !!document.querySelector('[data-testid=text-view]')?.textContent?.includes('Sentence 14'));
     c.textPaused = await waitFor(page, () => window.__core.state() !== 1);
     await page.keyboard.press('j');
     await page.waitForTimeout(300);
+    await skipRecall(page);
     const tid = await page.evaluate(() => window.__core.moment().id);
     c.textNotSeenBeforeEnd = !(await page.evaluate((id) => window.__core.seen(id), tid));
     await page.screenshot({ path: `${out}/${name}-9-text.png` });
     await page.evaluate(() => { const el = document.querySelector('[data-testid=text-view]'); el.scrollTop = el.scrollHeight; el.dispatchEvent(new Event('scroll')); });
     c.textSeenAtEnd = await waitFor(page, (id) => window.__core.seen(id), tid);
     c.textStillPaused = await page.evaluate(() => window.__core.state() !== 1);
+    await skipRecall(page);
     await page.click('[data-testid=form-switch] >> text=Audio');
     c.audioPlays = await waitFor(page, () => window.__core.state() === 1);
     c.audioBigCaption = await waitFor(page, () => { const el = document.querySelector('[data-testid=caption] span'); return !!el?.textContent && parseFloat(getComputedStyle(el).fontSize) >= 22; });
     await page.screenshot({ path: `${out}/${name}-10-audio.png` });
+    await skipRecall(page);
     await page.click('[data-testid=form-switch] >> text=Video');
     c.videoBack = await waitFor(page, () => window.__core.state() === 1 && !document.querySelector('[data-testid=text-view]'));
 
     // Doppeltipp speichert (für den Wochenrückblick)
+    await skipRecall(page);
     await page.mouse.dblclick(vp.width / 2, vp.height / 2);
     await page.waitForTimeout(400);
 
@@ -201,6 +214,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bufferedUnder300 = buf.length > 0 && r.latency.median < 300;
     c.latencyInDiag = (await page.evaluate(() => window.__core.diag())).some((x) => x.startsWith('first-frame'));
     // In den Einstellungen sichtbar
+    await skipRecall(page);
     await page.keyboard.press(' ');
     await page.click('nav [aria-label=Settings]');
     await page.locator('[data-testid=unlock-device]').scrollIntoViewIfNeeded();
@@ -222,14 +236,31 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await p2.goto(url + '?now=2026-10-25');
     c.weeklyReviewOnSunday = await waitFor(p2, () => !!document.querySelector('[data-testid="weekly-review"]'));
     c.reviewListsSaved = await p2.evaluate(() => document.querySelectorAll('[data-testid="weekly-review"] li').length >= 1);
+    // Punkt 7: Zahlen nur zur Aufgabe, keine Prozentkacheln, Plan Pflicht oder Skip
+    c.reviewWeekLine = await p2.evaluate(() => /^This week: \d+ seen, \d+ got it, \d+ applied$/.test(document.querySelector('[data-testid=week-line]')?.textContent ?? ''));
+    c.reviewNoPercent = await p2.evaluate(() => !document.querySelector('[data-testid="weekly-review"]').textContent.includes('%'));
+    c.reviewSaveNeedsPlan = await p2.evaluate(() => [...document.querySelectorAll('button')].find((b) => b.textContent === 'Save plan and continue')?.disabled === true);
+    await p2.fill('[data-testid=plan-when]', 'I finish the OCT clinic on Tuesday');
+    await p2.fill('[data-testid=plan-will]', 'explain one saved moment to a colleague');
+    await p2.locator('[data-testid=new-plan]').scrollIntoViewIfNeeded();
     await p2.screenshot({ path: `${out}/${name}-4-wochenrueckblick.png` });
-    await p2.click('text=Continue to feed');
+    await p2.click('text=Save plan and continue');
     c.feedAfterReview = await waitFor(p2, () => !!window.__core?.moment());
     await p2.waitForTimeout(800); // Zustand wird verzögert gespeichert
     await p2.close();
     const p3 = await ctx.newPage();
     await p3.goto(url + '?now=2026-10-25');
     c.reviewOnlyOnce = await waitFor(p3, () => !!window.__core?.moment()) && !(await p3.$('[data-testid="weekly-review"]'));
+    // Nächster Sonntag: Plan der Vorwoche mit "Did it happen?", dann Skip
+    await p3.close();
+    const p5 = await ctx.newPage();
+    await p5.goto(url + '?now=2026-11-01');
+    c.prevPlanShown = await waitFor(p5, () => document.querySelector('[data-testid=prev-plan]')?.textContent?.includes('When I finish the OCT clinic on Tuesday, I will explain one saved moment to a colleague.'));
+    await p5.click('[data-testid=prev-plan] >> text=Yes');
+    c.prevPlanAnswered = await waitFor(p5, () => document.querySelector('[data-testid=prev-plan] button[aria-pressed=true]')?.textContent === 'Yes');
+    await p5.screenshot({ path: `${out}/${name}-13-vorwoche.png` });
+    await p5.click('text=Skip this week');
+    c.skipWorks = await waitFor(p5, () => !!window.__core?.moment());
     c.pageErrors = errors.length;
     r.errors = errors.slice(0, 3);
   } catch (e) {
