@@ -133,6 +133,8 @@ body {
   width: 100vw; height: calc(100vw * 9 / 16); background: #1a1d24;
   top: 31%; transform: translateX(-50%);
 }
+/* Sichtbar, solange der Slot nicht der aktuelle ist oder sein Player nicht abspielt (data-live setzt der Player-Callback) */
+.vslot[data-live][aria-hidden='false'] .vposter { visibility: hidden; }
 .vplay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; opacity: 0.85; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6)); }
 .vgesture { position: absolute; inset: 0; z-index: 10; }
 .vtrack { position: absolute; left: 0; right: 0; top: env(safe-area-inset-top); height: 2px; z-index: 19; background: rgba(255, 255, 255, 0.18); }

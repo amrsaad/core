@@ -2,6 +2,7 @@ import type { Area, Card } from '../types';
 import type { Video } from '../videoTypes';
 import type { Moment, MomentLogEntry } from '../moments/types';
 import type { Weights } from '../moments/mix';
+import type { LatencySample } from '../moments/latency';
 
 export interface SavedItem {
   card: Card;
@@ -73,6 +74,8 @@ export interface AppState {
   momentDay?: string;
   /** Wochen (Montag als YYYY-MM-DD), in denen der Rückblick schon kam */
   weekReviewShown: Record<string, boolean>;
+  /** Diagnose: Wisch bis erstes Bild, letzte Messungen (Bauliste Runde 1, Punkt 1) */
+  playLatency?: LatencySample[];
 }
 
 export const DEFAULT_SPEED = 1.5;

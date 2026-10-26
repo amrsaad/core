@@ -5,6 +5,7 @@ import type { AppState } from '../lib/state';
 import { createPlayer, HLS, loadYT, STATE, type YTPlayer } from '../video/ytApi';
 import { applySignal, leaveSignal, newMomentCursor, nextMomentBlock, SIGNAL, type MomentCursor } from './mix';
 import { DEFAULT_SPEED } from '../lib/state';
+import { addSample } from './latency';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
 interface Props {
@@ -17,6 +18,8 @@ interface Props {
 
 interface Slot {
   host: HTMLDivElement | null;
+  /** Rahmen des Slots, trägt data-live, solange der Player wirklich abspielt (Vorschaubild wird synchron ausgeblendet) */
+  el: HTMLDivElement | null;
   player: YTPlayer | null;
   ready: boolean;
   index: number;
@@ -44,7 +47,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
   const queue = useRef<Moment[]>([]);
   const cursor = useRef<MomentCursor | null>(null);
   const idxRef = useRef(0);
-  const slots = useRef<Slot[]>(Array.from({ length: 3 }, () => ({ host: null, player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '' })));
+  const slots = useRef<Slot[]>(Array.from({ length: 3 }, () => ({ host: null, el: null, player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '' })));
   const soundOn = useRef(false);
   const userPaused = useRef(false);
   const since = useRef(Date.now());
@@ -56,6 +59,8 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
   const diag = useRef<string[]>([]);
   const bad = useRef(new Set<string>());
   const everPlayed = useRef(false);
+  /** Offene Messung Wisch bis erstes Bild */
+  const swipe = useRef<{ j: number; t0: number; buffered: boolean } | null>(null);
 
   const [idx, setIdx] = useState(0);
   const [, setTick] = useState(0);
@@ -191,6 +196,10 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       userPaused.current = false;
       setPaused(false);
       setProgress(0);
+      const target = slotFor(next);
+      const nm = queue.current[next];
+      // Gepuffert heißt: der Vorlade-Player hält genau diesen Moment schon angehalten am Start
+      swipe.current = { j: next, t0: performance.now(), buffered: !single && !!nm && target.ready && target.mid === nm.id && target.st === STATE.PAUSED };
       if (single) assign(slots.current[0], next, true);
       else {
         assign(slotFor(next), next, true);
@@ -249,7 +258,16 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
             onState: (st) => {
               diag.current.push(`slot${s} ${slot.mid} state ${st}`);
               slot.st = st;
+              // Vorschaubild bleibt bis zum ersten Bild: ohne Umweg über React, damit kein Frame der YouTube-Oberfläche durchrutscht
+              slot.el?.toggleAttribute('data-live', st === STATE.PLAYING);
               if (st === STATE.PLAYING) everPlayed.current = true;
+              const sw = swipe.current;
+              if (st === STATE.PLAYING && sw && slot.index === sw.j && sw.j === idxRef.current) {
+                swipe.current = null;
+                const ms = Math.round(performance.now() - sw.t0);
+                diag.current.push(`first-frame ${ms}ms ${sw.buffered ? 'buffered' : 'cold'}`);
+                update((x) => ({ ...x, playLatency: addSample(x.playLatency, { ms, buffered: sw.buffered, at: Date.now() }) }));
+              }
               // Standardtempo nach Fundament-Regel 11 (1,5x), gehaltenes 2x bleibt bis zum Loslassen
               if (st === STATE.PLAYING && !fastRef.current) slot.player?.setPlaybackRate(rateRef.current);
               if (st === STATE.ENDED && slot.index === idxRef.current) finish();
@@ -271,6 +289,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       cancelled = true;
       for (const s of slots.current) {
         s.player?.destroy();
+        s.el?.removeAttribute('data-live');
         Object.assign(s, { player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '' });
       }
     };
@@ -499,6 +518,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       next: () => goTo(idxRef.current + 1),
       diag: () => diag.current.slice(-40),
       slots: () => slots.current.slice(0, SLOTS).map((x) => ({ st: x.st, index: x.index })),
+      latency: () => stateRef.current.playLatency ?? [],
     };
   });
 
@@ -518,13 +538,12 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
         const mm = queue.current[j];
         const offset = single ? 0 : j - idx;
         const isCur = offset === 0;
-        const showPoster = !isCur || slot.st !== STATE.PLAYING || !!forYou || !!mm?.audio;
         return (
-          <div key={s} className={`vslot ${Math.abs(offset) <= 1 ? 'vslot-anim' : ''}`} style={{ ['--off' as string]: offset }} aria-hidden={!isCur}>
+          <div key={s} ref={(el) => (slot.el = el)} className={`vslot ${Math.abs(offset) <= 1 ? 'vslot-anim' : ''}`} style={{ ['--off' as string]: offset }} aria-hidden={!isCur}>
             <div className="vframe">
               <div ref={(el) => (slot.host = el)} />
             </div>
-            {mm && showPoster && !mm.audio && <img className="vposter" src={thumbOf(mm)} alt="" draggable={false} />}
+            {mm && !mm.audio && <img className="vposter" src={thumbOf(mm)} alt="" draggable={false} />}
             {mm?.audio && (
               <div className="vaudio">
                 <img className="vaudio-bg" src={thumbOf(mm)} alt="" draggable={false} />

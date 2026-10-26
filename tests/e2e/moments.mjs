@@ -107,7 +107,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const res = await page.evaluate(() => {
         const st = window.__core.slots();
         const dom = [...document.querySelectorAll('.vslot')];
-        return st.map((x, i) => ({ st: x.st, current: dom[i]?.getAttribute('aria-hidden') === 'false', poster: !!dom[i]?.querySelector('.vposter') }));
+        return st.map((x, i) => ({ st: x.st, current: dom[i]?.getAttribute('aria-hidden') === 'false', poster: (() => { const p = dom[i]?.querySelector('.vposter'); return !!p && getComputedStyle(p).visibility !== 'hidden'; })() }));
       });
       for (const x of res) {
         checksDone++;
@@ -119,6 +119,21 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.posterWheneverNotPlaying = violations === 0 && checksDone > 0;
     r.posterCheck = { checksDone, violations, endedSeen };
     await page.screenshot({ path: `${out}/${name}-3-nach-ende.png` });
+
+    // Punkt 1: Wisch bis erstes Bild wird gemessen, gepufferte Momente unter 300 ms (Nachbau-Player, echte Werte nur auf dem Gerät)
+    const lat = await page.evaluate(() => window.__core.latency());
+    const buf = lat.filter((x) => x.buffered).map((x) => x.ms).sort((a, b) => a - b);
+    r.latency = { n: lat.length, buffered: buf.length, median: buf[Math.floor((buf.length - 1) / 2)] ?? null };
+    c.latencyMeasured = lat.length >= 3 && buf.length >= 1;
+    c.bufferedUnder300 = buf.length > 0 && r.latency.median < 300;
+    c.latencyInDiag = (await page.evaluate(() => window.__core.diag())).some((x) => x.startsWith('first-frame'));
+    // In den Einstellungen sichtbar
+    await page.keyboard.press(' ');
+    await page.click('nav [aria-label=Settings]');
+    c.latencyInSettings = await waitFor(page, () => /Preloaded: median \d+ ms/.test(document.querySelector('[data-testid=latency]')?.textContent ?? ''));
+    await page.locator('[data-testid=latency]').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: `${out}/${name}-5-einstellungen.png` });
+    await page.click('nav [aria-label=Feed]');
 
     // Simulierter Sonntag: Wochenrückblick mit dem gespeicherten Moment.
     // Erste Seite schließen: zwei offene Tabs würden sich gegenseitig den gespeicherten Zustand überschreiben.

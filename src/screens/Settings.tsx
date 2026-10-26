@@ -5,6 +5,7 @@ import { exportJson, parseImport } from '../lib/db';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import { DEFAULT_SPEED, type AppState } from '../lib/state';
 import { dayKey, isTimeShifted, now } from '../lib/clock';
+import { LATENCY_TARGET_MS, latencyStats, type LatencySample } from '../moments/latency';
 
 const AREAS: Area[] = ['brain', 'body', 'beat'];
 
@@ -146,6 +147,7 @@ export function Settings({ state, update, replace, moments }: { state: AppState;
             onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, playerMode: e.target.checked ? 'single' : 'slots' } }))}
           />
         </label>
+        <Latency samples={state.playLatency} />
       </section>
 
       <section className={row}>
@@ -198,6 +200,26 @@ function CoreTime({ feedTime }: { feedTime: Record<string, number> }) {
           <span className="t-meta text-muted">{d.label}</span>
         </div>
       ))}
+    </div>
+  );
+}
+
+/** Wisch bis erstes Bild, getrennt nach gepuffert und nicht gepuffert. Ziel unter 300 ms bei gepuffertem Moment. */
+function Latency({ samples }: { samples?: LatencySample[] }) {
+  const line = (label: string, buffered: boolean) => {
+    const x = latencyStats(samples, buffered);
+    if (!x.n) return <span>{label}: no swipes measured yet</span>;
+    return (
+      <span>
+        {label}: median {x.median} ms, 90 % within {x.p90} ms, {Math.round((x.underTarget ?? 0) * 100)} % under {LATENCY_TARGET_MS} ms ({x.n} swipes)
+      </span>
+    );
+  };
+  return (
+    <div className="t-meta flex flex-col gap-1" data-testid="latency">
+      <span className="text-[16px]">Swipe to first frame</span>
+      {line('Preloaded', true)}
+      <span className="text-muted">{line('Not preloaded', false)}</span>
     </div>
   );
 }
