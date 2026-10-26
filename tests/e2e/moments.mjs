@@ -212,14 +212,6 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const p3 = await ctx.newPage();
     await p3.goto(url + '?now=2026-10-25');
     c.reviewOnlyOnce = await waitFor(p3, () => !!window.__core?.moment()) && !(await p3.$('[data-testid="weekly-review"]'));
-    // Nach Löschen von IndexedDB schaltet sich die App aus dem Cache Storage wieder frei
-    await p3.close();
-    const p4 = await ctx.newPage();
-    await p4.goto(url + 'icon.svg');
-    await p4.evaluate(() => new Promise((res) => { const q = indexedDB.deleteDatabase('core-key'); q.onsuccess = () => res('ok'); q.onerror = () => res('err'); q.onblocked = () => res('blocked'); })).then((x) => (r.deleteDb = x));
-    await p4.goto(url + '?now=2026-10-25');
-    c.keyRestoredFromCache = await waitFor(p4, () => !document.body.innerText.includes('not unlocked') && (!!window.__core?.moment() || !!document.querySelector('[data-testid="weekly-review"]')));
-    if (!c.keyRestoredFromCache) r.restoreBody = (await p4.innerText('body')).slice(0, 120);
     c.pageErrors = errors.length;
     r.errors = errors.slice(0, 3);
   } catch (e) {

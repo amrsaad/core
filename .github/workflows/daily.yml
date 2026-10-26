@@ -128,13 +128,20 @@ jobs:
           npx vite preview --host 127.0.0.1 --port 4173 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4173/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/moments.mjs http://127.0.0.1:4173/core/ pipeline/out/e2e-moments
+      - name: Schlüsselsicherung testen (3 Läufe je Browser, alle müssen grün sein)
+        if: always()
+        timeout-minutes: 8
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4174 --strictPort &
+          node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4174/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
+          RUNS=3 node tests/e2e/keyrestore.mjs http://127.0.0.1:4174/core/ pipeline/out/e2e-keyrestore
       - name: Ergebnisse committen
         if: always()
         run: |
-          [ -d pipeline/out/e2e-moments ] || { echo "Keine E2E-Ergebnisse."; exit 0; }
+          [ -d pipeline/out/e2e-moments ] || [ -d pipeline/out/e2e-keyrestore ] || { echo "Keine E2E-Ergebnisse."; exit 0; }
           git config user.name "core-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pipeline/out/e2e-moments
+          git add pipeline/out/e2e-moments pipeline/out/e2e-keyrestore 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "e2e: Momente-Feed $(date -u +%FT%H:%M)"
           for i in 1 2 3; do git pull --rebase -q origin "${{ github.ref_name }}" && git push origin "HEAD:${{ github.ref_name }}" && break; sleep 5; done
