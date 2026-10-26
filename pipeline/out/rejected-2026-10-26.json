@@ -1,8 +1,8 @@
 {
  "date": "2026-10-26",
  "seed": false,
- "candidates": 601,
- "accepted": 601,
+ "candidates": 638,
+ "accepted": 638,
  "rejectedCount": 0,
  "passRate": 1,
  "selected": 16,
@@ -11,7 +11,7 @@
   "body": 0,
   "beat": 2
  },
- "total": 1098,
+ "total": 1114,
  "rejected": [],
  "skippedByBuilder": [
   {
@@ -3592,6 +3592,142 @@
   },
   {
    "id": "pmid:40639966",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42132708",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39127408",
+   "reason": "Sperrliste: Hintergrund und Methode, kein Ergebnis"
+  },
+  {
+   "id": "pmid:39510371",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42042585",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
+  },
+  {
+   "id": "pmid:42609930",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42292472",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41965683",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41508653",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42346871",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42058786",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
+  },
+  {
+   "id": "pmid:42500681",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42625665",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42189256",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42861308",
+   "reason": "kein Conclusion-Satz unter 400 Zeichen"
+  },
+  {
+   "id": "pmid:42718525",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42588239",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42358682",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41644780",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42908686",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42694617",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
+  },
+  {
+   "id": "pmid:42494916",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42780342",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42492464",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42148069",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41725549",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42251739",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42609350",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42756819",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42161114",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42511308",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42571423",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42513295",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42737839",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41346855",
    "reason": "Titel zu lang für Headline"
   }
  ]
