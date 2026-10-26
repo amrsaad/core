@@ -6,6 +6,7 @@ import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import { SPEED_OPTIONS, speedOf, type AppState, type Speed } from '../lib/state';
 import { dayKey, isTimeShifted, now } from '../lib/clock';
 import type { CaptionMode } from '../moments/captions';
+import { UnlockDevice } from './UnlockDevice';
 import { LATENCY_TARGET_MS, latencyStats, type LatencySample } from '../moments/latency';
 
 const AREAS: Area[] = ['brain', 'body', 'beat'];
@@ -156,6 +157,8 @@ export function Settings({ state, update, replace, moments }: { state: AppState;
         </label>
         <Latency samples={state.playLatency} />
       </section>
+
+      <UnlockDevice />
 
       <section className={row}>
         <button className={btn} onClick={doExport}>Export as JSON</button>

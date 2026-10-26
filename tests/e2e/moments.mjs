@@ -54,6 +54,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.goto(`${url}?now=2026-10-23#k=${k}`);
     c.feedAfterDecrypt = await waitFor(page, () => !!window.__core?.moment());
     c.fragmentRemoved = !page.url().includes('#k=');
+    // Schlüssel doppelt gesichert: Cache Storage hat ihn, und nach Löschen von IndexedDB schaltet die App sich selbst wieder frei
+    c.keyInCache = await page.evaluate(async () => !!(await (await caches.open('core-key')).match(new URL('/core/__key', location.origin).href)));
     c.firstArea = await page.evaluate(() => window.__core.moment().area);
     c.firstPlaying = await waitFor(page, () => window.__core.state() === 1);
     const capState = () => page.evaluate(() => {
@@ -162,6 +164,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // In den Einstellungen sichtbar
     await page.keyboard.press(' ');
     await page.click('nav [aria-label=Settings]');
+    await page.locator('[data-testid=unlock-device]').scrollIntoViewIfNeeded();
+    await page.click('text=Show QR code');
+    c.unlockQr = await waitFor(page, () => !!document.querySelector('[data-testid=unlock-qr] svg'));
+    c.keyBackupsBoth = await waitFor(page, () => /IndexedDB yes .* offline cache yes/.test(document.querySelector('[data-testid=key-backups]')?.textContent ?? ''));
+    await page.screenshot({ path: `${out}/${name}-8-geraet-freischalten.png` });
     c.speedOptions = await page.evaluate(() => [...document.querySelectorAll('[data-testid=speed] option')].map((o) => o.value).join(',') === '1,1.5');
     c.latencyInSettings = await waitFor(page, () => /Preloaded: median \d+ ms/.test(document.querySelector('[data-testid=latency]')?.textContent ?? ''));
     await page.locator('[data-testid=latency]').scrollIntoViewIfNeeded();
@@ -184,7 +191,15 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const p3 = await ctx.newPage();
     await p3.goto(url + '?now=2026-10-25');
     c.reviewOnlyOnce = await waitFor(p3, () => !!window.__core?.moment()) && !(await p3.$('[data-testid="weekly-review"]'));
+    // Nach Löschen von IndexedDB schaltet sich die App aus dem Cache Storage wieder frei
+    await p3.close();
+    const p4 = await ctx.newPage();
+    await p4.goto(url + 'icon.svg');
+    await p4.evaluate(() => new Promise((res) => { const q = indexedDB.deleteDatabase('core-key'); q.onsuccess = q.onerror = q.onblocked = () => res(0); }));
+    await p4.goto(url + '?now=2026-10-25');
+    c.keyRestoredFromCache = await waitFor(p4, () => !!window.__core?.moment());
     c.pageErrors = errors.length;
+    r.errors = errors.slice(0, 3);
   } catch (e) {
     r.error = String(e);
   }
