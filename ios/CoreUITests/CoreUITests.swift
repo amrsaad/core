@@ -101,6 +101,10 @@ final class CoreUITests: XCTestCase {
         if copy.exists { copy.tap(); wait(0.3); shot("32-settings-copied") }
     }
 
+    private func diagLog() -> String {
+        (try? String(contentsOf: stateDir.appendingPathComponent("diag.log"), encoding: .utf8)) ?? ""
+    }
+
     /// The button with this identifier on the visible page (pages are stacked in a lazy list)
     private func visible(_ id: String) -> XCUIElement? {
         let screen = app.frame
@@ -231,8 +235,9 @@ final class CoreUITests: XCTestCase {
         XCTAssertEqual(visible("save")?.value as? String, "off")
         // double tap: heart at the tap point, liked, not saved
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.4, dy: 0.45)).doubleTap()
-        XCTAssertTrue(app.descendants(matching: .any)["heartBurst"].waitForExistence(timeout: 1), "heart missing")
         shot("81-double-tap-heart")
+        // the heart lasts 400 ms, XCTest only returns when the animation is over, so the app logs it
+        XCTAssertTrue(diagLog().contains("heart "), "heart missing")
         XCTAssertEqual(visible("like")?.value as? String, "on")
         XCTAssertEqual(visible("save")?.value as? String, "off")
         // menu entries
@@ -243,12 +248,13 @@ final class CoreUITests: XCTestCase {
         shot("82-menu")
         app.buttons["Known"].tap()
         wait(0.4)
-        XCTAssertFalse(app.staticTexts["Already known"].exists, "no toast for Known")
+        XCTAssertFalse(diagLog().contains("toast"), "no toast for Known")
         // Wrong: toast
         visible("menuButton")?.tap()
         XCTAssertTrue(app.buttons["Wrong"].waitForExistence(timeout: 5))
         app.buttons["Wrong"].tap()
-        XCTAssertTrue(app.staticTexts["Wrong"].waitForExistence(timeout: 2), "toast for Wrong missing")
+        wait(0.5)
+        XCTAssertTrue(diagLog().contains("toast Wrong"), "toast for Wrong missing")
         // measurement in settings under Player
         app.tabBars.buttons["Settings"].tap()
         XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 5))
@@ -276,7 +282,8 @@ final class CoreUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Text sources coming"].waitForExistence(timeout: 5), "text empty line missing")
         shot("58-text-empty")
         app.buttons["form-Video"].tap()
-        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 10), "video feed did not come back")
+        // after the switch the mix is free (the Beat-first rule only holds for the first moment of the day)
+        XCTAssertTrue(app.buttons["like"].waitForExistence(timeout: 10), "video feed did not come back")
         XCTAssertFalse(app.staticTexts["No audio moments yet"].exists)
         XCTAssertFalse(app.staticTexts["Text sources coming"].exists)
     }

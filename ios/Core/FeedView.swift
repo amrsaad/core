@@ -324,6 +324,7 @@ struct FeedView: View {
     }
 
     private func show(_ text: String) {
+        Diag.log("toast \(text)")
         withAnimation { flash = text }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { withAnimation { flash = nil } }
     }
@@ -534,6 +535,7 @@ struct MomentPage: View {
 
     private func showHeart(_ p: CGPoint) {
         let id = (heart?.id ?? 0) + 1
+        Diag.log("heart \(Int(p.x)),\(Int(p.y))")
         heart = (p, id)
         heartVisible = false
         DispatchQueue.main.asyncAfter(deadline: .now() + Actions.heartSeconds) {
