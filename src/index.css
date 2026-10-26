@@ -155,6 +155,27 @@ body {
 .vtext-end { margin-top: 32px; padding-top: 16px; border-top: 1px solid #262931; font-size: 13px; color: #8a8a8a; }
 .vcaption.vcaption-big span { font-size: 22px; line-height: 30px; }
 .vcaption.vcaption-big.vcaption-rtl span { font-size: 25px; line-height: 38px; }
+.recall {
+  position: absolute; inset: 0; z-index: 34; background: #000; color: #fff; overflow-y: auto;
+  padding: calc(env(safe-area-inset-top) + 72px) 20px calc(env(safe-area-inset-bottom) + 24px);
+  display: flex; flex-direction: column; gap: 16px;
+}
+.recall-label { font-size: 12px; letter-spacing: 0.12em; font-weight: 700; color: var(--area); }
+.recall-source { display: flex; gap: 12px; align-items: center; }
+.recall-source img { width: 96px; height: 54px; object-fit: cover; border-radius: 6px; background: #1a1d24; }
+.recall-area { font-size: 13px; font-weight: 600; }
+.recall-speaker { font-size: 13px; color: #b3b3b3; }
+.recall-q { margin: 8px 0 0; font-size: 26px; line-height: 32px; font-weight: 700; }
+.recall-input { width: 100%; border-radius: 12px; border: 1px solid #333; background: #111; color: #fff; padding: 12px; font-size: 17px; line-height: 24px; resize: none; }
+.recall-primary { min-height: 52px; border-radius: 12px; background: #fff; color: #000; font-size: 17px; font-weight: 600; }
+.recall-skip { min-height: 44px; color: #b3b3b3; font-size: 15px; }
+.recall-mine, .recall-answer { border-radius: 12px; background: #121212; padding: 14px 16px; }
+.recall-mine span, .recall-answer span { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #8a8a8a; }
+.recall-mine p { margin: 6px 0 0; font-size: 16px; line-height: 23px; color: #cfcfcf; }
+.recall-answer { border-left: 3px solid var(--area); }
+.recall-answer p { margin: 6px 0 0; font-size: 20px; line-height: 27px; font-weight: 600; }
+.recall-rate { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.recall-rate button { min-height: 52px; border-radius: 12px; border: 1px solid #3a3d45; color: #fff; font-size: 17px; font-weight: 600; }
 .vplay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; opacity: 0.85; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6)); }
 .vgesture { position: absolute; inset: 0; z-index: 10; }
 .vtrack { position: absolute; left: 0; right: 0; top: env(safe-area-inset-top); height: 2px; z-index: 19; background: rgba(255, 255, 255, 0.18); }

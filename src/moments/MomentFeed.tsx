@@ -7,7 +7,9 @@ import { applySignal, leaveSignal, newMomentCursor, nextMomentBlock, SIGNAL, typ
 import { clampRate, DEFAULT_SPEED, HOLD_SPEED, speedOf } from '../lib/state';
 import { addSample } from './latency';
 import { captionsShown } from './captions';
-import { countSeen, todayLine } from './today';
+import { countGotIt, countSeen, todayLine } from './today';
+import { answer, cardDue, pickRecall, type Recent } from './recall';
+import { RecallCard } from './RecallCard';
 import { FORM_LABEL, FORMS, momentText, textEndReached, type Form } from './form';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
@@ -62,6 +64,11 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
   const since = useRef(Date.now());
   const endedAt = useRef(-1);
   const forYouRef = useRef(false);
+  /** Abrufkarte offen: Player bleibt angehalten */
+  const recallRef = useRef(false);
+  const sessionSeen = useRef(0);
+  const counted = useRef(new Set<string>());
+  const recent = useRef<Recent[]>([]);
   const forYouTimer = useRef(0);
   const feedMs = useRef(0);
   const dragEl = useRef<HTMLDivElement>(null);
@@ -153,7 +160,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
   const soundGuard = (j: number) => {
     window.setTimeout(() => {
       const sl = slotFor(j);
-      if (idxRef.current !== j || userPaused.current || !sl.player || forYouRef.current) return;
+      if (idxRef.current !== j || userPaused.current || !sl.player || forYouRef.current || recallRef.current) return;
       if (sl.st !== STATE.PLAYING && soundOn.current) {
         sl.player.mute();
         sl.player.playVideo();
@@ -161,6 +168,18 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
         setHint(true);
       }
     }, 1500);
+  };
+
+  const [recall, setRecall] = useState<{ m: Moment; review: boolean } | null>(null);
+  const findMoment = (id: string): Moment | undefined => stateRef.current.savedMoments[id]?.moment ?? pool.find((x) => x.id === id);
+  const closeRecall = (got: boolean | null) => {
+    const r = recall;
+    if (r && got !== null)
+      update((s) => ({ ...s, recall: answer(s.recall ?? {}, r.m.id, got, clockNow().getTime(), !!s.savedMoments[r.m.id]), dayCount: got ? countGotIt(s.dayCount, today) : s.dayCount }));
+    recallRef.current = false;
+    setRecall(null);
+    since.current = Date.now();
+    if (!textRef.current && active && !userPaused.current) current().player?.playVideo();
   };
 
   const closeForYou = () => {
@@ -197,6 +216,20 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       endFast();
       waitSince.current = 0;
       setLoading(false);
+      // Für die Abrufkarte: geschauter Anteil des verlassenen Moments (Video: Position, Text: Ende erreicht)
+      let recallNow: { id: string; review: boolean } | null = null;
+      if (next > prev && prevM && !counted.current.has(prevM.id)) {
+        counted.current.add(prevM.id);
+        const len = prevM.end - prevM.start;
+        const pos = (current().player?.getCurrentTime?.() ?? prevM.start) - prevM.start;
+        const watched = endedAt.current === prev ? 1 : textRef.current ? (textSeen.current === prev ? 1 : 0) : Math.max(0, Math.min(1, pos / len));
+        recent.current = [...recent.current, { id: prevM.id, watched }].slice(-8);
+        sessionSeen.current += 1;
+        if (cardDue(sessionSeen.current)) {
+          const s0 = stateRef.current;
+          recallNow = pickRecall(s0.recall ?? {}, recent.current, clockNow().getTime(), (id) => !!findMoment(id));
+        }
+      }
       if (prevM && endedAt.current !== prev) log(prevM, {});
       current().player?.pauseVideo();
       idxRef.current = next;
@@ -219,6 +252,14 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       textSeen.current = -1;
       if (textBox.current) textBox.current.scrollTop = 0;
       if (!textRef.current) soundGuard(next);
+      if (recallNow) {
+        const rm = findMoment(recallNow.id);
+        if (rm) {
+          recallRef.current = true;
+          current().player?.pauseVideo();
+          setRecall({ m: rm, review: recallNow.review });
+        }
+      }
       setIdx(next);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -283,7 +324,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
               // Standardtempo nach Fundament-Regel 11 (1,5x), gehaltenes 2x bleibt bis zum Loslassen
               if (st === STATE.PLAYING && !fastRef.current) slot.player?.setPlaybackRate(clampRate(rateRef.current));
               if (st === STATE.ENDED && slot.index === idxRef.current) finish();
-              if (st === STATE.PLAYING && (slot.index !== idxRef.current || forYouRef.current || textRef.current)) slot.player?.pauseVideo();
+              if (st === STATE.PLAYING && (slot.index !== idxRef.current || forYouRef.current || textRef.current || recallRef.current)) slot.player?.pauseVideo();
               rerender();
             },
             onError: (code) => {
@@ -315,7 +356,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       const sl = current();
       const p = sl.player;
       const m = queue.current[idxRef.current];
-      if (!p || !sl.ready || !m || forYouRef.current || textRef.current) return;
+      if (!p || !sl.ready || !m || forYouRef.current || textRef.current || recallRef.current) return;
       const c = p.getCurrentTime?.() ?? 0;
       // Laden sichtbar machen, hängende Momente überspringen
       if (sl.st === STATE.PLAYING || userPaused.current) {
@@ -357,7 +398,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
 
   useEffect(() => {
     if (!active) current().player?.pauseVideo();
-    else if (!userPaused.current && !forYouRef.current && !textRef.current) current().player?.playVideo();
+    else if (!userPaused.current && !forYouRef.current && !textRef.current && !recallRef.current) current().player?.playVideo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
@@ -567,6 +608,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       slots: () => slots.current.slice(0, SLOTS).map((x) => ({ st: x.st, index: x.index })),
       latency: () => stateRef.current.playLatency ?? [],
       seen: (id: string) => !!stateRef.current.momentSeen[id],
+      recall: () => ({ open: recallRef.current, state: stateRef.current.recall ?? {}, sessionSeen: sessionSeen.current }),
     };
   });
 
@@ -653,7 +695,7 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
       )}
       {!forYou && (
         <div className="vtoday pointer-events-none" data-testid="today">
-          {todayLine(state.dayCount?.[today], false)}
+          {todayLine(state.dayCount?.[today], true)}
         </div>
       )}
       <div className="vprogress" style={{ transform: `scaleX(${progress})` }} />
@@ -713,6 +755,8 @@ export function MomentFeed({ pool, state, update, active, onPausedChange }: Prop
           </ActionButton>
         </div>
       )}
+
+      {recall && <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} onDone={closeRecall} />}
 
       {forYou && (
         <div

@@ -96,10 +96,27 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.sawBothKinds = seen.some((x) => x.has) && seen.some((x) => !x.has);
     c.stoppedAtEnd = seen.every((x) => x.stoppedAtEnd);
     c.autoNext = seen.length === 4;
+    // Punkt 5: nach dem 4. Moment kommt die Abrufkarte, Player steht, Hook erst nach dem Versuch
+    c.recallAfter4 = await waitFor(page, () => !!document.querySelector('[data-testid=recall-card]'));
+    c.recallPlayerStopped = await waitFor(page, () => window.__core.state() !== 1);
+    c.recallHookHidden = c.recallAfter4 && !(await page.evaluate(() => !!document.querySelector('[data-testid=recall-answer]')));
+    await page.screenshot({ path: `${out}/${name}-11-abruf-frage.png` });
+    await page.fill('[data-testid=recall-input]', 'Test sentence from memory.');
+    await page.click('[data-testid=recall-card] button >> text="Show answer"');
+    c.recallShowsHook = await waitFor(page, () => /^The pointTestmoment/.test(document.querySelector('[data-testid=recall-answer]')?.textContent ?? ''));
+    await page.screenshot({ path: `${out}/${name}-12-abruf-antwort.png` });
+    await page.click('[data-testid=recall-card] button >> text="Got it"');
+    c.recallClosed = await waitFor(page, () => !document.querySelector('[data-testid=recall-card]'));
+    c.recallPlaysAgain = await waitFor(page, () => window.__core.state() === 1);
+    const rs = await page.evaluate(() => Object.values(window.__core.recall().state));
+    r.recall = rs;
+    c.recallScheduled7d = rs.length === 1 && rs[0].results[0].got === true && Math.round((rs[0].due - rs[0].results[0].at) / 86400000) === 7;
+    c.todayGotIt = await waitFor(page, () => /, 1 got it$/.test(document.querySelector('[data-testid=today]')?.textContent ?? ''));
+
     // Punkt 6: Tageszahl oben, zählt jeden neu gezeigten Moment, kein Stopp
     const todayTxt = await page.evaluate(() => document.querySelector('[data-testid=today]')?.textContent ?? '');
     r.today = todayTxt;
-    c.todayCount = /^today ([5-9]|\d\d) seen$/.test(todayTxt);
+    c.todayCount = /^today ([5-9]|\d\d) seen, \d+ got it$/.test(todayTxt);
     // Punkt 4: auto heißt Englisch aus, Arabisch an, rechtsläufig, mindestens 20 px
     r.captions = capLog;
     c.captionsAutoRule = capLog.every((x) => x.shown === x.ar);

@@ -23,3 +23,9 @@ export function todayLine(c: DayCount | undefined, withGotIt: boolean): string {
   const seen = `today ${c?.seen ?? 0} seen`;
   return withGotIt ? `${seen}, ${c?.gotIt ?? 0} got it` : seen;
 }
+
+/** Abruf mit "Got it" heute (Punkt 5) */
+export function countGotIt(days: Record<string, DayCount> | undefined, day: string): Record<string, DayCount> {
+  const prev = days?.[day] ?? { seen: 0, gotIt: 0 };
+  return { ...(days ?? {}), [day]: { ...prev, gotIt: prev.gotIt + 1 } };
+}

@@ -6,6 +6,7 @@ import type { LatencySample } from '../moments/latency';
 import type { CaptionMode } from '../moments/captions';
 import type { DayCount } from '../moments/today';
 import type { Form } from '../moments/form';
+import type { RecallState } from '../moments/recall';
 
 export interface SavedItem {
   card: Card;
@@ -85,6 +86,8 @@ export interface AppState {
   playLatency?: LatencySample[];
   /** Tageszahl pro lokalem Tag (Punkt 6) */
   dayCount?: Record<string, DayCount>;
+  /** Abrufkarten: Ergebnisse und Wiedervorlage (Punkt 5) */
+  recall?: RecallState;
 }
 
 export const DEFAULT_SPEED = 1.5;
