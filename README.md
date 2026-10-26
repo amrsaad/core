@@ -65,7 +65,7 @@ GitHub Actions, täglich 03:00 UTC, vor der Karten-Pipeline
 
 Nur Einbettung über youtube-nocookie.com, kein Download, kein Re-Hosting. Kanal hinzufügen: Eintrag in `content/channels.json` mit `"channelId": null`, der nächste Lauf löst ihn auf.
 
-Test gegen echtes YouTube (Playwright, iPhone 15, WebKit und Chromium): Commit mit `[e2e]` in der Nachricht. Ergebnis und Screenshots landen in `pipeline/out/e2e/`.
+E2E bei jedem Lauf (Playwright, iPhone 15, WebKit und Chromium, nachgebaute YouTube-API): `tests/e2e/moments.mjs` und `tests/e2e/keyrestore.mjs` (3 Läufe je Browser). Deploy nur nach grünem E2E, und zwar genau der getestete Stand. Ergebnisse und Screenshots landen in `pipeline/out/e2e-moments/` und `pipeline/out/e2e-keyrestore/`.
 
 ## Wie Karten entstehen
 

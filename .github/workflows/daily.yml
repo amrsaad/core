@@ -106,10 +106,13 @@ jobs:
           echo "::error::Teilfehler: videos=${{ steps.videos.outcome }} fetch=${{ steps.fetch.outcome }} cards=${{ steps.cards.outcome }} verify=${{ steps.verify.outcome }}"
           exit 1
 
-  # E2E gegen echtes YouTube (nur mit [e2e] in der Commit-Nachricht). Ergebnisse und Screenshots werden committet.
+  # E2E (nachgebaute YouTube-API, WebKit und Chromium) bei jedem Lauf. Deploy nur nach grünem E2E (Max, 26.10.2026).
+  # Ergebnisse und Screenshots werden committet. Ausgabe sha = der getestete Stand, genau der wird deployt.
   e2e:
     needs: [test, pipeline]
-    if: always() && needs.test.result == 'success' && github.event_name == 'push' && (contains(github.event.head_commit.message, '[e2e]') || github.ref_name != github.event.repository.default_branch)
+    if: always() && needs.test.result == 'success' && needs.pipeline.result != 'cancelled'
+    outputs:
+      sha: ${{ steps.tested.outputs.sha }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     # Offizielles Image: Browser und Systempakete sind vorinstalliert (apt-Installation hing im Runner)
@@ -120,6 +123,8 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - id: tested
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - run: npm ci
       - run: npm run build
       - name: Momente-Feed testen (nachgebaute YouTube-API, WebKit und Chromium)
@@ -147,9 +152,9 @@ jobs:
           for i in 1 2 3; do git pull --rebase -q origin "${{ github.ref_name }}" && git push origin "HEAD:${{ github.ref_name }}" && break; sleep 5; done
 
   deploy:
-    needs: [test, pipeline]
-    # Auch nach Teilfehler deployen: committet wird nur, was bestanden hat
-    if: always() && needs.test.result == 'success' && needs.pipeline.result != 'cancelled' && github.ref_name == github.event.repository.default_branch
+    needs: [test, pipeline, e2e]
+    # Nur nach grünem E2E, und genau der getestete Stand. Teilfehler der Pipeline blockieren nicht: committet wird nur, was bestanden hat
+    if: always() && needs.test.result == 'success' && needs.e2e.result == 'success' && needs.pipeline.result != 'cancelled' && github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -157,7 +162,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ needs.e2e.outputs.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20
