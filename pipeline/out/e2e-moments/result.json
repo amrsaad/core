@@ -1,5 +1,5 @@
 {
- "at": "2026-10-26T16:17:39.057Z",
+ "at": "2026-10-26T16:42:22.956Z",
  "runs": [
   {
    "browser": "webkit",
@@ -41,7 +41,9 @@
     "textNotSeenBeforeEnd": true,
     "textSeenAtEnd": true,
     "textStillPaused": true,
-    "textShowsAllKinds": true,
+    "textOnlyTextMoments": true,
+    "textHookShown": true,
+    "textNeverLoadsPlayer": true,
     "audioOnlyAudio": true,
     "audioPlays": true,
     "audioCoverShown": true,
@@ -70,16 +72,17 @@
     "p6Feed": true,
     "emptyAudioLine": true,
     "emptyKeepsSwitch": true,
+    "emptyTextLine": true,
     "emptyBackToVideo": true,
     "pageErrors": 0
    },
    "recall": [
     {
-     "id": "test0000014:100",
-     "due": 1793361605036,
+     "id": "test0000015:100",
+     "due": 1793361605181,
      "results": [
       {
-       "at": 1792756805036,
+       "at": 1792756805181,
        "got": true
       }
      ]
@@ -95,11 +98,11 @@
      "align": "right"
     },
     {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
+     "ar": false,
+     "shown": false,
+     "rtl": false,
+     "size": 0,
+     "align": ""
     },
     {
      "ar": false,
@@ -118,15 +121,15 @@
    ],
    "sequence": [
     {
-     "id": "test0000011:100",
+     "id": "test0000003:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000009:100",
-     "has": false,
-     "fy": false,
+     "id": "test0000002:100",
+     "has": true,
+     "fy": true,
      "stoppedAtEnd": true
     },
     {
@@ -136,7 +139,7 @@
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000014:100",
+     "id": "test0000015:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -156,12 +159,12 @@
     2
    ],
    "posterCheck": {
-    "checksDone": 852,
+    "checksDone": 843,
     "violations": 0,
     "endedSeen": 0
    },
    "latency": {
-    "n": 29,
+    "n": 28,
     "buffered": 28,
     "median": 0
    },
@@ -208,7 +211,9 @@
     "textNotSeenBeforeEnd": true,
     "textSeenAtEnd": true,
     "textStillPaused": true,
-    "textShowsAllKinds": true,
+    "textOnlyTextMoments": true,
+    "textHookShown": true,
+    "textNeverLoadsPlayer": true,
     "audioOnlyAudio": true,
     "audioPlays": true,
     "audioCoverShown": true,
@@ -237,16 +242,17 @@
     "p6Feed": true,
     "emptyAudioLine": true,
     "emptyKeepsSwitch": true,
+    "emptyTextLine": true,
     "emptyBackToVideo": true,
     "pageErrors": 0
    },
    "recall": [
     {
-     "id": "test0000019:100",
-     "due": 1793361603247,
+     "id": "test0000012:100",
+     "due": 1793361603335,
      "results": [
       {
-       "at": 1792756803247,
+       "at": 1792756803335,
        "got": true
       }
      ]
@@ -255,25 +261,25 @@
    "today": "today 5 seen, 1 got it",
    "captions": [
     {
+     "ar": true,
+     "shown": true,
+     "rtl": true,
+     "size": 21,
+     "align": "right"
+    },
+    {
+     "ar": true,
+     "shown": true,
+     "rtl": true,
+     "size": 21,
+     "align": "right"
+    },
+    {
      "ar": false,
      "shown": false,
      "rtl": false,
      "size": 0,
      "align": ""
-    },
-    {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
-    },
-    {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
     },
     {
      "ar": false,
@@ -285,25 +291,25 @@
    ],
    "sequence": [
     {
-     "id": "test0000004:100",
+     "id": "test0000001:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000007:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000000:100",
      "has": true,
      "fy": true,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000009:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000003:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000019:100",
+     "id": "test0000012:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -323,13 +329,13 @@
     2
    ],
    "posterCheck": {
-    "checksDone": 861,
+    "checksDone": 849,
     "violations": 0,
     "endedSeen": 0
    },
    "latency": {
-    "n": 29,
-    "buffered": 28,
+    "n": 27,
+    "buffered": 27,
     "median": 0
    },
    "errors": [],
