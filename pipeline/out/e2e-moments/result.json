@@ -1,5 +1,5 @@
 {
- "at": "2026-10-26T11:48:54.917Z",
+ "at": "2026-10-26T11:56:02.290Z",
  "runs": [
   {
    "browser": "webkit",
@@ -30,7 +30,7 @@
     "captionsMenuOn": true,
     "holdFast": true,
     "releaseNormal": true,
-    "embedNoZoom": true,
+    "embedNoZoom": false,
     "embed16by9FullWidth": true,
     "speedDefault15": true,
     "speedHold2": true,
@@ -66,11 +66,11 @@
    },
    "recall": [
     {
-     "id": "test0000022:100",
-     "due": 1793361604901,
+     "id": "test0000012:100",
+     "due": 1793361604141,
      "results": [
       {
-       "at": 1792756804901,
+       "at": 1792756804141,
        "got": true
       }
      ]
@@ -109,9 +109,15 @@
    ],
    "sequence": [
     {
-     "id": "test0000011:100",
+     "id": "test0000001:100",
      "has": false,
      "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000006:100",
+     "has": true,
+     "fy": true,
      "stoppedAtEnd": true
     },
     {
@@ -121,13 +127,7 @@
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000002:100",
-     "has": true,
-     "fy": true,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000022:100",
+     "id": "test0000012:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -135,11 +135,11 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.0625,
+    "bh": 221.06253051757812,
     "fw": 393,
-    "fh": 221.0625,
+    "fh": 221.06246948242188,
     "dx": 0,
-    "dy": 0,
+    "dy": -4.33685302734375,
     "vw": 393
    },
    "rates": [
@@ -147,7 +147,7 @@
     2
    ],
    "posterCheck": {
-    "checksDone": 873,
+    "checksDone": 867,
     "violations": 0,
     "endedSeen": 0
    },
@@ -157,7 +157,7 @@
     "median": 0
    },
    "errors": [],
-   "ok": true
+   "ok": false
   },
   {
    "browser": "chromium",
@@ -224,11 +224,11 @@
    },
    "recall": [
     {
-     "id": "test0000016:100",
-     "due": 1793361603974,
+     "id": "test0000022:100",
+     "due": 1793361604103,
      "results": [
       {
-       "at": 1792756803974,
+       "at": 1792756804103,
        "got": true
       }
      ]
@@ -267,25 +267,25 @@
    ],
    "sequence": [
     {
-     "id": "test0000000:100",
+     "id": "test0000008:100",
      "has": true,
      "fy": true,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000011:100",
+     "id": "test0000005:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000002:100",
+     "id": "test0000010:100",
      "has": true,
      "fy": true,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000016:100",
+     "id": "test0000022:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -293,9 +293,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.0625,
+    "bh": 221.06248474121094,
     "fw": 393,
-    "fh": 221.0625,
+    "fh": 221.06248474121094,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -305,7 +305,7 @@
     2
    ],
    "posterCheck": {
-    "checksDone": 876,
+    "checksDone": 870,
     "violations": 0,
     "endedSeen": 0
    },
