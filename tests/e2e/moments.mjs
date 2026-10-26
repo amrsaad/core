@@ -40,7 +40,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
   let browser;
   try {
     browser = await type.launch(process.env.E2E_CHROME && type === chromium ? { executablePath: process.env.E2E_CHROME } : {});
-    const ctx = await browser.newContext({ ...devices['iPhone 15'] });
+    // Service Worker aus: Anfragen über den SW kann Playwright nicht umleiten, dann käme das echte YouTube statt des Nachbaus (Fehler 150)
+    const ctx = await browser.newContext({ ...devices['iPhone 15'], serviceWorkers: 'block' });
     await ctx.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
     await ctx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
     const page = await ctx.newPage();
