@@ -541,6 +541,66 @@
    "urlChecks": {
     "https://quran.com/2/135": 200
    }
+  },
+  {
+   "sourceId": "quran:2:136",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/136",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:136?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:136",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "قُولُوٓا۟ ءَامَنَّا بِٱللَّهِ وَمَآ أُنزِلَ إِلَيْنَا وَمَآ أُنزِلَ إِلَىٰٓ إِبْرَٰهِـۧمَ وَإِسْمَـٰعِيلَ وَإِسْحَـٰقَ وَيَعْقُوبَ وَٱلْأَسْبَاطِ وَمَآ أُوتِىَ مُوسَىٰ وَعِيسَىٰ وَمَآ أُوتِىَ ٱلنَّبِيُّونَ مِن رَّبِّهِمْ لَا نُفَرِّقُ بَيْنَ أَحَدٍ مِّنْهُمْ وَنَحْنُ لَهُۥ مُسْلِمُونَ",
+    "translation": "Sagt: Wir glauben an Allah und an das, was zu uns (als Offenbarung) herabgesandt worden ist, und an das, was zu Ibrahim, Isma’il, lshaq, Ya`qub und den Stämmen herabgesandt wurde, und (an das,) was Musa und ’Isa gegeben wurde, und (an das,) was den Propheten von ihrem Herrn gegeben wurde. Wir machen keinen Unterschied bei jemandem von ihnen, und wir sind Ihm ergeben.",
+    "tafsir_muyassar": "قولوا -أيها المؤمنون-<span class=\"blue\"> لهؤلاء اليهود والنَّصارى:</span> صدَّقنا بالله الواحد المعبود بحق، وبما أنزل إلينا من القرآن الذي أوحاه الله إلى نبيه ورسوله محمد صلى الله عليه وسلم، وما أنزل من الصحف إلى إبراهيم وابنيه إسماعيل وإسحاق، وإلى يعقوب والأسباط -وهم الأنبياء مِن ولد يعقوب الذين كانوا في قبائل بني إسرائيل الاثنتي عشرة- وما أُعطي موسى من التوراة، وعيسى من الإنجيل، وما أُعطي الأنبياء جميعًا من وحي ربهم، لا نفرق بين أحد منهم في الإيمان، ونحن خاضعون لله بالطاعة والعبادة.",
+    "tafsir_ibnkathir": "<h2>The Muslim believes in all that Allah `revealed and all the Prophets</h2><p>Allah directed His believing servants to believe in what He sent down to them through His Messenger Muhammad ﷺ and in what was revealed to the previous Prophets in general. Some Prophets Allah mentioned by name, while He did not mention the names of many others. Allah directed the believers to refrain from differentiating between the Prophets and to believe in them all. They should avoid imitating whomever Allah described as,</p><p>وَيُرِيدُونَ أَن يُفَرِّقُواْ بَيْنَ اللَّهِ وَرُسُلِهِ وَيقُولُونَ نُؤْمِنُ بِبَعْضٍ وَنَكْفُرُ بِبَعْضٍ وَيُرِيدُونَ أَن يَتَّخِذُواْ بَيْنَ ذَلِكَ سَبِيلاًأُوْلَـئِكَ هُمُ الْكَـفِرُونَ حَقّاً</p><p>(And wish to make distinction between Allah and His Messengers (by believing in Allah and disbelieving in His Messengers) saying, \"We believe in some but reject others,\" and wish to adopt a way in between. They are in truth disbelievers) (4:150-151).</p><p>Al-Bukhari narrated that Abu Hurayrah said, \"The People of the Book used to read the Torah in Hebrew and translate it into Arabic for the Muslims. The Messenger of Allah ﷺ said,</p><p>«لَا تُصَدِّقُوا أَهْلَ الْكِتَابِ وَلَا تُكَذِّبُوهُمْ وقُولُوا: آمَنَّا بِاللهِ وَمَا أُنْزل إِلَيْنَا»</p><p>(Do not believe the People of the Book, nor reject what they say. Rather, say, `We believe in Allah and in what was sent down to us.)\"</p><p>Also, Muslim, Abu Dawud and An-Nasa'i recorded that Ibn `Abbas said, \"Mostly, the Messenger of Allah ﷺ used to recite,</p><p>ءَامَنَّا بِاللَّهِ وَمَآ أُنزِلَ إِلَيْنَا</p><p>(We believe in Allah and that which has been sent down to us) (2: 136), and,</p><p>ءَامَنَّا بِاللَّهِ وَاشْهَدْ بِأَنَّا مُسْلِمُونَ</p><p>(We believe in Allah, and bear witness that we are Muslims (i.e. we submit to Allah)) (3:52) during the two (voluntary) Rak`at before Fajr.\"</p><p>Abu Al-`Aliyah, Ar-Rabi` and Qatadah said, \"Al-Asbat are the twelve sons of Jacob, and each one of them had an Ummah of people from his descendants. This is why they were called Al-Asbat.\" Al-Khalil bin Ahmad and others said, \"Al-Asbat among the Children of Israel are just like the tribes among the Children of Isma`il.\" This means that the Asbat are the various tribes of the Children of Israel, among whom Allah sent several Prophets. Moses said to the Children of Israel,</p><p>اذْكُرُواْ نِعْمَةَ اللَّهِ عَلَيْكُمْ إِذْ جَعَلَ فِيكُمْ أَنْبِيَآءَ وَجَعَلَكُمْ مُّلُوكاً</p><p>(Remember the favor of Allah to you: when He made Prophets among you, made you kings) (5:20). Also, Allah said,</p><p>وَقَطَّعْنَـهُمُ اثْنَتَىْ عَشْرَةَ أَسْبَاطًا</p><p>(And We divided them into twelve tribes) (7:160).</p><p>Al-Qurtubi said, \"Sibt is the group of people or a tribe all belonging to the same ancestors.\"</p><p>Qatadah said, \"Allah commanded the believers to believe in Him and in all His Books and Messengers. \" Also, Sulayman bin Habib said, \"We were commanded to believe in the (original) Torah and Injil, but not to implement them.\"</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:136"
+   },
+   "fetchedAt": "2026-10-26T09:20:23.693Z",
+   "urlChecks": {
+    "https://quran.com/2/136": 200
+   }
+  },
+  {
+   "sourceId": "quran:2:137",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/137",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:137?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:137",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "فَإِنْ ءَامَنُوا۟ بِمِثْلِ مَآ ءَامَنتُم بِهِۦ فَقَدِ ٱهْتَدَوا۟ ۖ وَّإِن تَوَلَّوْا۟ فَإِنَّمَا هُمْ فِى شِقَاقٍ ۖ فَسَيَكْفِيكَهُمُ ٱللَّهُ ۚ وَهُوَ ٱلسَّمِيعُ ٱلْعَلِيمُ",
+    "translation": "Wenn sie an das gleiche glauben, woran ihr glaubt, dann sind sie somit rechtgeleitet. Wenn sie sich jedoch abkehren, dann befinden sie sich in Widerstreit. Aber gegen sie wird Allah dir genügen. Er ist der Allhörende und Allwissende.",
+    "tafsir_muyassar": "فإنْ آمن الكفار من اليهود والنصارى وغيرهم بمثل الذي آمنتم به، مما جاء به الرسول، فقد اهتدوا إلى الحق، وإن أعرضوا فإنما هم في خلاف شديد، فسيكفيك الله -أيها الرسول- شرَّهم وينصرك عليهم، وهو السميع لأقوالكم، العليم بأحوالكم.",
+    "tafsir_ibnkathir": "<p>Allah said, if they, the disbelievers among the People of the Book and other disbelievers, believe in all of Allah's Books and Messengers and do not differentiate between any of them, </p><div class=\"arabic uthmani\">فَقَدِ اهْتَدَواْ</div><p>(then they are rightly guided) meaning, they would acquire the truth and be directed to it. </p><div class=\"arabic uthmani\">وَإِن تَوَلَّوْاْ</div><p>(but if they turn away) from truth to falsehood after proof had been presented to them, </p><div class=\"arabic uthmani\">فَإِنَّمَا هُمْ فِى شِقَاقٍ فَسَيَكْفِيكَهُمُ اللَّهُ</div><p>(then they are only in opposition. So Allah will suffice you against them) meaning, Allah will aid the believers against them, </p><div class=\"arabic uthmani\">وَهُوَ السَّمِيعُ الْعَلِيمُ</div><p>(And He is the Hearer, the Knower). Allah said, </p><div class=\"arabic uthmani\">صِبْغَةَ اللَّهِ</div><p>(The Sibghah of Allah). Ad-Dahhak said that Ibn `Abbas commented, \"The religion of Allah.\" This Tafsir was also reported of Mujahid, Abu Al-`Aliyah, `Ikrimah, Ibrahim, Al-Hasan, Qatadah, Ad-Dahhak, `Abdullah bin Kathir, `Atiyah Al-`Awfi, Ar-Rabi` bin Anas, As-Suddi and other scholars. The Ayah, </p><div class=\"arabic uthmani\">فِطْرَةَ اللَّهِ</div><p>(Allah's Fitrah (i.e. Allah's Islamic Monotheism)) (30:30) directs Muslims to, \"Hold to it.\" </p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:137"
+   },
+   "fetchedAt": "2026-10-26T09:20:23.693Z",
+   "urlChecks": {
+    "https://quran.com/2/137": 200
+   }
   }
  ]
 }
