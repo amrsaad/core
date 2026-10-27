@@ -9,6 +9,7 @@ import type { DayCount } from '../moments/today';
 import type { Form } from '../moments/form';
 import type { RecallState } from '../moments/recall';
 import type { WeekPlan } from '../moments/review';
+import type { NoteEntry } from '../moments/note';
 
 export interface SavedItem {
   card: Card;
@@ -90,8 +91,10 @@ export interface AppState {
   tapMs?: TapSample[];
   /** Momente mit gefülltem Herz (More like this) */
   momentLiked?: Record<string, number>;
-  /** Rückmeldung je Moment: Chips und Freitext, lokal gespeichert */
-  momentNotes?: Record<string, { chips: string[]; text: string; at: number }>;
+  /** Rückmeldung: jede Notiz (Chip oder Text) wird lokal gesammelt und einmal am Tag gesammelt als Issue gesendet */
+  feedbackNotes?: NoteEntry[];
+  /** Tag (lokal), an dem die Zeile "N notes, send?" zuletzt gezeigt wurde */
+  notesPromptDay?: string;
   /** Tageszahl pro lokalem Tag (Punkt 6) */
   dayCount?: Record<string, DayCount>;
   /** Abrufkarten: Ergebnisse und Wiedervorlage (Punkt 5) */

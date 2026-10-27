@@ -318,13 +318,24 @@ enum Actions {
     /// Zielgröße der Knöpfe in Punkt
     static let targetPt = 48.0
 
-    enum Kind { case more, save, source, known, weak, wrong, mute, captions }
+    enum Kind { case more, save, source, known, wrong, mute }
 
     /// Toast nur bei Mute und Wrong, alles andere bestätigt sich am Knopf
     static func toast(_ k: Kind) -> Bool { k == .mute || k == .wrong }
 
     /// Doppeltipp setzt nur (bleibt gefüllt), der Knopf schaltet um
     static func nextLiked(_ liked: Bool, double: Bool) -> Bool { double ? true : !liked }
+
+    /// Wischweg in Punkt, ab dem eine Geste zählt
+    static let swipePt = 60.0
+    enum Swipe: Equatable { case next, prev, note }
+
+    /// Welche Wischgeste ist es? Waagerecht gewinnt, wenn der Weg dort länger ist. Nach links öffnet die Rückmeldung,
+    /// nach rechts passiert nichts. Senkrecht: nach oben der nächste Moment, nach unten der vorige.
+    static func swipe(dx: Double, dy: Double) -> Swipe? {
+        if abs(dx) > abs(dy) { return dx < -swipePt ? .note : nil }
+        return dy < -swipePt ? .next : dy > swipePt ? .prev : nil
+    }
 
     struct Tap: Codable, Equatable {
         var ms: Int
@@ -379,74 +390,155 @@ enum Hook {
     static func closes(dy: CGFloat, scrollTop: CGFloat) -> Bool { dy > swipeCloseDy && scrollTop <= 0 }
 }
 
-// MARK: Aufgabe 5, Rückmeldung (Max 27.10.2026)
+// MARK: Rückmeldung in einer Ebene (Max 27.10.2026, ersetzt Aufgabe 5)
 
-/// Chips und Freitext zu einem Moment. "Send" öffnet eine vorausgefüllte GitHub-Issue-Seite im Browser des Geräts.
+/// Wisch nach links öffnet ein Blatt mit sechs Chips und einem Textfeld mit Done. Ein Tipp auf einen Chip speichert sofort lokal.
+/// Notizen sammeln sich lokal. Beim ersten Öffnen am Tag, wenn ungesendete Notizen vorliegen, steht "N notes, send?" im Feed.
+/// Ein Tipp darauf öffnet ein einziges vorausgefülltes Issue in core-content, danach gelten sie als gesendet.
 /// Gleiche Regeln und Prüfdaten wie src/moments/note.ts. Kein Token, kein Netzwerkaufruf der App.
 enum Note {
-    static let chips = ["Known", "Boring", "Wrong", "Bad cut", "Bad audio", "Bad captions", "Great"]
+    static let chips = ["Known", "Wrong", "Boring", "Bad cut", "Great", "Mute speaker"]
     static let issueBase = "https://github.com/amrsaad/core-content/issues/new"
     static let label = "feedback"
-    static let textMax = 1500
-    static let longPressSeconds = 0.5
+    /// Freitext je Notiz, damit viele Notizen in eine Adresse passen
+    static let textMax = 400
+    /// Adressen über etwa 8000 Zeichen nimmt GitHub nicht an. Darunter bleiben wir mit Reserve.
+    static let urlMax = 7000
+    /// Gesendete Notizen bleiben so lange lokal (Tage)
+    static let sentKeepDays = 30
 
-    /// Chip an- oder abwählen, die Reihenfolge bleibt die der Liste
-    static func toggle(_ selected: [String], _ chip: String) -> [String] {
-        chips.filter { $0 == chip ? !selected.contains(chip) : selected.contains($0) }
+    enum Effect: Equatable { case known, wrong, mute }
+
+    /// Known, Wrong und Mute speaker wirken wie das bisherige Menü, die anderen Chips speichern nur
+    static func effect(_ chip: String) -> Effect? {
+        switch chip {
+        case "Known": return .known
+        case "Wrong": return .wrong
+        case "Mute speaker": return .mute
+        default: return nil
+        }
     }
 
-    enum Effect: Equatable { case wrong, known }
-
-    /// Wrong und Known wirken wie das bisherige Menü. Wrong geht vor Known.
-    static func effect(_ selected: [String]) -> Effect? {
-        selected.contains("Wrong") ? .wrong : selected.contains("Known") ? .known : nil
+    struct Entry: Codable, Equatable {
+        /// eindeutig je Notiz: Moment-ID und Zeitpunkt
+        var key: String
+        var id: String
+        var hook: String
+        var chips: [String]
+        var text: String
+        /// Reiter zum Zeitpunkt der Notiz: Video, Audio oder Text
+        var tab: String
+        /// App-Commit zum Zeitpunkt der Notiz
+        var commit: String
+        /// Millisekunden seit 1970
+        var at: Int
+        /// Zeitpunkt, an dem die Notiz in ein Issue ging. Fehlt, solange sie ungesendet ist.
+        var sent: Int?
     }
 
     struct Context: Equatable {
         var id: String
-        var videoId: String
-        var start: Double
-        var end: Double
-        var channel: String
-        var sourceUrl: String
-        var area: String
-        var tab: String
-        var speed: Double
-        var device: String
-        var commit: String
         var hook: String
+        var tab: String
+        var commit: String
     }
 
-    private static func num(_ n: Double) -> String {
-        n == n.rounded() ? String(Int(n)) : String(format: "%g", (n * 10).rounded() / 10)
-    }
-
-    static func body(_ c: Context, chips selected: [String], text: String) -> String {
+    /// Neue Notiz aus Chips und Text. Ohne Chip und ohne Text gibt es keine Notiz.
+    static func makeEntry(_ c: Context, chips selected: [String], text: String, at: Int) -> Entry? {
         let t = String(text.trimmingCharacters(in: .whitespacesAndNewlines).prefix(textMax))
-        return [
-            "Moment: \(c.id)",
-            "Video: \(c.videoId)",
-            "Start: \(Int(c.start.rounded())) s",
-            "End: \(Int(c.end.rounded())) s",
-            "Source: \(c.channel), \(c.sourceUrl)",
-            "Area: \(c.area)",
-            "Tab: \(c.tab)",
-            "Speed: \(num(c.speed))x",
-            "Device: \(c.device)",
-            "App: \(c.commit)",
-            "Chips: \(selected.isEmpty ? "none" : selected.joined(separator: ", "))",
-            "",
-            t,
-        ].joined(separator: "\n")
+        let ordered = chips.filter { selected.contains($0) }
+        if ordered.isEmpty && t.isEmpty { return nil }
+        return Entry(key: "\(c.id)#\(at)", id: c.id, hook: c.hook, chips: ordered, text: t, tab: c.tab, commit: c.commit, at: at, sent: nil)
     }
+
+    static func unsent(_ list: [Entry]?) -> [Entry] { (list ?? []).filter { $0.sent == nil } }
+
+    /// "1 note, send?" oder "N notes, send?"
+    static func promptLine(_ n: Int) -> String { "\(n) \(n == 1 ? "note" : "notes"), send?" }
+
+    static func shouldPrompt(_ n: Int, last: String?, today: String) -> Bool { n > 0 && last != today }
+
+    /// Erstes Öffnen an diesem Tag? Dann wird der Tag vermerkt, und die Zeile erscheint, wenn ungesendete Notizen vorliegen.
+    static func firstOpenOfDay(last: String?, today: String) -> Bool { last != today }
+
+    struct Row: Equatable {
+        var id: String
+        var hook: String
+        var chips: [String]
+        var text: String
+        var tab: String
+        var commit: String
+        var keys: [String]
+    }
+
+    /// Notizen zum selben Moment werden eine Zeile: Chips vereint (Reihenfolge der Liste), Texte mit " / " verbunden
+    static func rows(_ list: [Entry]) -> [Row] {
+        var out: [Row] = []
+        for e in list {
+            if let i = out.firstIndex(where: { $0.id == e.id }) {
+                out[i].chips = chips.filter { out[i].chips.contains($0) || e.chips.contains($0) }
+                out[i].text = [out[i].text, e.text].filter { !$0.isEmpty }.joined(separator: " / ")
+                out[i].keys.append(e.key)
+            } else {
+                out.append(Row(id: e.id, hook: e.hook, chips: e.chips, text: e.text, tab: e.tab, commit: e.commit, keys: [e.key]))
+            }
+        }
+        return out
+    }
+
+    /// Eine Tabellenzelle: kein Zeilenumbruch, kein senkrechter Strich
+    private static func cell(_ s: String) -> String {
+        let parts = s.components(separatedBy: .newlines).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+        return parts.joined(separator: " ").replacingOccurrences(of: "|", with: "/").trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    static let header = ["| Moment | Hook | Chips | Text | Tab | App |", "|---|---|---|---|---|---|"]
+
+    static func rowLine(_ r: Row) -> String {
+        let cells = [r.id, r.hook, r.chips.isEmpty ? "-" : r.chips.joined(separator: ", "), r.text.isEmpty ? "-" : r.text, r.tab, r.commit]
+        return "| " + cells.map(cell).joined(separator: " | ") + " |"
+    }
+
+    static func body(_ list: [Row]) -> String { (header + list.map(rowLine)).joined(separator: "\n") }
+
+    static func title(day: String, n: Int) -> String { "Core feedback \(day), \(n) \(n == 1 ? "moment" : "moments")" }
 
     private static let unreserved = CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~")
 
     /// Wie encodeURIComponent im Web, dazu ! ' ( ) * kodiert, damit beide dieselbe Adresse bauen
     static func enc(_ s: String) -> String { s.addingPercentEncoding(withAllowedCharacters: unreserved) ?? s }
 
-    static func url(_ c: Context, chips selected: [String], text: String) -> String {
-        "\(issueBase)?title=\(enc(c.hook))&body=\(enc(body(c, chips: selected, text: text)))&labels=\(label)"
+    static func url(title: String, body: String) -> String {
+        "\(issueBase)?title=\(enc(title))&body=\(enc(body))&labels=\(label)"
+    }
+
+    struct Built: Equatable {
+        var url: String
+        /// Schlüssel der Notizen, die in diesem Issue stehen
+        var keys: [String]
+        var rows: Int
+    }
+
+    /// Ein einziges Issue aus allen ungesendeten Notizen, älteste zuerst. Passt nicht alles in die Adresse, kommen so viele Zeilen
+    /// hinein wie passen (mindestens eine). Der Rest bleibt ungesendet und geht beim nächsten Mal.
+    static func buildIssue(_ list: [Entry], day: String) -> Built? {
+        let all = rows(list)
+        if all.isEmpty { return nil }
+        func make(_ n: Int) -> String { url(title: title(day: day, n: n), body: body(Array(all.prefix(n)))) }
+        var k = all.count
+        while k > 1 && make(k).count > urlMax { k -= 1 }
+        let used = all.prefix(k)
+        return Built(url: make(k), keys: used.flatMap(\.keys), rows: k)
+    }
+
+    /// Gesendet markieren und alte gesendete Notizen entfernen
+    static func markSent(_ list: [Entry]?, keys: [String], at: Int) -> [Entry] {
+        let cutoff = at - sentKeepDays * 86_400_000
+        return (list ?? []).map { e -> Entry in
+            var x = e
+            if keys.contains(e.key) { x.sent = at }
+            return x
+        }.filter { $0.sent == nil || $0.sent! >= cutoff }
     }
 }
 

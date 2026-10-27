@@ -286,12 +286,14 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     for (let i = 1; i <= 5; i++) await page.mouse.move(vp.width / 2, vp.height * (0.7 - 0.09 * i));
     await page.mouse.up();
     c.swipeNext = await waitFor(page, (b) => window.__core.idx() === b + 1, before);
-    // Menü: Captions an, dann gilt immer an (auch Englisch)
+    // Untertitel: das Menü gibt es nicht mehr, der Schalter steht in Settings. Immer an gilt auch für Englisch.
     await skipRecall(page, name, out);
-    await page.click('[data-testid=options]');
-    await page.click('text=Captions');
-    await page.click('text=Cancel');
-    c.captionsMenuOn = await waitFor(page, () => !!document.querySelector('[data-testid=caption] span')?.textContent);
+    await page.keyboard.press(' ');
+    await page.click('nav [aria-label=Settings]');
+    await page.selectOption('[data-testid=captions]', 'on');
+    await page.click('nav [aria-label=Feed]');
+    await page.keyboard.press(' ');
+    c.captionsSettingsOn = await waitFor(page, () => !!document.querySelector('[data-testid=caption] span')?.textContent);
     await page.screenshot({ path: `${out}/${name}-7-untertitel-an.png` });
     // Gedrückt halten: 2x, Loslassen: normal
     await page.mouse.move(vp.width / 2, vp.height * 0.5);
@@ -409,55 +411,13 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.saveFills = await page.evaluate((id) => window.__core.saved(id) && document.querySelector('[data-testid=save]').getAttribute('aria-pressed') === 'true', op.id);
     // Spalte: vier Knöpfe, Ziele mindestens 48 pt, Abstände, Beschriftung
     const col = await page.evaluate(() => [...document.querySelectorAll('.vactions button')].map((b) => { const r = b.getBoundingClientRect(); return { id: b.dataset.testid, w: r.width, h: r.height, top: r.top, bottom: r.bottom, text: b.textContent }; }));
-    c.columnOrder = col.map((x) => x.id).join() === 'like,save,source,options';
+    c.columnOrder = col.map((x) => x.id).join() === 'like,save,source';
     c.columnTargets48 = col.every((x) => x.w >= 48 && x.h >= 48);
     c.columnSpacing = col.slice(1).every((x, i) => x.top - col[i].bottom >= 16);
-    c.columnLabels = col.map((x) => x.text).join('|') === 'More|Save|Source|';
-    // Menü: Known, Weak, Wrong, Mute speaker, Captions
-    await page.click('[data-testid=options]');
-    const items = await page.evaluate(() => [...document.querySelectorAll('.vfeed .z-40 button, .vfeed .z-40 label')].map((x) => x.textContent.trim()).filter((t) => t && t !== 'Cancel'));
-    c.menuItems = items.join() === 'Known,Weak,Wrong,Note,Mute speaker,Captions';
-    await page.screenshot({ path: `${out}/${name}-11-menue.png` });
-    await page.click('text=Cancel');
+    c.columnLabels = col.map((x) => x.text).join('|') === 'More|Save|Source';
+    // Das "…"-Menü entfällt
+    c.noOptionsButton = !(await page.$('[data-testid=options]')) && !(await page.$('[aria-label=Options]'));
     await page.screenshot({ path: `${out}/${name}-12-spalte.png` });
-    // Aufgabe 5: Rückmeldung. Langdruck auf das Herz öffnet das Blatt, Send öffnet die vorbereitete Issue-Seite, kein Netzwerkaufruf der App
-    const gh = [];
-    page.on('request', (q) => { if (/github\.com/.test(q.url())) gh.push(q.url()); });
-    await page.evaluate(() => { window.__opened = []; window.open = (u, t, f) => { window.__opened.push({ u, t, f }); return null; }; });
-    const nm = await page.evaluate(() => window.__core.moment());
-    const lb = await page.$eval('[data-testid=like]', (e) => { const q = e.getBoundingClientRect(); return { x: q.left + q.width / 2, y: q.top + q.height / 2 }; });
-    const likedBefore = await page.evaluate((id) => window.__core.liked(id), nm.id);
-    await page.mouse.move(lb.x, lb.y);
-    await page.mouse.down();
-    await page.waitForTimeout(800);
-    await page.mouse.up();
-    c.longPressOpensNote = await waitFor(page, () => !!document.querySelector('[data-testid=note-sheet]'));
-    await page.waitForTimeout(150);
-    c.longPressDoesNotToggle = (await page.evaluate((id) => window.__core.liked(id), nm.id)) === likedBefore;
-    const chipsSeen = await page.evaluate(() => [...document.querySelectorAll('[data-testid^=note-chip-]')].map((x) => x.textContent));
-    c.noteSevenChips = chipsSeen.join() === 'Known,Boring,Wrong,Bad cut,Bad audio,Bad captions,Great';
-    c.noteTextField = !!(await page.$('[data-testid=note-text]'));
-    await page.screenshot({ path: `${out}/${name}-20-note-leer.png` });
-    await page.click('[data-testid="note-chip-Boring"]');
-    await page.click('[data-testid="note-chip-Bad cut"]');
-    await page.fill('[data-testid=note-text]', 'The cut is two seconds late & the "hook" repeats.');
-    c.noteMultiSelect = await page.evaluate(() => ['Boring', 'Bad cut'].every((n) => document.querySelector(`[data-testid="note-chip-${n}"]`).getAttribute('aria-pressed') === 'true') && document.querySelector('[data-testid="note-chip-Known"]').getAttribute('aria-pressed') === 'false');
-    await page.screenshot({ path: `${out}/${name}-21-note-chips.png` });
-    const idxBefore = await page.evaluate(() => window.__core.idx());
-    await page.click('[data-testid=note-send]');
-    c.noteSheetClosed = await waitFor(page, () => !document.querySelector('[data-testid=note-sheet]'));
-    const op1 = await page.evaluate(() => window.__opened);
-    const u1 = op1[0] ? new URL(op1[0].u) : null;
-    c.noteOpensIssuePage = op1.length === 1 && !!u1 && u1.origin + u1.pathname === 'https://github.com/amrsaad/core-content/issues/new' && op1[0].t === '_blank';
-    c.noteTitleIsHook = !!u1 && u1.searchParams.get('title') === nm.hook;
-    c.noteLabelFeedback = !!u1 && u1.searchParams.get('labels') === 'feedback';
-    const body = u1?.searchParams.get('body') ?? '';
-    r.noteBody = body;
-    c.noteBodyFields = [`Moment: ${nm.id}`, `Video: ${nm.videoId}`, `Start: ${Math.round(nm.start)} s`, `End: ${Math.round(nm.end)} s`, 'Source: ', `Area: ${nm.area[0].toUpperCase()}${nm.area.slice(1)}`, 'Tab: Video', 'Speed: 1.5x', 'Device: ', 'Chips: Boring, Bad cut', 'The cut is two seconds late & the "hook" repeats.'].every((t) => body.includes(t));
-    c.noteBodyApp = /App: [0-9a-f]{7}\b|App: dev\b/.test(body);
-    c.noteSavedLocally = await page.evaluate((id) => { const n = window.__core.notes()[id]; return !!n && n.chips.join() === 'Boring,Bad cut' && n.text.startsWith('The cut'); }, nm.id);
-    c.noteOtherChipsNoEffect = (await page.evaluate(() => window.__core.idx())) === idxBefore && !(await page.evaluate(() => !!document.querySelector('.flash')));
-    c.noteNoNetwork = gh.length === 0;
 
     // Tipp bis Füllung: im Test gemessen (App-Messung und unabhängige Messung), Ziel unter 100 ms
     const fills = [];
@@ -482,37 +442,95 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const rec = await page.evaluate(() => window.__core.tapMs().map((x) => x.ms));
     r.tapToFill.recorded = med(rec);
     c.tapRecorded = rec.length >= 6 && r.tapToFill.recorded < 100;
-    // Known: kein Toast. Wrong und Mute: Toast
-    await skipRecall(page, name, out);
-    await page.click('[data-testid=options]');
-    await page.click('.vfeed .z-40 >> text=Known');
+
+    // Rückmeldung in einer Ebene (27.10.2026): Wisch nach links öffnet das Blatt, ein Tipp auf einen Chip speichert lokal und geht weiter, kein Netzwerkaufruf
+    const gh = [];
+    page.on('request', (q) => { if (/github\.com/.test(q.url())) gh.push(q.url()); });
+    await page.evaluate(() => { window.__opened = []; window.open = (u, t, f) => { window.__opened.push({ u, t, f }); return null; }; });
+    const swipeLeft = async (dxFrac = 0.5) => {
+      const y = vp.height * 0.45;
+      await page.mouse.move(vp.width * 0.8, y);
+      await page.mouse.down();
+      for (let i = 1; i <= 6; i++) await page.mouse.move(vp.width * (0.8 - (dxFrac / 6) * i), y + i);
+      await page.mouse.up();
+    };
+    const openSheet = async () => { await skipRecall(page, name, out); await swipeLeft(); return waitFor(page, () => !!document.querySelector('[data-testid=note-sheet]')); };
+    const notes = () => page.evaluate(() => window.__core.notes());
+    const nm = await page.evaluate(() => window.__core.moment());
+    const idxBefore = await page.evaluate(() => window.__core.idx());
+    const likedBefore = await page.evaluate((id) => window.__core.liked(id), nm.id);
+    c.swipeLeftOpensNote = await openSheet();
+    c.swipeLeftStaysOnMoment = (await page.evaluate(() => window.__core.idx())) === idxBefore;
+    const chipsSeen = await page.evaluate(() => [...document.querySelectorAll('[data-testid^=note-chip-]')].map((x) => x.textContent));
+    c.noteSixChips = chipsSeen.join() === 'Known,Wrong,Boring,Bad cut,Great,Mute speaker';
+    c.noteTextAndDone = !!(await page.$('[data-testid=note-text]')) && (await page.textContent('[data-testid=note-done]')) === 'Done';
+    c.noteNoSendButton = !(await page.$('[data-testid=note-send]')) && !(await page.$('text=Send'));
+    const chipBox = await page.evaluate(() => [...document.querySelectorAll('[data-testid^=note-chip-]')].map((e) => { const q = e.getBoundingClientRect(); return { w: q.width, h: q.height }; }));
+    c.noteChipsLarge = chipBox.every((x) => x.h >= 56 && x.w >= 120);
+    c.noteSheetOneLevel = (await page.evaluate(() => document.querySelectorAll('[data-testid=note-sheet]').length)) === 1;
+    await page.screenshot({ path: `${out}/${name}-20-note-leer.png` });
+    await page.fill('[data-testid=note-text]', 'typed only to test the keyboard keys: jjj kkk');
+    c.noteTypingDoesNotNavigate = (await page.evaluate(() => window.__core.idx())) === idxBefore;
+    await page.fill('[data-testid=note-text]', '');
+    // Tipp auf Boring: speichert sofort, Blatt zu, nächster Moment, kein Toast, kein Browser, Herz unverändert
+    await page.click('[data-testid="note-chip-Boring"]');
+    c.noteSheetClosed = await waitFor(page, () => !document.querySelector('[data-testid=note-sheet]'));
+    c.noteGoesToNext = await waitFor(page, (i) => window.__core.idx() === i + 1, idxBefore);
+    const n1 = await notes();
+    c.noteSavedLocally = n1.length === 1 && n1[0].id === nm.id && n1[0].chips.join() === 'Boring' && n1[0].hook === nm.hook && n1[0].tab === 'Video' && /^[0-9a-f]{7}$|^dev$/.test(n1[0].commit) && n1[0].sent === undefined;
+    c.noteBoringNoEffect = !(await page.evaluate(() => !!document.querySelector('.flash'))) && (await page.evaluate((id) => window.__core.liked(id), nm.id)) === likedBefore;
+    c.noteNothingOpened = (await page.evaluate(() => window.__opened)).length === 0 && gh.length === 0;
+    // Nur Text, dann Done: speichert den Text ohne Chip, schließt, nächster Moment
+    const nm2 = await page.evaluate(() => window.__core.moment());
+    const idx2 = await page.evaluate(() => window.__core.idx());
+    await openSheet();
+    await page.fill('[data-testid=note-text]', 'The cut is two seconds late & the "hook" repeats.');
+    await page.screenshot({ path: `${out}/${name}-21-note-text.png` });
+    await page.click('[data-testid=note-done]');
+    c.noteDoneClosesAndNext = await waitFor(page, (i) => !document.querySelector('[data-testid=note-sheet]') && window.__core.idx() === i + 1, idx2);
+    const n2 = await notes();
+    c.noteTextSaved = n2.length === 2 && n2[1].id === nm2.id && n2[1].chips.length === 0 && n2[1].text === 'The cut is two seconds late & the "hook" repeats.';
+    // Tipp neben das Blatt: schließt ohne Notiz, bleibt auf dem Moment. Done ohne Text: keine Notiz.
+    const idx3 = await page.evaluate(() => window.__core.idx());
+    await openSheet();
+    await page.click('[data-testid=note-sheet]', { position: { x: 20, y: 20 } });
+    c.noteOutsideCancels = await waitFor(page, () => !document.querySelector('[data-testid=note-sheet]')) && (await notes()).length === 2 && (await page.evaluate(() => window.__core.idx())) === idx3;
+    await openSheet();
+    await page.click('[data-testid=note-done]');
+    await page.waitForTimeout(300);
+    c.noteEmptyDoneNoNote = (await notes()).length === 2 && !(await page.$('[data-testid=note-sheet]'));
+    // Wisch nach rechts und kurzer Zug nach links tun nichts
+    await page.mouse.move(vp.width * 0.3, vp.height * 0.45);
+    await page.mouse.down();
+    for (let i = 1; i <= 6; i++) await page.mouse.move(vp.width * (0.3 + 0.08 * i), vp.height * 0.45 + i);
+    await page.mouse.up();
+    await swipeLeft(0.08);
+    await page.waitForTimeout(250);
+    c.noteOnlyLongLeftSwipe = !(await page.$('[data-testid=note-sheet]'));
+    c.noteNoNetwork = gh.length === 0;
+
+    // Known: kein Toast. Wrong und Mute: Toast. Alle drei wirken wie das frühere Menü und werden zusätzlich als Notiz gespeichert.
+    const chip = async (label) => { if (!(await openSheet())) return false; await page.click(`[data-testid="note-chip-${label}"]`); return true; };
+    const idxK = await page.evaluate(() => window.__core.idx());
+    const nK = (await notes()).length;
+    c.knownViaChip = await chip('Known');
     await page.waitForTimeout(350);
     c.knownNoToast = await page.evaluate(() => !document.querySelector('.flash'));
-    await skipRecall(page, name, out);
-    await page.click('[data-testid=options]');
-    await page.click('.vfeed .z-40 >> text=Wrong');
+    c.knownAdvanced = await waitFor(page, (i) => window.__core.idx() > i, idxK);
+    c.knownSaved = (await notes()).length === nK + 1 && (await notes()).at(-1).chips.join() === 'Known';
+    await page.waitForTimeout(300);
+    c.wrongViaChip = await chip('Wrong');
     c.wrongToast = await waitFor(page, () => document.querySelector('.flash')?.textContent === 'Wrong');
+    c.wrongSaved = (await notes()).at(-1).chips.join() === 'Wrong';
     await page.waitForTimeout(1000);
-    await skipRecall(page, name, out);
-    await page.click('[data-testid=options]');
-    await page.click('.vfeed .z-40 >> text=Mute speaker');
+    const idxM = await page.evaluate(() => window.__core.idx());
+    const mutedMoment = await page.evaluate(() => window.__core.moment());
+    c.muteViaChip = await chip('Mute speaker');
     c.muteToast = await waitFor(page, () => /muted$/.test(document.querySelector('.flash')?.textContent ?? ''));
-    await page.waitForTimeout(1000);
-    await skipRecall(page, name, out);
-    // Rückmeldung über das Menü: Known und Wrong wirken wie heute (Toast Wrong, weiter zum nächsten Moment)
-    await page.click('[data-testid=options]');
-    await page.click('.vfeed .z-40 >> text=Note');
-    c.noteViaMenu = await waitFor(page, () => !!document.querySelector('[data-testid=note-sheet]'));
-    const idx2 = await page.evaluate(() => window.__core.idx());
-    await page.click('[data-testid="note-chip-Known"]');
-    await page.click('[data-testid="note-chip-Wrong"]');
-    await page.evaluate(() => { window.__opened = []; });
-    await page.click('[data-testid=note-send]');
-    c.noteWrongEffect = await waitFor(page, () => document.querySelector('.flash')?.textContent === 'Wrong');
-    c.noteAdvanced = await waitFor(page, (i) => window.__core.idx() > i, idx2);
-    const op2 = await page.evaluate(() => window.__opened);
-    c.noteChipsInBody = op2.length === 1 && new URL(op2[0].u).searchParams.get('body').includes('Chips: Known, Wrong');
-    c.noteStillNoNetwork = gh.length === 0;
+    c.muteAdvanced = await waitFor(page, (i) => window.__core.idx() > i, idxM);
+    c.muteSaved = (await notes()).at(-1).chips.join() === 'Mute speaker' && (await notes()).at(-1).id === mutedMoment.id;
+    c.noteStillNoNetwork = gh.length === 0 && (await page.evaluate(() => window.__opened)).length === 0;
+    r.notesCount = (await notes()).length;
     await page.waitForTimeout(1000);
     await skipRecall(page, name, out);
 
@@ -577,11 +595,35 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await p2.screenshot({ path: `${out}/${name}-4-wochenrueckblick.png` });
     await p2.click('text=Save plan and continue');
     c.feedAfterReview = await waitFor(p2, () => !!window.__core?.moment());
+    // Erstes Öffnen an einem neuen Tag mit ungesendeten Notizen (23.10.): Zeile "N notes, send?", ein Tipp öffnet ein einziges Issue mit allen Notizen
+    const allNotes = await p2.evaluate(() => window.__core.notes());
+    c.notesUnsentBefore = allNotes.length === r.notesCount && allNotes.every((x) => x.sent === undefined);
+    c.promptLine = await waitFor(p2, (t) => document.querySelector('[data-testid=notes-prompt]')?.textContent === t, `${allNotes.length} notes, send?`);
+    await p2.screenshot({ path: `${out}/${name}-22-notes-send.png` });
+    await p2.evaluate(() => { window.__opened = []; window.open = (u, t, f) => { window.__opened.push({ u, t, f }); return null; }; });
+    await p2.click('[data-testid=notes-prompt]');
+    const opN = await p2.evaluate(() => window.__opened);
+    const uN = opN[0] ? new URL(opN[0].u) : null;
+    c.promptOneIssue = opN.length === 1 && !!uN && uN.origin + uN.pathname === 'https://github.com/amrsaad/core-content/issues/new' && opN[0].t === '_blank' && uN.searchParams.get('labels') === 'feedback';
+    const bodyN = uN?.searchParams.get('body') ?? '';
+    r.notesIssueBody = bodyN;
+    const lines = bodyN.split('\n');
+    const momentsN = new Set(allNotes.map((x) => x.id));
+    c.issueTable = lines[0] === '| Moment | Hook | Chips | Text | Tab | App |' && lines.length === 2 + momentsN.size;
+    c.issueRowsHaveAllFields = [[nm, 'Boring', '-'], [nm2, '-', 'The cut is two seconds late & the "hook" repeats.'], [mutedMoment, 'Mute speaker', '-']].every(([m, chipsCell, textCell]) => lines.some((l) => l.startsWith(`| ${m.id} | ${m.hook} | ${chipsCell} | ${textCell} | Video | `) && /\| ([0-9a-f]{7}|dev) \|$/.test(l)));
+    c.issueTitleCount = (uN?.searchParams.get('title') ?? '') === `Core feedback 2026-10-25, ${momentsN.size} moments`;
+    c.promptMarksSent = await waitFor(p2, () => window.__core.notes().every((x) => typeof x.sent === 'number') && !document.querySelector('[data-testid=notes-prompt]'));
+    // Nach dem Senden: neue Notiz bleibt ungesendet, und am selben Tag kommt die Zeile nicht noch einmal
+    await p2.evaluate(() => window.__core.openNote());
+    await p2.click('[data-testid="note-chip-Great"]');
     await p2.waitForTimeout(800); // Zustand wird verzögert gespeichert
+    c.newNoteUnsent = await p2.evaluate(() => window.__core.notes().filter((x) => x.sent === undefined).length === 1);
     await p2.close();
     const p3 = await ctx.newPage();
     await p3.goto(url + '?now=2026-10-25');
     c.reviewOnlyOnce = await waitFor(p3, () => !!window.__core?.moment()) && !(await p3.$('[data-testid="weekly-review"]'));
+    await p3.waitForTimeout(500);
+    c.promptOncePerDay = !(await p3.$('[data-testid=notes-prompt]')) && (await p3.evaluate(() => window.__core.notes().filter((x) => x.sent === undefined).length)) === 1;
     // Nächster Sonntag: Plan der Vorwoche mit "Did it happen?", dann Skip
     await p3.close();
     const p5 = await ctx.newPage();
@@ -594,9 +636,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.skipWorks = await waitFor(p5, () => !!window.__core?.moment());
     // Leerer Filter: eine Zeile statt leerem Feed, Schalter bleibt bedienbar
     await p5.close();
-    const p6 = await ctx.newPage();
-    await p6.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolVideoOnly }));
-    await p6.goto(url + '?now=2026-10-23');
+    // Eigener Kontext: im geteilten wären je nach Verlauf der Abschnitte davor schon fast alle Momente gesehen
+    const f6 = await freshPage(browser, url, k, poolVideoOnly, '?now=2026-10-23');
+    const p6 = f6.pg;
     c.p6Feed = await waitFor(p6, () => !!window.__core?.moment());
     await p6.click('[data-testid=form-switch] >> text=Audio');
     c.emptyAudioLine = await waitFor(p6, () => document.body.innerText.includes('No audio moments yet'));
@@ -608,6 +650,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await p6.screenshot({ path: `${out}/${name}-15-text-leer.png` });
     await p6.click('[data-testid=form-switch] >> text=Video');
     c.emptyBackToVideo = await waitFor(p6, () => !!window.__core?.moment() && !document.body.innerText.includes('No audio moments yet'));
+    if (!c.emptyBackToVideo) r.p6Text = (await p6.evaluate(() => document.body.innerText)).slice(0, 300);
     // Momente ohne recall bekommen keine Karte: fünf Wischer, nie eine Karte
     await p6.close();
     // Fehlerhafte Momente im Pool: der Feed läuft weiter, keine Fehlerseite, nur Überspringen
@@ -652,11 +695,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.throwStillNoErrorPage = await p9.evaluate(() => !/Moments need internet|Invalid video id/.test(document.body.innerText) && !!window.__core.moment());
     c.throwPageErrors = errors9.length === 0;
     await f9.cx.close();
-    const p7 = await ctx.newPage();
-    await p7.addInitScript(() => { window.__ytSlow = true; });
-    await p7.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolNoRecall }));
-    await p7.goto(url + '?now=2026-10-23&seed=3');
+    const f7 = await freshPage(browser, url, k, poolNoRecall, '?now=2026-10-23&seed=3');
+    const p7 = f7.pg;
     c.p7Feed = await waitFor(p7, () => !!window.__core?.moment());
+    if (!c.p7Feed) r.p7Text = (await p7.evaluate(() => document.body.innerText)).slice(0, 300);
     let cardSeen = false;
     const capLogs = [];
     for (let n = 0; n < 5; n++) {

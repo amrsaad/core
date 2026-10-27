@@ -98,9 +98,11 @@ struct FeedView: View {
     @State private var lastID: String?
     @State private var forYou: Moment?
     @State private var flash: String?
-    @State private var menuFor: Moment?
-    /// Aufgabe 5: Rückmeldungsblatt (Menü "Note" oder Langdruck auf das Herz)
+    /// Rückmeldungsblatt: öffnet mit Wisch nach links
     @State private var noteFor: Moment?
+    /// Zeile "N notes, send?" (nur beim ersten Öffnen am Tag, wenn ungesendete Notizen vorliegen)
+    @State private var promptShown = false
+    @State private var promptChecked = false
     @State private var feedSeconds: Double = 0
     // Punkt 5: Abrufkarte nach jedem 4. Moment
     @State private var recallCard: (moment: Moment, review: Bool)?
@@ -160,8 +162,6 @@ struct FeedView: View {
                             isActive: currentID == m.id,
                             insets: geo.safeAreaInsets,
                             flash: $flash,
-                            onMenu: { Diag.log("menu open \(m.id)"); menuFor = m },
-                            onNote: { Diag.log("note open \(m.id)"); noteFor = m },
                             onTextEnd: { textEnd(m) },
                             onNext: { advance() },
                             onCaption: { feed.captionOpen = $0 }
@@ -176,6 +176,11 @@ struct FeedView: View {
             .scrollDisabled(feed.captionOpen)
             .scrollPosition(id: $currentID)
             .ignoresSafeArea()
+            .simultaneousGesture(DragGesture(minimumDistance: 24).onEnded { v in
+                // Senkrecht blättert die Liste selbst. Hier zählt nur der Wisch nach links.
+                guard Actions.swipe(dx: v.translation.width, dy: v.translation.height) == .note else { return }
+                openNote()
+            })
         }
         .overlay(alignment: .top) {
             if forYou == nil && recallCard == nil { FeedTopBar().padding(.top, 6) }
@@ -198,21 +203,29 @@ struct FeedView: View {
                     .transition(.opacity)
             }
         }
-        .sheet(item: $noteFor) { m in
-            NoteSheetView(moment: m, initial: store.state.notes?[m.id]) { chips, text in
-                noteFor = nil
-                sendNote(m, chips: chips, text: text)
+        .overlay(alignment: .top) {
+            if promptShown && forYou == nil && recallCard == nil && noteFor == nil && !Note.unsent(store.state.feedbackNotes).isEmpty {
+                Button { sendNotes() } label: {
+                    Text(Note.promptLine(Note.unsent(store.state.feedbackNotes).count))
+                        .font(.system(size: 15, weight: .semibold))
+                        .padding(.horizontal, 16).frame(minHeight: Actions.targetPt)
+                        .background(.black.opacity(0.8), in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 48)
+                .accessibilityIdentifier("notesPrompt")
             }
         }
-        .sheet(item: $menuFor) { m in
-            MenuSheet(moment: m, captions: Binding(get: { store.captionsShown(m) }, set: { store.state.captionMode = $0 ? .on : .off })) { action in
-                menuFor = nil
-                menu(action, m)
-            }
+        .sheet(item: $noteFor) { m in
+            NoteSheetView(
+                moment: m,
+                onChip: { chip, text in saveNote(m, chip: chip, text: text) },
+                onDone: { text in saveNote(m, chip: nil, text: text) })
         }
         .onAppear {
             if currentID == nil { currentID = feed.queue.first?.id }
             if forYou == nil { activate(currentID) }
+            checkPrompt()
         }
         .onChange(of: currentID) { old, new in
             leave(old, to: new)
@@ -321,42 +334,58 @@ struct FeedView: View {
         withAnimation(.easeInOut(duration: 0.25)) { currentID = feed.queue[i + 1].id }
     }
 
-    /// Known und Weak bestätigen sich durch das Schließen des Menüs, Wrong und Mute zusätzlich mit Toast
-    private func menu(_ action: MenuAction, _ m: Moment) {
-        switch action {
-        case .known, .weak, .wrong:
+    /// Wisch nach links: Blatt öffnen, Wiedergabe pausiert nicht (der Ton läuft weiter)
+    private func openNote() {
+        guard noteFor == nil, forYou == nil, recallCard == nil, !feed.captionOpen,
+              let m = index(of: currentID).map({ feed.queue[$0] }) else { return }
+        Diag.log("note open \(m.id)")
+        noteFor = m
+    }
+
+    /// Tipp auf einen Chip speichert sofort lokal und schließt das Blatt, Done speichert nur den Text.
+    /// Known, Wrong und Mute speaker wirken wie bisher, danach geht der Feed zum nächsten Moment.
+    private func saveNote(_ m: Moment, chip: String?, text: String) {
+        noteFor = nil
+        let tab = store.state.currentForm.label
+        guard store.addNote(m, chip: chip, text: text, tab: tab) else { return }
+        UIImpactFeedbackGenerator(style: chip == nil ? .light : .medium).impactOccurred()
+        Diag.log("note saved \(m.id) \(chip ?? "-")")
+        switch chip.flatMap(Note.effect) {
+        case .known, .wrong:
+            let wrong = chip.flatMap(Note.effect) == .wrong
             store.signal(m, Mix.Signal.negative)
-            store.log(m, watched: feed.playback(for: m).watched, feedback: action.rawValue)
-            let kind: Actions.Kind = action == .wrong ? .wrong : action == .weak ? .weak : .known
-            if Actions.toast(kind) { show("Wrong") }
-            advance()
-        case .note:
-            // das Menü schließt zuerst, dann geht das Blatt auf
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { noteFor = m }
+            store.log(m, watched: feed.playback(for: m).watched, feedback: wrong ? "wrong" : "known")
+            if Actions.toast(wrong ? .wrong : .known) { show("Wrong") }
         case .mute:
             store.mute(m)
             if let i = index(of: m.id) { feed.removeUpcoming(channel: m.channel, after: i) }
             if Actions.toast(.mute) { show("\(m.speakerLine) muted") }
-            advance()
+        case nil:
+            break
         }
+        if currentID == m.id { advance() }
     }
 
-    /// Rückmeldung: lokal speichern, Known und Wrong wirken wie im Menü, dann die vorbereitete Issue-Seite im Browser öffnen
-    private func sendNote(_ m: Moment, chips: [String], text: String) {
-        let ctx = Note.Context(
-            id: m.id, videoId: m.videoId, start: m.start, end: m.end, channel: m.channel,
-            sourceUrl: m.fullURL?.absoluteString ?? "", area: m.area.label, tab: store.state.currentForm.label,
-            speed: store.state.speed, device: Diag.deviceLine, commit: Diag.commit, hook: m.hook)
-        let address = Note.url(ctx, chips: chips, text: text)
-        store.saveNote(m, chips: chips, text: text)
-        if Env.isTest { Diag.log("note url \(address)") }
+    /// Erstes Öffnen am Tag: Tag vermerken, Zeile zeigen, wenn ungesendete Notizen vorliegen.
+    /// Im UI-Test setzt CORE_NOTES_DAY den Tag, damit "morgen" simuliert werden kann.
+    private func checkPrompt() {
+        guard !promptChecked else { return }
+        promptChecked = true
+        let today = Env.values["CORE_NOTES_DAY"] ?? Day.key()
+        guard Note.firstOpenOfDay(last: store.state.notesPromptDay, today: today) else { return }
+        let n = Note.unsent(store.state.feedbackNotes).count
+        store.state.notesPromptDay = today
+        if n > 0 { promptShown = true }
+    }
+
+    /// Ein einziges vorausgefülltes Issue in core-content aus allen ungesendeten Notizen, danach gelten sie als gesendet
+    private func sendNotes() {
+        let today = Env.values["CORE_NOTES_DAY"] ?? Day.key()
+        guard let b = Note.buildIssue(Note.unsent(store.state.feedbackNotes), day: today) else { return }
+        if Env.isTest { Diag.log("notes url \(b.url)") }
         // Im UI-Test bleibt die App im Vordergrund
-        if !Env.isTest, let url = URL(string: address) { openURL(url) }
-        switch Note.effect(chips) {
-        case .wrong: menu(.wrong, m)
-        case .known: menu(.known, m)
-        case nil: break
-        }
+        if !Env.isTest, let url = URL(string: b.url) { openURL(url) }
+        store.markNotesSent(keys: b.keys)
     }
 
     private func show(_ text: String) {
@@ -375,8 +404,6 @@ struct FeedView: View {
     }
 }
 
-enum MenuAction: String { case known, weak, wrong, note, mute }
-
 // MARK: One moment
 
 struct MomentPage: View {
@@ -385,8 +412,6 @@ struct MomentPage: View {
     let isActive: Bool
     let insets: EdgeInsets
     @Binding var flash: String?
-    let onMenu: () -> Void
-    let onNote: () -> Void
     let onTextEnd: () -> Void
     let onNext: () -> Void
     let onCaption: (Bool) -> Void
@@ -556,7 +581,7 @@ struct MomentPage: View {
         let saved = store.isSaved(moment)
         let liked = store.isLiked(moment)
         return VStack(spacing: 22) {
-            ActionButton(icon: liked ? "heart.fill" : "heart", label: "More", bounce: liked ? 1 : 0, id: "like", value: liked ? "on" : "off", onLong: onNote) {
+            ActionButton(icon: liked ? "heart.fill" : "heart", label: "More", bounce: liked ? 1 : 0, id: "like", value: liked ? "on" : "off") {
                 let t0 = CACurrentMediaTime()
                 like(double: false)
                 measure(since: t0)
@@ -573,7 +598,6 @@ struct MomentPage: View {
                 playback.pause()
                 if let url = moment.fullURL { openURL(url) }
             }
-            ActionButton(icon: "ellipsis", label: "", bounce: 0, id: "menuButton", accessibility: "Options") { onMenu() }
         }
         .frame(width: 64)
     }
@@ -621,7 +645,7 @@ struct MomentPage: View {
         }
     }
 
-    private var actionsHeight: CGFloat { 4 * 48 + 3 * 22 + 16 }
+    private var actionsHeight: CGFloat { 3 * 48 + 2 * 22 + 16 }
 
     private var gestureSurface: some View {
         Color.black
@@ -647,52 +671,6 @@ struct MomentPage: View {
     }
 }
 
-/// Menu of one moment. Lives at feed level, because one sheet per page does not work in SwiftUI.
-struct MenuSheet: View {
-    let moment: Moment
-    @Binding var captions: Bool
-    let onAction: (MenuAction) -> Void
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 8) {
-                Circle().fill(moment.area.color).frame(width: 8, height: 8)
-                Text(moment.speakerLine).foregroundStyle(Palette.secondary)
-            }
-            .font(.system(size: 13))
-            .padding(.bottom, 8)
-            row("Known", .known)
-            row("Weak", .weak)
-            row("Wrong", .wrong)
-            row("Note", .note)
-            row("Mute speaker", .mute)
-            Toggle("Captions", isOn: $captions)
-                .font(.system(size: 17))
-                .frame(height: 52)
-            Button { dismiss() } label: {
-                Text("Cancel").font(.system(size: 17, weight: .semibold)).frame(maxWidth: .infinity, minHeight: 52)
-            }
-            .background(Palette.button, in: RoundedRectangle(cornerRadius: 12))
-            .padding(.top, 8)
-        }
-        .foregroundStyle(.white)
-        .padding(.horizontal, 16)
-        .padding(.top, 20)
-        .accessibilityIdentifier("menuSheet")
-        .presentationDetents([.medium])
-        .presentationBackground(Palette.surface)
-        .presentationDragIndicator(.visible)
-    }
-
-    private func row(_ title: String, _ action: MenuAction) -> some View {
-        Button { onAction(action) } label: {
-            Text(title).font(.system(size: 17)).frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
-        }
-        .overlay(alignment: .bottom) { Rectangle().fill(Palette.line).frame(height: 1) }
-    }
-}
-
 /// Ziel 48 pt. Die Füllung wechselt ohne Verzögerung, der Sprung dauert etwa 150 ms.
 struct ActionButton: View {
     let icon: String
@@ -701,13 +679,10 @@ struct ActionButton: View {
     var id: String = ""
     var accessibility: String? = nil
     var value: String? = nil
-    /// Langdruck (nur das Herz): öffnet die Rückmeldung, der Tipp danach bleibt aus
-    var onLong: (() -> Void)? = nil
     let action: () -> Void
-    @State private var longFired = false
 
     var body: some View {
-        Button(action: { if longFired { longFired = false } else { action() } }) {
+        Button(action: action) {
             VStack(spacing: 2) {
                 Image(systemName: icon)
                     .font(.system(size: 26, weight: .regular))
@@ -720,12 +695,6 @@ struct ActionButton: View {
             .shadow(color: .black.opacity(0.6), radius: 2, y: 1)
         }
         .buttonStyle(.plain)
-        .simultaneousGesture(LongPressGesture(minimumDuration: Note.longPressSeconds).onEnded { _ in
-            longFired = true
-            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-            onLong?()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { longFired = false }
-        }, including: onLong == nil ? .none : .all)
         .accessibilityLabel(accessibility ?? label)
         .accessibilityValue(value ?? "")
         .accessibilityIdentifier(id)

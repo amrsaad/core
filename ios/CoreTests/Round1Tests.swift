@@ -67,7 +67,7 @@ final class Round1Tests: XCTestCase {
         XCTAssertEqual(Actions.confirmSeconds, 0.15)
         XCTAssertEqual(Actions.targetPt, 48)
         // Toast nur bei Mute und Wrong
-        for k in [Actions.Kind.more, .save, .source, .known, .weak, .captions] { XCTAssertFalse(Actions.toast(k)) }
+        for k in [Actions.Kind.more, .save, .source, .known] { XCTAssertFalse(Actions.toast(k)) }
         XCTAssertTrue(Actions.toast(.mute) && Actions.toast(.wrong))
         // Doppeltipp setzt nur, der Knopf schaltet um
         XCTAssertTrue(Actions.nextLiked(false, double: true))
@@ -179,33 +179,86 @@ final class Round1Tests: XCTestCase {
         XCTAssertFalse(Hook.closes(dy: -90, scrollTop: 0))
     }
 
-    // Aufgabe 5, gleiche Prüfdaten wie tests/moments-note.test.ts
+    // Wischgeste, gleiche Prüfdaten wie tests/moments-actions.test.ts
+    func testSwipe() {
+        XCTAssertEqual(Actions.swipePt, 60)
+        XCTAssertEqual(Actions.swipe(dx: -61, dy: 0), .note)
+        XCTAssertNil(Actions.swipe(dx: -60, dy: 0))
+        XCTAssertEqual(Actions.swipe(dx: -120, dy: 40), .note)
+        XCTAssertEqual(Actions.swipe(dx: -70, dy: -80), .next)
+        XCTAssertEqual(Actions.swipe(dx: 0, dy: -61), .next)
+        XCTAssertEqual(Actions.swipe(dx: 10, dy: 61), .prev)
+        XCTAssertNil(Actions.swipe(dx: 0, dy: -60))
+        XCTAssertNil(Actions.swipe(dx: 120, dy: 10))
+        XCTAssertEqual(Actions.swipe(dx: -80, dy: -80), .next)
+    }
+
+    // Rückmeldung (Auftrag 27.10.2026), gleiche Prüfdaten wie tests/moments-note.test.ts
     func testNote() {
-        let c = Note.Context(id: "abc123:100", videoId: "abc123", start: 100, end: 160.4,
-                             channel: "Sigma Nutrition (Prof. Grant Tinsley)", sourceUrl: "https://www.youtube.com/watch?v=abc123&t=100",
-                             area: "Body", tab: "Video", speed: 1.5, device: "iPhone, iOS 18.1", commit: "4ed41a7",
-                             hook: "Don't compare body fat across devices (100% rule)!")
-        XCTAssertEqual(Note.chips, ["Known", "Boring", "Wrong", "Bad cut", "Bad audio", "Bad captions", "Great"])
-        var sel = Note.toggle([], "Great")
-        sel = Note.toggle(sel, "Known")
-        XCTAssertEqual(sel, ["Known", "Great"])
-        XCTAssertEqual(Note.toggle(sel, "Great"), ["Known"])
-        XCTAssertEqual(Note.effect(["Known"]), .known)
-        XCTAssertEqual(Note.effect(["Known", "Wrong"]), .wrong)
-        XCTAssertNil(Note.effect(["Boring", "Bad cut", "Great"]))
-        XCTAssertNil(Note.effect([]))
-        let lines = ["Moment: abc123:100", "Video: abc123", "Start: 100 s", "End: 160 s",
-                     "Source: Sigma Nutrition (Prof. Grant Tinsley), https://www.youtube.com/watch?v=abc123&t=100",
-                     "Area: Body", "Tab: Video", "Speed: 1.5x", "Device: iPhone, iOS 18.1", "App: 4ed41a7",
-                     "Chips: Known, Bad cut", "", "Cut is two seconds late."]
-        XCTAssertEqual(Note.body(c, chips: ["Known", "Bad cut"], text: "  Cut is two seconds late.  "), lines.joined(separator: "\n"))
-        var one = c; one.speed = 1
-        XCTAssertTrue(Note.body(one, chips: [], text: "").contains("Speed: 1x"))
-        XCTAssertTrue(Note.body(c, chips: [], text: "").contains("Chips: none"))
-        XCTAssertEqual(Note.body(c, chips: [], text: String(repeating: "x", count: Note.textMax + 50)).split(separator: "\n").last?.count, Note.textMax)
-        XCTAssertEqual(Note.url(c, chips: ["Known", "Bad cut"], text: "Cut is two seconds late."),
-                       "https://github.com/amrsaad/core-content/issues/new?title=Don%27t%20compare%20body%20fat%20across%20devices%20%28100%25%20rule%29%21&body=Moment%3A%20abc123%3A100%0AVideo%3A%20abc123%0AStart%3A%20100%20s%0AEnd%3A%20160%20s%0ASource%3A%20Sigma%20Nutrition%20%28Prof.%20Grant%20Tinsley%29%2C%20https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Dabc123%26t%3D100%0AArea%3A%20Body%0ATab%3A%20Video%0ASpeed%3A%201.5x%0ADevice%3A%20iPhone%2C%20iOS%2018.1%0AApp%3A%204ed41a7%0AChips%3A%20Known%2C%20Bad%20cut%0A%0ACut%20is%20two%20seconds%20late.&labels=feedback")
+        func ctx(_ id: String, _ hook: String) -> Note.Context { .init(id: id, hook: hook, tab: "Video", commit: "4ed41a7") }
+        let a = ctx("abc123:100", "Don't compare body fat across devices (100% rule)!")
+        let b = ctx("def456:20", "Sleep | not coffee")
+        XCTAssertEqual(Note.chips, ["Known", "Wrong", "Boring", "Bad cut", "Great", "Mute speaker"])
+        XCTAssertEqual(Note.effect("Known"), .known)
+        XCTAssertEqual(Note.effect("Wrong"), .wrong)
+        XCTAssertEqual(Note.effect("Mute speaker"), .mute)
+        for c in ["Boring", "Bad cut", "Great"] { XCTAssertNil(Note.effect(c)) }
+        // Notiz aus Chip oder Text
+        XCTAssertNil(Note.makeEntry(a, chips: [], text: "  ", at: 1))
+        let e = Note.makeEntry(a, chips: ["Great"], text: "  Clear.  ", at: 1_700_000_000_000)
+        XCTAssertEqual(e, Note.Entry(key: "abc123:100#1700000000000", id: "abc123:100", hook: a.hook, chips: ["Great"], text: "Clear.",
+                                     tab: "Video", commit: "4ed41a7", at: 1_700_000_000_000, sent: nil))
+        XCTAssertEqual(Note.makeEntry(a, chips: [], text: "Late cut", at: 1)?.chips, [])
+        XCTAssertEqual(Note.makeEntry(a, chips: [], text: String(repeating: "x", count: Note.textMax + 50), at: 1)?.text.count, Note.textMax)
+        // Zeile "N notes, send?" einmal pro Tag
+        XCTAssertEqual(Note.promptLine(1), "1 note, send?")
+        XCTAssertEqual(Note.promptLine(3), "3 notes, send?")
+        XCTAssertTrue(Note.shouldPrompt(2, last: nil, today: "2026-10-28"))
+        XCTAssertTrue(Note.shouldPrompt(2, last: "2026-10-27", today: "2026-10-28"))
+        XCTAssertFalse(Note.shouldPrompt(2, last: "2026-10-28", today: "2026-10-28"))
+        XCTAssertFalse(Note.shouldPrompt(0, last: nil, today: "2026-10-28"))
+        XCTAssertTrue(Note.firstOpenOfDay(last: nil, today: "2026-10-28"))
+        XCTAssertFalse(Note.firstOpenOfDay(last: "2026-10-28", today: "2026-10-28"))
+        // Zeilen je Moment
+        let list = [
+            Note.makeEntry(a, chips: ["Known"], text: "", at: 1)!,
+            Note.makeEntry(b, chips: [], text: "Cut is\ntwo seconds late", at: 2)!,
+            Note.makeEntry(a, chips: ["Bad cut"], text: "Starts mid-sentence", at: 3)!,
+        ]
+        let r = Note.rows(list)
+        XCTAssertEqual(r.count, 2)
+        XCTAssertEqual(r[0].chips, ["Known", "Bad cut"])
+        XCTAssertEqual(r[0].text, "Starts mid-sentence")
+        XCTAssertEqual(r[0].keys, ["abc123:100#1", "abc123:100#3"])
+        XCTAssertEqual(r[1].chips, [])
+        // Ein einziges Issue
+        let built = Note.buildIssue(list, day: "2026-10-28")
+        XCTAssertEqual(built?.rows, 2)
+        XCTAssertEqual(built?.keys, ["abc123:100#1", "abc123:100#3", "def456:20#2"])
+        XCTAssertEqual(built?.url, "https://github.com/amrsaad/core-content/issues/new?title=Core%20feedback%202026-10-28%2C%202%20moments&body=%7C%20Moment%20%7C%20Hook%20%7C%20Chips%20%7C%20Text%20%7C%20Tab%20%7C%20App%20%7C%0A%7C---%7C---%7C---%7C---%7C---%7C---%7C%0A%7C%20abc123%3A100%20%7C%20Don%27t%20compare%20body%20fat%20across%20devices%20%28100%25%20rule%29%21%20%7C%20Known%2C%20Bad%20cut%20%7C%20Starts%20mid-sentence%20%7C%20Video%20%7C%204ed41a7%20%7C%0A%7C%20def456%3A20%20%7C%20Sleep%20%2F%20not%20coffee%20%7C%20-%20%7C%20Cut%20is%20two%20seconds%20late%20%7C%20Video%20%7C%204ed41a7%20%7C&labels=feedback")
+        XCTAssertNil(Note.buildIssue([], day: "2026-10-28"))
+        XCTAssertTrue(Note.buildIssue([list[0]], day: "2026-10-28")?.url.contains("2026-10-28%2C%201%20moment&") ?? false)
         XCTAssertEqual(Note.enc("a b&c=d+e'(f)!*"), "a%20b%26c%3Dd%2Be%27%28f%29%21%2A")
+        // Zu viele Notizen: Adresse bleibt unter dem Limit, der Rest bleibt ungesendet
+        let many = (0..<60).map { i in
+            Note.makeEntry(ctx("vid\(i):0", String(repeating: "Hook number \(i) ", count: 4)), chips: ["Boring"], text: String(repeating: "y", count: 300), at: i + 10)!
+        }
+        let big = Note.buildIssue(many, day: "2026-10-28")!
+        XCTAssertLessThanOrEqual(big.url.count, Note.urlMax)
+        XCTAssertGreaterThan(big.rows, 5)
+        XCTAssertLessThan(big.rows, 60)
+        XCTAssertEqual(big.keys, many.prefix(big.rows).map(\.key))
+        let left = Note.unsent(Note.markSent(many, keys: big.keys, at: 99))
+        XCTAssertEqual(left.count, 60 - big.rows)
+        XCTAssertEqual(left.first?.key, many[big.rows].key)
+        // Gesendet markieren, nach 30 Tagen fallen alte heraus
+        let day = 86_400_000
+        var old = list[0]; old.sent = 1_000_000
+        let out = Note.markSent([old, list[1]], keys: [list[1].key], at: 1_000_000 + 31 * day)
+        XCTAssertEqual(out.map(\.key), [list[1].key])
+        XCTAssertEqual(out.first?.sent, 1_000_000 + 31 * day)
+        XCTAssertTrue(Note.unsent(out).isEmpty)
+        XCTAssertTrue(Note.unsent(nil).isEmpty)
     }
 
     // Aufgabe 6, gleiche Prüfdaten wie tests/moments-source.test.ts

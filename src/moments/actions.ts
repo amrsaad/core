@@ -1,6 +1,7 @@
 /**
  * Bedienung (Auftrag 26.10.2026, Aufgabe 3). Reine Regeln, gleiche Werte in ios/Core/Round1.swift (Actions).
- * Doppeltipp = "More like this" mit Herz an der Tippstelle, Spalte rechts: More, Save, Source, Optionen.
+ * Doppeltipp = "More like this" mit Herz an der Tippstelle, Spalte rechts: More, Save, Source.
+ * Wisch nach links öffnet die Rückmeldung (27.10.2026), das "…"-Menü entfällt.
  */
 export const HEART_MS = 400;
 export const CONFIRM_MS = 150;
@@ -10,7 +11,7 @@ export const TAP_MAX = 60;
 /** Zielgröße der Knöpfe in Punkt */
 export const TARGET_PT = 48;
 
-export type Action = 'more' | 'save' | 'source' | 'known' | 'weak' | 'wrong' | 'mute' | 'captions';
+export type Action = 'more' | 'save' | 'source' | 'known' | 'wrong' | 'mute';
 /** Toast nur bei Mute und Wrong, alles andere bestätigt sich am Knopf */
 export const toastFor = (a: Action): boolean => a === 'mute' || a === 'wrong';
 
@@ -38,5 +39,14 @@ export function nextLiked(liked: boolean, via: 'double' | 'button'): boolean {
   return via === 'double' ? true : !liked;
 }
 
-/** Langdruck auf das Herz öffnet die Rückmeldung */
-export const NOTE_LONG_MS = 500;
+/** Wischweg in Pixeln, ab dem eine Geste zählt */
+export const SWIPE_PX = 60;
+export type Swipe = 'next' | 'prev' | 'note' | null;
+/**
+ * Welche Wischgeste ist es? Waagerecht gewinnt, wenn der Weg dort länger ist. Nach links öffnet die Rückmeldung,
+ * nach rechts passiert nichts. Senkrecht: nach oben der nächste Moment, nach unten der vorige.
+ */
+export function swipeOf(dx: number, dy: number): Swipe {
+  if (Math.abs(dx) > Math.abs(dy)) return dx < -SWIPE_PX ? 'note' : null;
+  return dy < -SWIPE_PX ? 'next' : dy > SWIPE_PX ? 'prev' : null;
+}

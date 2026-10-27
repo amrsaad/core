@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addTap, CONFIRM_MS, HEART_MS, nextLiked, TAP_MAX, tapStats, TARGET_PT, toastFor } from '../src/moments/actions';
+import { addTap, CONFIRM_MS, HEART_MS, nextLiked, SWIPE_PX, swipeOf, TAP_MAX, tapStats, TARGET_PT, toastFor } from '../src/moments/actions';
 
 describe('Bedienung (Aufgabe 3)', () => {
   it('Herz 400 ms, Bestätigung am Knopf 150 ms, Ziele 48 pt', () => {
@@ -8,7 +8,7 @@ describe('Bedienung (Aufgabe 3)', () => {
     expect(TARGET_PT).toBe(48);
   });
   it('Toast nur bei Mute und Wrong', () => {
-    expect((['more', 'save', 'source', 'known', 'weak', 'captions'] as const).some(toastFor)).toBe(false);
+    expect((['more', 'save', 'source', 'known'] as const).some(toastFor)).toBe(false);
     expect(toastFor('mute') && toastFor('wrong')).toBe(true);
   });
   it('Doppeltipp setzt nur, der Knopf schaltet um', () => {
@@ -29,5 +29,18 @@ describe('Bedienung (Aufgabe 3)', () => {
     for (let i = 0; i < TAP_MAX + 10; i++) l = addTap(l, { ms: i, at: i });
     expect(l?.length).toBe(TAP_MAX);
     expect(l?.[0].ms).toBe(10);
+  });
+  // Gleiche Prüfdaten in ios/CoreTests/Round1Tests.swift (testSwipe)
+  it('Wischgeste: links öffnet die Rückmeldung, senkrecht blättert, waagerecht gewinnt bei längerem Weg', () => {
+    expect(SWIPE_PX).toBe(60);
+    expect(swipeOf(-61, 0)).toBe('note');
+    expect(swipeOf(-60, 0)).toBeNull();
+    expect(swipeOf(-120, 40)).toBe('note');
+    expect(swipeOf(-70, -80)).toBe('next');
+    expect(swipeOf(0, -61)).toBe('next');
+    expect(swipeOf(10, 61)).toBe('prev');
+    expect(swipeOf(0, -60)).toBeNull();
+    expect(swipeOf(120, 10)).toBeNull();
+    expect(swipeOf(-80, -80)).toBe('next');
   });
 });

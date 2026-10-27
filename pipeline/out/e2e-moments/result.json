@@ -1,8 +1,8 @@
 {
- "at": "2026-10-27T14:07:58.692Z",
+ "at": "2026-10-27T15:40:10.373Z",
  "runs": [
   {
-   "browser": "webkit",
+   "browser": "chromium",
    "checks": {
     "lockedWithoutKey": true,
     "feedAfterDecrypt": true,
@@ -32,7 +32,7 @@
     "captionsAutoRule": true,
     "captionsArabicRtl": true,
     "swipeNext": true,
-    "captionsMenuOn": true,
+    "captionsSettingsOn": true,
     "holdFast": true,
     "releaseNormal": true,
     "embedNoZoom": true,
@@ -75,31 +75,40 @@
     "columnTargets48": true,
     "columnSpacing": true,
     "columnLabels": true,
-    "menuItems": true,
-    "longPressOpensNote": true,
-    "longPressDoesNotToggle": true,
-    "noteSevenChips": true,
-    "noteTextField": true,
-    "noteMultiSelect": true,
-    "noteSheetClosed": true,
-    "noteOpensIssuePage": true,
-    "noteTitleIsHook": true,
-    "noteLabelFeedback": true,
-    "noteBodyFields": true,
-    "noteBodyApp": true,
-    "noteSavedLocally": true,
-    "noteOtherChipsNoEffect": true,
-    "noteNoNetwork": true,
+    "noOptionsButton": true,
     "fillImmediate": true,
     "fillUnder100": true,
     "tapRecorded": true,
+    "swipeLeftOpensNote": true,
+    "swipeLeftStaysOnMoment": true,
+    "noteSixChips": true,
+    "noteTextAndDone": true,
+    "noteNoSendButton": true,
+    "noteChipsLarge": true,
+    "noteSheetOneLevel": true,
+    "noteTypingDoesNotNavigate": true,
+    "noteSheetClosed": true,
+    "noteGoesToNext": true,
+    "noteSavedLocally": true,
+    "noteBoringNoEffect": true,
+    "noteNothingOpened": true,
+    "noteDoneClosesAndNext": true,
+    "noteTextSaved": true,
+    "noteOutsideCancels": true,
+    "noteEmptyDoneNoNote": true,
+    "noteOnlyLongLeftSwipe": true,
+    "noteNoNetwork": true,
+    "knownViaChip": true,
     "knownNoToast": true,
+    "knownAdvanced": true,
+    "knownSaved": true,
+    "wrongViaChip": true,
     "wrongToast": true,
+    "wrongSaved": true,
+    "muteViaChip": true,
     "muteToast": true,
-    "noteViaMenu": true,
-    "noteWrongEffect": true,
-    "noteAdvanced": true,
-    "noteChipsInBody": true,
+    "muteAdvanced": true,
+    "muteSaved": true,
     "noteStillNoNetwork": true,
     "posterWheneverNotPlaying": true,
     "latencyMeasured": true,
@@ -116,7 +125,16 @@
     "reviewNoPercent": true,
     "reviewSaveNeedsPlan": true,
     "feedAfterReview": true,
+    "notesUnsentBefore": true,
+    "promptLine": true,
+    "promptOneIssue": true,
+    "issueTable": true,
+    "issueRowsHaveAllFields": true,
+    "issueTitleCount": true,
+    "promptMarksSent": true,
+    "newNoteUnsent": true,
     "reviewOnlyOnce": true,
+    "promptOncePerDay": true,
     "prevPlanShown": true,
     "prevPlanAnswered": true,
     "skipWorks": true,
@@ -199,10 +217,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604195,
+     "due": 1792922403906,
      "results": [
       {
-       "at": 1792756804195,
+       "at": 1792749603906,
        "got": false
       }
      ]
@@ -278,21 +296,22 @@
     1.5,
     2
    ],
-   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: bb98407\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
    "tapToFill": {
-    "measured": 29,
-    "recorded": 29
+    "measured": 30.5,
+    "recorded": 30
    },
+   "notesCount": 5,
    "posterCheck": {
-    "checksDone": 879,
+    "checksDone": 813,
     "violations": 0,
-    "endedSeen": 148
+    "endedSeen": 136
    },
    "latency": {
-    "n": 32,
-    "buffered": 26,
+    "n": 36,
+    "buffered": 30,
     "median": 0
    },
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | 1911dc4 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 1911dc4 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | 1911dc4 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | 1911dc4 |\n| test0000046:100 | Testmoment 46 body | Mute speaker | - | Video | 1911dc4 |",
    "badWalk": [
     {
      "idx": 2,
@@ -387,14 +406,14 @@
       "full": true,
       "size": 15,
       "lines": 6,
-      "id": "test0000052:100"
+      "id": "test0000000:100"
      },
      "open": true,
      "hook": true,
      "exLen": 1180,
      "exDir": "ltr",
      "exAr": false,
-     "meta": "SpeakerKanal body 0EpisodeTestvideoAt1:40AreaBody",
+     "meta": "SpeakerKanal beat 0EpisodeTestvideoAt1:40AreaBeat",
      "speaker": true,
      "ep": true,
      "at": true,
@@ -418,7 +437,7 @@
        "rate 1.5",
        "unmute",
        "rate 1.5",
-       "load test0000020 100-200",
+       "load test0000014 100-200",
        "rate 1.5"
       ]
      }
@@ -430,14 +449,14 @@
       "full": true,
       "size": 15,
       "lines": 6,
-      "id": "test0000013:100"
+      "id": "test0000001:100"
      },
      "open": true,
      "hook": true,
      "exLen": 419,
      "exDir": "rtl",
      "exAr": true,
-     "meta": "SpeakerKanal brain 1EpisodeTestvideoAt1:40AreaBrain",
+     "meta": "SpeakerKanal beat 1EpisodeTestvideoAt1:40AreaBeat",
      "speaker": true,
      "ep": true,
      "at": true,
@@ -461,7 +480,7 @@
        "rate 1.5",
        "unmute",
        "rate 1.5",
-       "load test0000029 100-200",
+       "load test0000021 100-160",
        "rate 1.5"
       ]
      }
@@ -473,7 +492,50 @@
       "full": true,
       "size": 15,
       "lines": 6,
-      "id": "test0000022:100"
+      "id": "test0000006:100"
+     },
+     "open": true,
+     "hook": true,
+     "exLen": 1180,
+     "exDir": "ltr",
+     "exAr": false,
+     "meta": "SpeakerKanal beat 2EpisodeTestvideoAt1:40AreaBeat",
+     "speaker": true,
+     "ep": true,
+     "at": true,
+     "order": [
+      "DIV",
+      "caption-hook",
+      "caption-excerpt",
+      "caption-meta"
+     ],
+     "playing": true,
+     "stillPlaying": true,
+     "ar": false,
+     "stClose0": 1,
+     "closed": true,
+     "stClose": 1,
+     "after": {
+      "st": 1,
+      "idx": 3,
+      "log": [
+       "rate 1.5",
+       "rate 1.5",
+       "unmute",
+       "rate 1.5",
+       "load test0000012 100-160",
+       "rate 1.5"
+      ]
+     }
+    },
+    {
+     "hk": {
+      "step": "1",
+      "clipped": false,
+      "full": true,
+      "size": 15,
+      "lines": 6,
+      "id": "test0000014:100"
      },
      "open": true,
      "hook": true,
@@ -498,56 +560,13 @@
      "stClose": 1,
      "after": {
       "st": 1,
-      "idx": 3,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000028 100-180",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000020:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 1180,
-     "exDir": "ltr",
-     "exAr": false,
-     "meta": "SpeakerKanal brain 0EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": false,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
       "idx": 4,
       "log": [
        "rate 1.5",
        "rate 1.5",
        "unmute",
        "rate 1.5",
-       "load test0000018 100-160",
+       "load test0000050 100-200",
        "rate 1.5"
       ]
      }
@@ -559,7 +578,7 @@
       "full": true,
       "size": 15,
       "lines": 6,
-      "id": "test0000029:100"
+      "id": "test0000021:100"
      },
      "open": true,
      "hook": true,
@@ -590,7 +609,7 @@
        "rate 1.5",
        "unmute",
        "rate 1.5",
-       "load test0000025 100-180",
+       "load test0000053 100-200",
        "rate 1.5"
       ]
      }
@@ -610,634 +629,12 @@
      "dir": "rtl"
     },
     {
-     "ar": true,
-     "dir": "rtl"
-    }
-   ],
-   "hit": {
-    "green": true,
-    "why": true,
-    "due7": true,
-    "grew": true
-   },
-   "skip": {
-    "how": "hook",
-    "noRating": true
-   },
-   "errors": [],
-   "ok": true
-  },
-  {
-   "browser": "chromium",
-   "checks": {
-    "lockedWithoutKey": true,
-    "feedAfterDecrypt": true,
-    "fragmentRemoved": true,
-    "keyInCache": true,
-    "firstArea": "beat",
-    "firstPlaying": true,
-    "hookShortNormal": true,
-    "soundOn": true,
-    "forYouExactlyWhenSet": true,
-    "sawBothKinds": true,
-    "stoppedAtEnd": true,
-    "autoNext": true,
-    "recallAfter4": true,
-    "recallPlayerStopped": true,
-    "recallThreeFullWidthOptions": true,
-    "recallNothingBeforeChoice": true,
-    "recallOldControlsGone": true,
-    "recallLayout": true,
-    "recallColors": true,
-    "recallWhyAndNext": true,
-    "recallClosed": true,
-    "recallPlaysAgain": true,
-    "recallMissed2d": true,
-    "todayNoGotItForMiss": true,
-    "todayCount": true,
-    "captionsAutoRule": true,
-    "captionsArabicRtl": true,
-    "swipeNext": true,
-    "captionsMenuOn": true,
-    "holdFast": true,
-    "releaseNormal": true,
-    "embedNoZoom": true,
-    "embed16by9FullWidth": true,
-    "speedDefault15": true,
-    "speedHold2": true,
-    "speedNeverAbove2": true,
-    "speedBackAfterRelease": true,
-    "textView": true,
-    "textPaused": true,
-    "textNotSeenBeforeEnd": true,
-    "textSeenAtEnd": true,
-    "textStillPaused": true,
-    "textOnlyTextMoments": true,
-    "textHookShown": true,
-    "sourceLineAll": true,
-    "sourceLineFields": true,
-    "sourceLineQuoted": true,
-    "sourceLineLink": true,
-    "sourceLineOpens": true,
-    "textNeverLoadsPlayer": true,
-    "audioOnlyAudio": true,
-    "audioPlays": true,
-    "audioCoverShown": true,
-    "audioBigCaption": true,
-    "audioNeverVideo": true,
-    "videoBack": true,
-    "videoNeverAudio": true,
-    "pausedForCheck": true,
-    "heartShown": true,
-    "heartAtTap": true,
-    "heartGoneAfter400": true,
-    "doubleTapLikes": true,
-    "doubleTapDoesNotSave": true,
-    "doubleTapKeepsLike": true,
-    "likeButtonUndoes": true,
-    "likeButtonFills": true,
-    "saveFills": true,
-    "columnOrder": true,
-    "columnTargets48": true,
-    "columnSpacing": true,
-    "columnLabels": true,
-    "menuItems": true,
-    "longPressOpensNote": true,
-    "longPressDoesNotToggle": true,
-    "noteSevenChips": true,
-    "noteTextField": true,
-    "noteMultiSelect": true,
-    "noteSheetClosed": true,
-    "noteOpensIssuePage": true,
-    "noteTitleIsHook": true,
-    "noteLabelFeedback": true,
-    "noteBodyFields": true,
-    "noteBodyApp": true,
-    "noteSavedLocally": true,
-    "noteOtherChipsNoEffect": true,
-    "noteNoNetwork": true,
-    "fillImmediate": true,
-    "fillUnder100": true,
-    "tapRecorded": true,
-    "knownNoToast": true,
-    "wrongToast": true,
-    "muteToast": true,
-    "noteViaMenu": true,
-    "noteWrongEffect": true,
-    "noteAdvanced": true,
-    "noteChipsInBody": true,
-    "noteStillNoNetwork": true,
-    "posterWheneverNotPlaying": true,
-    "latencyMeasured": true,
-    "bufferedUnder300": true,
-    "latencyInDiag": true,
-    "unlockQr": true,
-    "keyBackupsBoth": true,
-    "speedOptions": true,
-    "tapInSettings": true,
-    "latencyInSettings": true,
-    "weeklyReviewOnSunday": true,
-    "reviewListsSaved": true,
-    "reviewWeekLine": true,
-    "reviewNoPercent": true,
-    "reviewSaveNeedsPlan": true,
-    "feedAfterReview": true,
-    "reviewOnlyOnce": true,
-    "prevPlanShown": true,
-    "prevPlanAnswered": true,
-    "skipWorks": true,
-    "p6Feed": true,
-    "emptyAudioLine": true,
-    "emptyKeepsSwitch": true,
-    "emptyTextLine": true,
-    "emptyBackToVideo": true,
-    "badFeedStarts": true,
-    "badFirstPlays": true,
-    "badNoErrorPage": true,
-    "badErrorsHappened": true,
-    "badNotStuckOnError": true,
-    "badNeverLoaded": true,
-    "badNeverShown": true,
-    "badSkippedLine": true,
-    "badPageErrors": true,
-    "throwFeedStarts": true,
-    "throwNoErrorPage": true,
-    "throwLogged": true,
-    "throwPlaysAfterSkip": true,
-    "throwStillNoErrorPage": true,
-    "throwPageErrors": true,
-    "p7Feed": true,
-    "hookLongSmallerNeverCut": true,
-    "captionOpensWithContent": true,
-    "captionOrder": true,
-    "captionKeepsPlaying": true,
-    "captionCloses": true,
-    "captionArabicRtl": true,
-    "noRecallNoCard": true,
-    "recallHit": true,
-    "recallSwipeSkipsWithoutRating": true,
-    "recallArabicRtl": true,
-    "recallEnglishLtr": true,
-    "pageErrors": 0
-   },
-   "card0": {
-    "n": 3,
-    "before": false,
-    "old": false,
-    "dir": "ltr",
-    "qar": false,
-    "fullWidth": true,
-    "order": [
-     "1",
-     "0",
-     "0"
-    ],
-    "cover": true,
-    "area": true,
-    "speaker": true,
-    "coverFirst": true,
-    "qBeforeOptions": true
-   },
-   "wrongChoice": {
-    "states": [
-     {
-      "c": "1",
-      "s": "right"
-     },
-     {
-      "c": "0",
-      "s": "wrong"
-     },
-     {
-      "c": "0",
-      "s": "rest"
-     }
-    ],
-    "col": [
-     "rgb(47, 179, 90)",
-     "rgb(229, 72, 77)",
-     "rgb(58, 61, 69)"
-    ],
-    "why": "Because 14 says so.",
-    "next": "Next",
-    "whyBelow": true
-   },
-   "recall": [
-    {
-     "id": "test0000014:100",
-     "due": 1792929603393,
-     "results": [
-      {
-       "at": 1792756803393,
-       "got": false
-      }
-     ]
-    }
-   ],
-   "today": "today 5 seen, 0 got it",
-   "captions": [
-    {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
-    },
-    {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
-    },
-    {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
-    },
-    {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
-    }
-   ],
-   "sequence": [
-    {
-     "id": "test0000000:100",
-     "has": true,
-     "fy": true,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000001:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000006:100",
-     "has": true,
-     "fy": true,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000014:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    }
-   ],
-   "band": {
-    "bw": 393,
-    "bh": 221.06251525878906,
-    "fw": 393,
-    "fh": 221.06251525878906,
-    "dx": 0,
-    "dy": 0,
-    "vw": 393
-   },
-   "rates": [
-    1.5,
-    2
-   ],
-   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: bb98407\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
-   "tapToFill": {
-    "measured": 32.40000000000873,
-    "recorded": 32
-   },
-   "posterCheck": {
-    "checksDone": 882,
-    "violations": 0,
-    "endedSeen": 147
-   },
-   "latency": {
-    "n": 32,
-    "buffered": 26,
-    "median": 0
-   },
-   "badWalk": [
-    {
-     "idx": 2,
-     "id": "test0000004",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 3,
-     "id": "test0000013",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 4,
-     "id": "test0000019",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 5,
-     "id": "test0000050",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 6,
-     "id": "test0000053",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 7,
-     "id": "test0000051",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 8,
-     "id": "test0000052",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 9,
-     "id": "test0000054",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 10,
-     "id": "test0000046",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 11,
-     "id": "test0000026",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 12,
-     "id": "test0000016",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 13,
-     "id": "test0000027",
-     "card": false,
-     "end": false,
-     "err": false
-    }
-   ],
-   "capLogs": [
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000052:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 1180,
-     "exDir": "ltr",
-     "exAr": false,
-     "meta": "SpeakerKanal body 0EpisodeTestvideoAt1:40AreaBody",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": false,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 1,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000020 100-200",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000013:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 419,
-     "exDir": "rtl",
-     "exAr": true,
-     "meta": "SpeakerKanal brain 1EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": true,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 2,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000029 100-200",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000022:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 1180,
-     "exDir": "ltr",
-     "exAr": false,
-     "meta": "SpeakerKanal brain 2EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": false,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 3,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000028 100-180",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000020:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 1180,
-     "exDir": "ltr",
-     "exAr": false,
-     "meta": "SpeakerKanal brain 0EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": false,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 4,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000018 100-160",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000029:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 419,
-     "exDir": "rtl",
-     "exAr": true,
-     "meta": "SpeakerKanal brain 1EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": true,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 5,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000025 100-180",
-       "rate 1.5"
-      ]
-     }
-    }
-   ],
-   "noRecallDbg": {
-    "cardSeen": false,
-    "idx": 5
-   },
-   "cards": [
-    {
      "ar": false,
      "dir": "ltr"
     },
     {
-     "ar": true,
-     "dir": "rtl"
-    },
-    {
-     "ar": true,
-     "dir": "rtl"
+     "ar": false,
+     "dir": "ltr"
     }
    ],
    "hit": {

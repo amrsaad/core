@@ -22,12 +22,6 @@ struct LogEntry: Codable, Equatable {
     var feedback: String?
 }
 
-struct NoteEntry: Codable, Equatable {
-    var chips: [String]
-    var text: String
-    var at: Date
-}
-
 /// Everything Core remembers on this phone. Stored as one JSON file.
 struct AppState: Codable, Equatable {
     var seen: [String: Date] = [:]
@@ -48,8 +42,10 @@ struct AppState: Codable, Equatable {
     /// Aufgabe 3: Momente mit gefülltem Herz (More like this) und Tipp bis Füllung am Knopf
     var liked: [String: Date]?
     var tapMs: [Actions.Tap]?
-    /// Aufgabe 5: Rückmeldung je Moment, lokal gespeichert
-    var notes: [String: NoteEntry]?
+    /// Rückmeldung: jede Notiz (Chip oder Text) wird lokal gesammelt und einmal am Tag gesammelt als Issue gesendet
+    var feedbackNotes: [Note.Entry]?
+    /// Tag (lokal), an dem die Zeile "N notes, send?" zuletzt gezeigt wurde
+    var notesPromptDay: String?
     var playLatency: [Latency.Sample]?
     var dayCount: [String: DayCount]?
     var recall: Recall.State?
@@ -164,10 +160,19 @@ final class Store: ObservableObject {
         signal(m, on ? Mix.Signal.more : 1 / Mix.Signal.more)
     }
 
-    func saveNote(_ m: Moment, chips: [String], text: String) {
-        var n = state.notes ?? [:]
-        n[m.id] = NoteEntry(chips: chips, text: text.trimmingCharacters(in: .whitespacesAndNewlines), at: Date())
-        state.notes = n
+    static var nowMs: Int { Int((Date().timeIntervalSince1970 * 1000).rounded()) }
+
+    /// Notiz zum Moment sofort lokal speichern. Gibt false zurück, wenn weder Chip noch Text da war.
+    @discardableResult
+    func addNote(_ m: Moment, chip: String?, text: String, tab: String) -> Bool {
+        let ctx = Note.Context(id: m.id, hook: m.hook, tab: tab, commit: Diag.commit)
+        guard let e = Note.makeEntry(ctx, chips: chip.map { [$0] } ?? [], text: text, at: Store.nowMs) else { return false }
+        state.feedbackNotes = (state.feedbackNotes ?? []) + [e]
+        return true
+    }
+
+    func markNotesSent(keys: [String]) {
+        state.feedbackNotes = Note.markSent(state.feedbackNotes, keys: keys, at: Store.nowMs)
     }
 
     func addTap(ms: Int) {

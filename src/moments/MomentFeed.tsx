@@ -13,10 +13,10 @@ import { RecallCard } from './RecallCard';
 import { CaptionSheet } from './CaptionSheet';
 import { sourceLine } from './source';
 import { NoteSheet } from './NoteSheet';
-import { deviceLine, issueUrl, noteEffect, type Chip } from './note';
+import { buildIssue, chipEffect, firstOpenOfDay, makeEntry, markSent, promptLine, unsent, type Chip } from './note';
 import { HOOK_LINE_PT, hookStep } from './hook';
 import { makeRng } from './rng';
-import { addTap, CONFIRM_MS, HEART_MS, nextLiked, NOTE_LONG_MS } from './actions';
+import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
 import { emptyFormLine, filterPool, FORM_LABEL, FORMS, momentText, textEndReached, type Form } from './form';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
@@ -43,7 +43,6 @@ interface Slot {
 const END_GUARD = 0.3;
 const FOR_YOU_MS = 6000;
 const POLL_MS = 150;
-const SWIPE_PX = 60;
 const TAP_MS = 260;
 const LONG_MS = 520;
 const LOG_MAX = 3000;
@@ -94,7 +93,6 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const [progress, setProgress] = useState(0);
   const [hint, setHint] = useState(true);
   const [paused, setPaused] = useState(false);
-  const [menu, setMenu] = useState(false);
   const [fast, setFast] = useState(false);
   const rateRef = useRef(DEFAULT_SPEED);
   const fastRef = useRef(false);
@@ -107,6 +105,11 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   /** Herz an der Tippstelle (400 ms) und kurze Bestätigung am Knopf (150 ms) */
   const [capOpen, setCapOpen] = useState(false);
   const [note, setNote] = useState<Moment | null>(null);
+  /** Zeile "N notes, send?" beim ersten Öffnen am Tag */
+  const [prompt, setPrompt] = useState(false);
+  const promptChecked = useRef(false);
+  const noteRef = useRef<Moment | null>(null);
+  noteRef.current = note;
   const hookEl = useRef<HTMLDivElement>(null);
   const [heart, setHeart] = useState<{ x: number; y: number; k: number } | null>(null);
   const heartTimer = useRef(0);
@@ -488,10 +491,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   const setForm = (f: Form) => update((s) => ({ ...s, settings: { ...s.settings, form: f } }));
   // Text: Wischen wechselt erst am Textende (oben am Anfang zurück), sonst scrollt der Text
-  const tt = useRef({ y: 0, top: false, end: false });
+  const tt = useRef({ x: 0, y: 0, top: false, end: false });
 
   // ---- Gesten ----
-  const g = useRef({ x: 0, y: 0, t: 0, moved: false, long: 0, fired: false, tap: 0, lastUp: 0, dy: 0 });
+  const g = useRef({ x: 0, y: 0, t: 0, moved: false, long: 0, fired: false, tap: 0, lastUp: 0, dx: 0, dy: 0 });
   const setDrag = (px: number) => {
     dragEl.current?.style.setProperty('--drag', `${px}px`);
     if (!px) dragEl.current?.removeAttribute('data-drag');
@@ -580,11 +583,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     });
   };
 
-  /** Known und Weak bestätigen sich durch das Schließen des Menüs, Wrong und Mute zusätzlich mit Toast */
+  /** Known bestätigt sich durch das Schließen des Blatts, Wrong und Mute zusätzlich mit Toast */
   const feedback = (fb: Feedback, target?: Moment) => {
     const cur = queue.current[idxRef.current];
     const m = target ?? cur;
-    setMenu(false);
     if (!m) return;
     update((s) => ({ ...s, momentWeights: applySignal(s.momentWeights, m, SIGNAL.negative) }));
     log(m, { feedback: fb });
@@ -592,35 +594,33 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (m === cur) goTo(idxRef.current + 1);
   };
 
-  /** Rückmeldung: lokal speichern, Known und Wrong wirken wie im Menü, dann die vorbereitete Issue-Seite im Browser öffnen */
-  const sendNote = (chips: Chip[], text: string) => {
-    const m = note;
+  /**
+   * Rückmeldung: ein Tipp auf einen Chip oder Done speichert sofort lokal, das Blatt schließt, der Feed geht zum nächsten Moment.
+   * Known, Wrong und Mute speaker wirken wie bisher. Es gibt keinen Netzwerkaufruf und keinen Send-Knopf.
+   */
+  const saveNote = (m: Moment, chip: Chip | null, text: string) => {
     setNote(null);
-    if (!m) return;
-    const ctx = {
-      id: m.id,
-      videoId: m.videoId,
-      start: m.start,
-      end: m.end,
-      channel: m.channel,
-      sourceUrl: fullVideoUrl(m),
-      area: AREA_LABEL[m.area],
-      tab: FORM_LABEL[form],
-      speed: speedOf(stateRef.current.settings),
-      device: deviceLine(navigator.userAgent),
-      commit: __APP_COMMIT__,
-      hook: m.hook,
-    };
-    const url = issueUrl(ctx, chips, text);
-    update((s) => ({ ...s, momentNotes: { ...(s.momentNotes ?? {}), [m.id]: { chips, text: text.trim(), at: Date.now() } } }));
-    window.open(url, '_blank', 'noopener');
-    const fx = noteEffect(chips);
-    if (fx) feedback(fx, m);
+    const entry = makeEntry({ id: m.id, hook: m.hook, tab: FORM_LABEL[form], commit: __APP_COMMIT__ }, chip ? [chip] : [], text, Date.now());
+    if (!entry) return;
+    navigator.vibrate?.(chip ? 15 : 10);
+    update((s) => ({ ...s, feedbackNotes: [...(s.feedbackNotes ?? []), entry] }));
+    const fx = chip ? chipEffect(chip) : null;
+    if (fx === 'kenne' || fx === 'falsch') return feedback(fx, m);
+    if (fx === 'mute') return muteChannel(m);
+    if (m === queue.current[idxRef.current]) goTo(idxRef.current + 1);
   };
 
-  const muteChannel = () => {
-    const m = queue.current[idxRef.current];
-    setMenu(false);
+  /** Ein einziges vorausgefülltes Issue in core-content aus allen ungesendeten Notizen, danach gelten sie als gesendet */
+  const sendNotes = () => {
+    const b = buildIssue(unsent(stateRef.current.feedbackNotes), today);
+    if (!b) return;
+    window.open(b.url, '_blank', 'noopener');
+    update((s) => ({ ...s, feedbackNotes: markSent(s.feedbackNotes, b.keys, Date.now()) }));
+  };
+
+  const muteChannel = (target?: Moment) => {
+    const cur = queue.current[idxRef.current];
+    const m = target ?? cur;
     if (!m) return;
     update((s) => ({ ...s, mutedChannels: { ...s.mutedChannels, [m.channel]: m.channel } }));
     stateRef.current = { ...stateRef.current, mutedChannels: { ...stateRef.current.mutedChannels, [m.channel]: m.channel } };
@@ -628,12 +628,11 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     queue.current = [...keep, ...queue.current.slice(idxRef.current + 1).filter((x) => x.channel !== m.channel)];
     for (const sl of slots.current) if (sl.index > idxRef.current) sl.index = -1;
     show(`${speakerLine(m.channel)} muted`);
-    goTo(idxRef.current + 1);
+    if (m === cur) goTo(idxRef.current + 1);
   };
 
   const openFull = () => {
     const m = queue.current[idxRef.current];
-    setMenu(false);
     if (!m) return;
     confirm('source');
     current().player?.pauseVideo();
@@ -645,7 +644,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   const onDown = (e: React.PointerEvent) => {
     const r = g.current;
-    Object.assign(r, { x: e.clientX, y: e.clientY, t: Date.now(), moved: false, fired: false, dy: 0 });
+    Object.assign(r, { x: e.clientX, y: e.clientY, t: Date.now(), moved: false, fired: false, dx: 0, dy: 0 });
     window.clearTimeout(r.long);
     r.long = window.setTimeout(() => {
       r.fired = true;
@@ -658,12 +657,14 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const onMove = (e: React.PointerEvent) => {
     const r = g.current;
     if (!r.t) return;
+    r.dx = e.clientX - r.x;
     r.dy = e.clientY - r.y;
-    if (Math.abs(r.dy) > 10 || Math.abs(e.clientX - r.x) > 10) {
+    if (Math.abs(r.dy) > 10 || Math.abs(r.dx) > 10) {
       r.moved = true;
       window.clearTimeout(r.long);
     }
-    if (r.moved && !single) {
+    // Waagerechter Zug verschiebt den Feed nicht
+    if (r.moved && !single && Math.abs(r.dy) >= Math.abs(r.dx)) {
       dragEl.current?.setAttribute('data-drag', '1');
       setDrag(r.dy);
     }
@@ -681,8 +682,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!wasDown) return;
     if (r.moved) {
       setDrag(0);
-      if (r.dy < -SWIPE_PX) goTo(idxRef.current + 1);
-      else if (r.dy > SWIPE_PX) goTo(idxRef.current - 1);
+      const sw = swipeOf(r.dx, r.dy);
+      if (sw === 'next') goTo(idxRef.current + 1);
+      else if (sw === 'prev') goTo(idxRef.current - 1);
+      else if (sw === 'note') openNote();
       return;
     }
     const t = Date.now();
@@ -700,9 +703,30 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     r.tap = window.setTimeout(togglePlay, TAP_MS);
   };
 
+  /** Wisch nach links: Blatt für den aktuellen Moment, nicht über Abrufkarte oder For-you-Karte */
+  const openNote = () => {
+    const m = queue.current[idxRef.current];
+    if (!m || forYouRef.current || recallRef.current || noteRef.current) return;
+    navigator.vibrate?.(10);
+    setNote(m);
+  };
+
+  // Beim ersten Öffnen am Tag, wenn ungesendete Notizen vorliegen: Zeile "N notes, send?"
+  useEffect(() => {
+    if (!active || promptChecked.current) return;
+    promptChecked.current = true;
+    const s = stateRef.current;
+    if (!firstOpenOfDay(s.notesPromptDay, today)) return;
+    update((st) => ({ ...st, notesPromptDay: today }));
+    if (unsent(s.feedbackNotes).length > 0) setPrompt(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
+
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
-      if (!active) return;
+      if (!active || noteRef.current) return;
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT')) return;
       if (e.key === 'ArrowDown' || e.key === 'j') goTo(idxRef.current + 1);
       if (e.key === 'ArrowUp' || e.key === 'k') goTo(idxRef.current - 1);
       if (e.key === ' ') togglePlay();
@@ -730,7 +754,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       tapMs: () => stateRef.current.tapMs ?? [],
       skipRecall: () => closeRecall(),
       closeCaption: () => setCapOpen(false),
-      notes: () => stateRef.current.momentNotes ?? {},
+      notes: () => stateRef.current.feedbackNotes ?? [],
+      openNote: () => openNote(),
       recall: () => ({ open: recallRef.current, state: stateRef.current.recall ?? {}, sessionSeen: sessionSeen.current }),
     };
   });
@@ -800,12 +825,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           onScroll={checkTextEnd}
           onTouchStart={(e) => {
             const el = e.currentTarget;
-            tt.current = { y: e.touches[0].clientY, top: el.scrollTop <= 0, end: textEndReached(el.scrollTop, el.clientHeight, el.scrollHeight) };
+            tt.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, top: el.scrollTop <= 0, end: textEndReached(el.scrollTop, el.clientHeight, el.scrollHeight) };
           }}
           onTouchEnd={(e) => {
+            const dx = e.changedTouches[0].clientX - tt.current.x;
             const dy = e.changedTouches[0].clientY - tt.current.y;
-            if (dy < -SWIPE_PX && tt.current.end) goTo(idxRef.current + 1);
-            else if (dy > SWIPE_PX && tt.current.top) goTo(idxRef.current - 1);
+            const sw = swipeOf(dx, dy);
+            if (sw === 'note') openNote();
+            else if (sw === 'next' && tt.current.end) goTo(idxRef.current + 1);
+            else if (sw === 'prev' && tt.current.top) goTo(idxRef.current - 1);
           }}
           onDoubleClick={(e) => likeAt(e.clientX, e.clientY)}
         >
@@ -900,7 +928,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
       {!forYou && (
         <div className="vactions">
-          <ActionButton testid="like" label="More" on={liked} onLong={() => { navigator.vibrate?.(20); setNote(queue.current[idxRef.current] ?? null); }} onClick={(e) => { const t0 = e.timeStamp; like('button'); recordTap(t0); }}>
+          <ActionButton testid="like" label="More" on={liked} onClick={(e) => { const t0 = e.timeStamp; like('button'); recordTap(t0); }}>
             <path d={HEART} />
           </ActionButton>
           <ActionButton testid="save" label="Save" on={saved} onClick={(e) => { const t0 = e.timeStamp; toggleSave(); recordTap(t0); }}>
@@ -908,9 +936,6 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           </ActionButton>
           <ActionButton testid="source" label="Source" on={pulse === 'source'} fill={false} onClick={openFull}>
             <path d="M7 17 17 7M9 7h8v8" />
-          </ActionButton>
-          <ActionButton testid="options" label="" aria="Options" onClick={() => setMenu(true)}>
-            <path d="M5 12h.01M12 12h.01M19 12h.01" strokeWidth="3.2" />
           </ActionButton>
         </div>
       )}
@@ -945,45 +970,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </div>
       )}
 
-      {note && <NoteSheet key={note.id} m={note} speaker={speakerLine(note.channel)} initial={stateRef.current.momentNotes?.[note.id]} onSend={sendNote} onCancel={() => setNote(null)} />}
-
-      {menu && m && (
-        <div className="absolute inset-0 z-40 flex items-end bg-black/60" onClick={(e) => e.target === e.currentTarget && setMenu(false)}>
-          <div className="w-full rounded-t-2xl bg-[#121212] px-4 pt-2 text-white" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
-            <div className="mx-auto mb-3 h-1 w-9 rounded-full bg-[#3A3D45]" aria-hidden="true" />
-            <div className="mb-2 flex items-center gap-2 text-[13px] leading-[18px] text-[#B3B3B3]">
-              <span className="h-2 w-2 rounded-full" style={{ background: AREA_COLOR[m.area] }} aria-hidden="true" />
-              {speakerLine(m.channel)}
-            </div>
-            {(
-              [
-                ['Known', () => feedback('kenne')],
-                ['Weak', () => feedback('schwach')],
-                ['Wrong', () => feedback('falsch')],
-                ['Note', () => { setMenu(false); setNote(queue.current[idxRef.current] ?? null); }],
-                ['Mute speaker', muteChannel],
-              ] as [string, () => void][]
-            ).map(([label, fn]) => (
-              <button key={label} onClick={fn} className="block h-[52px] w-full border-b border-[#262931] text-left text-[17px]">
-                {label}
-              </button>
-            ))}
-            <label className="flex h-[52px] items-center justify-between text-[17px]">
-              <span>Captions</span>
-              <input
-                type="checkbox"
-                checked={captionsOn}
-                disabled={!m.cues?.length}
-                onChange={() => update((s) => ({ ...s, settings: { ...s.settings, captionMode: captionsOn ? 'off' : 'on' } }))}
-                className="h-[22px] w-[22px] accent-white"
-              />
-            </label>
-            <button onClick={() => setMenu(false)} className="mt-2 h-[52px] w-full rounded-xl bg-[#1E2026] text-[17px] font-semibold">
-              Cancel
-            </button>
-          </div>
-        </div>
+      {prompt && !forYou && unsent(state.feedbackNotes).length > 0 && (
+        <button type="button" className="vnotes" data-testid="notes-prompt" onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()} onClick={sendNotes}>
+          {promptLine(unsent(state.feedbackNotes).length)}
+        </button>
       )}
+
+      {note && <NoteSheet key={note.id} m={note} speaker={speakerLine(note.channel)} onChip={(c, t) => saveNote(note, c, t)} onDone={(t) => saveNote(note, null, t)} onCancel={() => setNote(null)} />}
     </div>
   );
 }
@@ -991,35 +984,16 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 const HEART = 'M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z';
 
 /** Ziel 48 pt, Bestätigung am Knopf (Füllung ohne Verzögerung, Pop 150 ms) */
-function ActionButton({ label, aria, testid, onClick, onLong, on, fill = true, children }: { label: string; aria?: string; testid: string; onClick: (e: React.MouseEvent) => void; onLong?: () => void; on?: boolean; fill?: boolean; children: React.ReactNode }) {
-  const lp = useRef({ t: 0, fired: false });
-  const clear = () => window.clearTimeout(lp.current.t);
+function ActionButton({ label, aria, testid, onClick, on, fill = true, children }: { label: string; aria?: string; testid: string; onClick: (e: React.MouseEvent) => void; on?: boolean; fill?: boolean; children: React.ReactNode }) {
   return (
     <button
       aria-label={aria ?? label}
       aria-pressed={on === undefined || !fill ? undefined : on}
       data-testid={testid}
       data-on={on ? '1' : undefined}
-      onPointerDown={(e) => {
-        e.stopPropagation();
-        if (!onLong) return;
-        lp.current.fired = false;
-        clear();
-        lp.current.t = window.setTimeout(() => {
-          lp.current.fired = true;
-          onLong();
-          // Landet das Loslassen auf dem Blatt statt auf dem Knopf, bleibt kein Klick übrig, der den nächsten Tipp schluckt
-          window.setTimeout(() => { lp.current.fired = false; }, 600);
-        }, NOTE_LONG_MS);
-      }}
-      onPointerUp={(e) => { e.stopPropagation(); clear(); }}
-      onPointerCancel={clear}
-      onPointerLeave={clear}
-      onContextMenu={(e) => onLong && e.preventDefault()}
-      onClick={(e) => {
-        if (lp.current.fired) { lp.current.fired = false; return; }
-        onClick(e);
-      }}
+      onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
+      onClick={onClick}
       className="vbtn no-callout flex min-h-[48px] min-w-[48px] flex-col items-center justify-center gap-0.5 text-white"
     >
       <svg width="28" height="28" viewBox="0 0 24 24" fill={on && fill ? '#fff' : 'none'} stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,.6))' }}>

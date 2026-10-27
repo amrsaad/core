@@ -282,11 +282,13 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 /* No browser menu on long press (save image, open link). Holding belongs to the app (2x). */
 .vfeed, .vfeed * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 .vfeed img, .vfeed video, .vfeed iframe { pointer-events: none; }
-.note-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.note-chip { min-height: 44px; padding: 0 16px; border-radius: 22px; border: 1px solid #3a3d45; background: #1a1c21; color: #fff; font-size: 16px; font-weight: 600; }
-.note-chip[aria-pressed='true'] { background: #fff; color: #000; border-color: #fff; }
+.note-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.note-chip { min-height: 60px; padding: 0 16px; border-radius: 16px; border: 1px solid #3a3d45; background: #1a1c21; color: #fff; font-size: 18px; font-weight: 600; }
+.note-chip:active { background: #fff; color: #000; border-color: #fff; }
 .note-text { width: 100%; border-radius: 12px; border: 1px solid #333; background: #111; color: #fff; padding: 12px; font-size: 17px; line-height: 24px; resize: none; }
-.note-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
-.note-cancel, .note-send { min-height: 52px; border-radius: 12px; font-size: 17px; font-weight: 600; }
-.note-cancel { background: #1e2026; color: #fff; }
-.note-send { background: #fff; color: #000; }
+.note-done { width: 100%; min-height: 52px; margin-top: 10px; border-radius: 12px; background: #fff; color: #000; font-size: 17px; font-weight: 600; }
+/* Zeile "N notes, send?" beim ersten Öffnen am Tag, unter dem Formschalter, links neben der Tageszahl */
+.vnotes {
+  position: absolute; z-index: 26; left: calc(env(safe-area-inset-left) + 16px); top: calc(env(safe-area-inset-top) + 64px);
+  min-height: 36px; padding: 0 14px; border-radius: 999px; background: #fff; color: #000; font-size: 14px; font-weight: 600;
+}

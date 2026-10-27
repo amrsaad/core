@@ -1,15 +1,15 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { AREA_COLOR } from '../lib/labels';
-import { CHIPS, toggleChip, type Chip } from './note';
+import { CHIPS, TEXT_MAX, type Chip } from './note';
 import type { Moment } from './types';
 
 /**
- * Rückmeldung zu einem Moment: Chips (mehrfach) und Freitext. "Send" öffnet die vorbereitete GitHub-Issue-Seite
- * im Browser des Geräts. Die App ruft selbst nichts auf und hält keinen Token.
+ * Rückmeldung in einer Ebene. Ein Tipp auf einen Chip speichert sofort (mit dem Text, falls schon einer im Feld steht) und
+ * schließt das Blatt. Done speichert nur den Text. Ein Tipp neben das Blatt schließt es ohne Notiz. Kein Send-Knopf.
  */
-export function NoteSheet({ m, speaker, initial, onSend, onCancel }: { m: Moment; speaker: string; initial?: { chips: string[]; text: string }; onSend: (chips: Chip[], text: string) => void; onCancel: () => void }) {
-  const [chips, setChips] = useState<Chip[]>(() => CHIPS.filter((c) => initial?.chips.includes(c)));
-  const [text, setText] = useState(initial?.text ?? '');
+export function NoteSheet({ m, speaker, onChip, onDone, onCancel }: { m: Moment; speaker: string; onChip: (chip: Chip, text: string) => void; onDone: (text: string) => void; onCancel: () => void }) {
+  const [text, setText] = useState('');
+  const field = useRef<HTMLTextAreaElement>(null);
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
   return (
     <div className="absolute inset-0 z-40 flex items-end bg-black/60" data-testid="note-sheet" onPointerDown={stop} onPointerUp={stop} onClick={(e) => e.target === e.currentTarget && onCancel()}>
@@ -17,20 +17,19 @@ export function NoteSheet({ m, speaker, initial, onSend, onCancel }: { m: Moment
         <div className="mx-auto mb-3 h-1 w-9 rounded-full bg-[#3A3D45]" aria-hidden="true" />
         <div className="mb-3 flex items-center gap-2 text-[13px] leading-[18px] text-[#B3B3B3]">
           <span className="h-2 w-2 rounded-full" style={{ background: AREA_COLOR[m.area] }} aria-hidden="true" />
-          <span>Note · {speaker}</span>
+          <span>{speaker}</span>
         </div>
-        <div className="note-chips" role="group" aria-label="Chips">
+        <div className="note-chips" role="group" aria-label="Feedback">
           {CHIPS.map((c) => (
-            <button key={c} type="button" className="note-chip" data-testid={`note-chip-${c}`} aria-pressed={chips.includes(c)} onClick={() => setChips((x) => toggleChip(x, c))}>
+            <button key={c} type="button" className="note-chip" data-testid={`note-chip-${c}`} onClick={() => onChip(c, text)}>
               {c}
             </button>
           ))}
         </div>
-        <textarea className="note-text" data-testid="note-text" rows={3} maxLength={1500} placeholder="What should change?" value={text} onChange={(e) => setText(e.target.value)} />
-        <div className="note-actions">
-          <button type="button" className="note-cancel" data-testid="note-cancel" onClick={onCancel}>Cancel</button>
-          <button type="button" className="note-send" data-testid="note-send" onClick={() => onSend(chips, text)}>Send</button>
-        </div>
+        <textarea ref={field} className="note-text" data-testid="note-text" rows={2} maxLength={TEXT_MAX} placeholder="Note" value={text} onChange={(e) => setText(e.target.value)} />
+        <button type="button" className="note-done" data-testid="note-done" onClick={() => onDone(text)}>
+          Done
+        </button>
       </div>
     </div>
   );

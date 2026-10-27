@@ -79,8 +79,8 @@ final class CoreUITests: XCTestCase {
         wait(2.0)
         shot("15-feed-third")
 
-        openMenu(tag: "16")
-        if app.buttons["Cancel"].exists { app.buttons["Cancel"].tap() } else { app.swipeDown() }
+        openNoteSheet(tag: "16")
+        app.buttons["noteDone"].tap()
         wait(0.5)
 
         // saved tab
@@ -111,20 +111,16 @@ final class CoreUITests: XCTestCase {
         return app.buttons.matching(identifier: id).allElementsBoundByIndex.first { $0.frame.height > 0 && screen.contains($0.frame) }
     }
 
-    /// Taps the visible page's menu button and expects the sheet. Attaches hierarchy and app log when it fails.
-    private func openMenu(tag: String) {
-        let screen = app.frame
-        let menuButton = app.buttons.matching(identifier: "menuButton").allElementsBoundByIndex
-            .first { $0.frame.height > 0 && screen.contains($0.frame) }
-        XCTAssertNotNil(menuButton, "no visible menu button")
-        menuButton?.tap()
-        let mute = app.buttons["Mute speaker"]
-        let opened = mute.waitForExistence(timeout: 5)
+    /// Swipes left on the feed and expects the feedback sheet. Attaches hierarchy and app log when it fails.
+    private func openNoteSheet(tag: String) {
+        app.swipeLeft()
+        let done = app.buttons["noteDone"]
+        let opened = done.waitForExistence(timeout: 5)
         wait(0.6)
-        shot("\(tag)-menu")
+        shot("\(tag)-note-sheet")
         if !opened {
             let t = XCTAttachment(string: app.debugDescription)
-            t.name = "\(tag)-menu-hierarchy"
+            t.name = "\(tag)-note-hierarchy"
             t.lifetime = .keepAlways
             add(t)
         }
@@ -134,7 +130,7 @@ final class CoreUITests: XCTestCase {
             t.lifetime = .keepAlways
             add(t)
         }
-        XCTAssertTrue(opened, "\(tag): menu sheet did not open")
+        XCTAssertTrue(opened, "\(tag): note sheet did not open")
     }
 
     /// Punkt 7: Plan der Vorwoche (vorab in state.json gelegt), Zahlenzeile, genau ein Plan, Speichern erst mit Plan
@@ -217,12 +213,14 @@ final class CoreUITests: XCTestCase {
         launch()
         XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15), "feed did not appear")
         wait(1)
-        for id in ["like", "save", "source", "menuButton"] {
+        for id in ["like", "save", "source"] {
             let b = visible(id)
             XCTAssertNotNil(b, "\(id) missing")
             XCTAssertGreaterThanOrEqual(b?.frame.width ?? 0, 48, "\(id) narrower than 48 pt")
             XCTAssertGreaterThanOrEqual(b?.frame.height ?? 0, 48, "\(id) lower than 48 pt")
         }
+        XCTAssertNil(visible("menuButton"), "the options menu is gone")
+        XCTAssertFalse(app.buttons["Options"].exists, "the options menu is gone")
         shot("80-column")
         // button fills at once and undoes on the second tap
         visible("like")?.tap()
@@ -240,21 +238,7 @@ final class CoreUITests: XCTestCase {
         XCTAssertTrue(diagLog().contains("heart "), "heart missing")
         XCTAssertEqual(visible("like")?.value as? String, "on")
         XCTAssertEqual(visible("save")?.value as? String, "off")
-        // menu entries
-        visible("menuButton")?.tap()
-        XCTAssertTrue(app.buttons["Mute speaker"].waitForExistence(timeout: 5))
-        for t in ["Known", "Weak", "Wrong", "Mute speaker"] { XCTAssertTrue(app.buttons[t].exists, "\(t) missing") }
-        XCTAssertFalse(app.buttons["More like this"].exists, "More like this belongs to the column")
-        shot("82-menu")
-        app.buttons["Known"].tap()
-        wait(0.4)
-        XCTAssertFalse(diagLog().contains("toast"), "no toast for Known")
-        // Wrong: toast
-        visible("menuButton")?.tap()
-        XCTAssertTrue(app.buttons["Wrong"].waitForExistence(timeout: 5))
-        app.buttons["Wrong"].tap()
-        wait(0.5)
-        XCTAssertTrue(diagLog().contains("toast Wrong"), "toast for Wrong missing")
+        // the tap measurement needs the settings screen
         // measurement in settings under Player
         app.tabBars.buttons["Settings"].tap()
         XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 5))
@@ -368,40 +352,76 @@ final class CoreUITests: XCTestCase {
         shot("93-text-double-tap")
     }
 
-    /// Aufgabe 5: Note per Menü und per Langdruck auf das Herz, Chips, Send (im Test ohne Browser, die Adresse steht im Log)
+    /// Rückmeldung: Wisch nach links, sechs Chips, Textfeld, Done. Chip speichert sofort und geht weiter.
+    /// Die Zeile "N notes, send?" kommt beim ersten Öffnen am nächsten Tag (CORE_NOTES_DAY), ein Tipp loggt ein Issue.
     func test11Note() {
+        app.launchEnvironment["CORE_NOTES_DAY"] = "2026-10-27"
         launch()
         XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15), "feed did not appear")
         wait(1)
-        visible("menuButton")?.tap()
-        XCTAssertTrue(app.buttons["Note"].waitForExistence(timeout: 5), "Note missing in menu")
-        shot("94-menu-with-note")
-        app.buttons["Note"].tap()
-        XCTAssertTrue(app.buttons["noteSend"].waitForExistence(timeout: 8), "note sheet missing via menu")
-        app.buttons["noteCancel"].tap()
-        wait(0.8)
-        // long press on the heart opens the sheet and does not like
-        let before = visible("like")?.value as? String
+        XCTAssertFalse(app.buttons["notesPrompt"].exists, "no notes yet, no prompt")
+        // the old ways are gone
+        XCTAssertNil(visible("menuButton"))
         visible("like")?.press(forDuration: 0.8)
-        XCTAssertTrue(app.buttons["noteSend"].waitForExistence(timeout: 8), "long press did not open the sheet")
-        XCTAssertEqual(visible("like")?.value as? String ?? before, before, "long press must not toggle the like")
-        for chip in ["Known", "Boring", "Wrong", "Bad cut", "Bad audio", "Bad captions", "Great"] {
-            XCTAssertTrue(app.buttons["noteChip-\(chip)"].exists, "chip \(chip) missing")
+        wait(0.6)
+        XCTAssertFalse(app.buttons["noteDone"].exists, "long press on the heart must not open the sheet any more")
+        // swipe left opens one level: six chips, text field, Done, no Send
+        openNoteSheet(tag: "94")
+        for chip in ["Known", "Wrong", "Boring", "Bad cut", "Great", "Mute speaker"] {
+            let b = app.buttons["noteChip-\(chip)"]
+            XCTAssertTrue(b.exists, "chip \(chip) missing")
+            XCTAssertGreaterThanOrEqual(b.frame.height, 48, "chip \(chip) too small")
         }
+        XCTAssertFalse(app.buttons["noteSend"].exists, "no send button")
+        // Done without text saves nothing and closes
+        app.buttons["noteDone"].tap()
+        wait(0.8)
+        XCTAssertFalse(diagLog().contains("note saved"), "empty Done must not save")
+        // a chip saves at once, the sheet closes, the feed moves on
+        openNoteSheet(tag: "95")
         app.buttons["noteChip-Boring"].tap()
-        app.buttons["noteChip-Bad cut"].tap()
+        wait(1.2)
+        XCTAssertTrue(diagLog().contains("note saved"), "chip did not save")
+        XCTAssertFalse(app.buttons["noteDone"].exists, "sheet must close after a chip")
+        XCTAssertFalse(diagLog().contains("toast Wrong"), "Boring has no effect")
+        // text with Done
+        openNoteSheet(tag: "96")
         app.descendants(matching: .any)["noteText"].tap()
         app.descendants(matching: .any)["noteText"].typeText("Cut is late")
-        shot("95-note-sheet")
-        app.buttons["noteSend"].tap()
+        shot("96-note-text")
+        app.buttons["noteDone"].tap()
+        wait(1.2)
+        XCTAssertFalse(app.buttons["noteDone"].exists, "sheet must close after Done")
+        // Wrong acts like before: toast
+        openNoteSheet(tag: "97")
+        app.buttons["noteChip-Wrong"].tap()
+        wait(0.6)
+        XCTAssertTrue(diagLog().contains("toast Wrong"), "toast for Wrong missing")
+        XCTAssertFalse(app.buttons["notesPrompt"].exists, "prompt only on the first open of a day")
+        // next day: first open shows the line, one tap logs a single issue and the notes count as sent
+        wait(0.5)
+        app.terminate()
+        app.launchEnvironment["CORE_NOTES_DAY"] = "2026-10-28"
+        launch()
+        let prompt = app.buttons["notesPrompt"]
+        XCTAssertTrue(prompt.waitForExistence(timeout: 15), "prompt missing on the next day")
+        XCTAssertEqual(prompt.label, "3 notes, send?")
+        XCTAssertGreaterThanOrEqual(prompt.frame.height, 48)
+        shot("98-notes-send")
+        prompt.tap()
         wait(0.8)
         let log = diagLog()
-        XCTAssertTrue(log.contains("note url https://github.com/amrsaad/core-content/issues/new?title="), "no issue address logged")
+        XCTAssertTrue(log.contains("notes url https://github.com/amrsaad/core-content/issues/new?title=Core%20feedback%202026-10-28"), "no issue address logged")
         XCTAssertTrue(log.contains("labels=feedback"), "label missing")
-        XCTAssertTrue(log.contains("Chips%3A%20Boring%2C%20Bad%20cut"), "chips missing in body")
+        XCTAssertTrue(log.contains("Boring"), "chip missing in body")
         XCTAssertTrue(log.contains("Cut%20is%20late"), "text missing in body")
-        XCTAssertFalse(log.contains("toast Wrong"), "Boring and Bad cut have no effect")
-        shot("96-after-send")
+        XCTAssertFalse(app.buttons["notesPrompt"].exists, "line must go after sending")
+        // same day again: nothing to send, no line
+        app.terminate()
+        launch()
+        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15))
+        wait(1)
+        XCTAssertFalse(app.buttons["notesPrompt"].exists, "sent notes must not come back")
     }
 
     /// Aufgabe 6: Quellenzeile unter der Passage, antippbar, "Quoted from" nur bei vorbehaltenen Rechten
