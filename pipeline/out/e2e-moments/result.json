@@ -1,5 +1,5 @@
 {
- "at": "2026-10-27T08:57:27.038Z",
+ "at": "2026-10-27T10:18:49.194Z",
  "runs": [
   {
    "browser": "webkit",
@@ -48,6 +48,11 @@
     "textStillPaused": true,
     "textOnlyTextMoments": true,
     "textHookShown": true,
+    "sourceLineAll": true,
+    "sourceLineFields": true,
+    "sourceLineQuoted": true,
+    "sourceLineLink": true,
+    "sourceLineOpens": true,
     "textNeverLoadsPlayer": true,
     "audioOnlyAudio": true,
     "audioPlays": true,
@@ -179,10 +184,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604687,
+     "due": 1792929603959,
      "results": [
       {
-       "at": 1792756804687,
+       "at": 1792756803959,
        "got": false
       }
      ]
@@ -258,13 +263,13 @@
     1.5,
     2
    ],
-   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 43bdd0f\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
+   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: f952c9e\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
    "tapToFill": {
-    "measured": 30,
-    "recorded": 30
+    "measured": 29,
+    "recorded": 29
    },
    "posterCheck": {
-    "checksDone": 870,
+    "checksDone": 876,
     "violations": 0,
     "endedSeen": 146
    },
@@ -281,14 +286,14 @@
       "full": true,
       "size": 15,
       "lines": 6,
-      "id": "test0000052:100"
+      "id": "test0000046:100"
      },
      "open": true,
      "hook": true,
      "exLen": 1180,
      "exDir": "ltr",
      "exAr": false,
-     "meta": "SpeakerKanal body 0EpisodeTestvideoAt1:40AreaBody",
+     "meta": "SpeakerKanal body 2EpisodeTestvideoAt1:40AreaBody",
      "speaker": true,
      "ep": true,
      "at": true,
@@ -490,14 +495,14 @@
      }
     }
    ],
+   "noRecallDbg": {
+    "cardSeen": false,
+    "idx": 5
+   },
    "cards": [
     {
      "ar": false,
      "dir": "ltr"
-    },
-    {
-     "ar": true,
-     "dir": "rtl"
     },
     {
      "ar": true,
@@ -568,6 +573,11 @@
     "textStillPaused": true,
     "textOnlyTextMoments": true,
     "textHookShown": true,
+    "sourceLineAll": true,
+    "sourceLineFields": true,
+    "sourceLineQuoted": true,
+    "sourceLineLink": true,
+    "sourceLineOpens": true,
     "textNeverLoadsPlayer": true,
     "audioOnlyAudio": true,
     "audioPlays": true,
@@ -699,10 +709,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603420,
+     "due": 1792929603776,
      "results": [
       {
-       "at": 1792756803420,
+       "at": 1792756803776,
        "got": false
       }
      ]
@@ -778,15 +788,15 @@
     1.5,
     2
    ],
-   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 43bdd0f\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
+   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: f952c9e\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
    "tapToFill": {
-    "measured": 31.80000000000291,
+    "measured": 32.60000000000582,
     "recorded": 32
    },
    "posterCheck": {
-    "checksDone": 873,
+    "checksDone": 882,
     "violations": 0,
-    "endedSeen": 145
+    "endedSeen": 147
    },
    "latency": {
     "n": 32,
@@ -1010,14 +1020,14 @@
      }
     }
    ],
+   "noRecallDbg": {
+    "cardSeen": false,
+    "idx": 5
+   },
    "cards": [
     {
      "ar": false,
      "dir": "ltr"
-    },
-    {
-     "ar": true,
-     "dir": "rtl"
     },
     {
      "ar": true,
