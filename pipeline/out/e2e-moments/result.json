@@ -1,5 +1,5 @@
 {
- "at": "2026-10-27T11:54:04.054Z",
+ "at": "2026-10-27T12:05:28.157Z",
  "runs": [
   {
    "browser": "webkit",
@@ -184,10 +184,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604588,
+     "due": 1792929603853,
      "results": [
       {
-       "at": 1792756804588,
+       "at": 1792756803853,
        "got": false
       }
      ]
@@ -263,15 +263,15 @@
     1.5,
     2
    ],
-   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 711c44c\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
+   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 2d7c569\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
    "tapToFill": {
     "measured": 30,
-    "recorded": 31
+    "recorded": 29
    },
    "posterCheck": {
-    "checksDone": 864,
+    "checksDone": 885,
     "violations": 0,
-    "endedSeen": 145
+    "endedSeen": 148
    },
    "latency": {
     "n": 32,
@@ -286,14 +286,14 @@
       "full": true,
       "size": 15,
       "lines": 6,
-      "id": "test0000046:100"
+      "id": "test0000052:100"
      },
      "open": true,
      "hook": true,
      "exLen": 1180,
      "exDir": "ltr",
      "exAr": false,
-     "meta": "SpeakerKanal body 2EpisodeTestvideoAt1:40AreaBody",
+     "meta": "SpeakerKanal body 0EpisodeTestvideoAt1:40AreaBody",
      "speaker": true,
      "ep": true,
      "at": true,
@@ -709,10 +709,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603415,
+     "due": 1792929603428,
      "results": [
       {
-       "at": 1792756803415,
+       "at": 1792756803428,
        "got": false
       }
      ]
@@ -788,15 +788,15 @@
     1.5,
     2
    ],
-   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 711c44c\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
+   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 2d7c569\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
    "tapToFill": {
-    "measured": 32.09999999997672,
-    "recorded": 32
+    "measured": 32.60000000000582,
+    "recorded": 33
    },
    "posterCheck": {
-    "checksDone": 885,
+    "checksDone": 897,
     "violations": 0,
-    "endedSeen": 147
+    "endedSeen": 150
    },
    "latency": {
     "n": 32,
