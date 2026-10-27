@@ -1021,6 +1021,66 @@
    "urlChecks": {
     "https://quran.com/2/193": 200
    }
+  },
+  {
+   "sourceId": "quran:2:194",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/194",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:194?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:194",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "ٱلشَّهْرُ ٱلْحَرَامُ بِٱلشَّهْرِ ٱلْحَرَامِ وَٱلْحُرُمَـٰتُ قِصَاصٌ ۚ فَمَنِ ٱعْتَدَىٰ عَلَيْكُمْ فَٱعْتَدُوا۟ عَلَيْهِ بِمِثْلِ مَا ٱعْتَدَىٰ عَلَيْكُمْ ۚ وَٱتَّقُوا۟ ٱللَّهَ وَٱعْلَمُوٓا۟ أَنَّ ٱللَّهَ مَعَ ٱلْمُتَّقِينَ",
+    "translation": "Der Schutzmonat ist für den Schutzmonat, und (für) die unantastbaren Dinge ist Wiedervergeltung. Wenn jemand gegen euch übertritt, dann geht (auch ihr) in gleichem Maß gegen ihn vor, wie er gegen euch übertreten hat. Und fürchtet Allah und wißt, daß Allah mit den Gottesfürchtigen ist.",
+    "tafsir_muyassar": "قتالكم -أيها المؤمنون- للمشركين في الشهر الذي حرَّم الله القتال فيه هو جزاء لقتالهم لكم في الشهر الحرام. والذي يعتدي على ما حَرَّم الله من المكان والزمان، يعاقب بمثل فعله، ومن جنس عمله. فمن اعتدى عليكم بالقتال أو غيره فأنزلوا به عقوبة مماثلة لجنايته، ولا حرج عليكم في ذلك; لأنهم هم البادئون بالعدوان، وخافوا الله فلا تتجاوزوا المماثلة في العقوبة، واعلموا أن الله مع الذين يتقونه ويطيعونه بأداء فرائضه وتجنب محارمه.",
+    "tafsir_ibnkathir": "<h2>Fighting during the Sacred Months is prohibited, except in Self-Defense</h2><p>Ibn `Abbas, Ad-Dahhak, As-Suddi, Qatadah, Miqsam, Ar-Rabi` bin Anas and `Ata said, \"Allah's Messenger ﷺ went for `Umrah on the sixth year of Hijrah. Then, the idolators prevented him from entering the Sacred House (the Ka`bah in Makkah) along with the Muslims who came with him. This incident occurred during the sacred month of Dhul-Qa`dah. The idolators agreed to allow them to enter the House the next year. Hence, the Prophet entered the House the following year, along with the Muslims who accompanied him, and Allah permitted him to avenge the idolators' treatment of him, when He said:</p><p>الشَّهْرُ الْحَرَامُ بِالشَّهْرِ الْحَرَامِ وَالْحُرُمَـتُ قِصَاصٌ</p><p>(The sacred month is for the sacred month, and for the prohibited things, there is the Law of equality (Qisas).)</p><p>Imam Ahmad recorded that Jabir bin `Abdullah said, \"Allah's Messenger ﷺ would not engage in warfare during the Sacred Month unless he was first attacked, then he would march forth. He would otherwise remain idle until the end of the Sacred Months.\" This Hadith has an authentic chain of narrators.</p><p>Hence, when the Prophet was told that `Uthman was killed (in Makkah) when he was camped at the area of Al-Hudaybiyyah, after he had sent `Uthman as his emissary to the polytheists, he accepted the pledge from his Companions under the tree to fight the polytheists. They were one thousand and four hundred then. When the Prophet was informed that `Uthman was not killed, he abandoned the fight and reverted to peace.</p><p>When the Prophet finished fighting with (the tribes of) Hawazin during the battle of Hunayn and Hawazin took refuge in (the city of) At-Ta'if, he laid siege to that city. Then, the (sacred) month of Dhul-Qa`dah started, while At-Ta'if was still under siege. The siege went on for the rest of the forty days (rather, from the day the battle of Hunayn started until the Prophet went back to Al-Madinah from Al-Ji`ranah, were forty days), as reported in the Two Sahihs and narrated by Anas. When the Companions suffered mounting casualties (during the siege), the Prophet ended the siege before conquering At-Ta'if. He then went back to Makkah, performed `Umrah from Al-Ji`ranah, where he divided the war booty of Hunayn. This `Umrah occurred during Dhul-Qa`dah of the eighth year of Al-Hijrah.</p><p>Allah's statement:</p><p>فَمَنِ اعْتَدَى عَلَيْكُمْ فَاعْتَدُواْ عَلَيْهِ بِمِثْلِ مَا اعْتَدَى عَلَيْكُمْ</p><p>(...whoever transgresses against you, you transgress likewise against him.) ordains justice even with the polytheists. Allah also said in another Ayah:</p><p>وَإِنْ عَاقَبْتُمْ فَعَاقِبُواْ بِمِثْلِ مَا عُوقِبْتُمْ بِهِ</p><p>(And if you punish, then punish them with the like of that with which you were afflicted.) (16:126)</p><p>Allah's statement:</p><p>وَاتَّقُواْ اللَّهَ وَاعْلَمُواْ أَنَّ اللَّهَ مَعَ الْمُتَّقِينَ</p><p>(And fear Allah, and know that Allah is with Al-Muttaqin (the pious)) (2:194) commands that Allah be obeyed and feared out of Taqwa. The Ayah informs us that Allah is with those who have Taqwa by His aid and support in this life and the Hereafter.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:194"
+   },
+   "fetchedAt": "2026-10-27T14:06:53.378Z",
+   "urlChecks": {
+    "https://quran.com/2/194": 200
+   }
+  },
+  {
+   "sourceId": "quran:2:195",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/195",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:195?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:195",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "وَأَنفِقُوا۟ فِى سَبِيلِ ٱللَّهِ وَلَا تُلْقُوا۟ بِأَيْدِيكُمْ إِلَى ٱلتَّهْلُكَةِ ۛ وَأَحْسِنُوٓا۟ ۛ إِنَّ ٱللَّهَ يُحِبُّ ٱلْمُحْسِنِينَ",
+    "translation": "Und gebt auf Allahs Weg aus und stürzt euch nicht mit eigener Hand ins Verderben. Und tut Gutes. Allah liebt die Gutes Tuenden.",
+    "tafsir_muyassar": "واستمروا -أيها المؤمنون- في إنفاق الأموال لنصرة دين الله تعالى، والجهاد في سبيله، ولا توقعوا أنفسكم في المهالك بترك الجهاد في سبيل الله، وعدم الإنفاق فيه، وأحسنوا في الانفاق والطاعة، واجعلوا عَمَلَكُم كله خالصًا لوجه الله تعالى. إن الله يحب أهل الإخلاص والإحسان.",
+    "tafsir_ibnkathir": "<h2>The Command to spend in the Cause of Allah</h2><p>Al-Bukhari recorded that Hudhayfah said:</p><p>وَأَنفِقُواْ فِى سَبِيلِ اللَّهِ وَلاَ تُلْقُواْ بِأَيْدِيكُمْ إِلَى التَّهْلُكَةِ</p><p>(And spend in the cause of Allah and do not throw yourselves into destruction.) \"It was revealed about spending.\" Ibn Abu Hatim reported him saying similarly. He then commented, \"Similar is reported from Ibn `Abbas, Mujahid, `Ikrimah, Sa`id bin Jubayr, `Ata', Ad-Dahhak, Al-Hasan, Qatadah, As-Suddi and Muqatil bin Hayyan.\"</p><p>Aslam Abu `Imran said, \"A man from among the Ansar broke enemy (Byzantine) lines in Constantinople (Istanbul). Abu Ayyub Al-Ansari was with us then. So some people said, `He is throwing himself to destruction.' Abu Ayyub said, `We know this Ayah (2:195) better, for it was revealed about us, the Companions of Allah's Messenger ﷺ who participated in Jihad with him and aided and supported him. When Islam became strong, we, the Ansar, met and said to each other, `Allah has honored us by being the Companions of His Prophet and in supporting him until Islam became victorious and its following increased. We had before ignored the needs of our families, estates and children. Warfare has ceased, so let us go back to our families and children and attend to them.' So this Ayah was revealed about us:</p><p>وَأَنفِقُواْ فِى سَبِيلِ اللَّهِ وَلاَ تُلْقُواْ بِأَيْدِيكُمْ إِلَى التَّهْلُكَةِ</p><p>(And spend in the cause of Allah and do not throw yourselves into destruction.) the destruction refers to staying with our families and estates and abandoning Jihad'.\" This was recorded by Abu Dawud, At-Tirmidhi, An-Nasa'i, `Abd bin Humayd in his Tafsir, Ibn Abu Hatim, Ibn Jarir, Ibn Marduwyah, Al-Hafiz Abu Ya`la in his Musnad, Ibn Hibban and Al-Hakim. At-Tirmidhi said; \"Hasan, Sahih, Gharib\" Al-Hakim said, \"It meets the criteria of the Two Shaykhs (Al-Bukhari and Muslim) but they did not record it.\"</p><p>Abu Dawud's version mentions that Aslam Abu `Imran said, \"We were at (the siege of) Constantinople. Then, `Uqbah bin `Amr was leading the Egyptian forces, while the Syrian forces were led by Fadalah bin `Ubayd. Later on, a huge column of Roman (Byzantine) soldiers departed the city, and we stood in lines against them. A Muslim man raided the Roman lines until he broke through them and came back to us. The people shouted, `All praise is due to Allah! He is sending himself to certain demise.' Abu Ayyub said, `O people! You explain this Ayah the wrong way. It was revealed about us, the Ansar when Allah gave victory to His religion and its following increased. We said to each other, `It would be better for us now if we return to our estates and attend to them.' Then Allah revealed this Ayah (2:195)'.\"</p><p>Abu Bakr bin `Aiyash reported that Abu Ishaq As-Subai`y related that a man said to Al-Bara' bin `Azib, \"If I raided the enemy lines alone and they kill me, would I be throwing myself to certain demise\" He said, \"No. Allah said to His Messenger :</p><p>فَقَاتِلْ فِى سَبِيلِ اللَّهِ لاَ تُكَلَّفُ إِلاَّ نَفْسَكَ</p><p>(Then fight (O Muhammad ) in the cause of Allah, you are not tasked (held responsible) except for yourself.) (4:84) That Ayah (2:195) is about (refraining from) spending.\" Ibn Marduwyah reported this Hadith, as well as Al-Hakim in his Mustadrak who said; \"It meets the criteria of the Two Shaykhs (Al-Bukhari and Muslim) but they did not record it.\" Ath-Thawri and Qays bin Ar-Rabi` related it from Al-Bara'. but added:</p><p>لاَ تُكَلَّفُ إِلاَّ نَفْسَكَ</p><p>(You are not tasked (held responsible) except for yourself.) (4:84) \"Destruction refers to the man who sins and refrains from repenting, thus throwing himself to destruction.\"</p><p>Ibn `Abbas said:</p><p>وَأَنفِقُواْ فِى سَبِيلِ اللَّهِ وَلاَ تُلْقُواْ بِأَيْدِيكُمْ إِلَى التَّهْلُكَةِ</p><p>(And spend in the cause of Allah and do not throw yourselves into destruction) \"This is not about fighting. But about refraining from spending for the sake of Allah, in which case, one will be throwing his self into destruction.\"</p><p>The Ayah (2:195) includes the order to spend in Allah's cause, in the various areas and ways that involve obedience and drawing closer to Allah. It especially applies to spending in fighting the enemies and on what strengthens the Muslims against the enemy. Allah states that those who refrain from spending in this regard will face utter and certain demise and destruction, meaning those who acquire this habit. Allah commands that one should acquire Ihsan (excellence in the religion), as it is the highest part of the acts of obedience. Allah said:</p><p>وَأَحْسِنُواْ إِنَّ اللَّهَ يُحِبُّ الْمُحْسِنِينَ</p><p>(and do good. Truly, Allah loves Al-Muhsinin (those who do good).)</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:195"
+   },
+   "fetchedAt": "2026-10-27T14:06:53.378Z",
+   "urlChecks": {
+    "https://quran.com/2/195": 200
+   }
   }
  ]
 }

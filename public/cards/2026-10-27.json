@@ -4442,6 +4442,268 @@
    "arabic": "وَقَـٰتِلُوهُمْ حَتَّىٰ لَا تَكُونَ فِتْنَةٌ وَيَكُونَ ٱلدِّينُ لِلَّهِ ۖ فَإِنِ ٱنتَهَوْا۟ فَلَا عُدْوَٰنَ إِلَّا عَلَى ٱلظَّـٰلِمِينَ",
    "translation": "Und kämpft gegen sie, bis es keine Verfolgung mehr gibt und die Religion (allein) Allahs ist. Wenn sie jedoch aufhören, dann darf es kein feindseliges Vorgehen geben außer gegen die Ungerechten.",
    "reflection": "Was nimmst du heute aus diesem Vers mit?"
+  },
+  {
+   "id": "pmid:42334582",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "[Keeping track of things",
+   "source": {
+    "id": "pmid:42334582",
+    "title": "[Keeping track of things: large language models for patient synopses : Source-bound system for clinical information systems].",
+    "publisher": "Radiologie (Heidelberg, Germany)",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42334582/",
+    "excerpt": "LLM-based patient synopses can support text-intensive clinical workflows, provided that controlled retrieval, clear source attribution, physician validation, and an interoperable, regulation-compliant system architecture are in place. Prospective evaluations are required before routine clinical use."
+   },
+   "createdAt": "2026-10-27T14:06:58.994Z"
+  },
+  {
+   "id": "pmid:42717391",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Artificial intelligence in advanced liver disease: From risk stratification to decision",
+   "source": {
+    "id": "pmid:42717391",
+    "title": "Artificial intelligence in advanced liver disease: From risk stratification to decision.",
+    "publisher": "Journal of the Chinese Medical Association : JCMA",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42717391/",
+    "excerpt": "The potential benefits, drawbacks, limitations, and future perspectives of AI are also discussed."
+   },
+   "createdAt": "2026-10-27T14:06:58.994Z"
+  },
+  {
+   "id": "pmid:42602771",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "A review of flavonoids at the crossroads of plant defense",
+   "source": {
+    "id": "pmid:42602771",
+    "title": "A review of flavonoids at the crossroads of plant defense: integrating biotic and abiotic stress tolerance through AI- and CRISPR/Cas-guided metabolic reprogramming.",
+    "publisher": "Frontiers in plant science",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42602771/",
+    "excerpt": "By integrating advances in stress biology, computational prediction, genome engineering, and iterative DBTL frameworks, this review outlines a roadmap for predictive reprogramming of flavonoid networks under combined stress and the development of crops with improved resilience to increasingly complex environmental conditions."
+   },
+   "createdAt": "2026-10-27T14:06:58.994Z"
+  },
+  {
+   "id": "pmid:42884457",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Advances in Urinary Liquid Biopsy",
+   "source": {
+    "id": "pmid:42884457",
+    "title": "Advances in Urinary Liquid Biopsy: A Review of Emerging Sensing Platforms for Early Cancer Screening and Diagnosis.",
+    "publisher": "Sensors (Basel, Switzerland)",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42884457/",
+    "excerpt": "Finally, we discuss the gap between novel sensing systems and robust diagnostic devices for decentralized point-of-care testing (POCT) and personalized medicine in clinical routine."
+   },
+   "createdAt": "2026-10-27T14:06:58.994Z"
+  },
+  {
+   "id": "pmid:42523677",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "The role of artificial intelligence in thyroid cytology of indeterminate nodules",
+   "source": {
+    "id": "pmid:42523677",
+    "title": "The role of artificial intelligence in thyroid cytology of indeterminate nodules: from digital cytology to multimodal precision triage.",
+    "publisher": "Frontiers in endocrinology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42523677/",
+    "excerpt": "Future application will depend upon validation, standardization, and prospectively conducted studies in patients."
+   },
+   "createdAt": "2026-10-27T14:06:58.994Z"
+  },
+  {
+   "id": "pmid:42808954",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Melanoma Prognostication Using AI-Guided Histopathology",
+   "source": {
+    "id": "pmid:42808954",
+    "title": "Melanoma Prognostication Using AI-Guided Histopathology.",
+    "publisher": "International journal of dermatology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42808954/",
+    "excerpt": "Outcome-anchored, multimodal computational pathology pipelines integrating H&E WSIs with spatial multi-omic profiling offer a biologically grounded and scalable framework for personalized risk stratification in stage I-III CM, with potential to standardize diagnosis, discover novel prognostic features, and inform individualized treatment strategies."
+   },
+   "createdAt": "2026-10-27T14:06:58.994Z"
+  },
+  {
+   "id": "pmid:42117468",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Artificial Intelligence for Colorectal Surgeons-Part II",
+   "source": {
+    "id": "pmid:42117468",
+    "title": "Artificial Intelligence for Colorectal Surgeons-Part II: Research Applications, Challenges in Adoption, and Practical Resources.",
+    "publisher": "Diseases of the colon and rectum",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42117468/",
+    "excerpt": "Although artificial intelligence offers transformative potential for colorectal surgery research and practice, successful implementation requires addressing technical, regulatory, ethical, and economic challenges. The surgeon's evolving role demands both traditional expertise and computational fluency."
+   },
+   "createdAt": "2026-10-27T14:06:58.994Z"
+  },
+  {
+   "id": "pmid:41564330",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Artificial intelligence in nuclear medicine",
+   "source": {
+    "id": "pmid:41564330",
+    "title": "Artificial intelligence in nuclear medicine.",
+    "publisher": "The British journal of radiology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/41564330/",
+    "excerpt": "Below, we will briefly review selected areas and comment on challenges and opportunities for AI in nuclear medicine, with a special focus on the transition from development to clinical implementation."
+   },
+   "createdAt": "2026-10-27T14:06:58.994Z"
+  },
+  {
+   "id": "pmid:41501703",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Adoption of artificial intelligence in primary health care",
+   "source": {
+    "id": "pmid:41501703",
+    "title": "Adoption of artificial intelligence in primary health care: systematic synthesis of stakeholder perspectives.",
+    "publisher": "BMC primary care",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/41501703/",
+    "excerpt": "AI holds significant promise for transforming primary care by enhancing efficiency and patient care, but its adoption is hindered by multifaceted barriers from stakeholder perspectives. Transparent AI systems, robust training, and ethical frameworks are crucial to build trust and ensure equity."
+   },
+   "createdAt": "2026-10-27T14:06:58.994Z"
+  },
+  {
+   "id": "pmid:42564262",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Artificial intelligence in HIV research",
+   "source": {
+    "id": "pmid:42564262",
+    "title": "Artificial intelligence in HIV research: a structured review and task-oriented clinical framework.",
+    "publisher": "Frontiers in digital health",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42564262/",
+    "excerpt": "AI represents a key tool for enhancing HIV management. This framework provides a structured basis for future research, though it will be necessary to continuously redefine and update this framework as new medical challenges and technical methods arise."
+   },
+   "createdAt": "2026-10-27T14:06:58.994Z"
+  },
+  {
+   "id": "pmid:42700421",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Pulmonary Cytology in Transformation",
+   "source": {
+    "id": "pmid:42700421",
+    "title": "Pulmonary Cytology in Transformation.",
+    "publisher": "Acta cytologica",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42700421/",
+    "excerpt": "Key messages: The integration of morphology with appropriately validated molecular and computational methods has the potential to transform the framework of pulmonary cytology, extending its role from morphological diagnosis toward comprehensive and clinically significant characterization of pulmonary tumors."
+   },
+   "createdAt": "2026-10-27T14:06:58.994Z"
+  },
+  {
+   "id": "pmid:42667959",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Application of Artificial Intelligence in Diagnosis and Management of Thyroid Disease",
+   "source": {
+    "id": "pmid:42667959",
+    "title": "Application of Artificial Intelligence in Diagnosis and Management of Thyroid Disease.",
+    "publisher": "Endocrine practice : official journal of the American College of Endocrinology and the American Association of Clinical Endocrinologists",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42667959/",
+    "excerpt": "AI should be regarded as a decision-support adjunct that augments, rather than replaces, endocrinologist judgment, contingent on prospective multicenter validation, equitable access, transparent reporting, and defined reimbursement frameworks."
+   },
+   "createdAt": "2026-10-27T14:06:58.994Z"
+  },
+  {
+   "id": "pmid:42346724",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "The Impact of Artificial Intelligence-Supported Instruction on Student Learning in STEM",
+   "source": {
+    "id": "pmid:42346724",
+    "title": "The Impact of Artificial Intelligence-Supported Instruction on Student Learning in STEM: A Systematic Review and Meta-Analysis.",
+    "publisher": "Journal of Intelligence",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42346724/",
+    "excerpt": "These findings provide robust empirical evidence supporting the pedagogical value of AI in STEM education and offer guidance for educators and policymakers regarding effective implementation."
+   },
+   "createdAt": "2026-10-27T14:06:58.994Z"
+  },
+  {
+   "id": "pmid:41524988",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "AI for screening in healthcare: promise and challenges",
+   "source": {
+    "id": "pmid:41524988",
+    "title": "AI for screening in healthcare: promise and challenges.",
+    "publisher": "Abdominal radiology (New York)",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/41524988/",
+    "excerpt": "The overarching conclusion is cautious optimism: when validated and invisibly integrated, AI augments physicians, expands access, and improves efficiency; realizing durable public‑health benefits will depend on equity‑focused design, rigorous evaluation, and sustained human oversight."
+   },
+   "createdAt": "2026-10-27T14:06:58.994Z"
+  },
+  {
+   "id": "quran:2:194",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Der Schutzmonat ist für den Schutzmonat …",
+   "source": {
+    "id": "quran:2:194",
+    "title": "Sure Al-Baqarah, 2:194",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/2/194",
+    "excerpt": "قتالكم -أيها المؤمنون- للمشركين في الشهر الذي حرَّم الله القتال فيه هو جزاء لقتالهم لكم في الشهر الحرام. والذي يعتدي على ما حَرَّم الله من المكان والزمان، يعاقب بمثل فعله، ومن جنس عمله."
+   },
+   "createdAt": "2026-10-27T14:06:58.994Z",
+   "arabic": "ٱلشَّهْرُ ٱلْحَرَامُ بِٱلشَّهْرِ ٱلْحَرَامِ وَٱلْحُرُمَـٰتُ قِصَاصٌ ۚ فَمَنِ ٱعْتَدَىٰ عَلَيْكُمْ فَٱعْتَدُوا۟ عَلَيْهِ بِمِثْلِ مَا ٱعْتَدَىٰ عَلَيْكُمْ ۚ وَٱتَّقُوا۟ ٱللَّهَ وَٱعْلَمُوٓا۟ أَنَّ ٱللَّهَ مَعَ ٱلْمُتَّقِينَ",
+   "translation": "Der Schutzmonat ist für den Schutzmonat, und (für) die unantastbaren Dinge ist Wiedervergeltung. Wenn jemand gegen euch übertritt, dann geht (auch ihr) in gleichem Maß gegen ihn vor, wie er gegen euch übertreten hat. Und fürchtet Allah und wißt, daß Allah mit den Gottesfürchtigen ist.",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?",
+   "body": "Fighting during the Sacred Months is prohibited, except in Self-Defense: Ibn `Abbas, Ad-Dahhak, As-Suddi, Qatadah, Miqsam, Ar-Rabi` bin Anas and `Ata said, \"Allah's Messenger ﷺ went for `Umrah on the sixth year of Hijrah."
+  },
+  {
+   "id": "quran:2:195",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Und gebt auf Allahs Weg aus und stürzt euch nicht mit eigener Hand ins Verderben.",
+   "source": {
+    "id": "quran:2:195",
+    "title": "Sure Al-Baqarah, 2:195",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/2/195",
+    "excerpt": "واستمروا -أيها المؤمنون- في إنفاق الأموال لنصرة دين الله تعالى، والجهاد في سبيله، ولا توقعوا أنفسكم في المهالك بترك الجهاد في سبيل الله، وعدم الإنفاق فيه، وأحسنوا في الانفاق والطاعة، واجعلوا عَمَلَكُم كله خالصًا لوجه الله تعالى. إن الله يحب أهل الإخلاص والإحسان."
+   },
+   "createdAt": "2026-10-27T14:06:58.994Z",
+   "arabic": "وَأَنفِقُوا۟ فِى سَبِيلِ ٱللَّهِ وَلَا تُلْقُوا۟ بِأَيْدِيكُمْ إِلَى ٱلتَّهْلُكَةِ ۛ وَأَحْسِنُوٓا۟ ۛ إِنَّ ٱللَّهَ يُحِبُّ ٱلْمُحْسِنِينَ",
+   "translation": "Und gebt auf Allahs Weg aus und stürzt euch nicht mit eigener Hand ins Verderben. Und tut Gutes. Allah liebt die Gutes Tuenden.",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?",
+   "body": "The Command to spend in the Cause of Allah: Al-Bukhari recorded that Hudhayfah said: وَأَنفِقُواْ فِى سَبِيلِ اللَّهِ وَلاَ تُلْقُواْ بِأَيْدِيكُمْ إِلَى التَّهْلُكَةِ (And spend in the cause of Allah and do not throw yourselves into destruction.)"
   }
  ]
 }
