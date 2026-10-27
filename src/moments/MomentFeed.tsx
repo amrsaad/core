@@ -11,6 +11,7 @@ import { countGotIt, countSeen, todayLine } from './today';
 import { answer, cardDue, pickRecall, type Recent } from './recall';
 import { RecallCard } from './RecallCard';
 import { CaptionSheet } from './CaptionSheet';
+import { sourceLine } from './source';
 import { NoteSheet } from './NoteSheet';
 import { deviceLine, issueUrl, noteEffect, type Chip } from './note';
 import { HOOK_LINE_PT, hookStep } from './hook';
@@ -789,6 +790,16 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
               <p className={`vtext-body ${ar ? 'vtext-rtl' : ''}`} dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'}>{t}</p>
             ) : (
               <p className="vtext-body text-[#B3B3B3]">No text for this moment yet.</p>
+            );
+          })()}
+          {(() => {
+            const sl = sourceLine(m);
+            if (!sl) return null;
+            const label = `${sl.prefix}${sl.text}`;
+            return sl.url ? (
+              <a className="vtext-source" data-testid="text-source" href={sl.url} target="_blank" rel="noopener noreferrer">{label}</a>
+            ) : (
+              <p className="vtext-source" data-testid="text-source">{label}</p>
             );
           })()}
           <div className="vtext-end" aria-hidden="true">Swipe up for the next moment</div>

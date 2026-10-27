@@ -99,7 +99,13 @@ jobs:
           videos=$(node -p "require('./public/videos/pool.json').videos.length" 2>/dev/null || echo 0)
           cards=$(node -p "require('./public/cards/index.json').total")
           git commit -m "content: $(date -u +%F) (${videos} Videos, ${cards} Karten)"
-          git push origin "HEAD:${{ github.ref_name }}"
+          # Ein gleichzeitiger Push (Content-Bot, Entwicklung) darf den Schritt nicht rot machen
+          for i in 1 2 3 4 5; do
+            git pull --rebase -q origin "${{ github.ref_name }}" && git push origin "HEAD:${{ github.ref_name }}" && exit 0
+            sleep $((i * 5))
+          done
+          echo "Push nach 5 Versuchen fehlgeschlagen" >&2
+          exit 1
       - name: Teilfehler melden
         if: steps.videos.outcome == 'failure' || steps.fetch.outcome == 'failure' || steps.cards.outcome == 'failure' || steps.verify.outcome == 'failure'
         run: |

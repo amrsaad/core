@@ -208,6 +208,23 @@ final class Round1Tests: XCTestCase {
         XCTAssertEqual(Note.enc("a b&c=d+e'(f)!*"), "a%20b%26c%3Dd%2Be%27%28f%29%21%2A")
     }
 
+    // Aufgabe 6, gleiche Prüfdaten wie tests/moments-source.test.ts
+    func testSourceLine() {
+        let res = "Alle Rechte vorbehalten, frei lesbar. Private Nutzung, Passagen mit Quellenangabe"
+        XCTAssertEqual(SourceLine.line(author: "Jane Roe", channel: "Europe PMC", ref: "PMC123", license: "CC BY 4.0", sourceUrl: "https://example.org/a"),
+                       .init(prefix: "", text: "Jane Roe, Europe PMC, PMC123, CC BY 4.0", url: URL(string: "https://example.org/a")))
+        XCTAssertEqual(SourceLine.line(author: "Jordan Feigenbaum", channel: "Barbell Medicine", ref: nil, license: res, sourceUrl: "https://www.barbellmedicine.com/x/"),
+                       .init(prefix: "Quoted from ", text: "Jordan Feigenbaum, Barbell Medicine, All rights reserved", url: URL(string: "https://www.barbellmedicine.com/x/")))
+        XCTAssertTrue(SourceLine.isReserved("All rights reserved"))
+        XCTAssertFalse(SourceLine.isReserved("CC BY 4.0"))
+        XCTAssertFalse(SourceLine.isReserved(nil))
+        XCTAssertEqual(SourceLine.line(author: nil, channel: "Quran.com", ref: "Quran 94:5", license: "CC BY 4.0", sourceUrl: nil)?.text, "Quran.com, Quran 94:5, CC BY 4.0")
+        XCTAssertEqual(SourceLine.line(author: "Quran.com", channel: "Quran.com", ref: nil, license: "CC BY 4.0", sourceUrl: nil)?.text, "Quran.com, CC BY 4.0")
+        XCTAssertNil(SourceLine.line(author: "A", channel: "", ref: nil, license: "CC BY 4.0", sourceUrl: nil)?.url)
+        XCTAssertNil(SourceLine.line(author: "A", channel: "", ref: nil, license: "CC BY 4.0", sourceUrl: "javascript:alert(1)")?.url)
+        XCTAssertNil(SourceLine.line(author: nil, channel: "", ref: nil, license: nil, sourceUrl: nil))
+    }
+
     // Punkt 7
     func testWeekReview() {
         XCTAssertTrue(WeekReview.planComplete(when: "I finish the OCT clinic", will: "explain it"))

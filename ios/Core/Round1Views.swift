@@ -89,6 +89,7 @@ struct TextPanel: View {
                     .frame(maxWidth: .infinity, alignment: ar ? .trailing : .leading)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("textBody")
+                if let src = moment.sourceLine { SourceLineView(line: src) }
                 Rectangle().fill(Palette.line).frame(height: 1).padding(.top, 16)
                     .onAppear(perform: onEnd)
                 Button(action: onNext) {
@@ -107,6 +108,35 @@ struct TextPanel: View {
         .background(Color.black)
         .foregroundStyle(.white)
         .accessibilityIdentifier("textView")
+    }
+}
+
+/// Quellenzeile unter der Passage, antippbar wenn ein Link da ist, öffnet die Quelle im Browser des Geräts
+struct SourceLineView: View {
+    let line: SourceLine.Line
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        let label = line.prefix + line.text
+        Group {
+            if let url = line.url {
+                Button {
+                    Diag.log("source open \(url.absoluteString)")
+                    if !Env.isTest { openURL(url) }
+                } label: {
+                    Text(label).underline().frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(.isLink)
+            } else {
+                Text(label).frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            }
+        }
+        .font(.system(size: 13))
+        .foregroundStyle(Color(hex: 0x9AA0AA))
+        .multilineTextAlignment(.leading)
+        .accessibilityIdentifier("textSource")
+        .accessibilityLabel(label)
     }
 }
 

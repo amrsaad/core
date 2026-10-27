@@ -152,6 +152,8 @@ body {
 .vtext-hook { margin: 4px 0 16px; font-size: 24px; line-height: 31px; font-weight: 700; }
 .vtext-body { margin: 0; white-space: pre-line; font-size: 18px; line-height: 28px; color: #e6e6e6; }
 .vtext-rtl { text-align: right; font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', sans-serif; font-size: 21px; line-height: 36px; }
+.vtext-source { display: block; margin: 20px 0 0; min-height: 44px; font-size: 13px; line-height: 20px; color: #9aa0aa; text-decoration: none; overflow-wrap: anywhere; }
+a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 .vtext-end { margin-top: 32px; padding-top: 16px; border-top: 1px solid #262931; font-size: 13px; color: #8a8a8a; }
 .vcaption.vcaption-big span { font-size: 22px; line-height: 30px; }
 .vcaption.vcaption-big.vcaption-rtl span { font-size: 25px; line-height: 38px; }

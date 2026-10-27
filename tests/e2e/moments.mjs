@@ -38,6 +38,13 @@ for (const m of moments.slice(30, 35)) m.audio = true;
 for (const m of moments.slice(35, 40)) Object.assign(m, { audio: true, form: 'audio' });
 // Text-Momente: eigenes Feld form text, kein Player (die Video-ID dient nur dem Nachweis, dass nie geladen wird)
 for (const m of moments.slice(40, 46)) Object.assign(m, { form: 'text', videoId: m.videoId.replace('test', 'texto') });
+// Quellenzeile: gerade Nummern mit vorbehaltenen Rechten, ungerade CC BY (Aufgabe 6)
+for (const [i, m] of moments.slice(40, 46).entries()) {
+  Object.assign(m, {
+    author: `Author ${i}`, ref: `Ref ${i}`, sourceUrl: `https://example.org/source/${i}`,
+    license: i % 2 === 0 ? 'Alle Rechte vorbehalten, frei lesbar. Private Nutzung, Passagen mit Quellenangabe' : 'CC BY 4.0',
+  });
+}
 const raw = crypto.getRandomValues(new Uint8Array(32));
 const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt']);
 const encPool = async (list) => {
@@ -303,6 +310,30 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       return true;
     });
     c.textHookShown = await page.evaluate(() => { const m = window.__core.moment(); const t = document.querySelector('[data-testid=text-view]')?.textContent ?? ''; return t.includes(m.hook) && t.includes('Sentence 1 '); });
+    // Aufgabe 6: Quellenzeile unter der Passage, antippbar, "Quoted from" nur bei vorbehaltenen Rechten
+    const srcRows = await page.evaluate(async () => {
+      const rows = [];
+      for (let i = 0; i < 5; i++) {
+        const m = window.__core.moment();
+        const a = document.querySelector('[data-testid=text-view] [data-testid=text-source]');
+        const body = document.querySelector('[data-testid=text-view] .vtext-body');
+        rows.push({ license: m.license, author: m.author, ref: m.ref, url: m.sourceUrl, t: a?.textContent ?? null, href: a?.getAttribute('href') ?? null, target: a?.getAttribute('target') ?? null, below: !!(a && body && (body.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_FOLLOWING)), h: a ? a.getBoundingClientRect().height : 0 });
+        window.__core.next(); await new Promise((r) => setTimeout(r, 60));
+      }
+      return rows;
+    });
+    c.sourceLineAll = srcRows.length === 5 && srcRows.every((r) => r.t && r.below);
+    c.sourceLineFields = srcRows.every((r) => r.t.includes(r.author) && r.t.includes(r.ref));
+    c.sourceLineQuoted = srcRows.every((r) => (/Alle Rechte/.test(r.license) ? r.t.startsWith('Quoted from Author') && r.t.endsWith('All rights reserved') : r.t.startsWith('Author') && r.t.endsWith('CC BY 4.0')));
+    c.sourceLineLink = srcRows.every((r) => r.href === r.url && r.target === '_blank' && r.h >= 20);
+    for (let i = 0; i < 6 && (await page.$('[data-testid=recall-card]')); i++) { await page.evaluate(() => window.__core.skipRecall()); await page.waitForTimeout(250); }
+    await page.context().route('https://example.org/**', (r) => r.abort());
+    const popup = page.context().waitForEvent('page', { timeout: 4000 }).then(async (p) => { await p.waitForLoadState('commit').catch(() => {}); return p.url() || 'opened'; }, () => null);
+    await page.click('[data-testid=text-view] [data-testid=text-source]');
+    const popped = await popup;
+    c.sourceLineOpens = popped !== null;
+    await page.evaluate(() => { const el = document.querySelector('[data-testid=text-view]'); el.scrollTop = el.scrollHeight; });
+    await page.screenshot({ path: `${out}/${name}-22-source-line.png` });
     c.textNeverLoadsPlayer = await page.evaluate(() => !window.__ytlog.some((x) => x.includes('texto')));
     await skipRecall(page, name, out);
     await page.click('[data-testid=form-switch] >> text=Audio');
@@ -621,6 +652,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.captionKeepsPlaying = capLogs.every((x) => x.playing && x.stillPlaying);
     c.captionCloses = capLogs.every((x) => x.closed);
     c.captionArabicRtl = capLogs.some((x) => x.exAr) && capLogs.filter((x) => x.exAr).every((x) => x.exDir === 'rtl') && capLogs.filter((x) => !x.exAr).every((x) => x.exDir === 'ltr');
+    r.noRecallDbg = { cardSeen, idx: await p7.evaluate(() => window.__core.idx()) };
     c.noRecallNoCard = !cardSeen && (await p7.evaluate(() => window.__core.idx())) >= 5;
     c.recallHit = !!hitState.out && Object.values(hitState.out).every(Boolean);
     c.recallSwipeSkipsWithoutRating = !!hitState.skipped?.noRating;

@@ -404,6 +404,33 @@ final class CoreUITests: XCTestCase {
         shot("96-after-send")
     }
 
+    /// Aufgabe 6: Quellenzeile unter der Passage, antippbar, "Quoted from" nur bei vorbehaltenen Rechten
+    func test12SourceLine() {
+        launch()
+        XCTAssertTrue(app.buttons["form-Text"].waitForExistence(timeout: 15))
+        app.buttons["form-Text"].tap()
+        XCTAssertTrue(app.staticTexts["textBody"].waitForExistence(timeout: 10), "text view missing")
+        var seen: [String] = []
+        for _ in 0..<2 {
+            let src = app.descendants(matching: .any)["textSource"]
+            for _ in 0..<4 where !src.exists || !src.isHittable { app.swipeUp(velocity: .slow); wait(0.3) }
+            XCTAssertTrue(src.exists, "source line missing")
+            seen.append(src.label)
+            if seen.count == 1 { shot("97-source-line") }
+            if seen.count == 2 { shot("98-source-line-reserved") }
+            if seen.count == 1 {
+                src.tap()
+                wait(0.4)
+                XCTAssertTrue(diagLog().contains("source open https://example.org/text"), "tap did not open the source")
+            }
+            app.buttons["textNext"].tap()
+            wait(1)
+        }
+        XCTAssertEqual(seen.filter { $0.hasPrefix("Quoted from ") }.count, 1, "exactly the reserved passage says Quoted from: \(seen)")
+        XCTAssertTrue(seen.contains { $0.hasPrefix("Jane Roe") && $0.hasSuffix("CC BY 4.0") }, "\(seen)")
+        XCTAssertTrue(seen.contains { $0.hasPrefix("Quoted from Jordan Feigenbaum") && $0.hasSuffix("All rights reserved") }, "\(seen)")
+    }
+
     /// Schlüsselsicherung: Dateikopie gelöscht, die App trägt sie beim Start aus dem Keychain nach (und umgekehrt)
     func test06KeyRestore() throws {
         // Entsperrt heißt: der Feed mit Formschalter ist da (welcher Bereich zuerst kommt, hängt vom Tag ab)
@@ -466,7 +493,14 @@ final class CoreUITests: XCTestCase {
                 "cues": [[0, "This is the first caption line of the sample stream."], [3, "It changes every few seconds, like a real moment."], [6, "Captions sit under the video band in design A."], [9, "The end comes at forty-one seconds."]],
             ]
             if (!youTube || short) && !text { d["hls"] = video; d["url"] = "https://example.com/full" }
-            if text { d["form"] = "text" }
+            if text {
+                d["form"] = "text"
+                // Quellenzeile: text1 offen lizenziert, text2 mit vorbehaltenen Rechten
+                d["author"] = id == "text1" ? "Jane Roe" : "Jordan Feigenbaum"
+                d["ref"] = "Ref \(id)"
+                d["sourceUrl"] = "https://example.org/\(id)"
+                d["license"] = id == "text1" ? "CC BY 4.0" : "Alle Rechte vorbehalten, frei lesbar. Private Nutzung, Passagen mit Quellenangabe"
+            }
             if audio { d["audio"] = true }
             if let f = forYou { d["forYou"] = f }
             return d

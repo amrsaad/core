@@ -449,3 +449,39 @@ enum Note {
         "\(issueBase)?title=\(enc(c.hook))&body=\(enc(body(c, chips: selected, text: text)))&labels=\(label)"
     }
 }
+
+// MARK: Aufgabe 6, Quellenzeile der Textform
+
+/// Autor, Quelle, Fundstelle, Lizenz unter der Passage. Bei vorbehaltenen Rechten steht "Quoted from " vor dem Namen.
+/// Gleiche Regeln und Prüfdaten wie src/moments/source.ts.
+enum SourceLine {
+    struct Line: Equatable {
+        var prefix: String
+        var text: String
+        var url: URL?
+    }
+
+    static func isReserved(_ license: String?) -> Bool {
+        guard let l = license?.lowercased() else { return false }
+        return l.contains("alle rechte vorbehalten") || l.contains("all rights reserved")
+    }
+
+    static func line(author: String?, channel: String?, ref: String?, license: String?, sourceUrl: String?) -> Line? {
+        let reserved = isReserved(license)
+        let lic = reserved ? "All rights reserved" : (license ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let a = (author ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let c = (channel ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let r = (ref ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let parts = [a, c == a ? "" : c, r, lic].filter { !$0.isEmpty }
+        if parts.isEmpty { return nil }
+        var url: URL?
+        if let s = sourceUrl, let u = URL(string: s), let sc = u.scheme?.lowercased(), sc == "http" || sc == "https" { url = u }
+        return Line(prefix: reserved ? "Quoted from " : "", text: parts.joined(separator: ", "), url: url)
+    }
+}
+
+extension Moment {
+    var sourceLine: SourceLine.Line? {
+        SourceLine.line(author: author, channel: channel, ref: ref, license: license, sourceUrl: sourceUrl)
+    }
+}
