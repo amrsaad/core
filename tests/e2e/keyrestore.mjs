@@ -52,7 +52,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     let browser;
     try {
       browser = await type.launch(process.env.E2E_CHROME && type === chromium ? { executablePath: process.env.E2E_CHROME } : {});
-      const ctx = await browser.newContext({ ...devices['iPhone 15'] });
+      // Service Worker aus (wie in moments.mjs): Er holt die per Route abgebrochenen Vorschaubilder selbst und meldet das als unbehandelte NetworkError. Geprüft wird hier nur die Schlüsselsicherung, sie braucht den Worker nicht.
+      const ctx = await browser.newContext({ ...devices['iPhone 15'], serviceWorkers: 'block' });
       await ctx.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
       await ctx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
       const errors = [];

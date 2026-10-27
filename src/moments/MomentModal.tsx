@@ -26,6 +26,8 @@ export function MomentModal({ moment, onClose }: { moment: Moment; onClose: () =
           if (s === STATE.ENDED) close.current();
         },
       });
+    }).catch(() => {
+      /* YouTube-API nicht erreichbar: das Vorschaubild bleibt, Schließen geht weiter */
     });
     const poll = window.setInterval(() => {
       const p = player.current;

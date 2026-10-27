@@ -10,8 +10,8 @@ export function UnlockDevice() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    void unlockLink().then(setLink);
-    void keyBackups().then(setBackups);
+    unlockLink().then(setLink).catch(() => setLink(null));
+    keyBackups().then(setBackups).catch(() => {});
   }, []);
 
   const svg = (() => {
