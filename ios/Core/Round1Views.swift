@@ -354,6 +354,11 @@ struct CaptionSheetView: View {
     var body: some View {
         let text = moment.readingText
         let ar = Captions.isArabic(text)
+        let maxH = UIScreen.main.bounds.height * 0.62
+        let scrollable = contentH > maxH
+        let drag = DragGesture(minimumDistance: 20).onEnded { v in
+            if Hook.closes(dy: v.translation.height, scrollTop: offset) { onClose() }
+        }
         ZStack(alignment: .bottom) {
             Color.black.opacity(0.001)
                 .contentShape(Rectangle())
@@ -400,9 +405,9 @@ struct CaptionSheetView: View {
             .onPreferenceChange(CapHeightKey.self) { contentH = $0 }
             .frame(height: contentH > 0 ? min(contentH, UIScreen.main.bounds.height * 0.62) : UIScreen.main.bounds.height * 0.3)
             .background(Color(hex: 0x0A0A0A), in: UnevenRoundedRectangle(topLeadingRadius: 18, topTrailingRadius: 18))
-            .simultaneousGesture(DragGesture(minimumDistance: 20).onEnded { v in
-                if Hook.closes(dy: v.translation.height, scrollTop: offset) { onClose() }
-            })
+            // Passt der Text ohne Scrollen, gehört der Zug nach unten allein der Caption. Sonst läuft er neben dem Scrollen.
+            .highPriorityGesture(drag, including: scrollable ? .none : .all)
+            .simultaneousGesture(drag, including: scrollable ? .all : .none)
             .accessibilityIdentifier("captionSheet")
         }
         .foregroundStyle(.white)
