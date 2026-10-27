@@ -419,7 +419,7 @@ final class CoreUITests: XCTestCase {
         // same day again: nothing to send, no line
         app.terminate()
         launch()
-        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["form-Video"].waitForExistence(timeout: 15))
         wait(1)
         XCTAssertFalse(app.buttons["notesPrompt"].exists, "sent notes must not come back")
     }
