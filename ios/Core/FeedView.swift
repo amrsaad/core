@@ -8,6 +8,8 @@ final class FeedModel: ObservableObject {
     enum Status: Equatable { case loading, ready, error(String) }
 
     @Published var status: Status = .loading
+    /// Caption offen: das Blättern der Momente ruht, damit der Zug nach unten die Caption schließt
+    @Published var captionOpen = false
     @Published private(set) var queue: [Moment] = []
     /// Der ganze Pool. Gespielt wird nur der Teil, den der Filter durchlässt (formPool).
     private(set) var pool: [Moment] = []
@@ -155,7 +157,8 @@ struct FeedView: View {
                             flash: $flash,
                             onMenu: { Diag.log("menu open \(m.id)"); menuFor = m },
                             onTextEnd: { textEnd(m) },
-                            onNext: { advance() }
+                            onNext: { advance() },
+                            onCaption: { feed.captionOpen = $0 }
                         )
                         .frame(width: full.width, height: full.height)
                         .id(m.id)
@@ -164,6 +167,7 @@ struct FeedView: View {
                 .scrollTargetLayout()
             }
             .scrollTargetBehavior(.paging)
+            .scrollDisabled(feed.captionOpen)
             .scrollPosition(id: $currentID)
             .ignoresSafeArea()
         }
@@ -351,6 +355,7 @@ struct MomentPage: View {
     let onMenu: () -> Void
     let onTextEnd: () -> Void
     let onNext: () -> Void
+    let onCaption: (Bool) -> Void
     @EnvironmentObject var store: Store
     @State private var fast = false
     @State private var pressing = false
@@ -455,6 +460,7 @@ struct MomentPage: View {
         }
         .onAppear { playback.prepare() }
         .onChange(of: isActive) { _, a in if !a { captionOpen = false } }
+        .onChange(of: captionOpen) { _, v in onCaption(v) }
         .animation(.easeOut(duration: 0.2), value: captionOpen)
     }
 
