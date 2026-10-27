@@ -13,7 +13,8 @@ const FAKE = readFileSync(new URL('./fakeyt.js', import.meta.url), 'utf8');
 const raw = crypto.getRandomValues(new Uint8Array(32));
 const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt']);
 const iv = crypto.getRandomValues(new Uint8Array(12));
-const m = (i) => ({ id: `kr${i}:1`, videoId: `krtest${String(i).padStart(5, "0")}`, start: 1, end: 60, channel: 'Test', videoTitle: 'Test', area: 'brain', topic: 'augen', hook: `Test ${i}`, kind: 'regel', createdAt: '2026-10-20T00:00:00Z' });
+// thumb lokal: ohne Feld lädt die App i.ytimg.com, das der Service Worker selbst holt (Route fängt ihn nicht ab) und als NetworkError meldet
+const m = (i) => ({ id: `kr${i}:1`, videoId: `krtest${String(i).padStart(5, "0")}`, thumb: `${url}apple-touch-icon.png`, start: 1, end: 60, channel: 'Test', videoTitle: 'Test', area: 'brain', topic: 'augen', hook: `Test ${i}`, kind: 'regel', createdAt: '2026-10-20T00:00:00Z' });
 const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify({ updatedAt: '2026-10-23T00:00:00Z', lastRun: null, moments: Array.from({ length: 6 }, (_, i) => m(i)) })));
 mkdirSync('dist/moments', { recursive: true });
 writeFileSync('dist/moments/pool.enc', JSON.stringify({ v: 1, iv: Buffer.from(iv).toString('base64url'), ct: Buffer.from(ct).toString('base64url') }));
@@ -52,8 +53,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     let browser;
     try {
       browser = await type.launch(process.env.E2E_CHROME && type === chromium ? { executablePath: process.env.E2E_CHROME } : {});
-      // Service Worker aus (wie in moments.mjs): Er holt die per Route abgebrochenen Vorschaubilder selbst und meldet das als unbehandelte NetworkError. Geprüft wird hier nur die Schlüsselsicherung, sie braucht den Worker nicht.
-      const ctx = await browser.newContext({ ...devices['iPhone 15'], serviceWorkers: 'block' });
+      const ctx = await browser.newContext({ ...devices['iPhone 15'] });
       await ctx.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
       await ctx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
       const errors = [];
