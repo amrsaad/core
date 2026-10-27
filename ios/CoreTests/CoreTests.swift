@@ -113,10 +113,10 @@ final class VaultTests: XCTestCase {
 
     func testDecryptRoundTrip() throws {
         let key = Data((0..<32).map { UInt8($0) })
-        let json = #"{"updatedAt":"2026-10-23T00:00:00Z","moments":[{"id":"a:1","videoId":"a","start":1,"end":31,"channel":"C (Dr. X)","area":"brain","topic":"eyes","hook":"H","cues":[[0,"first"],[2.5,"second"]]}]}"#
+        let json = #"{"updatedAt":"2026-10-23T00:00:00Z","moments":[{"id":"a:1","videoId":"aaaaaaaaaaa","start":1,"end":31,"channel":"C (Dr. X)","area":"brain","topic":"eyes","hook":"H","cues":[[0,"first"],[2.5,"second"]]}]}"#
         let pool = try Vault.decrypt(try seal(json, key: key), key: key)
         XCTAssertEqual(pool.moments.count, 1)
-        let m = pool.moments[0]
+        let m = try XCTUnwrap(pool.moments.first)
         XCTAssertEqual(m.speakerLine, "C · Dr. X")
         XCTAssertTrue(m.isYouTube)
         XCTAssertEqual(m.caption(at: 1), "first")

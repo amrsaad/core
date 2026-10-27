@@ -13,7 +13,7 @@ const FAKE = readFileSync(new URL('./fakeyt.js', import.meta.url), 'utf8');
 const raw = crypto.getRandomValues(new Uint8Array(32));
 const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt']);
 const iv = crypto.getRandomValues(new Uint8Array(12));
-const m = (i) => ({ id: `kr${i}:1`, videoId: `kr${i}`, start: 1, end: 60, channel: 'Test', videoTitle: 'Test', area: 'brain', topic: 'augen', hook: `Test ${i}`, kind: 'regel', createdAt: '2026-10-20T00:00:00Z' });
+const m = (i) => ({ id: `kr${i}:1`, videoId: `krtest${String(i).padStart(5, "0")}`, start: 1, end: 60, channel: 'Test', videoTitle: 'Test', area: 'brain', topic: 'augen', hook: `Test ${i}`, kind: 'regel', createdAt: '2026-10-20T00:00:00Z' });
 const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify({ updatedAt: '2026-10-23T00:00:00Z', lastRun: null, moments: Array.from({ length: 6 }, (_, i) => m(i)) })));
 mkdirSync('dist/moments', { recursive: true });
 writeFileSync('dist/moments/pool.enc', JSON.stringify({ v: 1, iv: Buffer.from(iv).toString('base64url'), ct: Buffer.from(ct).toString('base64url') }));

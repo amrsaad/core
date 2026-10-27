@@ -70,7 +70,8 @@ const badMoments = [
   { ...badBase, id: 'pod-0000002x:100', videoId: 'pod-0000002x', area: 'body', hook: 'Video mit pod-ID', form: 'video' },
 ];
 const errMoments = Array.from({ length: 4 }, (_, i) => ({ ...badBase, id: `errorvid00${i}:100`, videoId: `errorvid00${i}`, area: ['beat', 'brain', 'body', 'brain'][i], hook: `Fehler 150 Nr. ${i}`, form: 'video' }));
-const goodVideo = [...moments.slice(0, 4), ...moments.slice(12, 16), ...moments.slice(46, 50)].map(({ recall, ...m }) => m);
+// Genug gültige Momente, damit 12 Wischer den Pool nie erschöpfen (am Poolende gibt es kein Weiter mehr)
+const goodVideo = [...moments.slice(0, 4), ...moments.slice(12, 16), ...moments.slice(46, 50), ...moments.slice(4, 8), ...moments.slice(16, 28), ...moments.slice(50, 55)].map(({ recall, ...m }) => m);
 const poolBad = await encPool([...badMoments.slice(0, 1), ...errMoments.slice(0, 2), badMoments[1], ...goodVideo.slice(0, 6), badMoments[2], ...errMoments.slice(2), ...goodVideo.slice(6)]);
 // Alle Beat-Momente werfen beim Anlegen des Players (Konstruktor wirft). Der Tag beginnt mit Beat, also trifft es die ersten drei Slots.
 const throwMoments = Array.from({ length: 3 }, (_, i) => ({ ...badBase, id: `throwvid00${i}:100`, videoId: `throwvid00${i}`, area: 'beat', hook: `Konstruktor wirft Nr. ${i}`, form: 'video' }));
@@ -609,14 +610,15 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     for (let n = 0; n < 12; n++) {
       await p8.evaluate(() => window.__core.next());
       await p8.waitForTimeout(250);
-      badWalk.push(await p8.evaluate(() => ({ id: window.__core.moment()?.videoId, err: /Moments need internet|Invalid video id/.test(document.body.innerText) })));
+      badWalk.push(await p8.evaluate(() => ({ idx: window.__core.idx(), id: window.__core.moment()?.videoId, err: /Moments need internet|Invalid video id/.test(document.body.innerText) })));
     }
     r.badWalk = badWalk;
     c.badNoErrorPage = badWalk.every((x) => x.id && !x.err);
     // Fehler 150 wurde ausgelöst und der Moment übersprungen: nach Ruhephase steht der Feed nie auf einem errorvid
     await p8.waitForTimeout(400);
     c.badErrorsHappened = (await p8.evaluate(() => window.__core.diag().some((x) => / error 150$/.test(x)) || window.__ytlog.some((x) => x.startsWith('load errorvid')))) === true;
-    c.badNotStuckOnError = badWalk.every((x) => !/^errorvid/.test(x.id));
+    // Jeder Wischer rückt wirklich vor (Index steigt), und der Feed steht nie auf einem errorvid
+    c.badNotStuckOnError = badWalk.every((x) => !/^errorvid/.test(x.id)) && badWalk.every((x, i) => i === 0 || x.idx > badWalk[i - 1].idx);
     // Nie ein Player für Text- oder Podcast-IDs ohne Stream
     c.badNeverLoaded = await p8.evaluate(() => !window.__ytlog.some((x) => /^(load|cue) (txt-|pod-)/.test(x)));
     c.badNeverShown = (await p8.evaluate(() => window.__core.diag().length)) >= 0 && badWalk.every((x) => !/^(txt|pod)-/.test(x.id));
