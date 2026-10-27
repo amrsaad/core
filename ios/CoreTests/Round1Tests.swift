@@ -124,28 +124,59 @@ final class Round1Tests: XCTestCase {
         XCTAssertEqual(Recall.pick([:], recent: recent, now: t, available: all), .init(id: "b", review: false))
         let old: [Recall.Recent] = [.init(id: "old", watched: 1)] + ["w", "x", "y", "z"].map { .init(id: $0, watched: 0.2) }
         XCTAssertNil(Recall.pick([:], recent: old, now: t, available: all))
-        XCTAssertNil(Recall.pick(Recall.answer([:], id: "b", got: true, now: t, saved: false), recent: [.init(id: "b", watched: 1)], now: t, available: all))
-        let r0 = Recall.answer([:], id: "old", got: true, now: t.addingTimeInterval(-8 * day), saved: false)
+        XCTAssertNil(Recall.pick(Recall.answer([:], id: "b", got: true, now: t), recent: [.init(id: "b", watched: 1)], now: t, available: all))
+        let r0 = Recall.answer([:], id: "old", got: true, now: t.addingTimeInterval(-8 * day))
         XCTAssertEqual(Recall.pick(r0, recent: [.init(id: "new", watched: 1)], now: t, available: all), .init(id: "old", review: true))
         XCTAssertEqual(Recall.pick(r0, recent: [.init(id: "new", watched: 1)], now: t, available: { $0 != "old" }), .init(id: "new", review: false))
 
-        var r = Recall.answer([:], id: "m", got: true, now: t, saved: true)
+        // Abstände: Treffer 7 Tage, zweiter Treffer 21 Tage, dritter beendet
+        var r = Recall.answer([:], id: "m", got: true, now: t)
         XCTAssertEqual(r["m"]?.due, t.addingTimeInterval(7 * day))
-        r = Recall.answer(r, id: "m", got: true, now: t.addingTimeInterval(7 * day), saved: true)
+        r = Recall.answer(r, id: "m", got: true, now: t.addingTimeInterval(7 * day))
         XCTAssertEqual(r["m"]?.due, t.addingTimeInterval(28 * day))
-        r = Recall.answer(r, id: "m", got: true, now: t.addingTimeInterval(28 * day), saved: true)
+        r = Recall.answer(r, id: "m", got: true, now: t.addingTimeInterval(28 * day))
         XCTAssertNil(r["m"]?.due)
 
-        var n = Recall.answer([:], id: "m", got: true, now: t, saved: false)
-        n = Recall.answer(n, id: "m", got: true, now: t.addingTimeInterval(7 * day), saved: false)
-        XCTAssertNil(n["m"]?.due)
-
-        var miss = Recall.answer([:], id: "m", got: false, now: t, saved: false)
-        XCTAssertEqual(miss["m"]?.due, t.addingTimeInterval(7 * day))
+        // Fehler: nach 2 Tagen, danach beginnt die Folge neu
+        var miss = Recall.answer([:], id: "m", got: false, now: t)
+        XCTAssertEqual(miss["m"]?.due, t.addingTimeInterval(2 * day))
         XCTAssertFalse(Recall.isKnown(miss, "m"))
-        miss = Recall.answer(miss, id: "m", got: true, now: t.addingTimeInterval(7 * day), saved: true)
+        miss = Recall.answer(miss, id: "m", got: true, now: t.addingTimeInterval(2 * day))
         XCTAssertTrue(Recall.isKnown(miss, "m"))
-        XCTAssertEqual(miss["m"]?.due, t.addingTimeInterval(28 * day))
+        XCTAssertEqual(miss["m"]?.due, t.addingTimeInterval(9 * day))
+        miss = Recall.answer(miss, id: "m", got: false, now: t.addingTimeInterval(9 * day))
+        XCTAssertEqual(miss["m"]?.due, t.addingTimeInterval(11 * day))
+        miss = Recall.answer(miss, id: "m", got: true, now: t.addingTimeInterval(11 * day))
+        miss = Recall.answer(miss, id: "m", got: true, now: t.addingTimeInterval(18 * day))
+        XCTAssertEqual(miss["m"]?.due, t.addingTimeInterval(39 * day))
+
+        // Momente ohne recall bekommen keine Karte, der nächste Kandidat mit recall rückt nach
+        let has: Set<String> = ["a", "c"]
+        let r4: [Recall.Recent] = [.init(id: "a", watched: 1), .init(id: "b", watched: 1), .init(id: "c", watched: 0.2), .init(id: "d", watched: 0.9)]
+        XCTAssertEqual(Recall.pick([:], recent: r4, now: t, available: { has.contains($0) }), .init(id: "a", review: false))
+        XCTAssertNil(Recall.pick([:], recent: r4, now: t, available: { _ in false }))
+
+        // Antwortreihenfolge: Permutation, alle 6 Reihenfolgen möglich
+        struct Lcg: RandomNumberGenerator { var s: UInt64; mutating func next() -> UInt64 { s = s &* 6364136223846793005 &+ 1442695040888963407; return s } }
+        var g = Lcg(s: 7)
+        var seen = Set<[Int]>()
+        for _ in 0..<300 {
+            let o = Recall.shuffleOrder(3, using: &g)
+            XCTAssertEqual(o.sorted(), [0, 1, 2])
+            seen.insert(o)
+        }
+        XCTAssertEqual(seen.count, 6)
+    }
+
+    // Aufgabe 4
+    func testHook() {
+        XCTAssertEqual([1, 2, 3, 4, 7].map { Hook.step(linesAtNormal: $0) }, [0, 0, 0, 1, 1])
+        XCTAssertEqual([0, 5, 65, 100, 760, 3723].map { Hook.atTime($0) }, ["0:00", "0:05", "1:05", "1:40", "12:40", "1:02:03"])
+        XCTAssertEqual(Hook.atTime(-4), "0:00")
+        XCTAssertTrue(Hook.closes(dy: 80, scrollTop: 0))
+        XCTAssertFalse(Hook.closes(dy: 80, scrollTop: 120))
+        XCTAssertFalse(Hook.closes(dy: 30, scrollTop: 0))
+        XCTAssertFalse(Hook.closes(dy: -90, scrollTop: 0))
     }
 
     // Punkt 7

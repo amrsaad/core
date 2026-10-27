@@ -179,8 +179,9 @@ enum FormText {
 enum Recall {
     static let every = 4
     static let minWatched = 0.8
-    static let firstGapDays = 7.0
-    static let savedGapDays = 21.0
+    static let missGapDays = 2.0
+    static let hitGapDays = 7.0
+    static let secondHitGapDays = 21.0
     static let day: TimeInterval = 86_400
 
     struct Result: Codable, Equatable {
@@ -222,25 +223,36 @@ enum Recall {
         return fresh.map { Pick(id: $0.id, review: false) }
     }
 
-    static func answer(_ recall: State, id: String, got: Bool, now: Date, saved: Bool) -> State {
+    /// Treffer in Folge am Ende der Ergebnisse
+    static func trailingHits(_ results: [Result]) -> Int {
+        var n = 0
+        for r in results.reversed() { if r.got { n += 1 } else { break } }
+        return n
+    }
+
+    /// Fehler nach 2 Tagen, Treffer nach 7, zweiter Treffer in Folge nach 21, dritter beendet
+    static func answer(_ recall: State, id: String, got: Bool, now: Date) -> State {
         let prev = recall[id] ?? Item(id: id, due: nil, results: [])
         let results = prev.results + [Result(at: now, got: got)]
+        let hits = trailingHits(results)
         let due: Date?
-        if !got {
-            due = now.addingTimeInterval(firstGapDays * day)
-        } else {
-            // Erste Karte: 7-Tage-Wiedervorlage. Erstes "Got it" in einer Wiedervorlage: gespeichert noch 21 Tage, sonst fertig
-            let reviewGots = results.dropFirst().filter(\.got).count
-            if prev.results.isEmpty { due = now.addingTimeInterval(firstGapDays * day) }
-            else if saved && reviewGots == 1 { due = now.addingTimeInterval(savedGapDays * day) }
-            else { due = nil }
-        }
+        if !got { due = now.addingTimeInterval(missGapDays * day) }
+        else if hits == 1 { due = now.addingTimeInterval(hitGapDays * day) }
+        else if hits == 2 { due = now.addingTimeInterval(secondHitGapDays * day) }
+        else { due = nil }
         var next = recall
         next[id] = Item(id: id, due: due, results: results)
         return next
     }
 
-    /// "Gekonnt" nur nach "Got it"
+    /// Reihenfolge der Antworten: Indizes in options, zufällig gemischt (Fisher-Yates), gleiche Regel wie Web
+    static func shuffleOrder<G: RandomNumberGenerator>(_ n: Int, using g: inout G) -> [Int] {
+        var a = Array(0..<n)
+        if n > 1 { for i in stride(from: n - 1, to: 0, by: -1) { a.swapAt(i, Int.random(in: 0...i, using: &g)) } }
+        return a
+    }
+
+    /// "Gekonnt" nur nach einer richtigen Wahl
     static func isKnown(_ recall: State, _ id: String) -> Bool { recall[id]?.results.contains { $0.got } ?? false }
 }
 
@@ -344,4 +356,25 @@ enum Actions {
         guard let median = s.median, let p90 = s.p90, let under = s.underTarget else { return "no taps measured yet" }
         return "Median \(median) ms, 90 % within \(p90) ms, \(Int((under * 100).rounded())) % under \(targetMs) ms (\(s.n) taps)"
     }
+}
+
+// MARK: Aufgabe 4, Hook und Caption (Max 27.10.2026)
+
+enum Hook {
+    static let maxLines = 3
+    static let sizePt: [CGFloat] = [17, 15]
+    static let swipeCloseDy: CGFloat = 60
+
+    /// Stufe 0 = normal, 1 = eine Stufe kleiner, nur wenn der Hook in Normalgröße mehr als drei Zeilen braucht. Nie gekürzt.
+    static func step(linesAtNormal: Int) -> Int { linesAtNormal > maxLines ? 1 : 0 }
+
+    /// Stelle im Video als Zeit: 1:05, 12:40, 1:02:03
+    static func atTime(_ seconds: Double) -> String {
+        let s = max(0, Int(seconds))
+        let h = s / 3600, m = (s % 3600) / 60, ss = s % 60
+        return h > 0 ? String(format: "%d:%02d:%02d", h, m, ss) : String(format: "%d:%02d", m, ss)
+    }
+
+    /// Zuklappen durch Wischen nach unten, nur wenn der Text oben steht
+    static func closes(dy: CGFloat, scrollTop: CGFloat) -> Bool { dy > swipeCloseDy && scrollTop <= 0 }
 }

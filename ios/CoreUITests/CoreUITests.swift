@@ -288,24 +288,83 @@ final class CoreUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["Text sources coming"].exists)
     }
 
-    /// Punkt 5: kurze Momente laufen von selbst durch, nach dem 4. kommt die Abrufkarte
+    /// Punkt 5: kurze Momente laufen von selbst durch, nach dem 4. kommt die Abrufkarte (Multiple Choice)
     func test05RecallCard() throws {
         try Self.testPool(short: true).write(to: stateDir.appendingPathComponent("pool.json"))
         launch()
-        XCTAssertTrue(app.staticTexts["What was the point?"].waitForExistence(timeout: 90), "no recall card after 4 moments")
-        XCTAssertFalse(app.otherElements["recallAnswer"].exists, "hook must stay hidden before the attempt")
+        let q = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'What follows from'")).firstMatch
+        XCTAssertTrue(q.waitForExistence(timeout: 90), "no recall card after 4 moments")
+        XCTAssertFalse(app.staticTexts["recallWhy"].exists, "explanation must stay hidden before the choice")
+        XCTAssertFalse(app.buttons["recallNext"].exists)
+        XCTAssertFalse(app.buttons["Show answer"].exists || app.buttons["Got it"].exists || app.buttons["Missed"].exists || app.buttons["Skip"].exists, "old controls must be gone")
+        XCTAssertEqual(app.buttons.matching(identifier: "recallOption").count, 3)
         wait(0.5)
         shot("60-recall-question")
-        let input = app.textFields["recallInput"].exists ? app.textFields["recallInput"] : app.textViews["recallInput"]
-        input.tap(); input.typeText("Test sentence from memory.")
-        app.buttons["Show answer"].tap()
-        wait(0.5)
+        // wrong choice: chosen red, right one green, explanation and Next
+        app.buttons["Wrong answer A"].tap()
+        XCTAssertTrue(app.staticTexts["recallWhy"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.buttons["Right answer"].value as? String, "right")
+        XCTAssertEqual(app.buttons["Wrong answer A"].value as? String, "wrong")
+        XCTAssertEqual(app.buttons["Wrong answer B"].value as? String, "rest")
+        wait(0.3)
         shot("61-recall-answer")
-        app.buttons["Got it"].tap()
+        app.buttons["recallNext"].tap()
         XCTAssertTrue(app.staticTexts["todayLine"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["todayLine"].label.hasSuffix(", 1 got it"), app.staticTexts["todayLine"].label)
+        XCTAssertTrue(app.staticTexts["todayLine"].label.hasSuffix(", 0 got it"), app.staticTexts["todayLine"].label)
         wait(0.5)
         shot("62-after-recall")
+    }
+
+    /// Aufgabe 4: Hook ungekürzt, Tipp klappt die Caption auf, der Ton läuft weiter, Tipp außerhalb und Wischen nach unten klappen zu
+    func test09Caption() {
+        launch()
+        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15), "feed did not appear")
+        wait(1)
+        let hook = app.staticTexts.matching(identifier: "hook").allElementsBoundByIndex.first { $0.frame.height > 0 && self.app.frame.contains($0.frame) }
+        XCTAssertNotNil(hook, "no hook on screen")
+        XCTAssertFalse(app.staticTexts["captionHook"].exists)
+        shot("90-hook")
+        hook?.tap()
+        XCTAssertTrue(app.staticTexts["captionHook"].waitForExistence(timeout: 5), "caption did not open")
+        XCTAssertTrue(app.staticTexts["captionExcerpt"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["captionMeta"].label.contains("0:01"), app.descendants(matching: .any)["captionMeta"].label)
+        XCTAssertTrue(app.descendants(matching: .any)["captionMeta"].label.contains("Test episode"))
+        wait(0.8)
+        shot("91-caption-open")
+        let log = diagLog()
+        XCTAssertTrue(log.contains("caption open playing="), "open not logged")
+        // der Ton läuft weiter: Zustand vor und nach dem Aufklappen gleich
+        let opened = log.components(separatedBy: "caption open playing=").last?.prefix(5)
+        let still = diagLog().components(separatedBy: "caption still playing=").last?.prefix(5)
+        XCTAssertEqual(opened?.hasPrefix("true"), still?.hasPrefix("true"), "caption must not pause or start playback")
+        // Tipp außerhalb schließt
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1)).tap()
+        let closed = NSPredicate(format: "exists == false")
+        expectation(for: closed, evaluatedWith: app.staticTexts["captionHook"])
+        waitForExpectations(timeout: 5)
+        // zweite Stelle: Zeile mit Sprecher und Bereich, zu durch Wischen nach unten
+        let line: XCUIElement? = app.staticTexts.matching(identifier: "speakerLine").allElementsBoundByIndex.first { $0.frame.height > 0 && self.app.frame.contains($0.frame) }
+        XCTAssertNotNil(line, "no speaker line")
+        line?.tap()
+        XCTAssertTrue(app.staticTexts["captionHook"].waitForExistence(timeout: 5), "speaker line must open the caption too")
+        app.staticTexts["captionHook"].swipeDown()
+        expectation(for: closed, evaluatedWith: app.staticTexts["captionHook"])
+        waitForExpectations(timeout: 5)
+        shot("92-caption-closed")
+    }
+
+    /// Doppeltipp im Text: More like this mit Herz
+    func test10TextDoubleTap() {
+        launch()
+        XCTAssertTrue(app.buttons["form-Text"].waitForExistence(timeout: 15))
+        app.buttons["form-Text"].tap()
+        XCTAssertTrue(app.staticTexts["textBody"].waitForExistence(timeout: 10), "text view missing")
+        wait(0.5)
+        app.staticTexts["textBody"].coordinate(withNormalizedOffset: CGVector(dx: 0.4, dy: 0.5)).doubleTap()
+        wait(0.3)
+        XCTAssertTrue(diagLog().contains("heart "), "heart missing in text form")
+        XCTAssertEqual(visible("like")?.value as? String, "on", "double tap in text must like")
+        shot("93-text-double-tap")
     }
 
     /// Schlüsselsicherung: Dateikopie gelöscht, die App trägt sie beim Start aus dem Keychain nach (und umgekehrt)
@@ -364,7 +423,8 @@ final class CoreUITests: XCTestCase {
         func m(_ id: String, _ area: String, _ topic: String, _ channel: String, _ hook: String, forYou: String? = nil, audio: Bool = false, youTube: Bool = false, text: Bool = false) -> [String: Any] {
             var d: [String: Any] = [
                 "id": id, "videoId": id, "start": 1, "end": short ? 6 : 41, "channel": channel, "area": area, "topic": topic, "hook": hook,
-                "kind": "story", "thumb": thumb,
+                "kind": "story", "thumb": thumb, "videoTitle": "Test episode",
+                "recall": ["question": "What follows from \(id)?", "options": ["Wrong answer A", "Right answer", "Wrong answer B"], "correct": 1, "why": "Because the moment says so."],
                 "excerpt": "This is the checked excerpt of the moment, shown as text.\nIt keeps its line breaks at sentence ends.\nThe text form counts a moment as seen only once its end was on screen.",
                 "cues": [[0, "This is the first caption line of the sample stream."], [3, "It changes every few seconds, like a real moment."], [6, "Captions sit under the video band in design A."], [9, "The end comes at forty-one seconds."]],
             ]

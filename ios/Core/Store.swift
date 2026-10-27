@@ -124,7 +124,7 @@ final class Store: ObservableObject {
     }
 
     func answerRecall(_ m: Moment, got: Bool) {
-        state.recall = Recall.answer(state.recall ?? [:], id: m.id, got: got, now: Date(), saved: isSaved(m))
+        state.recall = Recall.answer(state.recall ?? [:], id: m.id, got: got, now: Date())
         if got { state.dayCount = Today.countGotIt(state.dayCount ?? [:], Day.key()) }
     }
 

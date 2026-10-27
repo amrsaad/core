@@ -175,7 +175,7 @@ struct FeedView: View {
         }
         .overlay {
             if let r = recallCard {
-                RecallCardView(moment: r.moment, review: r.review) { got in closeRecall(r.moment, got) }
+                RecallCardView(moment: r.moment, review: r.review, onAnswer: { got in store.answerRecall(r.moment, got: got) }, onClose: { closeRecall() })
                     .id(r.moment.id + String(r.review))
             }
         }
@@ -262,7 +262,7 @@ struct FeedView: View {
             recent = Array((recent + [Recall.Recent(id: m.id, watched: watched)]).suffix(8))
             sessionSeen += 1
             if Recall.cardDue(sessionSeen),
-               let pick = Recall.pick(store.state.recall ?? [:], recent: recent, now: Date(), available: { findMoment($0) != nil }),
+               let pick = Recall.pick(store.state.recall ?? [:], recent: recent, now: Date(), available: { findMoment($0)?.recall != nil }),
                let rm = findMoment(pick.id) {
                 recallCard = (rm, pick.review)
             }
@@ -276,8 +276,7 @@ struct FeedView: View {
         store.state.saved[id]?.moment ?? feed.pool.first { $0.id == id }
     }
 
-    private func closeRecall(_ m: Moment, _ got: Bool?) {
-        if let got { store.answerRecall(m, got: got) }
+    private func closeRecall() {
         recallCard = nil
         if store.state.currentForm != .text, scenePhase == .active { feed.current(currentID)?.play() }
     }
@@ -359,6 +358,8 @@ struct MomentPage: View {
     @State private var heart: (point: CGPoint, id: Int)?
     @State private var heartVisible = false
     @State private var sourceBounce = 0
+    /// Aufgeklappte Caption: Hook, excerpt, Sprecher, Folge, Stelle. Der Ton läuft weiter.
+    @State private var captionOpen = false
     @Environment(\.openURL) private var openURL
 
     var body: some View {
@@ -404,7 +405,7 @@ struct MomentPage: View {
                 }
 
                 if isActive && store.state.currentForm == .text {
-                    TextPanel(moment: moment, insets: insets, onEnd: onTextEnd, onNext: onNext)
+                    TextPanel(moment: moment, insets: insets, onEnd: onTextEnd, onNext: onNext, onDouble: { like(double: true, at: $0) })
                         .frame(width: w, height: h)
                 }
 
@@ -412,8 +413,7 @@ struct MomentPage: View {
                     progressLine
                     Spacer()
                     HStack(alignment: .bottom, spacing: 0) {
-                        if store.state.currentForm != .text { info }
-                        Spacer(minLength: 16)
+                        if store.state.currentForm != .text { info } else { Spacer(minLength: 16) }
                         actions
                     }
                     .padding(.leading, 16)
@@ -436,6 +436,12 @@ struct MomentPage: View {
                         .onAppear { withAnimation(.easeOut(duration: 0.12)) { heartVisible = true } }
                 }
 
+                if captionOpen && isActive && store.state.currentForm != .text {
+                    CaptionSheetView(moment: moment, onClose: { captionOpen = false })
+                        .frame(width: w, height: h)
+                        .transition(.move(edge: .bottom))
+                }
+
                 if fast {
                     Text("2x")
                         .font(.system(size: 14, weight: .semibold))
@@ -448,6 +454,8 @@ struct MomentPage: View {
             .coordinateSpace(name: "page")
         }
         .onAppear { playback.prepare() }
+        .onChange(of: isActive) { _, a in if !a { captionOpen = false } }
+        .animation(.easeOut(duration: 0.2), value: captionOpen)
     }
 
     @ViewBuilder
@@ -488,12 +496,20 @@ struct MomentPage: View {
                 Text(moment.speakerLine).foregroundStyle(Palette.secondary).lineLimit(1)
             }
             .font(.system(size: 13))
-            Text(moment.hook)
-                .font(.system(size: 17, weight: .semibold))
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
+            .accessibilityIdentifier("speakerLine")
+            HookText(hook: moment.hook)
         }
         .shadow(color: .black.opacity(0.6), radius: 2, y: 1)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+        .onTapGesture { openCaption() }
+    }
+
+    private func openCaption() {
+        captionOpen = true
+        let p0 = playback.playing
+        Diag.log("caption open playing=\(p0)")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { if captionOpen { Diag.log("caption still playing=\(playback.playing)") } }
     }
 
     private var actions: some View {

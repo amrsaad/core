@@ -40,6 +40,14 @@ struct Cue: Codable, Hashable {
     }
 }
 
+/// Abfragefrage zum Ausschnitt: drei Antworten, eine richtig (Index in options)
+struct RecallQuestion: Codable, Hashable {
+    let question: String
+    let options: [String]
+    let correct: Int
+    let why: String
+}
+
 struct Moment: Codable, Identifiable, Hashable {
     let id: String
     let videoId: String
@@ -62,6 +70,8 @@ struct Moment: Codable, Identifiable, Hashable {
     var excerpt: String? = nil
     /// Form des Moments (video, audio, text). Fehlt im Pool, dann gilt audio true als audio, sonst video. Text-Momente haben keinen Player.
     var form: String? = nil
+    /// Abrufkarte: nur Momente mit diesem Feld bekommen eine Karte
+    var recall: RecallQuestion? = nil
 
     var cueTexts: [String] { (cues ?? []).map(\.text) }
     var readingText: String { FormText.text(excerpt: excerpt, cues: cueTexts) }
