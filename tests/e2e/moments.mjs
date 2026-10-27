@@ -36,6 +36,8 @@ for (const m of moments) {
 // Fallback ohne Feld form: audio true heißt audio. Die anderen fünf tragen das Feld.
 for (const m of moments.slice(30, 35)) m.audio = true;
 for (const m of moments.slice(35, 40)) Object.assign(m, { audio: true, form: 'audio' });
+// Vertrag: Audio braucht einen eigenen Stream (hls). Das <video> wird in fakeyt.js nachgebaut.
+for (const m of moments.slice(30, 40)) m.hls = `https://stream.test/${m.videoId}.m3u8`;
 // Text-Momente: eigenes Feld form text, kein Player (die Video-ID dient nur dem Nachweis, dass nie geladen wird)
 for (const m of moments.slice(40, 46)) Object.assign(m, { form: 'text', videoId: m.videoId.replace('test', 'texto') });
 // Quellenzeile: gerade Nummern mit vorbehaltenen Rechten, ungerade CC BY (Aufgabe 6)
@@ -59,6 +61,20 @@ const LONG = ' and the hook keeps going, because a real hook is a full sentence 
 const AREX = Array.from({ length: 6 }, (_, i) => `الجملة ${i + 1} من المقطع المفحوص، طويلة بما يكفي ليحتاج الشاشة إلى التمرير.`).join('\n');
 const poolNoRecall = await encPool(moments.map(({ recall, ...m }) => ({ ...m, hook: m.hook + LONG, ...(Number(m.videoId.slice(4)) % 2 === 1 ? { excerpt: AREX } : {}) })));
 const poolVideoOnly = await encPool(moments.filter((m) => !m.audio && m.form !== 'text'));
+// Pool mit fehlerhaften Momenten (Vertrag): Text ohne excerpt, Podcast ohne hls, Video mit pod-ID.
+// Dazu vier Momente mit gültiger ID, die YouTube mit Fehler 150 ablehnt (Nachbau, IDs errorvid...). Der Feed muss trotzdem laufen.
+const badBase = { start: 100, end: 160, channel: 'Kanal bad', videoTitle: 'Testvideo', topic: 'augen', kind: 'regel', createdAt: '2026-10-20T00:00:00Z' };
+const badMoments = [
+  { ...badBase, id: 'txt-0000001x:100', videoId: 'txt-0000001x', area: 'beat', hook: 'Text ohne excerpt', form: 'text' },
+  { ...badBase, id: 'pod-0000001x:100', videoId: 'pod-0000001x', area: 'brain', hook: 'Podcast ohne hls', form: 'audio', audio: true },
+  { ...badBase, id: 'pod-0000002x:100', videoId: 'pod-0000002x', area: 'body', hook: 'Video mit pod-ID', form: 'video' },
+];
+const errMoments = Array.from({ length: 4 }, (_, i) => ({ ...badBase, id: `errorvid00${i}:100`, videoId: `errorvid00${i}`, area: ['beat', 'brain', 'body', 'brain'][i], hook: `Fehler 150 Nr. ${i}`, form: 'video' }));
+const goodVideo = [...moments.slice(0, 4), ...moments.slice(12, 16), ...moments.slice(46, 50)].map(({ recall, ...m }) => m);
+const poolBad = await encPool([...badMoments.slice(0, 1), ...errMoments.slice(0, 2), badMoments[1], ...goodVideo.slice(0, 6), badMoments[2], ...errMoments.slice(2), ...goodVideo.slice(6)]);
+// Alle Beat-Momente werfen beim Anlegen des Players (Konstruktor wirft). Der Tag beginnt mit Beat, also trifft es die ersten drei Slots.
+const throwMoments = Array.from({ length: 3 }, (_, i) => ({ ...badBase, id: `throwvid00${i}:100`, videoId: `throwvid00${i}`, area: 'beat', hook: `Konstruktor wirft Nr. ${i}`, form: 'video' }));
+const poolThrow = await encPool([...throwMoments, ...goodVideo.filter((m) => m.area !== 'beat')]);
 const k = Buffer.from(raw).toString('base64url');
 
 const results = { at: new Date().toISOString(), runs: [] };
@@ -580,6 +596,51 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.emptyBackToVideo = await waitFor(p6, () => !!window.__core?.moment() && !document.body.innerText.includes('No audio moments yet'));
     // Momente ohne recall bekommen keine Karte: fünf Wischer, nie eine Karte
     await p6.close();
+    // Fehlerhafte Momente im Pool: der Feed läuft weiter, keine Fehlerseite, nur Überspringen
+    const p8 = await ctx.newPage();
+    const errors8 = [];
+    p8.on('pageerror', (e) => errors8.push(String(e)));
+    await p8.addInitScript(() => { window.__ytSlow = true; });
+    await p8.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBad }));
+    await p8.goto(url + '?now=2026-10-23&seed=3');
+    c.badFeedStarts = await waitFor(p8, () => !!window.__core?.moment());
+    c.badFirstPlays = await waitFor(p8, () => window.__core.state() === 1 && !/^errorvid/.test(window.__core.moment().videoId));
+    const badWalk = [];
+    for (let n = 0; n < 12; n++) {
+      await p8.evaluate(() => window.__core.next());
+      await p8.waitForTimeout(250);
+      badWalk.push(await p8.evaluate(() => ({ id: window.__core.moment()?.videoId, err: /Moments need internet|Invalid video id/.test(document.body.innerText) })));
+    }
+    r.badWalk = badWalk;
+    c.badNoErrorPage = badWalk.every((x) => x.id && !x.err);
+    // Fehler 150 wurde ausgelöst und der Moment übersprungen: nach Ruhephase steht der Feed nie auf einem errorvid
+    await p8.waitForTimeout(400);
+    c.badErrorsHappened = (await p8.evaluate(() => window.__core.diag().some((x) => / error 150$/.test(x)) || window.__ytlog.some((x) => x.startsWith('load errorvid')))) === true;
+    c.badNotStuckOnError = badWalk.every((x) => !/^errorvid/.test(x.id));
+    // Nie ein Player für Text- oder Podcast-IDs ohne Stream
+    c.badNeverLoaded = await p8.evaluate(() => !window.__ytlog.some((x) => /^(load|cue) (txt-|pod-)/.test(x)));
+    c.badNeverShown = (await p8.evaluate(() => window.__core.diag().length)) >= 0 && badWalk.every((x) => !/^(txt|pod)-/.test(x.id));
+    // Diagnose: drei aussortiert
+    await p8.click('[aria-label=Settings]');
+    c.badSkippedLine = await waitFor(p8, () => document.querySelector('[data-testid=moments-skipped]')?.textContent === 'Moments skipped: 3');
+    await p8.screenshot({ path: `${out}/${name}-20-moments-skipped.png` });
+    c.badPageErrors = errors8.length === 0;
+    await p8.close();
+    // Der Player-Konstruktor wirft für einen Moment: früher Fehlerseite, jetzt nur Überspringen
+    const p9 = await ctx.newPage();
+    const errors9 = [];
+    p9.on('pageerror', (e) => errors9.push(String(e)));
+    await p9.addInitScript(() => { window.__ytSlow = true; });
+    await p9.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolThrow }));
+    await p9.goto(url + '?now=2026-10-23&seed=3');
+    c.throwFeedStarts = await waitFor(p9, () => !!window.__core?.moment());
+    c.throwNoErrorPage = await p9.evaluate(() => !/Moments need internet|Invalid video id/.test(document.body.innerText));
+    c.throwLogged = await waitFor(p9, () => window.__core.diag().some((x) => / player failed /.test(x)), undefined, 3000);
+    c.throwPlaysAfterSkip = await waitFor(p9, () => window.__core.state() === 1 && !!document.querySelector('.vfeed'), undefined, 8000);
+    for (let n = 0; n < 6; n++) { await p9.evaluate(() => window.__core.next()); await p9.waitForTimeout(250); }
+    c.throwStillNoErrorPage = await p9.evaluate(() => !/Moments need internet|Invalid video id/.test(document.body.innerText) && !!window.__core.moment());
+    c.throwPageErrors = errors9.length === 0;
+    await p9.close();
     const p7 = await ctx.newPage();
     await p7.addInitScript(() => { window.__ytSlow = true; });
     await p7.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolNoRecall }));

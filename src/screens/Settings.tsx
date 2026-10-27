@@ -28,7 +28,7 @@ export function rebalance(shares: Record<Area, number>, area: Area, value: numbe
   return out;
 }
 
-export function Settings({ state, update, replace, moments }: { state: AppState; update: (fn: (s: AppState) => AppState) => void; replace: (s: AppState) => void; moments: MomentPool | null }) {
+export function Settings({ state, update, replace, moments, skipped = 0 }: { state: AppState; update: (fn: (s: AppState) => AppState) => void; replace: (s: AppState) => void; moments: MomentPool | null; skipped?: number }) {
   const list = moments?.moments ?? [];
   const file = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState<string | null>(null);
@@ -157,6 +157,7 @@ export function Settings({ state, update, replace, moments }: { state: AppState;
           />
         </label>
         <Latency samples={state.playLatency} />
+        <span className="t-meta" data-testid="moments-skipped">Moments skipped: {skipped}</span>
         <TapReaction samples={state.tapMs} />
       </section>
 

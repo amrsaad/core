@@ -189,6 +189,9 @@ struct SettingsView: View {
                     }
                     Text("Hold the video for 2x. Never faster than 2x.").font(.system(size: 13)).foregroundStyle(Palette.tertiary)
                     LatencyView(samples: store.state.playLatency ?? [])
+                    Text("Moments skipped: \(feed.skipped)")
+                        .font(.system(size: 13)).foregroundStyle(Palette.secondary)
+                        .accessibilityIdentifier("momentsSkipped")
                     TapReactionView(samples: store.state.tapMs ?? [])
                 }
 
@@ -227,7 +230,7 @@ struct SettingsView: View {
                             .font(.system(size: 13)).foregroundStyle(days <= 1 ? Color(hex: 0xE07B7B) : Palette.secondary)
                     }
                     Button("Copy diagnostics") {
-                        UIPasteboard.general.string = Diag.text(poolCount: feed.pool.count, poolUpdated: feed.updatedAt, state: store.state)
+                        UIPasteboard.general.string = Diag.text(poolCount: feed.pool.count, poolUpdated: feed.updatedAt, skipped: feed.skipped, state: store.state)
                         note = "Copied. Paste it into the chat."
                     }
                     .font(.system(size: 13))

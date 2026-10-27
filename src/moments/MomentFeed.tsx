@@ -82,6 +82,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const dragEl = useRef<HTMLDivElement>(null);
   const diag = useRef<string[]>([]);
   const bad = useRef(new Set<string>());
+  /** Zum nächsten Moment springen, auch aus Code, der vor goTo definiert ist */
+  const skipRef = useRef<() => void>(() => {});
   const everPlayed = useRef(false);
   /** Offene Messung Wisch bis erstes Bild */
   const swipe = useRef<{ j: number; t0: number; buffered: boolean } | null>(null);
@@ -145,18 +147,25 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     slot.index = j;
     // Text-Momente haben keinen Player
     if (!m || m.form === 'text' || !slot.player || !slot.ready) return;
-    // Vorladen ohne Ton, der aktuelle Moment bekommt den gewählten Ton
-    if (play) applySound(slot.player);
-    else slot.player.mute();
-    if (slot.mid !== m.id) {
-      slot.mid = m.id;
-      slot.st = STATE.UNSTARTED;
-      if (play) slot.player.loadVideoById(load(m));
-      // YouTube lädt bei cue nur das Vorschaubild. Darum stumm laden, der Player hält beim ersten Bild an (siehe onState).
-      else if (!HLS.has(m.videoId)) slot.player.loadVideoById(load(m));
-      else slot.player.cueVideoById(load(m));
-    } else if (play) slot.player.playVideo();
-    else slot.player.pauseVideo();
+    try {
+      // Vorladen ohne Ton, der aktuelle Moment bekommt den gewählten Ton
+      if (play) applySound(slot.player);
+      else slot.player.mute();
+      if (slot.mid !== m.id) {
+        slot.mid = m.id;
+        slot.st = STATE.UNSTARTED;
+        if (play) slot.player.loadVideoById(load(m));
+        // YouTube lädt bei cue nur das Vorschaubild. Darum stumm laden, der Player hält beim ersten Bild an (siehe onState).
+        else if (!HLS.has(m.videoId)) slot.player.loadVideoById(load(m));
+        else slot.player.cueVideoById(load(m));
+      } else if (play) slot.player.playVideo();
+      else slot.player.pauseVideo();
+    } catch (e) {
+      // Ein einzelner Moment ließ sich nicht laden: merken und zum nächsten, nie die Fehlerseite
+      diag.current.push(`assign ${m.id} failed ${e instanceof Error ? e.message : String(e)}`);
+      bad.current.add(m.videoId);
+      if (play) window.setTimeout(() => skipRef.current(), 0);
+    }
   }, []);
 
   const log = (m: Moment, patch: { ended?: boolean; feedback?: Feedback }) =>
@@ -286,6 +295,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     [ensureQueue, assign, single],
   );
 
+  skipRef.current = () => goTo(idxRef.current + 1);
+
   /** Moment bis end geschaut: Signal, dann Für dich (falls gesetzt) oder direkt weiter */
   const finish = useCallback(() => {
     if (endedAt.current === idxRef.current) return;
@@ -308,9 +319,11 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     let cancelled = false;
     ensureQueue(6);
     if (!queue.current.length) return;
-    loadYT()
-      .then((YT) => {
+    // Nur wenn die YouTube-API selbst nicht lädt, gibt es die Fehlerseite. Alles danach betrifft einzelne Momente und wird übersprungen.
+    loadYT().then(
+      (YT) => {
         if (cancelled) return;
+        const failedCurrent: number[] = [];
         for (let s = 0; s < SLOTS; s++) {
           const slot = slots.current[s];
           const j = single ? 0 : s;
@@ -318,46 +331,65 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           if (!slot.host || !m) continue;
           slot.index = j;
           slot.mid = '';
-          const target = document.createElement('div');
-          slot.host.replaceChildren(target);
-          slot.player = createPlayer(YT, target, m.videoId, {
-            onReady: () => {
-              slot.ready = true;
-              slot.player!.mute();
-              assign(slot, slot.index, slot.index === idxRef.current && !textRef.current);
-              if (slot.index === idxRef.current && !textRef.current) markSeen(queue.current[slot.index]);
-              rerender();
-            },
-            onState: (st) => {
-              diag.current.push(`slot${s} ${slot.mid} state ${st}`);
-              slot.st = st;
-              // Vorschaubild bleibt bis zum ersten Bild: ohne Umweg über React, damit kein Frame der YouTube-Oberfläche durchrutscht
-              slot.el?.toggleAttribute('data-live', st === STATE.PLAYING);
-              if (st === STATE.PLAYING) everPlayed.current = true;
-              const sw = swipe.current;
-              if (st === STATE.PLAYING && sw && slot.index === sw.j && sw.j === idxRef.current) {
-                swipe.current = null;
-                const ms = Math.round(performance.now() - sw.t0);
-                diag.current.push(`first-frame ${ms}ms ${sw.buffered ? 'buffered' : 'cold'}`);
-                update((x) => ({ ...x, playLatency: addSample(x.playLatency, { ms, buffered: sw.buffered, at: Date.now() }) }));
-              }
-              // Standardtempo nach Fundament-Regel 11 (1,5x), gehaltenes 2x bleibt bis zum Loslassen
-              if (st === STATE.PLAYING && !fastRef.current) slot.player?.setPlaybackRate(clampRate(rateRef.current));
-              if (st === STATE.ENDED && slot.index === idxRef.current) finish();
-              if (st === STATE.PLAYING && (slot.index !== idxRef.current || forYouRef.current || textRef.current || recallRef.current)) slot.player?.pauseVideo();
-              rerender();
-            },
-            onError: (code) => {
-              const m2 = queue.current[slot.index];
-              diag.current.push(`slot${s} ${slot.mid} error ${code}`);
-              if (m2) bad.current.add(m2.videoId);
-              if (!everPlayed.current && bad.current.size >= 8) setError(`YouTube spielt gerade keine Videos ab (Fehler ${code})`);
-              else if (slot.index === idxRef.current) goTo(idxRef.current + 1);
-            },
-          });
+          const mount = (id: string) => {
+            const target = document.createElement('div');
+            slot.host!.replaceChildren(target);
+            return createPlayer(YT, target, id, {
+              onReady: () => {
+                slot.ready = true;
+                slot.player!.mute();
+                assign(slot, slot.index, slot.index === idxRef.current && !textRef.current);
+                if (slot.index === idxRef.current && !textRef.current) markSeen(queue.current[slot.index]);
+                rerender();
+              },
+              onState: (st) => {
+                diag.current.push(`slot${s} ${slot.mid} state ${st}`);
+                slot.st = st;
+                // Vorschaubild bleibt bis zum ersten Bild: ohne Umweg über React, damit kein Frame der YouTube-Oberfläche durchrutscht
+                slot.el?.toggleAttribute('data-live', st === STATE.PLAYING);
+                if (st === STATE.PLAYING) everPlayed.current = true;
+                const sw = swipe.current;
+                if (st === STATE.PLAYING && sw && slot.index === sw.j && sw.j === idxRef.current) {
+                  swipe.current = null;
+                  const ms = Math.round(performance.now() - sw.t0);
+                  diag.current.push(`first-frame ${ms}ms ${sw.buffered ? 'buffered' : 'cold'}`);
+                  update((x) => ({ ...x, playLatency: addSample(x.playLatency, { ms, buffered: sw.buffered, at: Date.now() }) }));
+                }
+                // Standardtempo nach Fundament-Regel 11 (1,5x), gehaltenes 2x bleibt bis zum Loslassen
+                if (st === STATE.PLAYING && !fastRef.current) slot.player?.setPlaybackRate(clampRate(rateRef.current));
+                if (st === STATE.ENDED && slot.index === idxRef.current) finish();
+                if (st === STATE.PLAYING && (slot.index !== idxRef.current || forYouRef.current || textRef.current || recallRef.current)) slot.player?.pauseVideo();
+                rerender();
+              },
+              onError: (code) => {
+                const m2 = queue.current[slot.index];
+                diag.current.push(`slot${s} ${slot.mid} error ${code}`);
+                if (m2) bad.current.add(m2.videoId);
+                // Einzelne Fehler überspringen nur. Die Fehlerseite gibt es erst, wenn nie ein Video lief und acht Momente scheiterten.
+                if (!everPlayed.current && bad.current.size >= 8) setError(`YouTube spielt gerade keine Videos ab (Fehler ${code})`);
+                else if (slot.index === idxRef.current) goTo(idxRef.current + 1);
+              },
+            });
+          };
+          try {
+            slot.player = mount(m.videoId);
+          } catch (e) {
+            // Der Player eines Moments ließ sich nicht anlegen: Moment merken und überspringen, Slot neutral neu bauen
+            diag.current.push(`slot${s} ${m.id} player failed ${e instanceof Error ? e.message : String(e)}`);
+            bad.current.add(m.videoId);
+            try {
+              slot.player = mount('');
+            } catch (e2) {
+              slot.player = null;
+              diag.current.push(`slot${s} player failed again ${e2 instanceof Error ? e2.message : String(e2)}`);
+            }
+            if (j === idxRef.current) failedCurrent.push(j);
+          }
         }
-      })
-      .catch((e: Error) => setError(e.message));
+        if (failedCurrent.length) goTo(idxRef.current + 1);
+      },
+      (e: Error) => setError(e.message),
+    );
     return () => {
       cancelled = true;
       for (const s of slots.current) {

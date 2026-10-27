@@ -1,4 +1,5 @@
 // YouTube IFrame Player API, Einbettung über youtube-nocookie.com. Kein API-Key.
+import { isYtId } from '../moments/contract';
 
 export type YTLoad = string | { videoId: string; startSeconds?: number; endSeconds?: number };
 
@@ -58,7 +59,7 @@ export function loadYT(): Promise<YTNamespace> {
 
 /** Momente aus anderen Quellen (z.B. TED) mit eigenem HLS-Stream statt YouTube. Schlüssel ist videoId. */
 export const HLS = new Map<string, string>();
-export const isYtId = (id: string): boolean => /^[A-Za-z0-9_-]{11}$/.test(id);
+export { isYtId } from '../moments/contract';
 export const registerHls = (items: { videoId: string; hls?: string }[]) => {
   for (const m of items) if (m.hls) HLS.set(m.videoId, m.hls);
 };

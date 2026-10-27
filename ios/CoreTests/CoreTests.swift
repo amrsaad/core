@@ -161,3 +161,97 @@ final class StoreTests: XCTestCase {
         XCTAssertEqual(back, s)
     }
 }
+
+/// Vertrag zwischen Pool und App, gleiche Fälle wie tests/moments-contract.test.ts im Web.
+final class PoolContractTests: XCTestCase {
+    private let excerpt = "Sentence one of the checked excerpt.\nSentence two of the checked excerpt."
+
+    private func m(_ id: String, videoId: String = "dQw4w9WgXcQ", start: Double = 10, end: Double = 70, hls: String? = nil, audio: Bool? = nil, excerpt: String? = nil, form: String? = nil, hook: String = "Hook", recall: RecallQuestion? = nil) -> Moment {
+        Moment(id: id, videoId: videoId, start: start, end: end, channel: "Kanal", videoTitle: nil, area: .brain, topic: "t",
+               hook: hook, forYou: nil, kind: nil, top: nil, hls: hls, thumb: nil, url: nil, audio: audio, cues: nil, excerpt: excerpt, form: form, recall: recall)
+    }
+
+    func testYouTubeIDs() {
+        XCTAssertTrue(PoolContract.isYouTubeID("dQw4w9WgXcQ"))
+        for bad in ["", "short", "dQw4w9WgXcQ1", "dQw4w9 gXcQ", "dQw4w9WgXc!", "pod-abcdefg", "txt-abcdefg"] {
+            XCTAssertFalse(PoolContract.isYouTubeID(bad), bad)
+        }
+    }
+
+    func testValidCases() {
+        XCTAssertNil(PoolContract.violation(m("v")))
+        XCTAssertNil(PoolContract.violation(m("v", videoId: "ted-talk-1", hls: "https://x.test/v.m3u8")))
+        XCTAssertNil(PoolContract.violation(m("a", videoId: "pod-abcdef12", hls: "https://x.test/a.m3u8", form: "audio")))
+        XCTAssertNil(PoolContract.violation(m("a2", videoId: "pod-abcdef12", hls: "https://x.test/a.m3u8", audio: true)))
+        XCTAssertNil(PoolContract.violation(m("t", videoId: "txt-abcdef12", excerpt: excerpt, form: "text")))
+        // Text braucht weder Zeiten noch Stream
+        XCTAssertNil(PoolContract.violation(m("t2", start: 0, end: 0, excerpt: excerpt, form: "text")))
+    }
+
+    func testTextWithoutExcerpt() {
+        XCTAssertEqual(PoolContract.violation(m("t", videoId: "txt-abcdef12", form: "text")), "text ohne excerpt")
+        XCTAssertEqual(PoolContract.violation(m("t", excerpt: "  \n ", form: "text")), "text ohne excerpt")
+    }
+
+    func testAudioWithoutHLS() {
+        XCTAssertEqual(PoolContract.violation(m("a", videoId: "pod-abcdef12", form: "audio")), "audio ohne hls")
+        XCTAssertEqual(PoolContract.violation(m("a", audio: true)), "audio ohne hls")
+        XCTAssertEqual(PoolContract.violation(m("a", hls: "", form: "audio")), "hls leer")
+    }
+
+    func testVideoWithPodOrInvalidID() {
+        let why = "video ohne hls und ohne YouTube-ID"
+        XCTAssertEqual(PoolContract.violation(m("v", videoId: "pod-abcdefg")), why)
+        XCTAssertEqual(PoolContract.violation(m("v", videoId: "abc")), why)
+        XCTAssertEqual(PoolContract.violation(m("v", videoId: "txt-abcdefg")), why)
+    }
+
+    func testTimesAndRequiredFields() {
+        XCTAssertEqual(PoolContract.violation(m("v", end: 10)), "start oder end ungültig")
+        XCTAssertEqual(PoolContract.violation(m("v", end: .nan)), "start oder end ungültig")
+        XCTAssertEqual(PoolContract.violation(m("", hook: "x")), "id fehlt")
+        XCTAssertEqual(PoolContract.violation(m("v", hook: "  ")), "hook fehlt")
+        XCTAssertEqual(PoolContract.violation(m("v", form: "reel")), "form ungültig")
+    }
+
+    func testValidateSkipsCountsAndKeepsOrder() {
+        let list = [m("a"), m("b", videoId: "txt-abcdef12", form: "text"), m("c", videoId: "pod-abcdef12", hls: "https://x.test/a.m3u8", form: "audio"),
+                    m("d", videoId: "pod-abcdef12", form: "audio"), m("e", videoId: "pod-abcdefg"), m("a", hook: "doppelt")]
+        let r = PoolContract.validate(list)
+        XCTAssertEqual(r.moments.map(\.id), ["a", "c"])
+        XCTAssertEqual(r.skipped, 4)
+        XCTAssertEqual(r.reasons["text ohne excerpt"], 1)
+        XCTAssertEqual(r.reasons["audio ohne hls"], 1)
+        XCTAssertEqual(r.reasons["video ohne hls und ohne YouTube-ID"], 1)
+        XCTAssertEqual(r.reasons["doppelte id"], 1)
+    }
+
+    func testBadRecallIsDroppedMomentStays() {
+        let broken = RecallQuestion(question: "q", options: ["a", "b"], correct: 0, why: "w")
+        let outOfRange = RecallQuestion(question: "q", options: ["a", "b", "c"], correct: 3, why: "w")
+        let fine = RecallQuestion(question: "q", options: ["a", "b", "c"], correct: 2, why: "w")
+        let r = PoolContract.validate([m("a", recall: broken), m("b", recall: outOfRange), m("c", recall: fine)])
+        XCTAssertEqual(r.skipped, 0)
+        XCTAssertNil(r.moments[0].recall)
+        XCTAssertNil(r.moments[1].recall)
+        XCTAssertEqual(r.moments[2].recall, fine)
+    }
+
+    /// Ein einzelner nicht lesbarer Eintrag (falsche area, Zahl statt Objekt, kaputte Untertitel) kippt das Laden des Pools nicht
+    func testPoolDecodesPastUnreadableEntries() throws {
+        let json = """
+        {"updatedAt":"2026-10-27T00:00:00Z","moments":[
+          {"id":"ok1","videoId":"dQw4w9WgXcQ","start":1,"end":41,"channel":"K","area":"brain","topic":"t","hook":"H"},
+          {"id":"badarea","videoId":"dQw4w9WgXcQ","start":1,"end":41,"channel":"K","area":"mind","topic":"t","hook":"H"},
+          7,
+          {"id":"badcues","videoId":"dQw4w9WgXcQ","start":1,"end":41,"channel":"K","area":"body","topic":"t","hook":"H","cues":"nein"},
+          {"id":"pod1","videoId":"pod-abcdef12","start":1,"end":41,"channel":"K","area":"body","topic":"t","hook":"H","form":"audio"},
+          {"id":"txt1","videoId":"txt-abcdef12","start":1,"end":41,"channel":"K","area":"beat","topic":"t","hook":"H","form":"text"},
+          {"id":"ok2","videoId":"txt-abcdef12","start":1,"end":41,"channel":"K","area":"beat","topic":"t","hook":"H","form":"text","excerpt":"Ein Text."}
+        ]}
+        """
+        let pool = try JSONDecoder().decode(Pool.self, from: Data(json.utf8))
+        XCTAssertEqual(pool.moments.map(\.id), ["ok1", "ok2"])
+        XCTAssertEqual(pool.skipped, 5)
+    }
+}

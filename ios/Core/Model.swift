@@ -116,7 +116,39 @@ struct Moment: Codable, Identifiable, Hashable {
 
 struct Pool: Codable {
     let updatedAt: String?
+    /// Nur Momente, die den Vertrag erfüllen (PoolContract). Ein einzelner kaputter Moment lässt das Laden nie scheitern.
     let moments: [Moment]
+    /// Aussortierte Momente: nicht lesbar oder gegen den Vertrag. Steht in der Diagnose.
+    let skipped: Int
+
+    init(updatedAt: String?, moments: [Moment], skipped: Int = 0) {
+        self.updatedAt = updatedAt
+        self.moments = moments
+        self.skipped = skipped
+    }
+
+    private enum CodingKeys: String, CodingKey { case updatedAt, moments }
+    /// Zum Überspringen eines Eintrags, den der Decoder nicht lesen konnte (ohne das hört der Container nicht auf, ihn zu liefern)
+    private struct Unreadable: Decodable {}
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        updatedAt = try c.decodeIfPresent(String.self, forKey: .updatedAt)
+        var list = try c.nestedUnkeyedContainer(forKey: .moments)
+        var decoded: [Moment] = []
+        var unreadable = 0
+        while !list.isAtEnd {
+            if let m = try? list.decode(Moment.self) {
+                decoded.append(m)
+            } else {
+                unreadable += 1
+                _ = try? list.decode(Unreadable.self)
+            }
+        }
+        let check = PoolContract.validate(decoded)
+        moments = check.moments
+        skipped = unreadable + check.skipped
+    }
 }
 
 extension Color {

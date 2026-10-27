@@ -133,7 +133,7 @@ enum Vault {
             let (data, response) = try await URLSession.shared.data(for: request)
             if let http = response as? HTTPURLResponse, http.statusCode != 200 { throw VaultError.http(http.statusCode) }
             let pool = try decrypt(data, key: key)
-            Diag.log("pool loaded: \(pool.moments.count) moments, \(data.count) bytes")
+            Diag.log("pool loaded: \(pool.moments.count) moments, \(pool.skipped) skipped, \(data.count) bytes")
             try? FileManager.default.createDirectory(at: cacheFile.deletingLastPathComponent(), withIntermediateDirectories: true)
             try? data.write(to: cacheFile)
             return pool
@@ -145,5 +145,68 @@ enum Vault {
             if let cached = try? Data(contentsOf: cacheFile), let pool = try? decrypt(cached, key: key) { return pool }
             throw error
         }
+    }
+}
+
+/// Vertrag zwischen Pool und App, gleiche Regeln wie src/moments/contract.ts (Web) und core-content/pipeline/moments/build-enc.ts.
+/// Ein ungültiger Moment wird aussortiert und gezählt, nie geworfen ("Invalid video id", 27.10.2026).
+/// - Pflicht für alle: id, videoId, channel, hook nicht leer. form (falls gesetzt) video, audio oder text.
+/// - form text braucht einen excerpt.
+/// - form audio braucht hls und end nach start.
+/// - form video braucht hls oder eine echte 11-stellige YouTube-ID und end nach start.
+/// - Doppelte id: nur der erste zählt.
+/// Ohne Feld form gilt wie in FormFilter: audio true heißt audio, sonst video.
+enum PoolContract {
+    static func isYouTubeID(_ id: String) -> Bool {
+        id.range(of: "^[A-Za-z0-9_-]{11}$", options: .regularExpression) != nil && !id.hasPrefix("pod-") && !id.hasPrefix("txt-")
+    }
+
+    private static func blank(_ s: String?) -> Bool {
+        (s ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    /// Grund, warum der Moment nicht in die App darf, oder nil
+    static func violation(_ m: Moment) -> String? {
+        if blank(m.id) { return "id fehlt" }
+        if blank(m.videoId) { return "videoId fehlt" }
+        if blank(m.channel) { return "channel fehlt" }
+        if blank(m.hook) { return "hook fehlt" }
+        let form: String
+        if let f = m.form {
+            guard ["video", "audio", "text"].contains(f) else { return "form ungültig" }
+            form = f
+        } else {
+            form = m.isAudio ? "audio" : "video"
+        }
+        if form == "text" { return blank(m.excerpt) ? "text ohne excerpt" : nil }
+        if !m.start.isFinite || !m.end.isFinite || !(m.end > m.start) { return "start oder end ungültig" }
+        if m.hls != nil && blank(m.hls) { return "hls leer" }
+        if form == "audio" { return blank(m.hls) ? "audio ohne hls" : nil }
+        return (!blank(m.hls) || isYouTubeID(m.videoId)) ? nil : "video ohne hls und ohne YouTube-ID"
+    }
+
+    /// Abrufkarte mit falscher Form (nicht drei Antworten, Index außerhalb) entfällt, der Moment bleibt
+    private static func cleaned(_ m: Moment) -> Moment {
+        guard let r = m.recall, !(r.options.count == 3 && (0..<3).contains(r.correct)) else { return m }
+        var out = m
+        out.recall = nil
+        return out
+    }
+
+    static func validate(_ list: [Moment]) -> (moments: [Moment], skipped: Int, reasons: [String: Int]) {
+        var out: [Moment] = []
+        var seen = Set<String>()
+        var skipped = 0
+        var reasons: [String: Int] = [:]
+        func skip(_ why: String) {
+            skipped += 1
+            reasons[why, default: 0] += 1
+        }
+        for m in list {
+            if let why = violation(m) { skip(why); continue }
+            if !seen.insert(m.id).inserted { skip("doppelte id"); continue }
+            out.append(cleaned(m))
+        }
+        return (out, skipped, reasons)
     }
 }

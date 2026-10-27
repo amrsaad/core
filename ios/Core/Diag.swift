@@ -90,13 +90,13 @@ enum Diag {
         return ISO8601DateFormatter().date(from: String(inner[open.upperBound..<close.lowerBound]))
     }
 
-    static func text(poolCount: Int, poolUpdated: String?, state: AppState) -> String {
+    static func text(poolCount: Int, poolUpdated: String?, skipped: Int = 0, state: AppState) -> String {
         let d = UIDevice.current
         var out = """
         Core \(version) commit \(commit)
         iOS \(d.systemVersion), \(d.model)
         installed \(installedAt.map { stamp.string(from: $0) } ?? "?"), profile until \(expiresAt.map { stamp.string(from: $0) } ?? "?")
-        pool \(poolCount) moments, updated \(poolUpdated ?? "?")
+        pool \(poolCount) moments, updated \(poolUpdated ?? "?"), skipped \(skipped)
         seen \(state.seen.count), saved \(state.saved.count), muted \(state.muted.count), log \(state.log.count)
         feed time today \(Int(state.feedTime[Day.key()] ?? 0)) s
         \(Latency.line("swipe preloaded", Latency.stats(state.playLatency ?? [], buffered: true)))

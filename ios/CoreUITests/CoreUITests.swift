@@ -486,7 +486,8 @@ final class CoreUITests: XCTestCase {
         let thumb = bundle.url(forResource: "thumb", withExtension: "png")!.absoluteString
         func m(_ id: String, _ area: String, _ topic: String, _ channel: String, _ hook: String, forYou: String? = nil, audio: Bool = false, youTube: Bool = false, text: Bool = false) -> [String: Any] {
             var d: [String: Any] = [
-                "id": id, "videoId": id, "start": 1, "end": short ? 6 : 41, "channel": channel, "area": area, "topic": topic, "hook": hook,
+                // YouTube-Momente brauchen eine echte 11-stellige ID (Vertrag, PoolContract), sonst sortiert die App sie aus
+                "id": id, "videoId": youTube ? id.padding(toLength: 11, withPad: "x", startingAt: 0) : id, "start": 1, "end": short ? 6 : 41, "channel": channel, "area": area, "topic": topic, "hook": hook,
                 "kind": "story", "thumb": thumb, "videoTitle": "Test episode",
                 "recall": ["question": "What follows from \(id)?", "options": ["Wrong answer A", "Right answer", "Wrong answer B"], "correct": 1, "why": "Because the moment says so."],
                 "excerpt": "This is the checked excerpt of the moment, shown as text.\nIt keeps its line breaks at sentence ends.\nThe text form counts a moment as seen only once its end was on screen.",

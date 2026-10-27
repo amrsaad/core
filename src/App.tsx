@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { now as clockNow } from './lib/clock';
 import { useAppState } from './lib/useAppState';
 import { decryptJson, storeKeyFrom, unlockKey } from './lib/vault';
+import { validateMoments } from './moments/contract';
 import { MomentFeed } from './moments/MomentFeed';
 import { isReviewDue } from './moments/review';
 import { SavedMoments } from './moments/SavedMoments';
@@ -21,7 +22,7 @@ const ICONS: Record<Tab, JSX.Element> = {
 const NAMES: Record<Tab, string> = { feed: 'Feed', saved: 'Saved', settings: 'Settings' };
 const NAV_H = 56;
 
-type Vault = { status: 'loading' } | { status: 'locked' } | { status: 'error'; message: string } | { status: 'open'; pool: MomentPool };
+type Vault = { status: 'loading' } | { status: 'locked' } | { status: 'error'; message: string } | { status: 'open'; pool: MomentPool; skipped: number };
 
 export default function App() {
   const [state, update, replace] = useAppState();
@@ -36,8 +37,11 @@ export default function App() {
         const key = await unlockKey();
         if (!key) return setVault({ status: 'locked' });
         const pool = await decryptJson<MomentPool>(key, `${import.meta.env.BASE_URL}moments/pool.enc`);
-        if (pool) registerHls(pool.moments);
-        setVault({ status: 'open', pool: pool ?? { updatedAt: '', lastRun: null, moments: [] } });
+        // Vertragsprüfung: ungültige Momente werden aussortiert und gezählt, nie geworfen
+        const check = validateMoments(pool?.moments);
+        if (check.skipped) console.warn('Moments skipped', check.skipped, check.reasons);
+        registerHls(check.moments);
+        setVault({ status: 'open', skipped: check.skipped, pool: { updatedAt: pool?.updatedAt ?? '', lastRun: pool?.lastRun ?? null, moments: check.moments } });
       } catch (e) {
         setVault({ status: 'error', message: e instanceof Error ? e.message : String(e) });
       }
@@ -64,7 +68,7 @@ export default function App() {
         <MomentFeed key={state.settings.form ?? 'video'} pool={vault.pool.moments} state={state} update={update} active={tab === 'feed'} onPausedChange={onPausedChange} />
       </div>
       {tab === 'saved' && <SavedMoments state={state} update={update} />}
-      {tab === 'settings' && <Settings state={state} update={update} replace={replace} moments={vault.pool} />}
+      {tab === 'settings' && <Settings state={state} update={update} replace={replace} moments={vault.pool} skipped={vault.skipped} />}
       <nav
         className={`absolute inset-x-0 bottom-0 z-[60] flex justify-around border-t transition-transform duration-200 ${showBar ? '' : 'translate-y-full'} ${dark ? 'border-[#222] bg-black' : 'border-[var(--line)] bg-[var(--bg)]'}`}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}

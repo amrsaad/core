@@ -15,6 +15,8 @@ final class FeedModel: ObservableObject {
     private(set) var pool: [Moment] = []
     private(set) var form: FeedForm = .video
     private(set) var updatedAt: String?
+    /// Aussortierte Momente laut Vertrag, für die Diagnose
+    private(set) var skipped = 0
     private var cursor: Mix.Cursor?
     /// not published on purpose: created while views build
     private var playbacks: [String: Playback] = [:]
@@ -40,6 +42,7 @@ final class FeedModel: ObservableObject {
             pool = p.moments
             form = store.state.currentForm
             updatedAt = p.updatedAt
+            skipped = p.skipped
             queue = []
             cursor = nil
             ensure(upTo: 6, store: store)
