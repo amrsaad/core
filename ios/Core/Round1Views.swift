@@ -436,3 +436,105 @@ private struct CapHeightKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
 }
+
+// MARK: Aufgabe 5, Rückmeldungsblatt
+
+/// Chips (mehrfach) und Freitext. Send gibt beides zurück, die Adresse baut der Aufrufer.
+struct NoteSheetView: View {
+    let moment: Moment
+    let initial: NoteEntry?
+    let onSend: ([String], String) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var selected: [String]
+    @State private var text: String
+
+    init(moment: Moment, initial: NoteEntry?, onSend: @escaping ([String], String) -> Void) {
+        self.moment = moment
+        self.initial = initial
+        self.onSend = onSend
+        _selected = State(initialValue: initial?.chips ?? [])
+        _text = State(initialValue: initial?.text ?? "")
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
+                Circle().fill(moment.area.color).frame(width: 8, height: 8)
+                Text(moment.speakerLine).foregroundStyle(Palette.secondary)
+            }
+            .font(.system(size: 13))
+            FlowLayout(spacing: 8) {
+                ForEach(Note.chips, id: \.self) { chip in
+                    let on = selected.contains(chip)
+                    Button {
+                        selected = Note.toggle(selected, chip)
+                    } label: {
+                        Text(chip)
+                            .font(.system(size: 15, weight: .medium))
+                            .padding(.horizontal, 14)
+                            .frame(minHeight: 44)
+                            .background(on ? Color(hex: 0x2A3A5C) : Palette.button, in: Capsule())
+                            .overlay(Capsule().stroke(on ? Color(hex: 0x6C8EEF) : Color.clear, lineWidth: 1))
+                    }
+                    .accessibilityIdentifier("noteChip-\(chip)")
+                    .accessibilityAddTraits(on ? .isSelected : [])
+                }
+            }
+            TextField("Note", text: $text, axis: .vertical)
+                .lineLimit(3...6)
+                .padding(12)
+                .background(Color(hex: 0x121212), in: RoundedRectangle(cornerRadius: 12))
+                .accessibilityIdentifier("noteText")
+                .onChange(of: text) { _, v in if v.count > Note.textMax { text = String(v.prefix(Note.textMax)) } }
+            HStack(spacing: 10) {
+                Button { dismiss() } label: {
+                    Text("Cancel").font(.system(size: 17, weight: .semibold)).frame(maxWidth: .infinity, minHeight: 52)
+                }
+                .background(Palette.button, in: RoundedRectangle(cornerRadius: 12))
+                .accessibilityIdentifier("noteCancel")
+                Button { onSend(selected, text) } label: {
+                    Text("Send").font(.system(size: 17, weight: .semibold)).frame(maxWidth: .infinity, minHeight: 52)
+                }
+                .background(Color(hex: 0x3B5BDB), in: RoundedRectangle(cornerRadius: 12))
+                .accessibilityIdentifier("noteSend")
+            }
+            Spacer(minLength: 0)
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 16)
+        .padding(.top, 20)
+        .accessibilityElement(children: .contain)
+        .presentationDetents([.large])
+        .presentationBackground(Palette.surface)
+        .presentationDragIndicator(.visible)
+    }
+}
+
+/// Einfacher Zeilenumbruch für die Chips
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        arrange(proposal.width ?? 320, subviews).size
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let r = arrange(bounds.width, subviews)
+        for (i, p) in r.points.enumerated() {
+            subviews[i].place(at: CGPoint(x: bounds.minX + p.x, y: bounds.minY + p.y), proposal: .unspecified)
+        }
+    }
+
+    private func arrange(_ width: CGFloat, _ subviews: Subviews) -> (points: [CGPoint], size: CGSize) {
+        var pts: [CGPoint] = []
+        var x: CGFloat = 0, y: CGFloat = 0, rowH: CGFloat = 0
+        for s in subviews {
+            let sz = s.sizeThatFits(.unspecified)
+            if x + sz.width > width, x > 0 { x = 0; y += rowH + spacing; rowH = 0 }
+            pts.append(CGPoint(x: x, y: y))
+            x += sz.width + spacing
+            rowH = max(rowH, sz.height)
+        }
+        return (pts, CGSize(width: width, height: y + rowH))
+    }
+}

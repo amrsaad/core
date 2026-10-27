@@ -368,6 +368,42 @@ final class CoreUITests: XCTestCase {
         shot("93-text-double-tap")
     }
 
+    /// Aufgabe 5: Note per Menü und per Langdruck auf das Herz, Chips, Send (im Test ohne Browser, die Adresse steht im Log)
+    func test11Note() {
+        launch()
+        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15), "feed did not appear")
+        wait(1)
+        visible("menuButton")?.tap()
+        XCTAssertTrue(app.buttons["Note"].waitForExistence(timeout: 5), "Note missing in menu")
+        shot("94-menu-with-note")
+        app.buttons["Note"].tap()
+        XCTAssertTrue(app.buttons["noteSend"].waitForExistence(timeout: 8), "note sheet missing via menu")
+        app.buttons["noteCancel"].tap()
+        wait(0.8)
+        // long press on the heart opens the sheet and does not like
+        let before = visible("like")?.value as? String
+        visible("like")?.press(forDuration: 0.8)
+        XCTAssertTrue(app.buttons["noteSend"].waitForExistence(timeout: 8), "long press did not open the sheet")
+        XCTAssertEqual(visible("like")?.value as? String ?? before, before, "long press must not toggle the like")
+        for chip in ["Known", "Boring", "Wrong", "Bad cut", "Bad audio", "Bad captions", "Great"] {
+            XCTAssertTrue(app.buttons["noteChip-\(chip)"].exists, "chip \(chip) missing")
+        }
+        app.buttons["noteChip-Boring"].tap()
+        app.buttons["noteChip-Bad cut"].tap()
+        app.descendants(matching: .any)["noteText"].tap()
+        app.descendants(matching: .any)["noteText"].typeText("Cut is late")
+        shot("95-note-sheet")
+        app.buttons["noteSend"].tap()
+        wait(0.8)
+        let log = diagLog()
+        XCTAssertTrue(log.contains("note url https://github.com/amrsaad/core-content/issues/new?title="), "no issue address logged")
+        XCTAssertTrue(log.contains("labels=feedback"), "label missing")
+        XCTAssertTrue(log.contains("Chips%3A%20Boring%2C%20Bad%20cut"), "chips missing in body")
+        XCTAssertTrue(log.contains("Cut%20is%20late"), "text missing in body")
+        XCTAssertFalse(log.contains("toast Wrong"), "Boring and Bad cut have no effect")
+        shot("96-after-send")
+    }
+
     /// Schlüsselsicherung: Dateikopie gelöscht, die App trägt sie beim Start aus dem Keychain nach (und umgekehrt)
     func test06KeyRestore() throws {
         // Entsperrt heißt: der Feed mit Formschalter ist da (welcher Bereich zuerst kommt, hängt vom Tag ab)

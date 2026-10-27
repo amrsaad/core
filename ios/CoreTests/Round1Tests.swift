@@ -179,6 +179,35 @@ final class Round1Tests: XCTestCase {
         XCTAssertFalse(Hook.closes(dy: -90, scrollTop: 0))
     }
 
+    // Aufgabe 5, gleiche Prüfdaten wie tests/moments-note.test.ts
+    func testNote() {
+        let c = Note.Context(id: "abc123:100", videoId: "abc123", start: 100, end: 160.4,
+                             channel: "Sigma Nutrition (Prof. Grant Tinsley)", sourceUrl: "https://www.youtube.com/watch?v=abc123&t=100",
+                             area: "Body", tab: "Video", speed: 1.5, device: "iPhone, iOS 18.1", commit: "4ed41a7",
+                             hook: "Don't compare body fat across devices (100% rule)!")
+        XCTAssertEqual(Note.chips, ["Known", "Boring", "Wrong", "Bad cut", "Bad audio", "Bad captions", "Great"])
+        var sel = Note.toggle([], "Great")
+        sel = Note.toggle(sel, "Known")
+        XCTAssertEqual(sel, ["Known", "Great"])
+        XCTAssertEqual(Note.toggle(sel, "Great"), ["Known"])
+        XCTAssertEqual(Note.effect(["Known"]), .known)
+        XCTAssertEqual(Note.effect(["Known", "Wrong"]), .wrong)
+        XCTAssertNil(Note.effect(["Boring", "Bad cut", "Great"]))
+        XCTAssertNil(Note.effect([]))
+        let lines = ["Moment: abc123:100", "Video: abc123", "Start: 100 s", "End: 160 s",
+                     "Source: Sigma Nutrition (Prof. Grant Tinsley), https://www.youtube.com/watch?v=abc123&t=100",
+                     "Area: Body", "Tab: Video", "Speed: 1.5x", "Device: iPhone, iOS 18.1", "App: 4ed41a7",
+                     "Chips: Known, Bad cut", "", "Cut is two seconds late."]
+        XCTAssertEqual(Note.body(c, chips: ["Known", "Bad cut"], text: "  Cut is two seconds late.  "), lines.joined(separator: "\n"))
+        var one = c; one.speed = 1
+        XCTAssertTrue(Note.body(one, chips: [], text: "").contains("Speed: 1x"))
+        XCTAssertTrue(Note.body(c, chips: [], text: "").contains("Chips: none"))
+        XCTAssertEqual(Note.body(c, chips: [], text: String(repeating: "x", count: Note.textMax + 50)).split(separator: "\n").last?.count, Note.textMax)
+        XCTAssertEqual(Note.url(c, chips: ["Known", "Bad cut"], text: "Cut is two seconds late."),
+                       "https://github.com/amrsaad/core-content/issues/new?title=Don%27t%20compare%20body%20fat%20across%20devices%20%28100%25%20rule%29%21&body=Moment%3A%20abc123%3A100%0AVideo%3A%20abc123%0AStart%3A%20100%20s%0AEnd%3A%20160%20s%0ASource%3A%20Sigma%20Nutrition%20%28Prof.%20Grant%20Tinsley%29%2C%20https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Dabc123%26t%3D100%0AArea%3A%20Body%0ATab%3A%20Video%0ASpeed%3A%201.5x%0ADevice%3A%20iPhone%2C%20iOS%2018.1%0AApp%3A%204ed41a7%0AChips%3A%20Known%2C%20Bad%20cut%0A%0ACut%20is%20two%20seconds%20late.&labels=feedback")
+        XCTAssertEqual(Note.enc("a b&c=d+e'(f)!*"), "a%20b%26c%3Dd%2Be%27%28f%29%21%2A")
+    }
+
     // Punkt 7
     func testWeekReview() {
         XCTAssertTrue(WeekReview.planComplete(when: "I finish the OCT clinic", will: "explain it"))

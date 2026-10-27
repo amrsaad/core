@@ -347,9 +347,9 @@ struct FeedView: View {
             speed: store.state.speed, device: Diag.deviceLine, commit: Diag.commit, hook: m.hook)
         let address = Note.url(ctx, chips: chips, text: text)
         store.saveNote(m, chips: chips, text: text)
-        Diag.log("note url \(address)")
+        if Env.isTest { Diag.log("note url \(address)") }
         // Im UI-Test bleibt die App im Vordergrund
-        if ProcessInfo.processInfo.environment["CORE_TEST_NO_OPEN"] != "1", let url = URL(string: address) { openURL(url) }
+        if !Env.isTest, let url = URL(string: address) { openURL(url) }
         switch Note.effect(chips) {
         case .wrong: menu(.wrong, m)
         case .known: menu(.known, m)
