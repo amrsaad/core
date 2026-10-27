@@ -1,5 +1,5 @@
 {
- "at": "2026-10-27T13:18:39.169Z",
+ "at": "2026-10-27T13:24:54.158Z",
  "runs": [
   {
    "browser": "webkit",
@@ -9,15 +9,15 @@
     "savedInCache": true,
     "savedInIdb": true,
     "idbDeleted": true,
-    "restoredFromCache": true,
-    "idbRewritten": true,
-    "runsWithoutCache": true,
+    "restoredFromCache": false,
+    "idbRewritten": false,
+    "runsWithoutCache": false,
     "cacheRewritten": true,
     "noPageErrors": true
    },
    "deleteIdb": "ok",
    "errors": [],
-   "ok": true
+   "ok": false
   },
   {
    "browser": "webkit",
@@ -27,15 +27,15 @@
     "savedInCache": true,
     "savedInIdb": true,
     "idbDeleted": true,
-    "restoredFromCache": true,
-    "idbRewritten": true,
-    "runsWithoutCache": true,
+    "restoredFromCache": false,
+    "idbRewritten": false,
+    "runsWithoutCache": false,
     "cacheRewritten": true,
     "noPageErrors": true
    },
    "deleteIdb": "ok",
    "errors": [],
-   "ok": true
+   "ok": false
   },
   {
    "browser": "webkit",
@@ -45,15 +45,15 @@
     "savedInCache": true,
     "savedInIdb": true,
     "idbDeleted": true,
-    "restoredFromCache": true,
-    "idbRewritten": true,
-    "runsWithoutCache": true,
+    "restoredFromCache": false,
+    "idbRewritten": false,
+    "runsWithoutCache": false,
     "cacheRewritten": true,
     "noPageErrors": true
    },
    "deleteIdb": "ok",
    "errors": [],
-   "ok": true
+   "ok": false
   },
   {
    "browser": "chromium",

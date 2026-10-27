@@ -1,5 +1,5 @@
 {
- "at": "2026-10-27T13:17:07.854Z",
+ "at": "2026-10-27T13:23:28.563Z",
  "runs": [
   {
    "browser": "webkit",
@@ -199,10 +199,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604606,
+     "due": 1792929603980,
      "results": [
       {
-       "at": 1792756804606,
+       "at": 1792756803980,
        "got": false
       }
      ]
@@ -278,15 +278,15 @@
     1.5,
     2
    ],
-   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 2edf4d4\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
+   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 00ab7f4\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
    "tapToFill": {
-    "measured": 29,
-    "recorded": 30
+    "measured": 30.99999999999818,
+    "recorded": 31
    },
    "posterCheck": {
-    "checksDone": 861,
+    "checksDone": 867,
     "violations": 0,
-    "endedSeen": 143
+    "endedSeen": 144
    },
    "latency": {
     "n": 32,
@@ -825,10 +825,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603459,
+     "due": 1792929603456,
      "results": [
       {
-       "at": 1792756803459,
+       "at": 1792756803456,
        "got": false
       }
      ]
@@ -893,9 +893,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.0625,
+    "bh": 221.06251525878906,
     "fw": 393,
-    "fh": 221.0625,
+    "fh": 221.06251525878906,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -904,15 +904,15 @@
     1.5,
     2
    ],
-   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 2edf4d4\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
+   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 00ab7f4\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
    "tapToFill": {
-    "measured": 31.60000000000582,
+    "measured": 31.89999999999418,
     "recorded": 32
    },
    "posterCheck": {
-    "checksDone": 864,
+    "checksDone": 879,
     "violations": 0,
-    "endedSeen": 143
+    "endedSeen": 146
    },
    "latency": {
     "n": 32,
@@ -1056,50 +1056,7 @@
       "full": true,
       "size": 15,
       "lines": 6,
-      "id": "test0000013:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 419,
-     "exDir": "rtl",
-     "exAr": true,
-     "meta": "SpeakerKanal brain 1EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": true,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 2,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000029 100-200",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000022:100"
+      "id": "test0000018:100"
      },
      "open": true,
      "hook": true,
@@ -1124,13 +1081,56 @@
      "stClose": 1,
      "after": {
       "st": 1,
+      "idx": 2,
+      "log": [
+       "rate 1.5",
+       "rate 1.5",
+       "unmute",
+       "rate 1.5",
+       "load test0000029 100-200",
+       "rate 1.5"
+      ]
+     }
+    },
+    {
+     "hk": {
+      "step": "1",
+      "clipped": false,
+      "full": true,
+      "size": 15,
+      "lines": 6,
+      "id": "test0000025:100"
+     },
+     "open": true,
+     "hook": true,
+     "exLen": 419,
+     "exDir": "rtl",
+     "exAr": true,
+     "meta": "SpeakerKanal brain 1EpisodeTestvideoAt1:40AreaBrain",
+     "speaker": true,
+     "ep": true,
+     "at": true,
+     "order": [
+      "DIV",
+      "caption-hook",
+      "caption-excerpt",
+      "caption-meta"
+     ],
+     "playing": true,
+     "stillPlaying": true,
+     "ar": true,
+     "stClose0": 1,
+     "closed": true,
+     "stClose": 1,
+     "after": {
+      "st": 1,
       "idx": 3,
       "log": [
        "rate 1.5",
        "rate 1.5",
        "unmute",
        "rate 1.5",
-       "load test0000025 100-180",
+       "load test0000022 100-180",
        "rate 1.5"
       ]
      }
