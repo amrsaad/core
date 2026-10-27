@@ -133,6 +133,19 @@ const waitFor = async (page, fn, arg, timeout = 8000) => {
   try { await page.waitForFunction(fn, arg, { timeout }); return true; } catch { return false; }
 };
 
+// Frischer Kontext (eigener Speicher, kein Gesehen, keine gemerkten Momente, keine Abrufstände aus den Abschnitten davor).
+// Die Fehlerabschnitte nutzen dieselben Moment-IDs wie der Hauptpool. Im geteilten Kontext wären sie schon gesehen und der Feed am Poolende.
+const freshPage = async (browser, url, k, poolBody, query) => {
+  const cx = await browser.newContext({ ...devices['iPhone 15'], serviceWorkers: 'block' });
+  await cx.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
+  await cx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
+  const pg = await cx.newPage();
+  await pg.addInitScript(() => { window.__ytSlow = true; });
+  await pg.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBody }));
+  await pg.goto(`${url}${query}#k=${k}`);
+  return { cx, pg };
+};
+
 const targets = (process.env.E2E_BROWSERS ?? 'webkit,chromium').split(',');
 for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter(([n]) => targets.includes(n))) {
   const r = { browser: name, checks: {} };
@@ -598,19 +611,17 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // Momente ohne recall bekommen keine Karte: fünf Wischer, nie eine Karte
     await p6.close();
     // Fehlerhafte Momente im Pool: der Feed läuft weiter, keine Fehlerseite, nur Überspringen
-    const p8 = await ctx.newPage();
     const errors8 = [];
+    const f8 = await freshPage(browser, url, k, poolBad, '?now=2026-10-23&seed=3');
+    const p8 = f8.pg;
     p8.on('pageerror', (e) => errors8.push(String(e)));
-    await p8.addInitScript(() => { window.__ytSlow = true; });
-    await p8.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBad }));
-    await p8.goto(url + '?now=2026-10-23&seed=3');
     c.badFeedStarts = await waitFor(p8, () => !!window.__core?.moment());
     c.badFirstPlays = await waitFor(p8, () => window.__core.state() === 1 && !/^errorvid/.test(window.__core.moment().videoId));
     const badWalk = [];
     for (let n = 0; n < 12; n++) {
       await p8.evaluate(() => window.__core.next());
       await p8.waitForTimeout(250);
-      badWalk.push(await p8.evaluate(() => ({ idx: window.__core.idx(), id: window.__core.moment()?.videoId, err: /Moments need internet|Invalid video id/.test(document.body.innerText) })));
+      badWalk.push(await p8.evaluate(() => ({ idx: window.__core.idx(), id: window.__core.moment()?.videoId, card: !!document.querySelector('[data-testid=recall-card]'), end: /seen every moment/.test(document.body.innerText), err: /Moments need internet|Invalid video id/.test(document.body.innerText) })));
     }
     r.badWalk = badWalk;
     c.badNoErrorPage = badWalk.every((x) => x.id && !x.err);
@@ -627,14 +638,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.badSkippedLine = await waitFor(p8, () => document.querySelector('[data-testid=moments-skipped]')?.textContent === 'Moments skipped: 3');
     await p8.screenshot({ path: `${out}/${name}-20-moments-skipped.png` });
     c.badPageErrors = errors8.length === 0;
-    await p8.close();
+    await f8.cx.close();
     // Der Player-Konstruktor wirft für einen Moment: früher Fehlerseite, jetzt nur Überspringen
-    const p9 = await ctx.newPage();
     const errors9 = [];
+    const f9 = await freshPage(browser, url, k, poolThrow, '?now=2026-10-23&seed=3');
+    const p9 = f9.pg;
     p9.on('pageerror', (e) => errors9.push(String(e)));
-    await p9.addInitScript(() => { window.__ytSlow = true; });
-    await p9.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolThrow }));
-    await p9.goto(url + '?now=2026-10-23&seed=3');
     c.throwFeedStarts = await waitFor(p9, () => !!window.__core?.moment());
     c.throwNoErrorPage = await p9.evaluate(() => !/Moments need internet|Invalid video id/.test(document.body.innerText));
     c.throwLogged = await waitFor(p9, () => window.__core.diag().some((x) => / player failed /.test(x)), undefined, 3000);
@@ -642,7 +651,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     for (let n = 0; n < 6; n++) { await p9.evaluate(() => window.__core.next()); await p9.waitForTimeout(250); }
     c.throwStillNoErrorPage = await p9.evaluate(() => !/Moments need internet|Invalid video id/.test(document.body.innerText) && !!window.__core.moment());
     c.throwPageErrors = errors9.length === 0;
-    await p9.close();
+    await f9.cx.close();
     const p7 = await ctx.newPage();
     await p7.addInitScript(() => { window.__ytSlow = true; });
     await p7.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolNoRecall }));
