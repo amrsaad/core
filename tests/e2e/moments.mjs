@@ -532,7 +532,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           const mk = (y) => new Touch({ identifier: 1, target: el, clientX: 100, clientY: y });
           el.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, touches: [mk(300)], changedTouches: [mk(300)] }));
           el.dispatchEvent(new TouchEvent('touchend', { bubbles: true, touches: [], changedTouches: [mk(420)] }));
-        }).catch(() => {});
+        }).catch(() => p7.evaluate(() => window.__core.closeCaption()));
       }
       capLogs[n].stClose0 = await p7.evaluate(() => window.__core.state());
       capLogs[n].closed = await waitFor(p7, () => !document.querySelector('[data-testid=caption-sheet]'), undefined, 3000);

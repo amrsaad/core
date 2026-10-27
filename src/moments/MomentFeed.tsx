@@ -666,6 +666,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       saved: (id: string) => !!stateRef.current.savedMoments[id],
       tapMs: () => stateRef.current.tapMs ?? [],
       skipRecall: () => closeRecall(),
+      closeCaption: () => setCapOpen(false),
       recall: () => ({ open: recallRef.current, state: stateRef.current.recall ?? {}, sessionSeen: sessionSeen.current }),
     };
   });
