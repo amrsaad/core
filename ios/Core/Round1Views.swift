@@ -354,60 +354,65 @@ struct CaptionSheetView: View {
     var body: some View {
         let text = moment.readingText
         let ar = Captions.isArabic(text)
-        let maxH = UIScreen.main.bounds.height * 0.62
-        let scrollable = contentH > maxH
-        let drag = DragGesture(minimumDistance: 20).onEnded { v in
-            if Hook.closes(dy: v.translation.height, scrollTop: offset) { onClose() }
-        }
         ZStack(alignment: .bottom) {
             Color.black.opacity(0.001)
                 .contentShape(Rectangle())
                 .onTapGesture { onClose() }
                 .accessibilityIdentifier("captionBackdrop")
-            ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                // Kopf mit Griff und Hook: ein Zug nach unten klappt zu
                 VStack(alignment: .leading, spacing: 14) {
                     Capsule().fill(Color(hex: 0x444444)).frame(width: 36, height: 4).frame(maxWidth: .infinity)
                     Text(moment.hook).font(.system(size: 20, weight: .bold))
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityIdentifier("captionHook")
-                    if !text.isEmpty {
-                        Text(text)
-                            .font(.system(size: ar ? 20 : 17))
-                            .lineSpacing(ar ? 10 : 6)
-                            .foregroundStyle(Color(hex: 0xE0E0E0))
-                            .multilineTextAlignment(ar ? .trailing : .leading)
-                            .environment(\.layoutDirection, ar ? .rightToLeft : .leftToRight)
-                            .frame(maxWidth: .infinity, alignment: ar ? .trailing : .leading)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .accessibilityIdentifier("captionExcerpt")
-                    }
-                    Rectangle().fill(Palette.line).frame(height: 1)
-                    VStack(alignment: .leading, spacing: 6) {
-                        metaRow("Speaker", moment.speakerLine)
-                        metaRow("Episode", moment.videoTitle ?? "")
-                        metaRow("At", Hook.atTime(moment.start))
-                        metaRow("Area", moment.area.label)
-                    }
-                    .accessibilityElement(children: .combine)
-                    .accessibilityIdentifier("captionMeta")
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 8)
-                .padding(.bottom, 28)
-                .background(GeometryReader { g in
-                    Color.clear
-                        .preference(key: CapOffsetKey.self, value: -g.frame(in: .named("capScroll")).minY)
-                        .preference(key: CapHeightKey.self, value: g.size.height)
+                .padding(.horizontal, 20).padding(.top, 8).padding(.bottom, 14)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+                .gesture(DragGesture(minimumDistance: 20).onEnded { v in
+                    if Hook.closes(dy: v.translation.height, scrollTop: 0) { onClose() }
+                })
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 14) {
+                        if !text.isEmpty {
+                            Text(text)
+                                .font(.system(size: ar ? 20 : 17))
+                                .lineSpacing(ar ? 10 : 6)
+                                .foregroundStyle(Color(hex: 0xE0E0E0))
+                                .multilineTextAlignment(ar ? .trailing : .leading)
+                                .environment(\.layoutDirection, ar ? .rightToLeft : .leftToRight)
+                                .frame(maxWidth: .infinity, alignment: ar ? .trailing : .leading)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .accessibilityIdentifier("captionExcerpt")
+                        }
+                        Rectangle().fill(Palette.line).frame(height: 1)
+                        VStack(alignment: .leading, spacing: 6) {
+                            metaRow("Speaker", moment.speakerLine)
+                            metaRow("Episode", moment.videoTitle ?? "")
+                            metaRow("At", Hook.atTime(moment.start))
+                            metaRow("Area", moment.area.label)
+                        }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityIdentifier("captionMeta")
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 28)
+                    .background(GeometryReader { g in
+                        Color.clear
+                            .preference(key: CapOffsetKey.self, value: -g.frame(in: .named("capScroll")).minY)
+                            .preference(key: CapHeightKey.self, value: g.size.height)
+                    })
+                }
+                .coordinateSpace(name: "capScroll")
+                .onPreferenceChange(CapOffsetKey.self) { offset = $0 }
+                .onPreferenceChange(CapHeightKey.self) { contentH = $0 }
+                .frame(height: contentH > 0 ? min(contentH, UIScreen.main.bounds.height * 0.42) : UIScreen.main.bounds.height * 0.2)
+                .simultaneousGesture(DragGesture(minimumDistance: 20).onEnded { v in
+                    if Hook.closes(dy: v.translation.height, scrollTop: offset) { onClose() }
                 })
             }
-            .coordinateSpace(name: "capScroll")
-            .onPreferenceChange(CapOffsetKey.self) { offset = $0 }
-            .onPreferenceChange(CapHeightKey.self) { contentH = $0 }
-            .frame(height: contentH > 0 ? min(contentH, UIScreen.main.bounds.height * 0.62) : UIScreen.main.bounds.height * 0.3)
             .background(Color(hex: 0x0A0A0A), in: UnevenRoundedRectangle(topLeadingRadius: 18, topTrailingRadius: 18))
-            // Passt der Text ohne Scrollen, gehört der Zug nach unten allein der Caption. Sonst läuft er neben dem Scrollen.
-            .highPriorityGesture(drag, including: scrollable ? .none : .all)
-            .simultaneousGesture(drag, including: scrollable ? .all : .none)
             .accessibilityIdentifier("captionSheet")
         }
         .foregroundStyle(.white)
