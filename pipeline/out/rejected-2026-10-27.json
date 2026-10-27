@@ -1,8 +1,8 @@
 {
  "date": "2026-10-27",
  "seed": false,
- "candidates": 560,
- "accepted": 560,
+ "candidates": 595,
+ "accepted": 595,
  "rejectedCount": 0,
  "passRate": 1,
  "selected": 16,
@@ -11,7 +11,7 @@
   "body": 0,
   "beat": 2
  },
- "total": 1514,
+ "total": 1530,
  "rejected": [],
  "skippedByBuilder": [
   {
@@ -3949,6 +3949,134 @@
   {
    "id": "pmid:41108711",
    "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40288446",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42582132",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42780004",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41530736",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42192263",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42171796",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42063081",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41202773",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42414936",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42271364",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41260961",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42533341",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42114398",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42163202",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42366676",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41954697",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40954364",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42793461",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42639196",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42629596",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42506399",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42846705",
+   "reason": "Sperrliste: nur Aufruf zu Kooperation"
+  },
+  {
+   "id": "pmid:42898717",
+   "reason": "Sperrliste: nur Zielbeschreibung"
+  },
+  {
+   "id": "pmid:42909033",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42807000",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42516386",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42871782",
+   "reason": "Sperrliste: nur vage Rollenbeschreibung"
+  },
+  {
+   "id": "pmid:42657380",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
+  },
+  {
+   "id": "pmid:42870152",
+   "reason": "Sperrliste: abgeschnittener Ausblick"
+  },
+  {
+   "id": "pmid:42440871",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42817067",
+   "reason": "Sperrliste: nur Zielbeschreibung"
+  },
+  {
+   "id": "pmid:42815812",
+   "reason": "Sperrliste: nur Einordnung ohne Ergebnis"
   }
  ]
 }
