@@ -860,7 +860,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         onContextMenu={(e) => e.preventDefault()}
       />
 
-      {hint && !forYou && (
+      {hint && !forYou && form !== 'text' && (
         <div className="vhint pointer-events-none">
           <span>Tap for sound</span>
         </div>
