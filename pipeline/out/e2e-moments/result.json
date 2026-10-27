@@ -1,5 +1,5 @@
 {
- "at": "2026-10-27T06:17:28.404Z",
+ "at": "2026-10-27T06:23:42.268Z",
  "runs": [
   {
    "browser": "webkit",
@@ -179,10 +179,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604657,
+     "due": 1792929604152,
      "results": [
       {
-       "at": 1792756804657,
+       "at": 1792756804152,
        "got": false
       }
      ]
@@ -258,10 +258,10 @@
     1.5,
     2
    ],
-   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: ce7e7fe\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
+   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 1e25a61\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
    "tapToFill": {
-    "measured": 28,
-    "recorded": 31
+    "measured": 29,
+    "recorded": 29
    },
    "posterCheck": {
     "checksDone": 870,
@@ -699,10 +699,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603453,
+     "due": 1792929603374,
      "results": [
       {
-       "at": 1792756803453,
+       "at": 1792756803374,
        "got": false
       }
      ]
@@ -778,15 +778,15 @@
     1.5,
     2
    ],
-   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: ce7e7fe\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
+   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 1e25a61\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
    "tapToFill": {
-    "measured": 31.90000000000873,
+    "measured": 32,
     "recorded": 32
    },
    "posterCheck": {
-    "checksDone": 870,
+    "checksDone": 885,
     "violations": 0,
-    "endedSeen": 144
+    "endedSeen": 147
    },
    "latency": {
     "n": 32,
