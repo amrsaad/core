@@ -1,5 +1,5 @@
 {
- "at": "2026-10-27T12:24:08.799Z",
+ "at": "2026-10-27T12:41:00.783Z",
  "runs": [
   {
    "browser": "webkit",
@@ -129,7 +129,7 @@
     "badFirstPlays": true,
     "badNoErrorPage": true,
     "badErrorsHappened": true,
-    "badNotStuckOnError": true,
+    "badNotStuckOnError": false,
     "badNeverLoaded": true,
     "badNeverShown": true,
     "badSkippedLine": true,
@@ -147,7 +147,7 @@
     "captionKeepsPlaying": true,
     "captionCloses": true,
     "captionArabicRtl": true,
-    "noRecallNoCard": true,
+    "noRecallNoCard": false,
     "recallHit": true,
     "recallSwipeSkipsWithoutRating": true,
     "recallArabicRtl": true,
@@ -199,10 +199,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604047,
+     "due": 1792929604611,
      "results": [
       {
-       "at": 1792756804047,
+       "at": 1792756804611,
        "got": false
       }
      ]
@@ -278,15 +278,15 @@
     1.5,
     2
    ],
-   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 657acfd\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
+   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: b77a368\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
    "tapToFill": {
-    "measured": 27,
-    "recorded": 27
+    "measured": 24,
+    "recorded": 30
    },
    "posterCheck": {
-    "checksDone": 870,
+    "checksDone": 858,
     "violations": 0,
-    "endedSeen": 144
+    "endedSeen": 143
    },
    "latency": {
     "n": 32,
@@ -295,227 +295,67 @@
    },
    "badWalk": [
     {
+     "idx": 3,
+     "id": "test0000022",
+     "err": false
+    },
+    {
+     "idx": 4,
+     "id": "test0000020",
+     "err": false
+    },
+    {
+     "idx": 5,
      "id": "test0000013",
      "err": false
     },
     {
-     "id": "test0000013",
+     "idx": 6,
+     "id": "test0000018",
      "err": false
     },
     {
-     "id": "test0000013",
+     "idx": 7,
+     "id": "test0000025",
      "err": false
     },
     {
-     "id": "test0000013",
+     "idx": 7,
+     "id": "test0000025",
      "err": false
     },
     {
-     "id": "test0000013",
+     "idx": 7,
+     "id": "test0000025",
      "err": false
     },
     {
-     "id": "test0000013",
+     "idx": 7,
+     "id": "test0000025",
      "err": false
     },
     {
-     "id": "test0000013",
+     "idx": 7,
+     "id": "test0000025",
      "err": false
     },
     {
-     "id": "test0000013",
+     "idx": 7,
+     "id": "test0000025",
      "err": false
     },
     {
-     "id": "test0000013",
+     "idx": 7,
+     "id": "test0000025",
      "err": false
     },
     {
-     "id": "test0000013",
-     "err": false
-    },
-    {
-     "id": "test0000013",
-     "err": false
-    },
-    {
-     "id": "test0000013",
+     "idx": 7,
+     "id": "test0000025",
      "err": false
     }
    ],
    "capLogs": [
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000052:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 1180,
-     "exDir": "ltr",
-     "exAr": false,
-     "meta": "SpeakerKanal body 0EpisodeTestvideoAt1:40AreaBody",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": false,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 1,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000020 100-200",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000018:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 1180,
-     "exDir": "ltr",
-     "exAr": false,
-     "meta": "SpeakerKanal brain 2EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": false,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 2,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000029 100-200",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000025:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 419,
-     "exDir": "rtl",
-     "exAr": true,
-     "meta": "SpeakerKanal brain 1EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": true,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 3,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000028 100-180",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000020:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 1180,
-     "exDir": "ltr",
-     "exAr": false,
-     "meta": "SpeakerKanal brain 0EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": false,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 4,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000022 100-180",
-       "rate 1.5"
-      ]
-     }
-    },
     {
      "hk": {
       "step": "1",
@@ -548,9 +388,181 @@
      "stClose": 1,
      "after": {
       "st": 1,
-      "idx": 5,
+      "idx": 1,
       "log": [
+       "unmute",
        "rate 1.5",
+       "rate 1.5",
+       "rate 1.5",
+       "unmute",
+       "rate 1.5"
+      ]
+     }
+    },
+    {
+     "hk": {
+      "step": "1",
+      "clipped": false,
+      "full": true,
+      "size": 15,
+      "lines": 6,
+      "id": "test0000028:100"
+     },
+     "open": true,
+     "hook": true,
+     "exLen": 1180,
+     "exDir": "ltr",
+     "exAr": false,
+     "meta": "SpeakerKanal brain 0EpisodeTestvideoAt1:40AreaBrain",
+     "speaker": true,
+     "ep": true,
+     "at": true,
+     "order": [
+      "DIV",
+      "caption-hook",
+      "caption-excerpt",
+      "caption-meta"
+     ],
+     "playing": true,
+     "stillPlaying": true,
+     "ar": false,
+     "stClose0": 1,
+     "closed": true,
+     "stClose": 1,
+     "after": {
+      "st": 1,
+      "idx": 1,
+      "log": [
+       "unmute",
+       "rate 1.5",
+       "rate 1.5",
+       "rate 1.5",
+       "unmute",
+       "rate 1.5"
+      ]
+     }
+    },
+    {
+     "hk": {
+      "step": "1",
+      "clipped": false,
+      "full": true,
+      "size": 15,
+      "lines": 6,
+      "id": "test0000028:100"
+     },
+     "open": true,
+     "hook": true,
+     "exLen": 1180,
+     "exDir": "ltr",
+     "exAr": false,
+     "meta": "SpeakerKanal brain 0EpisodeTestvideoAt1:40AreaBrain",
+     "speaker": true,
+     "ep": true,
+     "at": true,
+     "order": [
+      "DIV",
+      "caption-hook",
+      "caption-excerpt",
+      "caption-meta"
+     ],
+     "playing": true,
+     "stillPlaying": true,
+     "ar": false,
+     "stClose0": 1,
+     "closed": true,
+     "stClose": 1,
+     "after": {
+      "st": 1,
+      "idx": 1,
+      "log": [
+       "unmute",
+       "rate 1.5",
+       "rate 1.5",
+       "rate 1.5",
+       "unmute",
+       "rate 1.5"
+      ]
+     }
+    },
+    {
+     "hk": {
+      "step": "1",
+      "clipped": false,
+      "full": true,
+      "size": 15,
+      "lines": 6,
+      "id": "test0000028:100"
+     },
+     "open": true,
+     "hook": true,
+     "exLen": 1180,
+     "exDir": "ltr",
+     "exAr": false,
+     "meta": "SpeakerKanal brain 0EpisodeTestvideoAt1:40AreaBrain",
+     "speaker": true,
+     "ep": true,
+     "at": true,
+     "order": [
+      "DIV",
+      "caption-hook",
+      "caption-excerpt",
+      "caption-meta"
+     ],
+     "playing": true,
+     "stillPlaying": true,
+     "ar": false,
+     "stClose0": 1,
+     "closed": true,
+     "stClose": 1,
+     "after": {
+      "st": 1,
+      "idx": 1,
+      "log": [
+       "unmute",
+       "rate 1.5",
+       "rate 1.5",
+       "rate 1.5",
+       "unmute",
+       "rate 1.5"
+      ]
+     }
+    },
+    {
+     "hk": {
+      "step": "1",
+      "clipped": false,
+      "full": true,
+      "size": 15,
+      "lines": 6,
+      "id": "test0000028:100"
+     },
+     "open": true,
+     "hook": true,
+     "exLen": 1180,
+     "exDir": "ltr",
+     "exAr": false,
+     "meta": "SpeakerKanal brain 0EpisodeTestvideoAt1:40AreaBrain",
+     "speaker": true,
+     "ep": true,
+     "at": true,
+     "order": [
+      "DIV",
+      "caption-hook",
+      "caption-excerpt",
+      "caption-meta"
+     ],
+     "playing": true,
+     "stillPlaying": true,
+     "ar": false,
+     "stClose0": 1,
+     "closed": true,
+     "stClose": 1,
+     "after": {
+      "st": 1,
+      "idx": 1,
+      "log": [
+       "unmute",
        "rate 1.5",
        "rate 1.5",
        "rate 1.5",
@@ -562,7 +574,7 @@
    ],
    "noRecallDbg": {
     "cardSeen": false,
-    "idx": 5
+    "idx": 1
    },
    "cards": [
     {
@@ -589,7 +601,7 @@
     "noRating": true
    },
    "errors": [],
-   "ok": true
+   "ok": false
   },
   {
    "browser": "chromium",
@@ -736,8 +748,8 @@
     "captionOrder": true,
     "captionKeepsPlaying": true,
     "captionCloses": true,
-    "captionArabicRtl": true,
-    "noRecallNoCard": true,
+    "captionArabicRtl": false,
+    "noRecallNoCard": false,
     "recallHit": true,
     "recallSwipeSkipsWithoutRating": true,
     "recallArabicRtl": true,
@@ -789,10 +801,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603428,
+     "due": 1792929603468,
      "results": [
       {
-       "at": 1792756803428,
+       "at": 1792756803468,
        "got": false
       }
      ]
@@ -868,15 +880,15 @@
     1.5,
     2
    ],
-   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 657acfd\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
+   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: b77a368\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
    "tapToFill": {
-    "measured": 32,
-    "recorded": 32
+    "measured": 31.70000000001164,
+    "recorded": 31
    },
    "posterCheck": {
-    "checksDone": 876,
+    "checksDone": 864,
     "violations": 0,
-    "endedSeen": 146
+    "endedSeen": 143
    },
    "latency": {
     "n": 32,
@@ -885,51 +897,63 @@
    },
    "badWalk": [
     {
-     "id": "errorvid003",
+     "idx": 5,
+     "id": "test0000020",
      "err": false
     },
     {
-     "id": "errorvid003",
+     "idx": 6,
+     "id": "test0000018",
      "err": false
     },
     {
-     "id": "errorvid003",
+     "idx": 7,
+     "id": "test0000013",
      "err": false
     },
     {
-     "id": "errorvid003",
+     "idx": 8,
+     "id": "test0000025",
      "err": false
     },
     {
-     "id": "errorvid003",
+     "idx": 8,
+     "id": "test0000025",
      "err": false
     },
     {
-     "id": "errorvid003",
+     "idx": 8,
+     "id": "test0000025",
      "err": false
     },
     {
-     "id": "errorvid003",
+     "idx": 8,
+     "id": "test0000025",
      "err": false
     },
     {
-     "id": "errorvid003",
+     "idx": 8,
+     "id": "test0000025",
      "err": false
     },
     {
-     "id": "errorvid003",
+     "idx": 8,
+     "id": "test0000025",
      "err": false
     },
     {
-     "id": "errorvid003",
+     "idx": 8,
+     "id": "test0000025",
      "err": false
     },
     {
-     "id": "errorvid003",
+     "idx": 8,
+     "id": "test0000025",
      "err": false
     },
     {
-     "id": "errorvid003",
+     "idx": 8,
+     "id": "test0000025",
      "err": false
     }
    ],
@@ -966,13 +990,11 @@
      "stClose": 1,
      "after": {
       "st": 1,
-      "idx": 1,
+      "idx": 0,
       "log": [
-       "rate 1.5",
+       "load test0000028 100-180",
        "rate 1.5",
        "unmute",
-       "rate 1.5",
-       "load test0000020 100-200",
        "rate 1.5"
       ]
      }
@@ -984,93 +1006,7 @@
       "full": true,
       "size": 15,
       "lines": 6,
-      "id": "test0000018:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 1180,
-     "exDir": "ltr",
-     "exAr": false,
-     "meta": "SpeakerKanal brain 2EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": false,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 2,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000029 100-200",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000025:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 419,
-     "exDir": "rtl",
-     "exAr": true,
-     "meta": "SpeakerKanal brain 1EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": true,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 3,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000022 100-180",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000020:100"
+      "id": "test0000028:100"
      },
      "open": true,
      "hook": true,
@@ -1095,11 +1031,9 @@
      "stClose": 1,
      "after": {
       "st": 1,
-      "idx": 4,
+      "idx": 0,
       "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "rate 1.5",
+       "load test0000028 100-180",
        "rate 1.5",
        "unmute",
        "rate 1.5"
@@ -1113,14 +1047,14 @@
       "full": true,
       "size": 15,
       "lines": 6,
-      "id": "test0000029:100"
+      "id": "test0000028:100"
      },
      "open": true,
      "hook": true,
-     "exLen": 419,
-     "exDir": "rtl",
-     "exAr": true,
-     "meta": "SpeakerKanal brain 1EpisodeTestvideoAt1:40AreaBrain",
+     "exLen": 1180,
+     "exDir": "ltr",
+     "exAr": false,
+     "meta": "SpeakerKanal brain 0EpisodeTestvideoAt1:40AreaBrain",
      "speaker": true,
      "ep": true,
      "at": true,
@@ -1132,17 +1066,97 @@
      ],
      "playing": true,
      "stillPlaying": true,
-     "ar": true,
+     "ar": false,
      "stClose0": 1,
      "closed": true,
      "stClose": 1,
      "after": {
       "st": 1,
-      "idx": 5,
+      "idx": 0,
       "log": [
+       "load test0000028 100-180",
        "rate 1.5",
+       "unmute",
+       "rate 1.5"
+      ]
+     }
+    },
+    {
+     "hk": {
+      "step": "1",
+      "clipped": false,
+      "full": true,
+      "size": 15,
+      "lines": 6,
+      "id": "test0000028:100"
+     },
+     "open": true,
+     "hook": true,
+     "exLen": 1180,
+     "exDir": "ltr",
+     "exAr": false,
+     "meta": "SpeakerKanal brain 0EpisodeTestvideoAt1:40AreaBrain",
+     "speaker": true,
+     "ep": true,
+     "at": true,
+     "order": [
+      "DIV",
+      "caption-hook",
+      "caption-excerpt",
+      "caption-meta"
+     ],
+     "playing": true,
+     "stillPlaying": true,
+     "ar": false,
+     "stClose0": 1,
+     "closed": true,
+     "stClose": 1,
+     "after": {
+      "st": 1,
+      "idx": 0,
+      "log": [
+       "load test0000028 100-180",
        "rate 1.5",
-       "rate 1.5",
+       "unmute",
+       "rate 1.5"
+      ]
+     }
+    },
+    {
+     "hk": {
+      "step": "1",
+      "clipped": false,
+      "full": true,
+      "size": 15,
+      "lines": 6,
+      "id": "test0000028:100"
+     },
+     "open": true,
+     "hook": true,
+     "exLen": 1180,
+     "exDir": "ltr",
+     "exAr": false,
+     "meta": "SpeakerKanal brain 0EpisodeTestvideoAt1:40AreaBrain",
+     "speaker": true,
+     "ep": true,
+     "at": true,
+     "order": [
+      "DIV",
+      "caption-hook",
+      "caption-excerpt",
+      "caption-meta"
+     ],
+     "playing": true,
+     "stillPlaying": true,
+     "ar": false,
+     "stClose0": 1,
+     "closed": true,
+     "stClose": 1,
+     "after": {
+      "st": 1,
+      "idx": 0,
+      "log": [
+       "load test0000028 100-180",
        "rate 1.5",
        "unmute",
        "rate 1.5"
@@ -1152,7 +1166,7 @@
    ],
    "noRecallDbg": {
     "cardSeen": false,
-    "idx": 5
+    "idx": 0
    },
    "cards": [
     {
