@@ -1,5 +1,5 @@
 {
- "at": "2026-10-27T04:24:53.330Z",
+ "at": "2026-10-27T04:30:57.994Z",
  "runs": [
   {
    "browser": "webkit",
@@ -160,10 +160,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604644,
+     "due": 1792929604803,
      "results": [
       {
-       "at": 1792756804644,
+       "at": 1792756804803,
        "got": false
       }
      ]
@@ -241,10 +241,10 @@
    ],
    "tapToFill": {
     "measured": 29,
-    "recorded": 30
+    "recorded": 29
    },
    "posterCheck": {
-    "checksDone": 852,
+    "checksDone": 855,
     "violations": 0,
     "endedSeen": 143
    },
@@ -608,7 +608,7 @@
     "captionKeepsPlaying": true,
     "captionCloses": true,
     "captionArabicRtl": true,
-    "noRecallNoCard": false,
+    "noRecallNoCard": true,
     "recallHit": true,
     "recallSwipeSkipsWithoutRating": true,
     "recallArabicRtl": true,
@@ -660,10 +660,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603468,
+     "due": 1792929603466,
      "results": [
       {
-       "at": 1792756803468,
+       "at": 1792756803466,
        "got": false
       }
      ]
@@ -740,13 +740,13 @@
     2
    ],
    "tapToFill": {
-    "measured": 31.5,
-    "recorded": 31
+    "measured": 31.80000000000291,
+    "recorded": 32
    },
    "posterCheck": {
-    "checksDone": 867,
+    "checksDone": 858,
     "violations": 0,
-    "endedSeen": 144
+    "endedSeen": 143
    },
    "latency": {
     "n": 32,
@@ -804,49 +804,6 @@
       "full": true,
       "size": 15,
       "lines": 6,
-      "id": "test0000013:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 419,
-     "exDir": "rtl",
-     "exAr": true,
-     "meta": "SpeakerKanal brain 1EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": true,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 2,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000052 100-180",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
       "id": "test0000020:100"
      },
      "open": true,
@@ -872,13 +829,56 @@
      "stClose": 1,
      "after": {
       "st": 1,
+      "idx": 2,
+      "log": [
+       "rate 1.5",
+       "rate 1.5",
+       "unmute",
+       "rate 1.5",
+       "load test0000052 100-180",
+       "rate 1.5"
+      ]
+     }
+    },
+    {
+     "hk": {
+      "step": "1",
+      "clipped": false,
+      "full": true,
+      "size": 15,
+      "lines": 6,
+      "id": "test0000022:100"
+     },
+     "open": true,
+     "hook": true,
+     "exLen": 1180,
+     "exDir": "ltr",
+     "exAr": false,
+     "meta": "SpeakerKanal brain 2EpisodeTestvideoAt1:40AreaBrain",
+     "speaker": true,
+     "ep": true,
+     "at": true,
+     "order": [
+      "DIV",
+      "caption-hook",
+      "caption-excerpt",
+      "caption-meta"
+     ],
+     "playing": true,
+     "stillPlaying": true,
+     "ar": false,
+     "stClose0": 1,
+     "closed": true,
+     "stClose": 1,
+     "after": {
+      "st": 1,
       "idx": 3,
       "log": [
        "rate 1.5",
        "rate 1.5",
-       "rate 1.5",
-       "rate 1.5",
        "unmute",
+       "rate 1.5",
+       "load test0000028 100-180",
        "rate 1.5"
       ]
      }
@@ -958,7 +958,7 @@
      "stClose": 1,
      "after": {
       "st": 1,
-      "idx": 4,
+      "idx": 5,
       "log": [
        "rate 1.5",
        "rate 1.5",
@@ -999,7 +999,7 @@
     "noRating": true
    },
    "errors": [],
-   "ok": false
+   "ok": true
   }
  ]
 }
