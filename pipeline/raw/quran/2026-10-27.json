@@ -301,6 +301,66 @@
    "urlChecks": {
     "https://quran.com/2/169": 200
    }
+  },
+  {
+   "sourceId": "quran:2:170",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/170",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:170?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:170",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "وَإِذَا قِيلَ لَهُمُ ٱتَّبِعُوا۟ مَآ أَنزَلَ ٱللَّهُ قَالُوا۟ بَلْ نَتَّبِعُ مَآ أَلْفَيْنَا عَلَيْهِ ءَابَآءَنَآ ۗ أَوَلَوْ كَانَ ءَابَآؤُهُمْ لَا يَعْقِلُونَ شَيْـًٔا وَلَا يَهْتَدُونَ",
+    "translation": "Und wenn man zu ihnen sagt: Folgt dem, was Allah herabgesandt hat, sagen sie: Nein! Vielmehr folgen wir dem, worin wir unsere Väter vorgefunden haben. Was denn, auch wenn ihre Väter nichts begriffen und nicht rechtgeleitet waren?",
+    "tafsir_muyassar": "<span class=\"blue\">وإذا قال المؤمنون ناصحين أهل الضلال:</span> اتبعوا ما أنزل الله من القرآن والهدى،<span class=\"blue\"> أصرُّوا على تقليد أسلافهم المشركين قائلين:</span> لا نتبع دينكم، بل نتبع ما وجدنا عليه آباءنا. أيتبعون آباءهم ولو كانوا لا يعقلون عن الله شيئًا، ولا يدركون رشدًا؟",
+    "tafsir_ibnkathir": "<h2>The Polytheist imitates Other Polytheists</h2><p>Allah states that if the disbelievers and polytheists are called to follow what Allah has revealed to His Messenger and abandon the practices of misguidance and ignorance that they indulge in, they will say, \"Rather. We shall follow what we found our fathers following,\" meaning, worshipping the idols and the false deities. Allah criticized their reasoning:</p><p>أَوَلَوْ كَانَ ءَابَاؤُهُمْ</p><p>((Would they do that!) even though their fathers), meaning, those whom they follow and whose practices they imitate, and:</p><p>لاَ يَعْقِلُونَ شَيْئًا وَلاَ يَهْتَدُونَ</p><p>(...did not understand anything nor were they guided) meaning, they had no sound understanding or guidance. Ibn Ishaq reported that Ibn `Abbas said that this was revealed about a group of Jews whom Allah's Messenger ﷺ called to Islam, but they refused, saying, \"Rather, we shall follow what we found our forefathers following.\" So Allah revealed this Ayah (2:170) above.\"</p><h2>The Disbeliever is just like an Animal</h2><p>Allah then made a parable of the disbelievers, just as He said in another Ayah:</p><p>لِلَّذِينَ لاَ يُؤْمِنُونَ بِالاٌّخِرَةِ مَثَلُ السَّوْءِ</p><p>(For those who believe not in the Hereafter is an evil description.) (16:60)</p><p>Similarly, Allah said here (2:171 above)</p><p>وَمَثَلُ الَّذِينَ كَفَرُواْ</p><p>(And the example of those who disbelieve...) meaning, in their injustice, misguidance and ignorance, they are just like wandering animals, not understanding what they are told; if the shepherd heralds them or calls them to what benefits them, they would not understand what is actually being said to them, for they only hear unintelligible sounds. This is what is reported from Ibn `Abbas, Abu Al-`Aliyah, Mujahid, `Ikrimah, `Ata', Al-Hasan, Qatadah, `Ata' Al-Khurasani and Ar-Rabi` bin Anas.</p><p>صُمٌّ بُكْمٌ عُمْىٌ</p><p>(They are deaf, dumb, and blind.) means, they are deaf, as they do not hear the truth; mute, as they do not utter it; and blind, as they do not see or recognize its path and way.</p><p>فَهُمْ لاَ يَعْقِلُونَ</p><p>(So they do not understand.) means, they do not comprehend or understand anything.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:170"
+   },
+   "fetchedAt": "2026-10-27T04:55:46.836Z",
+   "urlChecks": {
+    "https://quran.com/2/170": 200
+   }
+  },
+  {
+   "sourceId": "quran:2:171",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/171",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:171?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:171",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "وَمَثَلُ ٱلَّذِينَ كَفَرُوا۟ كَمَثَلِ ٱلَّذِى يَنْعِقُ بِمَا لَا يَسْمَعُ إِلَّا دُعَآءً وَنِدَآءً ۚ صُمٌّۢ بُكْمٌ عُمْىٌ فَهُمْ لَا يَعْقِلُونَ",
+    "translation": "Das Gleichnis derjenigen, die ungläubig sind, ist wie jemand, der etwas nachschreit, was nichts hört außer Stimmen und Zurufen. Taub, stumm, blind; so begreifen sie nicht.",
+    "tafsir_muyassar": "وصفة الذين كفروا ودَاعِيهم إلى الهدى والإيمان كصفة الرَّاعي الذي يصيح بالبهائم ويزجرها، وهي لا تفهم معاني كلامه، وإنما تسمع النداء ودَوِيَّ الصوت فقط. هؤلاء الكفار صُمٌّ سدُّوا أسماعهم عن الحق، بُكْم أخرسوا ألسنتهم عن النطق به، عُمْي لا ترى أعينهم براهينه الباهرة، فهم لا يعملون عقولهم فيما ينفعهم.",
+    "tafsir_ibnkathir": "<h2>The Polytheist imitates Other Polytheists</h2><p>Allah states that if the disbelievers and polytheists are called to follow what Allah has revealed to His Messenger and abandon the practices of misguidance and ignorance that they indulge in, they will say, \"Rather. We shall follow what we found our fathers following,\" meaning, worshipping the idols and the false deities. Allah criticized their reasoning:</p><p>أَوَلَوْ كَانَ ءَابَاؤُهُمْ</p><p>((Would they do that!) even though their fathers), meaning, those whom they follow and whose practices they imitate, and:</p><p>لاَ يَعْقِلُونَ شَيْئًا وَلاَ يَهْتَدُونَ</p><p>(...did not understand anything nor were they guided) meaning, they had no sound understanding or guidance. Ibn Ishaq reported that Ibn `Abbas said that this was revealed about a group of Jews whom Allah's Messenger ﷺ called to Islam, but they refused, saying, \"Rather, we shall follow what we found our forefathers following.\" So Allah revealed this Ayah (2:170) above.\"</p><h2>The Disbeliever is just like an Animal</h2><p>Allah then made a parable of the disbelievers, just as He said in another Ayah:</p><p>لِلَّذِينَ لاَ يُؤْمِنُونَ بِالاٌّخِرَةِ مَثَلُ السَّوْءِ</p><p>(For those who believe not in the Hereafter is an evil description.) (16:60)</p><p>Similarly, Allah said here (2:171 above)</p><p>وَمَثَلُ الَّذِينَ كَفَرُواْ</p><p>(And the example of those who disbelieve...) meaning, in their injustice, misguidance and ignorance, they are just like wandering animals, not understanding what they are told; if the shepherd heralds them or calls them to what benefits them, they would not understand what is actually being said to them, for they only hear unintelligible sounds. This is what is reported from Ibn `Abbas, Abu Al-`Aliyah, Mujahid, `Ikrimah, `Ata', Al-Hasan, Qatadah, `Ata' Al-Khurasani and Ar-Rabi` bin Anas.</p><p>صُمٌّ بُكْمٌ عُمْىٌ</p><p>(They are deaf, dumb, and blind.) means, they are deaf, as they do not hear the truth; mute, as they do not utter it; and blind, as they do not see or recognize its path and way.</p><p>فَهُمْ لاَ يَعْقِلُونَ</p><p>(So they do not understand.) means, they do not comprehend or understand anything.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:171"
+   },
+   "fetchedAt": "2026-10-27T04:55:46.836Z",
+   "urlChecks": {
+    "https://quran.com/2/171": 200
+   }
   }
  ]
 }
