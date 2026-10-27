@@ -90,6 +90,8 @@ export interface AppState {
   tapMs?: TapSample[];
   /** Momente mit gefülltem Herz (More like this) */
   momentLiked?: Record<string, number>;
+  /** Rückmeldung je Moment: Chips und Freitext, lokal gespeichert */
+  momentNotes?: Record<string, { chips: string[]; text: string; at: number }>;
   /** Tageszahl pro lokalem Tag (Punkt 6) */
   dayCount?: Record<string, DayCount>;
   /** Abrufkarten: Ergebnisse und Wiedervorlage (Punkt 5) */

@@ -378,3 +378,74 @@ enum Hook {
     /// Zuklappen durch Wischen nach unten, nur wenn der Text oben steht
     static func closes(dy: CGFloat, scrollTop: CGFloat) -> Bool { dy > swipeCloseDy && scrollTop <= 0 }
 }
+
+// MARK: Aufgabe 5, Rückmeldung (Max 27.10.2026)
+
+/// Chips und Freitext zu einem Moment. "Send" öffnet eine vorausgefüllte GitHub-Issue-Seite im Browser des Geräts.
+/// Gleiche Regeln und Prüfdaten wie src/moments/note.ts. Kein Token, kein Netzwerkaufruf der App.
+enum Note {
+    static let chips = ["Known", "Boring", "Wrong", "Bad cut", "Bad audio", "Bad captions", "Great"]
+    static let issueBase = "https://github.com/amrsaad/core-content/issues/new"
+    static let label = "feedback"
+    static let textMax = 1500
+    static let longPressSeconds = 0.5
+
+    /// Chip an- oder abwählen, die Reihenfolge bleibt die der Liste
+    static func toggle(_ selected: [String], _ chip: String) -> [String] {
+        chips.filter { $0 == chip ? !selected.contains(chip) : selected.contains($0) }
+    }
+
+    enum Effect: Equatable { case wrong, known }
+
+    /// Wrong und Known wirken wie das bisherige Menü. Wrong geht vor Known.
+    static func effect(_ selected: [String]) -> Effect? {
+        selected.contains("Wrong") ? .wrong : selected.contains("Known") ? .known : nil
+    }
+
+    struct Context: Equatable {
+        var id: String
+        var videoId: String
+        var start: Double
+        var end: Double
+        var channel: String
+        var sourceUrl: String
+        var area: String
+        var tab: String
+        var speed: Double
+        var device: String
+        var commit: String
+        var hook: String
+    }
+
+    private static func num(_ n: Double) -> String {
+        n == n.rounded() ? String(Int(n)) : String(format: "%g", (n * 10).rounded() / 10)
+    }
+
+    static func body(_ c: Context, chips selected: [String], text: String) -> String {
+        let t = String(text.trimmingCharacters(in: .whitespacesAndNewlines).prefix(textMax))
+        return [
+            "Moment: \(c.id)",
+            "Video: \(c.videoId)",
+            "Start: \(Int(c.start.rounded())) s",
+            "End: \(Int(c.end.rounded())) s",
+            "Source: \(c.channel), \(c.sourceUrl)",
+            "Area: \(c.area)",
+            "Tab: \(c.tab)",
+            "Speed: \(num(c.speed))x",
+            "Device: \(c.device)",
+            "App: \(c.commit)",
+            "Chips: \(selected.isEmpty ? "none" : selected.joined(separator: ", "))",
+            "",
+            t,
+        ].joined(separator: "\n")
+    }
+
+    private static let unreserved = CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~")
+
+    /// Wie encodeURIComponent im Web, dazu ! ' ( ) * kodiert, damit beide dieselbe Adresse bauen
+    static func enc(_ s: String) -> String { s.addingPercentEncoding(withAllowedCharacters: unreserved) ?? s }
+
+    static func url(_ c: Context, chips selected: [String], text: String) -> String {
+        "\(issueBase)?title=\(enc(c.hook))&body=\(enc(body(c, chips: selected, text: text)))&labels=\(label)"
+    }
+}

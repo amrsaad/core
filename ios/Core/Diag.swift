@@ -64,6 +64,15 @@ enum Diag {
     }
 
     /// Short git commit, written by install.sh and CI. "dev" when built from Xcode by hand.
+    /// "iPhone16,2, iOS 18.1" (im Simulator das simulierte Modell)
+    static var deviceLine: String {
+        var u = utsname()
+        uname(&u)
+        let machine = withUnsafeBytes(of: &u.machine) { String(decoding: $0.prefix { $0 != 0 }, as: UTF8.self) }
+        let model = ProcessInfo.processInfo.environment["SIMULATOR_MODEL_IDENTIFIER"] ?? machine
+        return "\(model), iOS \(UIDevice.current.systemVersion)"
+    }
+
     static var commit: String { Bundle.main.infoDictionary?["CoreCommit"] as? String ?? "dev" }
 
     static var installedAt: Date? {

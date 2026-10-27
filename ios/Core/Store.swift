@@ -22,6 +22,12 @@ struct LogEntry: Codable, Equatable {
     var feedback: String?
 }
 
+struct NoteEntry: Codable, Equatable {
+    var chips: [String]
+    var text: String
+    var at: Date
+}
+
 /// Everything Core remembers on this phone. Stored as one JSON file.
 struct AppState: Codable, Equatable {
     var seen: [String: Date] = [:]
@@ -42,6 +48,8 @@ struct AppState: Codable, Equatable {
     /// Aufgabe 3: Momente mit gefülltem Herz (More like this) und Tipp bis Füllung am Knopf
     var liked: [String: Date]?
     var tapMs: [Actions.Tap]?
+    /// Aufgabe 5: Rückmeldung je Moment, lokal gespeichert
+    var notes: [String: NoteEntry]?
     var playLatency: [Latency.Sample]?
     var dayCount: [String: DayCount]?
     var recall: Recall.State?
@@ -154,6 +162,12 @@ final class Store: ObservableObject {
         if on { l[m.id] = Date() } else { l[m.id] = nil }
         state.liked = l
         signal(m, on ? Mix.Signal.more : 1 / Mix.Signal.more)
+    }
+
+    func saveNote(_ m: Moment, chips: [String], text: String) {
+        var n = state.notes ?? [:]
+        n[m.id] = NoteEntry(chips: chips, text: text.trimmingCharacters(in: .whitespacesAndNewlines), at: Date())
+        state.notes = n
     }
 
     func addTap(ms: Int) {

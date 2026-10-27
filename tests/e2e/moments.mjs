@@ -355,10 +355,49 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // Menü: Known, Weak, Wrong, Mute speaker, Captions
     await page.click('[data-testid=options]');
     const items = await page.evaluate(() => [...document.querySelectorAll('.vfeed .z-40 button, .vfeed .z-40 label')].map((x) => x.textContent.trim()).filter((t) => t && t !== 'Cancel'));
-    c.menuItems = items.join() === 'Known,Weak,Wrong,Mute speaker,Captions';
+    c.menuItems = items.join() === 'Known,Weak,Wrong,Note,Mute speaker,Captions';
     await page.screenshot({ path: `${out}/${name}-11-menue.png` });
     await page.click('text=Cancel');
     await page.screenshot({ path: `${out}/${name}-12-spalte.png` });
+    // Aufgabe 5: Rückmeldung. Langdruck auf das Herz öffnet das Blatt, Send öffnet die vorbereitete Issue-Seite, kein Netzwerkaufruf der App
+    const gh = [];
+    page.on('request', (q) => { if (/github\.com/.test(q.url())) gh.push(q.url()); });
+    await page.evaluate(() => { window.__opened = []; window.open = (u, t, f) => { window.__opened.push({ u, t, f }); return null; }; });
+    const nm = await page.evaluate(() => window.__core.moment());
+    const lb = await page.$eval('[data-testid=like]', (e) => { const q = e.getBoundingClientRect(); return { x: q.left + q.width / 2, y: q.top + q.height / 2 }; });
+    const likedBefore = await page.evaluate((id) => window.__core.liked(id), nm.id);
+    await page.mouse.move(lb.x, lb.y);
+    await page.mouse.down();
+    await page.waitForTimeout(800);
+    await page.mouse.up();
+    c.longPressOpensNote = await waitFor(page, () => !!document.querySelector('[data-testid=note-sheet]'));
+    await page.waitForTimeout(150);
+    c.longPressDoesNotToggle = (await page.evaluate((id) => window.__core.liked(id), nm.id)) === likedBefore;
+    const chipsSeen = await page.evaluate(() => [...document.querySelectorAll('[data-testid^=note-chip-]')].map((x) => x.textContent));
+    c.noteSevenChips = chipsSeen.join() === 'Known,Boring,Wrong,Bad cut,Bad audio,Bad captions,Great';
+    c.noteTextField = !!(await page.$('[data-testid=note-text]'));
+    await page.screenshot({ path: `${out}/${name}-20-note-leer.png` });
+    await page.click('[data-testid="note-chip-Boring"]');
+    await page.click('[data-testid="note-chip-Bad cut"]');
+    await page.fill('[data-testid=note-text]', 'The cut is two seconds late & the "hook" repeats.');
+    c.noteMultiSelect = await page.evaluate(() => ['Boring', 'Bad cut'].every((n) => document.querySelector(`[data-testid="note-chip-${n}"]`).getAttribute('aria-pressed') === 'true') && document.querySelector('[data-testid="note-chip-Known"]').getAttribute('aria-pressed') === 'false');
+    await page.screenshot({ path: `${out}/${name}-21-note-chips.png` });
+    const idxBefore = await page.evaluate(() => window.__core.idx());
+    await page.click('[data-testid=note-send]');
+    c.noteSheetClosed = await waitFor(page, () => !document.querySelector('[data-testid=note-sheet]'));
+    const op1 = await page.evaluate(() => window.__opened);
+    const u1 = op1[0] ? new URL(op1[0].u) : null;
+    c.noteOpensIssuePage = op1.length === 1 && !!u1 && u1.origin + u1.pathname === 'https://github.com/amrsaad/core-content/issues/new' && op1[0].t === '_blank';
+    c.noteTitleIsHook = !!u1 && u1.searchParams.get('title') === nm.hook;
+    c.noteLabelFeedback = !!u1 && u1.searchParams.get('labels') === 'feedback';
+    const body = u1?.searchParams.get('body') ?? '';
+    r.noteBody = body;
+    c.noteBodyFields = [`Moment: ${nm.id}`, `Video: ${nm.videoId}`, `Start: ${Math.round(nm.start)} s`, `End: ${Math.round(nm.end)} s`, 'Source: ', `Area: ${nm.area[0].toUpperCase()}${nm.area.slice(1)}`, 'Tab: Video', 'Speed: 1.5x', 'Device: ', 'Chips: Boring, Bad cut', 'The cut is two seconds late & the "hook" repeats.'].every((t) => body.includes(t));
+    c.noteBodyApp = /App: [0-9a-f]{7}\b|App: dev\b/.test(body);
+    c.noteSavedLocally = await page.evaluate((id) => { const n = window.__core.notes()[id]; return !!n && n.chips.join() === 'Boring,Bad cut' && n.text.startsWith('The cut'); }, nm.id);
+    c.noteOtherChipsNoEffect = (await page.evaluate(() => window.__core.idx())) === idxBefore && !(await page.evaluate(() => !!document.querySelector('.flash')));
+    c.noteNoNetwork = gh.length === 0;
+
     // Tipp bis Füllung: im Test gemessen (App-Messung und unabhängige Messung), Ziel unter 100 ms
     const fills = [];
     for (let i = 0; i < 6; i++) {
@@ -397,6 +436,22 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.click('[data-testid=options]');
     await page.click('.vfeed .z-40 >> text=Mute speaker');
     c.muteToast = await waitFor(page, () => /muted$/.test(document.querySelector('.flash')?.textContent ?? ''));
+    await page.waitForTimeout(1000);
+    await skipRecall(page, name, out);
+    // Rückmeldung über das Menü: Known und Wrong wirken wie heute (Toast Wrong, weiter zum nächsten Moment)
+    await page.click('[data-testid=options]');
+    await page.click('.vfeed .z-40 >> text=Note');
+    c.noteViaMenu = await waitFor(page, () => !!document.querySelector('[data-testid=note-sheet]'));
+    const idx2 = await page.evaluate(() => window.__core.idx());
+    await page.click('[data-testid="note-chip-Known"]');
+    await page.click('[data-testid="note-chip-Wrong"]');
+    await page.evaluate(() => { window.__opened = []; });
+    await page.click('[data-testid=note-send]');
+    c.noteWrongEffect = await waitFor(page, () => document.querySelector('.flash')?.textContent === 'Wrong');
+    c.noteAdvanced = await waitFor(page, (i) => window.__core.idx() > i, idx2);
+    const op2 = await page.evaluate(() => window.__opened);
+    c.noteChipsInBody = op2.length === 1 && new URL(op2[0].u).searchParams.get('body').includes('Chips: Known, Wrong');
+    c.noteStillNoNetwork = gh.length === 0;
     await page.waitForTimeout(1000);
     await skipRecall(page, name, out);
 

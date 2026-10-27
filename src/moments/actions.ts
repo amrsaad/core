@@ -37,3 +37,6 @@ export function tapStats(list: TapSample[] | undefined): TapStats {
 export function nextLiked(liked: boolean, via: 'double' | 'button'): boolean {
   return via === 'double' ? true : !liked;
 }
+
+/** Langdruck auf das Herz öffnet die Rückmeldung */
+export const NOTE_LONG_MS = 500;
