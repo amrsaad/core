@@ -37,6 +37,12 @@ export interface Moment {
   audio?: boolean;
   /** Untertitel [Sekunden ab start, Text] */
   cues?: [number, string][];
+  /** Nur form text: Quelle der Passage, Namensnennung und Link in der App */
+  sourceUrl?: string;
+  license?: string;
+  author?: string;
+  /** Fundstelle in der Quelle, z.B. "Quran 94:5" oder "Hadith 12" */
+  ref?: string;
   /** Ausschnitt als Text für die Textform, Satzgrenzen (Arabisch: Sprechpausen) als Zeilenumbruch */
   excerpt?: string;
 }
