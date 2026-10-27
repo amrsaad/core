@@ -1,5 +1,5 @@
 {
- "at": "2026-10-26T17:26:29.172Z",
+ "at": "2026-10-27T03:36:01.163Z",
  "runs": [
   {
    "browser": "webkit",
@@ -100,11 +100,11 @@
    },
    "recall": [
     {
-     "id": "test0000023:100",
-     "due": 1793361605235,
+     "id": "test0000020:100",
+     "due": 1793361604972,
      "results": [
       {
-       "at": 1792756805235,
+       "at": 1792756804972,
        "got": true
       }
      ]
@@ -120,11 +120,11 @@
      "align": ""
     },
     {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
+     "ar": false,
+     "shown": false,
+     "rtl": false,
+     "size": 0,
+     "align": ""
     },
     {
      "ar": true,
@@ -143,25 +143,25 @@
    ],
    "sequence": [
     {
-     "id": "test0000000:100",
+     "id": "test0000006:100",
      "has": true,
      "fy": true,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000001:100",
+     "id": "test0000010:100",
+     "has": true,
+     "fy": true,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000003:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000011:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000023:100",
+     "id": "test0000020:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -169,9 +169,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06251525878906,
+    "bh": 221.0625,
     "fw": 393,
-    "fh": 221.06251525878906,
+    "fh": 221.0625,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -182,16 +182,16 @@
    ],
    "tapToFill": {
     "measured": 27,
-    "recorded": 27
+    "recorded": 29
    },
    "posterCheck": {
-    "checksDone": 867,
+    "checksDone": 864,
     "violations": 0,
     "endedSeen": 145
    },
    "latency": {
-    "n": 32,
-    "buffered": 32,
+    "n": 31,
+    "buffered": 31,
     "median": 0
    },
    "errors": [],
@@ -296,11 +296,11 @@
    },
    "recall": [
     {
-     "id": "test0000019:100",
-     "due": 1793361603544,
+     "id": "test0000012:100",
+     "due": 1793361604013,
      "results": [
       {
-       "at": 1792756803544,
+       "at": 1792756804013,
        "got": true
       }
      ]
@@ -316,11 +316,11 @@
      "align": "right"
     },
     {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
+     "ar": false,
+     "shown": false,
+     "rtl": false,
+     "size": 0,
+     "align": ""
     },
     {
      "ar": false,
@@ -339,25 +339,25 @@
    ],
    "sequence": [
     {
-     "id": "test0000001:100",
+     "id": "test0000011:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000007:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000006:100",
+     "id": "test0000002:100",
      "has": true,
      "fy": true,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000019:100",
+     "id": "test0000004:100",
+     "has": true,
+     "fy": true,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000012:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -365,9 +365,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06248474121094,
+    "bh": 221.0625,
     "fw": 393,
-    "fh": 221.06248474121094,
+    "fh": 221.0625,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -377,13 +377,13 @@
     2
    ],
    "tapToFill": {
-    "measured": 32.09999999997672,
+    "measured": 31.800000000017462,
     "recorded": 32
    },
    "posterCheck": {
     "checksDone": 870,
     "violations": 0,
-    "endedSeen": 217
+    "endedSeen": 145
    },
    "latency": {
     "n": 31,
