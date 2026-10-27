@@ -241,6 +241,66 @@
    "urlChecks": {
     "https://quran.com/2/167": 200
    }
+  },
+  {
+   "sourceId": "quran:2:168",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/168",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:168?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:168",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "يَـٰٓأَيُّهَا ٱلنَّاسُ كُلُوا۟ مِمَّا فِى ٱلْأَرْضِ حَلَـٰلًا طَيِّبًا وَلَا تَتَّبِعُوا۟ خُطُوَٰتِ ٱلشَّيْطَـٰنِ ۚ إِنَّهُۥ لَكُمْ عَدُوٌّ مُّبِينٌ",
+    "translation": "O ihr Menschen! Eßt von dem, was es auf der Erde gibt, als etwas Erlaubtem und Gutem, und folgt nicht den Fußstapfen des Satans! Er ist euch ein deutlicher Feind.",
+    "tafsir_muyassar": "يا أيها الناس كلوا من رزق الله الذي أباحه لكم في الأرض، وهو الطاهر غير النجس، النافع غير الضار، ولا تتبعوا طرق الشيطان في التحليل والتحريم، والبدع والمعاصي. إنه عدو لكم ظاهر العداوة.",
+    "tafsir_ibnkathir": "<h2>The Order to eat the Lawful Things, and the Prohibition of following the Footsteps of Shaytan</h2><p>After Allah stated that there is no deity worthy of worship except Him and that He Alone created the creation, He stated that He is the Sustainer for all His creation, and He mentioned a favor that He granted them; He has allowed them to eat any of the pure lawful things on the earth that do not cause harm to the body or the mind. He also forbade them from following the footsteps of Shaytan, meaning his ways and methods with which he misguides his followers, like prohibiting the Bahirah (a she-camel whose milk was spared for the idols and nobody was allowed to milk it), or Sa'ibah (a she-camel let loose for free pasture for the idols and nothing was allowed to be carried on it), or a Wasilah (a she-camel set free for idols because it has given birth to a she-camel at its first delivery and then again gives birth to a she-camel at its second delivery), and all of the other things that Shaytan made attractive to them during the time of Jahiliyyah. Muslim recorded `Iyad bin Himar saying that Allah's Messenger ﷺ said that Allah the Exalted says,</p><p>يَقُولُ اللهُ تَعَالَى:إِنَّ كُلَّ مَالٍ مَنَحْتُهُ عِبَادِي فَهُوَ لَهُمْ حَلَالٌ، وَفِيهِ وَإِنِّي خَلَقْتُ عِبَادِي حُنَفَاءَ، فَجَاءَتْهُمُ الشَّيَاطِينُ فَاجْتَالَتْهُمْ عَنْ دِينِهِمْ، وَحَرَّمَتْ عَلَيْهِمْ مَا أَحْلَلْتُ لَهُم»</p><p>(`Every type of wealth I have endowed My servants is allowed for them...' (until), `I have created My servants Hunafa' (pure or upright), but the devils came to them and led them astray from their (true) religion and prohibited them from what I allowed for them. ')</p><p>Allah said:</p><p>إِنَّهُ لَكُمْ عَدُوٌّ مُّبِينٌ</p><p>(...he is to you an open enemy.)</p><p>warning against Satan. Allah said in another instance:</p><p>إِنَّ الشَّيْطَـنَ لَكُمْ عَدُوٌّ فَاتَّخِذُوهُ عَدُوّاً إِنَّمَا يَدْعُو حِزْبَهُ لِيَكُونُواْ مِنْ أَصْحَـبِ السَّعِيرِ</p><p>(Surely, Shaytan is an enemy to you, so take (treat) him as an enemy. He only invites his Hizb (followers) that they may become the dwellers of the blazing Fire.) (35:6), and:</p><p>أَفَتَتَّخِذُونَهُ وَذُرِّيَّتَهُ أَوْلِيَآءَ مِن دُونِى وَهُمْ لَكُمْ عَدُوٌّ بِئْسَ لِلظَّـلِمِينَ بَدَلاً</p><p>(Will you then take him (Iblis) and his offspring as protectors and helpers rather than Me while they are enemies to you What an evil is the exchange for the Zalimin (polytheists, and wrongdoers, etc).) (18:50)</p><p>Qatadah and As-Suddi commented on what Allah said:</p><p>وَلاَ تَتَّبِعُواْ خُطُوَتِ الشَّيْطَـنِ</p><p>(...and follow not the footsteps of Shaytan (Satan)):</p><p>Every act of disobedience to Allah is among the footsteps of Satan.</p><p>`Abd bin Humayd reported that Ibn `Abbas said: \"Any vow or oath that one makes while angry, is among the footsteps of Shaytan and its expiation is that of the vow. \" Allah's statement:</p><p>إِنَّمَا يَأْمُرُكُم بِالسُّوءِ وَالْفَحْشَآءِ وَأَن تَقُولُواْ عَلَى اللَّهِ مَا لاَ تَعْلَمُونَ</p><p>(He (Satan) commands you only what is evil and Fahsha (sinful), and that you should say about Allah what you know not.)</p><p>The verse means: `Your enemy, Satan, commands you to commit evil acts and what is worse than that, such as adultery and so forth. He commands you to commit what is even worse, that is, saying about Allah without knowledge.' So this includes every innovator and disbeliever.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:168"
+   },
+   "fetchedAt": "2026-10-27T04:43:20.948Z",
+   "urlChecks": {
+    "https://quran.com/2/168": 200
+   }
+  },
+  {
+   "sourceId": "quran:2:169",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/169",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:169?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:169",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "إِنَّمَا يَأْمُرُكُم بِٱلسُّوٓءِ وَٱلْفَحْشَآءِ وَأَن تَقُولُوا۟ عَلَى ٱللَّهِ مَا لَا تَعْلَمُونَ",
+    "translation": "Er befiehlt euch nur Böses und Schändliches, und daß ihr gegen Allah aussagen sollt, was ihr nicht wißt.",
+    "tafsir_muyassar": "إنما يأمركم الشيطان بكل ذنب قبيح يسوءُكم، وبكل معصية بالغة القبح، وبأن تفتروا على الله الكذب من تحريم الحلال وغيره بدون علم.",
+    "tafsir_ibnkathir": "<h2>The Order to eat the Lawful Things, and the Prohibition of following the Footsteps of Shaytan</h2><p>After Allah stated that there is no deity worthy of worship except Him and that He Alone created the creation, He stated that He is the Sustainer for all His creation, and He mentioned a favor that He granted them; He has allowed them to eat any of the pure lawful things on the earth that do not cause harm to the body or the mind. He also forbade them from following the footsteps of Shaytan, meaning his ways and methods with which he misguides his followers, like prohibiting the Bahirah (a she-camel whose milk was spared for the idols and nobody was allowed to milk it), or Sa'ibah (a she-camel let loose for free pasture for the idols and nothing was allowed to be carried on it), or a Wasilah (a she-camel set free for idols because it has given birth to a she-camel at its first delivery and then again gives birth to a she-camel at its second delivery), and all of the other things that Shaytan made attractive to them during the time of Jahiliyyah. Muslim recorded `Iyad bin Himar saying that Allah's Messenger ﷺ said that Allah the Exalted says,</p><p>يَقُولُ اللهُ تَعَالَى:إِنَّ كُلَّ مَالٍ مَنَحْتُهُ عِبَادِي فَهُوَ لَهُمْ حَلَالٌ، وَفِيهِ وَإِنِّي خَلَقْتُ عِبَادِي حُنَفَاءَ، فَجَاءَتْهُمُ الشَّيَاطِينُ فَاجْتَالَتْهُمْ عَنْ دِينِهِمْ، وَحَرَّمَتْ عَلَيْهِمْ مَا أَحْلَلْتُ لَهُم»</p><p>(`Every type of wealth I have endowed My servants is allowed for them...' (until), `I have created My servants Hunafa' (pure or upright), but the devils came to them and led them astray from their (true) religion and prohibited them from what I allowed for them. ')</p><p>Allah said:</p><p>إِنَّهُ لَكُمْ عَدُوٌّ مُّبِينٌ</p><p>(...he is to you an open enemy.)</p><p>warning against Satan. Allah said in another instance:</p><p>إِنَّ الشَّيْطَـنَ لَكُمْ عَدُوٌّ فَاتَّخِذُوهُ عَدُوّاً إِنَّمَا يَدْعُو حِزْبَهُ لِيَكُونُواْ مِنْ أَصْحَـبِ السَّعِيرِ</p><p>(Surely, Shaytan is an enemy to you, so take (treat) him as an enemy. He only invites his Hizb (followers) that they may become the dwellers of the blazing Fire.) (35:6), and:</p><p>أَفَتَتَّخِذُونَهُ وَذُرِّيَّتَهُ أَوْلِيَآءَ مِن دُونِى وَهُمْ لَكُمْ عَدُوٌّ بِئْسَ لِلظَّـلِمِينَ بَدَلاً</p><p>(Will you then take him (Iblis) and his offspring as protectors and helpers rather than Me while they are enemies to you What an evil is the exchange for the Zalimin (polytheists, and wrongdoers, etc).) (18:50)</p><p>Qatadah and As-Suddi commented on what Allah said:</p><p>وَلاَ تَتَّبِعُواْ خُطُوَتِ الشَّيْطَـنِ</p><p>(...and follow not the footsteps of Shaytan (Satan)):</p><p>Every act of disobedience to Allah is among the footsteps of Satan.</p><p>`Abd bin Humayd reported that Ibn `Abbas said: \"Any vow or oath that one makes while angry, is among the footsteps of Shaytan and its expiation is that of the vow. \" Allah's statement:</p><p>إِنَّمَا يَأْمُرُكُم بِالسُّوءِ وَالْفَحْشَآءِ وَأَن تَقُولُواْ عَلَى اللَّهِ مَا لاَ تَعْلَمُونَ</p><p>(He (Satan) commands you only what is evil and Fahsha (sinful), and that you should say about Allah what you know not.)</p><p>The verse means: `Your enemy, Satan, commands you to commit evil acts and what is worse than that, such as adultery and so forth. He commands you to commit what is even worse, that is, saying about Allah without knowledge.' So this includes every innovator and disbeliever.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:169"
+   },
+   "fetchedAt": "2026-10-27T04:43:20.948Z",
+   "urlChecks": {
+    "https://quran.com/2/169": 200
+   }
   }
  ]
 }
