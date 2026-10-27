@@ -841,6 +841,66 @@
    "urlChecks": {
     "https://quran.com/2/187": 200
    }
+  },
+  {
+   "sourceId": "quran:2:188",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/188",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:188?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:188",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "وَلَا تَأْكُلُوٓا۟ أَمْوَٰلَكُم بَيْنَكُم بِٱلْبَـٰطِلِ وَتُدْلُوا۟ بِهَآ إِلَى ٱلْحُكَّامِ لِتَأْكُلُوا۟ فَرِيقًا مِّنْ أَمْوَٰلِ ٱلنَّاسِ بِٱلْإِثْمِ وَأَنتُمْ تَعْلَمُونَ",
+    "translation": "Und zehrt nicht euren Besitz untereinander auf nichtige Weise auf und bestecht nicht damit die Richter, um einen Teil des Besitzes der Menschen in sündhafter Weise zu verzehren, wo ihr (es) doch wißt.",
+    "tafsir_muyassar": "ولا يأكل بعضكم مال بعض بسبب باطل كاليمين الكاذبة، والغصب، والسرقة، والرشوة، والربا ونحو ذلك، ولا تلقوا بالحجج الباطلة إلى الحكام; لتأكلوا عن طريق التخاصم أموال طائفة من الناس بالباطل، وأنتم تعلمون تحريم ذلك عليكم.",
+    "tafsir_ibnkathir": "<h2>Bribery is prohibited and is a Sin</h2><p>`Ali bin Abu Talhah reported that Ibn `Abbas said, \"This (Ayah 2:188) is about the indebted person when there is no evidence of the loan. So he denies taking the loan and the case goes to the authorities, even though he knows that it is not his money and that he is a sinner, consuming what is not allowed for him.\" This opinion was also reported from Mujahid, Sa`id bin Jubayr, `Ikrimah, Al-Hasan, Qatadah, As-Suddi, Muqatil bin Hayan and `Abdur-Rahman bin Zayd bin Aslam. They all stated, \"Do not dispute when you know that you are being unjust.\"</p><h2>The Judge's Ruling does not allow the Prohibited or prohibit the Lawful</h2><p>It is reported in the Two Sahihs that Umm Salamah narrated that Allah's Messenger ﷺ said:</p><p>«أَلَا إِنَّمَا أَنَا بَشَرٌ، وَإِنَّمَا يَأْتِينِي الْخَصْمُ، فَلَعَلَّ بَعْضَكُمْ أَنْ يَكُونَ أَلْحَنَ بِحُجَّتِهِ مِنْ بَعْضٍ فَأَقْضِيَ لَهُ، فَمَنْ قَضَيْتُ لَهُ بِحَقِّ مُسْلِمٍ فَإِنَّمَا هِيَ قِطْعَةٌ مِنْ نَارٍ، فَلْيَحْمِلْهَا أَوْ لِيَذَرْهَا»</p><p>(I am only human! You people present your cases to me, and as some of you may be more eloquent and persuasive in presenting his argument, I might issue a judgment in his benefit. So, if I give a Muslim's right to another, I am really giving him a piece of fire; so he should not take it.)</p><p>The Ayah and the Hadith prove that the judgment of the authorities in any case does not change the reality of the truth. Hence, the ruling does not allow what is in fact prohibited or prohibit what is in fact allowed. It is only applicable in that case. So if the ruling agrees with the truth, then there is no harm in this case. Otherwise, the judge will acquire his reward, while the cheater will acquire the evil burden.</p><p>This is why Allah said:</p><p>وَلاَ تَأْكُلُواْ أَمْوَلَكُمْ بَيْنَكُم بِالْبَاطِلِ وَتُدْلُواْ بِهَآ إِلَى الْحُكَّامِ لِتَأْكُلُواْ فَرِيقًا مِّنْ أَمْوَالِ النَّاسِ بِالإِثْمِ وَأَنتُمْ تَعْلَمُونَ</p><p>(And eat up not one another's property unjustly, nor give bribery to the rulers (judges before presenting your cases) that you may knowingly eat up a part of the property of others sinfully.) meaning, `While you know the falsehood of what you claim. ' Qatadah said, \"O son of Adam! Know that the judge's ruling does not allow you what is prohibited or prohibit you from what is allowed. The judge only rules according to his best judgment and according to the testimony of the witnesses. The judge is only human and is bound to make mistakes. Know that if the judge erroneously rules in some one's favor, then that person will still encounter the dispute when the disputing parties meet Allah on the Day of Resurrection. Then, the unjust person will be judged swiftly and precisely with that which will surpass whatever he acquired by the erroneous judgment he received in the life of this world.\"</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:188"
+   },
+   "fetchedAt": "2026-10-27T12:54:49.003Z",
+   "urlChecks": {
+    "https://quran.com/2/188": 200
+   }
+  },
+  {
+   "sourceId": "quran:2:189",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/189",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:189?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:189",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "۞ يَسْـَٔلُونَكَ عَنِ ٱلْأَهِلَّةِ ۖ قُلْ هِىَ مَوَٰقِيتُ لِلنَّاسِ وَٱلْحَجِّ ۗ وَلَيْسَ ٱلْبِرُّ بِأَن تَأْتُوا۟ ٱلْبُيُوتَ مِن ظُهُورِهَا وَلَـٰكِنَّ ٱلْبِرَّ مَنِ ٱتَّقَىٰ ۗ وَأْتُوا۟ ٱلْبُيُوتَ مِنْ أَبْوَٰبِهَا ۚ وَٱتَّقُوا۟ ٱللَّهَ لَعَلَّكُمْ تُفْلِحُونَ",
+    "translation": "Sie fragen dich nach den Jungmonden. Sag: Sie sind festgesetzte Zeiten für die Menschen und für die Pilgerfahrt. Und nicht darin besteht die Frömmigkeit, daß ihr von der Rückseite in die Häuser kommt. Frömmigkeit besteht vielmehr darin, daß man gottesfürchtig ist. So kommt durch die Türen in die Häuser und fürchtet Allah, auf daß es euch wohl ergehen möge!",
+    "tafsir_muyassar": "يسألك أصحابك -أيها النبي-: عن الأهلة وتغيُّر أحوالها،<span class=\"blue\"> قل لهم:</span> جعل اللهُ الأهلة علامات يعرف بها الناس أوقات عباداتهم المحددة بوقت مثل الصيام والحج، ومعاملاتهم. وليس الخير ما تعودتم عليه في الجاهلية وأول الإسلام من دخول البيوت من ظهورها حين تُحْرِمون بالحج أو العمرة، ظانين أن ذلك قربة إلى الله، ولكن الخير هو فِعْلُ مَنِ اتقى الله واجتنب المعاصي، وادخلوا البيوت من أبوابها عند إحرامكم بالحج أو العمرة، واخشوا الله تعالى في كل أموركم، لتفوزوا بكل ما تحبون من خيري الدنيا والآخرة.",
+    "tafsir_ibnkathir": "<h2>The Crescent Moons</h2><p>Al-`Awfi related that Ibn `Abbas said, \"The people asked Allah's Messenger ﷺ about the crescent moons. Thereafter, this Ayah was revealed:</p><p>يَسْـَلُونَكَ عَنِ الأَهِلَّةِ قُلْ هِىَ مَوَاقِيتُ لِلنَّاسِ</p><p>(They ask you (O Muhammad) about the crescents. Say, \"These are signs to mark fixed periods of time for mankind...) so that they mark their acts of worship, the `Iddah (the period of time a divorced woman or a widow is required to wait before remarrying) of their women and the time of their Hajj (pilgrimage to Makkah).\" `Abdur-Razzaq reported that Ibn `Umar narrated that Allah's Messenger ﷺ said:</p><p>«جَعَلَ اللهُ الْأَهِلَّةَ مَوَاقِيتَ لِلنَّاسِ، فَصُومُوا لِرُؤْيَتِهِ، وَأَفْطِرُوا لِرُؤْيَتِهِ، فَإِنْ غُمَّ عَلَيْكُمْ فَعُدُّوا ثَلَاثِينَ يَوْمًا»</p><p>(Allah has made the crescents signs to mark fixed periods of time for mankind. Hence, fast on seeing it (the crescent for Ramadan) and break the fast on seeing it (the crescent for Shawwal). If it (the crescent) was obscure to you then count thirty days (mark that month as thirty days).) WThis Hadith was also collected by Al-Hakim in his Mustadrak, and he said, \"The chain is Sahih, and they (Al-Bukhari and Muslim) did not recorded it.\"</p><h2>Righteousness comes from Taqwa</h2><p>Allah said:</p><p>وَلَيْسَ الْبِرُّ بِأَن تَأْتُواْ الْبُيُوتَ مِن ظُهُورِهَا وَلَـكِنَّ الْبِرَّ مَنِ اتَّقَى وَأْتُواْ الْبُيُوتَ مِنْ أَبْوَبِهَا</p><p>(It is not Al-Birr (piety, righteousness, etc.) that you enter the houses from the back, but Al-Birr is from Taqwa. So enter houses through their proper doors.)</p><p>Al-Bukhari recorded that Al-Bara' said, \"During the time of Jahiliyyah, they used to enter the house from the back upon assuming the Ihram. Thereafter, Allah revealed (the following Ayah):</p><p>وَلَيْسَ الْبِرُّ بِأَن تَأْتُواْ الْبُيُوتَ مِن ظُهُورِهَا وَلَـكِنَّ الْبِرَّ مَنِ اتَّقَى وَأْتُواْ الْبُيُوتَ مِنْ أَبْوَبِهَا</p><p>(It is not Al-Birr (piety, righteousness, etc.) that you enter the houses from the back but Al-Birr is from Taqwa. So enter houses through their proper doors.)</p><p>Abu Dawud At-Tayalisi recorded the same Hadith from Al-Bara' but with the wording; \"The Ansar used to enter their houses from the back when returning from a journey. Thereafter, this Ayah (2:189 above) was revealed...\"</p><p>Al-Hasan said, \"When some people during the time of Jahiliyyah would leave home to travel, and then decide not to travel, they would not enter the house from its door. Rather, they would climb over the back wall. Allah the Exalted said:</p><p>وَلَيْسَ الْبِرُّ بِأَن تَأْتُواْ الْبُيُوتَ مِن ظُهُورِهَا</p><p>(It is not Al-Birr (piety, righteousness) that you enter the houses from the back,).\"</p><p>Allah's statement:</p><p>وَاتَّقُواْ اللَّهَ لَعَلَّكُمْ تُفْلِحُونَ</p><p>(...and have Taqwa of Allah that you may be successful.) Have Taqwa of Allah, means to do what He has commanded you and refrain from what He has forbidden for you,</p><p>لَعَلَّكُمْ تُفْلِحُونَ</p><p>(that you may be successful.) tomorrow when you stand before Him and He thus rewards you perfectly.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:189"
+   },
+   "fetchedAt": "2026-10-27T12:54:49.003Z",
+   "urlChecks": {
+    "https://quran.com/2/189": 200
+   }
   }
  ]
 }
