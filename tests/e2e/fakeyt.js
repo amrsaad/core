@@ -9,7 +9,7 @@ window.YT = { PlayerState: { ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED
   const set = (s) => { st = s; paint(); ev.onStateChange && ev.onStateChange({ data: s }); };
   const arg = (a) => (typeof a === 'string' ? { videoId: a } : a);
   // Wie bei YouTube: Zustandswechsel kommt erst nach dem Start, ein pauseVideo im Callback stoppt den Lauf
-  const play = () => { clearInterval(timer); timer = setInterval(() => { t += 10; paint(); if (t >= endAt) { clearInterval(timer); t = endAt; set(0); } }, 100); set(1); };
+  const play = () => { clearInterval(timer); timer = setInterval(() => { t += window.__ytSlow ? 0.1 : 10; paint(); if (t >= endAt) { clearInterval(timer); t = endAt; set(0); } }, 100); set(1); };
   this.loadVideoById = (a) => { a = arg(a); vid = a.videoId; t = a.startSeconds ?? 0; endAt = a.endSeconds ?? 600; window.__ytlog.push('load ' + vid + ' ' + t + '-' + endAt); play(); };
   this.cueVideoById = (a) => { a = arg(a); vid = a.videoId; t = a.startSeconds ?? 0; endAt = a.endSeconds ?? 600; clearInterval(timer); window.__ytlog.push('cue ' + vid); set(5); };
   this.playVideo = () => play();

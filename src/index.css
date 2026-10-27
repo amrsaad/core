@@ -160,22 +160,19 @@ body {
   padding: calc(env(safe-area-inset-top) + 72px) 20px calc(env(safe-area-inset-bottom) + 24px);
   display: flex; flex-direction: column; gap: 16px;
 }
-.recall-label { font-size: 12px; letter-spacing: 0.12em; font-weight: 700; color: var(--area); }
+
 .recall-source { display: flex; gap: 12px; align-items: center; }
-.recall-source img { width: 96px; height: 54px; object-fit: cover; border-radius: 6px; background: #1a1d24; }
+.recall-source img { width: 64px; height: 36px; object-fit: cover; border-radius: 6px; background: #1a1d24; flex: none; }
 .recall-area { font-size: 13px; font-weight: 600; }
 .recall-speaker { font-size: 13px; color: #b3b3b3; }
-.recall-q { margin: 8px 0 0; font-size: 26px; line-height: 32px; font-weight: 700; }
-.recall-input { width: 100%; border-radius: 12px; border: 1px solid #333; background: #111; color: #fff; padding: 12px; font-size: 17px; line-height: 24px; resize: none; }
+.recall-q { margin: 12px 0 4px; font-size: 26px; line-height: 33px; font-weight: 700; }
+.recall-options { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.recall-option { width: 100%; min-height: 56px; border-radius: 12px; border: 1px solid #3a3d45; background: #121212; color: #fff; padding: 12px 16px; font-size: 17px; line-height: 23px; font-weight: 600; text-align: start; }
+.recall-option.right { background: #12351f; border-color: #2fb35a; }
+.recall-option.wrong { background: #3d1417; border-color: #e5484d; }
+.recall-option.rest { opacity: 0.55; }
+.recall-why { margin: 4px 0 0; font-size: 17px; line-height: 25px; color: #d8d8d8; }
 .recall-primary { min-height: 52px; border-radius: 12px; background: #fff; color: #000; font-size: 17px; font-weight: 600; }
-.recall-skip { min-height: 44px; color: #b3b3b3; font-size: 15px; }
-.recall-mine, .recall-answer { border-radius: 12px; background: #121212; padding: 14px 16px; }
-.recall-mine span, .recall-answer span { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #8a8a8a; }
-.recall-mine p { margin: 6px 0 0; font-size: 16px; line-height: 23px; color: #cfcfcf; }
-.recall-answer { border-left: 3px solid var(--area); }
-.recall-answer p { margin: 6px 0 0; font-size: 20px; line-height: 27px; font-weight: 600; }
-.recall-rate { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.recall-rate button { min-height: 52px; border-radius: 12px; border: 1px solid #3a3d45; color: #fff; font-size: 17px; font-weight: 600; }
 .vplay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; opacity: 0.85; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6)); }
 .vgesture { position: absolute; inset: 0; z-index: 10; }
 .vtrack { position: absolute; left: 0; right: 0; top: env(safe-area-inset-top); height: 2px; z-index: 19; background: rgba(255, 255, 255, 0.18); }
@@ -229,8 +226,24 @@ body {
 .vtitle {
   font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   font-size: 17px; line-height: 22px; font-weight: 600;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  overflow-wrap: anywhere;
 }
+.vtitle[data-step='1'] { font-size: 15px; line-height: 20px; }
+.vinfo-tap { pointer-events: auto; cursor: pointer; }
+.vcap-backdrop { position: absolute; inset: 0; z-index: 36; background: transparent; }
+.vcap-sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 37; max-height: 62%; overflow-y: auto; overscroll-behavior: contain;
+  background: #0a0a0a; color: #fff; border-radius: 18px 18px 0 0;
+  padding: 8px 20px calc(env(safe-area-inset-bottom) + 24px);
+}
+.vcap-grip { width: 36px; height: 4px; border-radius: 2px; background: #444; margin: 0 auto 12px; }
+.vcap-hook { margin: 0 0 12px; font-size: 20px; line-height: 27px; font-weight: 700; }
+.vcap-text { margin: 0 0 16px; white-space: pre-line; font-size: 17px; line-height: 26px; color: #e0e0e0; }
+.vcap-text[dir='rtl'] { font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', sans-serif; font-size: 20px; line-height: 34px; }
+.vcap-meta { margin: 0; border-top: 1px solid #262931; padding-top: 12px; display: grid; gap: 6px; font-size: 14px; line-height: 20px; }
+.vcap-meta > div { display: flex; gap: 12px; }
+.vcap-meta dt { width: 64px; flex: none; color: #8a8a8a; }
+.vcap-meta dd { margin: 0; color: #d0d0d0; min-width: 0; overflow-wrap: anywhere; }
 .vactions {
   position: absolute; right: calc(env(safe-area-inset-right) + 12px); z-index: 20; width: 56px;
   bottom: calc(env(safe-area-inset-bottom) + var(--nav-h, 0px) + 24px);

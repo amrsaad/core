@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
@@ -10,6 +10,9 @@ import { captionsShown } from './captions';
 import { countGotIt, countSeen, todayLine } from './today';
 import { answer, cardDue, pickRecall, type Recent } from './recall';
 import { RecallCard } from './RecallCard';
+import { CaptionSheet } from './CaptionSheet';
+import { HOOK_LINE_PT, hookStep } from './hook';
+import { makeRng } from './rng';
 import { addTap, CONFIRM_MS, HEART_MS, nextLiked } from './actions';
 import { emptyFormLine, filterPool, FORM_LABEL, FORMS, momentText, textEndReached, type Form } from './form';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
@@ -97,6 +100,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   };
   const [forYou, setForYou] = useState<Moment | null>(null);
   /** Herz an der Tippstelle (400 ms) und kurze Bestätigung am Knopf (150 ms) */
+  const [capOpen, setCapOpen] = useState(false);
+  const hookEl = useRef<HTMLDivElement>(null);
   const [heart, setHeart] = useState<{ x: number; y: number; k: number } | null>(null);
   const heartTimer = useRef(0);
   const [pulse, setPulse] = useState('');
@@ -119,7 +124,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       const s = stateRef.current;
       cursor.current ??= newMomentCursor(s.momentDay !== today);
       while (queue.current.length < upTo) {
-        const b = nextMomentBlock(pool, { areaShares: s.settings.areaShares, weights: s.momentWeights, seen: s.momentSeen, mutedChannels: s.mutedChannels }, cursor.current);
+        const b = nextMomentBlock(pool, { areaShares: s.settings.areaShares, weights: s.momentWeights, seen: s.momentSeen, mutedChannels: s.mutedChannels }, cursor.current, rng.current);
         if (!b || !b.length) break;
         queue.current.push(...b.filter((m) => !bad.current.has(m.videoId)));
       }
@@ -180,10 +185,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   const [recall, setRecall] = useState<{ m: Moment; review: boolean } | null>(null);
   const findMoment = (id: string): Moment | undefined => stateRef.current.savedMoments[id]?.moment ?? pool.find((x) => x.id === id);
-  const closeRecall = (got: boolean | null) => {
+  const rng = useRef<() => number>();
+  rng.current ??= makeRng();
+  const answerRecall = (got: boolean) => {
     const r = recall;
-    if (r && got !== null)
-      update((s) => ({ ...s, recall: answer(s.recall ?? {}, r.m.id, got, clockNow().getTime(), !!s.savedMoments[r.m.id]), dayCount: got ? countGotIt(s.dayCount, today) : s.dayCount }));
+    if (r) update((s) => ({ ...s, recall: answer(s.recall ?? {}, r.m.id, got, clockNow().getTime()), dayCount: got ? countGotIt(s.dayCount, today) : s.dayCount }));
+  };
+  const closeRecall = () => {
     recallRef.current = false;
     setRecall(null);
     since.current = Date.now();
@@ -235,7 +243,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         sessionSeen.current += 1;
         if (cardDue(sessionSeen.current)) {
           const s0 = stateRef.current;
-          recallNow = pickRecall(s0.recall ?? {}, recent.current, clockNow().getTime(), (id) => !!findMoment(id));
+          recallNow = pickRecall(s0.recall ?? {}, recent.current, clockNow().getTime(), (id) => !!findMoment(id)?.recall);
         }
       }
       if (prevM && endedAt.current !== prev) log(prevM, {});
@@ -657,6 +665,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       liked: (id: string) => !!stateRef.current.momentLiked?.[id],
       saved: (id: string) => !!stateRef.current.savedMoments[id],
       tapMs: () => stateRef.current.tapMs ?? [],
+      skipRecall: () => closeRecall(),
       recall: () => ({ open: recallRef.current, state: stateRef.current.recall ?? {}, sessionSeen: sessionSeen.current }),
     };
   });
@@ -675,6 +684,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   if (!queue.current.length) return <Empty text="You have seen every moment. New ones arrive with the next daily run." />;
 
   const m = queue.current[idx];
+  useLayoutEffect(() => {
+    // Hook nie kürzen: mehr als drei Zeilen in Normalgröße, dann eine Stufe kleiner
+    const el = hookEl.current;
+    if (!el) return;
+    el.dataset.step = '0';
+    el.dataset.step = String(hookStep(Math.round(el.scrollHeight / HOOK_LINE_PT[0])));
+  }, [m?.id, form, forYou]);
+  useEffect(() => setCapOpen(false), [idx, form]);
+
   const saved = m && !!state.savedMoments[m.id];
   const liked = !!m && !!state.momentLiked?.[m.id];
   const captionsOn = !!m && form !== 'text' && captionsShown(form === 'audio' ? 'on' : state.settings.captionMode, m);
@@ -781,14 +799,23 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
       {m && !forYou && form !== 'text' && (
         <div className="vinfo pointer-events-none">
-          <div className="vchannel">
-            <span className="vdot" aria-hidden="true" />
-            <span style={{ color: AREA_COLOR[m.area] }}>{AREA_LABEL[m.area]}</span>
-            <span className="vspeaker">{speakerLine(m.channel)}</span>
+          <div
+            className="vinfo-tap"
+            data-testid="info-tap"
+            onPointerDown={(e) => e.stopPropagation()}
+            onPointerUp={(e) => { e.stopPropagation(); setCapOpen(true); }}
+          >
+            <div className="vchannel" data-testid="speaker-line">
+              <span className="vdot" aria-hidden="true" />
+              <span style={{ color: AREA_COLOR[m.area] }}>{AREA_LABEL[m.area]}</span>
+              <span className="vspeaker">{speakerLine(m.channel)}</span>
+            </div>
+            <div className="vtitle" data-testid="hook" ref={hookEl}>{m.hook}</div>
           </div>
-          <div className="vtitle">{m.hook}</div>
         </div>
       )}
+
+      {capOpen && m && !forYou && form !== 'text' && <CaptionSheet m={m} speaker={speakerLine(m.channel)} onClose={() => setCapOpen(false)} />}
 
       {heart && (
         <svg key={heart.k} className="vheart pointer-events-none" data-testid="heart-burst" style={{ left: heart.x - 48, top: heart.y - 48 }} width="96" height="96" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
@@ -813,7 +840,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </div>
       )}
 
-      {recall && <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} onDone={closeRecall} />}
+      {recall && <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} rng={rng.current!} onAnswer={answerRecall} onClose={closeRecall} />}
 
       {forYou && (
         <div

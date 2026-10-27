@@ -1,74 +1,63 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
-import { thumbOf, type Moment } from './types';
+import { shuffleOrder } from './recall';
+import { isArabic, thumbOf, type Moment } from './types';
 
 /**
- * Abrufkarte (Punkt 5): erst ein Satz aus dem Gedächtnis, dann die Musterantwort (der Hook), dann Selbstbewertung.
- * Der Hook ist die Antwort und erscheint deshalb erst nach dem Versuch. Wischen nach oben überspringt ohne Wertung.
+ * Abrufkarte: Cover, Sprecher und Bereich, darunter die Frage, darunter die drei Antworten in zufälliger Reihenfolge.
+ * Erst nach dem Tipp: richtige Antwort grün, falsch gewählte rot, dann recall.why und "Next".
+ * Die Wertung zählt beim Tipp. Wischen nach oben schließt, vor der Wahl ohne Wertung. Arabisch läuft rechtsläufig.
  */
-export function RecallCard({ m, review, onDone }: { m: Moment; review: boolean; onDone: (got: boolean | null) => void }) {
-  const [stage, setStage] = useState<'ask' | 'show'>('ask');
-  const [text, setText] = useState('');
+export function RecallCard({ m, review, rng, onAnswer, onClose }: { m: Moment; review: boolean; rng: () => number; onAnswer: (got: boolean) => void; onClose: () => void }) {
+  const r = m.recall!;
+  const order = useMemo(() => shuffleOrder(r.options.length, rng), [m.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [chosen, setChosen] = useState<number | null>(null);
   const y = useRef(0);
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
   const speaker = m.channel.replace(/^(.*?)\s*\((.+)\)$/, '$1 · $2');
+  const ar = isArabic(r.question);
+  const dir = ar ? 'rtl' : 'ltr';
+  const pick = (i: number) => {
+    if (chosen !== null) return;
+    setChosen(i);
+    onAnswer(i === r.correct);
+  };
   return (
     <div
       className="recall no-callout"
       data-testid="recall-card"
+      dir={dir}
+      lang={ar ? 'ar' : 'en'}
       style={{ ['--area' as string]: AREA_COLOR[m.area] }}
       onPointerDown={stop}
       onPointerUp={stop}
       onTouchStart={(e) => (y.current = e.touches[0].clientY)}
       onTouchEnd={(e) => {
-        const dy = e.changedTouches[0].clientY - y.current;
-        if (dy < -80 && (e.target as HTMLElement).tagName !== 'TEXTAREA') onDone(null);
+        if (e.changedTouches[0].clientY - y.current < -80) onClose();
       }}
     >
-      <div className="recall-label">{review ? 'RECALL · ONE WEEK LATER' : 'RECALL'}</div>
       <div className="recall-source">
         <img src={thumbOf(m)} alt="" draggable={false} />
         <div>
           <div className="recall-area" style={{ color: AREA_COLOR[m.area] }}>{AREA_LABEL[m.area]}</div>
-          <div className="recall-speaker">{speaker}</div>
+          <div className="recall-speaker">{speaker}{review ? ' · again' : ''}</div>
         </div>
       </div>
-      <h2 className="recall-q">What was the point?</h2>
-      {stage === 'ask' && (
+      <h2 className="recall-q" data-testid="recall-question">{r.question}</h2>
+      <div className="recall-options">
+        {order.map((i) => {
+          const state = chosen === null ? '' : i === r.correct ? 'right' : i === chosen ? 'wrong' : 'rest';
+          return (
+            <button key={i} className={`recall-option ${state}`} data-testid="recall-option" data-correct={i === r.correct ? '1' : '0'} data-state={state} disabled={chosen !== null && state === 'rest' ? true : undefined} aria-pressed={chosen === i} onClick={() => pick(i)}>
+              {r.options[i]}
+            </button>
+          );
+        })}
+      </div>
+      {chosen !== null && (
         <>
-          <textarea
-            className="recall-input"
-            data-testid="recall-input"
-            rows={3}
-            maxLength={240}
-            placeholder="One sentence, from memory"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-          <button className="recall-primary" onClick={() => setStage('show')}>
-            Show answer
-          </button>
-          <button className="recall-skip" onClick={() => onDone(null)}>
-            Skip
-          </button>
-        </>
-      )}
-      {stage === 'show' && (
-        <>
-          {text.trim() && (
-            <div className="recall-mine">
-              <span>You</span>
-              <p>{text.trim()}</p>
-            </div>
-          )}
-          <div className="recall-answer" data-testid="recall-answer">
-            <span>The point</span>
-            <p>{m.hook}</p>
-          </div>
-          <div className="recall-rate">
-            <button onClick={() => onDone(true)}>Got it</button>
-            <button onClick={() => onDone(false)}>Missed</button>
-          </div>
+          <p className="recall-why" data-testid="recall-why">{r.why}</p>
+          <button className="recall-primary" data-testid="recall-next" onClick={onClose}>Next</button>
         </>
       )}
     </div>

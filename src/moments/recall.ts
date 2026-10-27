@@ -1,15 +1,17 @@
 /**
- * Abrufkarte (Bauliste Runde 1, Punkt 5, Fundament R7, R8, R9, R10, R22).
- * Freigabe Max 26.10.2026: fest nach jedem 4. Moment, Kandidat aus den letzten 4 mit mindestens 80 % geschaut,
- * Wiedervorlage als Karte nach 7 Tagen, gespeicherte Momente nach "Got it" zusätzlich nach 21 Tagen,
+ * Abrufkarte (Bauliste Runde 1, Punkt 5, Fundament R7, R8, R9, R10, R22), neu am 27.10.2026 (Max):
+ * Multiple Choice aus dem Feld recall des Moments. Fest nach jedem 4. Moment, Kandidat aus den letzten 4 mit mindestens
+ * 80 % geschaut und mit Feld recall. Moment ohne recall bekommt nie eine Karte.
+ * Wiedervorlage: Fehler nach 2 Tagen, Treffer nach 7 Tagen, zweiter Treffer in Folge nach 21 Tagen, dritter beendet.
  * Wischen überspringt ohne Wertung. Keine Punkte, keine Streaks.
  * Reine Funktionen, gleiche Regeln für ios/Core.
  */
 export const RECALL_EVERY = 4;
 export const MIN_WATCHED = 0.8;
 export const DAY_MS = 86_400_000;
-export const FIRST_GAP_DAYS = 7;
-export const SAVED_GAP_DAYS = 21;
+export const MISS_GAP_DAYS = 2;
+export const HIT_GAP_DAYS = 7;
+export const SECOND_HIT_GAP_DAYS = 21;
 
 export interface RecallResult {
   at: number;
@@ -50,21 +52,35 @@ export function pickRecall(recall: RecallState, recent: Recent[], now: number, a
   return fresh ? { id: fresh.id, review: false } : null;
 }
 
+/** Treffer in Folge am Ende der Ergebnisse */
+const trailingHits = (results: RecallResult[]) => {
+  let n = 0;
+  for (let i = results.length - 1; i >= 0 && results[i].got; i--) n++;
+  return n;
+};
+
 /** Ergebnis eintragen und nächste Fälligkeit setzen */
-export function answer(recall: RecallState, id: string, got: boolean, now: number, saved: boolean): RecallState {
+export function answer(recall: RecallState, id: string, got: boolean, now: number): RecallState {
   const prev = recall[id] ?? { id, due: null, results: [] };
   const results = [...prev.results, { at: now, got }];
+  const hits = trailingHits(results);
   let due: number | null;
-  if (!got) due = now + FIRST_GAP_DAYS * DAY_MS;
-  else {
-    // Erste Karte: 7-Tage-Wiedervorlage. Erstes "Got it" in einer Wiedervorlage: bei gespeicherten Momenten noch die 21-Tage-Karte, sonst fertig
-    const reviewGots = results.slice(1).filter((r) => r.got).length;
-    if (prev.results.length === 0) due = now + FIRST_GAP_DAYS * DAY_MS;
-    else if (saved && reviewGots === 1) due = now + SAVED_GAP_DAYS * DAY_MS;
-    else due = null;
-  }
+  if (!got) due = now + MISS_GAP_DAYS * DAY_MS;
+  else if (hits === 1) due = now + HIT_GAP_DAYS * DAY_MS;
+  else if (hits === 2) due = now + SECOND_HIT_GAP_DAYS * DAY_MS;
+  else due = null;
   return { ...recall, [id]: { id, due, results } };
 }
 
-/** "gekonnt" nur nach "Got it" (R22) */
+/** Reihenfolge der drei Antworten: Indizes in options, zufällig gemischt (Fisher-Yates) */
+export function shuffleOrder(n: number, rng: () => number = Math.random): number[] {
+  const a = Array.from({ length: n }, (_, i) => i);
+  for (let i = n - 1; i > 0; i--) {
+    const j = Math.min(i, Math.floor(rng() * (i + 1)));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/** "gekonnt" nur nach einer richtigen Wahl (R22) */
 export const isKnown = (recall: RecallState, id: string) => !!recall[id]?.results.some((r) => r.got);
