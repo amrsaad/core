@@ -1,5 +1,5 @@
 {
- "at": "2026-10-27T11:02:49.316Z",
+ "at": "2026-10-27T11:54:04.054Z",
  "runs": [
   {
    "browser": "webkit",
@@ -184,10 +184,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604172,
+     "due": 1792929604588,
      "results": [
       {
-       "at": 1792756804172,
+       "at": 1792756804588,
        "got": false
       }
      ]
@@ -263,15 +263,15 @@
     1.5,
     2
    ],
-   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 49a4580\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
+   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 711c44c\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
    "tapToFill": {
-    "measured": 29,
-    "recorded": 29
+    "measured": 30,
+    "recorded": 31
    },
    "posterCheck": {
-    "checksDone": 876,
+    "checksDone": 864,
     "violations": 0,
-    "endedSeen": 146
+    "endedSeen": 145
    },
    "latency": {
     "n": 32,
@@ -286,14 +286,14 @@
       "full": true,
       "size": 15,
       "lines": 6,
-      "id": "test0000052:100"
+      "id": "test0000046:100"
      },
      "open": true,
      "hook": true,
      "exLen": 1180,
      "exDir": "ltr",
      "exAr": false,
-     "meta": "SpeakerKanal body 0EpisodeTestvideoAt1:40AreaBody",
+     "meta": "SpeakerKanal body 2EpisodeTestvideoAt1:40AreaBody",
      "speaker": true,
      "ep": true,
      "at": true,
@@ -709,10 +709,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603459,
+     "due": 1792929603415,
      "results": [
       {
-       "at": 1792756803459,
+       "at": 1792756803415,
        "got": false
       }
      ]
@@ -777,9 +777,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06248474121094,
+    "bh": 221.0625,
     "fw": 393,
-    "fh": 221.06248474121094,
+    "fh": 221.0625,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -788,9 +788,9 @@
     1.5,
     2
    ],
-   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 49a4580\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
+   "noteBody": "Moment: test0000054:100\nVideo: test0000054\nStart: 100 s\nEnd: 160 s\nSource: Kanal body 2, https://www.youtube.com/watch?v=test0000054&t=100\nArea: Body\nTab: Video\nSpeed: 1.5x\nDevice: iPhone, iOS 17.5, Safari\nApp: 711c44c\nChips: Boring, Bad cut\n\nThe cut is two seconds late & the \"hook\" repeats.",
    "tapToFill": {
-    "measured": 32.29999999998836,
+    "measured": 32.09999999997672,
     "recorded": 32
    },
    "posterCheck": {
@@ -897,14 +897,14 @@
       "full": true,
       "size": 15,
       "lines": 6,
-      "id": "test0000020:100"
+      "id": "test0000022:100"
      },
      "open": true,
      "hook": true,
      "exLen": 1180,
      "exDir": "ltr",
      "exAr": false,
-     "meta": "SpeakerKanal brain 0EpisodeTestvideoAt1:40AreaBrain",
+     "meta": "SpeakerKanal brain 2EpisodeTestvideoAt1:40AreaBrain",
      "speaker": true,
      "ep": true,
      "at": true,
@@ -928,7 +928,7 @@
        "rate 1.5",
        "unmute",
        "rate 1.5",
-       "load test0000022 100-180",
+       "load test0000020 100-200",
        "rate 1.5"
       ]
      }
@@ -969,9 +969,9 @@
       "log": [
        "rate 1.5",
        "rate 1.5",
-       "rate 1.5",
-       "rate 1.5",
        "unmute",
+       "rate 1.5",
+       "load test0000025 100-180",
        "rate 1.5"
       ]
      }
