@@ -258,6 +258,267 @@
    "arabic": "إِنَّ ٱلَّذِينَ كَفَرُوا۟ وَمَاتُوا۟ وَهُمْ كُفَّارٌ أُو۟لَـٰٓئِكَ عَلَيْهِمْ لَعْنَةُ ٱللَّهِ وَٱلْمَلَـٰٓئِكَةِ وَٱلنَّاسِ أَجْمَعِينَ",
    "translation": "Diejenigen aber, die ungläubig sind und als Ungläubige sterben, auf ihnen liegt der Fluch Allahs und der Engel und der Menschen allesamt,",
    "reflection": "Was nimmst du heute aus diesem Vers mit?"
+  },
+  {
+   "id": "arxiv:2610.35868",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Retriever-Free Retrieval: Navigating Documents with Decision Models",
+   "source": {
+    "id": "arxiv:2610.35868",
+    "title": "Retriever-Free Retrieval: Navigating Documents with Decision Models",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2610.35868",
+    "excerpt": "Across four benchmarks, including a corpus of 2.68 million Wikipedia paragraphs, retrieval takes just 0.7-1.8 seconds per query."
+   },
+   "createdAt": "2026-10-27T04:16:54.100Z"
+  },
+  {
+   "id": "pmid:42632992",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Real-Time Artificial Intelligence for Early Sepsis Prediction Using Dynamic Clinical Data",
+   "source": {
+    "id": "pmid:42632992",
+    "title": "Real-Time Artificial Intelligence for Early Sepsis Prediction Using Dynamic Clinical Data: A Systematic Review.",
+    "publisher": "Cureus",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42632992/",
+    "excerpt": "Current evidence suggests that real-time AI shows considerable promise for early sepsis recognition; however, prospective validation, calibration assessment, workflow integration, and demonstration of consistent patient benefit remain essential before widespread clinical implementation can be justified."
+   },
+   "createdAt": "2026-10-27T04:16:54.100Z"
+  },
+  {
+   "id": "pmid:42528953",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Artificial intelligence in cardiology: implications for healthcare outcomes",
+   "source": {
+    "id": "pmid:42528953",
+    "title": "Artificial intelligence in cardiology: implications for healthcare outcomes.",
+    "publisher": "Frontiers in artificial intelligence",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42528953/",
+    "excerpt": "Accordingly, cardiovascular medical practices and technology can progress forward with AI and precision medicine models that are both equitable and accurate."
+   },
+   "createdAt": "2026-10-27T04:16:54.100Z"
+  },
+  {
+   "id": "pmid:34902545",
+   "area": "brain",
+   "topic": "allgemein",
+   "type": "fact",
+   "headline": "Diabetic macular ischaemia- a new therapeutic target?",
+   "source": {
+    "id": "pmid:34902545",
+    "title": "Diabetic macular ischaemia- a new therapeutic target?",
+    "publisher": "Progress in retinal and eye research",
+    "year": 2022,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/34902545/",
+    "excerpt": "Finally, we discuss a complete set of proposed therapeutic pathways for DMI, including cell-based therapies that may provide restorative potential."
+   },
+   "createdAt": "2026-10-27T04:16:54.100Z"
+  },
+  {
+   "id": "arxiv:2610.35865",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Center-of-Mass Interpretation of Evolution Strategies",
+   "source": {
+    "id": "arxiv:2610.35865",
+    "title": "Center-of-Mass Interpretation of Evolution Strategies",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2610.35865",
+    "excerpt": "from its current location, the model moves towards the reward-weighted center of mass of its own population. The same picture explains what subtracting the mean reward does: it changes the point from which the displacement is measured, from the model to the sampled centroid. Our contribution is an intuitive, geometric way to visualize an ES update, exact for any finite population."
+   },
+   "createdAt": "2026-10-27T04:16:54.100Z"
+  },
+  {
+   "id": "pmid:42415751",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "The effects of different types of exercise on cognitive function in the older adults",
+   "source": {
+    "id": "pmid:42415751",
+    "title": "The effects of different types of exercise on cognitive function in the older adults: a systematic review and network meta-analysis.",
+    "publisher": "Frontiers in public health",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42415751/",
+    "excerpt": "Physical exercise effectively enhances multi-dimensional cognitive function in older adults, with distinct intervention advantages associated with different exercise types. In clinical practice, MT, RT, ST, or AT may be prioritized as intervention strategies based on the individual's cognitive assessment results and health status."
+   },
+   "createdAt": "2026-10-27T04:16:54.100Z"
+  },
+  {
+   "id": "pmid:42423852",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "The role of artificial intelligence in precision medicine for breast cancer",
+   "source": {
+    "id": "pmid:42423852",
+    "title": "The role of artificial intelligence in precision medicine for breast cancer.",
+    "publisher": "Discover oncology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42423852/",
+    "excerpt": "Ultimately, the paper offers valuable insights into the integration of AI throughout the entire process of precision medical management for BC patients."
+   },
+   "createdAt": "2026-10-27T04:16:54.100Z"
+  },
+  {
+   "id": "arxiv:2610.35862",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Learning Force-Reactive Humanoid Loco-Manipulation",
+   "source": {
+    "id": "arxiv:2610.35862",
+    "title": "Learning Force-Reactive Humanoid Loco-Manipulation",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2610.35862",
+    "excerpt": "For more details, please visit our website: https://louis-leee.github.io/FLoRe/."
+   },
+   "createdAt": "2026-10-27T04:16:54.100Z"
+  },
+  {
+   "id": "pmid:40665980",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Artificial intelligence in ophthalmology",
+   "source": {
+    "id": "pmid:40665980",
+    "title": "Artificial intelligence in ophthalmology: a bibliometric analysis of the 5-year trends in literature.",
+    "publisher": "Frontiers in medicine",
+    "year": 2025,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/40665980/",
+    "excerpt": "Our bibliometric analysis outlines the dynamic evolution and structural relationships within the AI and ophthalmology field. In contrast to previous studies, our research transcends individual domains to offer a more comprehensive insight."
+   },
+   "createdAt": "2026-10-27T04:16:54.100Z"
+  },
+  {
+   "id": "pmid:42721382",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Tool or Companion? Reframing Conversational AI to Prevent Psychological Harm",
+   "source": {
+    "id": "pmid:42721382",
+    "title": "Tool or Companion? Reframing Conversational AI to Prevent Psychological Harm.",
+    "publisher": "JMIR mental health",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42721382/",
+    "excerpt": "Perhaps more importantly, reviewing the current hype surrounding AI interactions can help reformulate a paradigm that contributes to human well-being and societal value, while minimizing misconceptions, maladaptive interactions, or social disintegration."
+   },
+   "createdAt": "2026-10-27T04:16:54.100Z"
+  },
+  {
+   "id": "arxiv:2610.35835",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "I-HITL: Inalienable Human-in-the-Loop",
+   "source": {
+    "id": "arxiv:2610.35835",
+    "title": "I-HITL: Inalienable Human-in-the-Loop",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2610.35835",
+    "excerpt": "We present a prototype I-HITL system called Countersign that can plug into and strengthen existing HITL systems using off-the-shelf consumer mobile devices."
+   },
+   "createdAt": "2026-10-27T04:16:54.100Z"
+  },
+  {
+   "id": "pmid:42861970",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "AI-enabled nystagmus analysis in vestibular assessment",
+   "source": {
+    "id": "pmid:42861970",
+    "title": "AI-enabled nystagmus analysis in vestibular assessment: Current evidence and future directions.",
+    "publisher": "Journal of vestibular research : equilibrium & orientation",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42861970/",
+    "excerpt": "Translation into routine practice will require multicentre patient-level external validation, transparent reporting, interpretable outputs, standardised performance metrics, and prospective evaluation in real clinical pathways."
+   },
+   "createdAt": "2026-10-27T04:16:54.100Z"
+  },
+  {
+   "id": "pmid:42017975",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Artificial intelligence construction",
+   "source": {
+    "id": "pmid:42017975",
+    "title": "Artificial intelligence construction: a review of the bridge between CT imaging features of lung ground-glass nodules adenocarcinoma and carcinogenic driver genes.",
+    "publisher": "Journal of cancer research and clinical oncology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42017975/",
+    "excerpt": "By providing a comprehensive overview of the intersection between AI, radiomics, and genomics in lung GGN adenocarcinoma, this article aims to offer theoretical insights and technical references to advance early detection and precision oncology."
+   },
+   "createdAt": "2026-10-27T04:16:54.100Z"
+  },
+  {
+   "id": "arxiv:2610.35832",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Profiling a Frontier Agent with EBench: From Direct Control to Harness with Policy",
+   "source": {
+    "id": "arxiv:2610.35832",
+    "title": "Profiling a Frontier Agent with EBench: From Direct Control to Harness with Policy",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2610.35832",
+    "excerpt": "Project page: https://internrobotics.github.io/EBench-Astra-Tech-Report/"
+   },
+   "createdAt": "2026-10-27T04:16:54.100Z"
+  },
+  {
+   "id": "quran:2:162",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "ewig darin zu bleiben.",
+   "source": {
+    "id": "quran:2:162",
+    "title": "Sure Al-Baqarah, 2:162",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/2/162",
+    "excerpt": "دائمين في اللعنة والنار، لا يخفف عنهم العذاب، ولا هم يمهلون بمعذرة يعتذرون بها."
+   },
+   "createdAt": "2026-10-27T04:16:54.100Z",
+   "arabic": "خَـٰلِدِينَ فِيهَا ۖ لَا يُخَفَّفُ عَنْهُمُ ٱلْعَذَابُ وَلَا هُمْ يُنظَرُونَ",
+   "translation": "ewig darin zu bleiben. Die Strafe soll ihnen nicht erleichtert, noch soll ihnen Aufschub gewährt werden,",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?"
+  },
+  {
+   "id": "quran:2:163",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Euer Gott ist ein Einziger Gott.",
+   "source": {
+    "id": "quran:2:163",
+    "title": "Sure Al-Baqarah, 2:163",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/2/163",
+    "excerpt": "وإلهكم -أيها الناس- إله واحد متفرد في ذاته وأسمائه وصفاته وأفعاله وعبودية خلقه له، لا معبود بحق إلا هو، الرحمن المتصف بالرحمة في ذاته وأفعاله لجميع الخلق، الرحيم بالمؤمنين."
+   },
+   "createdAt": "2026-10-27T04:16:54.100Z",
+   "arabic": "وَإِلَـٰهُكُمْ إِلَـٰهٌ وَٰحِدٌ ۖ لَّآ إِلَـٰهَ إِلَّا هُوَ ٱلرَّحْمَـٰنُ ٱلرَّحِيمُ",
+   "translation": "Euer Gott ist ein Einziger Gott. Es gibt keinen Gott außer Ihm, dem Allerbarmer, dem Barmherzigen.",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?",
+   "body": "In this Ayah, Allah mentions that He is the only deity, and that He has no partners or equals. He is Allah, the One and Only, the Sustainer, and there is no deity worthy of worship except Him. He is the Most Gracious ـ Ar-Rahman, the Most Merciful ـ Ar-Rahim."
   }
  ]
 }
