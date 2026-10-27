@@ -58,6 +58,7 @@ export function loadYT(): Promise<YTNamespace> {
 
 /** Momente aus anderen Quellen (z.B. TED) mit eigenem HLS-Stream statt YouTube. Schlüssel ist videoId. */
 export const HLS = new Map<string, string>();
+export const isYtId = (id: string): boolean => /^[A-Za-z0-9_-]{11}$/.test(id);
 export const registerHls = (items: { videoId: string; hls?: string }[]) => {
   for (const m of items) if (m.hls) HLS.set(m.videoId, m.hls);
 };
@@ -120,7 +121,8 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     if (mode === 'hls') events.onError?.(-1);
   });
 
-  const yt = ytPlayer(YT, el, mode === 'yt' ? videoId : undefined, {
+  // Nur echte YouTube-IDs an den IFrame-Player. Text- und Podcast-IDs ohne Stream werfen sonst "Invalid video id".
+  const yt = ytPlayer(YT, el, mode === 'yt' && isYtId(videoId) ? videoId : undefined, {
     onReady: () => {
       if (!readyFired) {
         readyFired = true;
@@ -165,6 +167,11 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     if (HLS.has(id)) {
       const o = typeof arg === 'string' ? { startSeconds: 0, endSeconds: undefined } : arg;
       prepareHls(id, o.startSeconds ?? 0, o.endSeconds, play);
+    } else if (!isYtId(id)) {
+      // Kein Stream und keine YouTube-ID (Text-Moment oder Podcast ohne hls): nichts laden, nichts werfen
+      video.pause();
+      try { yt.pauseVideo(); } catch { /* noch nicht bereit */ }
+      show('yt');
     } else {
       video.pause();
       show('yt');
