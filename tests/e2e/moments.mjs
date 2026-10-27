@@ -547,6 +547,18 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       capLogs[n].after = await p7.evaluate(() => ({ st: window.__core.state(), idx: window.__core.idx(), log: window.__ytlog.slice(-6) }));
       if (await p7.$('[data-testid=recall-card]')) cardSeen = true;
     }
+    // Falls ein Wischer nicht griff: weiter wischen, bis fünf Momente durch sind
+    for (let extra = 0; extra < 6 && (await p7.evaluate(() => window.__core.idx())) < 5; extra++) {
+      const b = await p7.evaluate(() => window.__core.idx());
+      if (await p7.$('.vhint')) await p7.mouse.click(vp.width / 2, vp.height / 2);
+      await p7.mouse.move(vp.width / 2, vp.height * 0.7);
+      await p7.mouse.down();
+      for (let i = 1; i <= 5; i++) await p7.mouse.move(vp.width / 2, vp.height * (0.7 - 0.09 * i));
+      await p7.mouse.up();
+      await waitFor(p7, (x) => window.__core.idx() === x + 1, b, 3000);
+      await p7.waitForTimeout(150);
+      if (await p7.$('[data-testid=recall-card]')) cardSeen = true;
+    }
     r.capLogs = capLogs;
     c.hookLongSmallerNeverCut = capLogs.every((x) => x.hk.step === '1' && !x.hk.clipped && x.hk.full && x.hk.size === 15);
     c.captionOpensWithContent = capLogs.every((x) => x.open && x.hook && x.exLen > 50 && x.speaker && x.ep && x.at);

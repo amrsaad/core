@@ -413,7 +413,6 @@ struct CaptionSheetView: View {
                 })
             }
             .background(Color(hex: 0x0A0A0A), in: UnevenRoundedRectangle(topLeadingRadius: 18, topTrailingRadius: 18))
-            .accessibilityIdentifier("captionSheet")
         }
         .foregroundStyle(.white)
     }
