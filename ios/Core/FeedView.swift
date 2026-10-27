@@ -98,7 +98,6 @@ struct FeedView: View {
     @State private var menuFor: Moment?
     /// Aufgabe 5: Rückmeldungsblatt (Menü "Note" oder Langdruck auf das Herz)
     @State private var noteFor: Moment?
-    @Environment(\.openURL) private var openURL
     @State private var feedSeconds: Double = 0
     // Punkt 5: Abrufkarte nach jedem 4. Moment
     @State private var recallCard: (moment: Moment, review: Bool)?
