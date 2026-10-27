@@ -1,5 +1,5 @@
 {
- "at": "2026-10-27T15:56:25.826Z",
+ "at": "2026-10-27T16:11:12.880Z",
  "runs": [
   {
    "browser": "webkit",
@@ -217,10 +217,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604169,
+     "due": 1792929604528,
      "results": [
       {
-       "at": 1792756804169,
+       "at": 1792756804528,
        "got": false
       }
      ]
@@ -285,9 +285,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06246948242188,
+    "bh": 221.0625,
     "fw": 393,
-    "fh": 221.06246948242188,
+    "fh": 221.0625,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -297,21 +297,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 28.00000000000182,
-    "recorded": 31
+    "measured": 28,
+    "recorded": 29
    },
    "notesCount": 5,
    "posterCheck": {
-    "checksDone": 873,
+    "checksDone": 870,
     "violations": 0,
-    "endedSeen": 147
+    "endedSeen": 146
    },
    "latency": {
     "n": 36,
     "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | 28bf814 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 28bf814 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | 28bf814 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | 28bf814 |\n| test0000046:100 | Testmoment 46 body | Mute speaker | - | Video | 28bf814 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | 2c7c608 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 2c7c608 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | 2c7c608 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | 2c7c608 |\n| test0000046:100 | Testmoment 46 body | Mute speaker | - | Video | 2c7c608 |",
    "badWalk": [
     {
      "idx": 2,
@@ -682,7 +682,7 @@
     "captionsArabicRtl": true,
     "swipeNext": true,
     "captionsSettingsOn": true,
-    "holdFast": false,
+    "holdFast": true,
     "releaseNormal": true,
     "embedNoZoom": true,
     "embed16by9FullWidth": true,
@@ -782,11 +782,11 @@
     "issueTitleCount": true,
     "promptMarksSent": true,
     "newNoteUnsent": true,
-    "reviewOnlyOnce": false,
+    "reviewOnlyOnce": true,
     "promptOncePerDay": true,
     "prevPlanShown": true,
     "prevPlanAnswered": true,
-    "skipWorks": false,
+    "skipWorks": true,
     "p6Feed": true,
     "emptyAudioLine": true,
     "emptyKeepsSwitch": true,
@@ -866,10 +866,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603471,
+     "due": 1792929603452,
      "results": [
       {
-       "at": 1792756803471,
+       "at": 1792756803452,
        "got": false
       }
      ]
@@ -946,21 +946,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 32.09999999999127,
-    "recorded": 32
+    "measured": 31.800000000017462,
+    "recorded": 31
    },
    "notesCount": 5,
    "posterCheck": {
-    "checksDone": 873,
+    "checksDone": 870,
     "violations": 0,
-    "endedSeen": 0
+    "endedSeen": 144
    },
    "latency": {
-    "n": 38,
-    "buffered": 32,
+    "n": 36,
+    "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000008:100 | Testmoment 8 beat | Boring | - | Video | 28bf814 |\n| test0000004:100 | Testmoment 4 beat | - | The cut is two seconds late & the \"hook\" repeats. | Video | 28bf814 |\n| test0000010:100 | Testmoment 10 beat | Known | - | Video | 28bf814 |\n| test0000003:100 | Testmoment 3 beat | Wrong | - | Video | 28bf814 |\n| test0000019:100 | Testmoment 19 brain | Mute speaker | - | Video | 28bf814 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | 2c7c608 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 2c7c608 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | 2c7c608 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | 2c7c608 |\n| test0000046:100 | Testmoment 46 body | Mute speaker | - | Video | 2c7c608 |",
    "badWalk": [
     {
      "idx": 2,
@@ -1278,10 +1278,6 @@
      "dir": "rtl"
     },
     {
-     "ar": true,
-     "dir": "rtl"
-    },
-    {
      "ar": false,
      "dir": "ltr"
     },
@@ -1301,7 +1297,7 @@
     "noRating": true
    },
    "errors": [],
-   "ok": false
+   "ok": true
   }
  ]
 }
