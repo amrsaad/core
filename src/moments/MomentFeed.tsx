@@ -673,6 +673,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   if (pool.length && !queue.current.length) ensureQueue(6);
 
+  useLayoutEffect(() => {
+    // Hook nie kürzen: mehr als drei Zeilen in Normalgröße, dann eine Stufe kleiner
+    const el = hookEl.current;
+    if (!el) return;
+    el.dataset.step = '0';
+    el.dataset.step = String(hookStep(Math.round(el.scrollHeight / HOOK_LINE_PT[0])));
+  }, [queue.current[idx]?.id, form, forYou]);
+  useEffect(() => setCapOpen(false), [idx, form]);
+
   if (!allPool.length) return <Empty text="No moments in the pool yet. The daily run fills it." />;
   if (!pool.length)
     return (
@@ -685,15 +694,6 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   if (!queue.current.length) return <Empty text="You have seen every moment. New ones arrive with the next daily run." />;
 
   const m = queue.current[idx];
-  useLayoutEffect(() => {
-    // Hook nie kürzen: mehr als drei Zeilen in Normalgröße, dann eine Stufe kleiner
-    const el = hookEl.current;
-    if (!el) return;
-    el.dataset.step = '0';
-    el.dataset.step = String(hookStep(Math.round(el.scrollHeight / HOOK_LINE_PT[0])));
-  }, [m?.id, form, forYou]);
-  useEffect(() => setCapOpen(false), [idx, form]);
-
   const saved = m && !!state.savedMoments[m.id];
   const liked = !!m && !!state.momentLiked?.[m.id];
   const captionsOn = !!m && form !== 'text' && captionsShown(form === 'audio' ? 'on' : state.settings.captionMode, m);
