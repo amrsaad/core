@@ -181,6 +181,7 @@ final class CoreUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["Do not compare body fat across measuring devices."].exists, "audio moment in video filter")
         XCTAssertFalse(app.staticTexts["Reader studies might favor computer aid. Connie showed real-life harm."].exists, "audio moment in video filter")
         // Audio: nur Podcast-Momente, Untertitel immer an und groß
+        XCTAssertTrue(app.buttons["form-Audio"].waitForExistence(timeout: 10), "form switch missing before Audio")
         app.buttons["form-Audio"].tap()
         wait(3)
         let audioHooks = ["Do not compare body fat across measuring devices.", "Reader studies might favor computer aid. Connie showed real-life harm."]
