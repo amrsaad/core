@@ -1,0 +1,54 @@
+{
+ "source": "wikipedia",
+ "date": "2026-10-27",
+ "records": [
+  {
+   "sourceId": "wiki:de:Nationalpark Donau-Auen",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Nationalpark_Donau-Auen",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/27",
+    "status": 200
+   },
+   "title": "Nationalpark Donau-Auen",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Der Nationalpark Donau-Auen ist ein 9600 ha großer Nationalpark, der sich von Wien bis zur Mündung der March in Niederösterreich an der Staatsgrenze zur Slowakei erstreckt. Er ist eine der größten weitgehend intakten Aulandschaften Mitteleuropas entlang der Donau. Das Gebiet hat eine Länge von 38 Kilometern, misst an seiner breitesten Stelle kaum vier Kilometer und umfasst Gebiete in den Gemeinden Wien (Lobau), Groß-Enzersdorf, Orth an der Donau, Eckartsau, Engelhartstetten, Hainburg, Bad Deutsch-Altenburg, Petronell-Carnuntum, Regelsbrunn, Haslau-Maria Ellend, Fischamend und Schwechat. Nachdem 1983 Teile des heutigen Nationalparks als Untere Lobau und grenzübergreifend mit der Slowakei als Donau-March-Thaya-Auen Ramsargebiet wurden, ist der Nationalpark seit 1996 Schutzgebiet nach der IUCN-Kategorie II. Durch den Nationalpark führen der Weitwanderweg 07 und der Donauradweg."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-27T03:34:57.366Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Nationalpark_Donau-Auen": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Turkmenistan",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Turkmenistan",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/27",
+    "status": 200
+   },
+   "title": "Turkmenistan",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Turkmenistan ist ein Staat in Zentralasien. Turkmenistan liegt am Kaspischen Meer und grenzt an Kasachstan im Nordwesten, Usbekistan im Nordosten, Afghanistan im Südosten, Iran im Süden und über eine Seegrenze durch das Kaspische Meer an Aserbaidschan im Westen. Der Binnenstaat ist mit 488.100 km² etwa so groß wie Spanien und landschaftlich vor allem von der Wüste Karakum geprägt. Der dünn besiedelte Staat hat mehr als sieben Millionen Einwohner, die Mehrheit davon muslimische Turkmenen. Hauptstadt und mit rund einer Million Einwohnern größte Stadt des Landes ist Aşgabat. Zu weiteren bedeutenden Städten gehören Türkmenabat, Türkmenbaşy, Daşoguz und Mary."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-27T03:34:57.366Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Turkmenistan": 200
+   }
+  }
+ ]
+}
