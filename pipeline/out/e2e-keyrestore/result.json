@@ -1,5 +1,5 @@
 {
- "at": "2026-10-27T03:50:41.518Z",
+ "at": "2026-10-27T03:56:51.117Z",
  "runs": [
   {
    "browser": "webkit",
@@ -13,11 +13,14 @@
     "idbRewritten": true,
     "runsWithoutCache": true,
     "cacheRewritten": true,
-    "noPageErrors": true
+    "noPageErrors": false
    },
    "deleteIdb": "ok",
-   "errors": [],
-   "ok": true
+   "errors": [
+    "Error: Minified React error #300; visit https://reactjs.org/docs/error-decoder.html?invariant=300 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+    "Error: Minified React error #300; visit https://reactjs.org/docs/error-decoder.html?invariant=300 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+   ],
+   "ok": false
   },
   {
    "browser": "webkit",
@@ -31,11 +34,14 @@
     "idbRewritten": true,
     "runsWithoutCache": true,
     "cacheRewritten": true,
-    "noPageErrors": true
+    "noPageErrors": false
    },
    "deleteIdb": "ok",
-   "errors": [],
-   "ok": true
+   "errors": [
+    "Error: Minified React error #300; visit https://reactjs.org/docs/error-decoder.html?invariant=300 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+    "Error: Minified React error #300; visit https://reactjs.org/docs/error-decoder.html?invariant=300 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+   ],
+   "ok": false
   },
   {
    "browser": "webkit",
@@ -49,11 +55,13 @@
     "idbRewritten": true,
     "runsWithoutCache": true,
     "cacheRewritten": true,
-    "noPageErrors": true
+    "noPageErrors": false
    },
    "deleteIdb": "ok",
-   "errors": [],
-   "ok": true
+   "errors": [
+    "Error: Minified React error #300; visit https://reactjs.org/docs/error-decoder.html?invariant=300 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+   ],
+   "ok": false
   },
   {
    "browser": "chromium",
