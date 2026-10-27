@@ -370,7 +370,8 @@ struct CaptionSheetView: View {
                 .padding(.horizontal, 20).padding(.top, 8).padding(.bottom, 14)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
-                .gesture(DragGesture(minimumDistance: 20).onEnded { v in
+                // Vorrang vor dem senkrechten Blättern der Momente, sonst gewinnt das Blättern den Zug
+                .highPriorityGesture(DragGesture(minimumDistance: 20).onEnded { v in
                     if Hook.closes(dy: v.translation.height, scrollTop: 0) { onClose() }
                 })
                 ScrollView {
