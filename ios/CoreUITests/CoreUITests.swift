@@ -531,6 +531,13 @@ final class CoreUITests: XCTestCase {
         return cond()
     }
 
+    /// Die Sync-Karte ins Bild holen, damit der Screenshot sie zeigt
+    private func showSyncCard() {
+        let anchor = app.staticTexts["Sync between devices"]
+        for _ in 0..<8 where !anchor.exists || !anchor.isHittable { app.swipeUp(); wait(0.3) }
+        wait(0.3)
+    }
+
     private func pick(_ id: String, _ option: String) {
         let picker = app.descendants(matching: .any)[id]
         for _ in 0..<6 where !picker.isHittable { app.swipeDown(); wait(0.3) }
@@ -574,6 +581,7 @@ final class CoreUITests: XCTestCase {
         XCTAssertFalse(app.secureTextFields["syncToken"].exists, "token field must disappear")
         var st = mockState()
         XCTAssertNotNil((st["momentSeen"] as? [String: Any])?["other-device:1"], "state of the other device must survive")
+        showSyncCard()
         shot("31-sync-token-saved")
 
         // 10 Sekunden nach der letzten Änderung, nicht früher
@@ -588,6 +596,7 @@ final class CoreUITests: XCTestCase {
         st = mockState()
         XCTAssertEqual((st["settings"] as? [String: Any])?["captionMode"] as? String, "on")
         XCTAssertNotNil(((st["momentWeights"] as? [String: Any])?["topic"] as? [String: Any])?["fremd"])
+        showSyncCard()
         shot("32-sync-written-after-10s")
 
         // Offline: sammeln, Fehlerzeile, bei Netz nachholen
@@ -597,6 +606,7 @@ final class CoreUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["syncError"].waitForExistence(timeout: 20), "no error line when offline")
         XCTAssertEqual(app.staticTexts["syncError"].label, "No connection to GitHub. Will retry.")
         XCTAssertEqual(mockPuts(), p2)
+        showSyncCard()
         shot("33-sync-offline")
         setMockMode("")
         app.buttons["syncNow"].tap()
@@ -609,6 +619,7 @@ final class CoreUITests: XCTestCase {
         app.buttons["syncNow"].tap()
         XCTAssertTrue(app.staticTexts["syncError"].waitForExistence(timeout: 10))
         XCTAssertEqual(app.staticTexts["syncError"].label, "GitHub rejected the token (401). Paste a new one.")
+        showSyncCard()
         shot("34-sync-token-rejected")
         setMockMode("")
 
