@@ -1,5 +1,5 @@
 {
- "at": "2026-10-28T17:50:48.862Z",
+ "at": "2026-10-28T20:24:32.450Z",
  "runs": [
   {
    "browser": "webkit",
@@ -223,10 +223,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604592,
+     "due": 1792929604679,
      "results": [
       {
-       "at": 1792756804592,
+       "at": 1792756804679,
        "got": false
       }
      ]
@@ -291,9 +291,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06253051757812,
+    "bh": 221.0625,
     "fw": 393,
-    "fh": 221.06253051757812,
+    "fh": 221.0625,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -303,12 +303,12 @@
     2
    ],
    "tapToFill": {
-    "measured": 28,
-    "recorded": 29
+    "measured": 30,
+    "recorded": 30
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 867,
+    "checksDone": 861,
     "violations": 0,
     "endedSeen": 139
    },
@@ -317,7 +317,7 @@
     "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | 22cc3d6 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 22cc3d6 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | 22cc3d6 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | 22cc3d6 |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | 22cc3d6 |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | 22cc3d6 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | 45bcd39 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 45bcd39 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | 45bcd39 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | 45bcd39 |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | 45bcd39 |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | 45bcd39 |",
    "badWalk": [
     {
      "idx": 2,
@@ -878,10 +878,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603477,
+     "due": 1792929603500,
      "results": [
       {
-       "at": 1792756803477,
+       "at": 1792756803500,
        "got": false
       }
      ]
@@ -946,9 +946,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.0625,
+    "bh": 221.06246948242188,
     "fw": 393,
-    "fh": 221.0625,
+    "fh": 221.06246948242188,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -958,12 +958,12 @@
     2
    ],
    "tapToFill": {
-    "measured": 32,
-    "recorded": 32
+    "measured": 31.89999999999418,
+    "recorded": 31
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 870,
+    "checksDone": 867,
     "violations": 0,
     "endedSeen": 140
    },
@@ -972,7 +972,7 @@
     "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | 22cc3d6 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 22cc3d6 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | 22cc3d6 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | 22cc3d6 |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | 22cc3d6 |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | 22cc3d6 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | 45bcd39 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 45bcd39 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | 45bcd39 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | 45bcd39 |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | 45bcd39 |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | 45bcd39 |",
    "badWalk": [
     {
      "idx": 2,
