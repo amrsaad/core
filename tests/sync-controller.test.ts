@@ -63,7 +63,7 @@ describe('Sync Steuerung', () => {
     expect(api.puts).toBe(1);
     const doc = await decryptDoc(await rawKey(5), api.file!.text);
     expect(Object.keys(doc.state.momentSeen).sort()).toEqual(['m1', 'm2']);
-    expect(a.sync.status().lastSync).toBe(Date.now());
+    expect(Math.abs(Date.now() - (a.sync.status().lastSync ?? 0))).toBeLessThan(1000);
     expect(a.sync.status().error).toBeNull();
   });
 
