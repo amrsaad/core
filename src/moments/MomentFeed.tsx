@@ -218,7 +218,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       const sl = slotFor(j);
       if (idxRef.current !== j || userPaused.current || !sl.player || forYouRef.current || recallRef.current) return;
       if (sl.st === STATE.PLAYING || !soundOn.current) return;
-      if (sl.st === STATE.BUFFERING && attempt < 4) {
+      // Eigener Stream (Podcast, Cybersight, TED): Bis die Metadaten da sind, bleibt der Zustand bei CUED, nicht BUFFERING.
+      // Eine echte Verweigerung meldet sich dort als PAUSED (play() abgelehnt). Alles andere ist Laden, also warten.
+      const m = queue.current[j];
+      const ownStream = !!m && HLS.has(m.videoId);
+      const loading = sl.st === STATE.BUFFERING || (ownStream && sl.st !== STATE.PAUSED);
+      if (loading && attempt < 6) {
         soundGuard(j, attempt + 1);
         return;
       }
