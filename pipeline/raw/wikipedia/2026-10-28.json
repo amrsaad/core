@@ -1,0 +1,54 @@
+{
+ "source": "wikipedia",
+ "date": "2026-10-28",
+ "records": [
+  {
+   "sourceId": "wiki:de:Juan Manuel Fangio",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Juan_Manuel_Fangio",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/28",
+    "status": 200
+   },
+   "title": "Juan Manuel Fangio",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Juan Manuel Fangio war ein argentinischer Automobilrennfahrer. Er prägte die Anfangsjahre der Formel 1 und wurde in dieser Klasse fünfmal Weltmeister – ein Rekord, der erst im Jahr 2003 von Michael Schumacher übertroffen wurde. Nicht zuletzt deshalb gilt Fangio bis heute als einer der erfolgreichsten und besten Rennfahrer in der Geschichte des Grand-Prix-Sports. Bei 51 Grand-Prix-Starts gewann Fangio 24 Mal, womit er 47 % seiner Rennen siegreich beendete, was bis heute eine unerreichte Erfolgsquote innerhalb der Formel 1 ist."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-28T07:55:38.422Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Juan_Manuel_Fangio": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Celerina/Schlarigna",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Celerina%2FSchlarigna",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/28",
+    "status": 200
+   },
+   "title": "Celerina/Schlarigna",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Celerina/Schlarigna ist eine politische Gemeinde im Schweizer Kanton Graubünden. Sie gehört zur Region Maloja."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-28T07:55:38.422Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Celerina%2FSchlarigna": 200
+   }
+  }
+ ]
+}
