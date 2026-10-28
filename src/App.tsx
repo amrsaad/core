@@ -1,15 +1,20 @@
 import { registerHls } from './video/ytApi';
 import { useCallback, useEffect, useState } from 'react';
-import { now as clockNow } from './lib/clock';
+import { dayKey, now as clockNow } from './lib/clock';
 import { useAppState } from './lib/useAppState';
 import { decryptJson, storeKeyFrom, unlockKey } from './lib/vault';
 import { validateMoments } from './moments/contract';
 import { MomentFeed } from './moments/MomentFeed';
+import { DeskBar, DeskHelp, DeskSheet } from './moments/DeskShell';
+import { deskHelpDue } from './moments/desktop';
+import { todayLine } from './moments/today';
+import { useDesktop } from './moments/useDesktop';
 import { isReviewDue } from './moments/review';
 import { SavedMoments } from './moments/SavedMoments';
 import type { MomentPool } from './moments/types';
 import { WeeklyReview } from './moments/WeeklyReview';
 import { Settings } from './screens/Settings';
+import type { Form } from './moments/form';
 
 // v1 (Karten) und v2 (Shorts) bleiben im Code, sind aber nicht mehr in der Navigation.
 type Tab = 'feed' | 'saved' | 'settings';
@@ -30,6 +35,10 @@ export default function App() {
   const [tab, setTab] = useState<Tab>('feed');
   const [paused, setPaused] = useState(false);
   const [review, setReview] = useState<boolean | null>(null);
+  // Desktop-Modus ab 900 px: Leiste oben, Panel rechts, Settings und Saved als Seitenblatt
+  const desk = useDesktop();
+  const [panel, setPanel] = useState<HTMLElement | null>(null);
+  const [help, setHelp] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -55,6 +64,18 @@ export default function App() {
 
   const onPausedChange = useCallback((p: boolean) => setPaused(p), []);
 
+  // Übersicht der Tasten genau einmal, beim ersten Start im Desktop-Modus (nicht über Entsperren oder Wochenrückblick)
+  const helpDue = !!state && vault.status === 'open' && review === false && desk && deskHelpDue(state.deskHelpSeen);
+  useEffect(() => {
+    if (!helpDue) return;
+    setHelp(true);
+    update((s) => ({ ...s, deskHelpSeen: true }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [helpDue]);
+  useEffect(() => {
+    if (!desk) setHelp(false);
+  }, [desk]);
+
   if (!state || vault.status === 'loading' || review === null) return <div className="h-[100dvh] bg-black" />;
   if (vault.status === 'locked') return <Unlock />;
   if (vault.status === 'error') return <Locked text={`Could not load the pool (${vault.message}). The first start needs internet.`} />;
@@ -62,30 +83,50 @@ export default function App() {
 
   const showBar = tab === 'feed' ? paused : true;
   const dark = tab === 'feed';
+  const form: Form = state.settings.form ?? 'video';
+  const setForm = (f: Form) => update((s) => ({ ...s, settings: { ...s.settings, form: f } }));
   return (
-    <div className="relative h-[100dvh] overflow-hidden" style={{ ['--nav-h' as string]: tab === 'feed' && showBar ? `${NAV_H}px` : '0px' }}>
-      <div className={tab === 'feed' ? '' : 'hidden'}>
-        <MomentFeed key={state.settings.form ?? 'video'} pool={vault.pool.moments} state={state} update={update} active={tab === 'feed'} onPausedChange={onPausedChange} />
+    <div className={desk ? 'desk' : 'relative h-[100dvh] overflow-hidden'} data-form={desk ? form : undefined} style={{ ['--nav-h' as string]: tab === 'feed' && showBar ? `${NAV_H}px` : '0px' }}>
+      {desk && <DeskBar form={form} setForm={setForm} todayText={todayLine(state.dayCount?.[dayKey(clockNow())], true)} tab={tab} setTab={setTab} onHelp={() => setHelp((h) => !h)} />}
+      <div className={desk ? 'dmain' : tab === 'feed' ? '' : 'hidden'}>
+        <MomentFeed
+          key={state.settings.form ?? 'video'}
+          pool={vault.pool.moments}
+          state={state}
+          update={update}
+          active={tab === 'feed'}
+          onPausedChange={onPausedChange}
+          desk={desk ? { panel, help, sheet: tab !== 'feed', onHelp: () => setHelp((h) => !h), onCloseSheet: () => setTab('feed') } : undefined}
+        />
       </div>
-      {tab === 'saved' && <SavedMoments state={state} update={update} />}
-      {tab === 'settings' && <Settings state={state} update={update} replace={replace} moments={vault.pool} skipped={vault.skipped} />}
-      <nav
-        className={`absolute inset-x-0 bottom-0 z-[60] flex justify-around border-t transition-transform duration-200 ${showBar ? '' : 'translate-y-full'} ${dark ? 'border-[#222] bg-black' : 'border-[var(--line)] bg-[var(--bg)]'}`}
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-      >
-        {(Object.keys(ICONS) as Tab[]).map((t) => (
-          <button
-            key={t}
-            aria-label={NAMES[t]}
-            onClick={() => setTab(t)}
-            className={`flex flex-1 justify-center py-3 ${tab === t ? (dark ? 'text-white' : 'text-[var(--fg)]') : dark ? 'text-[#B3B3B3]' : 'text-muted'}`}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              {ICONS[t]}
-            </svg>
-          </button>
-        ))}
-      </nav>
+      {desk && <aside ref={setPanel} className="dpanel" data-testid="desk-aside" data-nowheel aria-label="Moment" />}
+      {!desk && tab === 'saved' && <SavedMoments state={state} update={update} />}
+      {!desk && tab === 'settings' && <Settings state={state} update={update} replace={replace} moments={vault.pool} skipped={vault.skipped} />}
+      {desk && tab !== 'feed' && (
+        <DeskSheet title={NAMES[tab]} onClose={() => setTab('feed')}>
+          {tab === 'saved' ? <SavedMoments state={state} update={update} /> : <Settings state={state} update={update} replace={replace} moments={vault.pool} skipped={vault.skipped} />}
+        </DeskSheet>
+      )}
+      {desk && help && <DeskHelp onClose={() => setHelp(false)} />}
+      {!desk && (
+        <nav
+          className={`absolute inset-x-0 bottom-0 z-[60] flex justify-around border-t transition-transform duration-200 ${showBar ? '' : 'translate-y-full'} ${dark ? 'border-[#222] bg-black' : 'border-[var(--line)] bg-[var(--bg)]'}`}
+          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        >
+          {(Object.keys(ICONS) as Tab[]).map((t) => (
+            <button
+              key={t}
+              aria-label={NAMES[t]}
+              onClick={() => setTab(t)}
+              className={`flex flex-1 justify-center py-3 ${tab === t ? (dark ? 'text-white' : 'text-[var(--fg)]') : dark ? 'text-[#B3B3B3]' : 'text-muted'}`}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                {ICONS[t]}
+              </svg>
+            </button>
+          ))}
+        </nav>
+      )}
     </div>
   );
 }

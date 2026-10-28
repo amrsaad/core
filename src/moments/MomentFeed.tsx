@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
@@ -9,10 +10,13 @@ import { addSample } from './latency';
 import { captionsShown } from './captions';
 import { countGotIt, countSeen, todayLine } from './today';
 import { answer, cardDue, pickRecall, type Recent } from './recall';
-import { RecallCard } from './RecallCard';
+import { RecallCard, type RecallCtl } from './RecallCard';
 import { CaptionSheet } from './CaptionSheet';
 import { sourceLine } from './source';
-import { NoteSheet } from './NoteSheet';
+import { NoteSheet, type NoteCtl } from './NoteSheet';
+import { createWheel, deskKey, endsFast, TAB_KEYS, wheelPx, type DeskAction } from './desktop';
+import { DeskPanel } from './DeskShell';
+import { speakerLine } from './speaker';
 import { buildIssue, chipEffect, firstOpenOfDay, makeEntry, markSent, promptLine, unsent, type Chip } from './note';
 import { HOOK_LINE_PT, hookStep } from './hook';
 import { makeRng } from './rng';
@@ -20,12 +24,22 @@ import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
 import { emptyFormLine, filterPool, FORM_LABEL, FORMS, momentText, textEndReached, type Form } from './form';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
+/** Desktop-Modus ab 900 px: Panel rechts, Übersicht, Seitenblatt. Fehlt das Feld, gilt das mobile Verhalten unverändert. */
+export interface DeskProps {
+  panel: HTMLElement | null;
+  help: boolean;
+  sheet: boolean;
+  onHelp: () => void;
+  onCloseSheet: () => void;
+}
+
 interface Props {
   pool: Moment[];
   state: AppState;
   update: (fn: (s: AppState) => AppState) => void;
   active: boolean;
   onPausedChange: (paused: boolean) => void;
+  desk?: DeskProps;
 }
 
 interface Slot {
@@ -49,11 +63,22 @@ const LOG_MAX = 3000;
 
 const load = (m: Moment) => ({ videoId: m.videoId, startSeconds: m.start, endSeconds: m.end });
 
-export function MomentFeed({ pool: allPool, state, update, active, onPausedChange }: Props) {
+export function MomentFeed({ pool: allPool, state, update, active, onPausedChange, desk }: Props) {
   const single = state.settings.playerMode === 'single';
   const SLOTS = single ? 1 : 3;
   const stateRef = useRef(state);
   stateRef.current = state;
+  const deskRef = useRef(desk);
+  deskRef.current = desk;
+  /** Abrufkarte beantwortet (Enter ist dann Next) */
+  const recallAnswered = useRef(false);
+  const recallCtl = useRef<RecallCtl | null>(null);
+  const noteCtl = useRef<NoteCtl | null>(null);
+  /** Das 2x kommt von der Tastatur (Shift+. gehalten) */
+  const keyFast = useRef(false);
+  const spaceHandled = useRef(false);
+  const actRef = useRef<(a: DeskAction) => void>(() => {});
+  const playRef = useRef<(want: boolean) => void>(() => {});
   const form: Form = state.settings.form ?? 'video';
   const pool = useMemo(() => filterPool(allPool, form), [allPool, form]);
   const textRef = useRef(form === 'text');
@@ -210,10 +235,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   rng.current ??= makeRng();
   const answerRecall = (got: boolean) => {
     const r = recall;
+    recallAnswered.current = true;
     if (r) update((s) => ({ ...s, recall: answer(s.recall ?? {}, r.m.id, got, clockNow().getTime()), dayCount: got ? countGotIt(s.dayCount, today) : s.dayCount }));
   };
   const closeRecall = () => {
     recallRef.current = false;
+    recallAnswered.current = false;
     setRecall(null);
     since.current = Date.now();
     if (!textRef.current && active && !userPaused.current) current().player?.playVideo();
@@ -293,6 +320,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         const rm = findMoment(recallNow.id);
         if (rm) {
           recallRef.current = true;
+          recallAnswered.current = false;
           current().player?.pauseVideo();
           setRecall({ m: rm, review: recallNow.review });
         }
@@ -727,19 +755,226 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
+  // ---- Desktop ab 900 px (Auftrag 28.10.2026). Mobil ist alles unten ohne Wirkung, solange desk fehlt. ----
+  const capRef = useRef(false);
+  capRef.current = capOpen;
+
+  /** Abspielen oder anhalten, ohne den Ton zu berühren (anders als der erste Tipp mobil) */
+  const setPlaying = (want: boolean) => {
+    if (textRef.current) return;
+    const p = current().player;
+    if (!p) return;
+    if (want) {
+      p.playVideo();
+      userPaused.current = false;
+      setPaused(false);
+    } else {
+      p.pauseVideo();
+      userPaused.current = true;
+      setPaused(true);
+    }
+  };
+  playRef.current = setPlaying;
+  const togglePause = () => setPlaying(userPaused.current || current().st !== STATE.PLAYING);
+
+  /** M: Ton an oder aus. Die Taste ist selbst die Geste, die der Browser für den Ton verlangt. */
+  const toggleMute = () => {
+    if (textRef.current) return;
+    const on = !soundOn.current;
+    soundOn.current = on;
+    for (const sl of slots.current) {
+      if (on) sl.player?.unMute();
+      else sl.player?.mute();
+    }
+    setHint(false);
+    show(on ? 'Sound on' : 'Muted');
+  };
+
+  /** Shift+. gehalten: 2x bis zum Loslassen, nie darüber (Regel 11) */
+  const startFast = () => {
+    if (fastRef.current || textRef.current) return;
+    current().player?.setPlaybackRate(clampRate(HOLD_SPEED));
+    fastRef.current = true;
+    setFast(true);
+  };
+
+  /** Esc schließt die oberste Ebene: Übersicht, Seitenblatt, Rückmeldung, Abrufkarte (ohne Wertung), Caption */
+  const closeTop = () => {
+    const d = deskRef.current;
+    if (!d) return;
+    if (d.help) d.onHelp();
+    else if (d.sheet) d.onCloseSheet();
+    else if (noteRef.current) setNote(null);
+    else if (recallRef.current) closeRecall();
+    else if (capRef.current) setCapOpen(false);
+  };
+
+  const run = (a: DeskAction) => {
+    const d = deskRef.current;
+    if (!d) return;
+    if (a.startsWith('tab')) {
+      const f = TAB_KEYS[Number(a.slice(3)) - 1];
+      if (f && f !== form) setForm(f);
+      return;
+    }
+    if (a.startsWith('chip')) return noteCtl.current?.chip(Number(a.slice(4)) - 1);
+    if (a.startsWith('pick')) return recallCtl.current?.pick(Number(a.slice(4)) - 1);
+    switch (a) {
+      case 'next':
+        return goTo(idxRef.current + 1);
+      case 'prev':
+        return goTo(idxRef.current - 1);
+      case 'pause':
+        return togglePause();
+      case 'mute':
+        return toggleMute();
+      case 'like':
+        return like('button');
+      case 'save':
+        return toggleSave();
+      case 'source':
+        return openFull();
+      case 'note':
+        return openNote();
+      case 'caption':
+        return setCapOpen((o) => !o);
+      case 'fastOn':
+        keyFast.current = true;
+        return startFast();
+      case 'noteText':
+        return noteCtl.current?.focusText();
+      case 'recallNext':
+        return closeRecall();
+      case 'help':
+        return d.onHelp();
+      case 'close':
+        return closeTop();
+    }
+  };
+  actRef.current = run;
+
   useEffect(() => {
+    const typingIn = (t: EventTarget | null) => {
+      const el = t as HTMLElement | null;
+      return !!el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.isContentEditable);
+    };
     const key = (e: KeyboardEvent) => {
-      if (!active || noteRef.current) return;
-      const el = e.target as HTMLElement | null;
-      if (el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT')) return;
-      if (e.key === 'ArrowDown' || e.key === 'j') goTo(idxRef.current + 1);
-      if (e.key === 'ArrowUp' || e.key === 'k') goTo(idxRef.current - 1);
-      if (e.key === ' ') togglePlay();
+      const d = deskRef.current;
+      if (!d) {
+        // Mobil mit Hardware-Tastatur wie bisher
+        if (!active || noteRef.current) return;
+        const el = e.target as HTMLElement | null;
+        if (el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT')) return;
+        if (e.key === 'ArrowDown' || e.key === 'j') goTo(idxRef.current + 1);
+        if (e.key === 'ArrowUp' || e.key === 'k') goTo(idxRef.current - 1);
+        if (e.key === ' ') togglePlay();
+        return;
+      }
+      const a = deskKey(
+        { typing: typingIn(e.target), help: d.help, sheet: d.sheet, note: !!noteRef.current, recall: recallRef.current ? (recallAnswered.current ? 'answered' : 'open') : null },
+        { key: e.key, code: e.code, shift: e.shiftKey, ctrl: e.ctrlKey, meta: e.metaKey, alt: e.altKey },
+      );
+      if (!a) return;
+      // Die Taste gehört dem Feed: kein Klick auf einen fokussierten Knopf, kein Scrollen
+      e.preventDefault();
+      if (a === 'pause' && e.code === 'Space') spaceHandled.current = true;
+      if (e.repeat && a !== 'fastOn') return;
+      actRef.current(a);
+    };
+    const up = (e: KeyboardEvent) => {
+      if (!deskRef.current) return;
+      if (keyFast.current && endsFast(e)) {
+        keyFast.current = false;
+        endFast();
+      }
+      if (e.code === 'Space' && spaceHandled.current) {
+        spaceHandled.current = false;
+        e.preventDefault();
+      }
+    };
+    const blur = () => {
+      if (!keyFast.current) return;
+      keyFast.current = false;
+      endFast();
     };
     window.addEventListener('keydown', key);
-    return () => window.removeEventListener('keydown', key);
+    window.addEventListener('keyup', up);
+    window.addEventListener('blur', blur);
+    return () => {
+      window.removeEventListener('keydown', key);
+      window.removeEventListener('keyup', up);
+      window.removeEventListener('blur', blur);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, goTo]);
+
+  // Trackpad und Mausrad: zwei Finger senkrecht blättert (ein Wisch, ein Schritt), zwei Finger nach links öffnet die Rückmeldung
+  useEffect(() => {
+    if (!desk) return;
+    const wheel = createWheel();
+    const onWheel = (e: WheelEvent) => {
+      const d = deskRef.current;
+      if (!d || e.ctrlKey) return;
+      const target = e.target as HTMLElement | null;
+      // Panel, Leiste, Seitenblatt und Übersicht scrollen selbst
+      if (target?.closest?.('[data-nowheel]')) return;
+      if (!active || d.help || d.sheet || noteRef.current || recallRef.current) return;
+      const { dx, dy } = wheelPx(e, window.innerHeight);
+      const box = textRef.current ? textBox.current : null;
+      const edge = box ? { top: box.scrollTop <= 0, end: textEndReached(box.scrollTop, box.clientHeight, box.scrollHeight) } : undefined;
+      const out = wheel.feed({ dx, dy, t: e.timeStamp }, edge);
+      if (out.consume) e.preventDefault();
+      else if (box && !box.contains(target)) {
+        // Zeiger neben dem Text: der Text scrollt trotzdem
+        box.scrollTop += dy;
+        e.preventDefault();
+      }
+      if (out.act === 'next') goTo(idxRef.current + 1);
+      else if (out.act === 'prev') goTo(idxRef.current - 1);
+      else if (out.act === 'note') openNote();
+    };
+    window.addEventListener('wheel', onWheel, { passive: false });
+    return () => window.removeEventListener('wheel', onWheel);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [!!desk, active, goTo]);
+
+  // Fenstertitel zeigt den Hook, die Medien-Anzeige des Betriebssystems ebenso
+  const curId = queue.current[idx]?.id;
+  useEffect(() => {
+    if (!desk) return;
+    const cur = queue.current[idx];
+    document.title = cur ? cur.hook : 'core';
+    if (cur && 'mediaSession' in navigator && typeof MediaMetadata !== 'undefined') {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: cur.hook, artist: speakerLine(cur.channel), album: AREA_LABEL[cur.area], artwork: [{ src: thumbOf(cur) }] });
+    }
+    return () => {
+      document.title = 'core';
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [!!desk, curId]);
+
+  // Medientasten: Pause, Weiter und Zurück
+  useEffect(() => {
+    if (!desk || !('mediaSession' in navigator)) return;
+    const ms = navigator.mediaSession;
+    const set = (a: MediaSessionAction, f: MediaSessionActionHandler | null) => {
+      try {
+        ms.setActionHandler(a, f);
+      } catch {
+        /* Aktion nicht unterstützt */
+      }
+    };
+    set('play', () => playRef.current(true));
+    set('pause', () => playRef.current(false));
+    set('nexttrack', () => actRef.current('next'));
+    set('previoustrack', () => actRef.current('prev'));
+    return () => {
+      for (const a of ['play', 'pause', 'nexttrack', 'previoustrack'] as MediaSessionAction[]) set(a, null);
+    };
+  }, [!!desk]);
+  useEffect(() => {
+    if (desk && 'mediaSession' in navigator) navigator.mediaSession.playbackState = paused ? 'paused' : 'playing';
+  }, [!!desk, paused]);
 
   // Test-Hook für Playwright (liest nur App-Zustand, nicht den Cross-Origin-Player)
   useEffect(() => {
@@ -758,6 +993,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       saved: (id: string) => !!stateRef.current.savedMoments[id],
       tapMs: () => stateRef.current.tapMs ?? [],
       skipRecall: () => closeRecall(),
+      sound: () => soundOn.current,
+      fast: () => fastRef.current,
       closeCaption: () => setCapOpen(false),
       notes: () => stateRef.current.feedbackNotes ?? [],
       openNote: () => openNote(),
@@ -774,7 +1011,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     el.dataset.step = '0';
     el.dataset.step = String(hookStep(Math.round(el.scrollHeight / HOOK_LINE_PT[0])));
   }, [queue.current[idx]?.id, form, forYou]);
-  useEffect(() => setCapOpen(false), [idx, form]);
+  // Im Desktop-Modus bleibt die Caption im Panel offen, bis man sie schließt
+  useEffect(() => {
+    if (!deskRef.current) setCapOpen(false);
+  }, [idx, form]);
 
   if (!allPool.length) return <Empty text="No moments in the pool yet. The daily run fills it." />;
   if (!pool.length)
@@ -788,6 +1028,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   if (!queue.current.length) return <Empty text="You have seen every moment. New ones arrive with the next daily run." />;
 
   const m = queue.current[idx];
+  const recallEl = recall ? <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} rng={rng.current!} onAnswer={answerRecall} onClose={closeRecall} keys={!!desk} ctl={recallCtl} /> : null;
   const saved = m && !!state.savedMoments[m.id];
   const liked = !!m && !!state.momentLiked?.[m.id];
   const captionsOn = !!m && form !== 'text' && captionsShown(form === 'audio' ? 'on' : state.settings.captionMode, m);
@@ -842,12 +1083,16 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           }}
           onDoubleClick={(e) => likeAt(e.clientX, e.clientY)}
         >
-          <div className="vchannel">
-            <span className="vdot" aria-hidden="true" />
-            <span style={{ color: AREA_COLOR[m.area] }}>{AREA_LABEL[m.area]}</span>
-            <span className="vspeaker">{speakerLine(m.channel)}</span>
-          </div>
-          <h2 className="vtext-hook">{m.hook}</h2>
+          {!desk && (
+            <>
+              <div className="vchannel">
+                <span className="vdot" aria-hidden="true" />
+                <span style={{ color: AREA_COLOR[m.area] }}>{AREA_LABEL[m.area]}</span>
+                <span className="vspeaker">{speakerLine(m.channel)}</span>
+              </div>
+              <h2 className="vtext-hook">{m.hook}</h2>
+            </>
+          )}
           {(() => {
             const t = momentText(m);
             const ar = isArabic(t);
@@ -857,7 +1102,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
               <p className="vtext-body text-[#B3B3B3]">No text for this moment yet.</p>
             );
           })()}
-          {(() => {
+          {!desk && (() => {
             const sl = sourceLine(m);
             if (!sl) return null;
             const label = `${sl.prefix}${sl.text}`;
@@ -867,7 +1112,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
               <p className="vtext-source" data-testid="text-source">{label}</p>
             );
           })()}
-          <div className="vtext-end" aria-hidden="true">Swipe up for the next moment</div>
+          <div className="vtext-end" aria-hidden="true">{desk ? 'Next moment: J, Down, or two fingers up' : 'Swipe up for the next moment'}</div>
         </div>
       )}
       {!forYou && (
@@ -895,7 +1140,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
       {hint && !forYou && form !== 'text' && (
         <div className="vhint pointer-events-none">
-          <span>Tap for sound</span>
+          <span>{desk ? 'Click or press M for sound' : 'Tap for sound'}</span>
         </div>
       )}
 
@@ -905,7 +1150,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </div>
       )}
 
-      {m && !forYou && form !== 'text' && (
+      {m && !forYou && form !== 'text' && !desk && (
         <div className="vinfo pointer-events-none">
           <div
             className="vinfo-tap"
@@ -923,7 +1168,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </div>
       )}
 
-      {capOpen && m && !forYou && form !== 'text' && <CaptionSheet m={m} speaker={speakerLine(m.channel)} onClose={() => setCapOpen(false)} />}
+      {capOpen && m && !forYou && form !== 'text' && !desk && <CaptionSheet m={m} speaker={speakerLine(m.channel)} onClose={() => setCapOpen(false)} />}
 
       {heart && (
         <svg key={heart.k} className="vheart pointer-events-none" data-testid="heart-burst" style={{ left: heart.x - 48, top: heart.y - 48 }} width="96" height="96" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
@@ -945,7 +1190,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </div>
       )}
 
-      {recall && <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} rng={rng.current!} onAnswer={answerRecall} onClose={closeRecall} />}
+      {recall && !desk && recallEl}
+      {desk?.panel &&
+        createPortal(
+          <DeskPanel m={m} speaker={m ? speakerLine(m.channel) : ''} form={form} capOpen={capOpen} onCaption={() => setCapOpen((o) => !o)} onSource={openFull} recall={recall ? recallEl : null} />,
+          desk.panel,
+        )}
 
       {forYou && (
         <div
@@ -981,7 +1231,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </button>
       )}
 
-      {note && <NoteSheet key={note.id} m={note} speaker={speakerLine(note.channel)} onChip={(c, t) => saveNote(note, c, t)} onDone={(t) => saveNote(note, null, t)} onCancel={() => setNote(null)} />}
+      {note && <NoteSheet key={note.id} m={note} speaker={speakerLine(note.channel)} onChip={(c, t) => saveNote(note, c, t)} onDone={(t) => saveNote(note, null, t)} onCancel={() => setNote(null)} keys={!!desk} ctl={noteCtl} />}
     </div>
   );
 }
@@ -1023,10 +1273,4 @@ function FormSwitch({ form, setForm }: { form: Form; setForm: (f: Form) => void 
 
 function Empty({ text }: { text: string }) {
   return <div className="pad flex h-[100dvh] items-center bg-black text-[17px] leading-[25px] text-[#B3B3B3]">{text}</div>;
-}
-
-/** "Sigma Nutrition (Prof. Grant Tinsley)" wird zu "Sigma Nutrition · Prof. Grant Tinsley" */
-function speakerLine(channel: string) {
-  const m = channel.match(/^(.*?)\s*\((.+)\)$/);
-  return m ? `${m[1]} · ${m[2]}` : channel;
 }

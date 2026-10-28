@@ -101,6 +101,8 @@ export interface AppState {
   recall?: RecallState;
   /** Wenn-dann-Plan pro Woche (Montag als YYYY-MM-DD), Punkt 7 */
   plans?: Record<string, WeekPlan>;
+  /** Desktop-Modus: die Übersicht der Tasten wurde beim ersten Start schon gezeigt */
+  deskHelpSeen?: boolean;
 }
 
 export const DEFAULT_SPEED = 1.5;

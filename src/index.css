@@ -292,3 +292,106 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
   position: absolute; z-index: 26; left: calc(env(safe-area-inset-left) + 16px); top: calc(env(safe-area-inset-top) + 64px);
   min-height: 36px; padding: 0 14px; border-radius: 999px; background: #fff; color: #000; font-size: 14px; font-weight: 600;
 }
+
+/* ---------- Desktop ab 900 px (Auftrag Max 28.10.2026) ----------
+   Alles hängt an .desk, die Klasse setzt die App nur bei mindestens 900 px Breite. Mobile Regeln oben bleiben unberührt.
+   Raster: links frei, Mitte die Spalte (480 px, im Textreiter 65 Zeichen Lesebreite), rechts das feste Panel. Oben die Leiste. */
+.desk {
+  --bar-h: 56px;
+  --col-w: min(480px, calc(100vw - 340px));
+  --desk-cols: minmax(0, 1fr) var(--col-w) minmax(340px, 1fr);
+  --focus: #fff;
+  display: grid;
+  grid-template-columns: var(--desk-cols);
+  grid-template-rows: var(--bar-h) minmax(0, 1fr);
+  height: 100dvh;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+}
+/* ch misst die Schrift des Rasters, darum ist hier die Schrift des Textreiters gesetzt: 65 Zeichen plus Rand links 32 und rechts 88 (Platz für die Spalte mit Herz, Save, Source) */
+.desk[data-form='text'] { font-size: 18px; --col-w: min(calc(65ch + 120px), calc(100vw - 340px)); }
+
+.dbar { grid-column: 1 / -1; grid-row: 1; display: grid; grid-template-columns: var(--desk-cols); grid-template-columns: subgrid; align-items: center; background: #000; border-bottom: 1px solid #1c1e24; z-index: 60; }
+.dbar-left { grid-column: 1; grid-row: 1; padding-left: 24px; }
+.dbar-logo { font-size: 18px; line-height: 24px; font-weight: 700; letter-spacing: 0.02em; }
+.dbar-tabs { grid-column: 2; grid-row: 1; justify-self: center; display: flex; gap: 2px; padding: 3px; border-radius: 999px; background: #17191e; }
+.dbar-tabs button { min-height: 34px; padding: 0 14px; display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; color: #b3b3b3; font-size: 14px; line-height: 20px; font-weight: 600; }
+.dbar-tabs button.on { background: #fff; color: #000; }
+/* Die rechte Gruppe darf nach links in die Mitte reichen, wenn die Spalte (Textreiter) die Panelspalte schmal macht. Die Reiter bleiben klickbar. */
+.dbar-right { grid-column: 2 / 4; grid-row: 1; justify-self: stretch; display: flex; align-items: center; justify-content: flex-end; gap: 20px; padding: 0 24px; min-width: 0; pointer-events: none; }
+.dbar-right > * { pointer-events: auto; }
+.dbar-today { font-size: 13px; line-height: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.72); white-space: nowrap; }
+.dbar-actions { display: flex; gap: 8px; }
+.dbar-actions button { min-height: 34px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; border: 1px solid #2a2d35; color: #d8d8d8; font-size: 13px; line-height: 18px; font-weight: 600; }
+.dbar-actions button.on { background: #fff; color: #000; border-color: #fff; }
+.dbar-actions button.icon { width: 34px; padding: 0; justify-content: center; }
+.desk kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 4px; border: 1px solid currentColor; opacity: 0.55; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 11px; line-height: 1; font-weight: 600; }
+
+.dmain { grid-column: 2; grid-row: 2; position: relative; min-height: 0; overflow: hidden; background: #000; }
+.dpanel { grid-column: 3; grid-row: 2; justify-self: end; width: min(100%, 400px); min-height: 0; overflow-y: auto; padding: 24px; background: #0a0a0a; border-left: 1px solid #1c1e24; }
+
+/* Feed in der Spalte */
+.desk .vfeed { height: 100%; width: 100%; }
+.desk .vform, .desk .vtoday { display: none; }
+.desk .vgesture { cursor: pointer; }
+.desk .vframe { left: 0; top: 0; width: 100%; height: 100%; transform: none; }
+.desk .vframe > div { left: 0; top: 50%; width: 100%; height: auto; aspect-ratio: 16 / 9; transform: translateY(-50%); }
+.desk .vposter { left: 0; top: 50%; width: 100%; height: auto; aspect-ratio: 16 / 9; transform: translateY(-50%); }
+.desk .vcaption { left: 16px; right: 16px; top: calc(50% + var(--col-w) * 9 / 32 + 16px); }
+.desk .vaudio-art { top: calc(50% - 220px); width: 240px; }
+.desk .vcaption.vcaption-audio { top: calc(50% + 48px); }
+.desk .vnotes { top: 16px; left: 16px; }
+.desk .vtext { padding: 32px 88px 56px 32px; }
+.desk .vtext-body { max-width: 65ch; font-size: 18px; line-height: 29px; }
+.desk .vtext-rtl { font-size: 21px; line-height: 37px; }
+/* Kompakte Spalte statt 48 pt */
+.desk .vactions { right: 12px; bottom: 24px; width: 40px; gap: 10px; }
+.desk .vbtn { min-height: 36px; min-width: 36px; border-radius: 10px; }
+.desk .vbtn svg { width: 22px; height: 22px; }
+.desk .vlabel { font-size: 10px; line-height: 12px; }
+
+/* Rückmeldung und Abrufkarte */
+.desk .note-chip { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.desk .note-done { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.desk .recall { position: static; inset: auto; z-index: auto; overflow: visible; background: transparent; padding: 4px 0 0; gap: 12px; }
+.desk .recall-q { margin: 4px 0 0; font-size: 20px; line-height: 27px; }
+.desk .recall-option, .desk .recall-primary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; font-size: 16px; line-height: 22px; }
+.desk .recall-why { font-size: 15px; line-height: 23px; }
+
+/* Panel */
+.dp { display: flex; flex-direction: column; gap: 16px; }
+.dp-meta { display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 18px; font-weight: 600; }
+.dp-speaker { color: #b3b3b3; font-weight: 400; overflow-wrap: anywhere; }
+.dp-hook { margin: 0; font-size: 22px; line-height: 29px; font-weight: 700; overflow-wrap: anywhere; }
+.dp-sec { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #1c1e24; padding-top: 12px; }
+.dp-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: calc(100% + 16px); min-height: 32px; margin: 0 -8px; padding: 0 8px; border-radius: 8px; text-align: left; font-size: 12px; line-height: 16px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; color: #8a8f98; }
+.dp-head-static { cursor: default; }
+.dp-text { margin: 0 0 12px; white-space: pre-line; font-size: 16px; line-height: 25px; color: #e0e0e0; }
+.dp-text[dir='rtl'] { font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', sans-serif; font-size: 19px; line-height: 32px; }
+.dp-source { margin: 0; font-size: 14px; line-height: 21px; color: #b3b3b3; overflow-wrap: anywhere; }
+a.dp-source { text-decoration: underline; text-underline-offset: 3px; }
+.dp-open { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid #2a2d35; color: #d8d8d8; font-size: 13px; line-height: 18px; font-weight: 600; }
+.dp-open:hover { color: #fff; }
+
+/* Seitenblatt (Settings, Saved) und Übersicht */
+.dsheet-backdrop { position: fixed; left: 0; right: 0; top: var(--bar-h); bottom: 0; z-index: 70; background: rgba(0, 0, 0, 0.35); }
+.dsheet { position: fixed; top: var(--bar-h); right: 0; bottom: 0; z-index: 80; width: min(480px, 100vw); background: var(--bg); color: var(--fg); border-left: 1px solid var(--line); box-shadow: -12px 0 32px rgba(0, 0, 0, 0.45); --focus: var(--fg); animation: dslide 160ms ease-out; }
+@keyframes dslide { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.dsheet-close { position: absolute; top: 16px; right: 16px; z-index: 2; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--fg); }
+.dsheet-body { height: 100%; overflow: hidden; }
+.dsheet-body > .pad { height: 100%; padding-top: 24px; }
+.dsheet h1 { padding-right: 48px; }
+.dhelp-backdrop { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(0, 0, 0, 0.7); }
+.dhelp { width: min(560px, 100%); max-height: calc(100dvh - 48px); overflow-y: auto; padding: 24px; border-radius: 16px; border: 1px solid #2a2d35; background: #121212; color: #fff; }
+.dhelp h2 { margin: 0 0 16px; font-size: 20px; line-height: 27px; font-weight: 700; }
+.dhelp dl { margin: 0; }
+.dhelp dl > div { display: grid; grid-template-columns: 190px 1fr; gap: 16px; padding: 8px 0; border-top: 1px solid #1f2227; font-size: 14px; line-height: 20px; }
+.dhelp dt { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 600; color: #fff; }
+.dhelp dd { margin: 0; color: #b3b3b3; }
+.dhelp-close { margin-top: 16px; min-height: 40px; padding: 0 18px; border-radius: 10px; background: #fff; color: #000; font-size: 15px; font-weight: 600; }
+
+/* Hover und Fokusrahmen auf allen Knöpfen. Der Schatten liegt als Schleier über jeder Fläche, hell wie dunkel. */
+.desk :is(button, a[href], select, input, textarea, [tabindex]):focus-visible { outline: 2px solid var(--focus, #fff); outline-offset: 2px; }
+.desk :is(button, a[href], select):not(:disabled):hover { box-shadow: inset 0 0 0 999px rgba(127, 127, 127, 0.22); cursor: pointer; }
+.desk :is(button, select):disabled { cursor: default; }

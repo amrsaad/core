@@ -1,16 +1,31 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MutableRefObject } from 'react';
 import { AREA_COLOR } from '../lib/labels';
 import { CHIPS, TEXT_MAX, type Chip } from './note';
 import type { Moment } from './types';
 
+/** Steuerung von außen, nur im Desktop-Modus: Chip nach Nummer wählen, ins Textfeld springen */
+export interface NoteCtl {
+  chip: (index: number) => void;
+  focusText: () => void;
+}
+
 /**
  * Rückmeldung in einer Ebene. Ein Tipp auf einen Chip speichert sofort (mit dem Text, falls schon einer im Feld steht) und
  * schließt das Blatt. Done speichert nur den Text. Ein Tipp neben das Blatt schließt es ohne Notiz. Kein Send-Knopf.
+ * Desktop (keys): die Chips tragen die Nummern 1 bis 6, Enter springt ins Textfeld, Enter im Textfeld speichert (Shift+Enter
+ * macht eine neue Zeile).
  */
-export function NoteSheet({ m, speaker, onChip, onDone, onCancel }: { m: Moment; speaker: string; onChip: (chip: Chip, text: string) => void; onDone: (text: string) => void; onCancel: () => void }) {
+export function NoteSheet({ m, speaker, onChip, onDone, onCancel, keys, ctl }: { m: Moment; speaker: string; onChip: (chip: Chip, text: string) => void; onDone: (text: string) => void; onCancel: () => void; keys?: boolean; ctl?: MutableRefObject<NoteCtl | null> }) {
   const [text, setText] = useState('');
   const field = useRef<HTMLTextAreaElement>(null);
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
+  useEffect(() => {
+    if (!ctl) return;
+    ctl.current = { chip: (i) => CHIPS[i] && onChip(CHIPS[i], text), focusText: () => field.current?.focus() };
+    return () => {
+      ctl.current = null;
+    };
+  });
   return (
     <div className="absolute inset-0 z-40 flex items-end bg-black/60" data-testid="note-sheet" onPointerDown={stop} onPointerUp={stop} onClick={(e) => e.target === e.currentTarget && onCancel()}>
       <div className="w-full rounded-t-2xl bg-[#121212] px-4 pt-2 text-white" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
@@ -20,15 +35,32 @@ export function NoteSheet({ m, speaker, onChip, onDone, onCancel }: { m: Moment;
           <span>{speaker}</span>
         </div>
         <div className="note-chips" role="group" aria-label="Feedback">
-          {CHIPS.map((c) => (
+          {CHIPS.map((c, i) => (
             <button key={c} type="button" className="note-chip" data-testid={`note-chip-${c}`} onClick={() => onChip(c, text)}>
               {c}
+              {keys && <kbd className="note-key" aria-hidden="true">{i + 1}</kbd>}
             </button>
           ))}
         </div>
-        <textarea ref={field} className="note-text" data-testid="note-text" rows={2} maxLength={TEXT_MAX} placeholder="Note" value={text} onChange={(e) => setText(e.target.value)} />
+        <textarea
+          ref={field}
+          className="note-text"
+          data-testid="note-text"
+          rows={2}
+          maxLength={TEXT_MAX}
+          placeholder="Note"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (keys && e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              onDone(text);
+            }
+          }}
+        />
         <button type="button" className="note-done" data-testid="note-done" onClick={() => onDone(text)}>
           Done
+          {keys && <kbd className="note-key" aria-hidden="true">Enter</kbd>}
         </button>
       </div>
     </div>
