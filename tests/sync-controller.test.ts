@@ -32,13 +32,20 @@ function device(api: FakeApi, fill = 5, token: string | null = TOKEN): Dev {
     fetchImpl: api.fetch,
     now: () => Date.now(),
   });
+  running.push(d.sync);
   return d;
 }
 
 /** Zeit vorrücken und dazwischen echte WebCrypto-Arbeit abwarten */
+const running: Sync[] = [];
+const tick = () => new Promise((r) => setImmediate(r));
 const advance = async (ms: number) => {
   await vi.advanceTimersByTimeAsync(ms);
-  for (let i = 0; i < 40; i++) await new Promise((r) => setImmediate(r));
+  // Läuft ein Sync, auf die echte WebCrypto-Arbeit warten (auf langsamen Läufern dauert sie länger), höchstens 10 s echte Zeit
+  const end = performance.now() + 10_000;
+  for (let i = 0; i < 20; i++) await tick();
+  while (running.some((x) => x.status().running) && performance.now() < end) await tick();
+  for (let i = 0; i < 20; i++) await tick();
 };
 
 const saveMoment = (id: string) => (s: AppState): AppState => ({ ...s, momentSeen: { ...s.momentSeen, [id]: 1_700_000_000_000 } });
@@ -47,7 +54,10 @@ beforeEach(() => {
   vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] });
   vi.setSystemTime(new Date('2026-10-28T10:00:00Z'));
 });
-afterEach(() => vi.useRealTimers());
+afterEach(() => {
+  vi.useRealTimers();
+  running.length = 0;
+});
 
 describe('Sync Steuerung', () => {
   it('schreibt erst 10 s nach der letzten Änderung', async () => {
