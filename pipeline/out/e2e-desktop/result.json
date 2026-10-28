@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-28T09:38:29.836Z",
+  "at": "2026-10-28T09:44:50.208Z",
   "checks": {
     "below900Mobile": true,
     "at900Desktop": true,
@@ -10,7 +10,7 @@
     "helpFocusInside": true,
     "helpBlocksKeys": true,
     "escClosesHelp": true,
-    "helpOnlyOnce": false,
+    "helpOnlyOnce": true,
     "columnIs480": true,
     "columnCentered": true,
     "videoIs16by9": true,
@@ -24,22 +24,22 @@
     "noMobileOverlays": true,
     "compactButtons": true,
     "titleShowsHook": true,
-    "keyJ": false,
+    "keyJ": true,
     "keyK": true,
-    "keyArrowDown": false,
+    "keyArrowDown": true,
     "keyArrowUp": true,
     "titleFollowsMoment": true,
-    "spacePauses": false,
+    "spacePauses": true,
     "spaceDidNotClickFocused": true,
     "spaceResumes": true,
-    "keyM": false,
-    "fastOn": false,
+    "keyM": true,
+    "fastOn": true,
     "fastOff": true,
-    "keyL": false,
-    "keyS": false,
+    "keyL": true,
+    "keyS": true,
     "keySToggles": true,
-    "keyC": false,
-    "captionStaysOpenOnNext": false,
+    "keyC": true,
+    "captionStaysOpenOnNext": true,
     "escClosesCaption": true,
     "keyO": true,
     "keyF": true,
@@ -185,8 +185,8 @@
     ],
     "media": {
       "meta": true,
-      "title": "Testmoment 3 beat",
-      "artist": "Kanal beat · Dr. Test 3",
+      "title": "Testmoment 4 beat",
+      "artist": "Kanal beat · Dr. Test 0",
       "state": "playing"
     },
     "installability": [],
@@ -201,17 +201,6 @@
       ]
     }
   },
-  "ok": false,
-  "failed": [
-    "helpOnlyOnce",
-    "keyJ",
-    "keyArrowDown",
-    "spacePauses",
-    "keyM",
-    "fastOn",
-    "keyL",
-    "keyS",
-    "keyC",
-    "captionStaysOpenOnNext"
-  ]
+  "ok": true,
+  "failed": []
 }
