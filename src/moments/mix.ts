@@ -58,6 +58,11 @@ export function applySignal(w: Weights, m: Pick<Moment, 'channel' | 'topic' | 'a
   };
 }
 
+/** Nur das Thema: "Not for me" senkt das Gewicht des Themas, Kanal und Bereich bleiben (Faktor wie Weak, SIGNAL.negative) */
+export function applyTopic(w: Weights, m: Pick<Moment, 'topic'>, factor: number): Weights {
+  return { ...w, topic: { ...w.topic, [m.topic]: clampW((w.topic[m.topic] ?? 1) * factor) } };
+}
+
 /** Wirksame Bereichsanteile: Einstellungen mal gelerntes Gewicht, jeder Bereich mindestens 10 % */
 export function effectiveShares(p: Pick<MomentPrefs, 'areaShares' | 'weights'>, areas: Area[] = AREAS): Record<Area, number> {
   const raw = Object.fromEntries(areas.map((a) => [a, Math.max(0, p.areaShares[a] ?? 0) * (p.weights.area[a] ?? 1)])) as Record<Area, number>;

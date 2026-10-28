@@ -221,13 +221,19 @@ try {
   // F Rückmeldung: 1 bis 6 für Chips, Enter für Text
   await press(pg, 'f', 200);
   c.keyF = await has(pg, 'note-sheet');
-  c.noteShowsNumbers = (await E(pg, 'note-sheet').locator('.note-key').count()) >= 6;
+  c.noteShowsNumbers = (await E(pg, 'note-sheet').locator('.note-key').count()) >= 7;
   await pg.screenshot({ path: `${out}/04-feedback.png` });
   await press(pg, 'j', 150);
   c.noteBlocksNext = (await has(pg, 'note-sheet')) && true;
   const nBefore = await pg.evaluate(() => window.__core.notes().length);
-  await press(pg, '3', 200);
-  c.noteChipByNumber = !(await has(pg, 'note-sheet')) && (await pg.evaluate(() => window.__core.notes().length)) === nBefore + 1;
+  const nm = await pg.evaluate(() => window.__core.moment());
+  const w0 = await pg.evaluate(() => window.__core.weights().topic[window.__core.moment().topic] ?? 1);
+  await press(pg, '2', 200);
+  const nl = await pg.evaluate(() => window.__core.notes());
+  c.noteChipByNumber = !(await has(pg, 'note-sheet')) && nl.length === nBefore + 1 && nl.at(-1).chips.join() === 'Not for me' && nl.at(-1).id === nm.id;
+  // Beim Weiterblättern wirkt zusätzlich das Wegwischsignal (höchstens 0,9), also zwischen 0,567 und 0,7 des alten Werts
+  const w1 = await pg.evaluate((t) => window.__core.weights().topic[t] ?? 1, nm.topic);
+  c.notForMeKeyLowersTopic = w1 / w0 <= 0.701 && w1 / w0 >= 0.7 * 0.81 - 0.001;
   await press(pg, 'f', 200);
   await press(pg, 'Enter', 100);
   c.noteEnterFocusesText = await pg.evaluate(() => document.activeElement?.getAttribute('data-testid') === 'note-text');

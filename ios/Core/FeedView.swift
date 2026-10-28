@@ -360,6 +360,9 @@ struct FeedView: View {
             store.mute(m)
             if let i = index(of: m.id) { feed.removeUpcoming(channel: m.channel, after: i) }
             if Actions.toast(.mute) { show("\(m.speakerLine) muted") }
+        case .notForMe:
+            store.signalTopic(m, Mix.Signal.negative)
+            store.log(m, watched: feed.playback(for: m).watched, feedback: "weak")
         case nil:
             break
         }

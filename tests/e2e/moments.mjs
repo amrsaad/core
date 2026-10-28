@@ -462,7 +462,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.swipeLeftOpensNote = await openSheet();
     c.swipeLeftStaysOnMoment = (await page.evaluate(() => window.__core.idx())) === idxBefore;
     const chipsSeen = await page.evaluate(() => [...document.querySelectorAll('[data-testid^=note-chip-]')].map((x) => x.textContent));
-    c.noteSixChips = chipsSeen.join() === 'Known,Wrong,Boring,Bad cut,Great,Mute speaker';
+    c.noteSevenChips = chipsSeen.join() === 'Known,Not for me,Wrong,Boring,Bad cut,Great,Mute speaker';
     c.noteTextAndDone = !!(await page.$('[data-testid=note-text]')) && (await page.textContent('[data-testid=note-done]')) === 'Done';
     c.noteNoSendButton = !(await page.$('[data-testid=note-send]')) && !(await page.$('text=Send'));
     const chipBox = await page.evaluate(() => [...document.querySelectorAll('[data-testid^=note-chip-]')].map((e) => { const q = e.getBoundingClientRect(); return { w: q.width, h: q.height }; }));
@@ -522,6 +522,22 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.wrongViaChip = await chip('Wrong');
     c.wrongToast = await waitFor(page, () => document.querySelector('.flash')?.textContent === 'Wrong');
     c.wrongSaved = (await notes()).at(-1).chips.join() === 'Wrong';
+    await page.waitForTimeout(1000);
+    // Not for me: Gewicht des Themas runter (0,7), Kanal und Bereich bleiben, kein Toast, weiter, als Notiz gespeichert
+    const idxN = await page.evaluate(() => window.__core.idx());
+    const nm3 = await page.evaluate(() => window.__core.moment());
+    const wBefore = await page.evaluate(() => JSON.parse(JSON.stringify(window.__core.weights())));
+    c.notForMeViaChip = await chip('Not for me');
+    await page.waitForTimeout(350);
+    const wAfter = await page.evaluate(() => JSON.parse(JSON.stringify(window.__core.weights())));
+    // Beim Weiterblättern wirkt zusätzlich das Wegwischsignal (höchstens 0,9). Not for me allein ist 0,7. Weak auf Kanal und Bereich wäre 0,7 und 0,84.
+    const ratio = (a, b) => (a ?? 1) / (b ?? 1);
+    const rT = ratio(wAfter.topic[nm3.topic], wBefore.topic[nm3.topic]);
+    c.notForMeTopicDown = rT <= 0.7 + 0.001 && rT >= 0.7 * 0.9 * 0.9 - 0.001;
+    c.notForMeChannelAreaKept = ratio(wAfter.channel[nm3.channel], wBefore.channel[nm3.channel]) >= 0.9 - 0.001 && ratio(wAfter.area[nm3.area], wBefore.area[nm3.area]) >= Math.sqrt(0.9) - 0.001;
+    c.notForMeNoToast = await page.evaluate(() => !document.querySelector('.flash'));
+    c.notForMeAdvanced = await waitFor(page, (i) => window.__core.idx() > i, idxN);
+    c.notForMeSaved = (await notes()).at(-1).chips.join() === 'Not for me' && (await notes()).at(-1).id === nm3.id;
     await page.waitForTimeout(1000);
     const idxM = await page.evaluate(() => window.__core.idx());
     const mutedMoment = await page.evaluate(() => window.__core.moment());

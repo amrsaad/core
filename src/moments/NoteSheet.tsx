@@ -28,7 +28,7 @@ export function NoteSheet({ m, speaker, onChip, onDone, onCancel, keys, ctl }: {
   });
   return (
     <div className="absolute inset-0 z-40 flex items-end bg-black/60" data-testid="note-sheet" onPointerDown={stop} onPointerUp={stop} onClick={(e) => e.target === e.currentTarget && onCancel()}>
-      <div className="w-full rounded-t-2xl bg-[#121212] px-4 pt-2 text-white" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
+      <div className="w-full rounded-t-2xl bg-[#121212] px-4 pt-2 text-white" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + var(--nav-h, 0px) + 16px)' }}>
         <div className="mx-auto mb-3 h-1 w-9 rounded-full bg-[#3A3D45]" aria-hidden="true" />
         <div className="mb-3 flex items-center gap-2 text-[13px] leading-[18px] text-[#B3B3B3]">
           <span className="h-2 w-2 rounded-full" style={{ background: AREA_COLOR[m.area] }} aria-hidden="true" />

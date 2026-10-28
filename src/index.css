@@ -284,6 +284,7 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 .vfeed img, .vfeed video, .vfeed iframe { pointer-events: none; }
 .note-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
 .note-chip { min-height: 60px; padding: 0 16px; border-radius: 16px; border: 1px solid #3a3d45; background: #1a1c21; color: #fff; font-size: 18px; font-weight: 600; }
+.note-chip:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .note-chip:active { background: #fff; color: #000; border-color: #fff; }
 .note-text { width: 100%; border-radius: 12px; border: 1px solid #333; background: #111; color: #fff; padding: 12px; font-size: 17px; line-height: 24px; resize: none; }
 .note-done { width: 100%; min-height: 52px; margin-top: 10px; border-radius: 12px; background: #fff; color: #000; font-size: 17px; font-weight: 600; }

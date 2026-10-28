@@ -7,13 +7,14 @@ const A = ctx('abc123:100', "Don't compare body fat across devices (100% rule)!"
 const B = ctx('def456:20', 'Sleep | not coffee');
 
 describe('Rückmeldung (Auftrag 27.10.2026)', () => {
-  it('sechs Chips in fester Reihenfolge', () => {
-    expect([...CHIPS]).toEqual(['Known', 'Wrong', 'Boring', 'Bad cut', 'Great', 'Mute speaker']);
+  it('sieben Chips in fester Reihenfolge', () => {
+    expect([...CHIPS]).toEqual(['Known', 'Not for me', 'Wrong', 'Boring', 'Bad cut', 'Great', 'Mute speaker']);
   });
   it('Known, Wrong und Mute wirken, die anderen speichern nur', () => {
     expect(chipEffect('Known')).toBe('kenne');
     expect(chipEffect('Wrong')).toBe('falsch');
     expect(chipEffect('Mute speaker')).toBe('mute');
+    expect(chipEffect('Not for me')).toBe('thema');
     expect(['Boring', 'Bad cut', 'Great'].map((c) => chipEffect(c as never))).toEqual([null, null, null]);
   });
   it('Notiz aus Chip oder Text, ohne beides keine Notiz, Text gekürzt und getrimmt', () => {

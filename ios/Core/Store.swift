@@ -114,6 +114,10 @@ final class Store: ObservableObject {
         state.weights = Mix.applySignal(state.weights, m, factor)
     }
 
+    func signalTopic(_ m: Moment, _ factor: Double) {
+        state.weights = Mix.applyTopic(state.weights, m, factor)
+    }
+
     func markSeen(_ m: Moment) {
         if state.seen[m.id] == nil {
             state.seen[m.id] = Date()

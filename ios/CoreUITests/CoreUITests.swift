@@ -366,9 +366,9 @@ final class CoreUITests: XCTestCase {
         visible("like")?.press(forDuration: 0.8)
         wait(0.6)
         XCTAssertFalse(app.buttons["noteDone"].exists, "long press on the heart must not open the sheet any more")
-        // swipe left opens one level: six chips, text field, Done, no Send
+        // swipe left opens one level: seven chips, text field, Done, no Send
         openNoteSheet(tag: "94")
-        for chip in ["Known", "Wrong", "Boring", "Bad cut", "Great", "Mute speaker"] {
+        for chip in ["Known", "Not for me", "Wrong", "Boring", "Bad cut", "Great", "Mute speaker"] {
             let b = app.buttons["noteChip-\(chip)"]
             XCTAssertTrue(b.exists, "chip \(chip) missing")
             XCTAssertGreaterThanOrEqual(b.frame.height, 48, "chip \(chip) too small")

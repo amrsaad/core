@@ -4,7 +4,7 @@ import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { createPlayer, HLS, loadYT, STATE, type YTPlayer } from '../video/ytApi';
-import { applySignal, leaveSignal, newMomentCursor, nextMomentBlock, SIGNAL, type MomentCursor } from './mix';
+import { applySignal, applyTopic, leaveSignal, newMomentCursor, nextMomentBlock, SIGNAL, type MomentCursor } from './mix';
 import { clampRate, DEFAULT_SPEED, HOLD_SPEED, speedOf } from '../lib/state';
 import { addSample } from './latency';
 import { captionsShown } from './captions';
@@ -640,6 +640,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     const fx = chip ? chipEffect(chip) : null;
     if (fx === 'kenne' || fx === 'falsch') return feedback(fx, m);
     if (fx === 'mute') return muteChannel(m);
+    if (fx === 'thema') return notForMe(m);
     if (m === queue.current[idxRef.current]) goTo(idxRef.current + 1);
   };
 
@@ -649,6 +650,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!b) return;
     window.open(b.url, '_blank', 'noopener');
     update((s) => ({ ...s, feedbackNotes: markSent(s.feedbackNotes, b.keys, Date.now()) }));
+  };
+
+  /** Not for me: Gewicht des Themas runter (Faktor wie Weak), kein Toast, weiter zum nächsten Moment */
+  const notForMe = (m: Moment) => {
+    update((s) => ({ ...s, momentWeights: applyTopic(s.momentWeights, m, SIGNAL.negative) }));
+    log(m, { feedback: 'schwach' });
+    if (m === queue.current[idxRef.current]) goTo(idxRef.current + 1);
   };
 
   const muteChannel = (target?: Moment) => {
@@ -997,6 +1005,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       fast: () => fastRef.current,
       closeCaption: () => setCapOpen(false),
       notes: () => stateRef.current.feedbackNotes ?? [],
+      weights: () => stateRef.current.momentWeights,
       openNote: () => openNote(),
       recall: () => ({ open: recallRef.current, state: stateRef.current.recall ?? {}, sessionSeen: sessionSeen.current }),
     };

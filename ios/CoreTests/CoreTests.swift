@@ -82,6 +82,21 @@ final class MixTests: XCTestCase {
         XCTAssertEqual(w.channel["c"], 0.2)
     }
 
+    /// "Not for me": only the topic weight drops, by the factor of Weak (0.7); channel and area stay
+    func testNotForMeLowersOnlyTopic() {
+        let m = moment("x", .brain, topic: "augen", channel: "c")
+        let w1 = Mix.applyTopic(Weights(), m, Mix.Signal.negative)
+        XCTAssertEqual(w1.topic["augen"]!, 0.7, accuracy: 1e-9)
+        XCTAssertNil(w1.channel["c"])
+        XCTAssertNil(w1.area["brain"])
+        XCTAssertEqual(Mix.applyTopic(w1, m, Mix.Signal.negative).topic["augen"]!, 0.49, accuracy: 1e-9)
+        var w = Weights()
+        for _ in 0..<40 { w = Mix.applyTopic(w, m, Mix.Signal.negative) }
+        XCTAssertEqual(w.topic["augen"], 0.2)
+        XCTAssertNil(w.topic["ki"])
+        XCTAssertEqual(Mix.applySignal(Weights(), m, Mix.Signal.negative).topic["augen"]!, w1.topic["augen"]!, accuracy: 1e-9)
+    }
+
     func testEveryAreaKeepsTenPercent() {
         var w = Weights()
         w.area["beat"] = 0.2

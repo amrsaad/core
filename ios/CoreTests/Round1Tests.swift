@@ -198,10 +198,11 @@ final class Round1Tests: XCTestCase {
         func ctx(_ id: String, _ hook: String) -> Note.Context { .init(id: id, hook: hook, tab: "Video", commit: "4ed41a7") }
         let a = ctx("abc123:100", "Don't compare body fat across devices (100% rule)!")
         let b = ctx("def456:20", "Sleep | not coffee")
-        XCTAssertEqual(Note.chips, ["Known", "Wrong", "Boring", "Bad cut", "Great", "Mute speaker"])
+        XCTAssertEqual(Note.chips, ["Known", "Not for me", "Wrong", "Boring", "Bad cut", "Great", "Mute speaker"])
         XCTAssertEqual(Note.effect("Known"), .known)
         XCTAssertEqual(Note.effect("Wrong"), .wrong)
         XCTAssertEqual(Note.effect("Mute speaker"), .mute)
+        XCTAssertEqual(Note.effect("Not for me"), .notForMe)
         for c in ["Boring", "Bad cut", "Great"] { XCTAssertNil(Note.effect(c)) }
         // Notiz aus Chip oder Text
         XCTAssertNil(Note.makeEntry(a, chips: [], text: "  ", at: 1))

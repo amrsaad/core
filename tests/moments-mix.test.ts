@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applySignal, effectiveShares, newMomentCursor, nextMomentBlock, SIGNAL, type MomentPrefs } from '../src/moments/mix';
+import { applySignal, applyTopic, effectiveShares, newMomentCursor, nextMomentBlock, SIGNAL, type MomentPrefs } from '../src/moments/mix';
 import { leaveSignal } from '../src/moments/mix';
 import type { Moment } from '../src/moments/types';
 import type { Area } from '../src/types';
@@ -61,6 +61,23 @@ describe('Momente-Mix', () => {
   it('höchstens 1 Top-Moment von 15', () => {
     const idx = flat.map((m, i) => (m.top ? i : -1)).filter((i) => i >= 0);
     for (let k = 1; k < idx.length; k++) expect(idx[k] - idx[k - 1]).toBeGreaterThanOrEqual(15);
+  });
+  it('Not for me senkt nur das Gewicht des Themas, mit dem Faktor von Weak', () => {
+    const w0 = prefs().weights;
+    const m = { area: 'brain' as Area, channel: 'brain-0', topic: 'augen' };
+    const w1 = applyTopic(w0, m, SIGNAL.negative);
+    expect(w1.topic.augen).toBeCloseTo(0.7, 6);
+    expect(w1.channel).toEqual({});
+    expect(w1.area).toEqual({});
+    // zweimal: 0,49, nie unter die Untergrenze
+    expect(applyTopic(w1, m, SIGNAL.negative).topic.augen).toBeCloseTo(0.49, 6);
+    let w = w0;
+    for (let i = 0; i < 40; i++) w = applyTopic(w, m, SIGNAL.negative);
+    expect(w.topic.augen).toBe(0.2);
+    // andere Themen bleiben
+    expect(w.topic.ki).toBeUndefined();
+    // gleicher Faktor wie bei Weak (applySignal), aber ohne Kanal und Bereich
+    expect(applySignal(w0, m, SIGNAL.negative).topic.augen).toBeCloseTo(w1.topic.augen, 6);
   });
   it('gelernte Bereichsgewichte, jeder Bereich mindestens 10 %', () => {
     let w = prefs().weights;

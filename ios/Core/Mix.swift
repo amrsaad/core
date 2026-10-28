@@ -32,6 +32,13 @@ enum Mix {
         return out
     }
 
+    /// Topic only: "Not for me" lowers the weight of the topic, channel and area stay (same factor as Weak, Signal.negative)
+    static func applyTopic(_ w: Weights, _ m: Moment, _ factor: Double) -> Weights {
+        var out = w
+        out.topic[m.topic] = clamp((w.topic[m.topic] ?? 1) * factor)
+        return out
+    }
+
     /// Signal when swiping away, by share watched. nil = neutral.
     static func leaveSignal(watched: Double, duration: Double) -> Double? {
         if watched < 5 { return Signal.skip }

@@ -73,10 +73,10 @@ describe('Tasten in anderen Zuständen', () => {
       expect(act('?', ctx)).toBe('help');
     }
   });
-  it('Rückmeldung: 1 bis 6 Chips, Enter Text, sonst nichts', () => {
+  it('Rückmeldung: 1 bis 7 Chips, Enter Text, sonst nichts', () => {
     const c = { note: true };
-    expect(['1', '2', '3', '4', '5', '6'].map((x) => act(x, c))).toEqual(['chip1', 'chip2', 'chip3', 'chip4', 'chip5', 'chip6']);
-    expect(act('7', c)).toBeNull();
+    expect(['1', '2', '3', '4', '5', '6', '7'].map((x) => act(x, c))).toEqual(['chip1', 'chip2', 'chip3', 'chip4', 'chip5', 'chip6', 'chip7']);
+    expect(act('8', c)).toBeNull();
     expect(act('Enter', c)).toBe('noteText');
     for (const key of ['j', 'k', 'm', 'l', 's', 'o', 'f', 'c', ' ']) expect(act(key, c)).toBeNull();
     expect(act('Escape', c)).toBe('close');

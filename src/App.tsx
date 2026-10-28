@@ -86,7 +86,7 @@ export default function App() {
   const form: Form = state.settings.form ?? 'video';
   const setForm = (f: Form) => update((s) => ({ ...s, settings: { ...s.settings, form: f } }));
   return (
-    <div className={desk ? 'desk' : 'relative h-[100dvh] overflow-hidden'} data-form={desk ? form : undefined} style={{ ['--nav-h' as string]: tab === 'feed' && showBar ? `${NAV_H}px` : '0px' }}>
+    <div className={desk ? 'desk' : 'relative h-[100dvh] overflow-hidden'} data-form={desk ? form : undefined} style={{ ['--nav-h' as string]: !desk && tab === 'feed' && showBar ? `${NAV_H}px` : '0px' }}>
       {desk && <DeskBar form={form} setForm={setForm} todayText={todayLine(state.dayCount?.[dayKey(clockNow())], true)} tab={tab} setTab={setTab} onHelp={() => setHelp((h) => !h)} />}
       <div className={desk ? 'dmain' : tab === 'feed' ? '' : 'hidden'}>
         <MomentFeed
