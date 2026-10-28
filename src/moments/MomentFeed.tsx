@@ -186,17 +186,22 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     update((s) => (s.momentSeen[m.id] ? { ...s, momentDay: today } : { ...s, momentDay: today, momentSeen: { ...s.momentSeen, [m.id]: Date.now() }, dayCount: countSeen(s.dayCount, today) }));
   };
 
-  const soundGuard = (j: number) => {
+  // Erkennt, ob der Browser die Wiedergabe mit Ton verweigert hat. Puffern (langsames Netz, Podcast-Stream) ist keine
+  // Verweigerung, sonst stand "Tap for sound" bei laufendem Ton (28.10.). Dann später noch einmal prüfen.
+  const soundGuard = (j: number, attempt = 0) => {
     window.setTimeout(() => {
       const sl = slotFor(j);
       if (idxRef.current !== j || userPaused.current || !sl.player || forYouRef.current || recallRef.current) return;
-      if (sl.st !== STATE.PLAYING && soundOn.current) {
-        sl.player.mute();
-        sl.player.playVideo();
-        soundOn.current = false;
-        setHint(true);
+      if (sl.st === STATE.PLAYING || !soundOn.current) return;
+      if (sl.st === STATE.BUFFERING && attempt < 4) {
+        soundGuard(j, attempt + 1);
+        return;
       }
-    }, 1500);
+      sl.player.mute();
+      sl.player.playVideo();
+      soundOn.current = false;
+      setHint(true);
+    }, attempt === 0 ? 1500 : 2000);
   };
 
   const [recall, setRecall] = useState<{ m: Moment; review: boolean } | null>(null);
