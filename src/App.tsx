@@ -2,6 +2,7 @@ import { registerHls } from './video/ytApi';
 import { useCallback, useEffect, useState } from 'react';
 import { dayKey, now as clockNow } from './lib/clock';
 import { useAppState } from './lib/useAppState';
+import { useSync } from './lib/sync/useSync';
 import { decryptJson, storeKeyFrom, unlockKey } from './lib/vault';
 import { validateMoments } from './moments/contract';
 import { MomentFeed } from './moments/MomentFeed';
@@ -30,7 +31,7 @@ const NAV_H = 56;
 type Vault = { status: 'loading' } | { status: 'locked' } | { status: 'error'; message: string } | { status: 'open'; pool: MomentPool; skipped: number };
 
 export default function App() {
-  const [state, update, replace] = useAppState();
+  const [state, update, replace, access] = useAppState();
   const [vault, setVault] = useState<Vault>({ status: 'loading' });
   const [tab, setTab] = useState<Tab>('feed');
   const [paused, setPaused] = useState(false);
@@ -39,6 +40,8 @@ export default function App() {
   const desk = useDesktop();
   const [panel, setPanel] = useState<HTMLElement | null>(null);
   const [help, setHelp] = useState(false);
+  // Geräte-Sync: sobald Zustand und Pool-Schlüssel da sind
+  const sync = useSync(state, access, !!state && vault.status === 'open');
 
   useEffect(() => {
     (async () => {
@@ -101,10 +104,10 @@ export default function App() {
       </div>
       {desk && <aside ref={setPanel} className="dpanel" data-testid="desk-aside" data-nowheel aria-label="Moment" />}
       {!desk && tab === 'saved' && <SavedMoments state={state} update={update} />}
-      {!desk && tab === 'settings' && <Settings state={state} update={update} replace={replace} moments={vault.pool} skipped={vault.skipped} />}
+      {!desk && tab === 'settings' && <Settings state={state} update={update} replace={replace} moments={vault.pool} skipped={vault.skipped} sync={sync} />}
       {desk && tab !== 'feed' && (
         <DeskSheet title={NAMES[tab]} onClose={() => setTab('feed')}>
-          {tab === 'saved' ? <SavedMoments state={state} update={update} /> : <Settings state={state} update={update} replace={replace} moments={vault.pool} skipped={vault.skipped} />}
+          {tab === 'saved' ? <SavedMoments state={state} update={update} /> : <Settings state={state} update={update} replace={replace} moments={vault.pool} skipped={vault.skipped} sync={sync} />}
         </DeskSheet>
       )}
       {desk && help && <DeskHelp onClose={() => setHelp(false)} />}

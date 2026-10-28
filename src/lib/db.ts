@@ -51,3 +51,22 @@ export function parseImport(text: string): AppState {
   if (data.app !== 'core' || !data.state || data.state.version !== 1) throw new Error('Not a valid Core backup');
   return { ...emptyState(), ...data.state, settings: { ...emptyState().settings, ...data.state.settings } };
 }
+
+/** Gerätespezifisches zum Sync (letzter Kontakt), nicht Teil des Nutzungsstands und nicht im Export */
+const META = 'sync-meta';
+
+export async function loadSyncMeta(): Promise<{ lastSync?: number } | undefined> {
+  try {
+    return (await (await db()).get(STORE, META)) as { lastSync?: number } | undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function saveSyncMeta(m: { lastSync: number }): Promise<void> {
+  try {
+    await (await db()).put(STORE, m, META);
+  } catch {
+    /* nur Anzeige */
+  }
+}

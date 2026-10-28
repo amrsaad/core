@@ -1,8 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { loadState, requestPersistence, saveState } from './db';
 import type { AppState } from './state';
+import { stampChanges } from './sync/merge';
 
-export function useAppState(): [AppState | null, (fn: (s: AppState) => AppState, now?: boolean) => void, (s: AppState) => void] {
+/** Zugriff für den Geräte-Sync: jüngster Zustand und Änderung ohne neue Zeitstempel (Übernahme von GitHub) */
+export interface SyncAccess {
+  getState: () => AppState | null;
+  adopt: (fn: (s: AppState) => AppState) => void;
+}
+
+export function useAppState(): [AppState | null, (fn: (s: AppState) => AppState, now?: boolean) => void, (s: AppState) => void, SyncAccess] {
   const [state, setState] = useState<AppState | null>(null);
   const timer = useRef<number>();
   const latest = useRef<AppState | null>(null);
@@ -40,7 +47,8 @@ export function useAppState(): [AppState | null, (fn: (s: AppState) => AppState,
   const update = useCallback((fn: (s: AppState) => AppState, now?: boolean) => {
     setState((prev) => {
       if (!prev) return prev;
-      const next = fn(prev);
+      // Zeitstempel für den Geräte-Sync an einer Stelle: was sich geändert hat, bekommt die Zeit der Änderung
+      const next = stampChanges(prev, fn(prev), Date.now());
       persist(next, now);
       return next;
     });
@@ -48,10 +56,23 @@ export function useAppState(): [AppState | null, (fn: (s: AppState) => AppState,
 
   const replace = useCallback((s: AppState) => {
     window.clearTimeout(timer.current);
-    latest.current = s;
-    saveState(s);
-    setState(s);
+    const next = latest.current ? stampChanges(latest.current, s, Date.now()) : s;
+    latest.current = next;
+    saveState(next);
+    setState(next);
   }, []);
 
-  return [state, update, replace];
+  /** Übernahme vom anderen Gerät: keine neuen Zeitstempel, sofort gespeichert, gleicher Zustand bleibt gleich */
+  const adopt = useCallback((fn: (s: AppState) => AppState) => {
+    setState((prev) => {
+      if (!prev) return prev;
+      const next = fn(prev);
+      if (next !== prev) persist(next, true);
+      return next;
+    });
+  }, []);
+
+  const access = useRef<SyncAccess>({ getState: () => latest.current, adopt });
+
+  return [state, update, replace, access.current];
 }

@@ -7,6 +7,8 @@ import { SPEED_OPTIONS, speedOf, type AppState, type Speed } from '../lib/state'
 import { dayKey, isTimeShifted, now } from '../lib/clock';
 import type { CaptionMode } from '../moments/captions';
 import { UnlockDevice } from './UnlockDevice';
+import { SyncCard } from './SyncCard';
+import type { SyncUi } from '../lib/sync/useSync';
 import { tapStats, TAP_TARGET_MS, type TapSample } from '../moments/actions';
 import { LATENCY_TARGET_MS, latencyStats, type LatencySample } from '../moments/latency';
 
@@ -28,7 +30,7 @@ export function rebalance(shares: Record<Area, number>, area: Area, value: numbe
   return out;
 }
 
-export function Settings({ state, update, replace, moments, skipped = 0 }: { state: AppState; update: (fn: (s: AppState) => AppState) => void; replace: (s: AppState) => void; moments: MomentPool | null; skipped?: number }) {
+export function Settings({ state, update, replace, moments, skipped = 0, sync }: { state: AppState; update: (fn: (s: AppState) => AppState) => void; replace: (s: AppState) => void; moments: MomentPool | null; skipped?: number; sync: SyncUi }) {
   const list = moments?.moments ?? [];
   const file = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState<string | null>(null);
@@ -161,7 +163,9 @@ export function Settings({ state, update, replace, moments, skipped = 0 }: { sta
         <TapReaction samples={state.tapMs} />
       </section>
 
-      <UnlockDevice />
+      <SyncCard sync={sync} />
+
+      <UnlockDevice tokenKey={sync.status.hasToken} />
 
       <section className={row}>
         <button className={btn} onClick={doExport}>Export as JSON</button>

@@ -103,6 +103,8 @@ export interface AppState {
   plans?: Record<string, WeekPlan>;
   /** Desktop-Modus: die Übersicht der Tasten wurde beim ersten Start schon gezeigt */
   deskHelpSeen?: boolean;
+  /** Geräte-Sync: Zeitpunkt der letzten Änderung je Schlüssel (Gewichte, Gemerktes, Herzen, Stumme, Pläne, Einstellungen), siehe lib/sync/merge.ts */
+  syncTs?: Record<string, number>;
 }
 
 export const DEFAULT_SPEED = 1.5;
