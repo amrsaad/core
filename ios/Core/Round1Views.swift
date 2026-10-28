@@ -254,10 +254,13 @@ struct UnlockDeviceCard: View {
             Text("Unlock another device").font(.system(size: 17, weight: .semibold))
             if let key {
                 let link = KeyBackup.link(key)
+                // Der QR-Code trägt das Sync-Token mit (verschlüsselt mit dem Pool-Schlüssel), der geteilte Link nicht
+                let encToken = Vault.encryptedTokenForLink(key: key)
+                let qrLink = KeyBackup.link(key, encryptedToken: encToken)
                 Button(showQR ? "Hide QR code" : "Show QR code") { showQR.toggle() }
                     .font(.system(size: 15))
                     .accessibilityIdentifier("showQR")
-                if showQR, let img = QR.image(link) {
+                if showQR, let img = QR.image(qrLink) {
                     Image(uiImage: img)
                         .interpolation(.none)
                         .resizable()
@@ -273,6 +276,11 @@ struct UnlockDeviceCard: View {
                 }
                 Text("Anyone with this link can open your moments. Only send it to your own devices.")
                     .font(.system(size: 13)).foregroundStyle(Palette.tertiary)
+                if encToken != nil {
+                    Text("The QR code also carries your sync token. Only show it to your own devices.")
+                        .font(.system(size: 13)).foregroundStyle(Palette.tertiary)
+                        .accessibilityIdentifier("qrHasToken")
+                }
             }
             Text("Key saved in Keychain \(backups.keychain ? "yes" : "no") · in file copy \(backups.file ? "yes" : "no")")
                 .font(.system(size: 13)).foregroundStyle(Palette.tertiary)

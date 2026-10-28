@@ -50,6 +50,8 @@ struct AppState: Codable, Equatable {
     var dayCount: [String: DayCount]?
     var recall: Recall.State?
     var plans: [String: WeekPlan]?
+    /// Geräte-Sync: Zeitpunkt (ms) der letzten Änderung je Schlüssel, auch für Löschungen. Schlüssel siehe SyncMerge.tsKey.
+    var syncTs: [String: Double]?
 
     var speed: Double { Speed.of(playbackSpeed) }
     var currentForm: FeedForm { form ?? .video }
@@ -76,8 +78,23 @@ enum Day {
 @MainActor
 final class Store: ObservableObject {
     @Published var state: AppState {
-        didSet { if state != oldValue { save() } }
+        didSet {
+            guard state != oldValue else { return }
+            // Geräte-Sync: jede Änderung an Synchronisiertem bekommt zentral ihren Zeitstempel, keine einzelne Aktion muss daran denken
+            if !adopting {
+                let stamped = SyncWire.stamp(old: oldValue, new: state, now: Date())
+                if stamped.syncTs != state.syncTs { state.syncTs = stamped.syncTs }
+            }
+            save()
+            if !adopting && SyncWire.syncedChanged(oldValue, state) { onSynced?() }
+        }
     }
+
+    /// Wird gerufen, wenn sich etwas ändert, das zwischen Geräten wandert (startet die 10 Sekunden des Syncs)
+    var onSynced: (() -> Void)?
+    private var adopting = false
+    /// Es gibt nur einen Store. Der Sync greift darüber auf den Zustand zu.
+    static weak var current: Store?
 
     private static var file: URL {
         Env.stateDir.appendingPathComponent("state.json")
@@ -89,6 +106,22 @@ final class Store: ObservableObject {
         } else {
             state = AppState()
         }
+        Store.current = self
+    }
+
+    // MARK: Geräte-Sync
+
+    /// Dokument des Zustands für den Sync
+    func syncDoc() -> J { SyncWire.doc(from: state) }
+
+    /// Das Dokument von GitHub einarbeiten, ohne neue Zeitstempel. Rechnet gegen den neuesten Zustand.
+    func adopt(_ remote: J) {
+        let merged = SyncMerge.merge(SyncWire.doc(from: state), remote)
+        let next = SyncWire.apply(merged, to: state)
+        guard next != state else { return }
+        adopting = true
+        state = next
+        adopting = false
     }
 
     private static let decoder: JSONDecoder = {

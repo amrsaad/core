@@ -51,6 +51,8 @@ struct UnlockView: View {
             return
         }
         Vault.saveKey(key)
+        // Der QR-Code eines anderen Geräts trägt das Sync-Token mit
+        if let token = Vault.token(fromLink: s, key: key) { Vault.saveToken(token) }
         onUnlock(key)
     }
 }
@@ -194,6 +196,8 @@ struct SettingsView: View {
                         .accessibilityIdentifier("momentsSkipped")
                     TapReactionView(samples: store.state.tapMs ?? [])
                 }
+
+                card { SyncCard() }
 
                 card { UnlockDeviceCard(key: Vault.loadKey()) }
 

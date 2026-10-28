@@ -1,3 +1,4 @@
+import CryptoKit
 import XCTest
 
 /// Walks through every screen with a local test pool and attaches screenshots.
@@ -473,6 +474,152 @@ final class CoreUITests: XCTestCase {
         shot("71-key-restored-from-file")
         app.terminate()
         XCTAssertTrue(FileManager.default.fileExists(atPath: chain.path), "keychain copy not restored")
+    }
+
+
+    // MARK: Geräte-Sync (Max 28.10.2026), nachgebaute GitHub API im Prozess (CORE_SYNC_MOCK)
+
+    private static let syncToken = "github_pat_UITESTTOKEN0123456789_abcdefgh"
+    /// Schlüssel des Testmodus (Vault.loadKey)
+    private static let testKey = SymmetricKey(data: Data(repeating: 7, count: 32))
+
+    private func b64u(_ d: Data) -> String {
+        d.base64EncodedString().replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
+    }
+
+    private func unb64u(_ s: String) -> Data? {
+        var b = s.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+        while b.count % 4 != 0 { b += "=" }
+        return Data(base64Encoded: b)
+    }
+
+    /// Datei wie ein anderes Gerät sie schreibt: {"v":1,"iv","ct"} mit dem Pool-Schlüssel
+    private func encryptDoc(_ doc: [String: Any]) throws -> String {
+        let plain = try JSONSerialization.data(withJSONObject: doc, options: [.sortedKeys])
+        let box = try AES.GCM.seal(plain, using: Self.testKey)
+        let iv = box.nonce.withUnsafeBytes { Data($0) }
+        let env: [String: Any] = ["v": 1, "iv": b64u(iv), "ct": b64u(box.ciphertext + box.tag)]
+        return String(data: try JSONSerialization.data(withJSONObject: env, options: [.sortedKeys]), encoding: .utf8)!
+    }
+
+    private func decryptDoc(_ text: String) -> [String: Any]? {
+        guard let env = (try? JSONSerialization.jsonObject(with: Data(text.utf8))) as? [String: Any],
+              let iv = (env["iv"] as? String).flatMap(unb64u), let ct = (env["ct"] as? String).flatMap(unb64u), ct.count > 16,
+              let box = try? AES.GCM.SealedBox(nonce: AES.GCM.Nonce(data: iv), ciphertext: ct.dropLast(16), tag: ct.suffix(16)),
+              let plain = try? AES.GCM.open(box, using: Self.testKey) else { return nil }
+        return (try? JSONSerialization.jsonObject(with: plain)) as? [String: Any]
+    }
+
+    private var mockDir: URL { stateDir.appendingPathComponent("mock-github", isDirectory: true) }
+    private func mockPuts() -> Int { Int((try? String(contentsOf: mockDir.appendingPathComponent("puts.txt"), encoding: .utf8)) ?? "0") ?? 0 }
+    private func mockDoc() -> [String: Any]? {
+        (try? String(contentsOf: mockDir.appendingPathComponent("state.enc"), encoding: .utf8)).flatMap(decryptDoc)
+    }
+    private func mockState() -> [String: Any] { (mockDoc()?["state"] as? [String: Any]) ?? [:] }
+    private func setMockMode(_ mode: String) {
+        try? FileManager.default.createDirectory(at: mockDir, withIntermediateDirectories: true)
+        try? mode.write(to: mockDir.appendingPathComponent("mode.txt"), atomically: true, encoding: .utf8)
+    }
+
+    /// Wartet, bis die Bedingung gilt (Abfrage alle 0,25 s)
+    private func until(_ timeout: TimeInterval, _ cond: () -> Bool) -> Bool {
+        let end = Date().addingTimeInterval(timeout)
+        while Date() < end {
+            if cond() { return true }
+            wait(0.25)
+        }
+        return cond()
+    }
+
+    private func pick(_ id: String, _ option: String) {
+        let picker = app.descendants(matching: .any)[id]
+        for _ in 0..<6 where !picker.isHittable { app.swipeDown(); wait(0.3) }
+        picker.tap()
+        app.buttons[option].firstMatch.tap()
+    }
+
+    func test13Sync() throws {
+        // Ein anderes Gerät hat schon geschrieben: gesehener Moment und eine Einstellung
+        try FileManager.default.createDirectory(at: mockDir, withIntermediateDirectories: true)
+        let other: [String: Any] = [
+            "v": 1,
+            "state": [
+                "momentSeen": ["other-device:1": 1_761_000_000_000], "momentLog": [], "dayCount": [:], "savedMoments": [:],
+                "momentWeights": ["area": [:], "channel": [:], "topic": ["fremd": 1.4]], "recall": [:], "feedbackNotes": [],
+                "momentLiked": [:], "mutedChannels": [:], "feedTime": [:], "weekReviewShown": [:], "plans": [:], "settings": [:],
+            ],
+            "ts": ["w:topic:fremd": 1_761_000_000_000],
+        ]
+        try encryptDoc(other).write(to: mockDir.appendingPathComponent("state.enc"), atomically: true, encoding: .utf8)
+        try "seed-sha".write(to: mockDir.appendingPathComponent("sha.txt"), atomically: true, encoding: .utf8)
+        app.launchEnvironment["CORE_SYNC_MOCK"] = Self.syncToken
+        launch()
+        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15), "feed did not appear")
+        app.tabBars.buttons["Settings"].tap()
+        XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 5))
+        let field = app.secureTextFields["syncToken"]
+        for _ in 0..<8 where !field.exists || !field.isHittable { app.swipeUp(); wait(0.3) }
+        XCTAssertTrue(field.exists, "token field missing")
+        shot("30-sync-no-token")
+
+        // Token einfügen: laden, zusammenführen, schreiben
+        field.tap()
+        field.typeText(Self.syncToken)
+        app.buttons["saveToken"].tap()
+        let last = app.staticTexts["syncLast"]
+        XCTAssertTrue(last.waitForExistence(timeout: 10), "no sync line after saving the token")
+        XCTAssertTrue(until(15) { self.mockPuts() >= 1 }, "merged state was not written")
+        XCTAssertTrue(until(10) { last.label.hasPrefix("Last sync: just now") }, last.label)
+        XCTAssertFalse(app.staticTexts["syncError"].exists)
+        XCTAssertFalse(app.secureTextFields["syncToken"].exists, "token field must disappear")
+        var st = mockState()
+        XCTAssertNotNil((st["momentSeen"] as? [String: Any])?["other-device:1"], "state of the other device must survive")
+        shot("31-sync-token-saved")
+
+        // 10 Sekunden nach der letzten Änderung, nicht früher
+        let before = mockPuts()
+        let t0 = Date()
+        pick("captionMode", "Always on")
+        wait(7)
+        XCTAssertEqual(mockPuts(), before, "written before the 10 s were over")
+        XCTAssertTrue(until(10) { self.mockPuts() == before + 1 }, "not written after 10 s")
+        let delay = Date().timeIntervalSince(t0)
+        XCTAssertGreaterThanOrEqual(delay, 9.5)
+        st = mockState()
+        XCTAssertEqual((st["settings"] as? [String: Any])?["captionMode"] as? String, "on")
+        XCTAssertNotNil(((st["momentWeights"] as? [String: Any])?["topic"] as? [String: Any])?["fremd"])
+        shot("32-sync-written-after-10s")
+
+        // Offline: sammeln, Fehlerzeile, bei Netz nachholen
+        setMockMode("offline")
+        let p2 = mockPuts()
+        pick("speed", "1x")
+        XCTAssertTrue(app.staticTexts["syncError"].waitForExistence(timeout: 20), "no error line when offline")
+        XCTAssertEqual(app.staticTexts["syncError"].label, "No connection to GitHub. Will retry.")
+        XCTAssertEqual(mockPuts(), p2)
+        shot("33-sync-offline")
+        setMockMode("")
+        app.buttons["syncNow"].tap()
+        XCTAssertTrue(until(15) { self.mockPuts() == p2 + 1 }, "offline change was not caught up")
+        XCTAssertTrue(until(10) { !self.app.staticTexts["syncError"].exists }, "error line stays")
+        XCTAssertEqual((mockState()["settings"] as? [String: Any])?["playbackSpeed"] as? Double, 1)
+
+        // Token abgelehnt: eine Zeile, ohne Token
+        setMockMode("unauthorized")
+        app.buttons["syncNow"].tap()
+        XCTAssertTrue(app.staticTexts["syncError"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.staticTexts["syncError"].label, "GitHub rejected the token (401). Paste a new one.")
+        shot("34-sync-token-rejected")
+        setMockMode("")
+
+        // QR-Code trägt das Token mit
+        let qr = app.buttons["showQR"]
+        for _ in 0..<6 where !qr.isHittable { app.swipeUp(); wait(0.3) }
+        qr.tap()
+        XCTAssertTrue(app.images["unlockQR"].waitForExistence(timeout: 5), "QR missing")
+        XCTAssertTrue(app.staticTexts["qrHasToken"].exists, "QR note about the token missing")
+        app.swipeUp(); wait(0.5)
+        shot("35-sync-qr-with-token")
     }
 
     // MARK: State fixture

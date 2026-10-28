@@ -77,6 +77,8 @@ struct Moment: Codable, Identifiable, Hashable {
     var ref: String? = nil
     /// Abrufkarte: nur Momente mit diesem Feld bekommen eine Karte
     var recall: RecallQuestion? = nil
+    /// Wann der Moment in den Pool kam (ISO). Der Geräte-Sync nutzt es, wenn zwei Geräte verschiedene Fassungen desselben Moments haben.
+    var createdAt: String? = nil
 
     var cueTexts: [String] { (cues ?? []).map(\.text) }
     var readingText: String { FormText.text(excerpt: excerpt, cues: cueTexts) }

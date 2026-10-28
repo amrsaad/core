@@ -1,0 +1,41 @@
+{
+ "key": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+ "file": "{\"v\":1,\"iv\":\"2R1x1RTYbSZ82zf1\",\"ct\":\"BUXvQZkoEJ3RAemvAUwxSkYffHwGvbAWLXuhJfwf8vcsteb3BUkun_jGCn8CMl0_AkxhwsC8aw5RRXFXQuH9YIG8O0nrO0W3vYdoY-gyi9OKzMVyCnOD4CNE8BFGY9z7jvXLYoqyPwpOUH2WLyjN3JPJpAh6ZUIWjxuHRFfSv9pRA0YfD-kLwFjWWMHuoNxRy37IYlZ_ZuLBmErkQ4nD5aGz_SnJosj3QWNmMt72k4zgA_H9dADxLWJXFqQyhX84xAQGGk7dDjdBI7O0qmTm0Jgn6nktiKMyTd8Tz0XPoTZmf2g7i5931QvBeQ6UdALSWCaw0kUczymA9zsuRPXk6U7uNRfjlU990MgNF1-eabKVJ4U3goVbII4bFszS3x-sd-eHuBefNWLBBk1AKZ3S__e20B6ZPCR-6aRI6YlceUekwnteISZph_x3MK_VfKmR2akwOb-GeepieM408r30GWz14vPjxL1gDtSBRu6gv9soFWM0wX70CWB2-voJthGMLrThxbZitAtPLcjYHL-n-JlGctkRM_WCBylJXYgJr-unG2m-rb19vGwMHeCYN4iuyhDcS4W6OplqkNxwtA\"}",
+ "doc": {
+  "state": {
+   "dayCount": {},
+   "feedTime": {
+    "2026-10-28": 61000
+   },
+   "feedbackNotes": [],
+   "momentDay": "2026-10-28",
+   "momentLiked": {},
+   "momentLog": [],
+   "momentSeen": {
+    "m1:1": 1761000000000
+   },
+   "momentWeights": {
+    "area": {},
+    "channel": {
+     "Kanal ä": 1.25
+    },
+    "topic": {}
+   },
+   "mutedChannels": {},
+   "plans": {},
+   "recall": {},
+   "savedMoments": {},
+   "settings": {
+    "captionMode": "on"
+   },
+   "weekReviewShown": {}
+  },
+  "ts": {
+   "set:captionMode": 1761000000600,
+   "w:channel:Kanal ä": 1761000000500
+  },
+  "v": 1
+ },
+ "token": "github_pat_FIXTURETOKEN0123456789_abcdefghijkl",
+ "encToken": "bb1k--yBX-9Pi1NaoPyr_9eiuvQKL-x0uiqwrDqsVLJABBy1zVPzvL6jgFdT9bzMLr2uj788SRgHBztXwgJrWItD_ajzpFJw520"
+}

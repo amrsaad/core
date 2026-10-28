@@ -5,6 +5,7 @@ import SwiftUI
 struct CoreApp: App {
     @StateObject private var store = Store()
     @StateObject private var feed = FeedModel()
+    @StateObject private var sync = SyncEngine.app()
 
     init() {
         Diag.installCrashHandler()
@@ -19,6 +20,7 @@ struct CoreApp: App {
             RootView()
                 .environmentObject(store)
                 .environmentObject(feed)
+                .environmentObject(sync)
                 .preferredColorScheme(.dark)
         }
     }
@@ -27,6 +29,9 @@ struct CoreApp: App {
 struct RootView: View {
     @EnvironmentObject var store: Store
     @EnvironmentObject var feed: FeedModel
+    @EnvironmentObject var sync: SyncEngine
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var net: NetWatch?
     @State private var key: Data? = Vault.loadKey()
     @State private var tab = 0
     @State private var review = false
@@ -49,7 +54,14 @@ struct RootView: View {
                 .toolbarBackground(Color.black, for: .tabBar)
                 .toolbarBackground(.visible, for: .tabBar)
                 .task(id: key) { await feed.load(key: key, store: store) }
-                .onAppear { review = store.reviewDue }
+                // Geräte-Sync: beim Start laden und zusammenführen, 10 s nach der letzten Änderung schreiben
+                .task(id: key) { await sync.start() }
+                .onChange(of: scenePhase) { _, phase in sync.visible(phase == .active) }
+                .onAppear {
+                    review = store.reviewDue
+                    store.onSynced = { sync.poke() }
+                    if net == nil { net = NetWatch { sync.online() } }
+                }
                 .fullScreenCover(isPresented: $review) { WeeklyReviewView { review = false } }
             } else {
                 UnlockView { newKey in key = newKey }

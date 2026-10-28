@@ -86,3 +86,13 @@ describe('GitHub Client', () => {
     }
   });
 });
+
+describe('Datei für die iOS-Tests', () => {
+  it('tests/fixtures/sync-file.json lässt sich mit dem festen Schlüssel lesen (Swift liest dieselbe Datei)', async () => {
+    const { readFileSync } = await import('node:fs');
+    const f = JSON.parse(readFileSync(new URL('./fixtures/sync-file.json', import.meta.url), 'utf8'));
+    const key = await crypto.subtle.importKey('raw', Uint8Array.from(atob(f.key.replace(/-/g, '+').replace(/_/g, '/') + '='), (c) => c.charCodeAt(0)), 'AES-GCM', false, ['encrypt', 'decrypt']);
+    expect(await decryptDoc(key, f.file)).toEqual(f.doc);
+    expect(await decryptToken(key, f.encToken)).toBe(f.token);
+  });
+});

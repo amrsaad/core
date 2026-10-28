@@ -24,6 +24,12 @@
 		C0DE00000000000000000112 /* CoreUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000014 /* CoreUITests.swift */; };
 		C0DE00000000000000000113 /* sample.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000015 /* sample.mp4 */; };
 		C0DE00000000000000000114 /* thumb.png in Resources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000000016 /* thumb.png */; };
+		C0DE00000000000000002100 /* Sync.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000002000 /* Sync.swift */; };
+		C0DE00000000000000002101 /* SyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000002001 /* SyncEngine.swift */; };
+		C0DE00000000000000002102 /* SyncState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000002002 /* SyncState.swift */; };
+		C0DE00000000000000002103 /* SyncClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000002003 /* SyncClient.swift */; };
+		C0DE00000000000000002104 /* SyncViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000002004 /* SyncViews.swift */; };
+		C0DE00000000000000002105 /* SyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000002005 /* SyncTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +54,12 @@
 		C0DE00000000000000000016 /* thumb.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = thumb.png; sourceTree = "<group>"; };
 		C0DE00000000000000000017 /* CoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0DE00000000000000000018 /* CoreUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoreUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0DE00000000000000002000 /* Sync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sync.swift; sourceTree = "<group>"; };
+		C0DE00000000000000002001 /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
+		C0DE00000000000000002002 /* SyncState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncState.swift; sourceTree = "<group>"; };
+		C0DE00000000000000002003 /* SyncClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncClient.swift; sourceTree = "<group>"; };
+		C0DE00000000000000002004 /* SyncViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncViews.swift; sourceTree = "<group>"; };
+		C0DE00000000000000002005 /* SyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXContainerItemProxy section */
@@ -116,6 +128,11 @@
 				C0DE00000000000000000012 /* Diag.swift */,
 				C0DE00000000000000000019 /* Round1.swift */,
 				C0DE00000000000000000020 /* Round1Views.swift */,
+				C0DE00000000000000002000 /* Sync.swift */,
+				C0DE00000000000000002001 /* SyncEngine.swift */,
+				C0DE00000000000000002002 /* SyncState.swift */,
+				C0DE00000000000000002003 /* SyncClient.swift */,
+				C0DE00000000000000002004 /* SyncViews.swift */,
 				C0DE00000000000000000011 /* Assets.xcassets */,
 				C0DE00000000000000000009 /* Info.plist */,
 			);
@@ -137,6 +154,7 @@
 			children = (
 				C0DE00000000000000000013 /* CoreTests.swift */,
 				C0DE00000000000000000021 /* Round1Tests.swift */,
+				C0DE00000000000000002005 /* SyncTests.swift */,
 			);
 			path = CoreTests;
 			sourceTree = "<group>";
@@ -306,6 +324,11 @@
 				C0DE00000000000000000110 /* Diag.swift in Sources */,
 				C0DE00000000000000000115 /* Round1.swift in Sources */,
 				C0DE00000000000000000116 /* Round1Views.swift in Sources */,
+				C0DE00000000000000002100 /* Sync.swift in Sources */,
+				C0DE00000000000000002101 /* SyncEngine.swift in Sources */,
+				C0DE00000000000000002102 /* SyncState.swift in Sources */,
+				C0DE00000000000000002103 /* SyncClient.swift in Sources */,
+				C0DE00000000000000002104 /* SyncViews.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -315,6 +338,7 @@
 			files = (
 				C0DE00000000000000000111 /* CoreTests.swift in Sources */,
 				C0DE00000000000000000117 /* Round1Tests.swift in Sources */,
+				C0DE00000000000000002105 /* SyncTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

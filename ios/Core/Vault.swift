@@ -85,6 +85,68 @@ enum Vault {
         return Data(base64Encoded: b)
     }
 
+    // MARK: Sync-Token (Geräte-Sync, Max 28.10.2026)
+
+    private static let tokenAccount = "core.sync.token"
+    /// Form eines GitHub-Tokens (classic oder fine-grained), gleiche Regel wie die Web-App
+    static func tokenLooksValid(_ t: String) -> Bool {
+        t.range(of: "^[A-Za-z0-9_]{20,255}$", options: .regularExpression) != nil
+    }
+
+    private static var tokenTestFile: URL { Env.stateDir.appendingPathComponent("token-test.txt") }
+
+    /// Das Token liegt im Keychain (in UI-Tests in einer Datei, wie der Schlüssel)
+    static func loadToken() -> String? {
+        if Env.isTest { return (try? String(contentsOf: tokenTestFile, encoding: .utf8)).flatMap { tokenLooksValid($0) ? $0 : nil } }
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: tokenAccount,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+        ]
+        var out: AnyObject?
+        guard SecItemCopyMatching(query as CFDictionary, &out) == errSecSuccess, let data = out as? Data, let t = String(data: data, encoding: .utf8) else { return nil }
+        return tokenLooksValid(t) ? t : nil
+    }
+
+    @discardableResult
+    static func saveToken(_ raw: String) -> Bool {
+        let token = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard tokenLooksValid(token) else { return false }
+        if Env.isTest {
+            try? FileManager.default.createDirectory(at: tokenTestFile.deletingLastPathComponent(), withIntermediateDirectories: true)
+            return (try? token.write(to: tokenTestFile, atomically: true, encoding: .utf8)) != nil
+        }
+        let base: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrAccount as String: tokenAccount]
+        SecItemDelete(base as CFDictionary)
+        var add = base
+        add[kSecValueData as String] = Data(token.utf8)
+        add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
+        return SecItemAdd(add as CFDictionary, nil) == errSecSuccess
+    }
+
+    static func clearToken() {
+        if Env.isTest {
+            try? FileManager.default.removeItem(at: tokenTestFile)
+            return
+        }
+        let base: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrAccount as String: tokenAccount]
+        SecItemDelete(base as CFDictionary)
+    }
+
+    /// Token aus einem Freischalt-Link (…#k=<Schlüssel>&t=<verschlüsseltes Token>), entschlüsselt mit dem Pool-Schlüssel
+    static func token(fromLink text: String, key: Data) -> String? {
+        guard let range = text.range(of: #"[#&?]t=([A-Za-z0-9_-]{20,})"#, options: .regularExpression) else { return nil }
+        let value = String(text[range].dropFirst(3))
+        return SyncCrypto(key: key).decryptToken(value)
+    }
+
+    /// Das Token für den QR-Code, verschlüsselt mit dem Pool-Schlüssel
+    static func encryptedTokenForLink(key: Data) -> String? {
+        guard let t = loadToken() else { return nil }
+        return SyncCrypto(key: key).encryptToken(t)
+    }
+
     // MARK: Pool
 
     private struct Envelope: Decodable {

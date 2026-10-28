@@ -304,6 +304,12 @@ enum KeyBackup {
 
     /// Freischalt-Link für ein weiteres Gerät, wie in der Web-App
     static func link(_ key: Data) -> String { "https://amrsaad.github.io/core/#k=\(base64url(key))" }
+
+    /// Link für den QR-Code: trägt zusätzlich das Sync-Token mit, verschlüsselt mit dem Pool-Schlüssel (wie die Web-App)
+    static func link(_ key: Data, encryptedToken: String?) -> String {
+        guard let t = encryptedToken, !t.isEmpty else { return link(key) }
+        return link(key) + "&t=\(t)"
+    }
 }
 
 
