@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-28T09:44:50.208Z",
+  "at": "2026-10-28T12:11:54.568Z",
   "checks": {
     "below900Mobile": true,
     "at900Desktop": true,
@@ -46,6 +46,7 @@
     "noteShowsNumbers": true,
     "noteBlocksNext": true,
     "noteChipByNumber": true,
+    "notForMeKeyLowersTopic": true,
     "noteEnterFocusesText": true,
     "typingKeysStayText": true,
     "noteEnterSaves": true,

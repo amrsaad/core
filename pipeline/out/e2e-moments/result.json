@@ -1,5 +1,5 @@
 {
- "at": "2026-10-28T09:43:22.853Z",
+ "at": "2026-10-28T12:10:02.429Z",
  "runs": [
   {
    "browser": "webkit",
@@ -81,7 +81,7 @@
     "tapRecorded": true,
     "swipeLeftOpensNote": true,
     "swipeLeftStaysOnMoment": true,
-    "noteSixChips": true,
+    "noteSevenChips": true,
     "noteTextAndDone": true,
     "noteNoSendButton": true,
     "noteChipsLarge": true,
@@ -105,6 +105,12 @@
     "wrongViaChip": true,
     "wrongToast": true,
     "wrongSaved": true,
+    "notForMeViaChip": true,
+    "notForMeTopicDown": true,
+    "notForMeChannelAreaKept": true,
+    "notForMeNoToast": true,
+    "notForMeAdvanced": true,
+    "notForMeSaved": true,
     "muteViaChip": true,
     "muteToast": true,
     "muteAdvanced": true,
@@ -217,10 +223,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604110,
+     "due": 1792929604049,
      "results": [
       {
-       "at": 1792756804110,
+       "at": 1792756804049,
        "got": false
       }
      ]
@@ -297,21 +303,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 30.00000000000182,
-    "recorded": 32
+    "measured": 30,
+    "recorded": 30
    },
-   "notesCount": 5,
+   "notesCount": 6,
    "posterCheck": {
     "checksDone": 861,
     "violations": 0,
-    "endedSeen": 145
+    "endedSeen": 140
    },
    "latency": {
     "n": 36,
     "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | d4512c8 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | d4512c8 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | d4512c8 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | d4512c8 |\n| test0000046:100 | Testmoment 46 body | Mute speaker | - | Video | d4512c8 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | 0c9b7af |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 0c9b7af |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | 0c9b7af |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | 0c9b7af |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | 0c9b7af |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | 0c9b7af |",
    "badWalk": [
     {
      "idx": 2,
@@ -682,7 +688,7 @@
     "captionsArabicRtl": true,
     "swipeNext": true,
     "captionsSettingsOn": true,
-    "holdFast": true,
+    "holdFast": false,
     "releaseNormal": true,
     "embedNoZoom": true,
     "embed16by9FullWidth": true,
@@ -730,7 +736,7 @@
     "tapRecorded": true,
     "swipeLeftOpensNote": true,
     "swipeLeftStaysOnMoment": true,
-    "noteSixChips": true,
+    "noteSevenChips": true,
     "noteTextAndDone": true,
     "noteNoSendButton": true,
     "noteChipsLarge": true,
@@ -754,6 +760,12 @@
     "wrongViaChip": true,
     "wrongToast": true,
     "wrongSaved": true,
+    "notForMeViaChip": true,
+    "notForMeTopicDown": true,
+    "notForMeChannelAreaKept": true,
+    "notForMeNoToast": true,
+    "notForMeAdvanced": true,
+    "notForMeSaved": true,
     "muteViaChip": true,
     "muteToast": true,
     "muteAdvanced": true,
@@ -782,11 +794,11 @@
     "issueTitleCount": true,
     "promptMarksSent": true,
     "newNoteUnsent": true,
-    "reviewOnlyOnce": true,
+    "reviewOnlyOnce": false,
     "promptOncePerDay": true,
     "prevPlanShown": true,
     "prevPlanAnswered": true,
-    "skipWorks": true,
+    "skipWorks": false,
     "p6Feed": true,
     "emptyAudioLine": true,
     "emptyKeepsSwitch": true,
@@ -866,10 +878,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603375,
+     "due": 1792929603455,
      "results": [
       {
-       "at": 1792756803375,
+       "at": 1792756803455,
        "got": false
       }
      ]
@@ -946,21 +958,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 31.89999999999418,
+    "measured": 31.79999999998836,
     "recorded": 32
    },
-   "notesCount": 5,
+   "notesCount": 6,
    "posterCheck": {
-    "checksDone": 867,
+    "checksDone": 870,
     "violations": 0,
-    "endedSeen": 144
+    "endedSeen": 0
    },
    "latency": {
-    "n": 36,
-    "buffered": 30,
+    "n": 38,
+    "buffered": 32,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | d4512c8 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | d4512c8 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | d4512c8 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | d4512c8 |\n| test0000046:100 | Testmoment 46 body | Mute speaker | - | Video | d4512c8 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000008:100 | Testmoment 8 beat | Boring | - | Video | 0c9b7af |\n| test0000004:100 | Testmoment 4 beat | - | The cut is two seconds late & the \"hook\" repeats. | Video | 0c9b7af |\n| test0000010:100 | Testmoment 10 beat | Known | - | Video | 0c9b7af |\n| test0000003:100 | Testmoment 3 beat | Wrong | - | Video | 0c9b7af |\n| test0000019:100 | Testmoment 19 brain | Not for me | - | Video | 0c9b7af |\n| test0000024:100 | Testmoment 24 brain | Mute speaker | - | Video | 0c9b7af |",
    "badWalk": [
     {
      "idx": 2,
@@ -1278,12 +1290,16 @@
      "dir": "rtl"
     },
     {
-     "ar": false,
-     "dir": "ltr"
+     "ar": true,
+     "dir": "rtl"
     },
     {
      "ar": false,
      "dir": "ltr"
+    },
+    {
+     "ar": true,
+     "dir": "rtl"
     }
    ],
    "hit": {
@@ -1297,7 +1313,7 @@
     "noRating": true
    },
    "errors": [],
-   "ok": true
+   "ok": false
   }
  ]
 }
