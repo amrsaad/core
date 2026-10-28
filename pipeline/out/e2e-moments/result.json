@@ -1,5 +1,5 @@
 {
- "at": "2026-10-28T07:56:32.614Z",
+ "at": "2026-10-28T09:33:09.185Z",
  "runs": [
   {
    "browser": "webkit",
@@ -33,7 +33,7 @@
     "captionsArabicRtl": true,
     "swipeNext": true,
     "captionsSettingsOn": true,
-    "holdFast": false,
+    "holdFast": true,
     "releaseNormal": true,
     "embedNoZoom": true,
     "embed16by9FullWidth": true,
@@ -217,10 +217,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604031,
+     "due": 1792929604565,
      "results": [
       {
-       "at": 1792756804031,
+       "at": 1792756804565,
        "got": false
       }
      ]
@@ -297,21 +297,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 31,
-    "recorded": 31
+    "measured": 29,
+    "recorded": 32
    },
    "notesCount": 5,
    "posterCheck": {
-    "checksDone": 873,
+    "checksDone": 870,
     "violations": 0,
-    "endedSeen": 0
+    "endedSeen": 146
    },
    "latency": {
-    "n": 34,
-    "buffered": 28,
+    "n": 36,
+    "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000008:100 | Testmoment 8 beat | Boring | - | Video | 5501328 |\n| test0000004:100 | Testmoment 4 beat | - | The cut is two seconds late & the \"hook\" repeats. | Video | 5501328 |\n| test0000011:100 | Testmoment 11 beat | Known | - | Video | 5501328 |\n| test0000010:100 | Testmoment 10 beat | Wrong | - | Video | 5501328 |\n| test0000003:100 | Testmoment 3 beat | Mute speaker | - | Video | 5501328 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | da4b398 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | da4b398 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | da4b398 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | da4b398 |\n| test0000046:100 | Testmoment 46 body | Mute speaker | - | Video | da4b398 |",
    "badWalk": [
     {
      "idx": 2,
@@ -648,7 +648,7 @@
     "noRating": true
    },
    "errors": [],
-   "ok": false
+   "ok": true
   },
   {
    "browser": "chromium",
@@ -682,7 +682,7 @@
     "captionsArabicRtl": true,
     "swipeNext": true,
     "captionsSettingsOn": true,
-    "holdFast": false,
+    "holdFast": true,
     "releaseNormal": true,
     "embedNoZoom": true,
     "embed16by9FullWidth": true,
@@ -782,11 +782,11 @@
     "issueTitleCount": true,
     "promptMarksSent": true,
     "newNoteUnsent": true,
-    "reviewOnlyOnce": false,
+    "reviewOnlyOnce": true,
     "promptOncePerDay": true,
     "prevPlanShown": true,
     "prevPlanAnswered": true,
-    "skipWorks": false,
+    "skipWorks": true,
     "p6Feed": true,
     "emptyAudioLine": true,
     "emptyKeepsSwitch": true,
@@ -866,10 +866,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603456,
+     "due": 1792929603435,
      "results": [
       {
-       "at": 1792756803456,
+       "at": 1792756803435,
        "got": false
       }
      ]
@@ -946,21 +946,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 32.09999999997672,
+    "measured": 32.10000000000582,
     "recorded": 32
    },
    "notesCount": 5,
    "posterCheck": {
-    "checksDone": 891,
+    "checksDone": 882,
     "violations": 0,
-    "endedSeen": 0
+    "endedSeen": 147
    },
    "latency": {
-    "n": 38,
-    "buffered": 32,
+    "n": 36,
+    "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000008:100 | Testmoment 8 beat | Boring | - | Video | 5501328 |\n| test0000004:100 | Testmoment 4 beat | - | The cut is two seconds late & the \"hook\" repeats. | Video | 5501328 |\n| test0000010:100 | Testmoment 10 beat | Known | - | Video | 5501328 |\n| test0000003:100 | Testmoment 3 beat | Wrong | - | Video | 5501328 |\n| test0000019:100 | Testmoment 19 brain | Mute speaker | - | Video | 5501328 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | da4b398 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | da4b398 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | da4b398 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | da4b398 |\n| test0000046:100 | Testmoment 46 body | Mute speaker | - | Video | da4b398 |",
    "badWalk": [
     {
      "idx": 2,
@@ -1278,10 +1278,6 @@
      "dir": "rtl"
     },
     {
-     "ar": true,
-     "dir": "rtl"
-    },
-    {
      "ar": false,
      "dir": "ltr"
     },
@@ -1301,7 +1297,7 @@
     "noRating": true
    },
    "errors": [],
-   "ok": false
+   "ok": true
   }
  ]
 }
