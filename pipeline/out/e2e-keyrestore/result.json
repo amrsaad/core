@@ -1,5 +1,5 @@
 {
- "at": "2026-10-28T12:23:32.987Z",
+ "at": "2026-10-28T17:52:53.870Z",
  "runs": [
   {
    "browser": "webkit",
@@ -31,11 +31,13 @@
     "idbRewritten": true,
     "runsWithoutCache": true,
     "cacheRewritten": true,
-    "noPageErrors": true
+    "noPageErrors": false
    },
    "deleteIdb": "ok",
-   "errors": [],
-   "ok": true
+   "errors": [
+    "Unhandled Promise Rejection: NetworkError:  A network error occurred."
+   ],
+   "ok": false
   },
   {
    "browser": "webkit",
