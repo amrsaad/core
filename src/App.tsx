@@ -69,7 +69,7 @@ export default function App() {
   useEffect(() => {
     if (!helpDue) return;
     setHelp(true);
-    update((s) => ({ ...s, deskHelpSeen: true }));
+    update((s) => ({ ...s, deskHelpSeen: true }), true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [helpDue]);
   useEffect(() => {
