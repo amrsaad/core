@@ -1,5 +1,5 @@
 {
- "at": "2026-10-28T09:33:09.185Z",
+ "at": "2026-10-28T09:37:00.983Z",
  "runs": [
   {
    "browser": "webkit",
@@ -217,10 +217,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604565,
+     "due": 1792929604344,
      "results": [
       {
-       "at": 1792756804565,
+       "at": 1792756804344,
        "got": false
       }
      ]
@@ -297,21 +297,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 29,
+    "measured": 27,
     "recorded": 32
    },
    "notesCount": 5,
    "posterCheck": {
-    "checksDone": 870,
+    "checksDone": 858,
     "violations": 0,
-    "endedSeen": 146
+    "endedSeen": 143
    },
    "latency": {
     "n": 36,
     "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | da4b398 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | da4b398 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | da4b398 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | da4b398 |\n| test0000046:100 | Testmoment 46 body | Mute speaker | - | Video | da4b398 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | e0f50de |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | e0f50de |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | e0f50de |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | e0f50de |\n| test0000046:100 | Testmoment 46 body | Mute speaker | - | Video | e0f50de |",
    "badWalk": [
     {
      "idx": 2,
@@ -866,10 +866,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603435,
+     "due": 1792929603483,
      "results": [
       {
-       "at": 1792756803435,
+       "at": 1792756803483,
        "got": false
       }
      ]
@@ -946,21 +946,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 32.10000000000582,
+    "measured": 32.19999999999709,
     "recorded": 32
    },
    "notesCount": 5,
    "posterCheck": {
-    "checksDone": 882,
+    "checksDone": 873,
     "violations": 0,
-    "endedSeen": 147
+    "endedSeen": 145
    },
    "latency": {
     "n": 36,
     "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | da4b398 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | da4b398 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | da4b398 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | da4b398 |\n| test0000046:100 | Testmoment 46 body | Mute speaker | - | Video | da4b398 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | e0f50de |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | e0f50de |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | e0f50de |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | e0f50de |\n| test0000046:100 | Testmoment 46 body | Mute speaker | - | Video | e0f50de |",
    "badWalk": [
     {
      "idx": 2,

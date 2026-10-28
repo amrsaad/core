@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-28T09:31:16.247Z",
+  "at": "2026-10-28T09:38:29.836Z",
   "checks": {
     "below900Mobile": true,
     "at900Desktop": true,
@@ -10,7 +10,7 @@
     "helpFocusInside": true,
     "helpBlocksKeys": true,
     "escClosesHelp": true,
-    "helpOnlyOnce": true,
+    "helpOnlyOnce": false,
     "columnIs480": true,
     "columnCentered": true,
     "videoIs16by9": true,
@@ -24,22 +24,22 @@
     "noMobileOverlays": true,
     "compactButtons": true,
     "titleShowsHook": true,
-    "keyJ": true,
+    "keyJ": false,
     "keyK": true,
-    "keyArrowDown": true,
+    "keyArrowDown": false,
     "keyArrowUp": true,
     "titleFollowsMoment": true,
-    "spacePauses": true,
+    "spacePauses": false,
     "spaceDidNotClickFocused": true,
     "spaceResumes": true,
-    "keyM": true,
-    "fastOn": true,
+    "keyM": false,
+    "fastOn": false,
     "fastOff": true,
-    "keyL": true,
-    "keyS": true,
+    "keyL": false,
+    "keyS": false,
     "keySToggles": true,
-    "keyC": true,
-    "captionStaysOpenOnNext": true,
+    "keyC": false,
+    "captionStaysOpenOnNext": false,
     "escClosesCaption": true,
     "keyO": true,
     "keyF": true,
@@ -132,9 +132,9 @@
       "scrollW": 1440
     },
     "text": {
-      "w": 738.09375,
-      "ch65": 738.109375,
-      "col": 858.09375
+      "w": 701.53125,
+      "ch65": 701.546875,
+      "col": 821.53125
     },
     "ring": [
       {
@@ -185,8 +185,8 @@
     ],
     "media": {
       "meta": true,
-      "title": "Testmoment 4 beat",
-      "artist": "Kanal beat · Dr. Test 0",
+      "title": "Testmoment 3 beat",
+      "artist": "Kanal beat · Dr. Test 3",
       "state": "playing"
     },
     "installability": [],
@@ -201,6 +201,17 @@
       ]
     }
   },
-  "ok": true,
-  "failed": []
+  "ok": false,
+  "failed": [
+    "helpOnlyOnce",
+    "keyJ",
+    "keyArrowDown",
+    "spacePauses",
+    "keyM",
+    "fastOn",
+    "keyL",
+    "keyS",
+    "keyC",
+    "captionStaysOpenOnNext"
+  ]
 }
