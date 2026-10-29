@@ -196,6 +196,14 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 .vhint span {
   background: rgba(0, 0, 0, 0.75); border-radius: 999px; padding: 14px 22px; font-size: 17px; font-weight: 600;
 }
+/* Ton aus: kleines durchgestrichenes Lautsprecher-Symbol unten rechts im Videoband (16:9 ab 31 % der Höhe), kein Text */
+.vsound {
+  position: absolute; z-index: 15; width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.6);
+  right: calc(env(safe-area-inset-right) + 12px);
+  /* gleiche Rechnung wie .vframe: mittig, Höhe max(100dvh, 100vw * 16 / 9), Band ab 31 % davon. 44 px = Symbol 32 px plus 12 px Abstand zur Bandkante */
+  top: calc(50% - max(100dvh, 100vw * 16 / 9) * 0.19 + 100vw * 9 / 16 - 44px);
+}
 .vinfo {
   position: absolute; left: calc(env(safe-area-inset-left) + 16px); right: 88px; z-index: 20;
   bottom: calc(env(safe-area-inset-bottom) + var(--nav-h, 0px) + 24px);
@@ -339,6 +347,7 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 .desk .vframe { left: 0; top: 0; width: 100%; height: 100%; transform: none; }
 .desk .vframe > div { left: 0; top: 50%; width: 100%; height: auto; aspect-ratio: 16 / 9; transform: translateY(-50%); }
 .desk .vposter { left: 0; top: 50%; width: 100%; height: auto; aspect-ratio: 16 / 9; transform: translateY(-50%); }
+.desk .vsound { right: 12px; top: calc(50% + var(--col-w) * 9 / 32 - 44px); }
 .desk .vcaption { left: 16px; right: 16px; top: calc(50% + var(--col-w) * 9 / 32 + 16px); }
 .desk .vaudio-art { top: calc(50% - 220px); width: 240px; }
 .desk .vcaption.vcaption-audio { top: calc(50% + 48px); }

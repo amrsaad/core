@@ -104,6 +104,18 @@ try {
   await settle(pg);
   const bodyNoHelp = () => pg.evaluate(() => !!document.querySelector('[data-testid=desk-help]'));
 
+  // Ton aus: Symbol statt Text, unten rechts im 16:9-Band der Spalte (gemessen, wenn keine Transition mehr läuft)
+  await waitFor(pg, () => document.getAnimations().filter((a) => a instanceof CSSTransition).length === 0);
+  const dIcon = await pg.evaluate(() => {
+    const el = document.querySelector('[data-testid=sound-off]');
+    const band = document.querySelector('.vframe > div');
+    if (!el || !band) return null;
+    const a = el.getBoundingClientRect(), b = band.getBoundingClientRect();
+    return { right: b.right - a.right, fromBandBottom: b.bottom - a.bottom, w: a.width, text: el.textContent.trim(), pill: /for sound/i.test(document.body.innerText) };
+  });
+  c.soundIconDesk = !!dIcon && dIcon.text === '' && !dIcon.pill && Math.abs(dIcon.right - 12) <= 3 && Math.abs(dIcon.fromBandBottom - 12) <= 3;
+  if (!c.soundIconDesk) console.log('soundIconDesk', JSON.stringify(dIcon));
+
   // Übersicht einmalig beim ersten Desktop-Start
   c.helpShownFirst = await waitFor(pg, () => !!document.querySelector('[data-testid=desk-help]'));
   await pg.screenshot({ path: `${out}/01-uebersicht.png` });

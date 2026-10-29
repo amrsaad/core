@@ -63,6 +63,9 @@ const LOG_MAX = 3000;
 
 const load = (m: Moment) => ({ videoId: m.videoId, startSeconds: m.start, endSeconds: m.end });
 
+/** Das Symbol "Ton aus" erscheint nur, solange in dieser Sitzung noch nie Ton an war. Danach nie wieder (Max, 29.10.2026). */
+let soundSeenOn = false;
+
 export function MomentFeed({ pool: allPool, state, update, active, onPausedChange, desk }: Props) {
   const single = state.settings.playerMode === 'single';
   const SLOTS = single ? 1 : 3;
@@ -116,7 +119,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const [, setTick] = useState(0);
   const rerender = () => setTick((t) => t + 1);
   const [progress, setProgress] = useState(0);
-  const [hint, setHint] = useState(true);
+  const [hint, setHint] = useState(!soundSeenOn);
   const [paused, setPaused] = useState(false);
   const [fast, setFast] = useState(false);
   const rateRef = useRef(DEFAULT_SPEED);
@@ -540,6 +543,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       p.playVideo();
       userPaused.current = false;
       setPaused(false);
+      soundSeenOn = true;
       setHint(false);
       return;
     }
@@ -792,6 +796,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       if (on) sl.player?.unMute();
       else sl.player?.mute();
     }
+    soundSeenOn = true;
     setHint(false);
     show(on ? 'Sound on' : 'Muted');
   };
@@ -1146,8 +1151,11 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       />
 
       {hint && !forYou && form !== 'text' && (
-        <div className="vhint pointer-events-none">
-          <span>{desk ? 'Click or press M for sound' : 'Tap for sound'}</span>
+        <div className="vsound pointer-events-none" data-testid="sound-off" role="img" aria-label="Sound off">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M11 5 6 9H3v6h3l5 4z" fill="#fff" />
+            <path d="m16 9 5 6M21 9l-5 6" />
+          </svg>
         </div>
       )}
 

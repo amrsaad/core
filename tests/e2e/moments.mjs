@@ -188,10 +188,26 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const capLog = [];
     await page.screenshot({ path: `${out}/${name}-1-start.png` });
 
-    // Tipp: Ton an
+    // Ton aus: nur ein kleines durchgestrichenes Lautsprecher-Symbol unten rechts im Videoband, keine Pille und kein Text
     const vp = page.viewportSize();
+    // Messen erst, wenn keine Transition mehr läuft (der Feed gleitet beim Start noch ein)
+    await waitFor(page, () => document.getAnimations().filter((a) => a instanceof CSSTransition).length === 0);
+    const icon = await page.evaluate(() => {
+      const el = document.querySelector('[data-testid=sound-off]');
+      const band = document.querySelector('.vframe > div');
+      if (!el || !band) return null;
+      const a = el.getBoundingClientRect(), b = band.getBoundingClientRect();
+      return { w: a.width, h: a.height, text: el.textContent.trim(), right: innerWidth - a.right, fromBandBottom: b.bottom - a.bottom, inBand: a.top >= b.top && a.bottom <= b.bottom + 12, centered: Math.abs(a.left + a.width / 2 - innerWidth / 2) < 40, pillText: document.body.innerText.includes('Tap for sound'), slashed: !!el.querySelector('path[d^="m16 9"]') };
+    });
+    r.soundIcon = icon;
+    c.soundIconShownWhileMuted = !!icon && icon.w <= 40 && icon.h <= 40 && icon.text === '' && icon.slashed;
+    c.soundIconBottomRightOfBand = !!icon && icon.right >= 8 && icon.right <= 24 && icon.inBand && Math.abs(icon.fromBandBottom - 12) <= 3 && !icon.centered;
+    c.noSoundPill = !!icon && !icon.pillText && !(await page.$('.vhint'));
+    await page.screenshot({ path: `${out}/${name}-1b-ton-aus-symbol.png` });
+    // Tipp irgendwo: Ton an, Symbol verschwindet
     await page.mouse.click(vp.width / 2, vp.height / 2);
     c.soundOn = await waitFor(page, () => window.__ytlog.includes('unmute'));
+    c.soundIconGoneAfterTap = await waitFor(page, () => !document.querySelector('[data-testid=sound-off]'));
 
     // 4 Momente durchlaufen: Für dich genau dann, wenn forYou gesetzt ist; Ende genau bei end
     const seen = [];
@@ -211,6 +227,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await waitFor(page, (j) => window.__core.idx() === j + 1, m.idx);
       seen.push({ id: m.id, has: !!m.forYou, fy, stoppedAtEnd: !fy || t <= m.end + 0.01 });
     }
+    c.soundIconNeverBack = !(await page.$('[data-testid=sound-off]')) && (await page.evaluate(() => window.__core.sound()));
     c.forYouExactlyWhenSet = seen.every((x) => x.has === x.fy);
     c.sawBothKinds = seen.some((x) => x.has) && seen.some((x) => !x.has);
     c.stoppedAtEnd = seen.every((x) => x.stoppedAtEnd);
@@ -723,7 +740,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const hk = await p7.evaluate(() => { const e = document.querySelector('[data-testid=hook]'); const m = window.__core.moment(); return { step: e.dataset.step, clipped: e.scrollHeight > e.clientHeight + 1, full: e.textContent === m.hook, size: parseFloat(getComputedStyle(e).fontSize), lines: Math.round(e.scrollHeight / parseFloat(getComputedStyle(e).lineHeight)), id: m.id }; });
       capLogs.push({ hk });
       if (n === 0) await p7.screenshot({ path: `${out}/${name}-17-hook-lang.png` });
-      if (await p7.$('.vhint') || (await p7.evaluate(() => window.__core.state())) !== 1) await p7.mouse.click(vp.width / 2, vp.height / 2);
+      if (await p7.$('[data-testid=sound-off]') || (await p7.evaluate(() => window.__core.state())) !== 1) await p7.mouse.click(vp.width / 2, vp.height / 2);
       await waitFor(p7, () => window.__core.state() === 1);
       await p7.click(n % 2 === 0 ? '[data-testid=hook]' : '[data-testid=speaker-line]');
       const open = await waitFor(p7, () => !!document.querySelector('[data-testid=caption-sheet]'));
@@ -766,7 +783,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // Falls ein Wischer nicht griff: weiter wischen, bis fünf Momente durch sind
     for (let extra = 0; extra < 6 && (await p7.evaluate(() => window.__core.idx())) < 5; extra++) {
       const b = await p7.evaluate(() => window.__core.idx());
-      if (await p7.$('.vhint')) await p7.mouse.click(vp.width / 2, vp.height / 2);
+      if (await p7.$('[data-testid=sound-off]')) await p7.mouse.click(vp.width / 2, vp.height / 2);
       await p7.mouse.move(vp.width / 2, vp.height * 0.7);
       await p7.mouse.down();
       for (let i = 1; i <= 5; i++) await p7.mouse.move(vp.width / 2, vp.height * (0.7 - 0.09 * i));
