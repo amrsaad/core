@@ -1,0 +1,423 @@
+{
+ "source": "arxiv",
+ "date": "2026-10-29",
+ "records": [
+  {
+   "sourceId": "arxiv:2610.37668",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.37668",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Honeycomb-Surfels: Compact Hexagonal Primitives for Efficient Scene Rendering and Reconstruction",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Honeycomb-Surfels: Compact Hexagonal Primitives for Efficient Scene Rendering and Reconstruction",
+    "abstract": "Novel view synthesis and 3D reconstruction have advanced rapidly with radiance fields and splatting, yet their memory and computational demands limit their use in resource-constrained settings. We introduce Hexels: novel planar hexagonal surface elements with a first-order spatial color field for efficient 3D scene and 2D image representation. Hexels exploit locally planar regions with smoothly varying appearance using fewer, larger primitives. Their hexagonal support provides an area- and boundary-efficient domain, while the local color field captures appearance variation within each primitive. Across 34 scenes, Hexels improve PSNR over memory-matched 2DGS by 4.53-7.38 dB across datasets while requiring lower training VRAM. We further ablate Hexels by showing that per primitive, Hexels outperform 2DGS by upto 4.74 dB while using lower training VRAM and having 2.31 times faster FPS. Even in unconstrained settings, Hexels offers complementary quality-memory trade-offs. For efficient 3D surface reconstruction, Hexels reduce error by 28.9% compared with memory-matched 2DGS across 15 DTU scans. On 6 Tanks and Temples surface scenes, Hexels achieves the highest mean F1 among compared methods (34.38%, versus 31.72% for 2DGS). We further also show that Hexels, as a general primitive, improves 2D image representation over Image-GS. Hexels push the Pareto frontier on the quality-efficiency trade-off of surface-aligned primitives."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-27T17:59:59Z"
+   },
+   "fetchedAt": "2026-10-29T09:21:41.897Z"
+  },
+  {
+   "sourceId": "arxiv:2610.37656",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.37656",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Attention as Lattice Gauge Theory: Relations Interact Only Through Wilson Loops",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Attention as Lattice Gauge Theory: Relations Interact Only Through Wilson Loops",
+    "abstract": "Relations compose through the entity they share - Alice is Bob's mother and Bob is Carol's father, so Alice is Carol's grandmother - and the order matters, since a father's mother is not a mother's father; verifying a composed relation means closing the loop. We show that if each entity's coordinate frame may be rotated independently (per-entity frame freedom), three things follow. In the pure-gauge sector, relations that share no cycle cannot interact at all. The only gauge-invariant score of a triangle is a class function of its holonomy $H = T_{ij} T_{jk} T_{ki}$ - a Wilson loop. And the only equivariant update of an edge is $U = Ψ(H)\\, T_{ij}$ with $Ψ$ conjugation-equivariant. Edge attention by Wilson loops is therefore not one design among many but the unique form the symmetry permits. Three communities hold pieces of this form: the commuting-operator embeddings of knowledge graphs are its abelian (commuting) sector; AlphaFold's triangle update and the Edge Transformer have its shape - an edge updated through the third vertex - without its constraints; and lattice QCD builds it equivariantly on lattices. We instantiate the equivariant sub-family on general relational graphs as holonomy attention. With no training and composition alone, it infers unobserved $S_4$ relations on sparse graphs at 0.88 with a fifth of the edges corrupted, at or slightly below specialist synchronization algorithms, where every commutative architecture is capped at 0.083; its holonomy score flags corrupted triangles at AUC 0.99 where commuting scores are capped at 0.76 by a second selection rule, and it separates clusters without labels."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-27T17:58:48Z"
+   },
+   "fetchedAt": "2026-10-29T09:21:41.897Z"
+  },
+  {
+   "sourceId": "arxiv:2610.37598",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.37598",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "GAS-PFN: Graph-Aware Spatiotemporal Prior-Data Fitted Networks for Zero-Shot Traffic Forecasting",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "GAS-PFN: Graph-Aware Spatiotemporal Prior-Data Fitted Networks for Zero-Shot Traffic Forecasting",
+    "abstract": "Traffic forecasting requires modeling complex temporal dynamics and the spatial dependencies imposed by road topology. Supervised graph-based models achieve strong performance, but are often trained for a particular dataset and sensor graph, making deployment to new or evolving networks costly. Prior-Data Fitted Networks (PFNs) offer a zero-shot alternative by learning in-context inference from synthetic task priors, which provide an explicit mechanism for encoding domain-specific assumptions. Existing forecasting PFNs, however, do not explicitly represent the graph-structured dependencies governing traffic dynamics. To combine graph-aware traffic modeling with zero-shot adaptation, we introduce the Graph-Aware Spatiotemporal Prior-Data Fitted Network (GAS-PFN). GAS-PFN incorporates sampled road topology into its synthetic task prior through random-walk diffusion, teaching the model to learn graph-coupled dynamics during pretraining. Its co-designed inference architecture uses two mask-conditioned passes through a shared Transformer backbone to separately model sensor-specific temporal dynamics and spatiotemporal interactions among neighboring sensors before integrating their representations for prediction. This design enables GAS-PFN to use target-network structure and context without parameter updates. Across six benchmarks at the 90-minute horizon, GAS-PFN reduces MSE by 34.0% on average relative to TimePFN, its closest PFN-based predecessor. It also reduces MSE by 27.7% on average relative to four recent industry-developed general-purpose zero-shot forecasters. In this comparison, all models receive 90 minutes of contiguous recent history, and any additional context is drawn from each dataset's chronological training split. These results indicate that aligning PFN priors and inference architectures with graph structure improves in-context learning for zero-shot traffic forecasting."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-27T17:31:26Z"
+   },
+   "fetchedAt": "2026-10-29T09:21:41.897Z"
+  },
+  {
+   "sourceId": "arxiv:2610.37588",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.37588",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Understanding the limits of latent world models",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Understanding the limits of latent world models",
+    "abstract": "World models are widely proposed as core components for enabling agents to reason over long temporal and spatial horizons. Yet current evaluations often emphasize task performance while providing limited insight into whether learned world models acquire predictive latent dynamics that reflect the underlying structure of the environment. Here we introduce the concept of faithful latent world models as an equivariance condition between the environment's transition map and the learned latent dynamics. We propose latent rollout consistency (LRC) as a metric to evaluate action-conditioned latent prediction. Strikingly, we find that across the studied state of the art latent world models, none solves the task by actually faithfully modeling the dynamics of the environment."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-27T17:25:50Z"
+   },
+   "fetchedAt": "2026-10-29T09:21:41.897Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.37588": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.37585",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.37585",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Timestral",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Timestral",
+    "abstract": "We introduce Timestral, a family of four time series foundation models for probabilistic forecasting, with 5M, 28M, 123M, and 209M parameters. Timestral sets a new state of the art on GIFT-Eval, TIME, and fev-bench, where Timestral-209M and Timestral-123M take the top two places on every metric. We achieve this with three ingredients: Decoupled Horizon Forecasting (DHF), which separates prediction tokens from the causally encoded context, so that longer horizons are trained without masking context and each observed value is both a forecast target and context for later forecasts; a covariate framework that natively supports known-future covariates within a causal architecture; and a two-stage pipeline that pretrains exclusively on a diverse, large-scale synthetic corpus before post-training on a mix of real and synthetic data with extended context. This report describes the model design and its benchmark results. Weights for all four models are available on Hugging Face and inference code on GitHub."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-27T17:25:43Z"
+   },
+   "fetchedAt": "2026-10-29T09:21:41.897Z"
+  },
+  {
+   "sourceId": "arxiv:2610.37584",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.37584",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "REGER: Modeling inter-item Relations with Semantic IDs for Generative Recommendation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "REGER: Modeling inter-item Relations with Semantic IDs for Generative Recommendation",
+    "abstract": "Personalized recommendation depends on learning semantic and collaborative relations among items from online content and user interactions. Generative recommendation (GR) offers a promising paradigm by autoregressively generating discrete semantic IDs (SIDs) of items. However, randomly initialized SID token embeddings and GR models trained from scratch do not directly inherit the semantic relations inherent in items, while inter-item collaborative relations are learned largely implicitly through token-level attention and next-token supervision. To address this limitation, we propose REGER, a unified framework that explicitly incorporates inter-item relations into semantic pretraining, history encoding, and SID generation. We pretrain the GR model through generative semantic retrieval, enabling it to inherit inter-item semantic similarity by learning to generate semantic neighbors' SIDs. We combine global attention with local attention aligned with SID boundaries to capture historical context and directed transitions between adjacent items. We further develop a theoretical framework for hierarchical preference decomposition over the SID prefix tree, proving an exact factorization of collaborative preference distributions and a weighted decomposition of item-level KL divergence into prefix-conditional KL divergences. Building on this analysis, we distill a discriminative teacher's full conditional distributions over all legal next tokens at ground-truth prefixes along the target SID path, jointly optimizing this objective with cross-entropy. Extensive experiments on real-world datasets demonstrate consistent improvements over existing GR baselines and support the effectiveness of the proposed preference distillation."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-27T17:25:12Z"
+   },
+   "fetchedAt": "2026-10-29T09:21:41.897Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.37584": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.37571",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.37571",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "TeamGym: A Gym for Team Decision-Making by AI Agents with Distributed Information",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "TeamGym: A Gym for Team Decision-Making by AI Agents with Distributed Information",
+    "abstract": "Many real-world decisions require teams to integrate information distributed across participants. Yet AI agents are still primarily trained and benchmarked in isolation. We introduce TeamGym, an environment for evaluating and training language model-based agents on team decision-making problems constructed from real-world legal, finance, medical, and software engineering corpora. TeamGym introduces a method to identify a minimal set of facts, each element of which is necessary and all of which are collectively sufficient for a correct final decision, which we call pivotal information. This enables TeamGym to both control the distribution of pivotal information and track how well agents identify and integrate pivotal information when making team decisions. Examining 8 language models on 12 source corpora, we find that current AI agents often fail to effectively share information: Distributing pivotal information across participants lowers success rate by 22.9 percentage points on average relative to giving the same information to a single model (a communication gap). We also document that participants do not effectively retrieve decision-relevant information on their own: A team's success rate is lowered by a further 19.9 points when participants must identify and extract pivotal information from source material rather than receiving it directly (a retrieval gap). To help remedy these deficits, we use TeamGym to train policies through reinforcement learning on team decision loss. Across two policy-training experiments, we find that training improves final-decision quality and induces emergent coordination in participation, speaker selection, and communication, even though the reward evaluates only the final decision."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-27T17:15:54Z"
+   },
+   "fetchedAt": "2026-10-29T09:21:41.897Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.37571": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.37567",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.37567",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Gym-Anything-RT: Scaling Real-Time Environments for Vision-Language Agents",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Gym-Anything-RT: Scaling Real-Time Environments for Vision-Language Agents",
+    "abstract": "AI agents have made substantial progress in domains where they have a non-trivial amount of time to deliberate between actions, such as mathematics, software engineering, and performing tasks on desktop applications. It is less clear how such models fare in settings that demand real-time interaction, such as playing a video game or operating a physical device. In these settings, the environment state may evolve as the agent is reasoning, or even as the underlying model is performing a forward pass. To gain insight into the real-time interaction capabilities of vision-language agents, we introduce Gym-Anything-RT. Our key idea is to construct visual minigames that demand a portfolio of capabilities required for interactive real-time settings. Gym-Anything-RT uses an agentic pipeline to automatically generate such environments based on a taxonomy of six capabilities required for real-time interaction, including the ability to perceive the environment and act under an evolving environment state. A key feature of Gym-Anything-RT is that it allows for controlled comparison of real-time interaction capabilities: we can run the same minigame in real time, or pause or slow down the environment to relax the requirement for real-time actions. We use Gym-Anything-RT to construct 100 real-time minigames and evaluate AI agents on them. We find large capability gaps in real-time interaction. For example, GPT-6 Astra (xHigh) achieves a pass rate of only 9.0% on the real-time minigames, which rises to 75.0% when the environment is paused. We also identify intriguing behaviors by the most powerful frontier agents: for instance, when given the ability to write code, these agents write code that bypasses the need to perceive and act in real time. We publicly release Gym-Anything-RT and the generated minigames to spur further research on AI agents in real-time interactive settings."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-27T17:13:05Z"
+   },
+   "fetchedAt": "2026-10-29T09:21:41.897Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.37567": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.37561",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.37561",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "When uncertainty quantification fails: structural vulnerabilities and corrections for selective prediction under clinical class imbalance",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "When uncertainty quantification fails: structural vulnerabilities and corrections for selective prediction under clinical class imbalance",
+    "abstract": "Background. Selective prediction systems improve the safety of clinical artificial intelligence by deferring ambiguous cases to human experts while automating high-confidence decisions. However, this safety mechanism relies entirely on the premise that uncertainty scores accurately reflect clinical ambiguity. In prognostic tasks characterized by severe class imbalance, where the clinical outcome of interest is a minority, this assumption breaks down. Standard uncertainty measures cease to capture clinically aligned ambiguity; instead, they become a proxy for class membership, systematically penalizing minority patients regardless of their individual predictive clarity. Results. Across 56 synthetic conditions and three neurodegenerative cohorts spanning severe class imbalance to near-balanced conditions (multiple sclerosis, Parkinson's Disease, Alzheimer's Disease), our framework consistently maintained bounded, balanced risk across trajectories. In contrast, global metrics either collapsed minority Sensitivity or protected the minority at the expense of majority patients. Applying CCR with standard entropy fails to protect the minority because it breaks within-class monotonicity when tau=0.5. Combining CCR with threshold-aware metrics restores strict monotonicity, correctly identifies ambiguous patients, and safely mitigates minority exclusion. Conclusions. Under clinical class imbalance, standard uncertainty quantification measures dataset sparsity rather than clinical ambiguity, creating a systemic illusion of safety. This bias is a correctable structural flaw. Clinical pipelines deploying selective prediction under imbalance should adopt threshold-aligned uncertainty measures and class-stratified evaluation. This reduces class-specific risk imbalance, supporting safer selective prediction under the evaluated conditions without silently excluding the most vulnerable patients."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-27T17:08:31Z"
+   },
+   "fetchedAt": "2026-10-29T09:21:41.897Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.37561": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.37550",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.37550",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Kinematic Constraint-Referenced Evaluation for Articulated Object Manipulation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Kinematic Constraint-Referenced Evaluation for Articulated Object Manipulation",
+    "abstract": "Manipulation policies are evaluated predominantly by binary task success, which cannot tell whether the commanded gesture is the one the object's kinematics admit. We introduce Constraint-Referenced Strategy (CRS), which projects the commanded end-effector twist onto the object's joint axis, separating progress along the joint from off-constraint waste. CRS requires a joint model and a joint-following scripted controller derived from it, but no recorded demonstration or learned judge. On 74 simulated articulated objects, success registers three transfer failures as lower rates but attributes none, while the two CRS channels give each a distinct signature. A door-trained behavior-cloning policy opens drawers in 59 of 110 episodes, and in these passes it commands about $40\\times$ the off-axis rotation of a drawer-trained policy's passes ($1.27$ vs.\\ $0.032$~rad/s). Relative to a scripted controller scored with the same axis, CRS verdicts are unchanged under joint-axis errors up to $30^\\circ$; absolute thresholds tolerate about $8^\\circ$."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-27T17:00:01Z"
+   },
+   "fetchedAt": "2026-10-29T09:21:41.897Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.37550": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.37547",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.37547",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "When, Where, and What to Correct: Human-Guided Adaptive Residual Correction for Robot Policies",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "When, Where, and What to Correct: Human-Guided Adaptive Residual Correction for Robot Policies",
+    "abstract": "Imitation policies that reliably execute most of a manipulation trajectory can still fail in localized regions requiring last-mile precision. Updating the full policy or exploring residual actions everywhere treats this local failure as a global learning problem. We introduce Adaptive Residual Correction (ARC), a lightweight post-training module that uses reinforcement learning (RL) to learn a residual correction on top of a frozen policy while using sparse human corrections to structure autonomous exploration. Rather than treating human corrections as imitation targets, ARC uses pre-intervention states to determine 'when' residual control should become active and correction geometry to determine 'where' in residual action space autonomous refinement should explore; task reward determines 'what' residual is ultimately executed. Across three precision-manipulation tasks on a real robot, ARC improves average task success from 33.3% to 75.0%. The human corrections define task-dependent 2-3 dimensional subspaces of the seven-joint residual space that retain 96.0-97.7% of squared correction magnitude. Together, these results show that sparse human corrections can localize and constrain autonomous post-training without requiring the observed correction itself to serve as the final action target."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-27T16:58:54Z"
+   },
+   "fetchedAt": "2026-10-29T09:21:41.897Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.37547": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.37545",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.37545",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "GroundControl: Satellite-Conditioned Multi-View Diffusion for Reconstruction-Free Novel View Synthesis",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "GroundControl: Satellite-Conditioned Multi-View Diffusion for Reconstruction-Free Novel View Synthesis",
+    "abstract": "Multi-view or video diffusion models have recently emerged as state-of-the-art approaches for novel-view synthesis from sparse image collections. While they can produce high quality images, they tend to hallucinate unrealistic spatial layouts when synthesizing views outside the input views (scene extrapolation). We propose to address this challenge for outdoor scenes by using satellite images as an additional information source to condition the multi-view generative model. We introduce a new satellite-conditioned multi-view diffusion model that combines conditioning from a satellite image and street-level input images when generating novel-views. Our cross-attention based conditioning allows us to retain pretrained multi-view diffusion priors to generate seamless, realistic, novel views from a handful of source views, while also adhering to the scene layout as seen from satellite images. Our model does not use 3D scene reconstruction, and only relies on posed street and satellite views. Our experiments on outdoor datasets show that our model is better than both satellite-conditioned or street-view conditioned baselines on novel-view synthesis, especially on challenging cases where target views have very little overlap with source views. Project page: https://nianticspatial.github.io/groundcontrol"
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-27T16:56:45Z"
+   },
+   "fetchedAt": "2026-10-29T09:21:41.897Z"
+  },
+  {
+   "sourceId": "arxiv:2610.37533",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.37533",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Which Hand Was Late? Diagnosis for Robot Failure Recovery in Bimanual Tool Use",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Which Hand Was Late? Diagnosis for Robot Failure Recovery in Bimanual Tool Use",
+    "abstract": "Failure diagnosers for robot manipulation are increasingly vision--language models (VLMs), trained and evaluated on single-arm failures produced by perturbing a successful demonstration. Bimanual tool use adds failures of other kinds: a tool that slips out of its socket while still held, two correct gestures made at different times, and attempts that fail for two reasons at once. On a simulated bimanual tool-use task whose failure causes are read from the recorded trace, we measure what each sensing channel lets a diagnoser tell. The tool's slip is read on the tool hand; which hand was late is read on both arms, while a sensor on one hand reads its own hand's delay and at most part of the other's; and whether a late attempt was also pushed too weakly is not identifiable from passive sensing when the tool hand is late. Within two attempts, a repair policy that escalates when the cause is not identifiable repairs as many failures as one told the true cause. A VLM's internal state carries the late hand almost perfectly, along a direction no closer to the one its answer reads than a random one; whether the answer reports it depends on the wording of the question."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-27T16:53:18Z"
+   },
+   "fetchedAt": "2026-10-29T09:21:41.897Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.37533": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.37523",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.37523",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "The Structure Gap: When More Data Cannot Replace Structured Reasoning",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "The Structure Gap: When More Data Cannot Replace Structured Reasoning",
+    "abstract": "A persistent belief in modern AI is that sufficiently large learners trained on sufficiently much data can make explicit domain knowledge optional. This paper examines a limitation of that belief. We define structure-encoded problems: tasks whose input-output map is determined, or sharply constrained, by known structure such as a solver, symmetry group, graph, physical law, measurement operator, grammar, combinatorial search space, or optimization objective. For such tasks, the central question is not expressivity--a dense neural network may contain the desired map--but finite-data identification, extrapolation, and certification. We introduce the structure gap: the finite-resource gap between a method that receives the governing structure and a learner that receives only examples. The strongest useful form of the claim is asymptotic rather than absolute: structure-agnostic learning may approach a structured solver as coverage grows, but every finite dataset can leave residual uncertainty that the structure resolves by construction. We prove this exactly for a Gaussian inverse problem: the known-operator Wiener solver attains Bayes risk, while the dense empirical learner in the correct linear class has persistent expected excess risk. We also prove a cell-coverage lower bound and an unobserved-orbit non-identifiability result. Controlled experiments in known-operator inversion, sparse recovery, and graph reachability with size extrapolation instantiate the mechanisms. When validated structure is available, it can constrain the hypothesis space before learning begins, leaving learning to address components the structure does not specify."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-27T16:45:22Z"
+   },
+   "fetchedAt": "2026-10-29T09:21:41.897Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.37523": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.37517",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.37517",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Orthogonal and Parametrized Multi-Attribute Steering of LLMs",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Orthogonal and Parametrized Multi-Attribute Steering of LLMs",
+    "abstract": "Activation steering offers an effective and efficient way to modify an LLM's behavior at inference time. However, it remains unclear how to apply steering such that the signal is consistently strong and the steering strength has a universally interpretable meaning. We address this first by identifying the most steerable interval for each steering vector and rescaling the steering range accordingly. Building on this, we introduce a more interpretable method for steering, called parameterized steering which instead of pushing activations in a direction, it sets them at the desired trait strength. Next, with multi-trait steering, we find that naively combining vectors causes them to interfere with one another. In response, we develop a method to orthogonalize the vectors; it decouples these traits, allowing a model to exhibit one behavior without inducing the others, thus enabling multiple traits to be steered simultaneously."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-27T16:39:53Z"
+   },
+   "fetchedAt": "2026-10-29T09:21:41.897Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.37517": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.37504",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.37504",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Strategyproof Deep Reinforcement Learning for Online Resource Allocation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Strategyproof Deep Reinforcement Learning for Online Resource Allocation",
+    "abstract": "Online resource allocation faces two coupled challenges: (1) allocating scarce resources efficiently under uncertain future demand, and (2) ensuring that agents report task valuations and requirements truthfully (strategyproofness). Reinforcement Learning (RL) adapts allocation decisions through experience but does not necessarily ensure strategyproofness. Existing strategyproof RL uses a linear allocation rule, which limits the resource interactions it can represent. Neural mechanism design methods offer greater expressiveness, but provide only approximate incentive guarantees. Against this background, we introduce the first strategyproof deep RL mechanism for online resource allocation. It integrates three novel components: (i) a monotonic neural network that learns nonlinear interactions by construction (higher reported value cannot reduce acceptance, while a longer reported duration or larger resource requirement cannot increase it); (ii) a generalised critical payment: the lowest accepted value, with all other inputs fixed; and (iii) training by either RL or imitation of an existing rule. Together, monotonicity and the critical payment ensure strategyproofness and individual rationality, while the neural rule provides flexibility and imitation improves training efficiency. Empirically, on a four-resource stream with two partner pairs that a linear difference cannot represent, the neural rule achieves 97.8% of an offline welfare upper bound, compared with 93.8% for a linear learner and 89.0% for first-come, first-served, closing 65% and 80% of the remaining optimality gap, respectively. Moreover, imitation reaches 97.5% in only 261 seconds, about 89 times faster than RL."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-27T16:25:28Z"
+   },
+   "fetchedAt": "2026-10-29T09:21:41.897Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.37504": 200
+   }
+  }
+ ]
+}

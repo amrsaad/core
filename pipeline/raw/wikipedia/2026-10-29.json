@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-10-29",
+ "records": [
+  {
+   "sourceId": "wiki:de:Geschichte von Tarent",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Geschichte_von_Tarent",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/29",
+    "status": 200
+   },
+   "title": "Geschichte von Tarent",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Geschichte von Tarent, der Stadt im süditalienischen Apulien, beginnt legendenhaft fassbar im späten 8. Jahrhundert v. Chr. mit der Gründung der Apoikie Taras durch Sparta, doch die älteste Quelle stammt erst aus dem Jahr 473 v. Chr. Wie inzwischen archäologisch belegt ist, wurde das heutige Tarent spätestens in der Jungsteinzeit erstmals besiedelt. Im Laufe der mittleren Bronzezeit entwickelte sich eine über Jahrhunderte dauerhaft genutzte Siedlung zu einem der bedeutendsten Handelszentren des zentralen Mittelmeerraums, das in dauerhaftem Kontakt zum mykenischen Griechenland stand. Auch aus der frühen Eisenzeit gibt es Funde, die von der Besiedlung des späteren Tarents im 10. bis 8. Jahrhundert v. Chr. zeugen."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-10-29T09:21:49.256Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Geschichte_von_Tarent": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Volkskammer",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Volkskammer",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/29",
+    "status": 200
+   },
+   "title": "Volkskammer",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Volkskammer war vom 7. Oktober 1949 bis zum 2. Oktober 1990 das Parlament der Deutschen Demokratischen Republik (DDR). Nominell war sie das höchste Verfassungsorgan, tatsächlich bestimmte aber die Sozialistische Einheitspartei Deutschlands (SED) die Politik der DDR. Dies änderte sich erst durch die Friedliche Revolution von 1989/90."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-29T09:21:49.256Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Volkskammer": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Lunar Orbiter 1",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Lunar_Orbiter_1",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/29",
+    "status": 200
+   },
+   "title": "Lunar Orbiter 1",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Lunar Orbiter 1 war die erste von fünf Mondsonden des Lunar-Orbiter-Programms der US-amerikanischen Weltraumorganisation NASA. Mit dem Lunar-Orbiter-Programm sollte der Mond in hoher Auflösung fotografisch erfasst und kartografiert werden, um so Landeplätze für die Raumsonden des Surveyor-Programms sowie für die bemannte Mondlandung zu finden."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-29T09:21:49.256Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Lunar_Orbiter_1": 200
+   }
+  }
+ ]
+}
