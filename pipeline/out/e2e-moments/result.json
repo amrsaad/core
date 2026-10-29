@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T19:12:06.544Z",
+ "at": "2026-10-29T19:23:07.797Z",
  "runs": [
   {
    "browser": "webkit",
@@ -258,10 +258,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604736,
+     "due": 1792929604810,
      "results": [
       {
-       "at": 1792756804736,
+       "at": 1792756804810,
        "got": false
       }
      ]
@@ -338,21 +338,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 27,
+    "measured": 30,
     "recorded": 32
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 373,
+    "checksDone": 375,
     "violations": 0,
-    "endedSeen": 183
+    "endedSeen": 180
    },
    "latency": {
     "n": 38,
     "buffered": 31,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000026:100 | Testmoment 26 brain | Boring | - | Video | e91b220 |\n| test0000022:100 | Testmoment 22 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e91b220 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | e91b220 |\n| test0000046:100 | Testmoment 46 body | Wrong | - | Video | e91b220 |\n| test0000011:100 | Testmoment 11 beat | Not for me | - | Video | e91b220 |\n| test0000029:100 | Testmoment 29 brain | Mute speaker | - | Video | e91b220 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000026:100 | Testmoment 26 brain | Boring | - | Video | c7038c0 |\n| test0000022:100 | Testmoment 22 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | c7038c0 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | c7038c0 |\n| test0000046:100 | Testmoment 46 body | Wrong | - | Video | c7038c0 |\n| test0000011:100 | Testmoment 11 beat | Not for me | - | Video | c7038c0 |\n| test0000029:100 | Testmoment 29 brain | Mute speaker | - | Video | c7038c0 |",
    "badWalk": [
     {
      "idx": 2,
@@ -850,7 +850,7 @@
     "cardHasLessRows": true,
     "cardTopicBlocked": true,
     "resetAsks": true,
-    "resetCancelKeeps": false,
+    "resetCancelKeeps": true,
     "cardExpiryLifted": true,
     "resetEmpties": true,
     "resetClearsWeights": true,
@@ -948,10 +948,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603502,
+     "due": 1792929603796,
      "results": [
       {
-       "at": 1792756803502,
+       "at": 1792756803796,
        "got": false
       }
      ]
@@ -1016,9 +1016,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06246948242188,
+    "bh": 221.0625,
     "fw": 393,
-    "fh": 221.06246948242188,
+    "fh": 221.0625,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -1028,21 +1028,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 32.09999999997672,
-    "recorded": 32
+    "measured": 31.599999999976717,
+    "recorded": 31
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 388,
+    "checksDone": 390,
     "violations": 0,
-    "endedSeen": 189
+    "endedSeen": 190
    },
    "latency": {
     "n": 38,
     "buffered": 31,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000026:100 | Testmoment 26 brain | Boring | - | Video | e91b220 |\n| test0000022:100 | Testmoment 22 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e91b220 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | e91b220 |\n| test0000046:100 | Testmoment 46 body | Wrong | - | Video | e91b220 |\n| test0000011:100 | Testmoment 11 beat | Not for me | - | Video | e91b220 |\n| test0000029:100 | Testmoment 29 brain | Mute speaker | - | Video | e91b220 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000026:100 | Testmoment 26 brain | Boring | - | Video | c7038c0 |\n| test0000022:100 | Testmoment 22 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | c7038c0 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | c7038c0 |\n| test0000046:100 | Testmoment 46 body | Wrong | - | Video | c7038c0 |\n| test0000011:100 | Testmoment 11 beat | Not for me | - | Video | c7038c0 |\n| test0000029:100 | Testmoment 29 brain | Mute speaker | - | Video | c7038c0 |",
    "badWalk": [
     {
      "idx": 2,
@@ -1379,7 +1379,7 @@
     "noRating": true
    },
    "errors": [],
-   "ok": false
+   "ok": true
   }
  ]
 }
