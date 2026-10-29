@@ -758,7 +758,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!wasDown) return;
     // Jede erste Berührung (auch ein Wisch) gilt dem Browser als Geste: Ton sofort freischalten, damit nach einem
     // Neuladen der PWA nie ein Tipp nur für den Ton nötig ist und der Hinweis nicht zurückkommt (Max, 29.10.).
-    if (!soundOn.current && !textRef.current) {
+    const firstTouch = !soundOn.current && !textRef.current;
+    if (firstTouch) {
       soundOn.current = true;
       for (const s of slots.current) s.player?.unMute();
       soundSeenOn = true;
@@ -770,6 +771,14 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       if (sw === 'next') goTo(idxRef.current + 1);
       else if (sw === 'prev') goTo(idxRef.current - 1);
       else if (sw === 'note') openNote();
+      return;
+    }
+    // Ein Tipp, der nur den Ton freischaltet, pausiert nicht und zählt nicht als Doppeltipp (wie vor dem Freischalten bei jeder Berührung)
+    if (firstTouch) {
+      const p = current().player;
+      if (p) p.playVideo();
+      userPaused.current = false;
+      setPaused(false);
       return;
     }
     const t = Date.now();
