@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T16:10:51.756Z",
+ "at": "2026-10-29T18:03:06.599Z",
  "runs": [
   {
    "browser": "webkit",
@@ -43,9 +43,9 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "writeDelayMs": 10027,
+   "writeDelayMs": 10038,
    "hosts": [
-    "127.0.0.1:4176",
+    "127.0.0.1:4173",
     "fonts.googleapis.com",
     "www.youtube.com",
     "api.github.com"
@@ -95,9 +95,9 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "writeDelayMs": 10021,
+   "writeDelayMs": 10036,
    "hosts": [
-    "127.0.0.1:4176",
+    "127.0.0.1:4173",
     "fonts.googleapis.com",
     "www.youtube.com",
     "api.github.com"

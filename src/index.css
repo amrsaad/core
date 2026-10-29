@@ -97,17 +97,21 @@ body {
   background: #000;
   color: #fff;
   touch-action: none;
-  --drag: 0px;
 }
 .vslot {
   position: absolute;
   inset: 0;
   overflow: hidden;
   background: #000;
-  transform: translateY(calc(var(--off) * 100% + var(--drag)));
+  transform: translateY(calc(var(--off) * 100%));
 }
-.vslot-anim { transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1); }
-.vfeed[data-drag='1'] .vslot { transition: none; }
+/* Bühne und Overlay-Ebene bewegen sich gemeinsam beim Wischen: nur transform (und opacity), nie top, height oder Layout.
+   will-change steht ab dem Aufsetzen des Fingers und fällt nach dem Auslaufen wieder weg: im Ruhezustand kostet eine Vollbild-Ebene
+   nur Speicher und Zeichenarbeit (gemessen: im WebKit-Runner gingen im Stand fast die Hälfte der Frames verloren). */
+.vstage { position: absolute; inset: 0; }
+.vui { position: absolute; inset: 0; z-index: 20; pointer-events: none; }
+.vfeed[data-moving] .vstage, .vfeed[data-moving] .vui { will-change: transform; }
+.vui .vactions, .vui .vend { pointer-events: auto; }
 /* 9:16-Rahmen, füllt den Bildschirm wie Reels (Ränder werden beschnitten) */
 .vframe,
 .vposter {

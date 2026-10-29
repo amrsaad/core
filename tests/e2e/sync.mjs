@@ -165,7 +165,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // Konflikt: ein drittes Gerät schreibt zwischen Lesen und Schreiben von A
     await A.click('nav [aria-label=Feed]');
     await A.evaluate(() => window.__core.next());
-    const seenId = await A.evaluate(() => window.__core.moment()?.id);
+    // Im Zeitraffer kann der kleine Pool schon bis zur Endseite durchgelaufen sein (dann gibt es keinen aktuellen Moment): dann zählt der zuletzt gesehene
+    const seenId = await A.evaluate(() => window.__core.moment()?.id ?? Object.keys(JSON.parse(localStorage.getItem('core.state') ?? '{}').momentSeen ?? {}).at(-1) ?? 'seen');
     await settings(A);
     api.beforePut = async () => {
       const d = await decryptFile(api.file.text);

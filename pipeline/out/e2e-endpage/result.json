@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-29T16:48:35.139Z",
+  "at": "2026-10-29T17:47:19.028Z",
   "runs": [
     {
       "variant": "webkit",
@@ -54,10 +54,10 @@
         "full": true
       },
       "afterAudio": [
-        "Audio, 2 new",
+        "Audio, 3 new",
         "Text, 2 new"
       ],
-      "seenAudio": 3
+      "seenAudio": 2
     },
     {
       "variant": "chromium",
@@ -112,10 +112,10 @@
         "full": true
       },
       "afterAudio": [
-        "Audio, 2 new",
+        "Audio, 3 new",
         "Text, 2 new"
       ],
-      "seenAudio": 3
+      "seenAudio": 2
     }
   ]
 }

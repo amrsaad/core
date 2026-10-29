@@ -83,12 +83,15 @@ function ytPlayer(YT: YTNamespace, el: HTMLElement, videoId: string | undefined,
  * Ein Player pro Slot, der je nach Moment YouTube (IFrame) oder einen HLS-Stream (<video>, iOS spielt HLS nativ) nutzt.
  * Nach außen dieselbe Schnittstelle wie der YouTube-Player, damit Feed und Modal unverändert bleiben.
  */
-export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, events: { onReady?: () => void; onState?: (s: number) => void; onError?: (code: number) => void }): YTPlayer {
+export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, events: { onReady?: () => void; onState?: (s: number) => void; onError?: (code: number) => void; onDiag?: (line: string) => void }): YTPlayer {
   const host = el.parentElement!;
   host.style.position = 'relative';
   const video = document.createElement('video');
-  video.playsInline = true;
+  // iOS entscheidet über Autoplay an den Attributen, die vor dem Setzen von src stehen: muted und playsinline als Attribut, nicht nur als Eigenschaft
+  video.setAttribute('muted', '');
+  video.defaultMuted = true;
   video.muted = true;
+  video.playsInline = true;
   video.preload = 'auto';
   video.setAttribute('playsinline', '');
   video.setAttribute('webkit-playsinline', '');
@@ -145,22 +148,70 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     if (f) f.style.visibility = m === 'yt' ? 'visible' : 'hidden';
   };
 
+  const diag = (line: string) => events.onDiag?.(line);
+  const vstate = () => `rs=${video.readyState} ns=${video.networkState} muted=${video.muted} t=${video.currentTime.toFixed(1)}${video.error ? ` err=${video.error.code}` : ''}`;
+  let attemptNo = 0;
+  // Ein Startversuch mit Ergebnis im Protokoll. Verweigert der Browser den Ton (NotAllowedError), läuft das Bild stumm weiter, statt zu stehen.
+  const tryPlay = (why: string) => {
+    const n = ++attemptNo;
+    diag(`hls play#${n} ${why} ${vstate()}`);
+    let p: Promise<void> | undefined;
+    try {
+      p = video.play();
+    } catch (e) {
+      diag(`hls play#${n} threw ${e instanceof Error ? e.name : String(e)}`);
+      setHlsState(STATE.PAUSED);
+      return;
+    }
+    p?.then(
+      () => diag(`hls play#${n} ok ${vstate()}`),
+      (e: unknown) => {
+        const name = e instanceof Error ? e.name : String(e);
+        diag(`hls play#${n} refused ${name} ${vstate()}`);
+        if (name === 'NotAllowedError' && !video.muted) {
+          video.muted = true;
+          tryPlay('muted-retry');
+        } else if (name !== 'AbortError') setHlsState(STATE.PAUSED);
+      },
+    );
+  };
+
   const prepareHls = (id: string, start: number, end: number | undefined, play: boolean) => {
     try { yt.pauseVideo(); } catch { /* noch nicht bereit */ }
     show('hls');
     endAt = end ?? Infinity;
     const src = HLS.get(id)!;
+    let sought = false;
     const seek = () => {
-      try { video.currentTime = start; } catch { /* iOS setzt erst nach loadedmetadata */ }
-      if (play) void video.play().catch(() => setHlsState(STATE.PAUSED));
+      if (!sought) {
+        try {
+          video.currentTime = start;
+          sought = video.readyState >= 1;
+        } catch { /* iOS setzt erst nach loadedmetadata */ }
+      }
+    };
+    const onMeta = () => {
+      diag(`hls loadedmetadata ${vstate()}`);
+      seek();
+      if (play) tryPlay('loadedmetadata');
       else setHlsState(STATE.CUED);
+    };
+    // Zweiter Anstoß, wenn Daten da sind und das erste play() nichts bewirkt hat (iOS verwirft play() vor den Metadaten manchmal still)
+    const onCanPlay = () => {
+      diag(`hls canplay ${vstate()}`);
+      seek();
+      if (play && video.paused && hlsState !== STATE.PAUSED) tryPlay('canplay');
     };
     if (video.dataset.src !== src) {
       video.dataset.src = src;
+      video.addEventListener('loadedmetadata', onMeta, { once: true });
+      video.addEventListener('canplay', onCanPlay, { once: true });
       video.src = src;
-      video.addEventListener('loadedmetadata', seek, { once: true });
       video.load();
-    } else seek();
+      diag(`hls load ${play ? 'play' : 'cue'} start=${start} ${vstate()}`);
+    } else {
+      onMeta();
+    }
   };
 
   const route = (arg: YTLoad, play: boolean) => {
@@ -184,7 +235,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   return {
     loadVideoById: (arg) => route(arg, true),
     cueVideoById: (arg) => route(arg, false),
-    playVideo: () => (mode === 'hls' ? void video.play().catch(() => setHlsState(STATE.PAUSED)) : yt.playVideo()),
+    playVideo: () => (mode === 'hls' ? tryPlay('playVideo') : yt.playVideo()),
     pauseVideo: () => (mode === 'hls' ? video.pause() : yt.pauseVideo()),
     mute: () => {
       video.muted = true;

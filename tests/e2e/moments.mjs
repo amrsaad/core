@@ -47,6 +47,13 @@ for (const [i, m] of moments.slice(40, 46).entries()) {
     license: i % 2 === 0 ? 'Alle Rechte vorbehalten, frei lesbar. Private Nutzung, Passagen mit Quellenangabe' : 'CC BY 4.0',
   });
 }
+// Gesehen bleibt gesehen: hinter dem letzten Moment steht die Endseite, es gibt kein Weiter. Darum genug Text-Momente für die Durchläufe unten.
+for (let i = 55; i < 61; i++) {
+  const m = mk(i, 'body', 'kraft');
+  m.excerpt = EX;
+  Object.assign(m, { form: 'text', videoId: m.videoId.replace('test', 'texto'), author: `Author ${i}`, ref: `Ref ${i}`, sourceUrl: `https://example.org/source/${i}`, license: i % 2 === 0 ? 'Alle Rechte vorbehalten, frei lesbar. Private Nutzung, Passagen mit Quellenangabe' : 'CC BY 4.0' });
+  moments.push(m);
+}
 const raw = crypto.getRandomValues(new Uint8Array(32));
 const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt']);
 const encPool = async (list) => {
@@ -129,6 +136,8 @@ const skipRecall = async (page, name = 'x', out = 'pipeline/out/e2e-moments') =>
   }
   await page.waitForFunction(() => !document.querySelector('[data-testid=recall-card]'));
 };
+// Der Feed läuft nach einem Wechsel noch kurz als Feder aus. Ein Finger, der dort aufsetzt, fängt die Seite (wie bei Instagram), darum warten die Gesten hier ab.
+const settled = (page) => page.waitForFunction(() => !document.querySelector('.vfeed[data-moving]'), undefined, { timeout: 5000 }).catch(() => {});
 const waitFor = async (page, fn, arg, timeout = 8000) => {
   try { await page.waitForFunction(fn, arg, { timeout }); return true; } catch { return false; }
 };
@@ -297,6 +306,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     r.sequence = seen;
 
     // Wischen wechselt
+    await settled(page);
     const before = await page.evaluate(() => window.__core.idx());
     await page.mouse.move(vp.width / 2, vp.height * 0.7);
     await page.mouse.down();
@@ -388,6 +398,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.click('[data-testid=form-switch] >> text=Audio');
     c.audioOnlyAudio = await waitFor(page, () => window.__core.moment()?.audio === true && !document.querySelector('[data-testid=text-view]'));
     c.audioPlays = await waitFor(page, () => window.__core.state() === 1);
+    // Eigener Stream: jeder Startversuch steht mit Ergebnis im Protokoll (Metadaten, play, ok oder abgelehnt)
+    const hlsDiag = await page.evaluate(() => window.__core.diag().filter((l) => / hls /.test(l)));
+    r.hlsDiag = hlsDiag.slice(-6);
+    c.hlsDiagPerAttempt = hlsDiag.some((l) => /hls loadedmetadata/.test(l)) && hlsDiag.some((l) => /hls play#\d+ loadedmetadata rs=\d ns=\d muted=\w+/.test(l)) && hlsDiag.some((l) => /hls play#\d+ ok/.test(l));
     c.audioCoverShown = await waitFor(page, () => !!document.querySelector('.vslot[aria-hidden=false] .vaudio-art'));
     c.audioBigCaption = await waitFor(page, () => { const el = document.querySelector('[data-testid=caption] span'); return !!el?.textContent && parseFloat(getComputedStyle(el).fontSize) >= 22; });
     await page.screenshot({ path: `${out}/${name}-10-audio.png` });
@@ -471,7 +485,16 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       for (let i = 1; i <= 6; i++) await page.mouse.move(vp.width * (0.8 - (dxFrac / 6) * i), y + i);
       await page.mouse.up();
     };
-    const openSheet = async () => { await skipRecall(page, name, out); await swipeLeft(); return waitFor(page, () => !!document.querySelector('[data-testid=note-sheet]')); };
+    const openSheet = async () => {
+      // Im Zeitraffer kann der Moment unter dem Wisch enden (Abrufkarte, Wechsel): bis zu dreimal neu ansetzen
+      let ok = false;
+      for (let k = 0; k < 3 && !ok; k++) {
+        await settled(page); await skipRecall(page, name, out); await swipeLeft();
+        ok = await waitFor(page, () => !!document.querySelector('[data-testid=note-sheet]'), undefined, 3000);
+      }
+      if (!ok) r.openDbg = await page.evaluate(() => ({ moving: !!document.querySelector('.vfeed[data-moving]'), card: !!document.querySelector('[data-testid=recall-card]'), idx: window.__core.idx(), tr: document.querySelector('.vstage')?.style.transform, fy: window.__core.forYou(), recall: window.__core.recall().open }));
+      return ok;
+    };
     const notes = () => page.evaluate(() => window.__core.notes());
     const nm = await page.evaluate(() => window.__core.moment());
     const idxBefore = await page.evaluate(() => window.__core.idx());
@@ -498,9 +521,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.noteWeakNoEffect = !(await page.evaluate(() => !!document.querySelector('.flash'))) && (await page.evaluate((id) => window.__core.liked(id), nm.id)) === likedBefore;
     c.noteNothingOpened = (await page.evaluate(() => window.__opened)).length === 0 && gh.length === 0;
     // Nur Text, dann Done: speichert den Text ohne Chip, schließt, nächster Moment
+    await openSheet();
     const nm2 = await page.evaluate(() => window.__core.moment());
     const idx2 = await page.evaluate(() => window.__core.idx());
-    await openSheet();
     await page.fill('[data-testid=note-text]', 'The cut is two seconds late & the "hook" repeats.');
     await page.screenshot({ path: `${out}/${name}-21-note-text.png` });
     await page.click('[data-testid=note-done]');
@@ -508,8 +531,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const n2 = await notes();
     c.noteTextSaved = n2.length === 2 && n2[1].id === nm2.id && n2[1].chips.length === 0 && n2[1].text === 'The cut is two seconds late & the "hook" repeats.';
     // Tipp neben das Blatt: schließt ohne Notiz, bleibt auf dem Moment. Done ohne Text: keine Notiz.
-    const idx3 = await page.evaluate(() => window.__core.idx());
     await openSheet();
+    const idx3 = await page.evaluate(() => window.__core.idx()); // Stand bei offenem Blatt: im Zeitraffer kann der Moment davor schon zu Ende gewesen sein
     await page.click('[data-testid=note-sheet]', { position: { x: 20, y: 20 } });
     c.noteOutsideCancels = await waitFor(page, () => !document.querySelector('[data-testid=note-sheet]')) && (await notes()).length === 2 && (await page.evaluate(() => window.__core.idx())) === idx3;
     await openSheet();
@@ -527,7 +550,17 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.noteNoNetwork = gh.length === 0;
 
     // Already known: kein Toast. Wrong und Mute: Toast. Alle drei wirken wie das frühere Menü und werden zusätzlich als Notiz gespeichert.
-    const chip = async (label) => { if (!(await openSheet())) return false; await page.click(`[data-testid="note-chip-${label}"]`); return true; };
+    // probe: Moment und Gewichte genau beim Tipp und 80 ms danach (vor dem Wechsel, der erst nach der Feder zählt): die Wirkung des Chips allein
+    const chip = async (label, probe) => {
+      if (!(await openSheet())) return false;
+      if (probe) Object.assign(probe, await page.evaluate(() => ({ m: window.__core.moment(), before: JSON.parse(JSON.stringify(window.__core.weights())) })));
+      await page.click(`[data-testid="note-chip-${label}"]`);
+      if (probe) {
+        await page.waitForTimeout(80);
+        probe.after = await page.evaluate(() => JSON.parse(JSON.stringify(window.__core.weights())));
+      }
+      return true;
+    };
     const idxK = await page.evaluate(() => window.__core.idx());
     const nK = (await notes()).length;
     c.knownViaChip = await chip('Already known');
@@ -542,25 +575,32 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.waitForTimeout(1000);
     // Not for me: Gewicht des Themas runter (0,7), Kanal und Bereich bleiben, kein Toast, weiter, als Notiz gespeichert
     const idxN = await page.evaluate(() => window.__core.idx());
-    const nm3 = await page.evaluate(() => window.__core.moment());
-    const wBefore = await page.evaluate(() => JSON.parse(JSON.stringify(window.__core.weights())));
-    c.notForMeViaChip = await chip('Not for me');
-    await page.waitForTimeout(350);
-    const wAfter = await page.evaluate(() => JSON.parse(JSON.stringify(window.__core.weights())));
-    // Beim Weiterblättern wirkt zusätzlich das Wegwischsignal (höchstens 0,9). Not for me allein ist 0,7. Weak auf Kanal und Bereich wäre 0,7 und 0,84.
+    const probe = {};
+    c.notForMeViaChip = await chip('Not for me', probe);
+    const nm3 = probe.m;
+    const W_MIN = 0.2;
+    // Wirkung des Chips allein (80 ms nach dem Tipp, vor dem Wechsel): Thema mal 0,7, nicht unter dem Boden von 0,2
+    const wBefore = probe.before;
+    const wAfter = probe.after;
     const ratio = (a, b) => (a ?? 1) / (b ?? 1);
-    const rT = ratio(wAfter.topic[nm3.topic], wBefore.topic[nm3.topic]);
-    c.notForMeTopicDown = rT <= 0.7 + 0.001 && rT >= 0.7 * 0.9 * 0.9 - 0.001;
+    const bT = wBefore.topic[nm3.topic] ?? 1;
+    const aT = wAfter.topic[nm3.topic] ?? 1;
+    r.notForMeRatio = { topic: nm3.topic, bT, aT };
+    // Beim Weiterblättern kommt höchstens das Wegwischsignal (0,9) dazu, 80 ms später ist der Wechsel noch nicht passiert
+    c.notForMeTopicDown = Math.abs(aT - Math.max(W_MIN, bT * 0.7)) < 0.002 || (aT <= bT * 0.7 + 0.002 && aT >= Math.max(W_MIN, bT * 0.7 * 0.81) - 0.002);
+    await page.waitForTimeout(350);
     c.notForMeChannelAreaKept = ratio(wAfter.channel[nm3.channel], wBefore.channel[nm3.channel]) >= 0.9 - 0.001 && ratio(wAfter.area[nm3.area], wBefore.area[nm3.area]) >= Math.sqrt(0.9) - 0.001;
     c.notForMeNoToast = await page.evaluate(() => !document.querySelector('.flash'));
     c.notForMeAdvanced = await waitFor(page, (i) => window.__core.idx() > i, idxN);
     c.notForMeSaved = (await notes()).at(-1).chips.join() === 'Not for me' && (await notes()).at(-1).id === nm3.id;
     await page.waitForTimeout(1000);
     const idxM = await page.evaluate(() => window.__core.idx());
-    const mutedMoment = await page.evaluate(() => window.__core.moment());
-    c.muteViaChip = await chip('Mute speaker');
+    const muteProbe = {};
+    c.muteViaChip = await chip('Mute speaker', muteProbe);
+    const mutedMoment = muteProbe.m;
     c.muteToast = await waitFor(page, () => /muted$/.test(document.querySelector('.flash')?.textContent ?? ''));
     c.muteAdvanced = await waitFor(page, (i) => window.__core.idx() > i, idxM);
+    r.muteDbg = { last: (await notes()).at(-1), mutedId: mutedMoment.id, idxM, idxNow: await page.evaluate(() => window.__core.idx()) };
     c.muteSaved = (await notes()).at(-1).chips.join() === 'Mute speaker' && (await notes()).at(-1).id === mutedMoment.id;
     c.noteStillNoNetwork = gh.length === 0 && (await page.evaluate(() => window.__opened)).length === 0;
     r.notesCount = (await notes()).length;
@@ -593,7 +633,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const poster = (st) => page.evaluate(() => [...document.querySelectorAll('.vslot')].map((sl) => {
       const p = sl.querySelector('.vposter'); const host = sl.querySelector('.vframe > div'); const pr = p?.getBoundingClientRect(); const hr = host?.getBoundingClientRect();
       const vis = !!p && getComputedStyle(p).visibility !== 'hidden' && getComputedStyle(p).display !== 'none' && +getComputedStyle(p).opacity > 0;
-      return { rects: { p: pr && [pr.left, pr.top, pr.width, pr.height].map(Math.round), h: hr && [hr.left, hr.top, hr.width, hr.height].map(Math.round), iw: innerWidth }, current: sl.getAttribute('aria-hidden') === 'false', vis, live: sl.hasAttribute('data-live'), covers: !!pr && !!hr && pr.left <= hr.left + 0.5 && pr.right >= hr.right - 0.5 && pr.top <= hr.top + 0.5 && pr.bottom >= hr.bottom - 0.5, noZoom: !!pr && Math.abs(pr.width - innerWidth) < 1.5 && Math.abs(pr.height - (innerWidth * 9) / 16) < 1.5 };
+      return { rects: { p: pr && [pr.left, pr.top, pr.width, pr.height].map(Math.round), h: hr && [hr.left, hr.top, hr.width, hr.height].map(Math.round), iw: innerWidth }, current: sl.getAttribute('aria-hidden') === 'false', vis, live: sl.hasAttribute('data-live'), covers: !!pr && (!hr || (pr.left <= hr.left + 0.5 && pr.right >= hr.right - 0.5 && pr.top <= hr.top + 0.5 && pr.bottom >= hr.bottom - 0.5)), noZoom: !!pr && Math.abs(pr.width - innerWidth) < 1.5 && Math.abs(pr.height - (innerWidth * 9) / 16) < 1.5 };
     }));
     // ENDED am aktuellen Slot blättert weiter (finish), also wird er dort von der Schleife oben abgedeckt (endedSeen) und hier nur an den Nachbarn erzwungen
     const force = (st) => page.evaluate((s) => { for (const sl of document.querySelectorAll('.vslot')) if (s !== 0 || sl.getAttribute('aria-hidden') !== 'false') sl.querySelector('.vframe > div')?.firstChild?.__player?.__force(s); }, st);

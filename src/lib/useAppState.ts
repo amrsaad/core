@@ -9,6 +9,9 @@ export interface SyncAccess {
   adopt: (fn: (s: AppState) => AppState) => void;
 }
 
+/** Während eines Wischs (Ziehen und Auslaufen) wird nicht gespeichert: der Zustand bleibt im Speicher, das Schreiben in IndexedDB wartet. */
+export const saveGate = { busy: false };
+
 export function useAppState(): [AppState | null, (fn: (s: AppState) => AppState, now?: boolean) => void, (s: AppState) => void, SyncAccess] {
   const [state, setState] = useState<AppState | null>(null);
   const timer = useRef<number>();
@@ -38,10 +41,16 @@ export function useAppState(): [AppState | null, (fn: (s: AppState) => AppState,
     const t = Date.now();
     if (!pendingSince.current) pendingSince.current = t;
     const wait = now ? 0 : Math.max(0, Math.min(250, pendingSince.current + 1000 - t));
-    timer.current = window.setTimeout(() => {
+    const run = () => {
+      // Wisch läuft: später noch einmal versuchen (der jüngste Zustand steht in latest)
+      if (saveGate.busy) {
+        timer.current = window.setTimeout(run, 120);
+        return;
+      }
       pendingSince.current = 0;
-      saveState(s);
-    }, wait);
+      saveState(latest.current ?? s);
+    };
+    timer.current = window.setTimeout(run, wait);
   };
 
   const update = useCallback((fn: (s: AppState) => AppState, now?: boolean) => {

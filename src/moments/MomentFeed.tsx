@@ -21,6 +21,8 @@ import { buildIssue, chipEffect, firstOpenOfDay, makeEntry, markSent, promptLine
 import { HOOK_LINE_PT, hookStep } from './hook';
 import { makeRng } from './rng';
 import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
+import { addFrames, atRest, commitVelocity, dragY, frameSample, release, SPRING_BACK, SPRING_COMMIT, stepSpring, Velocity, type Spring, type SpringState } from './swipe';
+import { saveGate } from '../lib/useAppState';
 import { emptyFormLine, END_SUB, endButtonLabel, endLine, filterPool, FORM_LABEL, FORMS, momentText, otherForms, textEndReached, unseenCount, type Form } from './form';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
@@ -114,6 +116,19 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const everPlayed = useRef(false);
   /** Offene Messung Wisch bis erstes Bild */
   const swipe = useRef<{ j: number; t0: number; buffered: boolean } | null>(null);
+
+  /** Wischübergang: Bühne mit den Seiten und Ebene mit den Overlays bewegen sich gemeinsam, nur transform, direkt geschrieben (ohne React) */
+  const stageEl = useRef<HTMLDivElement>(null);
+  const uiEl = useRef<HTMLDivElement>(null);
+  const mot = useRef({ y: 0, raf: 0, busy: false });
+  const dragging = useRef(false);
+  const vel = useRef(new Velocity());
+  const pendingRender = useRef(false);
+  /** Wechsel mit Feder, auch aus Code, der vor der Definition von navigate steht (useCallback) */
+  const navRef = useRef<(next: number) => void>(() => {});
+  const meter = useRef({ on: false, raf: 0, last: 0, deltas: [] as number[], tail: 0 });
+  /** Während Ziehen und Auslaufen keine React-Arbeit: keine Neuzeichnung, kein Speichern, kein Polling */
+  const moving = () => mot.current.busy || dragging.current;
 
   const [idx, setIdx] = useState(0);
   const [, setTick] = useState(0);
@@ -267,6 +282,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       // Genau hinter dem letzten Moment liegt die Endseite (idx = Länge). Weiter geht es nicht.
       if (next > queue.current.length) return;
       const prev = idxRef.current;
+      diag.current.push(`go ${prev}->${next}`);
       const prevM = queue.current[prev];
       // Weitergewischt: Signal nach geschautem Anteil (unter 5 s Minus, fast ganz geschaut leichtes Plus)
       // Im Textmodus gibt es keine Wiedergabezeit, darum kein Zeitsignal (Lernen bleibt sonst gleich)
@@ -346,8 +362,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (m.forYou) {
       forYouRef.current = true;
       setForYou(m);
-      forYouTimer.current = window.setTimeout(() => goTo(idxRef.current + 1), FOR_YOU_MS);
-    } else goTo(idxRef.current + 1);
+      forYouTimer.current = window.setTimeout(() => navRef.current(idxRef.current + 1), FOR_YOU_MS);
+    } else navRef.current(idxRef.current + 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [goTo]);
 
@@ -372,6 +388,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
             const target = document.createElement('div');
             slot.host!.replaceChildren(target);
             const pl = createPlayer(YT, target, id, {
+              onDiag: (line) => diag.current.push(`slot${s} ${line}`),
               onReady: () => {
                 slot.ready = true;
                 slot.player!.mute();
@@ -396,7 +413,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                 if (st === STATE.PLAYING && !fastRef.current) slot.player?.setPlaybackRate(clampRate(rateRef.current));
                 if (st === STATE.ENDED && slot.index === idxRef.current) finish();
                 if (st === STATE.PLAYING && (slot.index !== idxRef.current || forYouRef.current || textRef.current || recallRef.current)) slot.player?.pauseVideo();
-                rerender();
+                if (moving()) pendingRender.current = true;
+                else rerender();
               },
               onError: (code) => {
                 const m2 = queue.current[slot.index];
@@ -452,6 +470,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   useEffect(() => {
     let flushed = 0;
     const t = window.setInterval(() => {
+      if (moving()) return;
       const sl = current();
       const p = sl.player;
       const m = queue.current[idxRef.current];
@@ -538,10 +557,133 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const tt = useRef({ x: 0, y: 0, top: false, end: false });
 
   // ---- Gesten ----
-  const g = useRef({ x: 0, y: 0, t: 0, moved: false, long: 0, fired: false, tap: 0, lastUp: 0, dx: 0, dy: 0 });
-  const setDrag = (px: number) => {
-    dragEl.current?.style.setProperty('--drag', `${px}px`);
-    if (!px) dragEl.current?.removeAttribute('data-drag');
+  const g = useRef({ x: 0, y: 0, t: 0, moved: false, axis: '' as '' | 'v' | 'h', base: 0, h: 0, long: 0, fired: false, tap: 0, lastUp: 0, dx: 0, dy: 0 });
+  // ---- Wischübergang (Auftrag Max 29.10.2026) ----
+  // Der Moment folgt dem Finger 1:1. Beim Loslassen entscheiden Strecke (25 Prozent der Höhe) und Tempo (0,4 px/ms), der Rest ist eine Feder mit
+  // Geschwindigkeitsübernahme. Am Anfang und Ende des Feeds Gummiband. Animiert wird nur transform. Player-Arbeit (goTo: laden, cue, Vorladen)
+  // läuft erst, wenn die Feder zur Ruhe kam, nie währenddessen.
+  const paint = (y: number) => {
+    mot.current.y = y;
+    const t = y || moving() ? `translate3d(0, ${y}px, 0)` : '';
+    if (stageEl.current) stageEl.current.style.transform = t;
+    if (uiEl.current) uiEl.current.style.transform = t;
+  };
+  /** Ebenen nur bewegen, solange gewischt wird (will-change per Attribut, siehe index.css) */
+  const setMoving = (on: boolean) => {
+    if (on) dragEl.current?.setAttribute('data-moving', '');
+    else dragEl.current?.removeAttribute('data-moving');
+  };
+  const stopMotion = () => {
+    window.cancelAnimationFrame(mot.current.raf);
+    mot.current.raf = 0;
+  };
+  const canNext = () => idxRef.current < queue.current.length;
+  const canPrev = () => idxRef.current > 0;
+  /** Ruhe: Bühne auf 0, Ebenen frei geben, aufgeschobene Arbeit nachholen */
+  const endMotion = () => {
+    mot.current.busy = false;
+    paint(0);
+    setMoving(false);
+    flushDeferred();
+  };
+  const flushDeferred = () => {
+    saveGate.busy = false;
+    if (pendingRender.current) {
+      pendingRender.current = false;
+      rerender();
+    }
+  };
+  const springTo = (target: number, v0: number, sp: Spring, onEnd: () => void) => {
+    stopMotion();
+    mot.current.busy = true;
+    saveGate.busy = true;
+    let st: SpringState = { x: mot.current.y - target, v: v0 };
+    let last = performance.now();
+    const frame = (now: number) => {
+      st = stepSpring(st, (now - last) / 1000, sp);
+      last = now;
+      if (atRest(st)) {
+        mot.current.raf = 0;
+        paint(target);
+        onEnd();
+        return;
+      }
+      paint(target + st.x);
+      mot.current.raf = window.requestAnimationFrame(frame);
+    };
+    mot.current.raf = window.requestAnimationFrame(frame);
+  };
+  /** Seite wechseln (dir 1 nach oben, -1 nach unten) oder zurückfedern (0). v in px/ms, negativ nach oben. */
+  const settle = (dir: 1 | -1 | 0, v: number) => {
+    const H = g.current.h || dragEl.current?.clientHeight || window.innerHeight;
+    if (dir === 0) {
+      springTo(0, v * 1000, SPRING_BACK, () => {
+        endMotion();
+        endMeter(true);
+      });
+      return;
+    }
+    const target = -dir * H;
+    springTo(target, commitVelocity(mot.current.y - target, v * 1000), SPRING_COMMIT, () => {
+      const next = idxRef.current + dir;
+      // Erst jetzt die Arbeit: Player laden, Nachbarn vorladen, Zustand schreiben. Die Bühne bleibt bis zur neuen Zeichnung am Ziel stehen.
+      goTo(next);
+      if (idxRef.current !== next) {
+        // goTo hat abgelehnt (Ende der Liste): Bühne zurück
+        endMotion();
+      }
+      endMeter(true);
+    });
+  };
+  /** Wechsel ohne Finger (Moment zu Ende, Rückmeldung, For-you-Karte): mit derselben Feder, aus der Ruhe. Desktop, Text, Einzelplayer und reduzierte Bewegung wechseln sofort. */
+  const navigate = (next: number) => {
+    const cur = idxRef.current;
+    const dir = next - cur;
+    const still = !deskRef.current && !single && !textRef.current && !moving() && !(typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    if (!still || (dir !== 1 && dir !== -1)) return goTo(next);
+    ensureQueue(cur + 5);
+    if (dir === 1 ? cur >= queue.current.length : cur <= 0) return goTo(next);
+    g.current.h = dragEl.current?.clientHeight || window.innerHeight;
+    startMeter();
+    settle(dir, 0);
+  };
+  navRef.current = navigate;
+
+  // Messung: verlorene Frames von Aufsetzen bis 600 ms nach dem Loslassen (gleiches Fenster wie tests/e2e/swipe.mjs)
+  const startMeter = () => {
+    const m = meter.current;
+    window.clearTimeout(m.tail);
+    setMoving(true);
+    if (m.on) return;
+    m.on = true;
+    m.last = 0;
+    m.deltas = [];
+    const loop = (t: number) => {
+      if (!m.on) return;
+      if (m.last) m.deltas.push(t - m.last);
+      m.last = t;
+      m.raf = window.requestAnimationFrame(loop);
+    };
+    m.raf = window.requestAnimationFrame(loop);
+  };
+  const stopMeter = (keep: boolean) => {
+    const m = meter.current;
+    window.clearTimeout(m.tail);
+    if (!dragging.current && !mot.current.busy) {
+      setMoving(false);
+      if (mot.current.y === 0) paint(0);
+    }
+    if (!m.on) return;
+    m.on = false;
+    window.cancelAnimationFrame(m.raf);
+    // Hängt die Seite im Hintergrund (ein Abstand über 1 s), zählt die Messung nicht
+    if (!keep || m.deltas.length < 10 || m.deltas.some((d) => d > 1000)) return;
+    const sample = frameSample(m.deltas, Date.now());
+    update((x) => ({ ...x, swipeFrames: addFrames(x.swipeFrames, sample) }));
+  };
+  const endMeter = (keep: boolean) => {
+    window.clearTimeout(meter.current.tail);
+    meter.current.tail = window.setTimeout(() => stopMeter(keep), 600);
   };
 
   const togglePlay = () => {
@@ -636,7 +778,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     update((s) => ({ ...s, momentWeights: applySignal(s.momentWeights, m, SIGNAL.negative) }));
     log(m, { feedback: fb });
     if (fb === 'falsch') show('Wrong');
-    if (m === cur) goTo(idxRef.current + 1);
+    if (m === cur) navRef.current(idxRef.current + 1);
   };
 
   /**
@@ -653,7 +795,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (fx === 'kenne' || fx === 'falsch') return feedback(fx, m);
     if (fx === 'mute') return muteChannel(m);
     if (fx === 'thema') return notForMe(m);
-    if (m === queue.current[idxRef.current]) goTo(idxRef.current + 1);
+    if (m === queue.current[idxRef.current]) navRef.current(idxRef.current + 1);
   };
 
   /** Ein einziges vorausgefülltes Issue in core-content aus allen ungesendeten Notizen, danach gelten sie als gesendet */
@@ -668,7 +810,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const notForMe = (m: Moment) => {
     update((s) => ({ ...s, momentWeights: applyTopic(s.momentWeights, m, SIGNAL.negative) }));
     log(m, { feedback: 'schwach' });
-    if (m === queue.current[idxRef.current]) goTo(idxRef.current + 1);
+    if (m === queue.current[idxRef.current]) navRef.current(idxRef.current + 1);
   };
 
   const muteChannel = (target?: Moment) => {
@@ -681,7 +823,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     queue.current = [...keep, ...queue.current.slice(idxRef.current + 1).filter((x) => x.channel !== m.channel)];
     for (const sl of slots.current) if (sl.index > idxRef.current) sl.index = -1;
     show(`${speakerLine(m.channel)} muted`);
-    if (m === cur) goTo(idxRef.current + 1);
+    if (m === cur) navRef.current(idxRef.current + 1);
   };
 
   const openFull = () => {
@@ -698,7 +840,19 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   const onDown = (e: React.PointerEvent) => {
     const r = g.current;
-    Object.assign(r, { x: e.clientX, y: e.clientY, t: Date.now(), moved: false, fired: false, dx: 0, dy: 0 });
+    // Der Seitenwechsel wird gerade übernommen (eine Zeichnung lang): kein neuer Griff
+    if (mot.current.busy && !mot.current.raf) return;
+    // Der Finger fängt die laufende Feder, die Seite bleibt, wo sie ist
+    const grabbed = !!mot.current.raf;
+    if (grabbed) {
+      stopMotion();
+      mot.current.busy = false;
+    }
+    Object.assign(r, { x: e.clientX, y: e.clientY, t: Date.now(), moved: grabbed, axis: grabbed ? 'v' : '', base: mot.current.y, h: dragEl.current?.clientHeight || window.innerHeight, fired: false, dx: 0, dy: 0 });
+    vel.current.reset();
+    vel.current.push(e.timeStamp, e.clientY);
+    if (!single && !textRef.current) startMeter();
+    if (grabbed) dragging.current = true;
     window.clearTimeout(r.long);
     r.long = window.setTimeout(() => {
       r.fired = true;
@@ -713,17 +867,22 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!r.t) return;
     r.dx = e.clientX - r.x;
     r.dy = e.clientY - r.y;
+    vel.current.push(e.timeStamp, e.clientY);
     if (Math.abs(r.dy) > 10 || Math.abs(r.dx) > 10) {
       r.moved = true;
       window.clearTimeout(r.long);
     }
-    // Waagerechter Zug verschiebt den Feed nicht
-    if (r.moved && !single && Math.abs(r.dy) >= Math.abs(r.dx)) {
-      dragEl.current?.setAttribute('data-drag', '1');
-      setDrag(r.dy);
+    // Achse wird nach 4 px festgelegt. Senkrecht folgt die Seite dem Finger ab dem ersten Pixel, waagerecht verschiebt sie den Feed nicht (Rückmeldung).
+    if (!r.axis && (Math.abs(r.dy) > 4 || Math.abs(r.dx) > 4)) {
+      r.axis = Math.abs(r.dy) >= Math.abs(r.dx) ? 'v' : 'h';
+      if (r.axis === 'v' && !single && !textRef.current) {
+        dragging.current = true;
+        saveGate.busy = true;
+      }
     }
+    if (dragging.current && r.axis === 'v') paint(dragY(r.base + r.dy, r.h, canNext(), canPrev()));
   };
-  const onUp = () => {
+  const onUp = (e: React.PointerEvent) => {
     const r = g.current;
     window.clearTimeout(r.long);
     const wasDown = r.t;
@@ -731,17 +890,38 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (r.fired) {
       r.fired = false;
       endFast();
+      if (dragging.current) {
+        dragging.current = false;
+        paint(0);
+        flushDeferred();
+      }
+      stopMeter(false);
       return;
     }
     if (!wasDown) return;
+    if (dragging.current) {
+      dragging.current = false;
+      if (r.moved) {
+        vel.current.push(e.timeStamp, e.clientY);
+        const v = vel.current.at(e.timeStamp);
+        const y = mot.current.y;
+        const res = release(y, v, r.h, canNext(), canPrev());
+        settle(res === 'next' ? 1 : res === 'prev' ? -1 : 0, v);
+        return;
+      }
+      // Weniger als 10 px: ein Tipp, kein Wisch
+      paint(0);
+      flushDeferred();
+    }
     if (r.moved) {
-      setDrag(0);
+      stopMeter(false);
       const sw = swipeOf(r.dx, r.dy);
       if (sw === 'next') goTo(idxRef.current + 1);
       else if (sw === 'prev') goTo(idxRef.current - 1);
       else if (sw === 'note') openNote();
       return;
     }
+    stopMeter(false);
     const t = Date.now();
     if (t - r.lastUp < TAP_MS) {
       window.clearTimeout(r.tap);
@@ -1014,6 +1194,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       liked: (id: string) => !!stateRef.current.momentLiked?.[id],
       saved: (id: string) => !!stateRef.current.savedMoments[id],
       tapMs: () => stateRef.current.tapMs ?? [],
+      swipeFrames: () => stateRef.current.swipeFrames ?? [],
       skipRecall: () => closeRecall(),
       sound: () => soundOn.current,
       fast: () => fastRef.current,
@@ -1026,6 +1207,23 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   });
 
   if (pool.length && !queue.current.length) ensureQueue(6);
+
+  // Neuer Index: die Seiten bekommen neue Versätze, die Bühne geht im selben Commit auf 0. Das Bild bleibt pixelgleich.
+  useLayoutEffect(() => {
+    if (mot.current.raf || dragging.current) return;
+    endMotion();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx]);
+  useEffect(
+    () => () => {
+      stopMotion();
+      saveGate.busy = false;
+      window.cancelAnimationFrame(meter.current.raf);
+      window.clearTimeout(meter.current.tail);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
   useLayoutEffect(() => {
     // Hook nie kürzen: mehr als drei Zeilen in Normalgröße, dann eine Stufe kleiner
@@ -1064,23 +1262,18 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   return (
     <div className="vfeed" ref={dragEl} style={{ ['--area' as string]: m ? AREA_COLOR[m.area] : '#fff' }}>
+      <div className="vstage" ref={stageEl}>
       {slots.current.slice(0, SLOTS).map((slot, s) => {
         const j = slot.index;
         const mm = queue.current[j];
         const offset = single ? 0 : j - idx;
         const isCur = offset === 0;
         return (
-          <div key={s} ref={(el) => (slot.el = el)} className={`vslot ${Math.abs(offset) <= 1 ? 'vslot-anim' : ''}`} style={{ ['--off' as string]: offset }} aria-hidden={!isCur}>
+          <div key={s} ref={(el) => (slot.el = el)} className="vslot" style={{ ['--off' as string]: offset }} aria-hidden={!isCur}>
             <div className="vframe">
               <div ref={(el) => (slot.host = el)} />
             </div>
-            {mm && mm.form !== 'text' && !mm.audio && <img className="vposter" src={thumbOf(mm)} alt="" draggable={false} />}
-            {mm && mm.form !== 'text' && mm.audio && (
-              <div className="vaudio">
-                <img className="vaudio-bg" src={thumbOf(mm)} alt="" draggable={false} />
-                <img className="vaudio-art" src={thumbOf(mm)} alt="" draggable={false} />
-              </div>
-            )}
+            {posterOf(mm)}
             {isCur && paused && !forYou && (
               <svg className="vplay" width="72" height="72" viewBox="0 0 24 24" fill="#fff" aria-label="Pausiert">
                 <path d="M8 5v14l11-7z" />
@@ -1089,6 +1282,18 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           </div>
         );
       })}
+      {/* Geister: der vorige Moment (nur Vorschaubild, er wird erst beim Zurückwischen zum Player) und hinter dem letzten Moment die Endseite */}
+      {!single && form !== 'text' && queue.current[idx - 1] && (
+        <div className="vslot vghost" style={{ ['--off' as string]: -1 }} aria-hidden="true">
+          {posterOf(queue.current[idx - 1])}
+        </div>
+      )}
+      {!single && form !== 'text' && idx === queue.current.length - 1 && (
+        <div className="vslot vghost" style={{ ['--off' as string]: 1 }} aria-hidden="true">
+          <EndPage form={form} counts={Object.fromEntries(otherForms(form).map((f) => [f, unseenCount(allPool, f, state.momentSeen, state.mutedChannels)])) as Record<Form, number>} setForm={setForm} ghost />
+        </div>
+      )}
+      </div>
 
       <div className="vtrack" />
       <FormSwitch form={form} setForm={setForm} />
@@ -1161,12 +1366,16 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           if (g.current.fired) endFast();
           g.current.fired = false;
           g.current.t = 0;
-          setDrag(0);
           window.clearTimeout(g.current.long);
+          if (dragging.current) {
+            dragging.current = false;
+            settle(0, 0);
+          } else stopMeter(false);
         }}
         onContextMenu={(e) => e.preventDefault()}
       />
 
+      <div className="vui" ref={uiEl}>
       {hint && !forYou && form !== 'text' && (
         <div className="vsound pointer-events-none" data-testid="sound-off" role="img" aria-label="Sound off">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -1200,14 +1409,6 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </div>
       )}
 
-      {capOpen && m && !forYou && form !== 'text' && !desk && <CaptionSheet m={m} speaker={speakerLine(m.channel)} onClose={() => setCapOpen(false)} />}
-
-      {heart && (
-        <svg key={heart.k} className="vheart pointer-events-none" data-testid="heart-burst" style={{ left: heart.x - 48, top: heart.y - 48 }} width="96" height="96" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
-          <path d={HEART} />
-        </svg>
-      )}
-
       {!forYou && (
         <div className="vactions">
           <ActionButton testid="like" label="More" on={liked} onClick={(e) => { const t0 = e.timeStamp; like('button'); recordTap(t0); }}>
@@ -1222,6 +1423,19 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </div>
       )}
 
+      {!m && !forYou && idx >= queue.current.length && (
+        <EndPage form={form} counts={Object.fromEntries(otherForms(form).map((f) => [f, unseenCount(allPool, f, state.momentSeen, state.mutedChannels)])) as Record<Form, number>} setForm={setForm} onBack={() => navRef.current(queue.current.length - 1)} />
+      )}
+      </div>
+
+      {capOpen && m && !forYou && form !== 'text' && !desk && <CaptionSheet m={m} speaker={speakerLine(m.channel)} onClose={() => setCapOpen(false)} />}
+
+      {heart && (
+        <svg key={heart.k} className="vheart pointer-events-none" data-testid="heart-burst" style={{ left: heart.x - 48, top: heart.y - 48 }} width="96" height="96" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+          <path d={HEART} />
+        </svg>
+      )}
+
       {recall && !desk && recallEl}
       {desk?.panel &&
         createPortal(
@@ -1233,7 +1447,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         <div
           className="foryou no-callout"
           data-testid="foryou"
-          onPointerUp={() => goTo(idxRef.current + 1)}
+          onPointerUp={() => navRef.current(idxRef.current + 1)}
           style={{ ['--area' as string]: AREA_COLOR[forYou.area] }}
         >
           <div className="foryou-label">FOR YOU</div>
@@ -1251,9 +1465,6 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </div>
       )}
 
-      {!m && !forYou && idx >= queue.current.length && (
-        <EndPage form={form} counts={Object.fromEntries(otherForms(form).map((f) => [f, unseenCount(allPool, f, state.momentSeen, state.mutedChannels)])) as Record<Form, number>} setForm={setForm} onBack={() => goTo(queue.current.length - 1)} />
-      )}
 
       {flash && (
         <div className="flash pointer-events-none absolute inset-x-0 bottom-40 z-30 flex justify-center">
@@ -1307,21 +1518,34 @@ function FormSwitch({ form, setForm }: { form: Form; setForm: (f: Form) => void 
   );
 }
 
+/** Vorschaubild eines Moments: Video über dem IFrame, Audio mit Cover. Text hat keins. */
+function posterOf(mm: Moment | undefined) {
+  if (!mm || mm.form === 'text') return null;
+  if (!mm.audio) return <img className="vposter" src={thumbOf(mm)} alt="" draggable={false} />;
+  return (
+    <div className="vaudio">
+      <img className="vaudio-bg" src={thumbOf(mm)} alt="" draggable={false} />
+      <img className="vaudio-art" src={thumbOf(mm)} alt="" draggable={false} />
+    </div>
+  );
+}
+
 /** Ruhige Endseite: Satz, zweiter Satz, zwei Knöpfe zu den anderen Reitern. Wisch nach unten geht zurück (nur hinter dem letzten Moment). */
-function EndPage({ form, counts, setForm, onBack }: { form: Form; counts: Record<Form, number>; setForm: (f: Form) => void; onBack?: () => void }) {
+function EndPage({ form, counts, setForm, onBack, ghost }: { form: Form; counts: Record<Form, number>; setForm: (f: Form) => void; onBack?: () => void; ghost?: boolean }) {
   const y0 = useRef<number | null>(null);
   return (
     <div
       className="vend"
-      data-testid="end-page"
+      data-testid={ghost ? undefined : 'end-page'}
+      {...(ghost ? ({ inert: '' } as object) : {})}
       onPointerDown={(e) => { y0.current = e.clientY; }}
       onPointerUp={(e) => { if (onBack && y0.current !== null && e.clientY - y0.current > 60) onBack(); y0.current = null; }}
     >
-      <p className="vend-line" data-testid="end-line">{endLine(form)}</p>
+      <p className="vend-line" data-testid={ghost ? undefined : 'end-line'}>{endLine(form)}</p>
       <p className="vend-sub">{END_SUB}</p>
       <div className="vend-btns">
         {otherForms(form).map((f) => (
-          <button key={f} type="button" className="vend-btn" data-testid={`end-${f}`} disabled={!counts[f]} onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()} onClick={() => setForm(f)}>
+          <button key={f} type="button" className="vend-btn" data-testid={ghost ? undefined : `end-${f}`} disabled={!counts[f]} onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()} onClick={() => setForm(f)}>
             {endButtonLabel(f, counts[f])}
           </button>
         ))}

@@ -4,6 +4,7 @@ import type { Moment, MomentLogEntry } from '../moments/types';
 import type { Weights } from '../moments/mix';
 import type { LatencySample } from '../moments/latency';
 import type { TapSample } from '../moments/actions';
+import type { FrameSample } from '../moments/swipe';
 import type { CaptionMode } from '../moments/captions';
 import type { DayCount } from '../moments/today';
 import type { Form } from '../moments/form';
@@ -89,6 +90,8 @@ export interface AppState {
   playLatency?: LatencySample[];
   /** Tipp bis Füllung am Knopf, letzte Messungen (Aufgabe 3) */
   tapMs?: TapSample[];
+  /** Swipe frame drops: je Wisch verlorene Frames von Aufsetzen bis 600 ms nach dem Loslassen, letzte Messungen (nur dieses Gerät) */
+  swipeFrames?: FrameSample[];
   /** Momente mit gefülltem Herz (More like this) */
   momentLiked?: Record<string, number>;
   /** Rückmeldung: jede Notiz (Chip oder Text) wird lokal gesammelt und einmal am Tag gesammelt als Issue gesendet */

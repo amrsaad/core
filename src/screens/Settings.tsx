@@ -11,6 +11,7 @@ import { SyncCard } from './SyncCard';
 import type { SyncUi } from '../lib/sync/useSync';
 import { tapStats, TAP_TARGET_MS, type TapSample } from '../moments/actions';
 import { LATENCY_TARGET_MS, latencyStats, type LatencySample } from '../moments/latency';
+import { DROP_TARGET_PCT, frameStats, type FrameSample } from '../moments/swipe';
 
 const AREAS: Area[] = ['brain', 'body', 'beat'];
 
@@ -161,6 +162,7 @@ export function Settings({ state, update, replace, moments, skipped = 0, sync }:
         <Latency samples={state.playLatency} />
         <span className="t-meta" data-testid="moments-skipped">Moments skipped: {skipped}</span>
         <TapReaction samples={state.tapMs} />
+        <SwipeFrames samples={state.swipeFrames} />
       </section>
 
       <SyncCard sync={sync} />
@@ -253,6 +255,23 @@ function TapReaction({ samples }: { samples?: TapSample[] }) {
         </span>
       ) : (
         <span>no taps measured yet</span>
+      )}
+    </div>
+  );
+}
+
+/** Verlorene Frames bei Wischen (Aufsetzen bis 600 ms nach dem Loslassen). Ziel unter 2 Prozent bei 60 Hz. */
+function SwipeFrames({ samples }: { samples?: FrameSample[] }) {
+  const x = frameStats(samples);
+  return (
+    <div className="t-meta flex flex-col gap-1" data-testid="swipe-frames">
+      <span className="text-[16px]">Swipe frame drops</span>
+      {x.n ? (
+        <span>
+          {x.lostPct} % lost over {x.n} swipes at {x.hz} Hz, worst swipe {x.worstPct} %, target under {DROP_TARGET_PCT} %
+        </span>
+      ) : (
+        <span>no swipes measured yet</span>
       )}
     </div>
   );
