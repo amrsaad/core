@@ -684,8 +684,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     current().player?.pauseVideo();
     userPaused.current = true;
     setPaused(true);
-    // Öffnet auf dem iPhone die YouTube-App an der Stelle des Moments
-    window.open(fullVideoUrl(m), '_blank', 'noopener');
+    // Öffnet die Quelle (YouTube-App, Podcast-Seite oder Artikel). Ohne Quelle passiert nichts.
+    const href = fullVideoUrl(m);
+    if (href) window.open(href, '_blank', 'noopener');
   };
 
   const onDown = (e: React.PointerEvent) => {
@@ -1198,9 +1199,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           <ActionButton testid="save" label="Save" on={saved} onClick={(e) => { const t0 = e.timeStamp; toggleSave(); recordTap(t0); }}>
             <path d="M7 4h10v16l-5-4-5 4z" />
           </ActionButton>
-          <ActionButton testid="source" label="Source" on={pulse === 'source'} fill={false} onClick={openFull}>
+          {m && fullVideoUrl(m) && <ActionButton testid="source" label="Source" on={pulse === 'source'} fill={false} onClick={openFull}>
             <path d="M7 17 17 7M9 7h8v8" />
-          </ActionButton>
+          </ActionButton>}
         </div>
       )}
 

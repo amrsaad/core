@@ -24,7 +24,7 @@ export function SavedMoments({ state, update }: { state: AppState; update: (fn: 
               <span className="text-[16px] font-semibold leading-[22px]">{m.hook}</span>
               {m.forYou && <span className="text-[14px] leading-[20px] text-muted">{m.forYou}</span>}
               <span className="mt-1 flex gap-4">
-                <a className="t-meta text-muted" href={fullVideoUrl(m)} target="_blank" rel="noopener noreferrer">{m.audio ? 'Full episode' : 'Full video'}</a>
+                {fullVideoUrl(m) && <a className="t-meta text-muted" href={fullVideoUrl(m)} target="_blank" rel="noopener noreferrer">{m.form === 'text' ? 'Source' : m.audio ? 'Full episode' : 'Full video'}</a>}
                 <button
                   className="t-meta text-muted"
                   onClick={() => update((s) => { const x = { ...s.savedMoments }; delete x[m.id]; return { ...s, savedMoments: x }; })}

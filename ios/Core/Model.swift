@@ -93,8 +93,12 @@ struct Moment: Codable, Identifiable, Hashable {
         URL(string: thumb ?? "https://i.ytimg.com/vi/\(videoId)/hqdefault.jpg")
     }
 
+    /// Quelle des Moments. YouTube nur bei echter YouTube-ID, sonst url (Podcast, Stream) oder sourceUrl (Text). Ohne beides nil.
     var fullURL: URL? {
-        URL(string: url ?? "https://www.youtube.com/watch?v=\(videoId)&t=\(Int(start))")
+        if let u = url, let x = URL(string: u) { return x }
+        if let u = sourceUrl, let x = URL(string: u) { return x }
+        let yt = videoId.count == 11 && videoId.allSatisfy { $0.isLetter || $0.isNumber || $0 == "_" || $0 == "-" } && !videoId.hasPrefix("pod-") && !videoId.hasPrefix("txt-")
+        return yt ? URL(string: "https://www.youtube.com/watch?v=\(videoId)&t=\(Int(start))") : nil
     }
 
     /// "Sigma Nutrition (Prof. Grant Tinsley)" becomes "Sigma Nutrition · Prof. Grant Tinsley"

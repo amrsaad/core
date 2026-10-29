@@ -66,7 +66,13 @@ export interface MomentLogEntry {
 }
 
 export const thumbOf = (m: { videoId: string; thumb?: string }) => m.thumb ?? `https://i.ytimg.com/vi/${m.videoId}/hqdefault.jpg`;
-export const fullVideoUrl = (m: { videoId: string; start: number; url?: string }) => m.url ?? `https://www.youtube.com/watch?v=${m.videoId}&t=${m.start}`;
+/** Quelle des Moments. YouTube nur bei echter YouTube-ID, sonst url (Podcast, Stream) oder sourceUrl (Text). Ohne beides: keine Quelle. */
+export const fullVideoUrl = (m: { videoId: string; start: number; url?: string; sourceUrl?: string }): string | undefined => {
+  if (m.url) return m.url;
+  if (m.sourceUrl) return m.sourceUrl;
+  if (/^[A-Za-z0-9_-]{11}$/.test(m.videoId) && !/^(pod|txt)-/.test(m.videoId)) return `https://www.youtube.com/watch?v=${m.videoId}&t=${Math.floor(m.start)}`;
+  return undefined;
+};
 
 /** Untertitel in arabischer Schrift werden rechtsläufig gesetzt */
 export const isArabic = (s: string) => /[\u0600-\u06FF]/.test(s);

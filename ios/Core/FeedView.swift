@@ -596,10 +596,12 @@ struct MomentPage: View {
                 if saved { store.unsave(moment) } else { store.save(moment) }
                 measure(since: t0)
             }
-            ActionButton(icon: "arrow.up.right", label: "Source", bounce: sourceBounce, id: "source") {
-                sourceBounce += 1
-                playback.pause()
-                if let url = moment.fullURL { openURL(url) }
+            if let sourceURL = moment.fullURL {
+                ActionButton(icon: "arrow.up.right", label: "Source", bounce: sourceBounce, id: "source") {
+                    sourceBounce += 1
+                    playback.pause()
+                    openURL(sourceURL)
+                }
             }
         }
         .frame(width: 64)
