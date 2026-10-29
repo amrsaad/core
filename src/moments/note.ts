@@ -6,6 +6,8 @@
  * Kein Token, kein Netzwerkaufruf der App. Reine Regeln, gleiche in ios/Core/Round1.swift (Note).
  * Gleiche Prüfdaten in tests/moments-note.test.ts und ios/CoreTests/Round1Tests.swift.
  */
+import type { Effect } from './learn';
+
 export const CHIPS = ['Known', 'Not for me', 'Wrong', 'Boring', 'Bad cut', 'Great', 'Mute speaker'] as const;
 export type Chip = (typeof CHIPS)[number];
 export const ISSUE_BASE = 'https://github.com/amrsaad/core-content/issues/new';
@@ -33,8 +35,14 @@ export interface NoteEntry {
   sent?: number;
 }
 
-/** Was ein Chip sofort bewirkt. Known, Wrong und Mute speaker wirken wie das bisherige Menü. Not for me senkt das Gewicht des Themas (wie Weak) und zählt in der Notiz wie Boring. Die anderen speichern nur. */
-export const chipEffect = (c: Chip): 'kenne' | 'falsch' | 'mute' | 'thema' | null => (c === 'Known' ? 'kenne' : c === 'Wrong' ? 'falsch' : c === 'Mute speaker' ? 'mute' : c === 'Not for me' ? 'thema' : null);
+/**
+ * Was ein Chip sofort lernt (Regeln und Zahlen in learn.ts). Known = Already known, Boring = Weak. Bad cut und Great speichern nur.
+ * Nach jedem Chip steht am Blatt eine Bestätigungszeile (learn.ts confirmLine).
+ */
+export const chipEffect = (c: Chip): Effect | null => (c === 'Known' ? 'known' : c === 'Wrong' ? 'wrong' : c === 'Mute speaker' ? 'mute' : c === 'Not for me' ? 'notForMe' : c === 'Boring' ? 'weak' : null);
+
+/** Wie lange die Bestätigungszeile am Blatt steht, bevor es schließt und der Feed zum nächsten Moment geht (ms) */
+export const CONFIRM_SHEET_MS = 900;
 
 export interface NoteContext {
   id: string;

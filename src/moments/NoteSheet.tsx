@@ -15,13 +15,13 @@ export interface NoteCtl {
  * Desktop (keys): die Chips tragen die Nummern 1 bis 6, Enter springt ins Textfeld, Enter im Textfeld speichert (Shift+Enter
  * macht eine neue Zeile).
  */
-export function NoteSheet({ m, speaker, onChip, onDone, onCancel, keys, ctl }: { m: Moment; speaker: string; onChip: (chip: Chip, text: string) => void; onDone: (text: string) => void; onCancel: () => void; keys?: boolean; ctl?: MutableRefObject<NoteCtl | null> }) {
+export function NoteSheet({ m, speaker, onChip, onDone, onCancel, confirm, keys, ctl }: { m: Moment; speaker: string; onChip: (chip: Chip, text: string) => void; onDone: (text: string) => void; onCancel: () => void; /** Bestätigungszeile nach einem Chip (z.B. "Less Barbell Medicine"), solange sie steht sind die Chips gesperrt */ confirm?: string | null; keys?: boolean; ctl?: MutableRefObject<NoteCtl | null> }) {
   const [text, setText] = useState('');
   const field = useRef<HTMLTextAreaElement>(null);
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
   useEffect(() => {
     if (!ctl) return;
-    ctl.current = { chip: (i) => CHIPS[i] && onChip(CHIPS[i], text), focusText: () => field.current?.focus() };
+    ctl.current = { chip: (i) => CHIPS[i] && !confirm && onChip(CHIPS[i], text), focusText: () => field.current?.focus() };
     return () => {
       ctl.current = null;
     };
@@ -34,9 +34,10 @@ export function NoteSheet({ m, speaker, onChip, onDone, onCancel, keys, ctl }: {
           <span className="h-2 w-2 rounded-full" style={{ background: AREA_COLOR[m.area] }} aria-hidden="true" />
           <span>{speaker}</span>
         </div>
+        <div className="note-confirm" data-testid="note-confirm" role="status" aria-live="polite">{confirm ?? ''}</div>
         <div className="note-chips" role="group" aria-label="Feedback">
           {CHIPS.map((c, i) => (
-            <button key={c} type="button" className="note-chip" data-testid={`note-chip-${c}`} onClick={() => onChip(c, text)}>
+            <button key={c} type="button" className="note-chip" data-testid={`note-chip-${c}`} disabled={!!confirm} onClick={() => onChip(c, text)}>
               {c}
               {keys && <kbd className="note-key" aria-hidden="true">{i + 1}</kbd>}
             </button>

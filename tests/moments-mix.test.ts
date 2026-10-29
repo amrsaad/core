@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { applySignal, applyTopic, effectiveShares, newMomentCursor, nextMomentBlock, SIGNAL, type MomentPrefs } from '../src/moments/mix';
-import { leaveSignal } from '../src/moments/mix';
+import { effectiveShares, EXPLORE, leaveOf, newMomentCursor, nextMomentBlock, SIGNAL, type MomentPrefs } from '../src/moments/mix';
+import { notForMe, signal } from '../src/moments/learn';
 import type { Moment } from '../src/moments/types';
 import type { Area } from '../src/types';
 
@@ -62,26 +62,9 @@ describe('Momente-Mix', () => {
     const idx = flat.map((m, i) => (m.top ? i : -1)).filter((i) => i >= 0);
     for (let k = 1; k < idx.length; k++) expect(idx[k] - idx[k - 1]).toBeGreaterThanOrEqual(15);
   });
-  it('Not for me senkt nur das Gewicht des Themas, mit dem Faktor von Weak', () => {
-    const w0 = prefs().weights;
-    const m = { area: 'brain' as Area, channel: 'brain-0', topic: 'augen' };
-    const w1 = applyTopic(w0, m, SIGNAL.negative);
-    expect(w1.topic.augen).toBeCloseTo(0.7, 6);
-    expect(w1.channel).toEqual({});
-    expect(w1.area).toEqual({});
-    // zweimal: 0,49, nie unter die Untergrenze
-    expect(applyTopic(w1, m, SIGNAL.negative).topic.augen).toBeCloseTo(0.49, 6);
-    let w = w0;
-    for (let i = 0; i < 40; i++) w = applyTopic(w, m, SIGNAL.negative);
-    expect(w.topic.augen).toBe(0.2);
-    // andere Themen bleiben
-    expect(w.topic.ki).toBeUndefined();
-    // gleicher Faktor wie bei Weak (applySignal), aber ohne Kanal und Bereich
-    expect(applySignal(w0, m, SIGNAL.negative).topic.augen).toBeCloseTo(w1.topic.augen, 6);
-  });
   it('gelernte Bereichsgewichte, jeder Bereich mindestens 10 %', () => {
     let w = prefs().weights;
-    for (let i = 0; i < 40; i++) w = applySignal(w, { area: 'beat', channel: 'beat-0', topic: 'islam' }, SIGNAL.negative);
+    for (let i = 0; i < 40; i++) w = signal(w, { area: 'beat', channel: 'beat-0', topic: 'islam' }, 0.7, 0);
     const s = effectiveShares(prefs({ weights: w }));
     expect(s.beat).toBeGreaterThanOrEqual(0.1 - 1e-9);
     expect(s.brain + s.body + s.beat).toBeCloseTo(1, 6);
@@ -90,7 +73,7 @@ describe('Momente-Mix', () => {
   });
   it('20 % Neues: unbekannte Kanäle kommen auch bei starken Favoriten vor', () => {
     let w = prefs().weights;
-    for (let i = 0; i < 10; i++) w = applySignal(w, { area: 'brain', channel: 'brain-0', topic: 'augen' }, SIGNAL.more);
+    for (let i = 0; i < 10; i++) w = signal(w, { area: 'brain', channel: 'brain-0', topic: 'augen' }, SIGNAL.more, 0);
     const brain = run(prefs({ weights: w }), 120, false).flat().filter((m) => m.area === 'brain');
     const fromFav = brain.filter((m) => m.channel === 'brain-0' || m.topic === 'augen').length / brain.length;
     expect(fromFav).toBeGreaterThan(0.5);
@@ -98,11 +81,53 @@ describe('Momente-Mix', () => {
   });
 });
 
-describe('leaveSignal', () => {
-  it('bewertet nach geschautem Anteil', () => {
-    expect(leaveSignal(3, 100)).toBe(SIGNAL.skip);
-    expect(leaveSignal(20, 100)).toBe(SIGNAL.early);
-    expect(leaveSignal(50, 100)).toBeNull();
-    expect(leaveSignal(85, 100)).toBe(SIGNAL.mostly);
+describe('leaveOf', () => {
+  it('bewertet nach geschautem Anteil, Skip unter 3 Sekunden', () => {
+    expect(leaveOf(0, 100)).toEqual({ kind: 'skip' });
+    expect(leaveOf(2.9, 100)).toEqual({ kind: 'skip' });
+    // ab 3 s kein Skip mehr, sondern früh weggewischt (unter 30 %)
+    expect(leaveOf(3, 100)).toEqual({ kind: 'factor', f: SIGNAL.early });
+    expect(leaveOf(4.5, 60)).toEqual({ kind: 'factor', f: SIGNAL.early });
+    expect(leaveOf(20, 100)).toEqual({ kind: 'factor', f: SIGNAL.early });
+    expect(leaveOf(50, 100)).toBeNull();
+    expect(leaveOf(79, 100)).toBeNull();
+    expect(leaveOf(85, 100)).toEqual({ kind: 'factor', f: SIGNAL.mostly });
+  });
+});
+
+describe('Erkundung', () => {
+  it('bleibt bei 20 Prozent', () => {
+    expect(EXPLORE).toBe(0.2);
+  });
+  it('rund ein Fünftel der Plätze geht an Unbekanntes, auch wenn Favoriten stark sind', () => {
+    // brain: Kanal brain-0 und Thema augen sind bekannt und beliebt, alle anderen Kanäle mit Thema ki sind unbekannt
+    let w = prefs().weights;
+    for (let i = 0; i < 4; i++) w = signal(w, { area: 'brain', channel: 'brain-0', topic: 'augen' }, SIGNAL.more, 0);
+    seed = 99;
+    const picks = run(prefs({ weights: w, now: 0 }), 150, false).flat().filter((m) => m.area === 'brain');
+    const fresh = picks.filter((m) => m.topic === 'ki' && m.channel !== 'brain-0').length / picks.length;
+    expect(fresh).toBeGreaterThan(0.1);
+    expect(fresh).toBeLessThan(0.3);
+  });
+});
+
+describe('Mix mit Abläufen der Gewichte', () => {
+  const t0 = 1_000_000;
+  it('ein gesperrtes Thema kommt 30 Tage nicht vor, danach wieder', () => {
+    const m = { area: 'brain' as Area, channel: 'brain-0', topic: 'augen' };
+    // Schlüssel bekannt, damit nicht jeder Moment "neu" ist: ki ist stark, augen gesperrt
+    let w = notForMe(prefs().weights, m, t0);
+    w = signal(w, { area: 'brain', channel: 'brain-1', topic: 'ki' }, SIGNAL.more, t0);
+    const share = (now: number) => {
+      seed = 5;
+      // wenige Blöcke, damit die 40 starken ki-Momente von brain-1 nicht aufgebraucht sind
+      const picks = run(prefs({ weights: w, now }), 14, false).flat().filter((x) => x.area === 'brain');
+      return picks.filter((x) => x.topic === 'augen').length / picks.length;
+    };
+    const during = share(t0 + 29 * 86_400_000);
+    const after = share(t0 + 30 * 86_400_000 + 1);
+    // Top-Momente (höchstens 1 von 15) gehen an den Gewichten vorbei, darum nicht genau 0
+    expect(during).toBeLessThan(0.1);
+    expect(after).toBeGreaterThan(0.4);
   });
 });

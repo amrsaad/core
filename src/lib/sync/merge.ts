@@ -6,7 +6,7 @@
  *
  * Regeln:
  * - Mengen werden vereinigt: gesehen (frühester Zeitpunkt), Protokoll (je Moment und Tag, Weitergeschautes und Ende bleiben), Notizen (je Schlüssel, "gesendet" bleibt).
- * - Gewichte, gemerkte Momente, Herzen, stummgeschaltete Sprecher, Pläne und Einstellungen gelten je Schlüssel nach dem jüngsten Zeitstempel (`ts`).
+ * - Gewichte (mit ihren Abläufen, siehe moments/learn.ts), gemerkte Momente, Herzen, stummgeschaltete Sprecher, Pläne und Einstellungen gelten je Schlüssel nach dem jüngsten Zeitstempel (`ts`).
  *   Auch ein Löschen bekommt einen Zeitstempel, sonst käme ein weggenommener Eintrag vom anderen Gerät zurück. Ohne Zeitstempel (alter Stand) gewinnt, was da ist.
  * - Abruftermine: Ergebnisse vereinigt, der Termin kommt vom Eintrag mit dem jüngsten Ergebnis (bei Gleichstand der spätere Termin).
  * - Zähler je Tag (Tageszahl, Zeit im Feed): der größere Wert.
@@ -19,6 +19,7 @@ import { DAY_KEEP } from '../../moments/today';
 import type { RecallItem, RecallResult, RecallState } from '../../moments/recall';
 import type { NoteEntry } from '../../moments/note';
 import type { WeekPlan } from '../../moments/review';
+import { parseUntilKey, type Until } from '../../moments/learn';
 
 export const SYNC_VERSION = 1;
 /** wie LOG_MAX in MomentFeed.tsx */
@@ -141,9 +142,21 @@ const moreLearned = (a: number, b: number) => {
   return da > db ? a : db > da ? b : Math.min(a, b);
 };
 
+/** Ein Ablauf teilt den Zeitstempel-Schlüssel mit dem Gewicht, zu dem er gehört: beide kommen vom selben Gerät */
+export const untilTsKey = (key: string): string => {
+  const { fam, k } = parseUntilKey(key);
+  return tsKey.weight(fam, k);
+};
+
+/** Gleichstand zweier Abläufe: der spätere Termin, dann das größere Gewicht danach */
+const combineUntil = (x: Until, y: Until): Until => (x.at !== y.at ? (x.at > y.at ? x : y) : x.back >= y.back ? x : y);
+
 function mergeWeights(a: Weights, b: Weights, tsA: Record<string, number>, tsB: Record<string, number>): Weights {
-  const fam = (f: keyof Weights) => lww(a[f], b[f], tsA, tsB, (k) => tsKey.weight(f, k), moreLearned);
-  return { area: fam('area'), channel: fam('channel'), topic: fam('topic') };
+  const fam = (f: 'area' | 'channel' | 'topic') => lww(a[f], b[f], tsA, tsB, (k) => tsKey.weight(f, k), moreLearned);
+  const out: Weights = { area: fam('area'), channel: fam('channel'), topic: fam('topic') };
+  const until = lww(a.until, b.until, tsA, tsB, untilTsKey, combineUntil);
+  if (Object.keys(until).length) out.until = until;
+  return out;
 }
 
 /** Gleiche ID, aber unterschiedlicher Inhalt (Pool wurde neu gebaut): der mit späterem createdAt, dann längerem excerpt, dann größerem hook. Sonst der erste. */
@@ -392,6 +405,7 @@ export function stampChanges(prev: AppState, next: AppState, now: number): AppSt
   const ts: Record<string, number> = { ...(next.syncTs ?? prev.syncTs ?? {}) };
   let changed = false;
   for (const f of ['area', 'channel', 'topic'] as const) changed = diffKeys(prev.momentWeights?.[f], next.momentWeights?.[f], (k) => tsKey.weight(f, k), ts, now) || changed;
+  changed = diffKeys(prev.momentWeights?.until, next.momentWeights?.until, untilTsKey, ts, now) || changed;
   changed = diffKeys(prev.savedMoments, next.savedMoments, tsKey.saved, ts, now) || changed;
   changed = diffKeys(prev.momentLiked, next.momentLiked, tsKey.liked, ts, now) || changed;
   changed = diffKeys(prev.mutedChannels, next.mutedChannels, tsKey.muted, ts, now) || changed;

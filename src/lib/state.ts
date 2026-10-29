@@ -10,6 +10,7 @@ import type { Form } from '../moments/form';
 import type { RecallState } from '../moments/recall';
 import type { WeekPlan } from '../moments/review';
 import type { NoteEntry } from '../moments/note';
+import type { SkipRun } from '../moments/learn';
 
 export interface SavedItem {
   card: Card;
@@ -79,6 +80,8 @@ export interface AppState {
   // Experten-Momente (v4)
   momentSeen: Record<string, number>;
   momentWeights: Weights;
+  /** Wie oft in Folge derselbe Kanal sofort weggewischt wurde (learn.ts). Nur an diesem Gerät, wandert nicht. */
+  skipRun?: SkipRun;
   savedMoments: Record<string, SavedMoment>;
   /** letzte Wiedergaben für Signale und Wochenrückblick */
   momentLog: MomentLogEntry[];

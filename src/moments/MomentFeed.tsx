@@ -4,7 +4,8 @@ import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { createPlayer, HLS, loadYT, STATE, type YTPlayer } from '../video/ytApi';
-import { applySignal, applyTopic, leaveSignal, newMomentCursor, nextMomentBlock, SIGNAL, type MomentCursor } from './mix';
+import { leaveOf, newMomentCursor, nextMomentBlock, SIGNAL, type MomentCursor } from './mix';
+import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
 import { clampRate, DEFAULT_SPEED, HOLD_SPEED, speedOf } from '../lib/state';
 import { addSample } from './latency';
 import { captionsShown } from './captions';
@@ -17,7 +18,7 @@ import { NoteSheet, type NoteCtl } from './NoteSheet';
 import { createWheel, deskKey, endsFast, TAB_KEYS, wheelPx, type DeskAction } from './desktop';
 import { DeskPanel } from './DeskShell';
 import { speakerLine } from './speaker';
-import { buildIssue, chipEffect, firstOpenOfDay, makeEntry, markSent, promptLine, unsent, type Chip } from './note';
+import { buildIssue, chipEffect, CONFIRM_SHEET_MS, firstOpenOfDay, makeEntry, markSent, promptLine, unsent, type Chip } from './note';
 import { HOOK_LINE_PT, hookStep } from './hook';
 import { makeRng } from './rng';
 import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
@@ -138,6 +139,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const promptChecked = useRef(false);
   const noteRef = useRef<Moment | null>(null);
   noteRef.current = note;
+  /** Bestätigungszeile am Blatt nach einem Chip, solange sie steht */
+  const [confirmText, setConfirm] = useState<string | null>(null);
+  const confirmRef = useRef(false);
+  const confirmTimer = useRef(0);
+  const confirmDone = useRef<() => void>(() => {});
+  /** Weiterwischen nach einem Chip: die Wirkung des Chips ersetzt die Wertung nach Sehdauer */
+  const silentLeave = useRef(false);
   const hookEl = useRef<HTMLDivElement>(null);
   const [heart, setHeart] = useState<{ x: number; y: number; k: number } | null>(null);
   const heartTimer = useRef(0);
@@ -161,7 +169,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       const s = stateRef.current;
       cursor.current ??= newMomentCursor(s.momentDay !== today);
       while (queue.current.length < upTo) {
-        const b = nextMomentBlock(pool, { areaShares: s.settings.areaShares, weights: s.momentWeights, seen: s.momentSeen, mutedChannels: s.mutedChannels }, cursor.current, rng.current);
+        const b = nextMomentBlock(pool, { areaShares: s.settings.areaShares, weights: s.momentWeights, seen: s.momentSeen, mutedChannels: s.mutedChannels, now: clockNow().getTime() }, cursor.current, rng.current);
         if (!b || !b.length) break;
         queue.current.push(...b.filter((m) => !bad.current.has(m.videoId)));
       }
@@ -267,15 +275,24 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       if (next >= queue.current.length) return;
       const prev = idxRef.current;
       const prevM = queue.current[prev];
-      // Weitergewischt: Signal nach geschautem Anteil (unter 5 s Minus, fast ganz geschaut leichtes Plus)
-      // Im Textmodus gibt es keine Wiedergabezeit, darum kein Zeitsignal (Lernen bleibt sonst gleich)
-      if (next > prev && prevM && endedAt.current !== prev && !textRef.current) {
-        const f = leaveSignal((Date.now() - since.current) / 1000, prevM.end - prevM.start);
-        if (f) update((s) => ({ ...s, momentWeights: applySignal(s.momentWeights, prevM, f) }));
+      // Weitergewischt: Wertung nach geschautem Anteil (learn.ts). Unter 3 s ist ein Skip, zwei Skips desselben Kanals in Folge
+      // sperren den Kanal 14 Tage. Jedes andere Weiterwischen unterbricht die Folge. Im Textmodus gibt es keine Wiedergabezeit,
+      // darum keine Zeitwertung. Nach einem Chip ersetzt dessen Wirkung die Wertung (silentLeave).
+      const nowMs = clockNow().getTime();
+      if (next > prev && prevM) {
+        const timed = endedAt.current !== prev && !textRef.current && !silentLeave.current;
+        const lv = timed ? leaveOf((Date.now() - since.current) / 1000, prevM.end - prevM.start) : null;
+        if (lv?.kind === 'skip')
+          update((s) => {
+            const r = skipRule(s.momentWeights, s.skipRun, prevM, nowMs);
+            return { ...s, momentWeights: r.weights, skipRun: r.run };
+          });
+        else if (lv || stateRef.current.skipRun)
+          update((s) => ({ ...s, momentWeights: lv ? signal(s.momentWeights, prevM, lv.f, nowMs) : s.momentWeights, skipRun: undefined }));
       }
       // Zurückgewischt, um etwas nochmal zu sehen: Plus für den Zielmoment
       const backM = queue.current[next];
-      if (next < prev && backM) update((s) => ({ ...s, momentWeights: applySignal(s.momentWeights, backM, SIGNAL.back) }));
+      if (next < prev && backM) update((s) => ({ ...s, momentWeights: signal(s.momentWeights, backM, SIGNAL.back, nowMs), skipRun: undefined }));
       setCaption('');
       endFast();
       waitSince.current = 0;
@@ -341,7 +358,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     current().player?.pauseVideo();
     if (!m) return;
     log(m, { ended: true });
-    update((s) => ({ ...s, momentWeights: applySignal(s.momentWeights, m, SIGNAL.ended) }));
+    update((s) => ({ ...s, momentWeights: signal(s.momentWeights, m, SIGNAL.ended, clockNow().getTime()) }));
     if (m.forYou) {
       forYouRef.current = true;
       setForYou(m);
@@ -592,7 +609,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       const liked = { ...(s.momentLiked ?? {}) };
       if (on) liked[m.id] = Date.now();
       else delete liked[m.id];
-      return { ...s, momentLiked: liked, momentWeights: applySignal(s.momentWeights, m, on ? SIGNAL.more : 1 / SIGNAL.more) };
+      return { ...s, momentLiked: liked, momentWeights: signal(s.momentWeights, m, on ? SIGNAL.more : 1 / SIGNAL.more, clockNow().getTime()) };
     });
     if (on) log(m, { feedback: 'mehr' });
   };
@@ -607,7 +624,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!m) return;
     navigator.vibrate?.(10);
     if (!stateRef.current.savedMoments[m.id]) {
-      update((s) => ({ ...s, savedMoments: { ...s.savedMoments, [m.id]: { moment: m, savedAt: new Date().toISOString() } }, momentWeights: applySignal(s.momentWeights, m, SIGNAL.save) }));
+      update((s) => ({ ...s, savedMoments: { ...s.savedMoments, [m.id]: { moment: m, savedAt: new Date().toISOString() } }, momentWeights: signal(s.momentWeights, m, SIGNAL.save, clockNow().getTime()) }));
       return;
     }
     update((s) => {
@@ -617,32 +634,59 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     });
   };
 
-  /** Known bestätigt sich durch das Schließen des Blatts, Wrong und Mute zusätzlich mit Toast */
-  const feedback = (fb: Feedback, target?: Moment) => {
-    const cur = queue.current[idxRef.current];
-    const m = target ?? cur;
-    if (!m) return;
-    update((s) => ({ ...s, momentWeights: applySignal(s.momentWeights, m, SIGNAL.negative) }));
-    log(m, { feedback: fb });
-    if (fb === 'falsch') show('Wrong');
-    if (m === cur) goTo(idxRef.current + 1);
-  };
+  /** Log-Eintrag je Effekt (Wochenrückblick zählt schwach und falsch) */
+  const FEEDBACK_OF: Record<Effect, Feedback | null> = { known: 'kenne', wrong: 'falsch', notForMe: 'schwach', weak: 'schwach', mute: null };
 
   /**
-   * Rückmeldung: ein Tipp auf einen Chip oder Done speichert sofort lokal, das Blatt schließt, der Feed geht zum nächsten Moment.
-   * Known, Wrong und Mute speaker wirken wie bisher. Es gibt keinen Netzwerkaufruf und keinen Send-Knopf.
+   * Rückmeldung: ein Tipp auf einen Chip speichert und lernt sofort lokal (learn.ts). Das Blatt bleibt kurz offen und zeigt eine
+   * Bestätigungszeile ("Less Barbell Medicine"), dann schließt es und der Feed geht zum nächsten Moment. Done speichert nur den Text
+   * und schließt sofort. Es gibt keinen Netzwerkaufruf und keinen Send-Knopf.
    */
   const saveNote = (m: Moment, chip: Chip | null, text: string) => {
-    setNote(null);
     const entry = makeEntry({ id: m.id, hook: m.hook, tab: FORM_LABEL[form], commit: __APP_COMMIT__ }, chip ? [chip] : [], text, Date.now());
-    if (!entry) return;
-    navigator.vibrate?.(chip ? 15 : 10);
-    update((s) => ({ ...s, feedbackNotes: [...(s.feedbackNotes ?? []), entry] }));
-    const fx = chip ? chipEffect(chip) : null;
-    if (fx === 'kenne' || fx === 'falsch') return feedback(fx, m);
-    if (fx === 'mute') return muteChannel(m);
-    if (fx === 'thema') return notForMe(m);
-    if (m === queue.current[idxRef.current]) goTo(idxRef.current + 1);
+    if (!chip) {
+      setNote(null);
+      if (!entry) return;
+      navigator.vibrate?.(10);
+      update((s) => ({ ...s, feedbackNotes: [...(s.feedbackNotes ?? []), entry] }));
+      if (m === queue.current[idxRef.current]) goTo(idxRef.current + 1);
+      return;
+    }
+    // Zweiter Tipp während die Bestätigung steht: nichts doppelt lernen
+    if (confirmRef.current || !entry) return;
+    navigator.vibrate?.(15);
+    const fx = chipEffect(chip);
+    const at = clockNow().getTime();
+    update((s) => ({
+      ...s,
+      feedbackNotes: [...(s.feedbackNotes ?? []), entry],
+      momentWeights: fx ? applyEffect(s.momentWeights, fx, m, at) : s.momentWeights,
+      skipRun: undefined,
+    }));
+    if (fx && FEEDBACK_OF[fx]) log(m, { feedback: FEEDBACK_OF[fx]! });
+    if (fx === 'mute') muteChannel(m);
+    setConfirm(confirmLine(fx, m));
+    confirmRef.current = true;
+    const done = () => {
+      window.clearTimeout(confirmTimer.current);
+      if (!confirmRef.current) return;
+      confirmRef.current = false;
+      setConfirm(null);
+      setNote(null);
+      if (m === queue.current[idxRef.current]) {
+        silentLeave.current = true;
+        goTo(idxRef.current + 1);
+        silentLeave.current = false;
+      }
+    };
+    confirmDone.current = done;
+    confirmTimer.current = window.setTimeout(done, CONFIRM_SHEET_MS);
+  };
+
+  /** Blatt schließen (Tipp daneben, Esc): während die Bestätigung steht, geht der Feed trotzdem weiter */
+  const cancelNote = () => {
+    if (confirmRef.current) confirmDone.current();
+    else setNote(null);
   };
 
   /** Ein einziges vorausgefülltes Issue in core-content aus allen ungesendeten Notizen, danach gelten sie als gesendet */
@@ -653,24 +697,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     update((s) => ({ ...s, feedbackNotes: markSent(s.feedbackNotes, b.keys, Date.now()) }));
   };
 
-  /** Not for me: Gewicht des Themas runter (Faktor wie Weak), kein Toast, weiter zum nächsten Moment */
-  const notForMe = (m: Moment) => {
-    update((s) => ({ ...s, momentWeights: applyTopic(s.momentWeights, m, SIGNAL.negative) }));
-    log(m, { feedback: 'schwach' });
-    if (m === queue.current[idxRef.current]) goTo(idxRef.current + 1);
-  };
-
-  const muteChannel = (target?: Moment) => {
-    const cur = queue.current[idxRef.current];
-    const m = target ?? cur;
-    if (!m) return;
+  /** Sprecher stumm: ab sofort nie mehr in der Warteschlange. Der Feed geht erst nach der Bestätigungszeile weiter (saveNote). */
+  const muteChannel = (m: Moment) => {
     update((s) => ({ ...s, mutedChannels: { ...s.mutedChannels, [m.channel]: m.channel } }));
     stateRef.current = { ...stateRef.current, mutedChannels: { ...stateRef.current.mutedChannels, [m.channel]: m.channel } };
     const keep = queue.current.slice(0, idxRef.current + 1);
     queue.current = [...keep, ...queue.current.slice(idxRef.current + 1).filter((x) => x.channel !== m.channel)];
     for (const sl of slots.current) if (sl.index > idxRef.current) sl.index = -1;
-    show(`${speakerLine(m.channel)} muted`);
-    if (m === cur) goTo(idxRef.current + 1);
   };
 
   const openFull = () => {
@@ -823,7 +856,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!d) return;
     if (d.help) d.onHelp();
     else if (d.sheet) d.onCloseSheet();
-    else if (noteRef.current) setNote(null);
+    else if (noteRef.current) cancelNote();
     else if (recallRef.current) closeRecall();
     else if (capRef.current) setCapOpen(false);
   };
@@ -1017,6 +1050,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       closeCaption: () => setCapOpen(false),
       notes: () => stateRef.current.feedbackNotes ?? [],
       weights: () => stateRef.current.momentWeights,
+      skipRun: () => stateRef.current.skipRun ?? null,
       openNote: () => openNote(),
       recall: () => ({ open: recallRef.current, state: stateRef.current.recall ?? {}, sessionSeen: sessionSeen.current }),
     };
@@ -1254,7 +1288,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </button>
       )}
 
-      {note && <NoteSheet key={note.id} m={note} speaker={speakerLine(note.channel)} onChip={(c, t) => saveNote(note, c, t)} onDone={(t) => saveNote(note, null, t)} onCancel={() => setNote(null)} keys={!!desk} ctl={noteCtl} />}
+      {note && <NoteSheet key={note.id} m={note} speaker={speakerLine(note.channel)} onChip={(c, t) => saveNote(note, c, t)} onDone={(t) => saveNote(note, null, t)} onCancel={cancelNote} confirm={confirmText} keys={!!desk} ctl={noteCtl} />}
     </div>
   );
 }

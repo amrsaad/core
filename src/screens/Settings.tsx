@@ -11,6 +11,8 @@ import { SyncCard } from './SyncCard';
 import type { SyncUi } from '../lib/sync/useSync';
 import { tapStats, TAP_TARGET_MS, type TapSample } from '../moments/actions';
 import { LATENCY_TARGET_MS, latencyStats, type LatencySample } from '../moments/latency';
+import { emptyWeights, learned, weightText, type Learned as LearnedRows, type Row } from '../moments/learn';
+import { speakerLine } from '../moments/speaker';
 
 const AREAS: Area[] = ['brain', 'body', 'beat'];
 
@@ -111,11 +113,9 @@ export function Settings({ state, update, replace, moments, skipped = 0, sync }:
             </button>
           </div>
         ))}
-        <Learned weights={state.momentWeights} />
-        <button className={btn} onClick={() => { update((st) => ({ ...st, momentWeights: { area: {}, channel: {}, topic: {} } })); setMsg('Learned weights reset.'); }}>
-          Reset what Core learned
-        </button>
       </section>
+
+      <LearnedCard state={state} update={update} row={row} btn={btn} />
 
       <section className={row}>
         <span className="text-[17px]">Time in Core</span>
@@ -184,19 +184,69 @@ export function Settings({ state, update, replace, moments, skipped = 0, sync }:
   );
 }
 
-/** Was der Feed bisher gelernt hat: stärkste und schwächste Themen und Sprecher */
-function Learned({ weights }: { weights: { channel: Record<string, number>; topic: Record<string, number> } }) {
-  const all = [...Object.entries(weights.topic).map(([k, v]) => [k, v] as const), ...Object.entries(weights.channel).map(([k, v]) => [k, v] as const)];
-  if (!all.length) return <p className="t-meta m-0 text-muted">Nothing learned yet. Core learns from watching, swiping, saving and More like this.</p>;
-  const up = all.filter(([, v]) => v > 1.001).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  const down = all.filter(([, v]) => v < 0.999).sort((a, b) => a[1] - b[1]).slice(0, 5);
-  const fmt = (v: number) => `${v > 1 ? '+' : ''}${Math.round((v - 1) * 100)} %`;
+/** Gewicht und Pfeil je Zeile, mit Ende der Frist, solange ein Ablauf läuft */
+function LearnedList({ title, rows, name, id }: { title: string; rows: Row[]; name: (k: string) => string; id: string }) {
   return (
-    <div className="t-meta flex flex-col gap-1">
-      <span className="text-[16px]">Learned</span>
-      {up.length > 0 && <span>More: {up.map(([k, v]) => `${k} ${fmt(v)}`).join(', ')}</span>}
-      {down.length > 0 && <span className="text-muted">Less: {down.map(([k, v]) => `${k} ${fmt(v)}`).join(', ')}</span>}
+    <div className="flex flex-col gap-1" data-testid={`learned-${id}`}>
+      <span className="t-meta text-muted">{title}</span>
+      {rows.length === 0 && <span className="t-meta text-muted">none yet</span>}
+      {rows.map((r) => (
+        <div key={r.key} className="flex items-baseline justify-between gap-3 text-[16px]" data-testid="learned-row">
+          <span className="min-w-0 truncate">{name(r.key)}</span>
+          <span className="shrink-0 tabular-nums" data-weight={r.weight.toFixed(2)}>
+            {weightText(r.weight)}
+            {r.until !== undefined && <span className="t-meta text-muted"> until {new Date(r.until).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+          </span>
+        </div>
+      ))}
     </div>
+  );
+}
+
+/** Karte "What Core learned": je fünf Sprecher und Themen oben und unten mit Gewicht und Pfeil. Reset learning fragt vorher nach. */
+function LearnedCard({ state, update, row, btn }: { state: AppState; update: (fn: (s: AppState) => AppState) => void; row: string; btn: string }) {
+  const [ask, setAsk] = useState(false);
+  const [done, setDone] = useState(false);
+  const l: LearnedRows = learned(state.momentWeights, now().getTime());
+  const any = l.channelUp.length + l.channelDown.length + l.topicUp.length + l.topicDown.length > 0;
+  const cap1 = (k: string) => k.charAt(0).toUpperCase() + k.slice(1);
+  return (
+    <section className={row} data-testid="learned-card">
+      <span className="text-[17px]">What Core learned</span>
+      {!any && <p className="t-meta m-0 text-muted" data-testid="learned-empty">{done ? 'Learning reset.' : 'Nothing learned yet. Core learns from what you watch, skip and save.'}</p>}
+      {any && (
+        <>
+          <LearnedList id="channel-up" title="Speakers, more" rows={l.channelUp} name={speakerLine} />
+          <LearnedList id="channel-down" title="Speakers, less" rows={l.channelDown} name={speakerLine} />
+          <LearnedList id="topic-up" title="Topics, more" rows={l.topicUp} name={cap1} />
+          <LearnedList id="topic-down" title="Topics, less" rows={l.topicDown} name={cap1} />
+        </>
+      )}
+      {!ask && (
+        <button className={btn} data-testid="reset-learning" onClick={() => { setAsk(true); setDone(false); }}>
+          Reset learning
+        </button>
+      )}
+      {ask && (
+        <div className="flex flex-col gap-2" role="alertdialog" aria-label="Reset learning" data-testid="reset-ask">
+          <p className="m-0 text-[16px]">Reset everything Core learned? Speakers and topics go back to normal.</p>
+          <div className="flex gap-2">
+            <button className={btn + ' flex-1'} data-testid="reset-cancel" onClick={() => setAsk(false)}>Cancel</button>
+            <button
+              className={btn + ' flex-1 font-semibold'}
+              data-testid="reset-confirm"
+              onClick={() => {
+                update((st) => ({ ...st, momentWeights: emptyWeights(), skipRun: undefined }));
+                setAsk(false);
+                setDone(true);
+              }}
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
 

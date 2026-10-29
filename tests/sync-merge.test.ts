@@ -30,6 +30,8 @@ const note = (key: string, at: number, extra: object = {}) => ({ key, id: key.sp
 
 const manyDays = (from: number, n: number) => Object.fromEntries(Array.from({ length: n }, (_, i) => [`2026-${String(Math.floor((from + i) / 28) + 1).padStart(2, '0')}-${String(((from + i) % 28) + 1).padStart(2, '0')}`, { seen: i + 1, gotIt: 0 }]));
 
+const WU = (topic: Record<string, number>, channel: Record<string, number>, until: Record<string, { at: number; back: number }>) => ({ area: {}, channel, topic, until });
+
 const CASES: Case[] = [
   {
     name: 'gesehen: Vereinigung, frühester Zeitpunkt',
@@ -90,6 +92,30 @@ const CASES: Case[] = [
     a: doc({ momentWeights: W({ x: 1.1, y: 0.5 }) }),
     b: doc({ momentWeights: W({ x: 0.6, y: 2 }) }),
     expected: doc({ momentWeights: W({ x: 0.6, y: 0.5 }) }),
+  },
+  {
+    name: 'Abläufe: der Ablauf folgt dem Zeitstempel seines Gewichts, der jüngere gewinnt',
+    a: doc({ momentWeights: WU({ augen: 0.2 }, {}, { 't:augen': { at: 5000, back: 1 } }) }, { [tsKey.weight('topic', 'augen')]: 100 }),
+    b: doc({ momentWeights: WU({ augen: 0.2 }, {}, { 't:augen': { at: 9000, back: 0.8 } }) }, { [tsKey.weight('topic', 'augen')]: 200 }),
+    expected: doc({ momentWeights: WU({ augen: 0.2 }, {}, { 't:augen': { at: 9000, back: 0.8 } }) }, { [tsKey.weight('topic', 'augen')]: 200 }),
+  },
+  {
+    name: 'Abläufe: Zurücksetzen auf dem anderen Gerät ist neuer, Gewicht und Ablauf fallen weg',
+    a: doc({ momentWeights: WU({ augen: 0.2 }, {}, { 't:augen': { at: 5000, back: 1 } }) }, { [tsKey.weight('topic', 'augen')]: 100 }),
+    b: doc({}, { [tsKey.weight('topic', 'augen')]: 300 }),
+    expected: doc({}, { [tsKey.weight('topic', 'augen')]: 300 }),
+  },
+  {
+    name: 'Abläufe: ohne Zeitstempel gewinnt der spätere Termin, bei Gleichstand das größere Gewicht danach',
+    a: doc({ momentWeights: WU({}, { c1: 0.2, c2: 0.2 }, { 'c:c1': { at: 5000, back: 0.6 }, 'c:c2': { at: 7000, back: 0.4 } }) }),
+    b: doc({ momentWeights: WU({}, { c1: 0.2, c2: 0.2 }, { 'c:c1': { at: 6000, back: 0.5 }, 'c:c2': { at: 7000, back: 0.6 } }) }),
+    expected: doc({ momentWeights: WU({}, { c1: 0.2, c2: 0.2 }, { 'c:c1': { at: 6000, back: 0.5 }, 'c:c2': { at: 7000, back: 0.6 } }) }),
+  },
+  {
+    name: 'Abläufe: Kanal und Thema laufen getrennt, von beiden Seiten',
+    a: doc({ momentWeights: WU({ augen: 0.2 }, {}, { 't:augen': { at: 5000, back: 1 } }) }, { [tsKey.weight('topic', 'augen')]: 100 }),
+    b: doc({ momentWeights: WU({}, { c1: 0.2 }, { 'c:c1': { at: 8000, back: 0.6 } }) }, { [tsKey.weight('channel', 'c1')]: 150 }),
+    expected: doc({ momentWeights: WU({ augen: 0.2 }, { c1: 0.2 }, { 't:augen': { at: 5000, back: 1 }, 'c:c1': { at: 8000, back: 0.6 } }) }, { [tsKey.weight('topic', 'augen')]: 100, [tsKey.weight('channel', 'c1')]: 150 }),
   },
   {
     name: 'Abruf: Ergebnisse vereinigt, Termin vom jüngsten Ergebnis',
@@ -214,6 +240,14 @@ export function randomDoc(r: () => number): SyncDoc {
         s.momentWeights[fam][k] = Number((0.3 + Math.floor(r() * 27) / 10).toFixed(4));
         stamp(tsKey.weight(fam, k));
       } else if (r() < 0.3) stamp(tsKey.weight(fam, k));
+    }
+  }
+  // Abläufe am Ende, damit frühere Zufallsfolgen unverändert bleiben
+  for (const [fam, keys] of [['topic', topics], ['channel', chans]] as const) {
+    for (const k of keys) {
+      if (k in s.momentWeights[fam] && r() < 0.4) {
+        s.momentWeights.until = { ...s.momentWeights.until, [`${fam === 'channel' ? 'c' : 't'}:${k}`]: { at: 1000 + Math.floor(r() * 5) * 1000, back: Number((0.4 + Math.floor(r() * 7) / 10).toFixed(4)) } };
+      }
     }
   }
   for (const id of some(ids, 0.4)) {
@@ -361,6 +395,13 @@ describe('Zeitstempel beim Ändern', () => {
     const s = base({ momentWeights: { area: {}, channel: { a: 0.9, b: 1.2 }, topic: {} }, syncTs: { [tsKey.weight('channel', 'a')]: 1, [tsKey.weight('channel', 'b')]: 1 } });
     const n = stampChanges(s, { ...s, momentWeights: { ...s.momentWeights, channel: { a: 0.9, b: 1.5 } } }, 50);
     expect(n.syncTs).toEqual({ [tsKey.weight('channel', 'a')]: 1, [tsKey.weight('channel', 'b')]: 50 });
+  });
+  it('ein neuer, geänderter oder abgelaufener Ablauf wird mit dem Gewicht gestempelt', () => {
+    const s = base({ momentWeights: { area: {}, channel: {}, topic: { t: 0.2 }, until: { 't:t': { at: 5000, back: 1 } } }, syncTs: { [tsKey.weight('topic', 't')]: 1 } });
+    const n = stampChanges(s, { ...s, momentWeights: { area: {}, channel: {}, topic: { t: 0.2 }, until: { 't:t': { at: 9000, back: 1 } } } }, 77);
+    expect(n.syncTs).toEqual({ [tsKey.weight('topic', 't')]: 77 });
+    const gone = stampChanges(s, { ...s, momentWeights: { area: {}, channel: {}, topic: { t: 1 } } }, 88);
+    expect(gone.syncTs?.[tsKey.weight('topic', 't')]).toBe(88);
   });
   it('Gerätespezifisches (Player-Modus, Messwerte) wird nicht gestempelt', () => {
     const s = base();

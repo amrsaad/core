@@ -11,11 +11,12 @@ describe('Rückmeldung (Auftrag 27.10.2026)', () => {
     expect([...CHIPS]).toEqual(['Known', 'Not for me', 'Wrong', 'Boring', 'Bad cut', 'Great', 'Mute speaker']);
   });
   it('Known, Wrong und Mute wirken, die anderen speichern nur', () => {
-    expect(chipEffect('Known')).toBe('kenne');
-    expect(chipEffect('Wrong')).toBe('falsch');
+    expect(chipEffect('Known')).toBe('known');
+    expect(chipEffect('Wrong')).toBe('wrong');
     expect(chipEffect('Mute speaker')).toBe('mute');
-    expect(chipEffect('Not for me')).toBe('thema');
-    expect(['Boring', 'Bad cut', 'Great'].map((c) => chipEffect(c as never))).toEqual([null, null, null]);
+    expect(chipEffect('Not for me')).toBe('notForMe');
+    expect(chipEffect('Boring')).toBe('weak');
+    expect(['Bad cut', 'Great'].map((c) => chipEffect(c as never))).toEqual([null, null]);
   });
   it('Notiz aus Chip oder Text, ohne beides keine Notiz, Text gekürzt und getrimmt', () => {
     expect(makeEntry(A, [], '  ', 1)).toBeNull();
