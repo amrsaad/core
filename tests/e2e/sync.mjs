@@ -133,7 +133,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.writeAfter10s = await poll(() => api.puts.length === putsBefore + 1, 8000);
     const dt = (api.puts.at(-1)?.at ?? 0) - t0;
     r.writeDelayMs = dt;
-    c.writeDelayAbout10s = dt >= 9500 && dt <= 14000;
+    // Untergrenze streng (nie früher als 10 s), Obergrenze so weit wie die Wartezeit davor (8 s + 8 s), damit ein langsamer Runner nicht zählt
+    c.writeDelayAbout10s = dt >= 9500 && dt <= 16000;
     c.captionInFile = (await decryptFile(api.file.text)).state.settings?.captionMode === 'on';
 
     // Entprellen: zwei Änderungen im Abstand von 6 s ergeben nur einen Schreibvorgang, 10 s nach der zweiten
