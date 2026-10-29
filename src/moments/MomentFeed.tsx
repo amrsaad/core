@@ -22,7 +22,8 @@ import { buildIssue, chipEffect, CONFIRM_SHEET_MS, firstOpenOfDay, makeEntry, ma
 import { HOOK_LINE_PT, hookStep } from './hook';
 import { makeRng } from './rng';
 import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
-import { emptyFormLine, filterPool, FORM_LABEL, FORMS, momentText, textEndReached, type Form } from './form';
+import { emptyFormLine, filterPool, formOf, FORM_LABEL, FORMS, momentText, textEndReached, type Form } from './form';
+import { atEnd, BG_STALL_MS, countsSeenAtStart, EndLedger, isBackground, onLeave } from './background';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
 /** Desktop-Modus ab 900 px: Panel rechts, Übersicht, Seitenblatt. Fehlt das Feld, gilt das mobile Verhalten unverändert. */
@@ -110,6 +111,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const dragEl = useRef<HTMLDivElement>(null);
   const diag = useRef<string[]>([]);
   const bad = useRef(new Set<string>());
+  // Hintergrund-Wiedergabe (Entscheidung 13)
+  const ledger = useRef(new EndLedger());
+  /** Abrufkarte, die im Hintergrund fällig wurde: kommt bei der Rückkehr */
+  const pendingRecall = useRef<{ id: string; review: boolean } | null>(null);
+  /** Beim Verlassen der Seite angehalten (YouTube, Text), nicht vom Menschen */
+  const leftPaused = useRef(false);
+  const bgStarted = useRef(new Set<string>());
+  const visRef = useRef<(v: string) => void>(() => {});
+  const msOnRef = useRef(false);
   /** Zum nächsten Moment springen, auch aus Code, der vor goTo definiert ist */
   const skipRef = useRef<() => void>(() => {});
   const everPlayed = useRef(false);
@@ -329,10 +339,16 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         assign(slotFor(next), next, play);
         for (const j of [next + 1, next + 2]) if (slotFor(j).index !== j) assign(slotFor(j), j, false);
       }
-      if (!textRef.current) markSeen(queue.current[next]);
+      // Im Hintergrund zählt erst das Ende (finish), bei der Rückkehr der laufende Moment
+      if (!textRef.current && countsSeenAtStart(isBackground(document.visibilityState))) markSeen(queue.current[next]);
       textSeen.current = -1;
       if (textBox.current) textBox.current.scrollTop = 0;
       if (!textRef.current) soundGuard(next);
+      if (recallNow && isBackground(document.visibilityState)) {
+        // Abrufkarte erst bei der Rückkehr, sonst bliebe der Ton im Hintergrund stehen
+        pendingRecall.current = recallNow;
+        recallNow = null;
+      }
       if (recallNow) {
         const rm = findMoment(recallNow.id);
         if (rm) {
@@ -359,7 +375,32 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!m) return;
     log(m, { ended: true });
     update((s) => ({ ...s, momentWeights: signal(s.momentWeights, m, SIGNAL.ended, clockNow().getTime()) }));
-    if (m.forYou) {
+    const bg = isBackground(document.visibilityState);
+    // Gesehen zählt beim Ende, höchstens einmal je Moment (auch nach der Rückkehr)
+    if (ledger.current.first(m.id)) {
+      if (bg) diag.current.push(`bg: ended ${m.id}`);
+      markSeen(m);
+    }
+    if (atEnd(formOf(m), bg) === 'stop') {
+      // Video-Reiter im Hintergrund: der Moment lief zu Ende, kein Auto-Weiter
+      diag.current.push(`bg: stop after ${m.id}`);
+      return;
+    }
+    if (bg) {
+      // Auto-Weiter im Hintergrund: derselbe Weg wie der Wisch, ohne Für-dich-Karte. Gelingt der Start nicht, hält der Feed sauber an.
+      const j = idxRef.current + 1;
+      goTo(j);
+      const nm = queue.current[idxRef.current];
+      diag.current.push(idxRef.current === j && nm ? `bg: next ${nm.id}` : `bg: stalled at ${m.id} (no next)`);
+      if (idxRef.current === j) {
+        window.setTimeout(() => {
+          if (!isBackground(document.visibilityState) || idxRef.current !== j || userPaused.current || current().st === STATE.PLAYING) return;
+          diag.current.push(`bg: stalled at ${queue.current[j]?.id}`);
+          current().player?.pauseVideo();
+          if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+        }, BG_STALL_MS);
+      }
+    } else if (m.forYou) {
       forYouRef.current = true;
       setForYou(m);
       forYouTimer.current = window.setTimeout(() => goTo(idxRef.current + 1), FOR_YOU_MS);
@@ -392,7 +433,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                 slot.ready = true;
                 slot.player!.mute();
                 assign(slot, slot.index, slot.index === idxRef.current && !textRef.current);
-                if (slot.index === idxRef.current && !textRef.current) markSeen(queue.current[slot.index]);
+                if (slot.index === idxRef.current && !textRef.current && countsSeenAtStart(isBackground(document.visibilityState))) markSeen(queue.current[slot.index]);
                 rerender();
               },
               onState: (st) => {
@@ -401,6 +442,14 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                 // Vorschaubild bleibt bis zum ersten Bild: ohne Umweg über React, damit kein Frame der YouTube-Oberfläche durchrutscht
                 slot.el?.toggleAttribute('data-live', st === STATE.PLAYING);
                 if (st === STATE.PLAYING) everPlayed.current = true;
+                if (st === STATE.PLAYING && slot.index === idxRef.current && isBackground(document.visibilityState) && !bgStarted.current.has(slot.mid)) {
+                  bgStarted.current.add(slot.mid);
+                  diag.current.push(`bg: started ${slot.mid}`);
+                }
+                if (slot.index === idxRef.current && msOnRef.current && 'mediaSession' in navigator) {
+                  if (st === STATE.PLAYING) navigator.mediaSession.playbackState = 'playing';
+                  else if (st === STATE.PAUSED || st === STATE.ENDED) navigator.mediaSession.playbackState = 'paused';
+                }
                 const sw = swipe.current;
                 if (st === STATE.PLAYING && sw && slot.index === sw.j && sw.j === idxRef.current) {
                   swipe.current = null;
@@ -999,24 +1048,68 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [!!desk, active, goTo]);
 
-  // Fenstertitel zeigt den Hook, die Medien-Anzeige des Betriebssystems ebenso
+  // Seite verlassen oder zurück (Entscheidung 13). Eigene Streams spielen weiter, YouTube und Text halten an.
+  visRef.current = (vis) => {
+    if (!active) return;
+    const m = queue.current[idxRef.current];
+    if (!m) return;
+    const playable = !textRef.current && !forYouRef.current && !recallRef.current;
+    if (isBackground(vis)) {
+      diag.current.push(`bg: left ${m.id}`);
+      if (playable && onLeave(formOf(m), !HLS.has(m.videoId)) === 'pause' && !userPaused.current) {
+        current().player?.pauseVideo();
+        leftPaused.current = true;
+      }
+      return;
+    }
+    diag.current.push(`bg: back ${m.id}`);
+    // Der laufende Moment ist jetzt zu sehen: gesehen (einmal), dann Karte oder Ton wieder aufnehmen
+    if (!textRef.current) markSeen(m);
+    const pr = pendingRecall.current;
+    if (pr) {
+      pendingRecall.current = null;
+      const rm = findMoment(pr.id);
+      if (rm) {
+        recallRef.current = true;
+        recallAnswered.current = false;
+        current().player?.pauseVideo();
+        setRecall({ m: rm, review: pr.review });
+        leftPaused.current = false;
+        return;
+      }
+    }
+    const wasLeft = leftPaused.current;
+    leftPaused.current = false;
+    if (!playable || userPaused.current || endedAt.current === idxRef.current) return;
+    // Angehalten beim Verlassen, vom Betriebssystem pausiert oder im Hintergrund nicht gestartet: weiter am Stand
+    if (wasLeft || current().st !== STATE.PLAYING) current().player?.playVideo();
+  };
+  useEffect(() => {
+    const on = () => visRef.current(document.visibilityState);
+    document.addEventListener('visibilitychange', on);
+    return () => document.removeEventListener('visibilitychange', on);
+  }, []);
+
+  // Fenstertitel (Desktop) und Medien-Anzeige des Betriebssystems: am Desktop immer, mobil im Audio-Reiter (Sperrbildschirm)
+  const msOn = !!desk || form === 'audio';
+  msOnRef.current = msOn;
   const curId = queue.current[idx]?.id;
   useEffect(() => {
-    if (!desk) return;
+    if (!msOn) return;
     const cur = queue.current[idx];
-    document.title = cur ? cur.hook : 'core';
+    if (desk) document.title = cur ? cur.hook : 'core';
     if (cur && 'mediaSession' in navigator && typeof MediaMetadata !== 'undefined') {
       navigator.mediaSession.metadata = new MediaMetadata({ title: cur.hook, artist: speakerLine(cur.channel), album: AREA_LABEL[cur.area], artwork: [{ src: thumbOf(cur) }] });
     }
     return () => {
-      document.title = 'core';
+      if (desk) document.title = 'core';
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [!!desk, curId]);
+  }, [msOn, !!desk, curId]);
 
-  // Medientasten: Pause, Weiter und Zurück
+  // Medientasten und Sperrbildschirm: Pause, Weiter und Zurück (Weiter vom Sperrbildschirm zählt wie ein Wisch)
   useEffect(() => {
-    if (!desk || !('mediaSession' in navigator)) return;
+    if (!msOn || !('mediaSession' in navigator)) return;
     const ms = navigator.mediaSession;
     const set = (a: MediaSessionAction, f: MediaSessionActionHandler | null) => {
       try {
@@ -1027,15 +1120,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     };
     set('play', () => playRef.current(true));
     set('pause', () => playRef.current(false));
-    set('nexttrack', () => actRef.current('next'));
-    set('previoustrack', () => actRef.current('prev'));
+    set('nexttrack', () => goTo(idxRef.current + 1));
+    set('previoustrack', () => goTo(idxRef.current - 1));
     return () => {
       for (const a of ['play', 'pause', 'nexttrack', 'previoustrack'] as MediaSessionAction[]) set(a, null);
     };
-  }, [!!desk]);
+  }, [msOn, goTo]);
   useEffect(() => {
-    if (desk && 'mediaSession' in navigator) navigator.mediaSession.playbackState = paused ? 'paused' : 'playing';
-  }, [!!desk, paused]);
+    if (msOn && 'mediaSession' in navigator) navigator.mediaSession.playbackState = paused ? 'paused' : 'playing';
+  }, [msOn, paused]);
 
   // Test-Hook für Playwright (liest nur App-Zustand, nicht den Cross-Origin-Player)
   useEffect(() => {

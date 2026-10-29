@@ -48,7 +48,8 @@ final class Playback: ObservableObject {
     private var statusObserver: NSKeyValueObservation?
     private var itemObserver: NSKeyValueObservation?
     private var wantsPlay = false
-    private var rate: Float = 1
+    /// Aktuelle Wiedergabegeschwindigkeit, auch für die Now-Playing-Karte
+    private(set) var rate: Float = 1
     private var lastTime: Double?
 
     init(moment: Moment) {
@@ -74,6 +75,8 @@ final class Playback: ObservableObject {
         }
         let p = AVPlayer(playerItem: item)
         p.automaticallyWaitsToMinimizeStalling = true
+        // Entscheidung 13: der Ton läuft im Hintergrund weiter, auch wenn der Video-Layer noch hängt
+        p.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
         p.seek(to: CMTime(seconds: moment.start, preferredTimescale: 600), toleranceBefore: .zero, toleranceAfter: .zero)
         statusObserver = p.observe(\.timeControlStatus, options: [.new]) { [weak self] player, _ in
             let status = player.timeControlStatus
@@ -108,6 +111,8 @@ final class Playback: ObservableObject {
     func play() {
         wantsPlay = true
         ended = false
+        // Audio-Sitzung nur während der Wiedergabe aktiv (Entscheidung 13)
+        AudioSessionGate.shared.want(moment.id, true)
         if let player {
             player.playImmediately(atRate: rate)
         } else {
@@ -117,6 +122,7 @@ final class Playback: ObservableObject {
 
     func pause() {
         wantsPlay = false
+        AudioSessionGate.shared.want(moment.id, false)
         player?.pause()
         js("pause()")
     }
@@ -241,22 +247,42 @@ private final class WeakHandler: NSObject, WKScriptMessageHandler {
 struct PlayerLayerView: UIViewRepresentable {
     let player: AVPlayer
 
+    /// Beim Wechsel in den Hintergrund wird der Layer vom Player gelöst, der AVPlayer bleibt: der Ton läuft weiter.
+    /// Beim Zurückkehren wird der Layer wieder angehängt (Bild und Ton sind dann an der gleichen Stelle).
     final class LayerView: UIView {
         override class var layerClass: AnyClass { AVPlayerLayer.self }
         var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
+        private(set) var attached: AVPlayer?
+
+        func attach(_ p: AVPlayer) {
+            attached = p
+            if UIApplication.shared.applicationState != .background { playerLayer.player = p }
+        }
+
+        override init(frame: CGRect) {
+            super.init(frame: frame)
+            NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(willEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        }
+
+        @available(*, unavailable)
+        required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
+
+        @objc private func didEnterBackground() { playerLayer.player = nil }
+        @objc private func willEnterForeground() { playerLayer.player = attached }
     }
 
     func makeUIView(context: Context) -> LayerView {
         let v = LayerView()
         v.backgroundColor = .black
         v.playerLayer.videoGravity = .resizeAspect
-        v.playerLayer.player = player
+        v.attach(player)
         v.isUserInteractionEnabled = false
         return v
     }
 
     func updateUIView(_ v: LayerView, context: Context) {
-        if v.playerLayer.player !== player { v.playerLayer.player = player }
+        if v.attached !== player { v.attach(player) }
     }
 }
 

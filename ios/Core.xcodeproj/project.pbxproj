@@ -32,6 +32,8 @@
 		C0DE00000000000000002103 /* SyncClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000002003 /* SyncClient.swift */; };
 		C0DE00000000000000002104 /* SyncViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000002004 /* SyncViews.swift */; };
 		C0DE00000000000000002105 /* SyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000002005 /* SyncTests.swift */; };
+		C0DE00000000000000002110 /* BackgroundAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000002010 /* BackgroundAudio.swift */; };
+		C0DE00000000000000002111 /* BackgroundTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE00000000000000002011 /* BackgroundTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -64,6 +66,8 @@
 		C0DE00000000000000002003 /* SyncClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncClient.swift; sourceTree = "<group>"; };
 		C0DE00000000000000002004 /* SyncViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncViews.swift; sourceTree = "<group>"; };
 		C0DE00000000000000002005 /* SyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTests.swift; sourceTree = "<group>"; };
+		C0DE00000000000000002010 /* BackgroundAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundAudio.swift; sourceTree = "<group>"; };
+		C0DE00000000000000002011 /* BackgroundTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXContainerItemProxy section */
@@ -138,6 +142,7 @@
 				C0DE00000000000000002002 /* SyncState.swift */,
 				C0DE00000000000000002003 /* SyncClient.swift */,
 				C0DE00000000000000002004 /* SyncViews.swift */,
+				C0DE00000000000000002010 /* BackgroundAudio.swift */,
 				C0DE00000000000000000011 /* Assets.xcassets */,
 				C0DE00000000000000000009 /* Info.plist */,
 			);
@@ -161,6 +166,7 @@
 				C0DE00000000000000000021 /* Round1Tests.swift */,
 				C0DE00000000000000009012 /* LearnTests.swift */,
 				C0DE00000000000000002005 /* SyncTests.swift */,
+				C0DE00000000000000002011 /* BackgroundTests.swift */,
 			);
 			path = CoreTests;
 			sourceTree = "<group>";
@@ -336,6 +342,7 @@
 				C0DE00000000000000002102 /* SyncState.swift in Sources */,
 				C0DE00000000000000002103 /* SyncClient.swift in Sources */,
 				C0DE00000000000000002104 /* SyncViews.swift in Sources */,
+				C0DE00000000000000002110 /* BackgroundAudio.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -347,6 +354,7 @@
 				C0DE00000000000000000117 /* Round1Tests.swift in Sources */,
 				C0DE00000000000000009002 /* LearnTests.swift in Sources */,
 				C0DE00000000000000002105 /* SyncTests.swift in Sources */,
+				C0DE00000000000000002111 /* BackgroundTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
