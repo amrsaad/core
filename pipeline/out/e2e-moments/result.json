@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T16:25:15.816Z",
+ "at": "2026-10-29T16:35:48.121Z",
  "runs": [
   {
    "browser": "webkit",
@@ -239,10 +239,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604063,
+     "due": 1792929604087,
      "results": [
       {
-       "at": 1792756804063,
+       "at": 1792756804087,
        "got": false
       }
      ]
@@ -320,11 +320,11 @@
    ],
    "tapToFill": {
     "measured": 30,
-    "recorded": 30
+    "recorded": 32
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 867,
+    "checksDone": 882,
     "violations": 0,
     "endedSeen": 0
    },
@@ -333,7 +333,7 @@
     "buffered": 32,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000008:100 | Testmoment 8 beat | Boring | - | Video | fdccafb |\n| test0000004:100 | Testmoment 4 beat | - | The cut is two seconds late & the \"hook\" repeats. | Video | fdccafb |\n| test0000011:100 | Testmoment 11 beat | Known | - | Video | fdccafb |\n| test0000010:100 | Testmoment 10 beat | Wrong | - | Video | fdccafb |\n| test0000003:100 | Testmoment 3 beat | Not for me | - | Video | fdccafb |\n| test0000019:100 | Testmoment 19 brain | Mute speaker | - | Video | fdccafb |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000008:100 | Testmoment 8 beat | Boring | - | Video | fefd9c5 |\n| test0000004:100 | Testmoment 4 beat | - | The cut is two seconds late & the \"hook\" repeats. | Video | fefd9c5 |\n| test0000011:100 | Testmoment 11 beat | Known | - | Video | fefd9c5 |\n| test0000010:100 | Testmoment 10 beat | Wrong | - | Video | fefd9c5 |\n| test0000003:100 | Testmoment 3 beat | Not for me | - | Video | fefd9c5 |\n| test0000019:100 | Testmoment 19 brain | Mute speaker | - | Video | fefd9c5 |",
    "badWalk": [
     {
      "idx": 2,
@@ -713,7 +713,7 @@
     "captionsArabicRtl": true,
     "swipeNext": true,
     "captionsSettingsOn": true,
-    "holdFast": true,
+    "holdFast": false,
     "releaseNormal": true,
     "embedNoZoom": true,
     "embed16by9FullWidth": true,
@@ -823,7 +823,7 @@
     "promptOncePerDay": true,
     "prevPlanShown": true,
     "prevPlanAnswered": true,
-    "skipWorks": true,
+    "skipWorks": false,
     "p6Feed": true,
     "emptyAudioLine": true,
     "emptyKeepsSwitch": true,
@@ -914,10 +914,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603438,
+     "due": 1792929603359,
      "results": [
       {
-       "at": 1792756803438,
+       "at": 1792756803359,
        "got": false
       }
      ]
@@ -994,21 +994,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 31.800000000017462,
-    "recorded": 32
+    "measured": 30.79999999998836,
+    "recorded": 31
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 879,
+    "checksDone": 885,
     "violations": 0,
-    "endedSeen": 142
+    "endedSeen": 0
    },
    "latency": {
-    "n": 36,
-    "buffered": 30,
+    "n": 38,
+    "buffered": 32,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | fdccafb |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | fdccafb |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | fdccafb |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | fdccafb |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | fdccafb |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | fdccafb |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000008:100 | Testmoment 8 beat | Boring | - | Video | fefd9c5 |\n| test0000004:100 | Testmoment 4 beat | - | The cut is two seconds late & the \"hook\" repeats. | Video | fefd9c5 |\n| test0000010:100 | Testmoment 10 beat | Known | - | Video | fefd9c5 |\n| test0000003:100 | Testmoment 3 beat | Wrong | - | Video | fefd9c5 |\n| test0000019:100 | Testmoment 19 brain | Not for me | - | Video | fefd9c5 |\n| test0000024:100 | Testmoment 24 brain | Mute speaker | - | Video | fefd9c5 |",
    "badWalk": [
     {
      "idx": 2,
@@ -1326,12 +1326,16 @@
      "dir": "rtl"
     },
     {
-     "ar": false,
-     "dir": "ltr"
+     "ar": true,
+     "dir": "rtl"
     },
     {
      "ar": false,
      "dir": "ltr"
+    },
+    {
+     "ar": true,
+     "dir": "rtl"
     }
    ],
    "hit": {
@@ -1345,7 +1349,7 @@
     "noRating": true
    },
    "errors": [],
-   "ok": true
+   "ok": false
   }
  ]
 }
