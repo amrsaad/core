@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T16:45:20.319Z",
+ "at": "2026-10-29T16:56:41.989Z",
  "runs": [
   {
    "browser": "webkit",
@@ -281,10 +281,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603449,
+     "due": 1792929603445,
      "results": [
       {
-       "at": 1792756803449,
+       "at": 1792756803445,
        "got": false
       }
      ]
@@ -349,9 +349,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06246948242188,
+    "bh": 221.06253051757812,
     "fw": 393,
-    "fh": 221.06246948242188,
+    "fh": 221.06253051757812,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -361,21 +361,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 31.89999999999418,
-    "recorded": 32
+    "measured": 31.70000000001164,
+    "recorded": 31
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 879,
+    "checksDone": 867,
     "violations": 0,
-    "endedSeen": 142
+    "endedSeen": 140
    },
    "latency": {
     "n": 36,
     "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | 0f51694 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 0f51694 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | 0f51694 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | 0f51694 |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | 0f51694 |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | 0f51694 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | 7231c07 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 7231c07 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | 7231c07 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | 7231c07 |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | 7231c07 |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | 7231c07 |",
    "badWalk": [
     {
      "idx": 2,
