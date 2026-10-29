@@ -1,10 +1,18 @@
 import Foundation
 import SwiftUI
 
+/// Ablauf eines Gewichts: bis `at` (ms seit 1970) gilt der Wert in der Tabelle, danach `back`
+struct Until: Codable, Equatable {
+    var at: Double
+    var back: Double
+}
+
 struct Weights: Codable, Equatable {
     var area: [String: Double] = [:]
     var channel: [String: Double] = [:]
     var topic: [String: Double] = [:]
+    /// Abläufe, Schlüssel c:<Kanal> und t:<Thema>. Fehlt, solange keiner läuft (Learn.swift).
+    var until: [String: Until]?
 }
 
 struct SavedMoment: Codable, Identifiable, Equatable {
@@ -26,6 +34,8 @@ struct LogEntry: Codable, Equatable {
 struct AppState: Codable, Equatable {
     var seen: [String: Date] = [:]
     var weights = Weights()
+    /// Folge von Skips desselben Kanals, nur lokal (nicht im Sync)
+    var skipRun: Learn.SkipRun?
     var saved: [String: SavedMoment] = [:]
     var muted: [String: String] = [:]
     /// seconds in the feed per local day (yyyy-MM-dd)
@@ -143,12 +153,29 @@ final class Store: ObservableObject {
 
     // MARK: Actions
 
+    /// Faktor auf Kanal, Thema und Bereich. Jede Wertung außer Skip unterbricht die Folge von Skips.
     func signal(_ m: Moment, _ factor: Double) {
-        state.weights = Mix.applySignal(state.weights, m, factor)
+        state.weights = Learn.signal(state.weights, m.mom, factor: factor, now: Double(Store.nowMs))
+        state.skipRun = nil
     }
 
-    func signalTopic(_ m: Moment, _ factor: Double) {
-        state.weights = Mix.applyTopic(state.weights, m, factor)
+    /// Skip (unter 3 s weggewischt): Deckel 0,6, zweiter Skip desselben Kanals in Folge 0,2 für 14 Tage
+    func skip(_ m: Moment) {
+        let r = Learn.skip(state.weights, run: state.skipRun, m.mom, now: Double(Store.nowMs))
+        state.weights = r.weights
+        state.skipRun = r.run
+    }
+
+    /// Wirkung eines Chips auf die Gewichte (Learn.apply), die Folge von Skips endet
+    func apply(_ e: Learn.Effect, _ m: Moment) {
+        state.weights = Learn.apply(state.weights, e, m.mom, now: Double(Store.nowMs))
+        state.skipRun = nil
+    }
+
+    /// Alles Gelernte zurück auf Standard
+    func resetLearning() {
+        state.weights = Weights()
+        state.skipRun = nil
     }
 
     func markSeen(_ m: Moment) {

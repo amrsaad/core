@@ -481,6 +481,8 @@ private struct CapHeightKey: PreferenceKey {
 /// Done speichert nur den Text. Wegwischen schließt ohne Notiz. Kein Send-Knopf, die Adresse baut später die Zeile im Feed.
 struct NoteSheetView: View {
     let moment: Moment
+    /// Bestätigungszeile nach einem Chip ("Less Barbell Medicine"), solange das Blatt noch offen ist
+    var confirm: String? = nil
     let onChip: (String, String) -> Void
     let onDone: (String) -> Void
     @State private var text = ""
@@ -494,6 +496,12 @@ struct NoteSheetView: View {
                 Text(moment.speakerLine).foregroundStyle(Palette.secondary)
             }
             .font(.system(size: 13))
+            Text(confirm ?? " ")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(Area.brain.color)
+                .frame(maxWidth: .infinity, minHeight: 20, alignment: .leading)
+                .accessibilityIdentifier("noteConfirm")
+                .accessibilityLabel(confirm ?? "")
             LazyVGrid(columns: columns, spacing: 10) {
                 ForEach(Note.chips, id: \.self) { chip in
                     Button { onChip(chip, text) } label: {
@@ -503,6 +511,8 @@ struct NoteSheetView: View {
                             .background(Palette.button, in: RoundedRectangle(cornerRadius: 16))
                     }
                     .buttonStyle(.plain)
+                    .disabled(confirm != nil)
+                    .opacity(confirm != nil ? 0.35 : 1)
                     .accessibilityIdentifier("noteChip-\(chip)")
                 }
             }

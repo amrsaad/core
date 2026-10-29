@@ -203,7 +203,8 @@ final class Round1Tests: XCTestCase {
         XCTAssertEqual(Note.effect("Wrong"), .wrong)
         XCTAssertEqual(Note.effect("Mute speaker"), .mute)
         XCTAssertEqual(Note.effect("Not for me"), .notForMe)
-        for c in ["Boring", "Bad cut", "Great"] { XCTAssertNil(Note.effect(c)) }
+        XCTAssertEqual(Note.effect("Boring"), .weak)
+        for c in ["Bad cut", "Great"] { XCTAssertNil(Note.effect(c)) }
         // Notiz aus Chip oder Text
         XCTAssertNil(Note.makeEntry(a, chips: [], text: "  ", at: 1))
         let e = Note.makeEntry(a, chips: ["Great"], text: "  Clear.  ", at: 1_700_000_000_000)

@@ -101,6 +101,8 @@ struct Moment: Codable, Identifiable, Hashable {
         return yt ? URL(string: "https://www.youtube.com/watch?v=\(videoId)&t=\(Int(start))") : nil
     }
 
+    var mom: Learn.Mom { Learn.Mom(area: area.rawValue, channel: channel, topic: topic) }
+
     /// "Sigma Nutrition (Prof. Grant Tinsley)" becomes "Sigma Nutrition · Prof. Grant Tinsley"
     var speakerLine: String {
         guard let open = channel.lastIndex(of: "("), channel.hasSuffix(")") else { return channel }

@@ -318,7 +318,23 @@ enum SyncMerge {
         for fam in ["area", "channel", "topic"] {
             out[fam] = .obj(lww(obj(a?[fam]), obj(b?[fam]), tsA, tsB, { tsKey(weight: fam, $0) }, moreLearned))
         }
+        // Abläufe (Learn.swift) teilen den Zeitstempel ihres Gewichts, beide kommen vom selben Gerät
+        let until = lww(obj(a?["until"]), obj(b?["until"]), tsA, tsB, untilTsKey, combineUntil)
+        if !until.isEmpty { out["until"] = .obj(until) }
         return .obj(out)
+    }
+
+    /// Zeitstempel-Schlüssel eines Ablaufs (c:<Kanal> oder t:<Thema>): der seines Gewichts
+    static func untilTsKey(_ key: String) -> String {
+        let (fam, k) = Learn.parseUntilKey(key)
+        return tsKey(weight: fam.rawValue, k)
+    }
+
+    /// Gleichstand zweier Abläufe: der spätere Termin, dann das größere Gewicht danach
+    private static func combineUntil(_ x: J, _ y: J, _ k: String) -> J {
+        let ax = x["at"]?.number ?? 0, ay = y["at"]?.number ?? 0
+        if ax != ay { return ax > ay ? x : y }
+        return (x["back"]?.number ?? 0) >= (y["back"]?.number ?? 0) ? x : y
     }
 
     private static func pickMoment(_ x: J, _ y: J) -> J {

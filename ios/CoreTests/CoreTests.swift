@@ -76,25 +76,11 @@ final class MixTests: XCTestCase {
     func testWeightsStayWithinLimits() {
         var w = Weights()
         let m = moment("x", .body, topic: "strength", channel: "c")
-        for _ in 0..<40 { w = Mix.applySignal(w, m, Mix.Signal.more) }
+        for _ in 0..<40 { w = Learn.signal(w, m.mom, factor: Mix.Signal.more, now: 0) }
         XCTAssertEqual(w.channel["c"], 3)
-        for _ in 0..<80 { w = Mix.applySignal(w, m, Mix.Signal.negative) }
+        XCTAssertEqual(w.topic["strength"], 3)
+        for _ in 0..<80 { w = Learn.signal(w, m.mom, factor: 0.7, now: 0) }
         XCTAssertEqual(w.channel["c"], 0.2)
-    }
-
-    /// "Not for me": only the topic weight drops, by the factor of Weak (0.7); channel and area stay
-    func testNotForMeLowersOnlyTopic() {
-        let m = moment("x", .brain, topic: "augen", channel: "c")
-        let w1 = Mix.applyTopic(Weights(), m, Mix.Signal.negative)
-        XCTAssertEqual(w1.topic["augen"]!, 0.7, accuracy: 1e-9)
-        XCTAssertNil(w1.channel["c"])
-        XCTAssertNil(w1.area["brain"])
-        XCTAssertEqual(Mix.applyTopic(w1, m, Mix.Signal.negative).topic["augen"]!, 0.49, accuracy: 1e-9)
-        var w = Weights()
-        for _ in 0..<40 { w = Mix.applyTopic(w, m, Mix.Signal.negative) }
-        XCTAssertEqual(w.topic["augen"], 0.2)
-        XCTAssertNil(w.topic["ki"])
-        XCTAssertEqual(Mix.applySignal(Weights(), m, Mix.Signal.negative).topic["augen"]!, w1.topic["augen"]!, accuracy: 1e-9)
     }
 
     func testEveryAreaKeepsTenPercent() {
@@ -106,11 +92,20 @@ final class MixTests: XCTestCase {
         XCTAssertEqual(shares.values.reduce(0, +), 1, accuracy: 1e-9)
     }
 
-    func testLeaveSignal() {
-        XCTAssertEqual(Mix.leaveSignal(watched: 2, duration: 60), Mix.Signal.skip)
-        XCTAssertEqual(Mix.leaveSignal(watched: 10, duration: 60), Mix.Signal.early)
-        XCTAssertNil(Mix.leaveSignal(watched: 30, duration: 60))
-        XCTAssertEqual(Mix.leaveSignal(watched: 50, duration: 60), Mix.Signal.mostly)
+    func testLeave() {
+        XCTAssertEqual(Mix.leave(watched: 0, duration: 100), .skip)
+        XCTAssertEqual(Mix.leave(watched: 2.9, duration: 100), .skip)
+        // ab 3 s kein Skip mehr, sondern früh weggewischt (unter 30 %)
+        XCTAssertEqual(Mix.leave(watched: 3, duration: 100), .factor(Mix.Signal.early))
+        XCTAssertEqual(Mix.leave(watched: 4.5, duration: 60), .factor(Mix.Signal.early))
+        XCTAssertEqual(Mix.leave(watched: 20, duration: 100), .factor(Mix.Signal.early))
+        XCTAssertNil(Mix.leave(watched: 50, duration: 100))
+        XCTAssertNil(Mix.leave(watched: 79, duration: 100))
+        XCTAssertEqual(Mix.leave(watched: 85, duration: 100), .factor(Mix.Signal.mostly))
+    }
+
+    func testExploreStaysTwentyPercent() {
+        XCTAssertEqual(Mix.explore, 0.2)
     }
 }
 

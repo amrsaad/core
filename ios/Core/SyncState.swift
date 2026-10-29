@@ -64,7 +64,9 @@ enum SyncWire {
             saved[k] = .obj(o)
         }
         st["savedMoments"] = .obj(saved)
-        st["momentWeights"] = .obj(["area": nums(s.weights.area), "channel": nums(s.weights.channel), "topic": nums(s.weights.topic)])
+        var weights: [String: J] = ["area": nums(s.weights.area), "channel": nums(s.weights.channel), "topic": nums(s.weights.topic)]
+        if let u = s.weights.until, !u.isEmpty { weights["until"] = .obj(u.mapValues { J.obj(["at": .num($0.at), "back": .num($0.back)]) }) }
+        st["momentWeights"] = .obj(weights)
         var recall = [String: J]()
         for (k, item) in s.recall ?? [:] {
             var o = [String: J]()
@@ -145,7 +147,11 @@ enum SyncWire {
         }
         if differs("momentWeights") {
             let w = next["momentWeights"]
-            out.weights = Weights(area: numbers(w?["area"]), channel: numbers(w?["channel"]), topic: numbers(w?["topic"]))
+            var until: [String: Until] = [:]
+            for (k, v) in w?["until"]?.object ?? [:] {
+                if let at = v["at"]?.number, let back = v["back"]?.number { until[k] = Until(at: at, back: back) }
+            }
+            out.weights = Weights(area: numbers(w?["area"]), channel: numbers(w?["channel"]), topic: numbers(w?["topic"]), until: until.isEmpty ? nil : until)
         }
         if differs("recall") {
             var recall = Recall.State()
@@ -209,6 +215,7 @@ enum SyncWire {
         diff(old.weights.area, new.weights.area) { SyncMerge.tsKey(weight: "area", $0) }
         diff(old.weights.channel, new.weights.channel) { SyncMerge.tsKey(weight: "channel", $0) }
         diff(old.weights.topic, new.weights.topic) { SyncMerge.tsKey(weight: "topic", $0) }
+        diff(old.weights.until ?? [:], new.weights.until ?? [:]) { SyncMerge.untilTsKey($0) }
         diff(old.saved, new.saved) { SyncMerge.tsKey(saved: $0) }
         diff(old.liked ?? [:], new.liked ?? [:]) { SyncMerge.tsKey(liked: $0) }
         diff(old.muted, new.muted) { SyncMerge.tsKey(muted: $0) }

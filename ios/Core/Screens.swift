@@ -140,16 +140,7 @@ struct SettingsView: View {
                     TimeBars(feedTime: store.state.feedTime)
                 }
 
-                card {
-                    Text("Learned").font(.system(size: 17, weight: .semibold))
-                    LearnedView(weights: store.state.weights)
-                    Button("Reset what Core learned") {
-                        store.state.weights = Weights()
-                        note = "Learned weights reset."
-                    }
-                    .font(.system(size: 13))
-                    .foregroundStyle(Area.brain.color)
-                }
+                LearnedCard()
 
                 card {
                     Text("Mix").font(.system(size: 17, weight: .semibold))
@@ -287,23 +278,74 @@ struct TimeBars: View {
     }
 }
 
-struct LearnedView: View {
-    let weights: Weights
+/// Karte "What Core learned": je fünf Kanäle und Themen oben und unten mit Gewicht und Pfeil (Learn.learned).
+/// Reset learning fragt vorher nach.
+struct LearnedCard: View {
+    @EnvironmentObject var store: Store
+    @State private var ask = false
+    @State private var done = false
+
+    private static let dayFormat: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US")
+        f.dateFormat = "MMM d"
+        return f
+    }()
+
+    private func list(_ id: String, _ title: String, _ rows: [Learn.Row], topic: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title).font(.system(size: 13)).foregroundStyle(Palette.tertiary)
+            if rows.isEmpty { Text("none yet").font(.system(size: 13)).foregroundStyle(Palette.tertiary) }
+            ForEach(rows, id: \.key) { r in
+                HStack(alignment: .firstTextBaseline) {
+                    Text(topic ? Learn.cap1(r.key) : Learn.speakerLine(r.key)).lineLimit(1)
+                    Spacer()
+                    Text(Learn.weightText(r.weight)).monospacedDigit()
+                    if let u = r.until {
+                        Text("until " + Self.dayFormat.string(from: Date(timeIntervalSince1970: u / 1000))).font(.system(size: 12)).foregroundStyle(Palette.tertiary)
+                    }
+                }
+                .font(.system(size: 16))
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("learnedRow")
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(id)
+    }
 
     var body: some View {
-        let all = Array(weights.topic) + Array(weights.channel)
-        let up = all.filter { $0.value > 1.001 }.sorted { $0.value > $1.value }.prefix(5)
-        let down = all.filter { $0.value < 0.999 }.sorted { $0.value < $1.value }.prefix(5)
-        let fmt: (Double) -> String = { v in "\(v > 1 ? "+" : "")\(Int(((v - 1) * 100).rounded())) %" }
-        return VStack(alignment: .leading, spacing: 4) {
-            if all.isEmpty {
-                Text("Nothing learned yet. Core learns from watching, swiping, saving and More like this.")
-                    .foregroundStyle(Palette.tertiary)
+        let l = Learn.learned(store.state.weights, now: Double(Store.nowMs))
+        let any = !(l.channelUp.isEmpty && l.channelDown.isEmpty && l.topicUp.isEmpty && l.topicDown.isEmpty)
+        VStack(alignment: .leading, spacing: 12) {
+            Text("What Core learned").font(.system(size: 17, weight: .semibold))
+            if !any {
+                Text(done ? "Learning reset." : "Nothing learned yet. Core learns from what you watch, skip and save.")
+                    .font(.system(size: 13)).foregroundStyle(Palette.tertiary)
+                    .accessibilityIdentifier("learnedEmpty")
+            } else {
+                list("learnedChannelUp", "Speakers, more", l.channelUp, topic: false)
+                list("learnedChannelDown", "Speakers, less", l.channelDown, topic: false)
+                list("learnedTopicUp", "Topics, more", l.topicUp, topic: true)
+                list("learnedTopicDown", "Topics, less", l.topicDown, topic: true)
             }
-            if !up.isEmpty { Text("More: " + up.map { "\($0.key) \(fmt($0.value))" }.joined(separator: ", ")).foregroundStyle(Palette.secondary) }
-            if !down.isEmpty { Text("Less: " + down.map { "\($0.key) \(fmt($0.value))" }.joined(separator: ", ")).foregroundStyle(Palette.tertiary) }
+            Button("Reset learning") { ask = true; done = false }
+                .font(.system(size: 13))
+                .foregroundStyle(Area.brain.color)
+                .accessibilityIdentifier("resetLearning")
+                .confirmationDialog("Reset everything Core learned? Speakers and topics go back to normal.", isPresented: $ask, titleVisibility: .visible) {
+                    Button("Reset", role: .destructive) {
+                        store.resetLearning()
+                        done = true
+                    }
+                    Button("Cancel", role: .cancel) {}
+                }
         }
-        .font(.system(size: 13))
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Palette.surface, in: RoundedRectangle(cornerRadius: 12))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("learnedCard")
     }
 }
 

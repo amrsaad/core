@@ -13,38 +13,26 @@ enum Mix {
 
     enum Signal {
         static let ended = 1.1
-        static let skip = 0.9
         static let early = 0.95
         static let mostly = 1.05
         static let back = 1.1
         static let more = 1.3
         static let save = 1.1
-        static let negative = 0.7
     }
 
     static func clamp(_ w: Double) -> Double { min(wMax, max(wMin, (w * 10000).rounded() / 10000)) }
 
-    static func applySignal(_ w: Weights, _ m: Moment, _ factor: Double) -> Weights {
-        var out = w
-        out.area[m.area.rawValue] = clamp((w.area[m.area.rawValue] ?? 1) * factor.squareRoot())
-        out.channel[m.channel] = clamp((w.channel[m.channel] ?? 1) * factor)
-        out.topic[m.topic] = clamp((w.topic[m.topic] ?? 1) * factor)
-        return out
+    enum Leave: Equatable {
+        case skip
+        case factor(Double)
     }
 
-    /// Topic only: "Not for me" lowers the weight of the topic, channel and area stay (same factor as Weak, Signal.negative)
-    static func applyTopic(_ w: Weights, _ m: Moment, _ factor: Double) -> Weights {
-        var out = w
-        out.topic[m.topic] = clamp((w.topic[m.topic] ?? 1) * factor)
-        return out
-    }
-
-    /// Signal when swiping away, by share watched. nil = neutral.
-    static func leaveSignal(watched: Double, duration: Double) -> Double? {
-        if watched < 5 { return Signal.skip }
+    /// Wertung beim Weiterwischen nach geschautem Anteil. Unter 3 Sekunden ist ein Skip (Learn.swift). nil = neutral.
+    static func leave(watched: Double, duration: Double) -> Leave? {
+        if watched < Learn.skipSec { return .skip }
         let f = watched / max(1, duration)
-        if f < 0.3 { return Signal.early }
-        if f >= 0.8 { return Signal.mostly }
+        if f < 0.3 { return .factor(Signal.early) }
+        if f >= 0.8 { return .factor(Signal.mostly) }
         return nil
     }
 
@@ -75,7 +63,7 @@ enum Mix {
 
     /// Next block. Changes the cursor. nil when nothing is left.
     static func nextBlock(pool: [Moment], state: AppState, cursor c: inout Cursor) -> [Moment]? {
-        let w = state.weights
+        let w = Learn.settle(state.weights, now: Double(Store.nowMs))
         let free = pool.filter { state.seen[$0.id] == nil && !c.used.contains($0.id) && state.muted[$0.channel] == nil }
         if free.isEmpty { return nil }
         let areas = Area.allCases.filter { a in free.contains { $0.area == a } }

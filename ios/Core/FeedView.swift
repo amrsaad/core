@@ -100,6 +100,12 @@ struct FeedView: View {
     @State private var flash: String?
     /// Rückmeldungsblatt: öffnet mit Wisch nach links
     @State private var noteFor: Moment?
+    /// Nach einem Chip: Bestätigungszeile am offenen Blatt, danach schließt es und der Feed geht weiter
+    @State private var confirm: String?
+    @State private var confirmFor: Moment?
+    @State private var confirmSeq = 0
+    /// Moment, den ein Chip gerade verlässt: sein Weiterwischen gibt kein eigenes Signal mehr (der Chip ersetzt es)
+    @State private var silentFor: String?
     /// Zeile "N notes, send?" (nur beim ersten Öffnen am Tag, wenn ungesendete Notizen vorliegen)
     @State private var promptShown = false
     @State private var promptChecked = false
@@ -216,9 +222,10 @@ struct FeedView: View {
                 .accessibilityIdentifier("notesPrompt")
             }
         }
-        .sheet(item: $noteFor) { m in
+        .sheet(item: $noteFor, onDismiss: finishConfirm) { m in
             NoteSheetView(
                 moment: m,
+                confirm: confirm,
                 onChip: { chip, text in saveNote(m, chip: chip, text: text) },
                 onDone: { text in saveNote(m, chip: nil, text: text) })
         }
@@ -279,9 +286,17 @@ struct FeedView: View {
         p.setRate(Float(store.state.speed))
         let ni = index(of: new) ?? oi
         let text = store.state.currentForm == .text
-        // Im Textmodus gibt es keine Wiedergabezeit, darum kein Zeitsignal
+        // Im Textmodus gibt es keine Wiedergabezeit, darum kein Zeitsignal. Nach einem Chip ersetzt dessen Wirkung die Wertung.
+        let silent = silentFor == m.id
+        if silent { silentFor = nil }
         if ni > oi && !p.ended && !text {
-            if let f = Mix.leaveSignal(watched: p.watched, duration: m.duration) { store.signal(m, f) }
+            if !silent {
+                switch Mix.leave(watched: p.watched, duration: m.duration) {
+                case .skip: store.skip(m)
+                case .factor(let f): store.signal(m, f)
+                case nil: store.state.skipRun = nil
+                }
+            }
             store.log(m, watched: p.watched)
         }
         // Punkt 5: geschauter Anteil des verlassenen Moments, Karte nach jedem 4.
@@ -342,30 +357,47 @@ struct FeedView: View {
         noteFor = m
     }
 
-    /// Tipp auf einen Chip speichert sofort lokal und schließt das Blatt, Done speichert nur den Text.
-    /// Known, Wrong und Mute speaker wirken wie bisher, danach geht der Feed zum nächsten Moment.
+    /// Tipp auf einen Chip speichert sofort lokal und wirkt nach Learn.swift. Das Blatt zeigt kurz die Bestätigungszeile
+    /// ("Less Barbell Medicine"), schließt dann und der Feed geht zum nächsten Moment. Done speichert nur den Text und schließt sofort.
     private func saveNote(_ m: Moment, chip: String?, text: String) {
-        noteFor = nil
+        guard confirmFor == nil else { return }
         let tab = store.state.currentForm.label
-        guard store.addNote(m, chip: chip, text: text, tab: tab) else { return }
+        guard store.addNote(m, chip: chip, text: text, tab: tab) else { noteFor = nil; return }
         UIImpactFeedbackGenerator(style: chip == nil ? .light : .medium).impactOccurred()
         Diag.log("note saved \(m.id) \(chip ?? "-")")
-        switch chip.flatMap(Note.effect) {
-        case .known, .wrong:
-            let wrong = chip.flatMap(Note.effect) == .wrong
-            store.signal(m, Mix.Signal.negative)
-            store.log(m, watched: feed.playback(for: m).watched, feedback: wrong ? "wrong" : "known")
-            if Actions.toast(wrong ? .wrong : .known) { show("Wrong") }
-        case .mute:
-            store.mute(m)
-            if let i = index(of: m.id) { feed.removeUpcoming(channel: m.channel, after: i) }
-            if Actions.toast(.mute) { show("\(m.speakerLine) muted") }
-        case .notForMe:
-            store.signalTopic(m, Mix.Signal.negative)
-            store.log(m, watched: feed.playback(for: m).watched, feedback: "weak")
-        case nil:
-            break
+        guard let chip else {
+            noteFor = nil
+            if currentID == m.id { advance() }
+            return
         }
+        let fx = Note.effect(chip)
+        if let fx {
+            store.apply(fx, m)
+            switch fx {
+            case .known: store.log(m, watched: feed.playback(for: m).watched, feedback: "known")
+            case .wrong: store.log(m, watched: feed.playback(for: m).watched, feedback: "wrong")
+            case .notForMe, .weak: store.log(m, watched: feed.playback(for: m).watched, feedback: "weak")
+            case .mute:
+                store.mute(m)
+                if let i = index(of: m.id) { feed.removeUpcoming(channel: m.channel, after: i) }
+            }
+        } else {
+            store.state.skipRun = nil
+        }
+        confirm = Learn.confirmLine(fx, m.mom)
+        confirmFor = m
+        silentFor = m.id
+        confirmSeq += 1
+        let seq = confirmSeq
+        DispatchQueue.main.asyncAfter(deadline: .now() + Note.confirmSheetSeconds) { if seq == confirmSeq { finishConfirm() } }
+    }
+
+    /// Bestätigung beenden: Blatt zu, weiter zum nächsten Moment. Auch beim Wegwischen des Blatts (dann sofort).
+    private func finishConfirm() {
+        guard let m = confirmFor else { return }
+        confirmFor = nil
+        confirm = nil
+        noteFor = nil
         if currentID == m.id { advance() }
     }
 

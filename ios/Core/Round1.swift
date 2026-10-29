@@ -413,15 +413,20 @@ enum Note {
     /// Gesendete Notizen bleiben so lange lokal (Tage)
     static let sentKeepDays = 30
 
-    enum Effect: Equatable { case known, wrong, mute, notForMe }
+    typealias Effect = Learn.Effect
 
-    /// Known, Wrong und Mute speaker wirken wie das bisherige Menü. Not for me senkt das Gewicht des Themas (wie Weak) und zählt in der Notiz wie Boring. Die anderen Chips speichern nur
+    /// So lange bleibt das Blatt nach einem Chip mit der Bestätigungszeile offen, dann schließt es und der Feed geht weiter
+    static let confirmSheetSeconds = 0.9
+
+    /// Was ein Chip lernt (Learn.swift): Known = Thema 0,7, Not for me = Thema 0,2 für 30 Tage und Kanal 0,5, Wrong = Kanal 0,5,
+    /// Boring = Kanal 0,7, Mute speaker = Sprecher stumm. Bad cut und Great speichern nur die Notiz.
     static func effect(_ chip: String) -> Effect? {
         switch chip {
         case "Known": return .known
         case "Wrong": return .wrong
         case "Mute speaker": return .mute
         case "Not for me": return .notForMe
+        case "Boring": return .weak
         default: return nil
         }
     }
