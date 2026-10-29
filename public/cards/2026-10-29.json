@@ -258,6 +258,268 @@
    "arabic": "۞ وَٱذْكُرُوا۟ ٱللَّهَ فِىٓ أَيَّامٍ مَّعْدُودَٰتٍ ۚ فَمَن تَعَجَّلَ فِى يَوْمَيْنِ فَلَآ إِثْمَ عَلَيْهِ وَمَن تَأَخَّرَ فَلَآ إِثْمَ عَلَيْهِ ۚ لِمَنِ ٱتَّقَىٰ ۗ وَٱتَّقُوا۟ ٱللَّهَ وَٱعْلَمُوٓا۟ أَنَّكُمْ إِلَيْهِ تُحْشَرُونَ",
    "translation": "Und gedenkt Allahs während einer bestimmten Anzahl von Tagen. Wer sich jedoch in zwei Tagen (mit dem Aufbruch) beeilt, den trifft keine Sünde, und wer länger bleibt, den trifft keine Sünde; (das gilt) für den, der gottesfürchtig ist. Fürchtet Allah und wißt, daß ihr zu Ihm versammelt werdet!",
    "reflection": "Was nimmst du heute aus diesem Vers mit?"
+  },
+  {
+   "id": "arxiv:2610.37561",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "When uncertainty quantification fails",
+   "source": {
+    "id": "arxiv:2610.37561",
+    "title": "When uncertainty quantification fails: structural vulnerabilities and corrections for selective prediction under clinical class imbalance",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2610.37561",
+    "excerpt": "This reduces class-specific risk imbalance, supporting safer selective prediction under the evaluated conditions without silently excluding the most vulnerable patients."
+   },
+   "createdAt": "2026-10-29T09:46:11.191Z"
+  },
+  {
+   "id": "pmid:42244453",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "\"Diagnostic Performance of Artificial Intelligence in Evaluating Tricuspid Regurgitation",
+   "source": {
+    "id": "pmid:42244453",
+    "title": "\"Diagnostic Performance of Artificial Intelligence in Evaluating Tricuspid Regurgitation: A Systematic Review and Meta-Analysis\".",
+    "publisher": "Clinical cardiology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42244453/",
+    "excerpt": "AI demonstrates promising diagnostic accuracy for TR, potentially standardizing early detection and triage. However, heterogeneity and methodological gaps necessitate larger prospective, multicenter studies with standardized reporting (e.g., TRIPOD-AI) to confirm clinical utility."
+   },
+   "createdAt": "2026-10-29T09:46:11.191Z"
+  },
+  {
+   "id": "pmid:42755520",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Artificial intelligence in personalized computed tomography dose optimization",
+   "source": {
+    "id": "pmid:42755520",
+    "title": "Artificial intelligence in personalized computed tomography dose optimization: a systematic review of techniques and clinical outcomes.",
+    "publisher": "Frontiers in medicine",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42755520/",
+    "excerpt": "AI-driven approaches in CT dose optimization show promising potential to reduce radiation exposure safely and effectively without compromising image quality."
+   },
+   "createdAt": "2026-10-29T09:46:11.191Z"
+  },
+  {
+   "id": "arxiv:2610.37550",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Kinematic Constraint-Referenced Evaluation for Articulated Object Manipulation",
+   "source": {
+    "id": "arxiv:2610.37550",
+    "title": "Kinematic Constraint-Referenced Evaluation for Articulated Object Manipulation",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2610.37550",
+    "excerpt": "Relative to a scripted controller scored with the same axis, CRS verdicts are unchanged under joint-axis errors up to $30^\\circ$; absolute thresholds tolerate about $8^\\circ$."
+   },
+   "createdAt": "2026-10-29T09:46:11.191Z"
+  },
+  {
+   "id": "pmid:41931504",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Artificial Intelligence for Diagnosing Meibomian Gland Dysfunction",
+   "source": {
+    "id": "pmid:41931504",
+    "title": "Artificial Intelligence for Diagnosing Meibomian Gland Dysfunction: A Systematic Review and Meta-Analysis of Diagnostic Test Accuracy Studies.",
+    "publisher": "Cornea",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/41931504/",
+    "excerpt": "Artificial intelligence-based meibography grading appears less accurate than human graders."
+   },
+   "createdAt": "2026-10-29T09:46:11.191Z"
+  },
+  {
+   "id": "pmid:42649513",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Reinventing the echocardiography workflow",
+   "source": {
+    "id": "pmid:42649513",
+    "title": "Reinventing the echocardiography workflow: from manual quantification to artificial intelligence-driven comprehensive interpretation.",
+    "publisher": "Journal of cardiovascular imaging",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42649513/",
+    "excerpt": "This review evaluates current evidence, identifies existing gaps, and outlines the requirements for responsible clinical implementation of AI."
+   },
+   "createdAt": "2026-10-29T09:46:11.191Z"
+  },
+  {
+   "id": "arxiv:2610.37547",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "When, Where, and What to Correct",
+   "source": {
+    "id": "arxiv:2610.37547",
+    "title": "When, Where, and What to Correct: Human-Guided Adaptive Residual Correction for Robot Policies",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2610.37547",
+    "excerpt": "Together, these results show that sparse human corrections can localize and constrain autonomous post-training without requiring the observed correction itself to serve as the final action target."
+   },
+   "createdAt": "2026-10-29T09:46:11.191Z"
+  },
+  {
+   "id": "pmid:42771768",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Diagnostic Accuracy of AI in Prediction and Assessment of Compromised Free Flaps",
+   "source": {
+    "id": "pmid:42771768",
+    "title": "Diagnostic Accuracy of AI in Prediction and Assessment of Compromised Free Flaps: Systematic Review and Meta-Analysis.",
+    "publisher": "Journal of medical Internet research",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42771768/",
+    "excerpt": "AI demonstrated favorable diagnostic performance for detecting free flap vascular compromise, particularly with image-based models. These findings support the use of AI as an adjunct to conventional postoperative flap monitoring."
+   },
+   "createdAt": "2026-10-29T09:46:11.191Z"
+  },
+  {
+   "id": "pmid:42638373",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Robotic Ultrasound Imaging",
+   "source": {
+    "id": "pmid:42638373",
+    "title": "Robotic Ultrasound Imaging: A Comprehensive Review of Historical Evolution, Current State-of-the-Art, and Future Perspectives.",
+    "publisher": "Journal of ultrasound in medicine : official journal of the American Institute of Ultrasound in Medicine",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42638373/",
+    "excerpt": "This review explores emerging frontiers, such as soft robotics, wearable ultrasound patches, and large language model (LLM) graph planners, while addressing the critical regulatory and ethical frameworks required for the future clinical translation of intelligent robotic sonographers."
+   },
+   "createdAt": "2026-10-29T09:46:11.191Z"
+  },
+  {
+   "id": "arxiv:2610.37533",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Which Hand Was Late? Diagnosis for Robot Failure Recovery in Bimanual Tool Use",
+   "source": {
+    "id": "arxiv:2610.37533",
+    "title": "Which Hand Was Late? Diagnosis for Robot Failure Recovery in Bimanual Tool Use",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2610.37533",
+    "excerpt": "A VLM's internal state carries the late hand almost perfectly, along a direction no closer to the one its answer reads than a random one; whether the answer reports it depends on the wording of the question."
+   },
+   "createdAt": "2026-10-29T09:46:11.191Z"
+  },
+  {
+   "id": "pmid:41985563",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Accuracy of deep learning for risk prediction and screening of diabetic foot Ulcers",
+   "source": {
+    "id": "pmid:41985563",
+    "title": "Accuracy of deep learning for risk prediction and screening of diabetic foot Ulcers: A systematic review and meta-analysis.",
+    "publisher": "Diabetes research and clinical practice",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/41985563/",
+    "excerpt": "This research discloses that image-based DL for detecting DFUs might be a promising approach."
+   },
+   "createdAt": "2026-10-29T09:46:11.191Z"
+  },
+  {
+   "id": "pmid:42648391",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Artificial intelligence for risk prediction in atherosclerotic cardiovascular disease",
+   "source": {
+    "id": "pmid:42648391",
+    "title": "Artificial intelligence for risk prediction in atherosclerotic cardiovascular disease: A narrative review of advances, validation challenges, and clinical translation (2020-2026).",
+    "publisher": "Progress in cardiovascular diseases",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42648391/",
+    "excerpt": "The central question is not only whether AI can detect complex patterns, but whether such models can be trusted, implemented, and shown to advance preventive cardiology in real-world settings."
+   },
+   "createdAt": "2026-10-29T09:46:11.191Z"
+  },
+  {
+   "id": "arxiv:2610.37523",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "The Structure Gap: When More Data Cannot Replace Structured Reasoning",
+   "source": {
+    "id": "arxiv:2610.37523",
+    "title": "The Structure Gap: When More Data Cannot Replace Structured Reasoning",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2610.37523",
+    "excerpt": "When validated structure is available, it can constrain the hypothesis space before learning begins, leaving learning to address components the structure does not specify."
+   },
+   "createdAt": "2026-10-29T09:46:11.191Z"
+  },
+  {
+   "id": "pmid:42379144",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Therapeutic Interaction Features of AI Chatbots in Depression Interventions",
+   "source": {
+    "id": "pmid:42379144",
+    "title": "Therapeutic Interaction Features of AI Chatbots in Depression Interventions: Systematic Review and Meta-Analysis.",
+    "publisher": "Journal of medical Internet research",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42379144/",
+    "excerpt": "This systematic review provides an interaction-focused synthesis of AI-driven chatbot interventions for depression, examining how interaction features relate to clinical outcomes and user adherence. Although overall effects were not statistically significant, emotional responsiveness, structured feedback, and interaction frequency were consistently associated with higher adherence."
+   },
+   "createdAt": "2026-10-29T09:46:11.191Z"
+  },
+  {
+   "id": "quran:2:204",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Unter den Menschen gibt es manch einen …",
+   "source": {
+    "id": "quran:2:204",
+    "title": "Sure Al-Baqarah, 2:204",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/2/204",
+    "excerpt": "وبعض الناس من المنافقين يعجبك -أيها الرسول- كلامه الفصيح الذي يريد به حظًّا من حظوظ الدنيا لا الآخرة، ويحلف مستشهدًا بالله على ما في قلبه من محبة الإسلام، وفي هذا غاية الجرأة على الله، وهو شديد العداوة والخصومة للإسلام والمسلمين."
+   },
+   "createdAt": "2026-10-29T09:46:11.191Z",
+   "arabic": "وَمِنَ ٱلنَّاسِ مَن يُعْجِبُكَ قَوْلُهُۥ فِى ٱلْحَيَوٰةِ ٱلدُّنْيَا وَيُشْهِدُ ٱللَّهَ عَلَىٰ مَا فِى قَلْبِهِۦ وَهُوَ أَلَدُّ ٱلْخِصَامِ",
+   "translation": "Unter den Menschen gibt es manch einen, dessen Worte über das diesseitige Leben dir gefallen, und der Allah zum Zeugen nimmt für das, was in seinem Herzen ist. Dabei ist er der hartnäckigste Widersacher.",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?",
+   "body": "The Characteristics of the Hypocrites: The Characteristics of the Hypocrites As-Suddi said that these Ayat were revealed about Al-Akhnas bin Shariq Ath-Thaqafi who came to Allah's Messenger ﷺ and announced his Islam although his heart concealed otherwise."
+  },
+  {
+   "id": "quran:2:205",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Wenn er sich abkehrt, bemüht er sich eifrig darum …",
+   "source": {
+    "id": "quran:2:205",
+    "title": "Sure Al-Baqarah, 2:205",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/2/205",
+    "excerpt": "وإذا خرج من عندك أيها الرسول، جَدَّ ونَشِط في الأرض ليفسد فيها، ويتلف زروع الناس، ويقتل ماشيتهم. والله لا يحب الفساد."
+   },
+   "createdAt": "2026-10-29T09:46:11.191Z",
+   "arabic": "وَإِذَا تَوَلَّىٰ سَعَىٰ فِى ٱلْأَرْضِ لِيُفْسِدَ فِيهَا وَيُهْلِكَ ٱلْحَرْثَ وَٱلنَّسْلَ ۗ وَٱللَّهُ لَا يُحِبُّ ٱلْفَسَادَ",
+   "translation": "Wenn er sich abkehrt, bemüht er sich eifrig darum, auf der Erde Unheil zu stiften und Saatfelder und Nachkommenschaft zu vernichten. Aber Allah liebt nicht das Unheil.",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?",
+   "body": "The Characteristics of the Hypocrites: The Characteristics of the Hypocrites As-Suddi said that these Ayat were revealed about Al-Akhnas bin Shariq Ath-Thaqafi who came to Allah's Messenger ﷺ and announced his Islam although his heart concealed otherwise."
   }
  ]
 }
