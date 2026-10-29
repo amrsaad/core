@@ -21,6 +21,9 @@ enum Learn {
     static let skipSec = 3.0
     static let listLength = 5
 
+    /// Jetzt in ms seit 1970 (nicht isoliert, damit auch Mix sie lesen kann)
+    static var nowMs: Double { (Date().timeIntervalSince1970 * 1000).rounded() }
+
     enum Rule {
         static let skip = 0.6
         static let skipRun = 0.2

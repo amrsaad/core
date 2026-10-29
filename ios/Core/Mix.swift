@@ -63,7 +63,7 @@ enum Mix {
 
     /// Next block. Changes the cursor. nil when nothing is left.
     static func nextBlock(pool: [Moment], state: AppState, cursor c: inout Cursor) -> [Moment]? {
-        let w = Learn.settle(state.weights, now: Double(Store.nowMs))
+        let w = Learn.settle(state.weights, now: Learn.nowMs)
         let free = pool.filter { state.seen[$0.id] == nil && !c.used.contains($0.id) && state.muted[$0.channel] == nil }
         if free.isEmpty { return nil }
         let areas = Area.allCases.filter { a in free.contains { $0.area == a } }

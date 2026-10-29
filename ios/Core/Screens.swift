@@ -315,7 +315,7 @@ struct LearnedCard: View {
     }
 
     var body: some View {
-        let l = Learn.learned(store.state.weights, now: Double(Store.nowMs))
+        let l = Learn.learned(store.state.weights, now: Learn.nowMs)
         let any = !(l.channelUp.isEmpty && l.channelDown.isEmpty && l.topicUp.isEmpty && l.topicDown.isEmpty)
         VStack(alignment: .leading, spacing: 12) {
             Text("What Core learned").font(.system(size: 17, weight: .semibold))

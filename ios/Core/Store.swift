@@ -155,20 +155,20 @@ final class Store: ObservableObject {
 
     /// Faktor auf Kanal, Thema und Bereich. Jede Wertung außer Skip unterbricht die Folge von Skips.
     func signal(_ m: Moment, _ factor: Double) {
-        state.weights = Learn.signal(state.weights, m.mom, factor: factor, now: Double(Store.nowMs))
+        state.weights = Learn.signal(state.weights, m.mom, factor: factor, now: Learn.nowMs)
         state.skipRun = nil
     }
 
     /// Skip (unter 3 s weggewischt): Deckel 0,6, zweiter Skip desselben Kanals in Folge 0,2 für 14 Tage
     func skip(_ m: Moment) {
-        let r = Learn.skip(state.weights, run: state.skipRun, m.mom, now: Double(Store.nowMs))
+        let r = Learn.skip(state.weights, run: state.skipRun, m.mom, now: Learn.nowMs)
         state.weights = r.weights
         state.skipRun = r.run
     }
 
     /// Wirkung eines Chips auf die Gewichte (Learn.apply), die Folge von Skips endet
     func apply(_ e: Learn.Effect, _ m: Moment) {
-        state.weights = Learn.apply(state.weights, e, m.mom, now: Double(Store.nowMs))
+        state.weights = Learn.apply(state.weights, e, m.mom, now: Learn.nowMs)
         state.skipRun = nil
     }
 
