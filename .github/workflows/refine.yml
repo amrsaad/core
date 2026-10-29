@@ -1,7 +1,7 @@
 name: refine
 # Verfeinert ausgewählte Fenster parallel (small bzw. large-v3-turbo bei de/ar). Auftrag in jobs/refine.json:
 # [{"id":"<videoId>","audio":"<url>","lang":"en|de|ar","windows":[[start,end],...]}]
-# Ergebnis je Video als Artefakt "refine-<id>" mit <id>.json (events nur in den Fenstern, Feld refined) und stats.json.
+# Ergebnis je Video als Artefakt "refine-<id>" mit <id>.json (events nur in den Fenstern, Feld refined, je Event Wortzeiten w) und stats.json.
 on:
   push:
     branches: [claude/compute]
@@ -55,6 +55,8 @@ jobs:
                   python3 transcribe.py check <audio> <out.json>    Exit 0, wenn beide Stellen passen
 
           out.json hat das Transkript-Format von core-content (events [{start, dur, text}]).
+          Im Modus refine tragen die Events zusätzlich "w": [[start, dur, text], ...] mit den Wortzeiten von faster-whisper
+          (start absolut inkl. offset, 2 Stellen). Der Modus scan (base) liefert keine Wortzeiten.
           Benötigt: pip install faster-whisper, ffmpeg.
           """
           import json
@@ -96,7 +98,9 @@ jobs:
                   if cur:
                       text = ''.join(w.word for w in cur).strip()
                       if text:
-                          ev.append({'start': round(cur[0].start + offset, 2), 'dur': round(cur[-1].end - cur[0].start, 2), 'text': text})
+                          # Wortzeiten für exakt synchrone Untertitel: [start absolut (inkl. offset), dur, text], auf 2 Stellen gerundet
+                          words = [[round(w.start + offset, 2), round(w.end - w.start, 2), w.word.strip()] for w in cur if w.word.strip()]
+                          ev.append({'start': round(cur[0].start + offset, 2), 'dur': round(cur[-1].end - cur[0].start, 2), 'text': text, 'w': words})
                       cur.clear()
               for s in segs:
                   for w in s.words or []:
