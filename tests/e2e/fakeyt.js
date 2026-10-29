@@ -7,6 +7,7 @@ window.YT = { PlayerState: { ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED
   const f = document.createElement('div');
   f.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font:18px sans-serif;background:#123';
   el.replaceWith(f);
+  f.__player = this;
   const paint = () => { f.textContent = `${vid} t=${t.toFixed(0)} state ${st}${muted ? ' stumm' : ' TON'}`; };
   const set = (s) => { st = s; paint(); ev.onStateChange && ev.onStateChange({ data: s }); };
   const arg = (a) => (typeof a === 'string' ? { videoId: a } : a);
@@ -24,6 +25,8 @@ window.YT = { PlayerState: { ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED
   this.mute = () => { muted = true; paint(); }; this.unMute = () => { muted = false; window.__ytlog.push('unmute'); paint(); }; this.isMuted = () => muted;
   this.getCurrentTime = () => t; this.getDuration = () => 600; this.getPlayerState = () => st; this.seekTo = (s) => { t = s; }; this.setPlaybackRate = (r) => { window.__ytlog.push('rate ' + r); };
   this.destroy = () => clearInterval(timer);
+  // Nur für Tests: Zustand erzwingen (Puffern, Cue, Pause, Ende), ohne Zeitraffer anzuhalten oder zu starten
+  this.__force = (s) => { if (s !== 1) clearInterval(timer); set(s); };
   setTimeout(() => ev.onReady && ev.onReady(), 30);
 }};
 window.onYouTubeIframeAPIReady && window.onYouTubeIframeAPIReady();

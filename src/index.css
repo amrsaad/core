@@ -131,7 +131,9 @@ body {
 .vposter {
   object-fit: cover; z-index: 1;
   width: 100vw; height: calc(100vw * 9 / 16); background: #1a1d24;
-  top: 31%; transform: translateX(-50%);
+  /* Gleiche Rechnung wie .vframe > div (Rahmen mittig, Band bei 31 % der Rahmenhöhe), sonst bleibt bei Bildschirmen unter 9:16 oben ein Streifen
+     des IFrames mit der YouTube-Titelzeile frei (Auftrag Max 29.10.2026, Poster über jedem Zustand außer PLAYING). */
+  top: calc(50% - 0.19 * max(100dvh, 100vw * 16 / 9)); transform: translateX(-50%);
 }
 /* Sichtbar, solange der Slot nicht der aktuelle ist oder sein Player nicht abspielt (data-live setzt der Player-Callback) */
 .vslot[data-live][aria-hidden='false'] .vposter { visibility: hidden; }

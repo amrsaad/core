@@ -585,6 +585,54 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
     c.posterWheneverNotPlaying = violations === 0 && checksDone > 0;
     r.posterCheck = { checksDone, violations, endedSeen };
+    // Alle Zustände (Auftrag Max 29.10.2026): ENDED, PAUSED, BUFFERING, CUED und UNSTARTED werden an jedem Slot erzwungen, auch an den
+    // vorgeladenen Nachbarn. Das Vorschaubild muss sichtbar sein, ohne Zoom (16:9 in Bildschirmbreite) und über dem ganzen Bildbereich des IFrames.
+    // Nur bei PLAYING des aktuellen Moments ist der IFrame sichtbar.
+    await skipRecall(page, name, out);
+    await page.waitForTimeout(400);
+    const poster = (st) => page.evaluate(() => [...document.querySelectorAll('.vslot')].map((sl) => {
+      const p = sl.querySelector('.vposter'); const host = sl.querySelector('.vframe > div'); const pr = p?.getBoundingClientRect(); const hr = host?.getBoundingClientRect();
+      const vis = !!p && getComputedStyle(p).visibility !== 'hidden' && getComputedStyle(p).display !== 'none' && +getComputedStyle(p).opacity > 0;
+      return { rects: { p: pr && [pr.left, pr.top, pr.width, pr.height].map(Math.round), h: hr && [hr.left, hr.top, hr.width, hr.height].map(Math.round), iw: innerWidth }, current: sl.getAttribute('aria-hidden') === 'false', vis, live: sl.hasAttribute('data-live'), covers: !!pr && !!hr && pr.left <= hr.left + 0.5 && pr.right >= hr.right - 0.5 && pr.top <= hr.top + 0.5 && pr.bottom >= hr.bottom - 0.5, noZoom: !!pr && Math.abs(pr.width - innerWidth) < 1.5 && Math.abs(pr.height - (innerWidth * 9) / 16) < 1.5 };
+    }));
+    // ENDED am aktuellen Slot blättert weiter (finish), also wird er dort von der Schleife oben abgedeckt (endedSeen) und hier nur an den Nachbarn erzwungen
+    const force = (st) => page.evaluate((s) => { for (const sl of document.querySelectorAll('.vslot')) if (s !== 0 || sl.getAttribute('aria-hidden') !== 'false') sl.querySelector('.vframe > div')?.firstChild?.__player?.__force(s); }, st);
+    const posterRuns = {};
+    let posterBad = 0;
+    for (const [label, st] of [['unstarted', -1], ['ended', 0], ['paused', 2], ['buffering', 3], ['cued', 5]]) {
+      await force(st);
+      await page.waitForTimeout(60);
+      const res = await poster(st);
+      if (st === 3) r.posterRects = res.map((x) => x.rects);
+      posterRuns[label] = res.map((x) => `${x.current ? 'cur' : 'nb'}:${x.vis ? 'poster' : 'KEIN-POSTER'}${x.covers && x.noZoom ? '' : ':GEOMETRIE'}`);
+      for (const x of res) if (!x.vis || !x.covers || !x.noZoom || (x.live && st !== 1)) posterBad++;
+    }
+    // PLAYING am aktuellen Slot: Poster weg, IFrame sichtbar. Nachbarn bleiben unter dem Poster.
+    await page.evaluate(() => { const sl = [...document.querySelectorAll('.vslot')].find((x) => x.getAttribute('aria-hidden') === 'false'); sl?.querySelector('.vframe > div')?.firstChild?.__player?.__force(1); });
+    await page.waitForTimeout(60);
+    const playingRes = await poster(1);
+    const curP = playingRes.find((x) => x.current);
+    posterRuns.playing = playingRes.map((x) => `${x.current ? 'cur' : 'nb'}:${x.vis ? 'poster' : 'ohne-Poster'}`);
+    c.posterAllStates = posterBad === 0 && !!curP && !curP.vis && playingRes.filter((x) => !x.current).every((x) => x.vis);
+    r.posterAllStates = posterRuns;
+    // Befehle, die das Spielen beenden, nehmen das Poster-Freigabe-Attribut sofort weg (kein Warten auf den Zustandswechsel des IFrames)
+    const sync = await page.evaluate(() => {
+      const sl = [...document.querySelectorAll('.vslot')].find((x) => x.getAttribute('aria-hidden') === 'false');
+      const pl = sl?.querySelector('.vframe > div')?.firstChild?.__player;
+      if (!sl || !pl) return null;
+      const out = {};
+      for (const k of ['pauseVideo', 'cueVideoById']) { // loadVideoById spielt im Nachbau sofort (PLAYING), also ist das Poster dort zu Recht weg
+        pl.__force(1);
+        out[k] = sl.hasAttribute('data-live');
+        const had = out[k];
+        if (k === 'pauseVideo') pl.pauseVideo(); else pl[k]({ videoId: 'syncvid0001', startSeconds: 0 });
+        out[k] = { vorher: had, nachherSofort: sl.hasAttribute('data-live') };
+      }
+      return out;
+    });
+    c.posterDropsSynchronously = !!sync && Object.values(sync).every((x) => x.vorher === true && x.nachherSofort === false);
+    r.posterSync = sync;
+    await page.waitForTimeout(300);
     await page.screenshot({ path: `${out}/${name}-3-nach-ende.png` });
 
     // Punkt 1: Wisch bis erstes Bild wird gemessen, gepufferte Momente unter 300 ms (Nachbau-Player, echte Werte nur auf dem Gerät)

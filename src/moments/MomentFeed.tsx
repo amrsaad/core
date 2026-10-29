@@ -370,7 +370,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           const mount = (id: string) => {
             const target = document.createElement('div');
             slot.host!.replaceChildren(target);
-            return createPlayer(YT, target, id, {
+            const pl = createPlayer(YT, target, id, {
               onReady: () => {
                 slot.ready = true;
                 slot.player!.mute();
@@ -406,6 +406,16 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                 else if (slot.index === idxRef.current) goTo(idxRef.current + 1);
               },
             });
+            // Das Vorschaubild liegt über dem IFrame in jedem Zustand außer PLAYING (Auftrag Max 29.10.2026). Der Zustandswechsel kommt
+            // vom IFrame asynchron, also fällt data-live schon beim Befehl, der das Spielen beendet oder einen anderen Inhalt lädt.
+            for (const k of ['pauseVideo', 'loadVideoById', 'cueVideoById'] as const) {
+              const f = pl[k].bind(pl) as (a?: never) => void;
+              pl[k] = ((arg?: never) => {
+                slot.el?.removeAttribute('data-live');
+                f(arg);
+              }) as never;
+            }
+            return pl;
           };
           try {
             slot.player = mount(m.videoId);

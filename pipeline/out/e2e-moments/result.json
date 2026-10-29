@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T16:30:50.005Z",
+ "at": "2026-10-29T16:41:30.173Z",
  "runs": [
   {
    "browser": "webkit",
@@ -122,6 +122,8 @@
     "muteSaved": true,
     "noteStillNoNetwork": true,
     "posterWheneverNotPlaying": true,
+    "posterAllStates": true,
+    "posterDropsSynchronously": true,
     "latencyMeasured": true,
     "bufferedUnder300": true,
     "latencyInDiag": true,
@@ -239,10 +241,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792922404146,
+     "due": 1792922404300,
      "results": [
       {
-       "at": 1792749604146,
+       "at": 1792749604300,
        "got": false
       }
      ]
@@ -307,9 +309,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.0625,
+    "bh": 221.06248474121094,
     "fw": 393,
-    "fh": 221.0625,
+    "fh": 221.06248474121094,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -319,21 +321,110 @@
     2
    ],
    "tapToFill": {
-    "measured": 36,
-    "recorded": 42
+    "measured": 35,
+    "recorded": 36
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 819,
+    "checksDone": 822,
     "violations": 0,
-    "endedSeen": 134
+    "endedSeen": 133
+   },
+   "posterRects": [
+    {
+     "p": [
+      0,
+      197,
+      393,
+      221
+     ],
+     "h": [
+      0,
+      197,
+      393,
+      221
+     ],
+     "iw": 393
+    },
+    {
+     "p": [
+      0,
+      856,
+      393,
+      221
+     ],
+     "h": [
+      0,
+      856,
+      393,
+      221
+     ],
+     "iw": 393
+    },
+    {
+     "p": [
+      0,
+      1515,
+      393,
+      221
+     ],
+     "h": [
+      0,
+      1515,
+      393,
+      221
+     ],
+     "iw": 393
+    }
+   ],
+   "posterAllStates": {
+    "unstarted": [
+     "cur:poster",
+     "nb:poster",
+     "nb:poster"
+    ],
+    "ended": [
+     "cur:poster",
+     "nb:poster",
+     "nb:poster"
+    ],
+    "paused": [
+     "cur:poster",
+     "nb:poster",
+     "nb:poster"
+    ],
+    "buffering": [
+     "cur:poster",
+     "nb:poster",
+     "nb:poster"
+    ],
+    "cued": [
+     "cur:poster",
+     "nb:poster",
+     "nb:poster"
+    ],
+    "playing": [
+     "cur:ohne-Poster",
+     "nb:poster",
+     "nb:poster"
+    ]
+   },
+   "posterSync": {
+    "pauseVideo": {
+     "vorher": true,
+     "nachherSofort": false
+    },
+    "cueVideoById": {
+     "vorher": true,
+     "nachherSofort": false
+    }
    },
    "latency": {
     "n": 36,
     "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Weak | - | Video | fdccafb |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | fdccafb |\n| test0000019:100 | Testmoment 19 brain | Already known | - | Video | fdccafb |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | fdccafb |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | fdccafb |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | fdccafb |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Weak | - | Video | 785f4c0 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 785f4c0 |\n| test0000019:100 | Testmoment 19 brain | Already known | - | Video | 785f4c0 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | 785f4c0 |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | 785f4c0 |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | 785f4c0 |",
    "badWalk": [
     {
      "idx": 2,
@@ -793,6 +884,8 @@
     "muteSaved": true,
     "noteStillNoNetwork": true,
     "posterWheneverNotPlaying": true,
+    "posterAllStates": true,
+    "posterDropsSynchronously": true,
     "latencyMeasured": true,
     "bufferedUnder300": true,
     "latencyInDiag": true,
@@ -910,10 +1003,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792922403571,
+     "due": 1792922403496,
      "results": [
       {
-       "at": 1792749603571,
+       "at": 1792749603496,
        "got": false
       }
      ]
@@ -990,21 +1083,110 @@
     2
    ],
    "tapToFill": {
-    "measured": 29.699999999953434,
-    "recorded": 29
+    "measured": 30.100000000093132,
+    "recorded": 30
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 837,
+    "checksDone": 834,
     "violations": 0,
     "endedSeen": 134
+   },
+   "posterRects": [
+    {
+     "p": [
+      0,
+      197,
+      393,
+      221
+     ],
+     "h": [
+      0,
+      197,
+      393,
+      221
+     ],
+     "iw": 393
+    },
+    {
+     "p": [
+      0,
+      856,
+      393,
+      221
+     ],
+     "h": [
+      0,
+      856,
+      393,
+      221
+     ],
+     "iw": 393
+    },
+    {
+     "p": [
+      0,
+      1515,
+      393,
+      221
+     ],
+     "h": [
+      0,
+      1515,
+      393,
+      221
+     ],
+     "iw": 393
+    }
+   ],
+   "posterAllStates": {
+    "unstarted": [
+     "cur:poster",
+     "nb:poster",
+     "nb:poster"
+    ],
+    "ended": [
+     "cur:poster",
+     "nb:poster",
+     "nb:poster"
+    ],
+    "paused": [
+     "cur:poster",
+     "nb:poster",
+     "nb:poster"
+    ],
+    "buffering": [
+     "cur:poster",
+     "nb:poster",
+     "nb:poster"
+    ],
+    "cued": [
+     "cur:poster",
+     "nb:poster",
+     "nb:poster"
+    ],
+    "playing": [
+     "cur:ohne-Poster",
+     "nb:poster",
+     "nb:poster"
+    ]
+   },
+   "posterSync": {
+    "pauseVideo": {
+     "vorher": true,
+     "nachherSofort": false
+    },
+    "cueVideoById": {
+     "vorher": true,
+     "nachherSofort": false
+    }
    },
    "latency": {
     "n": 36,
     "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Weak | - | Video | fdccafb |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | fdccafb |\n| test0000019:100 | Testmoment 19 brain | Already known | - | Video | fdccafb |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | fdccafb |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | fdccafb |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | fdccafb |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Weak | - | Video | 785f4c0 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 785f4c0 |\n| test0000019:100 | Testmoment 19 brain | Already known | - | Video | 785f4c0 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | 785f4c0 |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | 785f4c0 |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | 785f4c0 |",
    "badWalk": [
     {
      "idx": 2,
