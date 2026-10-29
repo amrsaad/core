@@ -402,17 +402,34 @@ struct LearnedCard: View {
                 list("learnedTopicUp", "Topics, more", l.topicUp, topic: true)
                 list("learnedTopicDown", "Topics, less", l.topicDown, topic: true)
             }
-            Button("Reset learning") { ask = true; done = false }
-                .font(.system(size: 13))
-                .foregroundStyle(Area.brain.color)
-                .accessibilityIdentifier("resetLearning")
-                .confirmationDialog("Reset everything Core learned? Speakers and topics go back to normal.", isPresented: $ask, titleVisibility: .visible) {
-                    Button("Reset", role: .destructive) {
-                        store.resetLearning()
-                        done = true
+            if !ask {
+                Button("Reset learning") { ask = true; done = false }
+                    .font(.system(size: 13))
+                    .foregroundStyle(Area.brain.color)
+                    .accessibilityIdentifier("resetLearning")
+            } else {
+                // Rückfrage in der Karte (wie im Web), kein Dialog
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Reset everything Core learned? Speakers and topics go back to normal.").font(.system(size: 15))
+                    HStack(spacing: 10) {
+                        Button { ask = false } label: {
+                            Text("Cancel").frame(maxWidth: .infinity, minHeight: 44).background(Palette.button, in: RoundedRectangle(cornerRadius: 12))
+                        }
+                        .accessibilityIdentifier("resetCancel")
+                        Button {
+                            store.resetLearning()
+                            ask = false
+                            done = true
+                        } label: {
+                            Text("Reset").fontWeight(.semibold).frame(maxWidth: .infinity, minHeight: 44).background(Palette.button, in: RoundedRectangle(cornerRadius: 12))
+                        }
+                        .accessibilityIdentifier("resetConfirm")
                     }
-                    Button("Cancel", role: .cancel) {}
+                    .buttonStyle(.plain)
                 }
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("resetAsk")
+            }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)

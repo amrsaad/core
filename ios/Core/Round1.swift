@@ -421,7 +421,7 @@ enum Note {
     typealias Effect = Learn.Effect
 
     /// So lange bleibt das Blatt nach einem Chip mit der Bestätigungszeile offen, dann schließt es und der Feed geht weiter
-    static let confirmSheetSeconds = 0.9
+    static var confirmSheetSeconds: Double { Double(Env.values["CORE_CONFIRM_SECONDS"] ?? "") ?? 0.9 }
 
     /// Was ein Chip lernt (Learn.swift): Known = Thema 0,7, Not for me = Thema 0,2 für 30 Tage und Kanal 0,5, Wrong = Kanal 0,5,
     /// Boring = Kanal 0,7, Mute speaker = Sprecher stumm. Bad cut und Great speichern nur die Notiz.

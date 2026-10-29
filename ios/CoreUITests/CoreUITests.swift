@@ -358,6 +358,8 @@ final class CoreUITests: XCTestCase {
     /// Die Zeile "N notes, send?" kommt beim ersten Öffnen am nächsten Tag (CORE_NOTES_DAY), ein Tipp loggt ein Issue.
     func test11Note() {
         app.launchEnvironment["CORE_NOTES_DAY"] = "2026-10-27"
+        // UI queries are slow: keep the confirmation line on screen long enough to read it
+        app.launchEnvironment["CORE_CONFIRM_SECONDS"] = "4"
         launch()
         XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15), "feed did not appear")
         wait(1)
@@ -388,7 +390,7 @@ final class CoreUITests: XCTestCase {
         XCTAssertTrue(until(1) { confirm.label.hasPrefix("Less ") }, "no confirmation line after Boring: \(confirm.label)")
         XCTAssertFalse(app.buttons["noteChip-Great"].isEnabled, "chips must be locked while the line shows")
         shot("95-note-confirm")
-        wait(1.5)
+        wait(4.5)
         XCTAssertTrue(diagLog().contains("note saved"), "chip did not save")
         XCTAssertFalse(app.buttons["noteDone"].exists, "sheet must close after a chip")
         XCTAssertFalse(diagLog().contains("toast"), "no toasts any more, the line replaces them")
@@ -406,7 +408,7 @@ final class CoreUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["noteConfirm"].waitForExistence(timeout: 2))
         XCTAssertTrue(until(1) { app.descendants(matching: .any)["noteConfirm"].label.hasPrefix("Less ") }, "no confirmation line after Wrong")
         shot("97-note-confirm-wrong")
-        wait(1.5)
+        wait(4.5)
         XCTAssertFalse(diagLog().contains("toast"), "no toast for Wrong")
         XCTAssertFalse(app.buttons["notesPrompt"].exists, "prompt only on the first open of a day")
         // next day: first open shows the line, one tap logs a single issue and the notes count as sent
@@ -689,15 +691,15 @@ final class CoreUITests: XCTestCase {
         XCTAssertTrue(rows.contains { $0.contains("Abgelaufen") && $0.contains("0.90 ↓") && !$0.contains("until") }, "\(rows)")
         // Reset learning asks first; Cancel keeps everything
         app.buttons["resetLearning"].tap()
-        XCTAssertTrue(app.buttons["Reset"].waitForExistence(timeout: 3), "no confirmation")
+        XCTAssertTrue(app.buttons["resetConfirm"].waitForExistence(timeout: 3), "no confirmation")
         shot("34-reset-ask")
-        app.buttons["Cancel"].tap()
+        app.buttons["resetCancel"].tap()
         wait(0.5)
         XCTAssertFalse(app.descendants(matching: .any)["learnedEmpty"].exists)
         XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "learnedRow").count, rows.count)
         app.buttons["resetLearning"].tap()
-        XCTAssertTrue(app.buttons["Reset"].waitForExistence(timeout: 3))
-        app.buttons["Reset"].tap()
+        XCTAssertTrue(app.buttons["resetConfirm"].waitForExistence(timeout: 3))
+        app.buttons["resetConfirm"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["learnedEmpty"].waitForExistence(timeout: 3), "card must be empty after reset")
         XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "learnedRow").count, 0)
         shot("35-learned-reset")
