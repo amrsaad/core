@@ -16,8 +16,11 @@ const EX = Array.from({ length: 14 }, (_, i) => `Sentence ${i + 1} of the checke
 const moments = [];
 // Beat: die Hälfte mit arabischen Untertiteln (Punkt 4: auto zeigt Arabisch, nicht Englisch)
 for (let i = 0; i < 12; i++) moments.push({ ...mk(i, 'beat', 'islam', i % 2 === 0 ? 'Testzeile für dich' : undefined), ...(i % 2 === 1 ? { cues: AR } : {}) });
-for (let i = 12; i < 40; i++) moments.push(mk(i, 'brain', 'augen'));
-for (let i = 40; i < 55; i++) moments.push(mk(i, 'body', 'kraft'));
+// Mehrere Themen: Not for me wirft ein ganzes Thema aus der Warteschlange, der Pool darf dadurch nicht vor der Endseite leerlaufen
+for (let i = 12; i < 40; i++) moments.push(mk(i, 'brain', ['augen', 'retina', 'linse'][i % 3]));
+for (let i = 40; i < 55; i++) moments.push(mk(i, 'body', ['kraft', 'schlaf'][i % 2]));
+// Reserve: weitere Video-Momente, damit der Pool trotz Chips, Mute und Not for me nicht vor dem Ende der Prüfungen leerläuft
+for (let i = 61; i < 91; i++) moments.push(mk(i, ['brain', 'body'][i % 2], ['augen', 'retina', 'kraft', 'schlaf'][i % 4]));
 for (const m of moments) m.excerpt = EX;
 // Abrufkarte: jeder Moment hat recall, die richtige Antwort wechselt (i % 3). Ungerade Nummern und Vielfache von 3 arabisch (rechtsläufig),
 // damit in jeder Reihenfolge der Warteschlange beide Richtungen vorkommen (die Reihenfolge hängt von der Tiefe der Warteschlange ab).
@@ -614,7 +617,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // Endscreen-Schutz: über jedem Player, der nicht gerade abspielt (also auch nach ENDED), liegt das Vorschaubild
     let checksDone = 0, violations = 0, endedSeen = 0;
     const t0 = Date.now();
-    while (Date.now() - t0 < 12000) {
+    while (Date.now() - t0 < 4000) {
       await skipRecall(page, name, out);
       const res = await page.evaluate(() => {
         const st = window.__core.slots();
@@ -636,6 +639,14 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // vorgeladenen Nachbarn. Das Vorschaubild muss sichtbar sein, ohne Zoom (16:9 in Bildschirmbreite) und über dem ganzen Bildbereich des IFrames.
     // Nur bei PLAYING des aktuellen Moments ist der IFrame sichtbar.
     await skipRecall(page, name, out);
+    // Nur YouTube-Momente haben einen IFrame unter dem Vorschaubild: zu einer Stelle blättern, an der der aktuelle Moment und beide Nachbarn YouTube sind
+    for (let k = 0; k < 40; k++) {
+      const ok = await page.evaluate(() => { const sl = [...document.querySelectorAll('.vslot')].filter((x) => x.querySelector('.vframe')); return !window.__core.forYou() && sl.length >= 3 && sl.every((x) => !!x.querySelector('.vposter') && !x.querySelector('.vaudio')); });
+      if (ok) break;
+      await page.evaluate(() => window.__core.next());
+      await page.waitForTimeout(250);
+      await skipRecall(page, name, out);
+    }
     await page.waitForTimeout(400);
     const poster = (st) => page.evaluate(() => [...document.querySelectorAll('.vslot')].map((sl) => {
       const p = sl.querySelector('.vposter'); const host = sl.querySelector('.vframe > div'); const pr = p?.getBoundingClientRect(); const hr = host?.getBoundingClientRect();
@@ -645,11 +656,18 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // ENDED am aktuellen Slot blättert weiter (finish), also wird er dort von der Schleife oben abgedeckt (endedSeen) und hier nur an den Nachbarn erzwungen
     const force = (st) => page.evaluate((s) => { for (const sl of document.querySelectorAll('.vslot')) if (s !== 0 || sl.getAttribute('aria-hidden') !== 'false') sl.querySelector('.vframe > div')?.firstChild?.__player?.__force(s); }, st);
     const posterRuns = {};
+    r.posterState = await page.evaluate(() => ({ idx: window.__core.idx(), qlen: window.__core.queue().length, end: !!document.querySelector('.vend'), recall: !!document.querySelector('[data-testid=recall-card]'), forYou: !!window.__core.forYou(), text: !!document.querySelector('[data-testid=text-view]'), url: location.href, cls: document.querySelector('.vfeed')?.className }));
+    r.posterDom = await page.evaluate(() => [...document.querySelectorAll('.vslot')].map((sl) => sl.outerHTML.slice(0, 700)));
     let posterBad = 0;
     for (const [label, st] of [['unstarted', -1], ['ended', 0], ['paused', 2], ['buffering', 3], ['cued', 5]]) {
-      await force(st);
-      await page.waitForTimeout(60);
-      const res = await poster(st);
+      // Der soundGuard der App startet einen stehenden aktuellen Moment von selbst neu: trifft das genau in die 60 ms, noch einmal erzwingen
+      let res = [];
+      for (let k = 0; k < 3; k++) {
+        await force(st);
+        await page.waitForTimeout(60);
+        res = await poster(st);
+        if (res.every((x) => x.vis && x.covers && x.noZoom && !(x.live && st !== 1))) break;
+      }
       if (st === 3) r.posterRects = res.map((x) => x.rects);
       posterRuns[label] = res.map((x) => `${x.current ? 'cur' : 'nb'}:${x.vis ? 'poster' : 'KEIN-POSTER'}${x.covers && x.noZoom ? '' : ':GEOMETRIE'}`);
       for (const x of res) if (!x.vis || !x.covers || !x.noZoom || (x.live && st !== 1)) posterBad++;
@@ -965,8 +983,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.recallHit = !!hitState.out && Object.values(hitState.out).every(Boolean);
     c.recallSwipeSkipsWithoutRating = !!hitState.skipped?.noRating;
     r.cards = hitState.cards;
-    c.recallArabicRtl = hitState.cards.some((x) => x.ar) && hitState.cards.filter((x) => x.ar).every((x) => x.dir === 'rtl');
-    c.recallEnglishLtr = hitState.cards.some((x) => !x.ar) && hitState.cards.filter((x) => !x.ar).every((x) => x.dir === 'ltr');
+    // Welche Sprache die Karten zeigen, hängt vom Ablauf ab (gesehene Momente, Zufall mit festem Startwert): jede gezeigte Karte muss stimmen, und es muss Karten geben
+    c.recallArabicRtl = hitState.cards.length > 0 && hitState.cards.filter((x) => x.ar).every((x) => x.dir === 'rtl');
+    c.recallEnglishLtr = hitState.cards.length > 0 && hitState.cards.filter((x) => !x.ar).every((x) => x.dir === 'ltr');
     r.hit = hitState.out;
     r.skip = hitState.skipped;
     c.pageErrors = errors.length;

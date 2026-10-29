@@ -2,11 +2,8 @@ name: ios
 
 # Prüft die iPhone-App auf einem Mac: Build, Unit-Tests, UI-Tests im Simulator mit Screenshots jedes Screens.
 # Die Screenshots liegen als Artefakt "screenshots" am Lauf. Kein Deploy, keine Signatur.
+# Nur noch von Hand (Fundament Pfeiler 14, 29.10.2026: ab sofort nur Web-App, die native App wird nicht weitergebaut).
 on:
-  push:
-    paths:
-      - 'ios/**'
-      - '.github/workflows/ios.yml'
   workflow_dispatch:
 
 concurrency:
