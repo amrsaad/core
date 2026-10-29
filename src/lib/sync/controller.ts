@@ -9,8 +9,9 @@
  */
 import type { AppState } from '../state';
 import { applyDoc, canon, mergeDocs, SYNC_VERSION, toDoc, type SyncDoc } from './merge';
-import { CryptoFail, decryptDoc, encryptDoc } from './crypto';
-import { readRemote, SyncError, writeRemote } from './github';
+import { CryptoFail, decryptDoc, decryptLatest, encryptDoc } from './crypto';
+import { DIGEST_PATH, readRemote, SyncError, writeRemote } from './github';
+import type { DigestLatest } from '../../moments/digest';
 
 export const WRITE_DELAY_MS = 10_000;
 export const MAX_ATTEMPTS = 4;
@@ -32,6 +33,8 @@ export interface SyncDeps {
   adopt(fn: (s: AppState) => AppState): void;
   getKey(): Promise<CryptoKey | null>;
   getToken(): Promise<string | null>;
+  /** Core Digest: neue Wochenkarte von GitHub (state/digest-latest.enc). Ohne diese Funktion wird sie nicht geladen. */
+  adoptDigest?(latest: DigestLatest): void;
   fetchImpl?: typeof fetch;
   now?: () => number;
   loadMeta?: () => Promise<{ lastSync?: number } | undefined>;
@@ -65,6 +68,8 @@ export function createSync(deps: SyncDeps): Sync {
   let active: Promise<void> | null = null;
   let again = false;
   let stopped = false;
+  /** Version der zuletzt gelesenen Wochenkarte, damit dieselbe Datei nicht noch einmal entschlüsselt wird */
+  let digestSha: string | null = null;
 
   const set = (p: Partial<SyncStatus>) => {
     st = { ...st, ...p };
@@ -123,6 +128,22 @@ export function createSync(deps: SyncDeps): Sync {
     }
   }
 
+  /** Wochenkarte laden. Sie ist optional: jeder Fehler (kein Netz, Datei fehlt, anderer Schlüssel) lässt den Sync unberührt, der nächste Lauf versucht es erneut. */
+  async function loadDigest(): Promise<void> {
+    if (!deps.adoptDigest) return;
+    try {
+      const token = await deps.getToken();
+      const key = token ? await deps.getKey() : null;
+      if (!token || !key) return;
+      const remote = await readRemote(token, deps.fetchImpl, DIGEST_PATH);
+      if (!remote || remote.sha === digestSha) return;
+      deps.adoptDigest(await decryptLatest(key, remote.text));
+      digestSha = remote.sha;
+    } catch {
+      /* Wochenkarte bleibt, wie sie ist */
+    }
+  }
+
   async function run(): Promise<void> {
     if (stopped) return;
     if (active) {
@@ -135,6 +156,7 @@ export function createSync(deps: SyncDeps): Sync {
       set({ running: true });
       try {
         await attempt();
+        await loadDigest();
         fails = 0;
         clearTimeout(retryTimer);
         if (rev === startRev) pending = false;

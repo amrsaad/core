@@ -178,6 +178,24 @@ const CASES: Case[] = [
     expected: doc({ plans: { '2026-10-19': { when: 'When I wake up', will: 'I will stretch', happened: true } } }, { [tsKey.plan('2026-10-19')]: 200 }),
   },
   {
+    name: 'Digest-Taps: je Schlüssel der jüngste Zeitstempel, beide Seiten bringen etwas mit',
+    a: doc({ digestTaps: { 'a:m1': { choice: 'done', at: 100 }, 'c:m3': { choice: 'a', at: 300 } } }, { [tsKey.digest('a:m1')]: 100, [tsKey.digest('c:m3')]: 300 }),
+    b: doc({ digestTaps: { 'a:m1': { choice: 'drop', at: 200 }, 'a:m2': { choice: 'done', at: 50 } } }, { [tsKey.digest('a:m1')]: 200, [tsKey.digest('a:m2')]: 50 }),
+    expected: doc({ digestTaps: { 'a:m1': { choice: 'drop', at: 200 }, 'a:m2': { choice: 'done', at: 50 }, 'c:m3': { choice: 'a', at: 300 } } }, { [tsKey.digest('a:m1')]: 200, [tsKey.digest('a:m2')]: 50, [tsKey.digest('c:m3')]: 300 }),
+  },
+  {
+    name: 'Digest-Taps: gleicher Zeitstempel, der spätere Tap, dann die größere Wahl',
+    a: doc({ digestTaps: { 'a:m1': { choice: 'done', at: 500 }, 'c:m3': { choice: 'a', at: 700 } } }, { [tsKey.digest('a:m1')]: 100, [tsKey.digest('c:m3')]: 100 }),
+    b: doc({ digestTaps: { 'a:m1': { choice: 'drop', at: 400 }, 'c:m3': { choice: 'b', at: 700 } } }, { [tsKey.digest('a:m1')]: 100, [tsKey.digest('c:m3')]: 100 }),
+    expected: doc({ digestTaps: { 'a:m1': { choice: 'done', at: 500 }, 'c:m3': { choice: 'b', at: 700 } } }, { [tsKey.digest('a:m1')]: 100, [tsKey.digest('c:m3')]: 100 }),
+  },
+  {
+    name: 'Digest-Taps: alter Stand ohne Zeitstempel, was da ist, bleibt',
+    a: doc({ digestTaps: { 'a:m1': { choice: 'done', at: 100 } } }),
+    b: doc({}),
+    expected: doc({ digestTaps: { 'a:m1': { choice: 'done', at: 100 } } }),
+  },
+  {
     name: 'Tage und Wochen: späterer Tag, Rückblick einmal gezeigt',
     a: doc({ notesPromptDay: '2026-10-26', momentDay: '2026-10-27', weekReviewShown: { '2026-10-19': true } }),
     b: doc({ notesPromptDay: '2026-10-27', momentDay: '2026-10-26', weekReviewShown: { '2026-10-12': true } }),
@@ -274,6 +292,10 @@ export function randomDoc(r: () => number): SyncDoc {
   for (const w of some(weeks, 0.4)) {
     s.plans[w] = { when: pickOf(['When I wake up', 'When I sit down']), will: pickOf(['I will stretch', 'I will read']), ...(r() < 0.4 ? { happened: r() < 0.5 } : {}) };
     stamp(tsKey.plan(w));
+  }
+  for (const k of some(['a:m1', 'a:m2', 'c:m3'], 0.4)) {
+    s.digestTaps[k] = { choice: k.startsWith('a') ? pickOf(['done', 'drop'] as const) : pickOf(['a', 'b'] as const), at: 1000 + Math.floor(r() * 4) * 100 };
+    stamp(tsKey.digest(k));
   }
   if (r() < 0.5) {
     s.settings.playbackSpeed = pickOf([1, 1.5]);
@@ -386,6 +408,17 @@ describe('Zeitstempel beim Ändern', () => {
     );
     expect(n.syncTs).toEqual({ [tsKey.weight('area', 'brain')]: 777, [tsKey.weight('channel', 'c')]: 777, [tsKey.weight('topic', 't')]: 777, [tsKey.saved('m1')]: 777, [tsKey.liked('m1')]: 777, [tsKey.muted('c')]: 777, [tsKey.plan('w')]: 777, [tsKey.setting('form')]: 777, [tsKey.setting('playbackSpeed')]: 777 });
   });
+  it('Taps auf der Wochenkarte bekommen die Zeit der Änderung', () => {
+    const s = base();
+    const n = stampChanges(s, { ...s, digestTaps: { 'a:m1': { choice: 'done', at: 5 } } }, 321);
+    expect(n.syncTs).toEqual({ [tsKey.digest('a:m1')]: 321 });
+    expect(syncedChanged(s, n)).toBe(true);
+    // die geladene Wochenkarte selbst wandert nicht
+    const l = { ...s, digestLatest: { v: 1 as const, week: '2026-W44', generatedAt: '2026-10-29T17:00:00.000Z', saves: 1, counts: { action: 0, habit: 0, rule: 0, know: 1, research: 0, content: 0, script: 0, source: 0, contradiction: 0 }, actions: [], contradictions: [] } };
+    expect(stampChanges(s, l, 5)).toBe(l);
+    expect(syncedChanged(s, l)).toBe(false);
+    expect(JSON.stringify(toDoc(l))).not.toMatch(/digestLatest|2026-W44/);
+  });
   it('Wegnehmen und Zurücksetzen bekommen auch eine Zeit', () => {
     const s = base({ savedMoments: { m1: sv('m1') }, momentWeights: { area: {}, channel: { c: 0.9 }, topic: { t: 0.7 } }, mutedChannels: { c: 'c' }, syncTs: { old: 1 } });
     const n = stampChanges(s, { ...s, savedMoments: {}, momentWeights: { area: {}, channel: {}, topic: {} }, mutedChannels: {} }, 900);
@@ -414,7 +447,7 @@ describe('Dokument und Zustand', () => {
   it('toDoc nimmt nur Synchronisiertes, Gerätespezifisches bleibt draußen', () => {
     const s = base({ momentSeen: { a: 1 }, deskHelpSeen: true, playLatency: [{ ms: 1, buffered: true, at: 1 }] as never, tapMs: [{ ms: 1, at: 1 }] as never, settings: { ...emptyState().settings, playerMode: 'single' } });
     const d = toDoc(s);
-    expect(Object.keys(d.state).sort()).toEqual(['dayCount', 'feedTime', 'feedbackNotes', 'momentLiked', 'momentLog', 'momentSeen', 'momentWeights', 'mutedChannels', 'plans', 'recall', 'savedMoments', 'settings', 'weekReviewShown']);
+    expect(Object.keys(d.state).sort()).toEqual(['dayCount', 'digestTaps', 'feedTime', 'feedbackNotes', 'momentLiked', 'momentLog', 'momentSeen', 'momentWeights', 'mutedChannels', 'plans', 'recall', 'savedMoments', 'settings', 'weekReviewShown']);
     expect(Object.keys(d.state.settings).sort()).toEqual(['areaShares', 'captionMode', 'playbackSpeed']);
     expect(JSON.stringify(d)).not.toMatch(/playerMode|deskHelpSeen|playLatency|tapMs/);
   });

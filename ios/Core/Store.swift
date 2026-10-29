@@ -62,6 +62,10 @@ struct AppState: Codable, Equatable {
     var plans: [String: WeekPlan]?
     /// Geräte-Sync: Zeitpunkt (ms) der letzten Änderung je Schlüssel, auch für Löschungen. Schlüssel siehe SyncMerge.tsKey.
     var syncTs: [String: Double]?
+    /// Core Digest: Taps auf der Wochenkarte (a:<id> done oder drop, c:<id> a oder b). Wandern per Sync, der nächste Lauf sammelt sie ein.
+    var digestTaps: [String: DigestTap]?
+    /// Core Digest: zuletzt geladene Wochenkarte (state/digest-latest.enc). Nur an diesem Gerät, kommt bei jedem Sync neu.
+    var digestLatest: DigestLatest?
 
     var speed: Double { Speed.of(playbackSpeed) }
     var currentForm: FeedForm { form ?? .video }
@@ -134,6 +138,20 @@ final class Store: ObservableObject {
         adopting = false
     }
 
+    /// Core Digest: neue Wochenkarte von GitHub. Wandert nicht weiter, bekommt keinen Zeitstempel.
+    func adoptDigest(_ latest: DigestLatest) {
+        guard state.digestLatest != latest else { return }
+        adopting = true
+        state.digestLatest = latest
+        adopting = false
+    }
+
+    /// Core Digest: Tap auf Done, Drop, Option A oder B. Ein Tap lässt sich ändern.
+    func tapDigest(_ key: String, _ choice: String) {
+        let next = DigestCard.setTap(state.digestTaps, key: key, choice: choice, now: SyncWire.ms(Date()))
+        if next != state.digestTaps { state.digestTaps = next }
+    }
+
     private static let decoder: JSONDecoder = {
         let d = JSONDecoder()
         d.dateDecodingStrategy = .iso8601
@@ -192,7 +210,7 @@ final class Store: ObservableObject {
     }
 
     func answerRecall(_ m: Moment, got: Bool) {
-        state.recall = Recall.answer(state.recall ?? [:], id: m.id, got: got, now: Date())
+        state.recall = Recall.answer(state.recall ?? [:], id: m.id, got: got, now: Date(), boost: m.recallBoost == true)
         if got { state.dayCount = Today.countGotIt(state.dayCount ?? [:], Day.key()) }
     }
 

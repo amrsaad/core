@@ -182,6 +182,10 @@ enum Recall {
     static let missGapDays = 2.0
     static let hitGapDays = 7.0
     static let secondHitGapDays = 21.0
+    /// Core Digest (recallBoost): Fehler nach 1 Tag, Treffer nach 4, zweiter Treffer in Folge nach 14
+    static let boostMissGapDays = 1.0
+    static let boostHitGapDays = 4.0
+    static let boostSecondHitGapDays = 14.0
     static let day: TimeInterval = 86_400
 
     struct Result: Codable, Equatable {
@@ -231,14 +235,15 @@ enum Recall {
     }
 
     /// Fehler nach 2 Tagen, Treffer nach 7, zweiter Treffer in Folge nach 21, dritter beendet
-    static func answer(_ recall: State, id: String, got: Bool, now: Date) -> State {
+    static func answer(_ recall: State, id: String, got: Bool, now: Date, boost: Bool = false) -> State {
         let prev = recall[id] ?? Item(id: id, due: nil, results: [])
         let results = prev.results + [Result(at: now, got: got)]
         let hits = trailingHits(results)
         let due: Date?
-        if !got { due = now.addingTimeInterval(missGapDays * day) }
-        else if hits == 1 { due = now.addingTimeInterval(hitGapDays * day) }
-        else if hits == 2 { due = now.addingTimeInterval(secondHitGapDays * day) }
+        let gaps = boost ? [boostMissGapDays, boostHitGapDays, boostSecondHitGapDays] : [missGapDays, hitGapDays, secondHitGapDays]
+        if !got { due = now.addingTimeInterval(gaps[0] * day) }
+        else if hits == 1 { due = now.addingTimeInterval(gaps[1] * day) }
+        else if hits == 2 { due = now.addingTimeInterval(gaps[2] * day) }
         else { due = nil }
         var next = recall
         next[id] = Item(id: id, due: due, results: results)

@@ -248,7 +248,7 @@ enum SyncMerge {
             "momentSeen": .obj([:]), "momentLog": .arr([]), "dayCount": .obj([:]), "savedMoments": .obj([:]),
             "momentWeights": .obj(["area": .obj([:]), "channel": .obj([:]), "topic": .obj([:])]),
             "recall": .obj([:]), "feedbackNotes": .arr([]), "momentLiked": .obj([:]), "mutedChannels": .obj([:]),
-            "feedTime": .obj([:]), "weekReviewShown": .obj([:]), "plans": .obj([:]), "settings": .obj([:]),
+            "feedTime": .obj([:]), "weekReviewShown": .obj([:]), "plans": .obj([:]), "digestTaps": .obj([:]), "settings": .obj([:]),
         ]
     }
 
@@ -260,6 +260,7 @@ enum SyncMerge {
     static func tsKey(muted ch: String) -> String { "muted:\(ch)" }
     static func tsKey(plan week: String) -> String { "plan:\(week)" }
     static func tsKey(setting k: String) -> String { "set:\(k)" }
+    static func tsKey(digest k: String) -> String { "digest:\(k)" }
 
     private static func obj(_ v: J?) -> O { v?.object ?? [:] }
     private static func arr(_ v: J?) -> [J] { v?.array ?? [] }
@@ -366,6 +367,14 @@ enum SyncMerge {
         let hy = y["happened"]?.boolean
         if let hx, let hy { out["happened"] = .bool(hx || hy) } else if let h = hx ?? hy { out["happened"] = .bool(h) }
         return .obj(out)
+    }
+
+    /// Gleichzeitig getippt: der spätere Tap, bei gleicher Zeit die größere Wahl (wie combineTap in TypeScript)
+    private static func combineTap(_ x: J, _ y: J, _ k: String) -> J {
+        let ax: Double = x["at"]?.number ?? 0
+        let ay: Double = y["at"]?.number ?? 0
+        if ax != ay { return ax > ay ? x : y }
+        return cmp(x["choice"]?.string ?? "", y["choice"]?.string ?? "") >= 0 ? x : y
     }
 
     private static func mergeLog(_ a: [J], _ b: [J]) -> J {
@@ -527,6 +536,7 @@ enum SyncMerge {
         for (k, v) in obj(y["weekReviewShown"]) { shown[k] = v }
         s["weekReviewShown"] = .obj(shown)
         s["plans"] = .obj(lww(obj(x["plans"]), obj(y["plans"]), tsA, tsB, { tsKey(plan: $0) }, combinePlan))
+        s["digestTaps"] = .obj(lww(obj(x["digestTaps"]), obj(y["digestTaps"]), tsA, tsB, { tsKey(digest: $0) }, combineTap))
         s["settings"] = .obj(lww(obj(x["settings"]), obj(y["settings"]), tsA, tsB, { tsKey(setting: $0) }, pickSetting))
         if let npd = maxStr(x["notesPromptDay"], y["notesPromptDay"]) { s["notesPromptDay"] = npd }
         if let md = maxStr(x["momentDay"], y["momentDay"]) { s["momentDay"] = md }
@@ -536,4 +546,119 @@ enum SyncMerge {
 
     /// Gleiche Form wie nach einer Zusammenführung (Reihenfolge, Kürzungen), ohne Inhalt zu ändern
     static func normalized(_ d: J) -> J { merge(d, emptyDoc()) }
+}
+
+// MARK: Core Digest (fundament.md Entscheidung 12 in core-content)
+// Wochenkarte oben im Saved-Reiter. Gleiche Regeln wie src/moments/digest.ts.
+
+struct DigestAction: Codable, Equatable {
+    var id: String
+    var title: String
+    var metric: String
+    /// YYYY-MM-DD
+    var due: String
+    var url: String?
+}
+
+struct DigestContradiction: Codable, Equatable {
+    var id: String
+    var otherId: String
+    var question: String
+    /// Knopf Option A: gilt dieser Save
+    var a: String
+    /// Knopf Option B: gilt der andere
+    var b: String
+}
+
+struct DigestLatest: Codable, Equatable {
+    /// z.B. 2026-W44
+    var week: String
+    /// ISO-Zeit des Laufs
+    var generatedAt: String
+    var saves: Int
+    var counts: [String: Int]
+    var actions: [DigestAction]
+    var contradictions: [DigestContradiction]
+}
+
+/// Ein Tap auf der Wochenkarte: done oder drop (Action), a oder b (Widerspruch). at in Millisekunden.
+struct DigestTap: Codable, Equatable {
+    var choice: String
+    var at: Double
+}
+
+enum DigestCard {
+    static let kinds = ["action", "habit", "rule", "know", "research", "content", "script", "source", "contradiction"]
+
+    static func actionKey(_ id: String) -> String { "a:\(id)" }
+    static func contradictionKey(_ id: String) -> String { "c:\(id)" }
+
+    /// Prüft die Form der Datei, damit eine fehlerhafte oder neuere Fassung die App nie zum Absturz bringt. nil = unbrauchbar.
+    static func parse(_ j: J) -> DigestLatest? {
+        guard j["v"]?.number == 1, let week = j["week"]?.string, let generated = j["generatedAt"]?.string, SyncWire.parseISO(generated) != nil else { return nil }
+        var counts = [String: Int]()
+        for k in kinds {
+            if let n = j["counts"]?[k]?.number, n.isFinite, n >= 0 { counts[k] = Int(n.rounded(.down)) } else { counts[k] = 0 }
+        }
+        let actions: [DigestAction] = (j["actions"]?.array ?? []).compactMap { (a: J) -> DigestAction? in
+            guard let id = a["id"]?.string, let title = a["title"]?.string, let metric = a["metric"]?.string, let due = a["due"]?.string else { return nil }
+            return DigestAction(id: id, title: title, metric: metric, due: due, url: a["url"]?.string)
+        }
+        let contradictions: [DigestContradiction] = (j["contradictions"]?.array ?? []).compactMap { (c: J) -> DigestContradiction? in
+            guard let id = c["id"]?.string, let other = c["otherId"]?.string, let q = c["question"]?.string, let a = c["a"]?.string, let b = c["b"]?.string else { return nil }
+            return DigestContradiction(id: id, otherId: other, question: q, a: a, b: b)
+        }
+        let saves: Int = { if let n = j["saves"]?.number, n.isFinite, n >= 0 { return Int(n.rounded(.down)) } else { return 0 } }()
+        return DigestLatest(week: week, generatedAt: generated, saves: saves, counts: counts, actions: actions, contradictions: contradictions)
+    }
+
+    /// Tap setzen oder ändern. Gleiche Wahl noch einmal oder eine Wahl, die zur Art nicht passt: nichts ändert sich.
+    static func setTap(_ taps: [String: DigestTap]?, key: String, choice: String, now: Double) -> [String: DigestTap] {
+        let cur = taps ?? [:]
+        let allowed: [String] = key.hasPrefix("a:") ? ["done", "drop"] : (key.hasPrefix("c:") ? ["a", "b"] : [])
+        if !allowed.contains(choice) || cur[key]?.choice == choice { return cur }
+        var next = cur
+        next[key] = DigestTap(choice: choice, at: now)
+        return next
+    }
+
+    static func actionTap(_ taps: [String: DigestTap]?, _ id: String) -> String? { taps?[actionKey(id)]?.choice }
+    static func contradictionTap(_ taps: [String: DigestTap]?, _ id: String) -> String? { taps?[contradictionKey(id)]?.choice }
+
+    /// Actions ohne Tap
+    static func openActions(_ latest: DigestLatest?, _ taps: [String: DigestTap]?) -> Int {
+        guard let latest else { return 0 }
+        return latest.actions.filter { actionTap(taps, $0.id) == nil }.count
+    }
+
+    /// Arten mit Zahl größer 0, in fester Reihenfolge
+    static func countList(_ latest: DigestLatest) -> [(kind: String, n: Int)] {
+        kinds.compactMap { (k: String) -> (kind: String, n: Int)? in
+            let n = latest.counts[k] ?? 0
+            return n > 0 ? (kind: k, n: n) : nil
+        }
+    }
+
+    private static let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+    /// "Oct 29" in der lokalen Zeit des Geräts
+    static func shortDate(_ iso: String) -> String {
+        guard let d = SyncWire.parseISO(iso) else { return iso }
+        let c = Calendar.current.dateComponents([.month, .day], from: d)
+        return "\(months[(c.month ?? 1) - 1]) \(c.day ?? 1)"
+    }
+
+    /// YYYY-MM-DD als "Nov 9" ohne Zeitzonenverschiebung
+    static func dueDate(_ day: String) -> String {
+        let p = day.split(separator: "-")
+        guard p.count == 3, p[0].count == 4, p[1].count == 2, p[2].count == 2, let m = Int(p[1]), let d = Int(p[2]), (1...12).contains(m) else { return day }
+        return "\(months[m - 1]) \(d)"
+    }
+
+    /// Zeile in den Einstellungen
+    static func lastLine(_ latest: DigestLatest?, _ taps: [String: DigestTap]?) -> String {
+        guard let latest else { return "Last digest: none yet" }
+        let n = openActions(latest, taps)
+        return "Last digest: \(shortDate(latest.generatedAt)), \(n) \(n == 1 ? "action" : "actions") open"
+    }
 }

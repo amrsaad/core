@@ -244,7 +244,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const answerRecall = (got: boolean) => {
     const r = recall;
     recallAnswered.current = true;
-    if (r) update((s) => ({ ...s, recall: answer(s.recall ?? {}, r.m.id, got, clockNow().getTime()), dayCount: got ? countGotIt(s.dayCount, today) : s.dayCount }));
+    if (r) update((s) => ({ ...s, recall: answer(s.recall ?? {}, r.m.id, got, clockNow().getTime(), !!r.m.recallBoost), dayCount: got ? countGotIt(s.dayCount, today) : s.dayCount }));
   };
   const closeRecall = () => {
     recallRef.current = false;

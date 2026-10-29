@@ -47,6 +47,21 @@ struct SyncCrypto: SyncCipher {
         return doc
     }
 
+    /// state/digest-latest.enc (Core Digest): gleicher Umschlag, Inhalt ist die Wochenkarte
+    func decryptLatest(_ text: String) throws -> DigestLatest {
+        let bad = SyncError(kind: .format, message: "The digest file has an unexpected format.", status: nil)
+        guard let env = SyncJSON.parse(text), let ivText = env["iv"]?.string, let ctText = env["ct"]?.string,
+              let iv = Vault.base64url(ivText), let ct = Vault.base64url(ctText), iv.count == 12, ct.count > 16 else { throw bad }
+        let plain: Data
+        do {
+            plain = try open(iv: iv, ct: ct)
+        } catch {
+            throw SyncError(kind: .key, message: "The digest file does not match this unlock key.", status: nil)
+        }
+        guard let j = SyncJSON.parse(plain), let latest = DigestCard.parse(j) else { throw bad }
+        return latest
+    }
+
     /// Token für den QR-Code: base64url(iv + Chiffretext + Tag), wie in der Web-App
     func encryptToken(_ token: String) -> String? {
         guard let s = try? seal(Data(token.utf8)) else { return nil }
@@ -65,6 +80,8 @@ struct GitHubTransport: SyncTransport {
     static let host = "https://api.github.com"
     static let repo = "amrsaad/core-content"
     static let path = "state/core-state.enc"
+    /// Core Digest: Wochenkarte, wöchentlich von der Aufgabe geschrieben, von der App nur gelesen
+    static let digestPath = "state/digest-latest.enc"
 
     var session: URLSession
 
@@ -117,8 +134,12 @@ struct GitHubTransport: SyncTransport {
         return String(data: d, encoding: .utf8)
     }
 
-    func read(token: String) async throws -> SyncRemote? {
-        let (data, http) = try await send(request("\(Self.host)/repos/\(Self.repo)/contents/\(Self.path)", token: token))
+    func read(token: String) async throws -> SyncRemote? { try await read(path: Self.path, token: token) }
+
+    func readDigest(token: String) async throws -> SyncRemote? { try await read(path: Self.digestPath, token: token) }
+
+    private func read(path: String, token: String) async throws -> SyncRemote? {
+        let (data, http) = try await send(request("\(Self.host)/repos/\(Self.repo)/contents/\(path)", token: token))
         if http.statusCode == 404 { return nil }
         guard http.statusCode == 200 else { throw SyncError.failure(status: http.statusCode, rateLimited: rateLimited(http)) }
         guard let j = SyncJSON.parse(data), let sha = j["sha"]?.string else { throw SyncError.unexpected }
@@ -154,6 +175,7 @@ extension SyncEngine {
             local: { Store.current?.syncDoc() },
             adopt: { Store.current?.adopt($0) }
         )
+        deps.adoptDigest = { Store.current?.adoptDigest($0) }
         deps.loadLastSync = { SyncMeta.load() }
         deps.saveLastSync = { SyncMeta.save($0) }
         return SyncEngine(deps)
@@ -219,6 +241,8 @@ enum SyncMock {
     static var shaURL: URL { dir.appendingPathComponent("sha.txt") }
     static var modeURL: URL { dir.appendingPathComponent("mode.txt") }
     static var putsURL: URL { dir.appendingPathComponent("puts.txt") }
+    /// Core Digest: Wochenkarte, die der Test ablegt (verschlüsselt wie auf GitHub)
+    static var digestURL: URL { dir.appendingPathComponent("digest.enc") }
 
     static func read(_ url: URL) -> String? { try? String(contentsOf: url, encoding: .utf8) }
     static func write(_ url: URL, _ s: String) {
@@ -248,6 +272,11 @@ final class SyncMockProtocol: URLProtocol {
         }
         let auth = request.value(forHTTPHeaderField: "Authorization")
         guard mode != "unauthorized", let token = SyncMock.token, auth == "Bearer \(token)" else { return reply(401, .obj([:])) }
+        if request.url?.path.hasSuffix("/contents/state/digest-latest.enc") == true {
+            guard request.httpMethod == "GET" || request.httpMethod == nil else { return reply(405, .obj([:])) }
+            guard let t = SyncMock.read(SyncMock.digestURL) else { return reply(404, .obj([:])) }
+            return reply(200, .obj(["sha": .str("digest-\(t.utf8.count)"), "size": .num(Double(t.utf8.count)), "encoding": .str("base64"), "content": .str(Data(t.utf8).base64EncodedString())]))
+        }
         guard request.url?.path.hasSuffix("/contents/state/core-state.enc") == true else { return reply(404, .obj([:])) }
         let text = SyncMock.read(SyncMock.fileURL)
         let sha = SyncMock.read(SyncMock.shaURL) ?? ""

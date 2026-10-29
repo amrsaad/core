@@ -69,6 +69,10 @@ struct SavedView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Saved").font(.system(size: 28, weight: .bold)).padding(.top, 16)
                 Text(items.count == 1 ? "1 moment" : "\(items.count) moments").font(.system(size: 13)).foregroundStyle(Palette.tertiary)
+                if let latest = store.state.digestLatest {
+                    DigestCardView(latest: latest, taps: store.state.digestTaps, tap: { store.tapDigest($0, $1) })
+                        .padding(.vertical, 8)
+                }
                 if items.isEmpty {
                     Text("Double tap a moment to save it here.").font(.system(size: 17)).foregroundStyle(Palette.secondary).padding(.top, 16)
                 }
@@ -80,6 +84,71 @@ struct SavedView: View {
         }
         .foregroundStyle(.white)
         .background(Color.black.ignoresSafeArea())
+    }
+}
+
+/// "This week" (Core Digest): Zahlen je Art, Actions mit Done und Drop, Widersprüche mit Option A und B.
+/// Nur diese beiden Arten verlangen einen Tap. Ein Tap lässt sich ändern. Der nächste Lauf sammelt den Stand ein.
+struct DigestCardView: View {
+    let latest: DigestLatest
+    let taps: [String: DigestTap]?
+    let tap: (String, String) -> Void
+
+    private func choice(_ label: String, selected: Bool, id: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
+                .font(.system(size: 16, weight: selected ? .semibold : .regular))
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .foregroundStyle(selected ? Color.black : Color.white)
+                .background(selected ? Color.white : Color.clear, in: RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Palette.line))
+        }
+        .accessibilityIdentifier(id)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("This week").font(.system(size: 20, weight: .bold))
+                Spacer()
+                Text("\(latest.week) · \(latest.saves) \(latest.saves == 1 ? "save" : "saves")")
+                    .font(.system(size: 13)).foregroundStyle(Palette.tertiary)
+                    .accessibilityIdentifier("digestWeek")
+            }
+            let counts = DigestCard.countList(latest)
+            if !counts.isEmpty {
+                Text(counts.map { "\($0.kind) \($0.n)" }.joined(separator: "   "))
+                    .font(.system(size: 13)).foregroundStyle(Palette.tertiary)
+                    .accessibilityIdentifier("digestCounts")
+            }
+            ForEach(Array(latest.actions.enumerated()), id: \.element.id) { i, a in
+                let c = DigestCard.actionTap(taps, a.id)
+                VStack(alignment: .leading, spacing: 8) {
+                    Divider().overlay(Palette.line)
+                    Text(a.title).font(.system(size: 16, weight: .semibold))
+                    Text("\(a.metric) · due \(DigestCard.dueDate(a.due))").font(.system(size: 14)).foregroundStyle(Palette.secondary)
+                    HStack(spacing: 8) {
+                        choice("Done", selected: c == "done", id: "digestDone\(i)") { tap(DigestCard.actionKey(a.id), "done") }
+                        choice("Drop", selected: c == "drop", id: "digestDrop\(i)") { tap(DigestCard.actionKey(a.id), "drop") }
+                    }
+                }
+            }
+            ForEach(Array(latest.contradictions.enumerated()), id: \.element.id) { i, x in
+                let c = DigestCard.contradictionTap(taps, x.id)
+                VStack(alignment: .leading, spacing: 8) {
+                    Divider().overlay(Palette.line)
+                    Text(x.question).font(.system(size: 16, weight: .semibold))
+                    choice("Option A: \(x.a)", selected: c == "a", id: "digestA\(i)") { tap(DigestCard.contradictionKey(x.id), "a") }
+                    choice("Option B: \(x.b)", selected: c == "b", id: "digestB\(i)") { tap(DigestCard.contradictionKey(x.id), "b") }
+                }
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Palette.surface, in: RoundedRectangle(cornerRadius: 12))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("digestCard")
     }
 }
 
@@ -189,6 +258,10 @@ struct SettingsView: View {
                 }
 
                 card { SyncCard() }
+
+                Text(DigestCard.lastLine(store.state.digestLatest, store.state.digestTaps))
+                    .font(.system(size: 13)).foregroundStyle(Palette.tertiary)
+                    .accessibilityIdentifier("digestLine")
 
                 card { UnlockDeviceCard(key: Vault.loadKey()) }
 

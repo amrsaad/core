@@ -79,6 +79,8 @@ struct Moment: Codable, Identifiable, Hashable {
     var recall: RecallQuestion? = nil
     /// Wann der Moment in den Pool kam (ISO). Der Geräte-Sync nutzt es, wenn zwei Geräte verschiedene Fassungen desselben Moments haben.
     var createdAt: String? = nil
+    /// Core Digest: Moment aus einem gemerkten Save mit Regel. Die Abrufkarte kommt nach 1, 4 und 14 Tagen statt 2, 7 und 21.
+    var recallBoost: Bool? = nil
 
     var cueTexts: [String] { (cues ?? []).map(\.text) }
     var readingText: String { FormText.text(excerpt: excerpt, cues: cueTexts) }

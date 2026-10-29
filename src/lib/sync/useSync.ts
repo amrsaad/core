@@ -4,7 +4,8 @@ import type { SyncAccess } from '../useAppState';
 import { loadSyncMeta, saveSyncMeta } from '../db';
 import { clearToken, loadToken, saveToken, syncKey } from '../vault';
 import { createSync, type Sync, type SyncStatus } from './controller';
-import { syncedChanged } from './merge';
+import { canon, syncedChanged } from './merge';
+import type { DigestLatest } from '../../moments/digest';
 
 export interface SyncUi {
   status: SyncStatus;
@@ -29,6 +30,7 @@ export function useSync(state: AppState | null, access: SyncAccess, enabled: boo
       adopt: access.adopt,
       getKey: syncKey,
       getToken: loadToken,
+      adoptDigest: (l: DigestLatest) => access.adopt((st) => (st.digestLatest && canon(st.digestLatest) === canon(l) ? st : { ...st, digestLatest: l })),
       loadMeta: loadSyncMeta,
       saveMeta: saveSyncMeta,
       onStatus: setStatus,

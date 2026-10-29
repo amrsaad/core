@@ -1,3 +1,4 @@
+import CryptoKit
 import XCTest
 @testable import Core
 
@@ -29,7 +30,7 @@ final class SyncTests: XCTestCase {
                 count += 1
             }
         }
-        XCTAssertEqual(count, 62)
+        XCTAssertEqual(count, 69)
     }
 
     func testJSONUnicodeAndNumbers() throws {
@@ -105,6 +106,102 @@ final class SyncTests: XCTestCase {
         device.captions = false
         XCTAssertFalse(SyncWire.syncedChanged(base, device), "Gerätespezifisches wandert nicht")
         XCTAssertTrue(SyncWire.syncedChanged(base, n))
+    }
+
+    // MARK: Core Digest
+
+    private func latestJSON(week: String = "2026-W44") -> String {
+        #"{"v":1,"week":"\#(week)","generatedAt":"2026-11-01T04:48:00.000Z","saves":13,"counts":{"action":2,"habit":0,"rule":4,"know":9,"research":1,"content":1,"script":1,"source":1,"contradiction":0},"actions":[{"id":"ted-2034:278.2","title":"Record a short talk opening twice, once from the chest","metric":"Both recordings exist","due":"2026-11-09","url":null},{"id":"bad"}],"contradictions":[{"id":"c1","otherId":"c2","question":"Which one holds?","a":"Rule A","b":"Rule B"}]}"#
+    }
+
+    func testDigestParseAndTaps() throws {
+        let latest = try XCTUnwrap(DigestCard.parse(try XCTUnwrap(SyncJSON.parse(latestJSON()))))
+        XCTAssertEqual(latest.week, "2026-W44")
+        XCTAssertEqual(latest.saves, 13)
+        XCTAssertEqual(latest.actions.count, 1, "Eintrag ohne Pflichtfelder fällt weg")
+        XCTAssertEqual(latest.contradictions.count, 1)
+        XCTAssertEqual(DigestCard.countList(latest).map { "\($0.kind) \($0.n)" }, ["action 2", "rule 4", "know 9", "research 1", "content 1", "script 1", "source 1"])
+        XCTAssertNil(DigestCard.parse(try XCTUnwrap(SyncJSON.parse(#"{"v":2,"week":"x","generatedAt":"2026-11-01T04:48:00Z"}"#))))
+        XCTAssertNil(DigestCard.parse(try XCTUnwrap(SyncJSON.parse(#"{"v":1,"week":"x","generatedAt":"gestern"}"#))))
+
+        XCTAssertEqual(DigestCard.dueDate("2026-11-09"), "Nov 9")
+        XCTAssertEqual(DigestCard.lastLine(nil, nil), "Last digest: none yet")
+        XCTAssertTrue(DigestCard.lastLine(latest, nil).hasSuffix(", 1 action open"))
+        let key = DigestCard.actionKey("ted-2034:278.2")
+        var taps = DigestCard.setTap(nil, key: key, choice: "done", now: 5)
+        XCTAssertEqual(taps[key], DigestTap(choice: "done", at: 5))
+        XCTAssertEqual(DigestCard.setTap(taps, key: key, choice: "done", now: 9), taps, "gleiche Wahl ändert nichts")
+        XCTAssertEqual(DigestCard.setTap(taps, key: key, choice: "a", now: 9), taps, "falsche Wahl für diese Art")
+        taps = DigestCard.setTap(taps, key: key, choice: "drop", now: 9)
+        XCTAssertEqual(DigestCard.actionTap(taps, "ted-2034:278.2"), "drop")
+        XCTAssertEqual(DigestCard.openActions(latest, taps), 0)
+        XCTAssertTrue(DigestCard.lastLine(latest, taps).hasSuffix(", 0 actions open"))
+    }
+
+    func testDigestTapsStampSyncAndMerge() {
+        let now = Date(timeIntervalSince1970: 1_000)
+        var s = AppState()
+        s.digestTaps = ["a:m1": DigestTap(choice: "done", at: 100), "c:m3": DigestTap(choice: "a", at: 300)]
+        let stamped = SyncWire.stamp(old: AppState(), new: s, now: now)
+        XCTAssertEqual(stamped.syncTs, ["digest:a:m1": 1_000_000, "digest:c:m3": 1_000_000])
+        XCTAssertTrue(SyncWire.syncedChanged(AppState(), stamped))
+        // die geladene Wochenkarte selbst wandert nicht
+        var l = AppState()
+        l.digestLatest = DigestCard.parse(SyncJSON.parse(latestJSON())!)
+        XCTAssertFalse(SyncWire.syncedChanged(AppState(), l))
+        XCTAssertEqual(SyncWire.stamp(old: AppState(), new: l, now: now), l)
+        XCTAssertFalse(SyncJSON.canon(SyncWire.doc(from: l)).contains("2026-W44"))
+        // zweites Gerät tippt später auf dieselbe Action: der spätere Tap gilt auf beiden
+        var other = AppState()
+        other.digestTaps = ["a:m1": DigestTap(choice: "drop", at: 200)]
+        other = SyncWire.stamp(old: AppState(), new: other, now: Date(timeIntervalSince1970: 2_000))
+        let merged = SyncMerge.merge(SyncWire.doc(from: stamped), SyncWire.doc(from: other))
+        let a = SyncWire.apply(merged, to: stamped)
+        XCTAssertEqual(a.digestTaps?["a:m1"], DigestTap(choice: "drop", at: 200))
+        XCTAssertEqual(a.digestTaps?["c:m3"], DigestTap(choice: "a", at: 300))
+        XCTAssertEqual(SyncWire.doc(from: SyncWire.apply(merged, to: other)), SyncWire.doc(from: a))
+    }
+
+    @MainActor
+    func testDigestFileAndEngineLoad() async throws {
+        _ = useMock()
+        let token = "github_pat_UNITTESTTOKEN0123456789_abcdef"
+        let key = Data(repeating: 9, count: 32)
+        // Datei wie die Aufgabe sie schreibt: {v, iv, ct} mit AES-GCM
+        let box = try AES.GCM.seal(Data(latestJSON().utf8), using: SymmetricKey(data: key))
+        let iv = box.nonce.withUnsafeBytes { Data($0) }
+        let env = J.obj(["v": .num(1), "iv": .str(KeyBackup.base64url(iv)), "ct": .str(KeyBackup.base64url(box.ciphertext + box.tag))])
+        let file = SyncJSON.canon(env)
+        let latest = try SyncCrypto(key: key).decryptLatest(file)
+        XCTAssertEqual(latest.week, "2026-W44")
+        do {
+            _ = try SyncCrypto(key: Data(repeating: 1, count: 32)).decryptLatest(file)
+            XCTFail("falscher Schlüssel")
+        } catch let e as SyncError {
+            XCTAssertEqual(e.kind, .key)
+        }
+
+        // Der Ablauf lädt die Karte nach dem Sync, nur einmal je Version, und ein Fehler stört den Sync nicht
+        SyncMock.write(SyncMock.digestURL, file)
+        final class Box { var adopted: [DigestLatest] = [] }
+        let seen = Box()
+        var deps = SyncEngine.Deps(
+            transport: GitHubTransport.mocked(),
+            cipher: { SyncCrypto(key: key) },
+            token: { token },
+            local: { SyncMerge.emptyDoc() },
+            adopt: { _ in }
+        )
+        deps.adoptDigest = { seen.adopted.append($0) }
+        let engine = SyncEngine(deps)
+        await engine.syncNow()
+        await engine.syncNow()
+        XCTAssertEqual(seen.adopted.map(\.week), ["2026-W44"], "dieselbe Version nur einmal")
+        XCTAssertNil(engine.status.error)
+        SyncMock.write(SyncMock.digestURL, "kein json")
+        await engine.syncNow()
+        XCTAssertNil(engine.status.error, "kaputte Wochenkarte stört den Sync nicht")
+        XCTAssertEqual(seen.adopted.count, 1)
     }
 
     func testSavedMomentRoundTrip() throws {

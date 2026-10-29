@@ -102,6 +102,9 @@ enum SyncWire {
             plans[k] = .obj(o)
         }
         st["plans"] = .obj(plans)
+        var taps = [String: J]()
+        for (k, t) in s.digestTaps ?? [:] { taps[k] = .obj(["choice": .str(t.choice), "at": .num(t.at)]) }
+        st["digestTaps"] = .obj(taps)
         var set = [String: J]()
         set["areaShares"] = nums(s.areaShares)
         if let c = s.captionMode { set["captionMode"] = .str(c.rawValue) }
@@ -184,6 +187,14 @@ enum SyncWire {
             }
             out.plans = plans
         }
+        if differs("digestTaps") {
+            var taps = [String: DigestTap]()
+            for (k, v) in next["digestTaps"]?.object ?? [:] {
+                guard let choice = v["choice"]?.string, let at = v["at"]?.number else { continue }
+                taps[k] = DigestTap(choice: choice, at: at)
+            }
+            out.digestTaps = taps
+        }
         if differs("settings") {
             let set = next["settings"]
             if let shares = set?["areaShares"], !numbers(shares).isEmpty { out.areaShares = numbers(shares) }
@@ -220,6 +231,7 @@ enum SyncWire {
         diff(old.liked ?? [:], new.liked ?? [:]) { SyncMerge.tsKey(liked: $0) }
         diff(old.muted, new.muted) { SyncMerge.tsKey(muted: $0) }
         diff(old.plans ?? [:], new.plans ?? [:]) { SyncMerge.tsKey(plan: $0) }
+        diff(old.digestTaps ?? [:], new.digestTaps ?? [:]) { SyncMerge.tsKey(digest: $0) }
         if old.areaShares != new.areaShares { ts[SyncMerge.tsKey(setting: "areaShares")] = t; changed = true }
         if old.captionMode != new.captionMode { ts[SyncMerge.tsKey(setting: "captionMode")] = t; changed = true }
         if old.form != new.form { ts[SyncMerge.tsKey(setting: "form")] = t; changed = true }
@@ -246,6 +258,7 @@ enum SyncWire {
         if a.feedTime != b.feedTime { return true }
         if a.weekReviewShown != b.weekReviewShown { return true }
         if a.plans != b.plans { return true }
+        if a.digestTaps != b.digestTaps { return true }
         if a.areaShares != b.areaShares { return true }
         if a.captionMode != b.captionMode { return true }
         if a.form != b.form { return true }

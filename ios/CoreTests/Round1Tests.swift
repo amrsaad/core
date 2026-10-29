@@ -156,6 +156,17 @@ final class Round1Tests: XCTestCase {
         XCTAssertEqual(Recall.pick([:], recent: r4, now: t, available: { has.contains($0) }), .init(id: "a", review: false))
         XCTAssertNil(Recall.pick([:], recent: r4, now: t, available: { _ in false }))
 
+        // Core Digest (recallBoost): Fehler 1 Tag, Treffer 4, zweiter Treffer in Folge 14, dritter beendet
+        var b = Recall.answer([:], id: "b", got: true, now: t, boost: true)
+        XCTAssertEqual(b["b"]?.due, t.addingTimeInterval(4 * day))
+        b = Recall.answer(b, id: "b", got: true, now: t.addingTimeInterval(4 * day), boost: true)
+        XCTAssertEqual(b["b"]?.due, t.addingTimeInterval(18 * day))
+        b = Recall.answer(b, id: "b", got: true, now: t.addingTimeInterval(18 * day), boost: true)
+        XCTAssertNil(b["b"]?.due)
+        let bm = Recall.answer([:], id: "b", got: false, now: t, boost: true)
+        XCTAssertEqual(bm["b"]?.due, t.addingTimeInterval(1 * day))
+        XCTAssertEqual(Recall.answer([:], id: "b", got: false, now: t)["b"]?.due, t.addingTimeInterval(2 * day), "ohne Boost bleibt es bei 2 Tagen")
+
         // Antwortreihenfolge: Permutation, alle 6 Reihenfolgen möglich
         struct Lcg: RandomNumberGenerator { var s: UInt64; mutating func next() -> UInt64 { s = s &* 6364136223846793005 &+ 1442695040888963407; return s } }
         var g = Lcg(s: 7)

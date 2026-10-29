@@ -12,6 +12,10 @@ export const DAY_MS = 86_400_000;
 export const MISS_GAP_DAYS = 2;
 export const HIT_GAP_DAYS = 7;
 export const SECOND_HIT_GAP_DAYS = 21;
+/** Core Digest (Know oder Rule, recallBoost): kürzere Abstände 1, 4 und 14 Tage statt 2, 7 und 21 */
+export const BOOST_MISS_GAP_DAYS = 1;
+export const BOOST_HIT_GAP_DAYS = 4;
+export const BOOST_SECOND_HIT_GAP_DAYS = 14;
 
 export interface RecallResult {
   at: number;
@@ -59,15 +63,16 @@ const trailingHits = (results: RecallResult[]) => {
   return n;
 };
 
-/** Ergebnis eintragen und nächste Fälligkeit setzen */
-export function answer(recall: RecallState, id: string, got: boolean, now: number): RecallState {
+/** Ergebnis eintragen und nächste Fälligkeit setzen. boost: Moment mit recallBoost, kürzere Abstände. */
+export function answer(recall: RecallState, id: string, got: boolean, now: number, boost = false): RecallState {
   const prev = recall[id] ?? { id, due: null, results: [] };
   const results = [...prev.results, { at: now, got }];
   const hits = trailingHits(results);
   let due: number | null;
-  if (!got) due = now + MISS_GAP_DAYS * DAY_MS;
-  else if (hits === 1) due = now + HIT_GAP_DAYS * DAY_MS;
-  else if (hits === 2) due = now + SECOND_HIT_GAP_DAYS * DAY_MS;
+  const gaps = boost ? [BOOST_MISS_GAP_DAYS, BOOST_HIT_GAP_DAYS, BOOST_SECOND_HIT_GAP_DAYS] : [MISS_GAP_DAYS, HIT_GAP_DAYS, SECOND_HIT_GAP_DAYS];
+  if (!got) due = now + gaps[0] * DAY_MS;
+  else if (hits === 1) due = now + gaps[1] * DAY_MS;
+  else if (hits === 2) due = now + gaps[2] * DAY_MS;
   else due = null;
   return { ...recall, [id]: { id, due, results } };
 }

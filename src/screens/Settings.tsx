@@ -8,6 +8,7 @@ import { dayKey, isTimeShifted, now } from '../lib/clock';
 import type { CaptionMode } from '../moments/captions';
 import { UnlockDevice } from './UnlockDevice';
 import { SyncCard } from './SyncCard';
+import { lastDigestLine } from '../moments/digest';
 import type { SyncUi } from '../lib/sync/useSync';
 import { tapStats, TAP_TARGET_MS, type TapSample } from '../moments/actions';
 import { LATENCY_TARGET_MS, latencyStats, type LatencySample } from '../moments/latency';
@@ -164,6 +165,8 @@ export function Settings({ state, update, replace, moments, skipped = 0, sync }:
       </section>
 
       <SyncCard sync={sync} />
+
+      <p className="t-meta m-0 px-1 text-muted" data-testid="digest-line">{lastDigestLine(state.digestLatest, state.digestTaps)}</p>
 
       <UnlockDevice tokenKey={sync.status.hasToken} />
 
