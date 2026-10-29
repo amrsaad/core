@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T18:31:40.039Z",
+ "at": "2026-10-29T19:12:06.544Z",
  "runs": [
   {
    "browser": "webkit",
@@ -14,11 +14,11 @@
     "soundIconShownWhileMuted": true,
     "soundIconBottomRightOfBand": true,
     "noSoundPill": true,
-    "soundOn": false,
-    "soundIconGoneAfterTap": false,
-    "soundIconNeverBack": false,
+    "soundOn": true,
+    "soundIconGoneAfterTap": true,
+    "soundIconNeverBack": true,
     "forYouExactlyWhenSet": true,
-    "sawBothKinds": false,
+    "sawBothKinds": true,
     "stoppedAtEnd": true,
     "autoNext": true,
     "recallAfter4": true,
@@ -258,10 +258,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929710571,
+     "due": 1792929604736,
      "results": [
       {
-       "at": 1792756910571,
+       "at": 1792756804736,
        "got": false
       }
      ]
@@ -277,11 +277,11 @@
      "align": ""
     },
     {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
+     "ar": true,
+     "shown": true,
+     "rtl": true,
+     "size": 21,
+     "align": "right"
     },
     {
      "ar": false,
@@ -300,25 +300,25 @@
    ],
    "sequence": [
     {
-     "id": "test0000021:100",
+     "id": "test0000000:100",
+     "has": true,
+     "fy": true,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000001:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000021:100",
-     "has": false,
-     "fy": false,
+     "id": "test0000006:100",
+     "has": true,
+     "fy": true,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000021:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000021:100",
+     "id": "test0000014:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -326,9 +326,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06253051757812,
+    "bh": 221.0625,
     "fw": 393,
-    "fh": 221.06253051757812,
+    "fh": 221.0625,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -338,12 +338,12 @@
     2
    ],
    "tapToFill": {
-    "measured": 30,
-    "recorded": 31
+    "measured": 27,
+    "recorded": 32
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 378,
+    "checksDone": 373,
     "violations": 0,
     "endedSeen": 183
    },
@@ -352,7 +352,7 @@
     "buffered": 31,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000026:100 | Testmoment 26 brain | Boring | - | Video | c0bba99 |\n| test0000022:100 | Testmoment 22 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | c0bba99 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | c0bba99 |\n| test0000046:100 | Testmoment 46 body | Wrong | - | Video | c0bba99 |\n| test0000011:100 | Testmoment 11 beat | Not for me | - | Video | c0bba99 |\n| test0000029:100 | Testmoment 29 brain | Mute speaker | - | Video | c0bba99 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000026:100 | Testmoment 26 brain | Boring | - | Video | e91b220 |\n| test0000022:100 | Testmoment 22 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e91b220 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | e91b220 |\n| test0000046:100 | Testmoment 46 body | Wrong | - | Video | e91b220 |\n| test0000011:100 | Testmoment 11 beat | Not for me | - | Video | e91b220 |\n| test0000029:100 | Testmoment 29 brain | Mute speaker | - | Video | e91b220 |",
    "badWalk": [
     {
      "idx": 2,
@@ -689,7 +689,7 @@
     "noRating": true
    },
    "errors": [],
-   "ok": false
+   "ok": true
   },
   {
    "browser": "chromium",
@@ -850,7 +850,7 @@
     "cardHasLessRows": true,
     "cardTopicBlocked": true,
     "resetAsks": true,
-    "resetCancelKeeps": true,
+    "resetCancelKeeps": false,
     "cardExpiryLifted": true,
     "resetEmpties": true,
     "resetClearsWeights": true,
@@ -948,10 +948,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603436,
+     "due": 1792929603502,
      "results": [
       {
-       "at": 1792756803436,
+       "at": 1792756803502,
        "got": false
       }
      ]
@@ -1016,9 +1016,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.0625,
+    "bh": 221.06246948242188,
     "fw": 393,
-    "fh": 221.0625,
+    "fh": 221.06246948242188,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -1028,21 +1028,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 32.29999999998836,
+    "measured": 32.09999999997672,
     "recorded": 32
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 396,
+    "checksDone": 388,
     "violations": 0,
-    "endedSeen": 190
+    "endedSeen": 189
    },
    "latency": {
     "n": 38,
     "buffered": 31,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000026:100 | Testmoment 26 brain | Boring | - | Video | c0bba99 |\n| test0000022:100 | Testmoment 22 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | c0bba99 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | c0bba99 |\n| test0000046:100 | Testmoment 46 body | Wrong | - | Video | c0bba99 |\n| test0000011:100 | Testmoment 11 beat | Not for me | - | Video | c0bba99 |\n| test0000029:100 | Testmoment 29 brain | Mute speaker | - | Video | c0bba99 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000026:100 | Testmoment 26 brain | Boring | - | Video | e91b220 |\n| test0000022:100 | Testmoment 22 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e91b220 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | e91b220 |\n| test0000046:100 | Testmoment 46 body | Wrong | - | Video | e91b220 |\n| test0000011:100 | Testmoment 11 beat | Not for me | - | Video | e91b220 |\n| test0000029:100 | Testmoment 29 brain | Mute speaker | - | Video | e91b220 |",
    "badWalk": [
     {
      "idx": 2,
@@ -1379,7 +1379,7 @@
     "noRating": true
    },
    "errors": [],
-   "ok": true
+   "ok": false
   }
  ]
 }
