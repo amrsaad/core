@@ -25,6 +25,8 @@ export interface Moment {
   forYou?: string;
   kind: Kind;
   recall?: Recall;
+  /** Core Digest (Know oder Rule): Abrufkarte nach 1, 4 und 14 Tagen statt 2, 7 und 21 */
+  recallBoost?: boolean;
   /** Inhaltsstrom: video, audio oder text. Erbt von der Quelle in registry.json. Fehlt das Feld: audio true heißt audio, sonst video. Text-Momente haben keinen Player. */
   form?: 'video' | 'audio' | 'text';
   top?: boolean;

@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T18:17:52.108Z",
+ "at": "2026-10-29T18:06:55.030Z",
  "runs": [
   {
    "browser": "webkit",
@@ -61,7 +61,6 @@
     "textNeverLoadsPlayer": true,
     "audioOnlyAudio": true,
     "audioPlays": true,
-    "hlsDiagPerAttempt": true,
     "audioCoverShown": true,
     "audioBigCaption": true,
     "audioNeverVideo": true,
@@ -87,16 +86,19 @@
     "tapRecorded": true,
     "swipeLeftOpensNote": true,
     "swipeLeftStaysOnMoment": true,
-    "noteSixChips": true,
+    "noteSevenChips": true,
     "noteTextAndDone": true,
     "noteNoSendButton": true,
     "noteChipsLarge": true,
     "noteSheetOneLevel": true,
     "noteTypingDoesNotNavigate": true,
+    "noteConfirmLine": true,
+    "noteChipsLockedWhileConfirm": true,
     "noteSheetClosed": true,
     "noteGoesToNext": true,
     "noteSavedLocally": true,
-    "noteWeakNoEffect": true,
+    "noteBoringWeakensChannel": true,
+    "noteBoringNoToastNoHeart": true,
     "noteNothingOpened": true,
     "noteDoneClosesAndNext": true,
     "noteTextSaved": true,
@@ -105,26 +107,23 @@
     "noteOnlyLongLeftSwipe": true,
     "noteNoNetwork": true,
     "knownViaChip": true,
-    "knownNoToast": true,
-    "knownAdvanced": true,
-    "knownSaved": true,
+    "knownTopicCap": true,
+    "knownChannelKept": true,
     "wrongViaChip": true,
-    "wrongToast": true,
-    "wrongSaved": true,
+    "wrongChannelCap": true,
+    "wrongTopicKept": true,
     "notForMeViaChip": true,
-    "notForMeTopicDown": true,
-    "notForMeChannelAreaKept": true,
-    "notForMeNoToast": true,
-    "notForMeAdvanced": true,
-    "notForMeSaved": true,
+    "notForMeTopic02": true,
+    "notForMeChannel05": true,
+    "notForMeAreaKept": true,
+    "notForMeExpiry30Days": true,
     "muteViaChip": true,
-    "muteToast": true,
+    "muteLine": true,
+    "muteNoToast": true,
     "muteAdvanced": true,
     "muteSaved": true,
     "noteStillNoNetwork": true,
     "posterWheneverNotPlaying": true,
-    "posterAllStates": true,
-    "posterDropsSynchronously": true,
     "latencyMeasured": true,
     "bufferedUnder300": true,
     "latencyInDiag": true,
@@ -146,12 +145,29 @@
     "issueRowsHaveAllFields": true,
     "issueTitleCount": true,
     "promptMarksSent": true,
+    "greatNoted": true,
+    "greatLearnsNothing": true,
     "newNoteUnsent": true,
     "reviewOnlyOnce": true,
     "promptOncePerDay": true,
     "prevPlanShown": true,
     "prevPlanAnswered": true,
     "skipWorks": true,
+    "cardShown": true,
+    "cardMax5": true,
+    "cardArrows": true,
+    "cardSortedDown": true,
+    "cardHasLessRows": true,
+    "cardTopicBlocked": true,
+    "resetAsks": true,
+    "resetCancelKeeps": true,
+    "cardExpiryLifted": true,
+    "resetEmpties": true,
+    "resetClearsWeights": true,
+    "soloFeed": true,
+    "soloFirstSkip": true,
+    "soloSecondSkip02": true,
+    "soloSecondSkip14Days": true,
     "p6Feed": true,
     "emptyAudioLine": true,
     "emptyKeepsSwitch": true,
@@ -242,10 +258,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792922406329,
+     "due": 1792929604706,
      "results": [
       {
-       "at": 1792749606329,
+       "at": 1792756804706,
        "got": false
       }
      ]
@@ -310,9 +326,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.0625,
+    "bh": 221.06253051757812,
     "fw": 393,
-    "fh": 221.0625,
+    "fh": 221.06253051757812,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -321,156 +337,22 @@
     1.5,
     2
    ],
-   "hlsDiag": [
-    "slot2 hls load cue start=100 rs=0 ns=0 muted=true t=0.0",
-    "slot0 hls loadedmetadata rs=0 ns=0 muted=true t=0.0",
-    "slot0 hls play#1 loadedmetadata rs=0 ns=0 muted=true t=100.0",
-    "slot0 hls play#1 ok rs=0 ns=0 muted=true t=100.0",
-    "slot1 hls loadedmetadata rs=0 ns=0 muted=true t=0.0",
-    "slot2 hls loadedmetadata rs=0 ns=0 muted=true t=0.0"
-   ],
    "tapToFill": {
-    "measured": 21.00000000000182,
-    "recorded": 40
-   },
-   "notForMeRatio": {
-    "topic": "augen",
-    "bT": 0.2047,
-    "aT": 0.2
-   },
-   "muteDbg": {
-    "last": {
-     "key": "test0000048:100#1793297895622",
-     "id": "test0000048:100",
-     "hook": "Testmoment 48 body",
-     "chips": [
-      "Mute speaker"
-     ],
-     "text": "",
-     "tab": "Video",
-     "commit": "309d7b1",
-     "at": 1793297895622
-    },
-    "mutedId": "test0000048:100",
-    "idxM": 19,
-    "idxNow": 20
+    "measured": 27,
+    "recorded": 35
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 816,
+    "checksDone": 843,
     "violations": 0,
-    "endedSeen": 21
-   },
-   "posterRects": [
-    {
-     "p": [
-      0,
-      197,
-      393,
-      221
-     ],
-     "h": [
-      0,
-      197,
-      393,
-      221
-     ],
-     "iw": 393
-    },
-    {
-     "p": [
-      0,
-      856,
-      393,
-      221
-     ],
-     "h": [
-      0,
-      856,
-      393,
-      221
-     ],
-     "iw": 393
-    },
-    {
-     "p": [
-      0,
-      1515,
-      393,
-      221
-     ],
-     "h": [
-      0,
-      1515,
-      393,
-      221
-     ],
-     "iw": 393
-    },
-    {
-     "p": [
-      0,
-      -462,
-      393,
-      221
-     ],
-     "iw": 393
-    }
-   ],
-   "posterAllStates": {
-    "unstarted": [
-     "cur:poster",
-     "nb:poster",
-     "nb:poster",
-     "nb:poster"
-    ],
-    "ended": [
-     "cur:poster",
-     "nb:poster",
-     "nb:poster",
-     "nb:poster"
-    ],
-    "paused": [
-     "cur:poster",
-     "nb:poster",
-     "nb:poster",
-     "nb:poster"
-    ],
-    "buffering": [
-     "cur:poster",
-     "nb:poster",
-     "nb:poster",
-     "nb:poster"
-    ],
-    "cued": [
-     "cur:poster",
-     "nb:poster",
-     "nb:poster",
-     "nb:poster"
-    ],
-    "playing": [
-     "cur:ohne-Poster",
-     "nb:poster",
-     "nb:poster",
-     "nb:poster"
-    ]
-   },
-   "posterSync": {
-    "pauseVideo": {
-     "vorher": true,
-     "nachherSofort": false
-    },
-    "cueVideoById": {
-     "vorher": true,
-     "nachherSofort": false
-    }
+    "endedSeen": 263
    },
    "latency": {
-    "n": 35,
-    "buffered": 29,
+    "n": 34,
+    "buffered": 28,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Weak | - | Video | 309d7b1 |\n| test0000049:100 | Testmoment 49 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 309d7b1 |\n| test0000019:100 | Testmoment 19 brain | Already known | - | Video | 309d7b1 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | 309d7b1 |\n| test0000024:100 | Testmoment 24 brain | Not for me | - | Video | 309d7b1 |\n| test0000048:100 | Testmoment 48 body | Mute speaker | - | Video | 309d7b1 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | e777c5b |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e777c5b |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | e777c5b |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | e777c5b |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | e777c5b |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | e777c5b |",
    "badWalk": [
     {
      "idx": 2,
@@ -516,42 +398,42 @@
     },
     {
      "idx": 8,
-     "id": "test0000052",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 9,
-     "id": "test0000054",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 10,
-     "id": "test0000046",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 11,
-     "id": "test0000026",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 12,
      "id": "test0000016",
      "card": false,
      "end": false,
      "err": false
     },
     {
+     "idx": 9,
+     "id": "test0000023",
+     "card": false,
+     "end": false,
+     "err": false
+    },
+    {
+     "idx": 10,
+     "id": "test0000021",
+     "card": false,
+     "end": false,
+     "err": false
+    },
+    {
+     "idx": 11,
+     "id": "test0000052",
+     "card": false,
+     "end": false,
+     "err": false
+    },
+    {
+     "idx": 12,
+     "id": "test0000047",
+     "card": false,
+     "end": false,
+     "err": false
+    },
+    {
      "idx": 13,
-     "id": "test0000027",
+     "id": "test0000007",
      "card": false,
      "end": false,
      "err": false
@@ -790,10 +672,6 @@
     {
      "ar": false,
      "dir": "ltr"
-    },
-    {
-     "ar": true,
-     "dir": "rtl"
     }
    ],
    "hit": {
@@ -869,7 +747,6 @@
     "textNeverLoadsPlayer": true,
     "audioOnlyAudio": true,
     "audioPlays": true,
-    "hlsDiagPerAttempt": true,
     "audioCoverShown": true,
     "audioBigCaption": true,
     "audioNeverVideo": true,
@@ -895,16 +772,19 @@
     "tapRecorded": true,
     "swipeLeftOpensNote": true,
     "swipeLeftStaysOnMoment": true,
-    "noteSixChips": true,
+    "noteSevenChips": true,
     "noteTextAndDone": true,
     "noteNoSendButton": true,
     "noteChipsLarge": true,
     "noteSheetOneLevel": true,
     "noteTypingDoesNotNavigate": true,
+    "noteConfirmLine": true,
+    "noteChipsLockedWhileConfirm": true,
     "noteSheetClosed": true,
     "noteGoesToNext": true,
     "noteSavedLocally": true,
-    "noteWeakNoEffect": true,
+    "noteBoringWeakensChannel": true,
+    "noteBoringNoToastNoHeart": true,
     "noteNothingOpened": true,
     "noteDoneClosesAndNext": true,
     "noteTextSaved": true,
@@ -913,26 +793,23 @@
     "noteOnlyLongLeftSwipe": true,
     "noteNoNetwork": true,
     "knownViaChip": true,
-    "knownNoToast": true,
-    "knownAdvanced": true,
-    "knownSaved": true,
+    "knownTopicCap": true,
+    "knownChannelKept": true,
     "wrongViaChip": true,
-    "wrongToast": true,
-    "wrongSaved": true,
+    "wrongChannelCap": true,
+    "wrongTopicKept": true,
     "notForMeViaChip": true,
-    "notForMeTopicDown": true,
-    "notForMeChannelAreaKept": true,
-    "notForMeNoToast": true,
-    "notForMeAdvanced": true,
-    "notForMeSaved": true,
+    "notForMeTopic02": true,
+    "notForMeChannel05": true,
+    "notForMeAreaKept": true,
+    "notForMeExpiry30Days": true,
     "muteViaChip": true,
-    "muteToast": true,
+    "muteLine": true,
+    "muteNoToast": true,
     "muteAdvanced": true,
     "muteSaved": true,
     "noteStillNoNetwork": true,
     "posterWheneverNotPlaying": true,
-    "posterAllStates": true,
-    "posterDropsSynchronously": true,
     "latencyMeasured": true,
     "bufferedUnder300": true,
     "latencyInDiag": true,
@@ -954,12 +831,29 @@
     "issueRowsHaveAllFields": true,
     "issueTitleCount": true,
     "promptMarksSent": true,
+    "greatNoted": true,
+    "greatLearnsNothing": true,
     "newNoteUnsent": true,
     "reviewOnlyOnce": true,
     "promptOncePerDay": true,
     "prevPlanShown": true,
     "prevPlanAnswered": true,
     "skipWorks": true,
+    "cardShown": true,
+    "cardMax5": true,
+    "cardArrows": true,
+    "cardSortedDown": true,
+    "cardHasLessRows": true,
+    "cardTopicBlocked": true,
+    "resetAsks": true,
+    "resetCancelKeeps": true,
+    "cardExpiryLifted": true,
+    "resetEmpties": true,
+    "resetClearsWeights": true,
+    "soloFeed": true,
+    "soloFirstSkip": true,
+    "soloSecondSkip02": true,
+    "soloSecondSkip14Days": true,
     "p6Feed": true,
     "emptyAudioLine": true,
     "emptyKeepsSwitch": true,
@@ -1050,10 +944,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792922405394,
+     "due": 1792929603451,
      "results": [
       {
-       "at": 1792749605394,
+       "at": 1792756803451,
        "got": false
       }
      ]
@@ -1118,9 +1012,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.0625,
+    "bh": 221.06246948242188,
     "fw": 393,
-    "fh": 221.0625,
+    "fh": 221.06246948242188,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -1129,156 +1023,22 @@
     1.5,
     2
    ],
-   "hlsDiag": [
-    "slot2 hls load cue start=100 rs=0 ns=0 muted=true t=0.0",
-    "slot0 hls loadedmetadata rs=0 ns=0 muted=true t=0.0",
-    "slot0 hls play#1 loadedmetadata rs=0 ns=0 muted=true t=100.0",
-    "slot0 hls play#1 ok rs=0 ns=0 muted=true t=100.0",
-    "slot1 hls loadedmetadata rs=0 ns=0 muted=true t=0.0",
-    "slot2 hls loadedmetadata rs=0 ns=0 muted=true t=0.0"
-   ],
    "tapToFill": {
-    "measured": 30.299999999813735,
-    "recorded": 30
-   },
-   "notForMeRatio": {
-    "topic": "augen",
-    "bT": 0.2923,
-    "aT": 0.2046
-   },
-   "muteDbg": {
-    "last": {
-     "key": "test0000046:100#1793297950281",
-     "id": "test0000046:100",
-     "hook": "Testmoment 46 body",
-     "chips": [
-      "Mute speaker"
-     ],
-     "text": "",
-     "tab": "Video",
-     "commit": "309d7b1",
-     "at": 1793297950281
-    },
-    "mutedId": "test0000046:100",
-    "idxM": 18,
-    "idxNow": 19
+    "measured": 31.899999999965075,
+    "recorded": 32
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 831,
+    "checksDone": 846,
     "violations": 0,
-    "endedSeen": 179
-   },
-   "posterRects": [
-    {
-     "p": [
-      0,
-      197,
-      393,
-      221
-     ],
-     "h": [
-      0,
-      197,
-      393,
-      221
-     ],
-     "iw": 393
-    },
-    {
-     "p": [
-      0,
-      856,
-      393,
-      221
-     ],
-     "h": [
-      0,
-      856,
-      393,
-      221
-     ],
-     "iw": 393
-    },
-    {
-     "p": [
-      0,
-      1515,
-      393,
-      221
-     ],
-     "h": [
-      0,
-      1515,
-      393,
-      221
-     ],
-     "iw": 393
-    },
-    {
-     "p": [
-      0,
-      -462,
-      393,
-      221
-     ],
-     "iw": 393
-    }
-   ],
-   "posterAllStates": {
-    "unstarted": [
-     "cur:poster",
-     "nb:poster",
-     "nb:poster",
-     "nb:poster"
-    ],
-    "ended": [
-     "cur:poster",
-     "nb:poster",
-     "nb:poster",
-     "nb:poster"
-    ],
-    "paused": [
-     "cur:poster",
-     "nb:poster",
-     "nb:poster",
-     "nb:poster"
-    ],
-    "buffering": [
-     "cur:poster",
-     "nb:poster",
-     "nb:poster",
-     "nb:poster"
-    ],
-    "cued": [
-     "cur:poster",
-     "nb:poster",
-     "nb:poster",
-     "nb:poster"
-    ],
-    "playing": [
-     "cur:ohne-Poster",
-     "nb:poster",
-     "nb:poster",
-     "nb:poster"
-    ]
-   },
-   "posterSync": {
-    "pauseVideo": {
-     "vorher": true,
-     "nachherSofort": false
-    },
-    "cueVideoById": {
-     "vorher": true,
-     "nachherSofort": false
-    }
+    "endedSeen": 263
    },
    "latency": {
-    "n": 35,
-    "buffered": 29,
+    "n": 34,
+    "buffered": 28,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Weak | - | Video | 309d7b1 |\n| test0000049:100 | Testmoment 49 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 309d7b1 |\n| test0000051:100 | Testmoment 51 body | Already known | - | Video | 309d7b1 |\n| test0000019:100 | Testmoment 19 brain | Wrong | - | Video | 309d7b1 |\n| test0000024:100 | Testmoment 24 brain | Not for me | - | Video | 309d7b1 |\n| test0000046:100 | Testmoment 46 body | Mute speaker | - | Video | 309d7b1 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | e777c5b |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e777c5b |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | e777c5b |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | e777c5b |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | e777c5b |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | e777c5b |",
    "badWalk": [
     {
      "idx": 2,
@@ -1324,42 +1084,42 @@
     },
     {
      "idx": 8,
-     "id": "test0000052",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 9,
-     "id": "test0000054",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 10,
-     "id": "test0000046",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 11,
-     "id": "test0000026",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 12,
      "id": "test0000016",
      "card": false,
      "end": false,
      "err": false
     },
     {
+     "idx": 9,
+     "id": "test0000023",
+     "card": false,
+     "end": false,
+     "err": false
+    },
+    {
+     "idx": 10,
+     "id": "test0000021",
+     "card": false,
+     "end": false,
+     "err": false
+    },
+    {
+     "idx": 11,
+     "id": "test0000052",
+     "card": false,
+     "end": false,
+     "err": false
+    },
+    {
+     "idx": 12,
+     "id": "test0000047",
+     "card": false,
+     "end": false,
+     "err": false
+    },
+    {
      "idx": 13,
-     "id": "test0000027",
+     "id": "test0000007",
      "card": false,
      "end": false,
      "err": false
@@ -1596,12 +1356,8 @@
      "dir": "rtl"
     },
     {
-     "ar": true,
-     "dir": "rtl"
-    },
-    {
-     "ar": true,
-     "dir": "rtl"
+     "ar": false,
+     "dir": "ltr"
     }
    ],
    "hit": {

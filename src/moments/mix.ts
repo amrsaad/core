@@ -2,6 +2,9 @@
 // 80 % aus Bekanntem mit positivem Gewicht, 20 % Neues, Top-Momente höchstens 1 von 15.
 import type { Area } from '../types';
 import type { Moment } from './types';
+import { clampW, SKIP_SEC, settle, W_MAX, W_MIN, type Until } from './learn';
+
+export { clampW, W_MAX, W_MIN };
 
 export const BLOCK = 3;
 export const AREAS: Area[] = ['brain', 'body', 'beat'];
@@ -13,6 +16,8 @@ export interface Weights {
   area: Record<string, number>;
   channel: Record<string, number>;
   topic: Record<string, number>;
+  /** Abläufe (learn.ts): bis zum Zeitstempel gilt das Gewicht oben, danach `back`. Schlüssel c:<Kanal> und t:<Thema>. Fehlt das Feld, läuft nichts ab. */
+  until?: Record<string, Until>;
 }
 
 export interface MomentPrefs {
@@ -21,6 +26,14 @@ export interface MomentPrefs {
   weights: Weights;
   seen: Record<string, number>;
   mutedChannels: Record<string, string>;
+  /** Jetzt in ms, für die Abläufe der Gewichte. Fehlt es, gilt die Systemzeit. */
+  now?: number;
+  /**
+   * Optional, nur im schlechten Netz: kleinerer Rang kommt eher (0 vorgeladen oder Text, 1 sonstiger Stream, 2 YouTube).
+   * Er engt nur die Kandidaten innerhalb des gewählten Bereichs ein. Blöcke, Bereichsanteile, Beat zuerst, 20 % Neues
+   * und Top-Rate bleiben wie ohne Rang.
+   */
+  rank?: (m: Moment) => number;
 }
 
 export interface MomentCursor {
@@ -33,34 +46,18 @@ export interface MomentCursor {
 
 export const newMomentCursor = (firstOfDay: boolean): MomentCursor => ({ counts: { brain: 0, body: 0, beat: 0 }, firstOfDay, used: new Set(), sinceTop: TOP_RATE ** -1 });
 
-export const W_MIN = 0.2;
-export const W_MAX = 3;
-export const clampW = (w: number) => Math.min(W_MAX, Math.max(W_MIN, Number(w.toFixed(4))));
+/** Faktoren der Signale, die Gewichte wachsen oder schrumpfen lassen. Skip, Not for me, Wrong, Known und Weak sind Deckel (learn.ts RULE). */
+export const SIGNAL = { ended: 1.1, early: 0.95, mostly: 1.05, back: 1.1, more: 1.3, save: 1.1 } as const;
 
-export const SIGNAL = { ended: 1.1, skip: 0.9, early: 0.95, mostly: 1.05, back: 1.1, more: 1.3, save: 1.1, negative: 0.7 } as const;
+export type Leave = { kind: 'skip' } | { kind: 'factor'; f: number } | null;
 
-/** Signal beim Weiterwischen nach Anteil des geschauten Moments. null = neutral. */
-export function leaveSignal(watchedSec: number, durationSec: number): number | null {
-  if (watchedSec < 5) return SIGNAL.skip;
+/** Wertung beim Weiterwischen nach geschautem Anteil. Skip: unter 3 s. null = neutral. */
+export function leaveOf(watchedSec: number, durationSec: number): Leave {
+  if (watchedSec < SKIP_SEC) return { kind: 'skip' };
   const f = watchedSec / Math.max(1, durationSec);
-  if (f < 0.3) return SIGNAL.early;
-  if (f >= 0.8) return SIGNAL.mostly;
+  if (f < 0.3) return { kind: 'factor', f: SIGNAL.early };
+  if (f >= 0.8) return { kind: 'factor', f: SIGNAL.mostly };
   return null;
-}
-
-/** Wirkt ein Signal auf Kanal, Topic und (abgeschwächt) Bereich */
-export function applySignal(w: Weights, m: Pick<Moment, 'channel' | 'topic' | 'area'>, factor: number, opts: { area?: boolean } = {}): Weights {
-  const area = opts.area === false ? w.area : { ...w.area, [m.area]: clampW((w.area[m.area] ?? 1) * Math.sqrt(factor)) };
-  return {
-    area,
-    channel: { ...w.channel, [m.channel]: clampW((w.channel[m.channel] ?? 1) * factor) },
-    topic: { ...w.topic, [m.topic]: clampW((w.topic[m.topic] ?? 1) * factor) },
-  };
-}
-
-/** Nur das Thema: "Not for me" senkt das Gewicht des Themas, Kanal und Bereich bleiben (Faktor wie Weak, SIGNAL.negative) */
-export function applyTopic(w: Weights, m: Pick<Moment, 'topic'>, factor: number): Weights {
-  return { ...w, topic: { ...w.topic, [m.topic]: clampW((w.topic[m.topic] ?? 1) * factor) } };
 }
 
 /** Wirksame Bereichsanteile: Einstellungen mal gelerntes Gewicht, jeder Bereich mindestens 10 % */
@@ -84,7 +81,9 @@ const known = (w: Weights, m: Moment) => m.channel in w.channel || m.topic in w.
 const score = (w: Weights, m: Moment) => (w.channel[m.channel] ?? 1) * (w.topic[m.topic] ?? 1);
 
 /** Nächster Block. Verändert den Cursor. null, wenn nichts mehr verfügbar ist. */
-export function nextMomentBlock(pool: Moment[], p: MomentPrefs, c: MomentCursor, rng: () => number = Math.random): Moment[] | null {
+export function nextMomentBlock(pool: Moment[], p0: MomentPrefs, c: MomentCursor, rng: () => number = Math.random): Moment[] | null {
+  // Abgelaufene Fristen der Gewichte einrechnen, dann arbeiten alle Regeln unten mit dem wirksamen Gewicht
+  const p: MomentPrefs = { ...p0, weights: settle(p0.weights, p0.now ?? Date.now()) };
   const free = pool.filter((m) => !p.seen[m.id] && !c.used.has(m.id) && !p.mutedChannels[m.channel]);
   if (!free.length) return null;
   const areas = AREAS.filter((a) => free.some((m) => m.area === a));
@@ -98,8 +97,12 @@ export function nextMomentBlock(pool: Moment[], p: MomentPrefs, c: MomentCursor,
   const inArea = free.filter((m) => m.area === area);
   const block: Moment[] = [];
   for (let i = 0; i < BLOCK; i++) {
-    const avail = inArea.filter((m) => !block.includes(m));
+    let avail = inArea.filter((m) => !block.includes(m));
     if (!avail.length) break;
+    if (p.rank) {
+      const best = Math.min(...avail.map(p.rank));
+      avail = avail.filter((m) => p.rank!(m) === best);
+    }
     const tops = avail.filter((m) => m.top);
     const normal = avail.filter((m) => !m.top);
     let pick: Moment | undefined;

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { AppState } from '../lib/state';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import { MomentModal } from './MomentModal';
+import { DigestCard } from './DigestCard';
 import { fullVideoUrl, thumbOf, type Moment } from './types';
 
 export function SavedMoments({ state, update }: { state: AppState; update: (fn: (s: AppState) => AppState) => void }) {
@@ -10,6 +11,7 @@ export function SavedMoments({ state, update }: { state: AppState; update: (fn: 
   return (
     <div className="pad pad-nav flex h-[100dvh] flex-col gap-4 overflow-y-auto">
       <h1 className="t-headline m-0">Saved</h1>
+      <DigestCard state={state} update={update} />
       {!items.length && <p className="t-body text-muted">Double tap a moment to save it here.</p>}
       <ul className="m-0 flex list-none flex-col gap-3 p-0">
         {items.map(({ moment: m, done }) => (

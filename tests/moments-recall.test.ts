@@ -52,6 +52,24 @@ describe('Abrufkarte (Runde 1, Punkt 5)', () => {
     r = answer(r, 'm', true, T + 18 * DAY_MS);
     expect(r.m.due).toBe(T + 39 * DAY_MS);
   });
+  it('recallBoost (Core Digest): Treffer nach 4 Tagen, zweiter Treffer nach 14, dritter beendet, Fehler nach 1 Tag', () => {
+    let r: RecallState = answer({}, 'm', true, T, true);
+    expect(r.m.due).toBe(T + 4 * DAY_MS);
+    r = answer(r, 'm', true, T + 4 * DAY_MS, true);
+    expect(r.m.due).toBe(T + 18 * DAY_MS);
+    r = answer(r, 'm', true, T + 18 * DAY_MS, true);
+    expect(r.m.due).toBeNull();
+    expect(answer({}, 'x', false, T, true).x.due).toBe(T + 1 * DAY_MS);
+    // nach einem Fehler beginnt die Folge neu mit 4 und 14 Tagen
+    const miss = answer(answer({}, 'y', true, T, true), 'y', false, T + 1, true);
+    expect(answer(miss, 'y', true, T + 2, true).y.due).toBe(T + 2 + 4 * DAY_MS);
+  });
+  it('ohne recallBoost bleibt es bei 2, 7 und 21 Tagen', () => {
+    expect(answer({}, 'a', false, T).a.due).toBe(T + 2 * DAY_MS);
+    expect(answer({}, 'b', true, T, false).b.due).toBe(T + 7 * DAY_MS);
+    const second = answer(answer({}, 'c', true, T), 'c', true, T + 7 * DAY_MS);
+    expect(second.c.due).toBe(T + 28 * DAY_MS);
+  });
   it('Momente ohne recall bekommen keine Karte, der nächste Kandidat mit recall rückt nach', () => {
     const has = new Set(['a', 'c']);
     const recent = [{ id: 'a', watched: 1 }, { id: 'b', watched: 1 }, { id: 'c', watched: 0.2 }, { id: 'd', watched: 0.9 }];

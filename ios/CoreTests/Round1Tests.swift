@@ -85,26 +85,6 @@ final class Round1Tests: XCTestCase {
         XCTAssertEqual(Actions.line(Actions.stats([])), "no taps measured yet")
     }
 
-    // Endseite (Auftrag 29.10.2026), gleiche Prüfdaten wie tests/moments-form.test.ts
-    func testEndPage() {
-        func m(_ id: String, audio: Bool?, channel: String = "K") -> Moment {
-            Moment(id: id, videoId: id, start: 0, end: 60, channel: channel, videoTitle: nil, area: .brain, topic: "eyes",
-                   hook: "Hook \(id)", forYou: nil, kind: "story", top: false, hls: nil, thumb: nil, url: nil, audio: audio, cues: nil)
-        }
-        XCTAssertEqual(EndPage.line(.video), "You've seen every video moment.")
-        XCTAssertEqual(EndPage.line(.audio), "You've seen every audio moment.")
-        XCTAssertEqual(EndPage.sub, "New ones arrive daily.")
-        XCTAssertEqual(EndPage.others(.video), [.audio, .text])
-        XCTAssertEqual(EndPage.others(.text), [.video, .audio])
-        XCTAssertEqual(EndPage.label(.audio, 412), "Audio, 412 new")
-        XCTAssertEqual(EndPage.label(.text, 230), "Text, 230 new")
-        let pool = [m("a", audio: true), m("b", audio: true), m("c", audio: true, channel: "M"), m("e", audio: nil)]
-        XCTAssertEqual(EndPage.unseen(pool, .audio, seen: [:], muted: [:]), 3)
-        XCTAssertEqual(EndPage.unseen(pool, .audio, seen: ["a": Date()], muted: [:]), 2)
-        XCTAssertEqual(EndPage.unseen(pool, .audio, seen: ["a": Date()], muted: ["M": "x"]), 1)
-        XCTAssertEqual(EndPage.unseen(pool, .video, seen: ["e": Date()], muted: [:]), 0)
-    }
-
     func testFormFilter() {
         // ohne Feld form: audio true heißt audio, sonst video
         XCTAssertEqual(FormFilter.of(form: nil, audio: false), .video)
@@ -176,6 +156,17 @@ final class Round1Tests: XCTestCase {
         XCTAssertEqual(Recall.pick([:], recent: r4, now: t, available: { has.contains($0) }), .init(id: "a", review: false))
         XCTAssertNil(Recall.pick([:], recent: r4, now: t, available: { _ in false }))
 
+        // Core Digest (recallBoost): Fehler 1 Tag, Treffer 4, zweiter Treffer in Folge 14, dritter beendet
+        var b = Recall.answer([:], id: "b", got: true, now: t, boost: true)
+        XCTAssertEqual(b["b"]?.due, t.addingTimeInterval(4 * day))
+        b = Recall.answer(b, id: "b", got: true, now: t.addingTimeInterval(4 * day), boost: true)
+        XCTAssertEqual(b["b"]?.due, t.addingTimeInterval(18 * day))
+        b = Recall.answer(b, id: "b", got: true, now: t.addingTimeInterval(18 * day), boost: true)
+        XCTAssertNil(b["b"]?.due)
+        let bm = Recall.answer([:], id: "b", got: false, now: t, boost: true)
+        XCTAssertEqual(bm["b"]?.due, t.addingTimeInterval(1 * day))
+        XCTAssertEqual(Recall.answer([:], id: "b", got: false, now: t)["b"]?.due, t.addingTimeInterval(2 * day), "ohne Boost bleibt es bei 2 Tagen")
+
         // Antwortreihenfolge: Permutation, alle 6 Reihenfolgen möglich
         struct Lcg: RandomNumberGenerator { var s: UInt64; mutating func next() -> UInt64 { s = s &* 6364136223846793005 &+ 1442695040888963407; return s } }
         var g = Lcg(s: 7)
@@ -218,16 +209,17 @@ final class Round1Tests: XCTestCase {
         func ctx(_ id: String, _ hook: String) -> Note.Context { .init(id: id, hook: hook, tab: "Video", commit: "4ed41a7") }
         let a = ctx("abc123:100", "Don't compare body fat across devices (100% rule)!")
         let b = ctx("def456:20", "Sleep | not coffee")
-        XCTAssertEqual(Note.chips, ["Already known", "Not for me", "Weak", "Wrong", "Bad cut", "Mute speaker"])
-        XCTAssertEqual(Note.effect("Already known"), .known)
+        XCTAssertEqual(Note.chips, ["Known", "Not for me", "Wrong", "Boring", "Bad cut", "Great", "Mute speaker"])
+        XCTAssertEqual(Note.effect("Known"), .known)
         XCTAssertEqual(Note.effect("Wrong"), .wrong)
         XCTAssertEqual(Note.effect("Mute speaker"), .mute)
         XCTAssertEqual(Note.effect("Not for me"), .notForMe)
-        for c in ["Weak", "Bad cut"] { XCTAssertNil(Note.effect(c)) }
+        XCTAssertEqual(Note.effect("Boring"), .weak)
+        for c in ["Bad cut", "Great"] { XCTAssertNil(Note.effect(c)) }
         // Notiz aus Chip oder Text
         XCTAssertNil(Note.makeEntry(a, chips: [], text: "  ", at: 1))
-        let e = Note.makeEntry(a, chips: ["Weak"], text: "  Clear.  ", at: 1_700_000_000_000)
-        XCTAssertEqual(e, Note.Entry(key: "abc123:100#1700000000000", id: "abc123:100", hook: a.hook, chips: ["Weak"], text: "Clear.",
+        let e = Note.makeEntry(a, chips: ["Great"], text: "  Clear.  ", at: 1_700_000_000_000)
+        XCTAssertEqual(e, Note.Entry(key: "abc123:100#1700000000000", id: "abc123:100", hook: a.hook, chips: ["Great"], text: "Clear.",
                                      tab: "Video", commit: "4ed41a7", at: 1_700_000_000_000, sent: nil))
         XCTAssertEqual(Note.makeEntry(a, chips: [], text: "Late cut", at: 1)?.chips, [])
         XCTAssertEqual(Note.makeEntry(a, chips: [], text: String(repeating: "x", count: Note.textMax + 50), at: 1)?.text.count, Note.textMax)
@@ -242,13 +234,13 @@ final class Round1Tests: XCTestCase {
         XCTAssertFalse(Note.firstOpenOfDay(last: "2026-10-28", today: "2026-10-28"))
         // Zeilen je Moment
         let list = [
-            Note.makeEntry(a, chips: ["Already known"], text: "", at: 1)!,
+            Note.makeEntry(a, chips: ["Known"], text: "", at: 1)!,
             Note.makeEntry(b, chips: [], text: "Cut is\ntwo seconds late", at: 2)!,
             Note.makeEntry(a, chips: ["Bad cut"], text: "Starts mid-sentence", at: 3)!,
         ]
         let r = Note.rows(list)
         XCTAssertEqual(r.count, 2)
-        XCTAssertEqual(r[0].chips, ["Already known", "Bad cut"])
+        XCTAssertEqual(r[0].chips, ["Known", "Bad cut"])
         XCTAssertEqual(r[0].text, "Starts mid-sentence")
         XCTAssertEqual(r[0].keys, ["abc123:100#1", "abc123:100#3"])
         XCTAssertEqual(r[1].chips, [])
@@ -256,13 +248,13 @@ final class Round1Tests: XCTestCase {
         let built = Note.buildIssue(list, day: "2026-10-28")
         XCTAssertEqual(built?.rows, 2)
         XCTAssertEqual(built?.keys, ["abc123:100#1", "abc123:100#3", "def456:20#2"])
-        XCTAssertEqual(built?.url, "https://github.com/amrsaad/core-content/issues/new?title=Core%20feedback%202026-10-28%2C%202%20moments&body=%7C%20Moment%20%7C%20Hook%20%7C%20Chips%20%7C%20Text%20%7C%20Tab%20%7C%20App%20%7C%0A%7C---%7C---%7C---%7C---%7C---%7C---%7C%0A%7C%20abc123%3A100%20%7C%20Don%27t%20compare%20body%20fat%20across%20devices%20%28100%25%20rule%29%21%20%7C%20Already%20known%2C%20Bad%20cut%20%7C%20Starts%20mid-sentence%20%7C%20Video%20%7C%204ed41a7%20%7C%0A%7C%20def456%3A20%20%7C%20Sleep%20%2F%20not%20coffee%20%7C%20-%20%7C%20Cut%20is%20two%20seconds%20late%20%7C%20Video%20%7C%204ed41a7%20%7C&labels=feedback")
+        XCTAssertEqual(built?.url, "https://github.com/amrsaad/core-content/issues/new?title=Core%20feedback%202026-10-28%2C%202%20moments&body=%7C%20Moment%20%7C%20Hook%20%7C%20Chips%20%7C%20Text%20%7C%20Tab%20%7C%20App%20%7C%0A%7C---%7C---%7C---%7C---%7C---%7C---%7C%0A%7C%20abc123%3A100%20%7C%20Don%27t%20compare%20body%20fat%20across%20devices%20%28100%25%20rule%29%21%20%7C%20Known%2C%20Bad%20cut%20%7C%20Starts%20mid-sentence%20%7C%20Video%20%7C%204ed41a7%20%7C%0A%7C%20def456%3A20%20%7C%20Sleep%20%2F%20not%20coffee%20%7C%20-%20%7C%20Cut%20is%20two%20seconds%20late%20%7C%20Video%20%7C%204ed41a7%20%7C&labels=feedback")
         XCTAssertNil(Note.buildIssue([], day: "2026-10-28"))
         XCTAssertTrue(Note.buildIssue([list[0]], day: "2026-10-28")?.url.contains("2026-10-28%2C%201%20moment&") ?? false)
         XCTAssertEqual(Note.enc("a b&c=d+e'(f)!*"), "a%20b%26c%3Dd%2Be%27%28f%29%21%2A")
         // Zu viele Notizen: Adresse bleibt unter dem Limit, der Rest bleibt ungesendet
         let many = (0..<60).map { i in
-            Note.makeEntry(ctx("vid\(i):0", String(repeating: "Hook number \(i) ", count: 4)), chips: ["Weak"], text: String(repeating: "y", count: 300), at: i + 10)!
+            Note.makeEntry(ctx("vid\(i):0", String(repeating: "Hook number \(i) ", count: 4)), chips: ["Boring"], text: String(repeating: "y", count: 300), at: i + 10)!
         }
         let big = Note.buildIssue(many, day: "2026-10-28")!
         XCTAssertLessThanOrEqual(big.url.count, Note.urlMax)

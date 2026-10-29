@@ -1,6 +1,7 @@
 // AES-GCM wie pool.enc: Datei ist {"v":1,"iv":"<base64url>","ct":"<base64url, Chiffretext plus 16 Byte Tag>"}.
 // Gleiche Form in ios/Core/SyncClient.swift. Der Schlüssel ist der Pool-Schlüssel.
 import { canon, SYNC_VERSION, type SyncDoc } from './merge';
+import { parseLatest, type DigestLatest } from '../../moments/digest';
 
 export const b64uEncode = (bytes: Uint8Array): string => {
   let s = '';
@@ -47,6 +48,31 @@ export async function decryptDoc(key: CryptoKey, text: string): Promise<SyncDoc>
   } catch {
     throw new CryptoFail('format', 'The sync file has an unexpected format.');
   }
+}
+
+/** state/digest-latest.enc (Core Digest): gleicher Umschlag, Inhalt ist die Wochenkarte */
+export async function decryptLatest(key: CryptoKey, text: string): Promise<DigestLatest> {
+  let env: { iv?: unknown; ct?: unknown };
+  try {
+    env = JSON.parse(text);
+  } catch {
+    throw new CryptoFail('format', 'The digest file has an unexpected format.');
+  }
+  if (typeof env.iv !== 'string' || typeof env.ct !== 'string') throw new CryptoFail('format', 'The digest file has an unexpected format.');
+  let plain: ArrayBuffer;
+  try {
+    plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64uDecode(env.iv) }, key, b64uDecode(env.ct));
+  } catch {
+    throw new CryptoFail('key', 'The digest file does not match this unlock key.');
+  }
+  let latest: DigestLatest | null = null;
+  try {
+    latest = parseLatest(JSON.parse(new TextDecoder().decode(plain)));
+  } catch {
+    /* unten */
+  }
+  if (!latest) throw new CryptoFail('format', 'The digest file has an unexpected format.');
+  return latest;
 }
 
 /** Token für den QR-Code: base64url(iv + Chiffretext), nur mit dem Pool-Schlüssel lesbar */

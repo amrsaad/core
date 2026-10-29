@@ -30,6 +30,8 @@ const note = (key: string, at: number, extra: object = {}) => ({ key, id: key.sp
 
 const manyDays = (from: number, n: number) => Object.fromEntries(Array.from({ length: n }, (_, i) => [`2026-${String(Math.floor((from + i) / 28) + 1).padStart(2, '0')}-${String(((from + i) % 28) + 1).padStart(2, '0')}`, { seen: i + 1, gotIt: 0 }]));
 
+const WU = (topic: Record<string, number>, channel: Record<string, number>, until: Record<string, { at: number; back: number }>) => ({ area: {}, channel, topic, until });
+
 const CASES: Case[] = [
   {
     name: 'gesehen: Vereinigung, frühester Zeitpunkt',
@@ -92,6 +94,30 @@ const CASES: Case[] = [
     expected: doc({ momentWeights: W({ x: 0.6, y: 0.5 }) }),
   },
   {
+    name: 'Abläufe: der Ablauf folgt dem Zeitstempel seines Gewichts, der jüngere gewinnt',
+    a: doc({ momentWeights: WU({ augen: 0.2 }, {}, { 't:augen': { at: 5000, back: 1 } }) }, { [tsKey.weight('topic', 'augen')]: 100 }),
+    b: doc({ momentWeights: WU({ augen: 0.2 }, {}, { 't:augen': { at: 9000, back: 0.8 } }) }, { [tsKey.weight('topic', 'augen')]: 200 }),
+    expected: doc({ momentWeights: WU({ augen: 0.2 }, {}, { 't:augen': { at: 9000, back: 0.8 } }) }, { [tsKey.weight('topic', 'augen')]: 200 }),
+  },
+  {
+    name: 'Abläufe: Zurücksetzen auf dem anderen Gerät ist neuer, Gewicht und Ablauf fallen weg',
+    a: doc({ momentWeights: WU({ augen: 0.2 }, {}, { 't:augen': { at: 5000, back: 1 } }) }, { [tsKey.weight('topic', 'augen')]: 100 }),
+    b: doc({}, { [tsKey.weight('topic', 'augen')]: 300 }),
+    expected: doc({}, { [tsKey.weight('topic', 'augen')]: 300 }),
+  },
+  {
+    name: 'Abläufe: ohne Zeitstempel gewinnt der spätere Termin, bei Gleichstand das größere Gewicht danach',
+    a: doc({ momentWeights: WU({}, { c1: 0.2, c2: 0.2 }, { 'c:c1': { at: 5000, back: 0.6 }, 'c:c2': { at: 7000, back: 0.4 } }) }),
+    b: doc({ momentWeights: WU({}, { c1: 0.2, c2: 0.2 }, { 'c:c1': { at: 6000, back: 0.5 }, 'c:c2': { at: 7000, back: 0.6 } }) }),
+    expected: doc({ momentWeights: WU({}, { c1: 0.2, c2: 0.2 }, { 'c:c1': { at: 6000, back: 0.5 }, 'c:c2': { at: 7000, back: 0.6 } }) }),
+  },
+  {
+    name: 'Abläufe: Kanal und Thema laufen getrennt, von beiden Seiten',
+    a: doc({ momentWeights: WU({ augen: 0.2 }, {}, { 't:augen': { at: 5000, back: 1 } }) }, { [tsKey.weight('topic', 'augen')]: 100 }),
+    b: doc({ momentWeights: WU({}, { c1: 0.2 }, { 'c:c1': { at: 8000, back: 0.6 } }) }, { [tsKey.weight('channel', 'c1')]: 150 }),
+    expected: doc({ momentWeights: WU({ augen: 0.2 }, { c1: 0.2 }, { 't:augen': { at: 5000, back: 1 }, 'c:c1': { at: 8000, back: 0.6 } }) }, { [tsKey.weight('topic', 'augen')]: 100, [tsKey.weight('channel', 'c1')]: 150 }),
+  },
+  {
     name: 'Abruf: Ergebnisse vereinigt, Termin vom jüngsten Ergebnis',
     a: doc({ recall: { r1: { id: 'r1', due: 1000 + 2 * DAY, results: [{ at: 1000, got: false }] }, r2: { id: 'r2', due: null, results: [{ at: 5, got: true }] } } }),
     b: doc({ recall: { r1: { id: 'r1', due: 2000 + 7 * DAY, results: [{ at: 2000, got: true }] } } }),
@@ -150,6 +176,24 @@ const CASES: Case[] = [
     a: doc({ plans: { '2026-10-19': { when: 'When I wake up', will: 'I will stretch' } } }, { [tsKey.plan('2026-10-19')]: 100 }),
     b: doc({ plans: { '2026-10-19': { when: 'When I wake up', will: 'I will stretch', happened: true } } }, { [tsKey.plan('2026-10-19')]: 200 }),
     expected: doc({ plans: { '2026-10-19': { when: 'When I wake up', will: 'I will stretch', happened: true } } }, { [tsKey.plan('2026-10-19')]: 200 }),
+  },
+  {
+    name: 'Digest-Taps: je Schlüssel der jüngste Zeitstempel, beide Seiten bringen etwas mit',
+    a: doc({ digestTaps: { 'a:m1': { choice: 'done', at: 100 }, 'c:m3': { choice: 'a', at: 300 } } }, { [tsKey.digest('a:m1')]: 100, [tsKey.digest('c:m3')]: 300 }),
+    b: doc({ digestTaps: { 'a:m1': { choice: 'drop', at: 200 }, 'a:m2': { choice: 'done', at: 50 } } }, { [tsKey.digest('a:m1')]: 200, [tsKey.digest('a:m2')]: 50 }),
+    expected: doc({ digestTaps: { 'a:m1': { choice: 'drop', at: 200 }, 'a:m2': { choice: 'done', at: 50 }, 'c:m3': { choice: 'a', at: 300 } } }, { [tsKey.digest('a:m1')]: 200, [tsKey.digest('a:m2')]: 50, [tsKey.digest('c:m3')]: 300 }),
+  },
+  {
+    name: 'Digest-Taps: gleicher Zeitstempel, der spätere Tap, dann die größere Wahl',
+    a: doc({ digestTaps: { 'a:m1': { choice: 'done', at: 500 }, 'c:m3': { choice: 'a', at: 700 } } }, { [tsKey.digest('a:m1')]: 100, [tsKey.digest('c:m3')]: 100 }),
+    b: doc({ digestTaps: { 'a:m1': { choice: 'drop', at: 400 }, 'c:m3': { choice: 'b', at: 700 } } }, { [tsKey.digest('a:m1')]: 100, [tsKey.digest('c:m3')]: 100 }),
+    expected: doc({ digestTaps: { 'a:m1': { choice: 'done', at: 500 }, 'c:m3': { choice: 'b', at: 700 } } }, { [tsKey.digest('a:m1')]: 100, [tsKey.digest('c:m3')]: 100 }),
+  },
+  {
+    name: 'Digest-Taps: alter Stand ohne Zeitstempel, was da ist, bleibt',
+    a: doc({ digestTaps: { 'a:m1': { choice: 'done', at: 100 } } }),
+    b: doc({}),
+    expected: doc({ digestTaps: { 'a:m1': { choice: 'done', at: 100 } } }),
   },
   {
     name: 'Tage und Wochen: späterer Tag, Rückblick einmal gezeigt',
@@ -216,6 +260,14 @@ export function randomDoc(r: () => number): SyncDoc {
       } else if (r() < 0.3) stamp(tsKey.weight(fam, k));
     }
   }
+  // Abläufe am Ende, damit frühere Zufallsfolgen unverändert bleiben
+  for (const [fam, keys] of [['topic', topics], ['channel', chans]] as const) {
+    for (const k of keys) {
+      if (k in s.momentWeights[fam] && r() < 0.4) {
+        s.momentWeights.until = { ...s.momentWeights.until, [`${fam === 'channel' ? 'c' : 't'}:${k}`]: { at: 1000 + Math.floor(r() * 5) * 1000, back: Number((0.4 + Math.floor(r() * 7) / 10).toFixed(4)) } };
+      }
+    }
+  }
   for (const id of some(ids, 0.4)) {
     const n = 1 + Math.floor(r() * 3);
     const results = Array.from({ length: n }, (_, i) => ({ at: 1000 + (Math.floor(r() * 4) + i) * 100, got: r() < 0.5 }));
@@ -240,6 +292,10 @@ export function randomDoc(r: () => number): SyncDoc {
   for (const w of some(weeks, 0.4)) {
     s.plans[w] = { when: pickOf(['When I wake up', 'When I sit down']), will: pickOf(['I will stretch', 'I will read']), ...(r() < 0.4 ? { happened: r() < 0.5 } : {}) };
     stamp(tsKey.plan(w));
+  }
+  for (const k of some(['a:m1', 'a:m2', 'c:m3'], 0.4)) {
+    s.digestTaps[k] = { choice: k.startsWith('a') ? pickOf(['done', 'drop'] as const) : pickOf(['a', 'b'] as const), at: 1000 + Math.floor(r() * 4) * 100 };
+    stamp(tsKey.digest(k));
   }
   if (r() < 0.5) {
     s.settings.playbackSpeed = pickOf([1, 1.5]);
@@ -352,6 +408,17 @@ describe('Zeitstempel beim Ändern', () => {
     );
     expect(n.syncTs).toEqual({ [tsKey.weight('area', 'brain')]: 777, [tsKey.weight('channel', 'c')]: 777, [tsKey.weight('topic', 't')]: 777, [tsKey.saved('m1')]: 777, [tsKey.liked('m1')]: 777, [tsKey.muted('c')]: 777, [tsKey.plan('w')]: 777, [tsKey.setting('form')]: 777, [tsKey.setting('playbackSpeed')]: 777 });
   });
+  it('Taps auf der Wochenkarte bekommen die Zeit der Änderung', () => {
+    const s = base();
+    const n = stampChanges(s, { ...s, digestTaps: { 'a:m1': { choice: 'done', at: 5 } } }, 321);
+    expect(n.syncTs).toEqual({ [tsKey.digest('a:m1')]: 321 });
+    expect(syncedChanged(s, n)).toBe(true);
+    // die geladene Wochenkarte selbst wandert nicht
+    const l = { ...s, digestLatest: { v: 1 as const, week: '2026-W44', generatedAt: '2026-10-29T17:00:00.000Z', saves: 1, counts: { action: 0, habit: 0, rule: 0, know: 1, research: 0, content: 0, script: 0, source: 0, contradiction: 0 }, actions: [], contradictions: [] } };
+    expect(stampChanges(s, l, 5)).toBe(l);
+    expect(syncedChanged(s, l)).toBe(false);
+    expect(JSON.stringify(toDoc(l))).not.toMatch(/digestLatest|2026-W44/);
+  });
   it('Wegnehmen und Zurücksetzen bekommen auch eine Zeit', () => {
     const s = base({ savedMoments: { m1: sv('m1') }, momentWeights: { area: {}, channel: { c: 0.9 }, topic: { t: 0.7 } }, mutedChannels: { c: 'c' }, syncTs: { old: 1 } });
     const n = stampChanges(s, { ...s, savedMoments: {}, momentWeights: { area: {}, channel: {}, topic: {} }, mutedChannels: {} }, 900);
@@ -361,6 +428,13 @@ describe('Zeitstempel beim Ändern', () => {
     const s = base({ momentWeights: { area: {}, channel: { a: 0.9, b: 1.2 }, topic: {} }, syncTs: { [tsKey.weight('channel', 'a')]: 1, [tsKey.weight('channel', 'b')]: 1 } });
     const n = stampChanges(s, { ...s, momentWeights: { ...s.momentWeights, channel: { a: 0.9, b: 1.5 } } }, 50);
     expect(n.syncTs).toEqual({ [tsKey.weight('channel', 'a')]: 1, [tsKey.weight('channel', 'b')]: 50 });
+  });
+  it('ein neuer, geänderter oder abgelaufener Ablauf wird mit dem Gewicht gestempelt', () => {
+    const s = base({ momentWeights: { area: {}, channel: {}, topic: { t: 0.2 }, until: { 't:t': { at: 5000, back: 1 } } }, syncTs: { [tsKey.weight('topic', 't')]: 1 } });
+    const n = stampChanges(s, { ...s, momentWeights: { area: {}, channel: {}, topic: { t: 0.2 }, until: { 't:t': { at: 9000, back: 1 } } } }, 77);
+    expect(n.syncTs).toEqual({ [tsKey.weight('topic', 't')]: 77 });
+    const gone = stampChanges(s, { ...s, momentWeights: { area: {}, channel: {}, topic: { t: 1 } } }, 88);
+    expect(gone.syncTs?.[tsKey.weight('topic', 't')]).toBe(88);
   });
   it('Gerätespezifisches (Player-Modus, Messwerte) wird nicht gestempelt', () => {
     const s = base();
@@ -373,7 +447,7 @@ describe('Dokument und Zustand', () => {
   it('toDoc nimmt nur Synchronisiertes, Gerätespezifisches bleibt draußen', () => {
     const s = base({ momentSeen: { a: 1 }, deskHelpSeen: true, playLatency: [{ ms: 1, buffered: true, at: 1 }] as never, tapMs: [{ ms: 1, at: 1 }] as never, settings: { ...emptyState().settings, playerMode: 'single' } });
     const d = toDoc(s);
-    expect(Object.keys(d.state).sort()).toEqual(['dayCount', 'feedTime', 'feedbackNotes', 'momentLiked', 'momentLog', 'momentSeen', 'momentWeights', 'mutedChannels', 'plans', 'recall', 'savedMoments', 'settings', 'weekReviewShown']);
+    expect(Object.keys(d.state).sort()).toEqual(['dayCount', 'digestTaps', 'feedTime', 'feedbackNotes', 'momentLiked', 'momentLog', 'momentSeen', 'momentWeights', 'mutedChannels', 'plans', 'recall', 'savedMoments', 'settings', 'weekReviewShown']);
     expect(Object.keys(d.state.settings).sort()).toEqual(['areaShares', 'captionMode', 'playbackSpeed']);
     expect(JSON.stringify(d)).not.toMatch(/playerMode|deskHelpSeen|playLatency|tapMs/);
   });

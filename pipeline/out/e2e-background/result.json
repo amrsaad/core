@@ -1,0 +1,87 @@
+{
+ "at": "2026-10-29T18:14:27.262Z",
+ "runs": [
+  {
+   "browser": "webkit",
+   "checks": {
+    "bgAudioPlays": true,
+    "bgAudioElement": true,
+    "bgMediaSession": true,
+    "bgSeenAtStartInForeground": true,
+    "bgAudioKeepsPlaying": true,
+    "bgAudioAdvances": true,
+    "bgNotSeenAtStart": true,
+    "bgEndedSeen": true,
+    "bgBackOnRunningMoment": true,
+    "bgLogStartedEndedNext": true,
+    "bgEndedOnce": true,
+    "bgAutoNextEqualsSwipe": true,
+    "bgStallLogged": true,
+    "bgStallStopsClean": true,
+    "bgStallResumesOnReturn": true,
+    "bgVideoPlays": true,
+    "bgVideoKeepsPlaying": true,
+    "bgVideoStops": true,
+    "bgVideoNoAutoNext": true,
+    "bgVideoStaysStopped": true,
+    "bgVideoNoMediaSession": true,
+    "bgYtPlays": true,
+    "bgYtPauses": true,
+    "bgYtStaysPaused": true,
+    "bgYtResumes": true
+   },
+   "bgAudioLog": [
+    "bg: left bgaudio0:0",
+    "bg: ended bgaudio0:0",
+    "bg: started bgaudio1:0",
+    "bg: next bgaudio1:0",
+    "bg: ended bgaudio1:0",
+    "bg: started bgaudio5:0",
+    "bg: next bgaudio5:0",
+    "bg: back bgaudio5:0"
+   ],
+   "ok": true
+  },
+  {
+   "browser": "chromium",
+   "checks": {
+    "bgAudioPlays": true,
+    "bgAudioElement": true,
+    "bgMediaSession": true,
+    "bgSeenAtStartInForeground": true,
+    "bgAudioKeepsPlaying": true,
+    "bgAudioAdvances": true,
+    "bgNotSeenAtStart": true,
+    "bgEndedSeen": true,
+    "bgBackOnRunningMoment": true,
+    "bgLogStartedEndedNext": true,
+    "bgEndedOnce": true,
+    "bgAutoNextEqualsSwipe": true,
+    "bgStallLogged": true,
+    "bgStallStopsClean": true,
+    "bgStallResumesOnReturn": true,
+    "bgVideoPlays": true,
+    "bgVideoKeepsPlaying": true,
+    "bgVideoStops": true,
+    "bgVideoNoAutoNext": true,
+    "bgVideoStaysStopped": true,
+    "bgVideoNoMediaSession": true,
+    "bgYtPlays": true,
+    "bgYtPauses": true,
+    "bgYtStaysPaused": true,
+    "bgYtResumes": true
+   },
+   "bgAudioLog": [
+    "bg: left bgaudio0:0",
+    "bg: ended bgaudio0:0",
+    "bg: started bgaudio1:0",
+    "bg: next bgaudio1:0",
+    "bg: ended bgaudio1:0",
+    "bg: started bgaudio5:0",
+    "bg: next bgaudio5:0",
+    "bg: back bgaudio5:0"
+   ],
+   "ok": true
+  }
+ ]
+}

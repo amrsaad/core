@@ -10,9 +10,10 @@ struct CoreApp: App {
     init() {
         Diag.installCrashHandler()
         Diag.log("start \(Diag.version) \(Diag.commit)")
-        // Sound like Reels: plays with the silent switch on and keeps playing with the screen locked
+        // Sound like Reels: plays with the silent switch on and keeps playing with the screen locked.
+        // Only the category is set here. The session turns on while a moment plays and off when nothing plays
+        // (AudioSessionGate, Entscheidung 13).
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
-        try? AVAudioSession.sharedInstance().setActive(true)
     }
 
     var body: some Scene {

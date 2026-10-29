@@ -53,6 +53,8 @@ struct SyncRemote: Equatable {
 protocol SyncTransport {
     /// nil, wenn die Datei noch nicht existiert
     func read(token: String) async throws -> SyncRemote?
+    /// Core Digest: state/digest-latest.enc, nur lesen. nil, wenn es die Datei nicht gibt (Standard).
+    func readDigest(token: String) async throws -> SyncRemote?
     /// Gibt die neue sha zurück
     func write(token: String, text: String, sha: String?, message: String) async throws -> String
 }
@@ -61,6 +63,18 @@ protocol SyncTransport {
 protocol SyncCipher {
     func encrypt(_ doc: J) throws -> String
     func decrypt(_ text: String) throws -> J
+    /// Core Digest: Inhalt von state/digest-latest.enc
+    func decryptLatest(_ text: String) throws -> DigestLatest
+}
+
+extension SyncTransport {
+    func readDigest(token: String) async throws -> SyncRemote? { nil }
+}
+
+extension SyncCipher {
+    func decryptLatest(_ text: String) throws -> DigestLatest {
+        throw SyncError(kind: .format, message: "The digest file has an unexpected format.", status: nil)
+    }
 }
 
 struct SyncStatus: Equatable {
@@ -87,6 +101,8 @@ final class SyncEngine: ObservableObject {
         var local: () -> J?
         /// Dokument von GitHub in den Zustand übernehmen, ohne neue Zeitstempel. Rechnet gegen den neuesten Zustand.
         var adopt: (J) -> Void
+        /// Core Digest: neue Wochenkarte übernehmen
+        var adoptDigest: (DigestLatest) -> Void = { _ in }
         var now: () -> Date = Date.init
         var loadLastSync: () -> Date? = { nil }
         var saveLastSync: (Date) -> Void = { _ in }
@@ -105,6 +121,8 @@ final class SyncEngine: ObservableObject {
     private var active: Task<Void, Never>?
     private var again = false
     private var stopped = false
+    /// Version der zuletzt gelesenen Wochenkarte, damit dieselbe Datei nicht noch einmal entschlüsselt wird
+    private var digestSha: String?
 
     init(_ deps: Deps) {
         self.deps = deps
@@ -154,6 +172,18 @@ final class SyncEngine: ObservableObject {
         }
     }
 
+    /// Wochenkarte laden. Sie ist optional: jeder Fehler (kein Netz, Datei fehlt, anderer Schlüssel) lässt den Sync unberührt, der nächste Lauf versucht es erneut.
+    private func loadDigest() async {
+        guard let token = deps.token(), let cipher = deps.cipher() else { return }
+        do {
+            guard let remote = try await deps.transport.readDigest(token: token), remote.sha != digestSha else { return }
+            deps.adoptDigest(try cipher.decryptLatest(remote.text))
+            digestSha = remote.sha
+        } catch {
+            // Wochenkarte bleibt, wie sie ist
+        }
+    }
+
     nonisolated static func iso(_ d: Date) -> String {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -174,6 +204,7 @@ final class SyncEngine: ObservableObject {
             self.set { $0.running = true }
             do {
                 try await self.attempt()
+                await self.loadDigest()
                 self.fails = 0
                 self.retryTimer?.cancel()
                 if self.rev == startRev { self.pending = false }

@@ -1,5 +1,7 @@
 // YouTube IFrame Player API, Einbettung über youtube-nocookie.com. Kein API-Key.
 import { isYtId } from '../moments/contract';
+import { formOf } from '../moments/form';
+import { localKey } from '../moments/localKey';
 
 export type YTLoad = string | { videoId: string; startSeconds?: number; endSeconds?: number };
 
@@ -16,6 +18,10 @@ export interface YTPlayer {
   getPlayerState(): number;
   setPlaybackRate(rate: number): void;
   destroy(): void;
+  /** Nur Stream-Player: Der angehaltene Moment hat schon Daten für das erste Bild (readyState 3 oder höher) */
+  isBuffered?(): boolean;
+  /** Nur Stream-Player: Der Moment kommt aus dem Offline-Vorrat (Blob-URL) */
+  isLocal?(): boolean;
 }
 
 interface YTNamespace {
@@ -60,9 +66,49 @@ export function loadYT(): Promise<YTNamespace> {
 /** Momente aus anderen Quellen (z.B. TED) mit eigenem HLS-Stream statt YouTube. Schlüssel ist videoId. */
 export const HLS = new Map<string, string>();
 export { isYtId } from '../moments/contract';
-export const registerHls = (items: { videoId: string; hls?: string }[]) => {
-  for (const m of items) if (m.hls) HLS.set(m.videoId, m.hls);
+/** HLS-Momente der Audio-Form laufen auf einem <audio>-Element: iOS Safari spielt es bei gesperrtem Bildschirm weiter (Entscheidung 13) */
+export const AUDIO_ONLY = new Set<string>();
+export const registerHls = (items: { videoId: string; hls?: string; audio?: boolean; form?: 'video' | 'audio' | 'text' }[]) => {
+  for (const m of items) {
+    if (!m.hls) continue;
+    HLS.set(m.videoId, m.hls);
+    if (formOf(m) === 'audio') AUDIO_ONLY.add(m.videoId);
+    else AUDIO_ONLY.delete(m.videoId);
+  }
 };
+
+/**
+ * Ausschnitte aus dem Offline-Vorrat (Blob-URL), Schlüssel localKey(videoId, start, end).
+ * offset ist die Tonzeit des ersten Bytes der Quelle: Zeit im Ausschnitt = Zeit in der Quelle minus offset.
+ */
+export interface LocalSrc { url: string; offset: number }
+export const LOCAL = new Map<string, LocalSrc>();
+
+/**
+ * Ersatz, wenn die YouTube-API nicht zu laden ist (offline, blockiert). Streams, Podcasts und Text laufen trotzdem,
+ * YouTube-Momente tun nichts und werden im schlechten Netz ohnehin nach hinten gestellt.
+ */
+export function offlineYT(): YTNamespace {
+  class Stub implements YTPlayer {
+    constructor(_el: HTMLElement, opts: Record<string, unknown>) {
+      const ev = (opts.events ?? {}) as { onReady?: () => void };
+      setTimeout(() => ev.onReady?.(), 0);
+    }
+    loadVideoById() {}
+    cueVideoById() {}
+    playVideo() {}
+    pauseVideo() {}
+    mute() {}
+    unMute() {}
+    isMuted() { return true; }
+    getCurrentTime() { return 0; }
+    getDuration() { return 0; }
+    getPlayerState() { return STATE.UNSTARTED; }
+    setPlaybackRate() {}
+    destroy() {}
+  }
+  return { Player: Stub, PlayerState: { ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 } };
+}
 
 function ytPlayer(YT: YTNamespace, el: HTMLElement, videoId: string | undefined, events: { onReady?: () => void; onState?: (s: number) => void; onError?: (code: number) => void }): YTPlayer {
   return new YT.Player(el, {
@@ -97,6 +143,16 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   video.setAttribute('webkit-playsinline', '');
   Object.assign(video.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', objectFit: 'contain', background: '#000', display: 'none', pointerEvents: 'none' });
   host.appendChild(video);
+  // Audio-Form: eigenes <audio>-Element ohne Bild. Das Bild des Moments zeigt die Seite selbst (vaudio).
+  const audio = document.createElement('audio');
+  audio.setAttribute('muted', '');
+  audio.defaultMuted = true;
+  audio.muted = true;
+  audio.preload = 'auto';
+  audio.style.display = 'none';
+  host.appendChild(audio);
+  /** Das Element des laufenden HLS-Moments. Das andere ist angehalten. */
+  let media: HTMLMediaElement = video;
   const hideNativeCaptions = () => {
     for (let i = 0; i < video.textTracks.length; i++) video.textTracks[i].mode = 'disabled';
   };
@@ -106,24 +162,40 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   let mode: 'yt' | 'hls' = HLS.has(videoId) ? 'hls' : 'yt';
   let hlsState: number = STATE.UNSTARTED;
   let endAt = Infinity;
+  /** Tonzeit des ersten Bytes, wenn der Moment aus dem Vorrat kommt (sonst 0) */
+  let offset = 0;
+  let lastArgs: { id: string; start: number; end: number | undefined; play: boolean } | null = null;
   let readyFired = false;
   const setHlsState = (st: number) => {
     hlsState = st;
     if (mode === 'hls') events.onState?.(st);
   };
-  video.addEventListener('playing', () => setHlsState(STATE.PLAYING));
-  video.addEventListener('pause', () => setHlsState(video.ended ? STATE.ENDED : STATE.PAUSED));
-  video.addEventListener('waiting', () => setHlsState(STATE.BUFFERING));
-  video.addEventListener('ended', () => setHlsState(STATE.ENDED));
-  video.addEventListener('timeupdate', () => {
-    if (mode === 'hls' && video.currentTime >= endAt && !video.paused) {
-      video.pause();
-      setHlsState(STATE.ENDED);
-    }
-  });
-  video.addEventListener('error', () => {
-    if (mode === 'hls') events.onError?.(-1);
-  });
+  for (const el of [video, audio]) {
+    // Ereignisse des gerade nicht benutzten Elements zählen nicht
+    const mine = () => el === media;
+    el.addEventListener('playing', () => mine() && setHlsState(STATE.PLAYING));
+    el.addEventListener('pause', () => mine() && setHlsState(el.ended ? STATE.ENDED : STATE.PAUSED));
+    el.addEventListener('waiting', () => mine() && setHlsState(STATE.BUFFERING));
+    el.addEventListener('ended', () => mine() && setHlsState(STATE.ENDED));
+    el.addEventListener('timeupdate', () => {
+      if (mine() && mode === 'hls' && el.currentTime >= endAt && !el.paused) {
+        el.pause();
+        setHlsState(STATE.ENDED);
+      }
+    });
+    el.addEventListener('error', () => {
+      if (!mine() || mode !== 'hls') return;
+      // Ausschnitt aus dem Vorrat nicht abspielbar: einmal vom Netz laden statt zu überspringen
+      if (el.dataset.local === '1' && lastArgs) {
+        const a = lastArgs;
+        LOCAL.delete(localKey(a.id, a.start, a.end));
+        delete el.dataset.src;
+        prepareHls(a.id, a.start, a.end, a.play);
+        return;
+      }
+      events.onError?.(-1);
+    });
+  }
 
   // Nur echte YouTube-IDs an den IFrame-Player. Text- und Podcast-IDs ohne Stream werfen sonst "Invalid video id".
   const yt = ytPlayer(YT, el, mode === 'yt' && isYtId(videoId) ? videoId : undefined, {
@@ -143,13 +215,13 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   const iframe = () => host.querySelector('iframe') as HTMLElement | null;
   const show = (m: 'yt' | 'hls') => {
     mode = m;
-    video.style.display = m === 'hls' ? 'block' : 'none';
+    video.style.display = m === 'hls' && media === video ? 'block' : 'none';
     const f = iframe();
     if (f) f.style.visibility = m === 'yt' ? 'visible' : 'hidden';
   };
 
   const diag = (line: string) => events.onDiag?.(line);
-  const vstate = () => `rs=${video.readyState} ns=${video.networkState} muted=${video.muted} t=${video.currentTime.toFixed(1)}${video.error ? ` err=${video.error.code}` : ''}`;
+  const vstate = () => `rs=${media.readyState} ns=${media.networkState} muted=${media.muted} t=${media.currentTime.toFixed(1)}${media.error ? ` err=${media.error.code}` : ''}`;
   let attemptNo = 0;
   // Ein Startversuch mit Ergebnis im Protokoll. Verweigert der Browser den Ton (NotAllowedError), läuft das Bild stumm weiter, statt zu stehen.
   const tryPlay = (why: string) => {
@@ -157,7 +229,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     diag(`hls play#${n} ${why} ${vstate()}`);
     let p: Promise<void> | undefined;
     try {
-      p = video.play();
+      p = media.play();
     } catch (e) {
       diag(`hls play#${n} threw ${e instanceof Error ? e.name : String(e)}`);
       setHlsState(STATE.PAUSED);
@@ -168,8 +240,8 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       (e: unknown) => {
         const name = e instanceof Error ? e.name : String(e);
         diag(`hls play#${n} refused ${name} ${vstate()}`);
-        if (name === 'NotAllowedError' && !video.muted) {
-          video.muted = true;
+        if (name === 'NotAllowedError' && !media.muted) {
+          media.muted = true;
           tryPlay('muted-retry');
         } else if (name !== 'AbortError') setHlsState(STATE.PAUSED);
       },
@@ -178,19 +250,34 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
 
   const prepareHls = (id: string, start: number, end: number | undefined, play: boolean) => {
     try { yt.pauseVideo(); } catch { /* noch nicht bereit */ }
+    const next = AUDIO_ONLY.has(id) ? audio : video;
+    if (next !== media) {
+      // Elementwechsel (Reiterwechsel): das alte Element anhalten, Ton und Tempo übernehmen
+      const old = media;
+      media = next;
+      old.pause();
+      media.muted = old.muted;
+      media.playbackRate = old.playbackRate;
+    }
     show('hls');
-    endAt = end ?? Infinity;
-    const src = HLS.get(id)!;
+    lastArgs = { id, start, end, play };
+    const loc = LOCAL.get(localKey(id, start, end));
+    offset = loc?.offset ?? 0;
+    media.dataset.local = loc ? '1' : '0';
+    endAt = (end ?? Infinity) - offset;
+    const src = loc?.url ?? HLS.get(id)!;
+    const el = media;
     let sought = false;
     const seek = () => {
       if (!sought) {
         try {
-          video.currentTime = start;
-          sought = video.readyState >= 1;
+          el.currentTime = Math.max(0, start - offset);
+          sought = el.readyState >= 1;
         } catch { /* iOS setzt erst nach loadedmetadata */ }
       }
     };
     const onMeta = () => {
+      if (el !== media) return; // inzwischen auf das andere Element gewechselt
       diag(`hls loadedmetadata ${vstate()}`);
       seek();
       if (play) tryPlay('loadedmetadata');
@@ -198,20 +285,19 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     };
     // Zweiter Anstoß, wenn Daten da sind und das erste play() nichts bewirkt hat (iOS verwirft play() vor den Metadaten manchmal still)
     const onCanPlay = () => {
+      if (el !== media) return;
       diag(`hls canplay ${vstate()}`);
       seek();
-      if (play && video.paused && hlsState !== STATE.PAUSED) tryPlay('canplay');
+      if (play && el.paused && hlsState !== STATE.PAUSED) tryPlay('canplay');
     };
-    if (video.dataset.src !== src) {
-      video.dataset.src = src;
-      video.addEventListener('loadedmetadata', onMeta, { once: true });
-      video.addEventListener('canplay', onCanPlay, { once: true });
-      video.src = src;
-      video.load();
+    if (el.dataset.src !== src) {
+      el.dataset.src = src;
+      el.addEventListener('loadedmetadata', onMeta, { once: true });
+      el.addEventListener('canplay', onCanPlay, { once: true });
+      el.src = src;
+      el.load();
       diag(`hls load ${play ? 'play' : 'cue'} start=${start} ${vstate()}`);
-    } else {
-      onMeta();
-    }
+    } else onMeta();
   };
 
   const route = (arg: YTLoad, play: boolean) => {
@@ -222,10 +308,12 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     } else if (!isYtId(id)) {
       // Kein Stream und keine YouTube-ID (Text-Moment oder Podcast ohne hls): nichts laden, nichts werfen
       video.pause();
+      audio.pause();
       try { yt.pauseVideo(); } catch { /* noch nicht bereit */ }
       show('yt');
     } else {
       video.pause();
+      audio.pause();
       show('yt');
       if (play) yt.loadVideoById(arg);
       else yt.cueVideoById(arg);
@@ -236,21 +324,26 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     loadVideoById: (arg) => route(arg, true),
     cueVideoById: (arg) => route(arg, false),
     playVideo: () => (mode === 'hls' ? tryPlay('playVideo') : yt.playVideo()),
-    pauseVideo: () => (mode === 'hls' ? video.pause() : yt.pauseVideo()),
+    pauseVideo: () => (mode === 'hls' ? media.pause() : yt.pauseVideo()),
     mute: () => {
       video.muted = true;
+      audio.muted = true;
       yt.mute();
     },
     unMute: () => {
       video.muted = false;
+      audio.muted = false;
       yt.unMute();
     },
-    isMuted: () => (mode === 'hls' ? video.muted : yt.isMuted()),
-    getCurrentTime: () => (mode === 'hls' ? video.currentTime : yt.getCurrentTime()),
-    getDuration: () => (mode === 'hls' ? video.duration || 0 : yt.getDuration()),
+    isMuted: () => (mode === 'hls' ? media.muted : yt.isMuted()),
+    getCurrentTime: () => (mode === 'hls' ? media.currentTime + offset : yt.getCurrentTime()),
+    getDuration: () => (mode === 'hls' ? (media.duration || 0) + offset : yt.getDuration()),
+    isBuffered: () => mode === 'hls' && hlsState === STATE.CUED && media.readyState >= 3,
+    isLocal: () => mode === 'hls' && media.dataset.local === '1',
     getPlayerState: () => (mode === 'hls' ? hlsState : yt.getPlayerState()),
     setPlaybackRate: (rate: number) => {
       video.playbackRate = rate;
+      audio.playbackRate = rate;
       try {
         yt.setPlaybackRate(rate);
       } catch {
@@ -258,10 +351,12 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       }
     },
     destroy: () => {
-      video.pause();
-      video.removeAttribute('src');
-      video.load();
-      video.remove();
+      for (const el of [video, audio]) {
+        el.pause();
+        el.removeAttribute('src');
+        el.load();
+        el.remove();
+      }
       yt.destroy();
     },
   };

@@ -79,6 +79,8 @@ struct Moment: Codable, Identifiable, Hashable {
     var recall: RecallQuestion? = nil
     /// Wann der Moment in den Pool kam (ISO). Der Geräte-Sync nutzt es, wenn zwei Geräte verschiedene Fassungen desselben Moments haben.
     var createdAt: String? = nil
+    /// Core Digest: Moment aus einem gemerkten Save mit Regel. Die Abrufkarte kommt nach 1, 4 und 14 Tagen statt 2, 7 und 21.
+    var recallBoost: Bool? = nil
 
     var cueTexts: [String] { (cues ?? []).map(\.text) }
     var readingText: String { FormText.text(excerpt: excerpt, cues: cueTexts) }
@@ -100,6 +102,8 @@ struct Moment: Codable, Identifiable, Hashable {
         let yt = videoId.count == 11 && videoId.allSatisfy { $0.isLetter || $0.isNumber || $0 == "_" || $0 == "-" } && !videoId.hasPrefix("pod-") && !videoId.hasPrefix("txt-")
         return yt ? URL(string: "https://www.youtube.com/watch?v=\(videoId)&t=\(Int(start))") : nil
     }
+
+    var mom: Learn.Mom { Learn.Mom(area: area.rawValue, channel: channel, topic: topic) }
 
     /// "Sigma Nutrition (Prof. Grant Tinsley)" becomes "Sigma Nutrition · Prof. Grant Tinsley"
     var speakerLine: String {

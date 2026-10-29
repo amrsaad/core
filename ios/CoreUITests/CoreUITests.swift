@@ -358,6 +358,8 @@ final class CoreUITests: XCTestCase {
     /// Die Zeile "N notes, send?" kommt beim ersten Öffnen am nächsten Tag (CORE_NOTES_DAY), ein Tipp loggt ein Issue.
     func test11Note() {
         app.launchEnvironment["CORE_NOTES_DAY"] = "2026-10-27"
+        // UI queries are slow: keep the confirmation line on screen long enough to read it
+        app.launchEnvironment["CORE_CONFIRM_SECONDS"] = "4"
         launch()
         XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15), "feed did not appear")
         wait(1)
@@ -367,9 +369,9 @@ final class CoreUITests: XCTestCase {
         visible("like")?.press(forDuration: 0.8)
         wait(0.6)
         XCTAssertFalse(app.buttons["noteDone"].exists, "long press on the heart must not open the sheet any more")
-        // swipe left opens one level: six chips, text field, Done, no Send
+        // swipe left opens one level: seven chips, text field, Done, no Send
         openNoteSheet(tag: "94")
-        for chip in ["Already known", "Not for me", "Weak", "Wrong", "Bad cut", "Mute speaker"] {
+        for chip in ["Known", "Not for me", "Wrong", "Boring", "Bad cut", "Great", "Mute speaker"] {
             let b = app.buttons["noteChip-\(chip)"]
             XCTAssertTrue(b.exists, "chip \(chip) missing")
             XCTAssertGreaterThanOrEqual(b.frame.height, 48, "chip \(chip) too small")
@@ -381,11 +383,17 @@ final class CoreUITests: XCTestCase {
         XCTAssertFalse(diagLog().contains("note saved"), "empty Done must not save")
         // a chip saves at once, the sheet closes, the feed moves on
         openNoteSheet(tag: "95")
-        app.buttons["noteChip-Weak"].tap()
-        wait(1.2)
+        app.buttons["noteChip-Boring"].tap()
+        // the sheet shows a confirmation line for about a second ("Less <speaker>"), the chips are locked meanwhile
+        let confirm = app.descendants(matching: .any)["noteConfirm"]
+        XCTAssertTrue(confirm.waitForExistence(timeout: 2))
+        XCTAssertTrue(until(1) { confirm.label.hasPrefix("Less ") }, "no confirmation line after Boring: \(confirm.label)")
+        XCTAssertFalse(app.buttons["noteChip-Great"].isEnabled, "chips must be locked while the line shows")
+        shot("95-note-confirm")
+        wait(4.5)
         XCTAssertTrue(diagLog().contains("note saved"), "chip did not save")
         XCTAssertFalse(app.buttons["noteDone"].exists, "sheet must close after a chip")
-        XCTAssertFalse(diagLog().contains("toast Wrong"), "Weak has no effect")
+        XCTAssertFalse(diagLog().contains("toast"), "no toasts any more, the line replaces them")
         // text with Done
         openNoteSheet(tag: "96")
         app.descendants(matching: .any)["noteText"].tap()
@@ -394,11 +402,14 @@ final class CoreUITests: XCTestCase {
         app.buttons["noteDone"].tap()
         wait(1.2)
         XCTAssertFalse(app.buttons["noteDone"].exists, "sheet must close after Done")
-        // Wrong acts like before: toast
+        // Wrong: confirmation line instead of a toast
         openNoteSheet(tag: "97")
         app.buttons["noteChip-Wrong"].tap()
-        wait(0.6)
-        XCTAssertTrue(diagLog().contains("toast Wrong"), "toast for Wrong missing")
+        XCTAssertTrue(app.descendants(matching: .any)["noteConfirm"].waitForExistence(timeout: 2))
+        XCTAssertTrue(until(1) { app.descendants(matching: .any)["noteConfirm"].label.hasPrefix("Less ") }, "no confirmation line after Wrong")
+        shot("97-note-confirm-wrong")
+        wait(4.5)
+        XCTAssertFalse(diagLog().contains("toast"), "no toast for Wrong")
         XCTAssertFalse(app.buttons["notesPrompt"].exists, "prompt only on the first open of a day")
         // next day: first open shows the line, one tap logs a single issue and the notes count as sent
         wait(0.5)
@@ -415,7 +426,7 @@ final class CoreUITests: XCTestCase {
         let log = diagLog()
         XCTAssertTrue(log.contains("notes url https://github.com/amrsaad/core-content/issues/new?title=Core%20feedback%202026-10-28"), "no issue address logged")
         XCTAssertTrue(log.contains("labels=feedback"), "label missing")
-        XCTAssertTrue(log.contains("Weak"), "chip missing in body")
+        XCTAssertTrue(log.contains("Boring"), "chip missing in body")
         XCTAssertTrue(log.contains("Cut%20is%20late"), "text missing in body")
         XCTAssertFalse(app.buttons["notesPrompt"].exists, "line must go after sending")
         // same day again: nothing to send, no line
@@ -646,6 +657,52 @@ final class CoreUITests: XCTestCase {
         f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "yyyy-MM-dd"
         return f.string(from: monday)
+    }
+
+    /// What Core learned: five rows up and down per list with weight and arrow, running terms with "until", Reset learning asks first
+    func test14LearnedCard() throws {
+        let inTen = (Date().timeIntervalSince1970 + 10 * 86_400) * 1000
+        let past = (Date().timeIntervalSince1970 - 5) * 1000
+        let s: [String: Any] = [
+            "seen": [:], "saved": [:], "muted": [:], "feedTime": [:], "log": [], "weekReviewShown": [:], "captions": true,
+            "areaShares": ["brain": 0.34, "body": 0.33, "beat": 0.33],
+            "weights": [
+                "area": [:],
+                "channel": ["Kanal A": 0.2, "Kanal B": 1.5, "Kanal C": 0.6, "Kanal D": 1.2],
+                "topic": ["augen": 0.2, "kraft": 1.4, "abgelaufen": 0.2, "schlaf": 0.7],
+                "until": ["t:augen": ["at": inTen, "back": 1.0], "t:abgelaufen": ["at": past, "back": 0.9], "c:Kanal A": ["at": inTen, "back": 0.6]],
+            ] as [String: Any],
+        ]
+        try JSONSerialization.data(withJSONObject: s).write(to: stateDir.appendingPathComponent("state.json"))
+        launch()
+        XCTAssertTrue(app.staticTexts["Beat"].waitForExistence(timeout: 15), "feed did not appear")
+        app.tabBars.buttons["Settings"].tap()
+        XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 5))
+        let card = app.descendants(matching: .any)["learnedCard"]
+        for _ in 0..<8 where !card.exists || !card.isHittable { app.swipeUp(); wait(0.3) }
+        XCTAssertTrue(card.exists, "card missing")
+        XCTAssertTrue(app.staticTexts["What Core learned"].exists)
+        shot("33-learned-card")
+        let rows = app.descendants(matching: .any).matching(identifier: "learnedRow").allElementsBoundByIndex.map(\.label)
+        XCTAssertTrue(rows.contains { $0.contains("Kanal B") && $0.contains("1.50 ↑") }, "\(rows)")
+        XCTAssertTrue(rows.contains { $0.contains("Kanal A") && $0.contains("0.20 ↓") && $0.contains("until") }, "\(rows)")
+        XCTAssertTrue(rows.contains { $0.contains("Augen") && $0.contains("0.20 ↓") && $0.contains("until") }, "\(rows)")
+        // the expired term is already settled: back at 0.90 without "until"
+        XCTAssertTrue(rows.contains { $0.contains("Abgelaufen") && $0.contains("0.90 ↓") && !$0.contains("until") }, "\(rows)")
+        // Reset learning asks first; Cancel keeps everything
+        app.buttons["resetLearning"].tap()
+        XCTAssertTrue(app.buttons["resetConfirm"].waitForExistence(timeout: 3), "no confirmation")
+        shot("34-reset-ask")
+        app.buttons["resetCancel"].tap()
+        wait(0.5)
+        XCTAssertFalse(app.descendants(matching: .any)["learnedEmpty"].exists)
+        XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "learnedRow").count, rows.count)
+        app.buttons["resetLearning"].tap()
+        XCTAssertTrue(app.buttons["resetConfirm"].waitForExistence(timeout: 3))
+        app.buttons["resetConfirm"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["learnedEmpty"].waitForExistence(timeout: 3), "card must be empty after reset")
+        XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "learnedRow").count, 0)
+        shot("35-learned-reset")
     }
 
     private func seedState(plans: [String: [String: String]]) throws {

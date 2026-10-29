@@ -1,9 +1,11 @@
 // Nachgebaute GitHub Contents API für Unit-Tests: eine Datei, SHA-Prüfung, Fehler einschaltbar
-import { API_HOST, REPO, STATE_PATH } from '../src/lib/sync/github';
+import { API_HOST, DIGEST_PATH, REPO, STATE_PATH } from '../src/lib/sync/github';
 
 export interface FakeApi {
   fetch: typeof fetch;
   file: { text: string; sha: string } | null;
+  /** Core Digest: state/digest-latest.enc, nur lesbar */
+  digest: { text: string; sha: string } | null;
   calls: { method: string; url: string; auth: string | null }[];
   puts: number;
   /** Nächste Anfragen mit diesem Status beantworten */
@@ -22,6 +24,7 @@ export const newSha = () => `sha${++n}`;
 export function fakeApi(token = 'ghp_TESTTOKENTESTTOKEN1234'): FakeApi {
   const api: FakeApi = {
     file: null,
+    digest: null,
     calls: [],
     puts: 0,
     failNext: [],
@@ -38,6 +41,10 @@ export function fakeApi(token = 'ghp_TESTTOKENTESTTOKEN1234'): FakeApi {
       if (f) return new Response('{}', { status: f });
       if (h.Authorization !== `Bearer ${token}`) return new Response('{}', { status: 401 });
       const path = `${API_HOST}/repos/${REPO}/contents/${STATE_PATH}`;
+      if (url === `${API_HOST}/repos/${REPO}/contents/${DIGEST_PATH}` && method === 'GET') {
+        if (!api.digest) return new Response('{}', { status: 404 });
+        return Response.json({ sha: api.digest.sha, size: api.digest.text.length, content: b64(api.digest.text), encoding: 'base64' });
+      }
       if (url === path && method === 'GET') {
         if (!api.file) return new Response('{}', { status: 404 });
         return Response.json(api.big ? { sha: api.file.sha, size: 2_000_000, content: '', encoding: 'none' } : { sha: api.file.sha, size: api.file.text.length, content: b64(api.file.text), encoding: 'base64' });

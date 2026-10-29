@@ -75,6 +75,12 @@ enum Diag {
 
     static var commit: String { Bundle.main.infoDictionary?["CoreCommit"] as? String ?? "dev" }
 
+    /// Background playback (Entscheidung 13): how often "bg: started", "bg: ended" and "bg: next" are in the log below.
+    static func backgroundLine(_ log: String) -> String {
+        func n(_ key: String) -> Int { log.components(separatedBy: "bg: \(key) ").count - 1 }
+        return "background: started \(n("started")), ended \(n("ended")), next \(n("next"))"
+    }
+
     static var installedAt: Date? {
         (try? Bundle.main.bundleURL.resourceValues(forKeys: [.creationDateKey]))?.creationDate
     }
@@ -103,7 +109,9 @@ enum Diag {
         \(Latency.line("swipe not preloaded", Latency.stats(state.playLatency ?? [], buffered: false)))
 
         """
-        out += (try? String(contentsOf: file, encoding: .utf8)) ?? "(no log)"
+        let log = (try? String(contentsOf: file, encoding: .utf8)) ?? ""
+        out += backgroundLine(log) + "\n\n"
+        out += log.isEmpty ? "(no log)" : log
         return out
     }
 }

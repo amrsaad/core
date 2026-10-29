@@ -160,21 +160,6 @@ enum FormFilter {
     static func emptyLine(_ f: FeedForm) -> String { f == .text ? "Text sources coming" : "No \(f.rawValue) moments yet" }
 }
 
-/// Endseite (Max 29.10.2026): Gesehen bleibt gesehen, nie Wiederholung. Ist der Reiter durch, steht eine ruhige Seite mit zwei Knöpfen zu den
-/// anderen Reitern und der Zahl ihrer ungesehenen Momente. Gleiche Regeln und Prüfdaten wie src/moments/form.ts (endLine, unseenCount).
-enum EndPage {
-    /// Kennung der Seite hinter dem letzten Moment
-    static let id = "end-page"
-    static func line(_ f: FeedForm) -> String { "You've seen every \(f.rawValue) moment." }
-    static let sub = "New ones arrive daily."
-    static func others(_ f: FeedForm) -> [FeedForm] { FeedForm.allCases.filter { $0 != f } }
-    /// Nicht gesehen und nicht von einem stummgeschalteten Sprecher
-    static func unseen(_ pool: [Moment], _ f: FeedForm, seen: [String: Date], muted: [String: String]) -> Int {
-        pool.filter { $0.feedForm == f && seen[$0.id] == nil && muted[$0.channel] == nil }.count
-    }
-    static func label(_ f: FeedForm, _ n: Int) -> String { "\(f.label), \(n) new" }
-}
-
 enum FormText {
     /// Der geprüfte Ausschnitt (Zeilenumbrüche bleiben), ohne Ausschnitt die Untertitel als Fließtext
     static func text(excerpt: String?, cues: [String]) -> String {
@@ -197,6 +182,10 @@ enum Recall {
     static let missGapDays = 2.0
     static let hitGapDays = 7.0
     static let secondHitGapDays = 21.0
+    /// Core Digest (recallBoost): Fehler nach 1 Tag, Treffer nach 4, zweiter Treffer in Folge nach 14
+    static let boostMissGapDays = 1.0
+    static let boostHitGapDays = 4.0
+    static let boostSecondHitGapDays = 14.0
     static let day: TimeInterval = 86_400
 
     struct Result: Codable, Equatable {
@@ -246,14 +235,15 @@ enum Recall {
     }
 
     /// Fehler nach 2 Tagen, Treffer nach 7, zweiter Treffer in Folge nach 21, dritter beendet
-    static func answer(_ recall: State, id: String, got: Bool, now: Date) -> State {
+    static func answer(_ recall: State, id: String, got: Bool, now: Date, boost: Bool = false) -> State {
         let prev = recall[id] ?? Item(id: id, due: nil, results: [])
         let results = prev.results + [Result(at: now, got: got)]
         let hits = trailingHits(results)
         let due: Date?
-        if !got { due = now.addingTimeInterval(missGapDays * day) }
-        else if hits == 1 { due = now.addingTimeInterval(hitGapDays * day) }
-        else if hits == 2 { due = now.addingTimeInterval(secondHitGapDays * day) }
+        let gaps = boost ? [boostMissGapDays, boostHitGapDays, boostSecondHitGapDays] : [missGapDays, hitGapDays, secondHitGapDays]
+        if !got { due = now.addingTimeInterval(gaps[0] * day) }
+        else if hits == 1 { due = now.addingTimeInterval(gaps[1] * day) }
+        else if hits == 2 { due = now.addingTimeInterval(gaps[2] * day) }
         else { due = nil }
         var next = recall
         next[id] = Item(id: id, due: due, results: results)
@@ -413,12 +403,12 @@ enum Hook {
 
 // MARK: Rückmeldung in einer Ebene (Max 27.10.2026, ersetzt Aufgabe 5)
 
-/// Wisch nach links öffnet ein Blatt mit sechs Chips und einem Textfeld mit Done. Ein Tipp auf einen Chip speichert sofort lokal.
+/// Wisch nach links öffnet ein Blatt mit sieben Chips und einem Textfeld mit Done. Ein Tipp auf einen Chip speichert sofort lokal.
 /// Notizen sammeln sich lokal. Beim ersten Öffnen am Tag, wenn ungesendete Notizen vorliegen, steht "N notes, send?" im Feed.
 /// Ein Tipp darauf öffnet ein einziges vorausgefülltes Issue in core-content, danach gelten sie als gesendet.
 /// Gleiche Regeln und Prüfdaten wie src/moments/note.ts. Kein Token, kein Netzwerkaufruf der App.
 enum Note {
-    static let chips = ["Already known", "Not for me", "Weak", "Wrong", "Bad cut", "Mute speaker"]
+    static let chips = ["Known", "Not for me", "Wrong", "Boring", "Bad cut", "Great", "Mute speaker"]
     static let issueBase = "https://github.com/amrsaad/core-content/issues/new"
     static let label = "feedback"
     /// Freitext je Notiz, damit viele Notizen in eine Adresse passen
@@ -428,15 +418,20 @@ enum Note {
     /// Gesendete Notizen bleiben so lange lokal (Tage)
     static let sentKeepDays = 30
 
-    enum Effect: Equatable { case known, wrong, mute, notForMe }
+    typealias Effect = Learn.Effect
 
-    /// Already known, Wrong und Mute speaker wirken wie das bisherige Menü. Not for me senkt das Gewicht des Themas (Faktor wie das frühere Weak im Menü). Weak (früher Boring) und Bad cut speichern nur
+    /// So lange bleibt das Blatt nach einem Chip mit der Bestätigungszeile offen, dann schließt es und der Feed geht weiter
+    static var confirmSheetSeconds: Double { Double(Env.values["CORE_CONFIRM_SECONDS"] ?? "") ?? 0.9 }
+
+    /// Was ein Chip lernt (Learn.swift): Known = Thema 0,7, Not for me = Thema 0,2 für 30 Tage und Kanal 0,5, Wrong = Kanal 0,5,
+    /// Boring = Kanal 0,7, Mute speaker = Sprecher stumm. Bad cut und Great speichern nur die Notiz.
     static func effect(_ chip: String) -> Effect? {
         switch chip {
-        case "Already known": return .known
+        case "Known": return .known
         case "Wrong": return .wrong
         case "Mute speaker": return .mute
         case "Not for me": return .notForMe
+        case "Boring": return .weak
         default: return nil
         }
     }

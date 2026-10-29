@@ -3,6 +3,8 @@
 export const API_HOST = 'https://api.github.com';
 export const REPO = 'amrsaad/core-content';
 export const STATE_PATH = 'state/core-state.enc';
+/** Core Digest: Wochenkarte, wöchentlich von der Aufgabe geschrieben, von der App nur gelesen */
+export const DIGEST_PATH = 'state/digest-latest.enc';
 
 export type SyncErrorKind = 'auth' | 'forbidden' | 'notfound' | 'conflict' | 'rate' | 'offline' | 'server' | 'format' | 'key' | 'setup';
 
@@ -47,10 +49,10 @@ const net = (): SyncError => new SyncError('offline', 'No connection to GitHub. 
 const rateLimited = (r: Response) => r.headers.get('x-ratelimit-remaining') === '0';
 
 /** null, wenn die Datei noch nicht existiert */
-export async function readRemote(token: string, f: Fetch = fetch): Promise<{ text: string; sha: string } | null> {
+export async function readRemote(token: string, f: Fetch = fetch, path: string = STATE_PATH): Promise<{ text: string; sha: string } | null> {
   let r: Response;
   try {
-    r = await f(`${API_HOST}/repos/${REPO}/contents/${STATE_PATH}`, { headers: headers(token), cache: 'no-store' });
+    r = await f(`${API_HOST}/repos/${REPO}/contents/${path}`, { headers: headers(token), cache: 'no-store' });
   } catch {
     throw net();
   }

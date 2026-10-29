@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { SyncUi } from '../lib/sync/useSync';
+import { syncKey } from '../lib/vault';
 
 /** "just now", "3 min ago", "2 h ago", "4 d ago". Englisch wie die ganze App. */
 export function ago(ms: number, now: number): string {
@@ -30,7 +31,8 @@ export function SyncCard({ sync }: { sync: SyncUi }) {
     if (ok) {
       setText('');
       setMsg('');
-    } else setMsg('That does not look like a GitHub token, or this device needs your unlock link once more.');
+    } else if (!(await syncKey())) setMsg('This device still has the old key format. Open your unlock link here once more, then paste the token again.');
+    else setMsg('That does not look like a GitHub token. It starts with github_pat_ or ghp_.');
   };
 
   const btn = 'rounded-xl border border-[var(--line)] px-4 py-3 text-[16px] text-left';

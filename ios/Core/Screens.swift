@@ -69,6 +69,10 @@ struct SavedView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Saved").font(.system(size: 28, weight: .bold)).padding(.top, 16)
                 Text(items.count == 1 ? "1 moment" : "\(items.count) moments").font(.system(size: 13)).foregroundStyle(Palette.tertiary)
+                if let latest = store.state.digestLatest {
+                    DigestCardView(latest: latest, taps: store.state.digestTaps, tap: { store.tapDigest($0, $1) })
+                        .padding(.vertical, 8)
+                }
                 if items.isEmpty {
                     Text("Double tap a moment to save it here.").font(.system(size: 17)).foregroundStyle(Palette.secondary).padding(.top, 16)
                 }
@@ -80,6 +84,71 @@ struct SavedView: View {
         }
         .foregroundStyle(.white)
         .background(Color.black.ignoresSafeArea())
+    }
+}
+
+/// "This week" (Core Digest): Zahlen je Art, Actions mit Done und Drop, Widersprüche mit Option A und B.
+/// Nur diese beiden Arten verlangen einen Tap. Ein Tap lässt sich ändern. Der nächste Lauf sammelt den Stand ein.
+struct DigestCardView: View {
+    let latest: DigestLatest
+    let taps: [String: DigestTap]?
+    let tap: (String, String) -> Void
+
+    private func choice(_ label: String, selected: Bool, id: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
+                .font(.system(size: 16, weight: selected ? .semibold : .regular))
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .foregroundStyle(selected ? Color.black : Color.white)
+                .background(selected ? Color.white : Color.clear, in: RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Palette.line))
+        }
+        .accessibilityIdentifier(id)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("This week").font(.system(size: 20, weight: .bold))
+                Spacer()
+                Text("\(latest.week) · \(latest.saves) \(latest.saves == 1 ? "save" : "saves")")
+                    .font(.system(size: 13)).foregroundStyle(Palette.tertiary)
+                    .accessibilityIdentifier("digestWeek")
+            }
+            let counts = DigestCard.countList(latest)
+            if !counts.isEmpty {
+                Text(counts.map { "\($0.kind) \($0.n)" }.joined(separator: "   "))
+                    .font(.system(size: 13)).foregroundStyle(Palette.tertiary)
+                    .accessibilityIdentifier("digestCounts")
+            }
+            ForEach(Array(latest.actions.enumerated()), id: \.element.id) { i, a in
+                let c = DigestCard.actionTap(taps, a.id)
+                VStack(alignment: .leading, spacing: 8) {
+                    Divider().overlay(Palette.line)
+                    Text(a.title).font(.system(size: 16, weight: .semibold))
+                    Text("\(a.metric) · due \(DigestCard.dueDate(a.due))").font(.system(size: 14)).foregroundStyle(Palette.secondary)
+                    HStack(spacing: 8) {
+                        choice("Done", selected: c == "done", id: "digestDone\(i)") { tap(DigestCard.actionKey(a.id), "done") }
+                        choice("Drop", selected: c == "drop", id: "digestDrop\(i)") { tap(DigestCard.actionKey(a.id), "drop") }
+                    }
+                }
+            }
+            ForEach(Array(latest.contradictions.enumerated()), id: \.element.id) { i, x in
+                let c = DigestCard.contradictionTap(taps, x.id)
+                VStack(alignment: .leading, spacing: 8) {
+                    Divider().overlay(Palette.line)
+                    Text(x.question).font(.system(size: 16, weight: .semibold))
+                    choice("Option A: \(x.a)", selected: c == "a", id: "digestA\(i)") { tap(DigestCard.contradictionKey(x.id), "a") }
+                    choice("Option B: \(x.b)", selected: c == "b", id: "digestB\(i)") { tap(DigestCard.contradictionKey(x.id), "b") }
+                }
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Palette.surface, in: RoundedRectangle(cornerRadius: 12))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("digestCard")
     }
 }
 
@@ -140,16 +209,7 @@ struct SettingsView: View {
                     TimeBars(feedTime: store.state.feedTime)
                 }
 
-                card {
-                    Text("Learned").font(.system(size: 17, weight: .semibold))
-                    LearnedView(weights: store.state.weights)
-                    Button("Reset what Core learned") {
-                        store.state.weights = Weights()
-                        note = "Learned weights reset."
-                    }
-                    .font(.system(size: 13))
-                    .foregroundStyle(Area.brain.color)
-                }
+                LearnedCard()
 
                 card {
                     Text("Mix").font(.system(size: 17, weight: .semibold))
@@ -198,6 +258,10 @@ struct SettingsView: View {
                 }
 
                 card { SyncCard() }
+
+                Text(DigestCard.lastLine(store.state.digestLatest, store.state.digestTaps))
+                    .font(.system(size: 13)).foregroundStyle(Palette.tertiary)
+                    .accessibilityIdentifier("digestLine")
 
                 card { UnlockDeviceCard(key: Vault.loadKey()) }
 
@@ -287,23 +351,91 @@ struct TimeBars: View {
     }
 }
 
-struct LearnedView: View {
-    let weights: Weights
+/// Karte "What Core learned": je fünf Kanäle und Themen oben und unten mit Gewicht und Pfeil (Learn.learned).
+/// Reset learning fragt vorher nach.
+struct LearnedCard: View {
+    @EnvironmentObject var store: Store
+    @State private var ask = false
+    @State private var done = false
+
+    private static let dayFormat: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US")
+        f.dateFormat = "MMM d"
+        return f
+    }()
+
+    private func list(_ id: String, _ title: String, _ rows: [Learn.Row], topic: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title).font(.system(size: 13)).foregroundStyle(Palette.tertiary)
+            if rows.isEmpty { Text("none yet").font(.system(size: 13)).foregroundStyle(Palette.tertiary) }
+            ForEach(rows, id: \.key) { r in
+                HStack(alignment: .firstTextBaseline) {
+                    Text(topic ? Learn.cap1(r.key) : Learn.speakerLine(r.key)).lineLimit(1)
+                    Spacer()
+                    Text(Learn.weightText(r.weight)).monospacedDigit()
+                    if let u = r.until {
+                        Text("until " + Self.dayFormat.string(from: Date(timeIntervalSince1970: u / 1000))).font(.system(size: 12)).foregroundStyle(Palette.tertiary)
+                    }
+                }
+                .font(.system(size: 16))
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("learnedRow")
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(id)
+    }
 
     var body: some View {
-        let all = Array(weights.topic) + Array(weights.channel)
-        let up = all.filter { $0.value > 1.001 }.sorted { $0.value > $1.value }.prefix(5)
-        let down = all.filter { $0.value < 0.999 }.sorted { $0.value < $1.value }.prefix(5)
-        let fmt: (Double) -> String = { v in "\(v > 1 ? "+" : "")\(Int(((v - 1) * 100).rounded())) %" }
-        return VStack(alignment: .leading, spacing: 4) {
-            if all.isEmpty {
-                Text("Nothing learned yet. Core learns from watching, swiping, saving and More like this.")
-                    .foregroundStyle(Palette.tertiary)
+        let l = Learn.learned(store.state.weights, now: Learn.nowMs)
+        let any = !(l.channelUp.isEmpty && l.channelDown.isEmpty && l.topicUp.isEmpty && l.topicDown.isEmpty)
+        VStack(alignment: .leading, spacing: 12) {
+            Text("What Core learned").font(.system(size: 17, weight: .semibold))
+            if !any {
+                Text(done ? "Learning reset." : "Nothing learned yet. Core learns from what you watch, skip and save.")
+                    .font(.system(size: 13)).foregroundStyle(Palette.tertiary)
+                    .accessibilityIdentifier("learnedEmpty")
+            } else {
+                list("learnedChannelUp", "Speakers, more", l.channelUp, topic: false)
+                list("learnedChannelDown", "Speakers, less", l.channelDown, topic: false)
+                list("learnedTopicUp", "Topics, more", l.topicUp, topic: true)
+                list("learnedTopicDown", "Topics, less", l.topicDown, topic: true)
             }
-            if !up.isEmpty { Text("More: " + up.map { "\($0.key) \(fmt($0.value))" }.joined(separator: ", ")).foregroundStyle(Palette.secondary) }
-            if !down.isEmpty { Text("Less: " + down.map { "\($0.key) \(fmt($0.value))" }.joined(separator: ", ")).foregroundStyle(Palette.tertiary) }
+            if !ask {
+                Button("Reset learning") { ask = true; done = false }
+                    .font(.system(size: 13))
+                    .foregroundStyle(Area.brain.color)
+                    .accessibilityIdentifier("resetLearning")
+            } else {
+                // Rückfrage in der Karte (wie im Web), kein Dialog
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Reset everything Core learned? Speakers and topics go back to normal.").font(.system(size: 15))
+                    HStack(spacing: 10) {
+                        Button { ask = false } label: {
+                            Text("Cancel").frame(maxWidth: .infinity, minHeight: 44).background(Palette.button, in: RoundedRectangle(cornerRadius: 12))
+                        }
+                        .accessibilityIdentifier("resetCancel")
+                        Button {
+                            store.resetLearning()
+                            ask = false
+                            done = true
+                        } label: {
+                            Text("Reset").fontWeight(.semibold).frame(maxWidth: .infinity, minHeight: 44).background(Palette.button, in: RoundedRectangle(cornerRadius: 12))
+                        }
+                        .accessibilityIdentifier("resetConfirm")
+                    }
+                    .buttonStyle(.plain)
+                }
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("resetAsk")
+            }
         }
-        .font(.system(size: 13))
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Palette.surface, in: RoundedRectangle(cornerRadius: 12))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("learnedCard")
     }
 }
 

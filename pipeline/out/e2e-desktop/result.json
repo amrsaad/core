@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-29T17:43:09.512Z",
+  "at": "2026-10-29T18:08:47.859Z",
   "checks": {
     "below900Mobile": true,
     "at900Desktop": true,
@@ -46,8 +46,9 @@
     "keyF": true,
     "noteShowsNumbers": true,
     "noteBlocksNext": true,
+    "noteConfirmLine": true,
+    "notForMeKeyTopic02": true,
     "noteChipByNumber": true,
-    "notForMeKeyLowersTopic": true,
     "noteEnterFocusesText": true,
     "typingKeysStayText": true,
     "noteEnterSaves": true,
@@ -134,9 +135,9 @@
       "scrollW": 1440
     },
     "text": {
-      "w": 738.09375,
-      "ch65": 738.109375,
-      "col": 858.09375
+      "w": 701.53125,
+      "ch65": 701.546875,
+      "col": 821.53125
     },
     "ring": [
       {

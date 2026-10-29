@@ -100,6 +100,12 @@ struct FeedView: View {
     @State private var flash: String?
     /// Rückmeldungsblatt: öffnet mit Wisch nach links
     @State private var noteFor: Moment?
+    /// Nach einem Chip: Bestätigungszeile am offenen Blatt, danach schließt es und der Feed geht weiter
+    @State private var confirm: String?
+    @State private var confirmFor: Moment?
+    @State private var confirmSeq = 0
+    /// Moment, den ein Chip gerade verlässt: sein Weiterwischen gibt kein eigenes Signal mehr (der Chip ersetzt es)
+    @State private var silentFor: String?
     /// Zeile "N notes, send?" (nur beim ersten Öffnen am Tag, wenn ungesendete Notizen vorliegen)
     @State private var promptShown = false
     @State private var promptChecked = false
@@ -111,6 +117,12 @@ struct FeedView: View {
     @State private var recent: [Recall.Recent] = []
     /// Punkt 3: Textende erreicht (dann erst "gesehen")
     @State private var textSeen: Set<String> = []
+    /// Entscheidung 13: pausiert wegen Hintergrund (YouTube, Text), nur dann startet die Rückkehr wieder
+    @State private var scenePaused = false
+    /// Jedes Ende zählt nur einmal, auch nach der Rückkehr in den Vordergrund
+    @State private var ledger = EndLedger()
+    /// Abrufkarte, die im Hintergrund fällig wurde, kommt beim Zurückkehren
+    @State private var pendingRecall: (moment: Moment, review: Bool)?
     private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -125,8 +137,7 @@ struct FeedView: View {
                     message(FormFilter.emptyLine(feed.form))
                         .overlay(alignment: .top) { FeedTopBar().padding(.top, 6) }
                 } else if feed.queue.isEmpty {
-                    endPage
-                        .overlay(alignment: .top) { FeedTopBar().padding(.top, 6) }
+                    message("You have seen every moment. New ones arrive with the next daily run.")
                 } else {
                     pager
                 }
@@ -135,8 +146,9 @@ struct FeedView: View {
         .background(Color.black)
         .onReceive(ticker) { _ in countTime() }
         .onDisappear { feed.current(currentID)?.pause() }
-        .onChange(of: scenePhase) { _, phase in
-            if phase != .active { feed.current(currentID)?.pause() } else if forYou == nil && recallCard == nil && store.state.currentForm != .text { feed.current(currentID)?.play() }
+        .onChange(of: scenePhase) { _, phase in sceneChanged(phase) }
+        .onChange(of: store.state.saved.count) { _, _ in
+            if let m = index(of: currentID).map({ feed.queue[$0] }) { NowPlaying.shared.setSaved(store.isSaved(m)) }
         }
         .onChange(of: store.state.form) { _, _ in
             // Filterwechsel: neue Warteschlange nur aus passenden Momenten, Wiedergabe beginnt beim ersten
@@ -170,10 +182,6 @@ struct FeedView: View {
                         .frame(width: full.width, height: full.height)
                         .id(m.id)
                     }
-                    // Hinter dem letzten Moment: Endseite, nie eine Wiederholung
-                    endPage
-                        .frame(width: full.width, height: full.height)
-                        .id(EndPage.id)
                 }
                 .scrollTargetLayout()
             }
@@ -221,13 +229,15 @@ struct FeedView: View {
                 .accessibilityIdentifier("notesPrompt")
             }
         }
-        .sheet(item: $noteFor) { m in
+        .sheet(item: $noteFor, onDismiss: finishConfirm) { m in
             NoteSheetView(
                 moment: m,
+                confirm: confirm,
                 onChip: { chip, text in saveNote(m, chip: chip, text: text) },
                 onDone: { text in saveNote(m, chip: nil, text: text) })
         }
         .onAppear {
+            NowPlaying.shared.handlers = remoteHandlers()
             if currentID == nil { currentID = feed.queue.first?.id }
             if forYou == nil { activate(currentID) }
             checkPrompt()
@@ -236,36 +246,6 @@ struct FeedView: View {
             leave(old, to: new)
             activate(new, measure: true)
         }
-    }
-
-    private var endPage: some View {
-        let form = feed.form
-        return VStack(spacing: 8) {
-            Text(EndPage.line(form)).font(.system(size: 20, weight: .semibold)).foregroundStyle(.white).multilineTextAlignment(.center)
-                .accessibilityIdentifier("endLine")
-            Text(EndPage.sub).font(.system(size: 16)).foregroundStyle(Palette.secondary)
-            VStack(spacing: 12) {
-                ForEach(EndPage.others(form), id: \.self) { f in
-                    let n = EndPage.unseen(feed.pool, f, seen: store.state.seen, muted: store.state.muted)
-                    Button { store.state.form = f } label: {
-                        Text(EndPage.label(f, n))
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundStyle(n > 0 ? Color.white : Color(hex: 0x6B6B6B))
-                            .frame(maxWidth: .infinity, minHeight: 56)
-                            .background(Color(hex: 0x1F1F1F), in: RoundedRectangle(cornerRadius: 16))
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(n == 0)
-                    .accessibilityIdentifier("endButton-\(f.rawValue)")
-                }
-            }
-            .frame(maxWidth: 320)
-            .padding(.top, 28)
-        }
-        .padding(.horizontal, 32)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.black)
-        .accessibilityIdentifier("endPage")
     }
 
     private func message(_ text: String) -> some View {
@@ -281,11 +261,43 @@ struct FeedView: View {
 
     private func index(of id: String?) -> Int? { id.flatMap { i in feed.queue.firstIndex { $0.id == i } } }
 
+    /// Szenenwechsel (Entscheidung 13). Eigener Stream: der Ton läuft weiter, in Audio und Video, und der Video-Layer
+    /// wird in PlayerLayerView gelöst. YouTube und Text: Player stoppt. Beim Zurückkehren steht der Feed auf dem
+    /// laufenden Moment, Position und Untertitel kommen aus dem Player selbst.
+    private func sceneChanged(_ phase: ScenePhase) {
+        guard let i = index(of: currentID) else { return }
+        let m = feed.queue[i]
+        let p = feed.playback(for: m)
+        if phase != .active {
+            if BackgroundPolicy.onLeave(form: store.state.currentForm, isYouTube: m.isYouTube) == .pause {
+                if p.isPlayingWanted { scenePaused = true }
+                p.pause()
+            }
+            if phase == .background {
+                Diag.log("bg: left \(m.id) \(store.state.currentForm.rawValue) playing=\(p.playing) \(Int(p.progress * 100))%")
+            }
+            return
+        }
+        Diag.log("bg: back \(m.id) playing=\(p.playing) ended=\(p.ended) \(Int(p.progress * 100))%")
+        // Gesehen zählt für einen im Hintergrund gestarteten Moment spätestens jetzt, mehrfaches Aufrufen zählt nicht doppelt
+        if store.state.currentForm != .text { store.markSeen(m) }
+        if let r = pendingRecall {
+            pendingRecall = nil
+            p.pause()
+            recallCard = r
+        } else if scenePaused {
+            scenePaused = false
+            if forYou == nil && recallCard == nil && store.state.currentForm != .text && !p.ended { p.play() }
+        }
+        NowPlaying.shared.setSaved(store.isSaved(m))
+    }
+
     private func activate(_ id: String?, measure: Bool = false) {
         guard let id, let i = index(of: id) else { return }
         forYou = nil
         let m = feed.queue[i]
         let p = feed.playback(for: m)
+        let background = AppPhase.inBackground
         let preloaded = p.isPreloaded
         p.prepare()
         p.onEnded = { finished(m) }
@@ -299,7 +311,14 @@ struct FeedView: View {
             if measure { p.startMeasure(buffered: preloaded) }
             p.play()
         }
-        if !text { store.markSeen(m) }
+        // Vordergrund wie bisher beim Start. Im Hintergrund erst bei ended (finished) oder bei der Rückkehr (sceneChanged).
+        if !text && BackgroundPolicy.countsSeenAtStart(inBackground: background) { store.markSeen(m) }
+        if background { Diag.log("bg: started \(m.id)") }
+        if !text && !m.isYouTube {
+            NowPlaying.shared.attach(moment: m, playback: p, form: store.state.currentForm, saved: store.isSaved(m))
+        } else {
+            NowPlaying.shared.clear()
+        }
         feed.ensure(upTo: i + 5, store: store)
         for j in [i + 1, i + 2] where j < feed.queue.count { feed.playback(for: feed.queue[j]).prepare() }
         feed.prune(around: i)
@@ -312,11 +331,19 @@ struct FeedView: View {
         let p = feed.playback(for: m)
         p.pause()
         p.setRate(Float(store.state.speed))
-        let ni = new == EndPage.id ? oi + 1 : (index(of: new) ?? oi)
+        let ni = index(of: new) ?? oi
         let text = store.state.currentForm == .text
-        // Im Textmodus gibt es keine Wiedergabezeit, darum kein Zeitsignal
+        // Im Textmodus gibt es keine Wiedergabezeit, darum kein Zeitsignal. Nach einem Chip ersetzt dessen Wirkung die Wertung.
+        let silent = silentFor == m.id
+        if silent { silentFor = nil }
         if ni > oi && !p.ended && !text {
-            if let f = Mix.leaveSignal(watched: p.watched, duration: m.duration) { store.signal(m, f) }
+            if !silent {
+                switch Mix.leave(watched: p.watched, duration: m.duration) {
+                case .skip: store.skip(m)
+                case .factor(let f): store.signal(m, f)
+                case nil: store.state.skipRun = nil
+                }
+            }
             store.log(m, watched: p.watched)
         }
         // Punkt 5: geschauter Anteil des verlassenen Moments, Karte nach jedem 4.
@@ -328,7 +355,8 @@ struct FeedView: View {
             if Recall.cardDue(sessionSeen),
                let pick = Recall.pick(store.state.recall ?? [:], recent: recent, now: Date(), available: { findMoment($0)?.recall != nil }),
                let rm = findMoment(pick.id) {
-                recallCard = (rm, pick.review)
+                // Im Hintergrund kann niemand antworten: die Karte wartet bis zur Rückkehr (sceneChanged)
+                if AppPhase.inBackground { pendingRecall = (rm, pick.review) } else { recallCard = (rm, pick.review) }
             }
         }
         if ni < oi, let new, let target = feed.queue.first(where: { $0.id == new }) {
@@ -353,22 +381,87 @@ struct FeedView: View {
 
     private func finished(_ m: Moment) {
         guard currentID == m.id else { return }
-        store.log(m, watched: feed.playback(for: m).watched, ended: true)
-        store.signal(m, Mix.Signal.ended)
-        if m.forYou != nil {
-            withAnimation(.easeOut(duration: 0.2)) { forYou = m }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 6) { if forYou?.id == m.id { advance() } }
-        } else {
-            advance()
+        // Ein Ende zählt einmal: Lernsignal ended, Log, gesehen. Nach der Rückkehr zählt dasselbe Ende nicht noch einmal.
+        if ledger.first(m.id) {
+            store.log(m, watched: feed.playback(for: m).watched, ended: true)
+            store.signal(m, Mix.Signal.ended)
+            store.markSeen(m)
+        }
+        let background = AppPhase.inBackground
+        if background { Diag.log("bg: ended \(m.id)") }
+        switch BackgroundPolicy.atEnd(form: store.state.currentForm, inBackground: background) {
+        case .stop:
+            // Video-Reiter im Hintergrund: der Moment lief zu Ende, kein Auto-Weiter
+            Diag.log("bg: stop after \(m.id)")
+        case .advance:
+            if background {
+                advanceInBackground(from: m)
+            } else if m.forYou != nil {
+                withAnimation(.easeOut(duration: 0.2)) { forYou = m }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 6) { if forYou?.id == m.id { advance() } }
+            } else {
+                advance()
+            }
+        }
+    }
+
+    /// Audio-Reiter im Hintergrund: derselbe Schritt wie beim Wisch, der Nachfolger aus der bestehenden Mischung.
+    /// Die For-you-Karte entfällt, weil sie niemand liest. Läuft der Wechsel nicht durch, steht der Ton still (sauberer Stopp).
+    private func advanceInBackground(from m: Moment) {
+        guard let next = QueueStep.next(in: feed.queue, after: m.id) else {
+            Diag.log("bg: queue end after \(m.id)")
+            return
+        }
+        Diag.log("bg: next \(next.id)")
+        advance()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            if currentID == m.id { Diag.log("bg: stalled at \(m.id)") }
         }
     }
 
     private func advance() {
         forYou = nil
+        guard let next = QueueStep.next(in: feed.queue, after: currentID) else { return }
+        withAnimation(.easeInOut(duration: 0.25)) { currentID = next.id }
+    }
+
+    // MARK: Lock screen (Entscheidung 13)
+
+    /// Dieselben Schritte wie die Gesten: Weiter ist ein Wisch nach oben (Skip-Signal über leave), Zurück ein Wisch zurück.
+    private func remoteHandlers() -> NowPlaying.Handlers {
+        NowPlaying.Handlers(
+            play: { remotePlay() },
+            pause: { feed.current(currentID)?.pause() },
+            toggle: { feed.current(currentID)?.togglePlay() },
+            next: { advance() },
+            previous: { remotePrevious() },
+            save: { remoteSave() })
+    }
+
+    private func remotePlay() {
+        guard let p = feed.current(currentID) else { return }
+        if p.ended { p.restart() }
+        p.play()
+    }
+
+    /// Wie im Podcast-Player: nach den ersten 3 Sekunden beginnt der Moment von vorn, sonst geht es einen zurück.
+    private func remotePrevious() {
+        guard let i = index(of: currentID), let p = feed.current(currentID) else { return }
+        let m = feed.queue[i]
+        guard let before = QueueStep.previous(in: feed.queue, before: m.id), p.progress * m.duration <= 3 else {
+            p.restart()
+            p.play()
+            return
+        }
+        withAnimation(.easeInOut(duration: 0.25)) { currentID = before.id }
+    }
+
+    private func remoteSave() {
         guard let i = index(of: currentID) else { return }
-        // Nach dem letzten Moment kommt die Endseite (Abrufkarte und Signale laufen wie bei jedem Wechsel)
-        let next = i + 1 < feed.queue.count ? feed.queue[i + 1].id : EndPage.id
-        withAnimation(.easeInOut(duration: 0.25)) { currentID = next }
+        let m = feed.queue[i]
+        Diag.log("remote save \(m.id)")
+        if store.isSaved(m) { store.unsave(m) } else { store.save(m) }
+        NowPlaying.shared.setSaved(store.isSaved(m))
     }
 
     /// Wisch nach links: Blatt öffnen, Wiedergabe pausiert nicht (der Ton läuft weiter)
@@ -379,30 +472,47 @@ struct FeedView: View {
         noteFor = m
     }
 
-    /// Tipp auf einen Chip speichert sofort lokal und schließt das Blatt, Done speichert nur den Text.
-    /// Already known, Wrong und Mute speaker wirken wie bisher, danach geht der Feed zum nächsten Moment.
+    /// Tipp auf einen Chip speichert sofort lokal und wirkt nach Learn.swift. Das Blatt zeigt kurz die Bestätigungszeile
+    /// ("Less Barbell Medicine"), schließt dann und der Feed geht zum nächsten Moment. Done speichert nur den Text und schließt sofort.
     private func saveNote(_ m: Moment, chip: String?, text: String) {
-        noteFor = nil
+        guard confirmFor == nil else { return }
         let tab = store.state.currentForm.label
-        guard store.addNote(m, chip: chip, text: text, tab: tab) else { return }
+        guard store.addNote(m, chip: chip, text: text, tab: tab) else { noteFor = nil; return }
         UIImpactFeedbackGenerator(style: chip == nil ? .light : .medium).impactOccurred()
         Diag.log("note saved \(m.id) \(chip ?? "-")")
-        switch chip.flatMap(Note.effect) {
-        case .known, .wrong:
-            let wrong = chip.flatMap(Note.effect) == .wrong
-            store.signal(m, Mix.Signal.negative)
-            store.log(m, watched: feed.playback(for: m).watched, feedback: wrong ? "wrong" : "known")
-            if Actions.toast(wrong ? .wrong : .known) { show("Wrong") }
-        case .mute:
-            store.mute(m)
-            if let i = index(of: m.id) { feed.removeUpcoming(channel: m.channel, after: i) }
-            if Actions.toast(.mute) { show("\(m.speakerLine) muted") }
-        case .notForMe:
-            store.signalTopic(m, Mix.Signal.negative)
-            store.log(m, watched: feed.playback(for: m).watched, feedback: "weak")
-        case nil:
-            break
+        guard let chip else {
+            noteFor = nil
+            if currentID == m.id { advance() }
+            return
         }
+        let fx = Note.effect(chip)
+        if let fx {
+            store.apply(fx, m)
+            switch fx {
+            case .known: store.log(m, watched: feed.playback(for: m).watched, feedback: "known")
+            case .wrong: store.log(m, watched: feed.playback(for: m).watched, feedback: "wrong")
+            case .notForMe, .weak: store.log(m, watched: feed.playback(for: m).watched, feedback: "weak")
+            case .mute:
+                store.mute(m)
+                if let i = index(of: m.id) { feed.removeUpcoming(channel: m.channel, after: i) }
+            }
+        } else {
+            store.state.skipRun = nil
+        }
+        confirm = Learn.confirmLine(fx, m.mom)
+        confirmFor = m
+        silentFor = m.id
+        confirmSeq += 1
+        let seq = confirmSeq
+        DispatchQueue.main.asyncAfter(deadline: .now() + Note.confirmSheetSeconds) { if seq == confirmSeq { finishConfirm() } }
+    }
+
+    /// Bestätigung beenden: Blatt zu, weiter zum nächsten Moment. Auch beim Wegwischen des Blatts (dann sofort).
+    private func finishConfirm() {
+        guard let m = confirmFor else { return }
+        confirmFor = nil
+        confirm = nil
+        noteFor = nil
         if currentID == m.id { advance() }
     }
 
