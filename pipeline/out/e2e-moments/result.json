@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T16:08:33.210Z",
+ "at": "2026-10-29T16:30:50.005Z",
  "runs": [
   {
    "browser": "webkit",
@@ -11,7 +11,12 @@
     "firstArea": "beat",
     "firstPlaying": true,
     "hookShortNormal": true,
+    "soundIconShownWhileMuted": true,
+    "soundIconBottomRightOfBand": true,
+    "noSoundPill": true,
     "soundOn": true,
+    "soundIconGoneAfterTap": true,
+    "soundIconNeverBack": true,
     "forYouExactlyWhenSet": true,
     "sawBothKinds": true,
     "stoppedAtEnd": true,
@@ -81,7 +86,7 @@
     "tapRecorded": true,
     "swipeLeftOpensNote": true,
     "swipeLeftStaysOnMoment": true,
-    "noteSevenChips": true,
+    "noteSixChips": true,
     "noteTextAndDone": true,
     "noteNoSendButton": true,
     "noteChipsLarge": true,
@@ -90,7 +95,7 @@
     "noteSheetClosed": true,
     "noteGoesToNext": true,
     "noteSavedLocally": true,
-    "noteBoringNoEffect": true,
+    "noteWeakNoEffect": true,
     "noteNothingOpened": true,
     "noteDoneClosesAndNext": true,
     "noteTextSaved": true,
@@ -178,6 +183,17 @@
     "recallEnglishLtr": true,
     "pageErrors": 0
    },
+   "soundIcon": {
+    "w": 32,
+    "h": 32,
+    "text": "",
+    "right": 12,
+    "fromBandBottom": 11.9947509765625,
+    "inBand": true,
+    "centered": false,
+    "pillText": false,
+    "slashed": true
+   },
    "card0": {
     "n": 3,
     "before": false,
@@ -223,10 +239,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604711,
+     "due": 1792922404146,
      "results": [
       {
-       "at": 1792756804711,
+       "at": 1792749604146,
        "got": false
       }
      ]
@@ -303,21 +319,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 30,
-    "recorded": 32
+    "measured": 36,
+    "recorded": 42
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 852,
+    "checksDone": 819,
     "violations": 0,
-    "endedSeen": 138
+    "endedSeen": 134
    },
    "latency": {
     "n": 36,
     "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | f90a7f6 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | f90a7f6 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | f90a7f6 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | f90a7f6 |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | f90a7f6 |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | f90a7f6 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Weak | - | Video | fdccafb |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | fdccafb |\n| test0000019:100 | Testmoment 19 brain | Already known | - | Video | fdccafb |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | fdccafb |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | fdccafb |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | fdccafb |",
    "badWalk": [
     {
      "idx": 2,
@@ -666,7 +682,12 @@
     "firstArea": "beat",
     "firstPlaying": true,
     "hookShortNormal": true,
+    "soundIconShownWhileMuted": true,
+    "soundIconBottomRightOfBand": true,
+    "noSoundPill": true,
     "soundOn": true,
+    "soundIconGoneAfterTap": true,
+    "soundIconNeverBack": true,
     "forYouExactlyWhenSet": true,
     "sawBothKinds": true,
     "stoppedAtEnd": true,
@@ -736,7 +757,7 @@
     "tapRecorded": true,
     "swipeLeftOpensNote": true,
     "swipeLeftStaysOnMoment": true,
-    "noteSevenChips": true,
+    "noteSixChips": true,
     "noteTextAndDone": true,
     "noteNoSendButton": true,
     "noteChipsLarge": true,
@@ -745,7 +766,7 @@
     "noteSheetClosed": true,
     "noteGoesToNext": true,
     "noteSavedLocally": true,
-    "noteBoringNoEffect": true,
+    "noteWeakNoEffect": true,
     "noteNothingOpened": true,
     "noteDoneClosesAndNext": true,
     "noteTextSaved": true,
@@ -833,6 +854,17 @@
     "recallEnglishLtr": true,
     "pageErrors": 0
    },
+   "soundIcon": {
+    "w": 32,
+    "h": 32,
+    "text": "",
+    "right": 12,
+    "fromBandBottom": 12,
+    "inBand": true,
+    "centered": false,
+    "pillText": false,
+    "slashed": true
+   },
    "card0": {
     "n": 3,
     "before": false,
@@ -878,10 +910,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603482,
+     "due": 1792922403571,
      "results": [
       {
-       "at": 1792756803482,
+       "at": 1792749603571,
        "got": false
       }
      ]
@@ -946,9 +978,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06253051757812,
+    "bh": 221.0625,
     "fw": 393,
-    "fh": 221.06253051757812,
+    "fh": 221.0625,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -958,21 +990,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 31.69999999999709,
-    "recorded": 32
+    "measured": 29.699999999953434,
+    "recorded": 29
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 864,
+    "checksDone": 837,
     "violations": 0,
-    "endedSeen": 139
+    "endedSeen": 134
    },
    "latency": {
     "n": 36,
     "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | f90a7f6 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | f90a7f6 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | f90a7f6 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | f90a7f6 |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | f90a7f6 |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | f90a7f6 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Weak | - | Video | fdccafb |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | fdccafb |\n| test0000019:100 | Testmoment 19 brain | Already known | - | Video | fdccafb |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | fdccafb |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | fdccafb |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | fdccafb |",
    "badWalk": [
     {
      "idx": 2,

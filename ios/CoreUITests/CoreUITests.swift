@@ -367,9 +367,9 @@ final class CoreUITests: XCTestCase {
         visible("like")?.press(forDuration: 0.8)
         wait(0.6)
         XCTAssertFalse(app.buttons["noteDone"].exists, "long press on the heart must not open the sheet any more")
-        // swipe left opens one level: seven chips, text field, Done, no Send
+        // swipe left opens one level: six chips, text field, Done, no Send
         openNoteSheet(tag: "94")
-        for chip in ["Known", "Not for me", "Wrong", "Boring", "Bad cut", "Great", "Mute speaker"] {
+        for chip in ["Already known", "Not for me", "Weak", "Wrong", "Bad cut", "Mute speaker"] {
             let b = app.buttons["noteChip-\(chip)"]
             XCTAssertTrue(b.exists, "chip \(chip) missing")
             XCTAssertGreaterThanOrEqual(b.frame.height, 48, "chip \(chip) too small")
@@ -381,11 +381,11 @@ final class CoreUITests: XCTestCase {
         XCTAssertFalse(diagLog().contains("note saved"), "empty Done must not save")
         // a chip saves at once, the sheet closes, the feed moves on
         openNoteSheet(tag: "95")
-        app.buttons["noteChip-Boring"].tap()
+        app.buttons["noteChip-Weak"].tap()
         wait(1.2)
         XCTAssertTrue(diagLog().contains("note saved"), "chip did not save")
         XCTAssertFalse(app.buttons["noteDone"].exists, "sheet must close after a chip")
-        XCTAssertFalse(diagLog().contains("toast Wrong"), "Boring has no effect")
+        XCTAssertFalse(diagLog().contains("toast Wrong"), "Weak has no effect")
         // text with Done
         openNoteSheet(tag: "96")
         app.descendants(matching: .any)["noteText"].tap()
@@ -415,7 +415,7 @@ final class CoreUITests: XCTestCase {
         let log = diagLog()
         XCTAssertTrue(log.contains("notes url https://github.com/amrsaad/core-content/issues/new?title=Core%20feedback%202026-10-28"), "no issue address logged")
         XCTAssertTrue(log.contains("labels=feedback"), "label missing")
-        XCTAssertTrue(log.contains("Boring"), "chip missing in body")
+        XCTAssertTrue(log.contains("Weak"), "chip missing in body")
         XCTAssertTrue(log.contains("Cut%20is%20late"), "text missing in body")
         XCTAssertFalse(app.buttons["notesPrompt"].exists, "line must go after sending")
         // same day again: nothing to send, no line

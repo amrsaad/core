@@ -343,7 +343,7 @@ struct FeedView: View {
     }
 
     /// Tipp auf einen Chip speichert sofort lokal und schließt das Blatt, Done speichert nur den Text.
-    /// Known, Wrong und Mute speaker wirken wie bisher, danach geht der Feed zum nächsten Moment.
+    /// Already known, Wrong und Mute speaker wirken wie bisher, danach geht der Feed zum nächsten Moment.
     private func saveNote(_ m: Moment, chip: String?, text: String) {
         noteFor = nil
         let tab = store.state.currentForm.label

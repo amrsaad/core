@@ -398,12 +398,12 @@ enum Hook {
 
 // MARK: Rückmeldung in einer Ebene (Max 27.10.2026, ersetzt Aufgabe 5)
 
-/// Wisch nach links öffnet ein Blatt mit sieben Chips und einem Textfeld mit Done. Ein Tipp auf einen Chip speichert sofort lokal.
+/// Wisch nach links öffnet ein Blatt mit sechs Chips und einem Textfeld mit Done. Ein Tipp auf einen Chip speichert sofort lokal.
 /// Notizen sammeln sich lokal. Beim ersten Öffnen am Tag, wenn ungesendete Notizen vorliegen, steht "N notes, send?" im Feed.
 /// Ein Tipp darauf öffnet ein einziges vorausgefülltes Issue in core-content, danach gelten sie als gesendet.
 /// Gleiche Regeln und Prüfdaten wie src/moments/note.ts. Kein Token, kein Netzwerkaufruf der App.
 enum Note {
-    static let chips = ["Known", "Not for me", "Wrong", "Boring", "Bad cut", "Great", "Mute speaker"]
+    static let chips = ["Already known", "Not for me", "Weak", "Wrong", "Bad cut", "Mute speaker"]
     static let issueBase = "https://github.com/amrsaad/core-content/issues/new"
     static let label = "feedback"
     /// Freitext je Notiz, damit viele Notizen in eine Adresse passen
@@ -415,10 +415,10 @@ enum Note {
 
     enum Effect: Equatable { case known, wrong, mute, notForMe }
 
-    /// Known, Wrong und Mute speaker wirken wie das bisherige Menü. Not for me senkt das Gewicht des Themas (wie Weak) und zählt in der Notiz wie Boring. Die anderen Chips speichern nur
+    /// Already known, Wrong und Mute speaker wirken wie das bisherige Menü. Not for me senkt das Gewicht des Themas (Faktor wie das frühere Weak im Menü). Weak (früher Boring) und Bad cut speichern nur
     static func effect(_ chip: String) -> Effect? {
         switch chip {
-        case "Known": return .known
+        case "Already known": return .known
         case "Wrong": return .wrong
         case "Mute speaker": return .mute
         case "Not for me": return .notForMe

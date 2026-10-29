@@ -1,12 +1,12 @@
 /**
  * Rückmeldung zu einem Moment (Auftrag Max 27.10.2026, ersetzt Aufgabe 5). Eine Ebene: Wisch nach links öffnet ein Blatt mit
- * sieben Chips und einem Textfeld mit Done. Ein Tipp auf einen Chip speichert sofort lokal. Es gibt keinen Send-Knopf.
+ * sechs Chips und einem Textfeld mit Done. Ein Tipp auf einen Chip speichert sofort lokal. Es gibt keinen Send-Knopf.
  * Notizen sammeln sich lokal. Beim ersten Öffnen am Tag, wenn ungesendete Notizen vorliegen, steht eine Zeile "N notes, send?"
  * im Feed. Ein Tipp darauf öffnet ein einziges vorausgefülltes Issue in core-content, danach gelten die Notizen als gesendet.
  * Kein Token, kein Netzwerkaufruf der App. Reine Regeln, gleiche in ios/Core/Round1.swift (Note).
  * Gleiche Prüfdaten in tests/moments-note.test.ts und ios/CoreTests/Round1Tests.swift.
  */
-export const CHIPS = ['Known', 'Not for me', 'Wrong', 'Boring', 'Bad cut', 'Great', 'Mute speaker'] as const;
+export const CHIPS = ['Already known', 'Not for me', 'Weak', 'Wrong', 'Bad cut', 'Mute speaker'] as const;
 export type Chip = (typeof CHIPS)[number];
 export const ISSUE_BASE = 'https://github.com/amrsaad/core-content/issues/new';
 export const ISSUE_LABEL = 'feedback';
@@ -33,8 +33,8 @@ export interface NoteEntry {
   sent?: number;
 }
 
-/** Was ein Chip sofort bewirkt. Known, Wrong und Mute speaker wirken wie das bisherige Menü. Not for me senkt das Gewicht des Themas (wie Weak) und zählt in der Notiz wie Boring. Die anderen speichern nur. */
-export const chipEffect = (c: Chip): 'kenne' | 'falsch' | 'mute' | 'thema' | null => (c === 'Known' ? 'kenne' : c === 'Wrong' ? 'falsch' : c === 'Mute speaker' ? 'mute' : c === 'Not for me' ? 'thema' : null);
+/** Was ein Chip sofort bewirkt. Already known, Wrong und Mute speaker wirken wie das bisherige Menü. Not for me senkt das Gewicht des Themas (Faktor wie das frühere Weak im Menü). Weak (früher Boring) und Bad cut speichern nur. */
+export const chipEffect = (c: Chip): 'kenne' | 'falsch' | 'mute' | 'thema' | null => (c === 'Already known' ? 'kenne' : c === 'Wrong' ? 'falsch' : c === 'Mute speaker' ? 'mute' : c === 'Not for me' ? 'thema' : null);
 
 export interface NoteContext {
   id: string;

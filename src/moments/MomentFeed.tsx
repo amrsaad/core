@@ -617,7 +617,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     });
   };
 
-  /** Known bestätigt sich durch das Schließen des Blatts, Wrong und Mute zusätzlich mit Toast */
+  /** Already known bestätigt sich durch das Schließen des Blatts, Wrong und Mute zusätzlich mit Toast */
   const feedback = (fb: Feedback, target?: Moment) => {
     const cur = queue.current[idxRef.current];
     const m = target ?? cur;
@@ -630,7 +630,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   /**
    * Rückmeldung: ein Tipp auf einen Chip oder Done speichert sofort lokal, das Blatt schließt, der Feed geht zum nächsten Moment.
-   * Known, Wrong und Mute speaker wirken wie bisher. Es gibt keinen Netzwerkaufruf und keinen Send-Knopf.
+   * Already known, Wrong und Mute speaker wirken wie bisher. Es gibt keinen Netzwerkaufruf und keinen Send-Knopf.
    */
   const saveNote = (m: Moment, chip: Chip | null, text: string) => {
     setNote(null);

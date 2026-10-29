@@ -1,9 +1,10 @@
 {
-  "at": "2026-10-29T16:10:08.915Z",
+  "at": "2026-10-29T16:33:02.714Z",
   "checks": {
     "below900Mobile": true,
     "at900Desktop": true,
     "resizeKeepsMoment": true,
+    "soundIconDesk": true,
     "helpShownFirst": true,
     "helpListsKeys": true,
     "helpNoDashes": true,
@@ -133,9 +134,9 @@
       "scrollW": 1440
     },
     "text": {
-      "w": 701.53125,
-      "ch65": 701.546875,
-      "col": 821.53125
+      "w": 738.09375,
+      "ch65": 738.109375,
+      "col": 858.09375
     },
     "ring": [
       {

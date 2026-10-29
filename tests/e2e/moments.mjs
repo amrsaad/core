@@ -479,7 +479,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.swipeLeftOpensNote = await openSheet();
     c.swipeLeftStaysOnMoment = (await page.evaluate(() => window.__core.idx())) === idxBefore;
     const chipsSeen = await page.evaluate(() => [...document.querySelectorAll('[data-testid^=note-chip-]')].map((x) => x.textContent));
-    c.noteSevenChips = chipsSeen.join() === 'Known,Not for me,Wrong,Boring,Bad cut,Great,Mute speaker';
+    c.noteSixChips = chipsSeen.join() === 'Already known,Not for me,Weak,Wrong,Bad cut,Mute speaker' && !chipsSeen.includes('Great') && !chipsSeen.includes('Boring');
     c.noteTextAndDone = !!(await page.$('[data-testid=note-text]')) && (await page.textContent('[data-testid=note-done]')) === 'Done';
     c.noteNoSendButton = !(await page.$('[data-testid=note-send]')) && !(await page.$('text=Send'));
     const chipBox = await page.evaluate(() => [...document.querySelectorAll('[data-testid^=note-chip-]')].map((e) => { const q = e.getBoundingClientRect(); return { w: q.width, h: q.height }; }));
@@ -489,13 +489,13 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.fill('[data-testid=note-text]', 'typed only to test the keyboard keys: jjj kkk');
     c.noteTypingDoesNotNavigate = (await page.evaluate(() => window.__core.idx())) === idxBefore;
     await page.fill('[data-testid=note-text]', '');
-    // Tipp auf Boring: speichert sofort, Blatt zu, nächster Moment, kein Toast, kein Browser, Herz unverändert
-    await page.click('[data-testid="note-chip-Boring"]');
+    // Tipp auf Weak (früher Boring): speichert sofort, Blatt zu, nächster Moment, kein Toast, kein Browser, Herz unverändert
+    await page.click('[data-testid="note-chip-Weak"]');
     c.noteSheetClosed = await waitFor(page, () => !document.querySelector('[data-testid=note-sheet]'));
     c.noteGoesToNext = await waitFor(page, (i) => window.__core.idx() === i + 1, idxBefore);
     const n1 = await notes();
-    c.noteSavedLocally = n1.length === 1 && n1[0].id === nm.id && n1[0].chips.join() === 'Boring' && n1[0].hook === nm.hook && n1[0].tab === 'Video' && /^[0-9a-f]{7}$|^dev$/.test(n1[0].commit) && n1[0].sent === undefined;
-    c.noteBoringNoEffect = !(await page.evaluate(() => !!document.querySelector('.flash'))) && (await page.evaluate((id) => window.__core.liked(id), nm.id)) === likedBefore;
+    c.noteSavedLocally = n1.length === 1 && n1[0].id === nm.id && n1[0].chips.join() === 'Weak' && n1[0].hook === nm.hook && n1[0].tab === 'Video' && /^[0-9a-f]{7}$|^dev$/.test(n1[0].commit) && n1[0].sent === undefined;
+    c.noteWeakNoEffect = !(await page.evaluate(() => !!document.querySelector('.flash'))) && (await page.evaluate((id) => window.__core.liked(id), nm.id)) === likedBefore;
     c.noteNothingOpened = (await page.evaluate(() => window.__opened)).length === 0 && gh.length === 0;
     // Nur Text, dann Done: speichert den Text ohne Chip, schließt, nächster Moment
     const nm2 = await page.evaluate(() => window.__core.moment());
@@ -526,15 +526,15 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.noteOnlyLongLeftSwipe = !(await page.$('[data-testid=note-sheet]'));
     c.noteNoNetwork = gh.length === 0;
 
-    // Known: kein Toast. Wrong und Mute: Toast. Alle drei wirken wie das frühere Menü und werden zusätzlich als Notiz gespeichert.
+    // Already known: kein Toast. Wrong und Mute: Toast. Alle drei wirken wie das frühere Menü und werden zusätzlich als Notiz gespeichert.
     const chip = async (label) => { if (!(await openSheet())) return false; await page.click(`[data-testid="note-chip-${label}"]`); return true; };
     const idxK = await page.evaluate(() => window.__core.idx());
     const nK = (await notes()).length;
-    c.knownViaChip = await chip('Known');
+    c.knownViaChip = await chip('Already known');
     await page.waitForTimeout(350);
     c.knownNoToast = await page.evaluate(() => !document.querySelector('.flash'));
     c.knownAdvanced = await waitFor(page, (i) => window.__core.idx() > i, idxK);
-    c.knownSaved = (await notes()).length === nK + 1 && (await notes()).at(-1).chips.join() === 'Known';
+    c.knownSaved = (await notes()).length === nK + 1 && (await notes()).at(-1).chips.join() === 'Already known';
     await page.waitForTimeout(300);
     c.wrongViaChip = await chip('Wrong');
     c.wrongToast = await waitFor(page, () => document.querySelector('.flash')?.textContent === 'Wrong');
@@ -643,12 +643,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const lines = bodyN.split('\n');
     const momentsN = new Set(allNotes.map((x) => x.id));
     c.issueTable = lines[0] === '| Moment | Hook | Chips | Text | Tab | App |' && lines.length === 2 + momentsN.size;
-    c.issueRowsHaveAllFields = [[nm, 'Boring', '-'], [nm2, '-', 'The cut is two seconds late & the "hook" repeats.'], [mutedMoment, 'Mute speaker', '-']].every(([m, chipsCell, textCell]) => lines.some((l) => l.startsWith(`| ${m.id} | ${m.hook} | ${chipsCell} | ${textCell} | Video | `) && /\| ([0-9a-f]{7}|dev) \|$/.test(l)));
+    c.issueRowsHaveAllFields = [[nm, 'Weak', '-'], [nm2, '-', 'The cut is two seconds late & the "hook" repeats.'], [mutedMoment, 'Mute speaker', '-']].every(([m, chipsCell, textCell]) => lines.some((l) => l.startsWith(`| ${m.id} | ${m.hook} | ${chipsCell} | ${textCell} | Video | `) && /\| ([0-9a-f]{7}|dev) \|$/.test(l)));
     c.issueTitleCount = (uN?.searchParams.get('title') ?? '') === `Core feedback 2026-10-25, ${momentsN.size} moments`;
     c.promptMarksSent = await waitFor(p2, () => window.__core.notes().every((x) => typeof x.sent === 'number') && !document.querySelector('[data-testid=notes-prompt]'));
     // Nach dem Senden: neue Notiz bleibt ungesendet, und am selben Tag kommt die Zeile nicht noch einmal
     await p2.evaluate(() => window.__core.openNote());
-    await p2.click('[data-testid="note-chip-Great"]');
+    await p2.click('[data-testid="note-chip-Bad cut"]');
     await p2.waitForTimeout(800); // Zustand wird verzögert gespeichert
     c.newNoteUnsent = await p2.evaluate(() => window.__core.notes().filter((x) => x.sent === undefined).length === 1);
     await p2.close();

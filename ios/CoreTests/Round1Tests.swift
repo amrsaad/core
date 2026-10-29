@@ -198,16 +198,16 @@ final class Round1Tests: XCTestCase {
         func ctx(_ id: String, _ hook: String) -> Note.Context { .init(id: id, hook: hook, tab: "Video", commit: "4ed41a7") }
         let a = ctx("abc123:100", "Don't compare body fat across devices (100% rule)!")
         let b = ctx("def456:20", "Sleep | not coffee")
-        XCTAssertEqual(Note.chips, ["Known", "Not for me", "Wrong", "Boring", "Bad cut", "Great", "Mute speaker"])
-        XCTAssertEqual(Note.effect("Known"), .known)
+        XCTAssertEqual(Note.chips, ["Already known", "Not for me", "Weak", "Wrong", "Bad cut", "Mute speaker"])
+        XCTAssertEqual(Note.effect("Already known"), .known)
         XCTAssertEqual(Note.effect("Wrong"), .wrong)
         XCTAssertEqual(Note.effect("Mute speaker"), .mute)
         XCTAssertEqual(Note.effect("Not for me"), .notForMe)
-        for c in ["Boring", "Bad cut", "Great"] { XCTAssertNil(Note.effect(c)) }
+        for c in ["Weak", "Bad cut"] { XCTAssertNil(Note.effect(c)) }
         // Notiz aus Chip oder Text
         XCTAssertNil(Note.makeEntry(a, chips: [], text: "  ", at: 1))
-        let e = Note.makeEntry(a, chips: ["Great"], text: "  Clear.  ", at: 1_700_000_000_000)
-        XCTAssertEqual(e, Note.Entry(key: "abc123:100#1700000000000", id: "abc123:100", hook: a.hook, chips: ["Great"], text: "Clear.",
+        let e = Note.makeEntry(a, chips: ["Weak"], text: "  Clear.  ", at: 1_700_000_000_000)
+        XCTAssertEqual(e, Note.Entry(key: "abc123:100#1700000000000", id: "abc123:100", hook: a.hook, chips: ["Weak"], text: "Clear.",
                                      tab: "Video", commit: "4ed41a7", at: 1_700_000_000_000, sent: nil))
         XCTAssertEqual(Note.makeEntry(a, chips: [], text: "Late cut", at: 1)?.chips, [])
         XCTAssertEqual(Note.makeEntry(a, chips: [], text: String(repeating: "x", count: Note.textMax + 50), at: 1)?.text.count, Note.textMax)
@@ -222,13 +222,13 @@ final class Round1Tests: XCTestCase {
         XCTAssertFalse(Note.firstOpenOfDay(last: "2026-10-28", today: "2026-10-28"))
         // Zeilen je Moment
         let list = [
-            Note.makeEntry(a, chips: ["Known"], text: "", at: 1)!,
+            Note.makeEntry(a, chips: ["Already known"], text: "", at: 1)!,
             Note.makeEntry(b, chips: [], text: "Cut is\ntwo seconds late", at: 2)!,
             Note.makeEntry(a, chips: ["Bad cut"], text: "Starts mid-sentence", at: 3)!,
         ]
         let r = Note.rows(list)
         XCTAssertEqual(r.count, 2)
-        XCTAssertEqual(r[0].chips, ["Known", "Bad cut"])
+        XCTAssertEqual(r[0].chips, ["Already known", "Bad cut"])
         XCTAssertEqual(r[0].text, "Starts mid-sentence")
         XCTAssertEqual(r[0].keys, ["abc123:100#1", "abc123:100#3"])
         XCTAssertEqual(r[1].chips, [])
@@ -236,13 +236,13 @@ final class Round1Tests: XCTestCase {
         let built = Note.buildIssue(list, day: "2026-10-28")
         XCTAssertEqual(built?.rows, 2)
         XCTAssertEqual(built?.keys, ["abc123:100#1", "abc123:100#3", "def456:20#2"])
-        XCTAssertEqual(built?.url, "https://github.com/amrsaad/core-content/issues/new?title=Core%20feedback%202026-10-28%2C%202%20moments&body=%7C%20Moment%20%7C%20Hook%20%7C%20Chips%20%7C%20Text%20%7C%20Tab%20%7C%20App%20%7C%0A%7C---%7C---%7C---%7C---%7C---%7C---%7C%0A%7C%20abc123%3A100%20%7C%20Don%27t%20compare%20body%20fat%20across%20devices%20%28100%25%20rule%29%21%20%7C%20Known%2C%20Bad%20cut%20%7C%20Starts%20mid-sentence%20%7C%20Video%20%7C%204ed41a7%20%7C%0A%7C%20def456%3A20%20%7C%20Sleep%20%2F%20not%20coffee%20%7C%20-%20%7C%20Cut%20is%20two%20seconds%20late%20%7C%20Video%20%7C%204ed41a7%20%7C&labels=feedback")
+        XCTAssertEqual(built?.url, "https://github.com/amrsaad/core-content/issues/new?title=Core%20feedback%202026-10-28%2C%202%20moments&body=%7C%20Moment%20%7C%20Hook%20%7C%20Chips%20%7C%20Text%20%7C%20Tab%20%7C%20App%20%7C%0A%7C---%7C---%7C---%7C---%7C---%7C---%7C%0A%7C%20abc123%3A100%20%7C%20Don%27t%20compare%20body%20fat%20across%20devices%20%28100%25%20rule%29%21%20%7C%20Already%20known%2C%20Bad%20cut%20%7C%20Starts%20mid-sentence%20%7C%20Video%20%7C%204ed41a7%20%7C%0A%7C%20def456%3A20%20%7C%20Sleep%20%2F%20not%20coffee%20%7C%20-%20%7C%20Cut%20is%20two%20seconds%20late%20%7C%20Video%20%7C%204ed41a7%20%7C&labels=feedback")
         XCTAssertNil(Note.buildIssue([], day: "2026-10-28"))
         XCTAssertTrue(Note.buildIssue([list[0]], day: "2026-10-28")?.url.contains("2026-10-28%2C%201%20moment&") ?? false)
         XCTAssertEqual(Note.enc("a b&c=d+e'(f)!*"), "a%20b%26c%3Dd%2Be%27%28f%29%21%2A")
         // Zu viele Notizen: Adresse bleibt unter dem Limit, der Rest bleibt ungesendet
         let many = (0..<60).map { i in
-            Note.makeEntry(ctx("vid\(i):0", String(repeating: "Hook number \(i) ", count: 4)), chips: ["Boring"], text: String(repeating: "y", count: 300), at: i + 10)!
+            Note.makeEntry(ctx("vid\(i):0", String(repeating: "Hook number \(i) ", count: 4)), chips: ["Weak"], text: String(repeating: "y", count: 300), at: i + 10)!
         }
         let big = Note.buildIssue(many, day: "2026-10-28")!
         XCTAssertLessThanOrEqual(big.url.count, Note.urlMax)

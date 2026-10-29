@@ -233,7 +233,7 @@ try {
   // F Rückmeldung: 1 bis 6 für Chips, Enter für Text
   await press(pg, 'f', 200);
   c.keyF = await has(pg, 'note-sheet');
-  c.noteShowsNumbers = (await E(pg, 'note-sheet').locator('.note-key').count()) >= 7;
+  c.noteShowsNumbers = (await E(pg, 'note-sheet').locator('.note-chip .note-key').count()) === 6;
   await pg.screenshot({ path: `${out}/04-feedback.png` });
   await press(pg, 'j', 150);
   c.noteBlocksNext = (await has(pg, 'note-sheet')) && true;
