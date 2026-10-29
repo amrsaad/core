@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T19:12:06.544Z",
+ "at": "2026-10-29T19:45:44.535Z",
  "runs": [
   {
    "browser": "webkit",
@@ -61,6 +61,7 @@
     "textNeverLoadsPlayer": true,
     "audioOnlyAudio": true,
     "audioPlays": true,
+    "hlsDiagPerAttempt": true,
     "audioCoverShown": true,
     "audioBigCaption": true,
     "audioNeverVideo": true,
@@ -86,7 +87,7 @@
     "tapRecorded": true,
     "swipeLeftOpensNote": true,
     "swipeLeftStaysOnMoment": true,
-    "noteSevenChips": true,
+    "noteSixChips": true,
     "noteTextAndDone": true,
     "noteNoSendButton": true,
     "noteChipsLarge": true,
@@ -97,8 +98,8 @@
     "noteSheetClosed": true,
     "noteGoesToNext": true,
     "noteSavedLocally": true,
-    "noteBoringWeakensChannel": true,
-    "noteBoringNoToastNoHeart": true,
+    "noteWeakWeakensChannel": true,
+    "noteWeakNoToastNoHeart": true,
     "noteNothingOpened": true,
     "noteDoneClosesAndNext": true,
     "noteTextSaved": true,
@@ -124,6 +125,8 @@
     "muteSaved": true,
     "noteStillNoNetwork": true,
     "posterWheneverNotPlaying": true,
+    "posterAllStates": true,
+    "posterDropsSynchronously": true,
     "latencyMeasured": true,
     "bufferedUnder300": true,
     "latencyInDiag": true,
@@ -145,8 +148,8 @@
     "issueRowsHaveAllFields": true,
     "issueTitleCount": true,
     "promptMarksSent": true,
-    "greatNoted": true,
-    "greatLearnsNothing": true,
+    "badCutNoted": true,
+    "badCutLearnsNothing": true,
     "newNoteUnsent": true,
     "reviewOnlyOnce": true,
     "promptOncePerDay": true,
@@ -217,12 +220,12 @@
     "n": 3,
     "before": false,
     "old": false,
-    "dir": "ltr",
-    "qar": false,
+    "dir": "rtl",
+    "qar": true,
     "fullWidth": true,
     "order": [
-     "1",
      "0",
+     "1",
      "0"
     ],
     "cover": true,
@@ -234,12 +237,12 @@
    "wrongChoice": {
     "states": [
      {
-      "c": "1",
-      "s": "right"
-     },
-     {
       "c": "0",
       "s": "wrong"
+     },
+     {
+      "c": "1",
+      "s": "right"
      },
      {
       "c": "0",
@@ -247,21 +250,21 @@
      }
     ],
     "col": [
-     "rgb(47, 179, 90)",
      "rgb(229, 72, 77)",
+     "rgb(47, 179, 90)",
      "rgb(58, 61, 69)"
     ],
-    "why": "Because 14 says so.",
+    "why": "لأن هذا ما قيل في المقطع 17.",
     "next": "Next",
     "whyBelow": true
    },
    "recall": [
     {
-     "id": "test0000014:100",
-     "due": 1792929604736,
+     "id": "test0000017:100",
+     "due": 1792922406532,
      "results": [
       {
-       "at": 1792756804736,
+       "at": 1792749606532,
        "got": false
       }
      ]
@@ -318,7 +321,7 @@
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000014:100",
+     "id": "test0000017:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -337,22 +340,150 @@
     1.5,
     2
    ],
+   "hlsDiag": [
+    "slot2 hls load cue start=100 rs=0 ns=0 muted=true t=0.0",
+    "slot0 hls loadedmetadata rs=0 ns=0 muted=true t=0.0",
+    "slot0 hls play#1 loadedmetadata rs=0 ns=0 muted=true t=100.0",
+    "slot0 hls play#1 ok rs=0 ns=0 muted=true t=100.0",
+    "slot1 hls loadedmetadata rs=0 ns=0 muted=true t=0.0",
+    "slot2 hls loadedmetadata rs=0 ns=0 muted=true t=0.0"
+   ],
    "tapToFill": {
-    "measured": 27,
+    "measured": 32,
     "recorded": 32
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 373,
+    "checksDone": 240,
     "violations": 0,
-    "endedSeen": 183
+    "endedSeen": 49
+   },
+   "posterState": {
+    "idx": 26,
+    "qlen": 52,
+    "end": false,
+    "recall": false,
+    "forYou": false,
+    "text": false,
+    "url": "http://127.0.0.1:4173/core/?now=2026-10-23&seed=3",
+    "cls": "vfeed"
+   },
+   "posterDom": [
+    "<div class=\"vslot\" aria-hidden=\"true\" style=\"--off: 1;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-style: normal; font-variant-caps: normal; font-weight: normal; font-width: normal; font-size: 18px; line-height: normal; font-family: sans-serif; font-size-adjust: none; font-kerning: auto; font-variant-alternates: normal; font-variant-ligatures: normal; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-position: normal; font-variant-emoji: normal; font-feature-settings: normal; font-optical-sizing: auto; font-variation-settings:",
+    "<div class=\"vslot\" aria-hidden=\"true\" style=\"--off: 2;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-style: normal; font-variant-caps: normal; font-weight: normal; font-width: normal; font-size: 18px; line-height: normal; font-family: sans-serif; font-size-adjust: none; font-kerning: auto; font-variant-alternates: normal; font-variant-ligatures: normal; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-position: normal; font-variant-emoji: normal; font-feature-settings: normal; font-optical-sizing: auto; font-variation-settings:",
+    "<div class=\"vslot\" aria-hidden=\"false\" style=\"--off: 0;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-style: normal; font-variant-caps: normal; font-weight: normal; font-width: normal; font-size: 18px; line-height: normal; font-family: sans-serif; font-size-adjust: none; font-kerning: auto; font-variant-alternates: normal; font-variant-ligatures: normal; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-position: normal; font-variant-emoji: normal; font-feature-settings: normal; font-optical-sizing: auto; font-variation-settings",
+    "<div class=\"vslot vghost\" aria-hidden=\"true\" style=\"--off: -1;\"><img class=\"vposter\" src=\"https://i.ytimg.com/vi/test0000010/hqdefault.jpg\" alt=\"\" draggable=\"false\"></div>"
+   ],
+   "posterRects": [
+    {
+     "p": [
+      0,
+      213,
+      393,
+      221
+     ],
+     "h": [
+      0,
+      213,
+      393,
+      221
+     ],
+     "iw": 393
+    },
+    {
+     "p": [
+      0,
+      872,
+      393,
+      221
+     ],
+     "h": [
+      0,
+      872,
+      393,
+      221
+     ],
+     "iw": 393
+    },
+    {
+     "p": [
+      0,
+      -446,
+      393,
+      221
+     ],
+     "h": [
+      0,
+      -446,
+      393,
+      221
+     ],
+     "iw": 393
+    },
+    {
+     "p": [
+      0,
+      -1105,
+      393,
+      221
+     ],
+     "iw": 393
+    }
+   ],
+   "posterAllStates": {
+    "unstarted": [
+     "nb:poster",
+     "nb:poster",
+     "cur:poster",
+     "nb:poster"
+    ],
+    "ended": [
+     "nb:poster",
+     "nb:poster",
+     "cur:poster",
+     "nb:poster"
+    ],
+    "paused": [
+     "nb:poster",
+     "nb:poster",
+     "cur:poster",
+     "nb:poster"
+    ],
+    "buffering": [
+     "nb:poster",
+     "nb:poster",
+     "cur:poster",
+     "nb:poster"
+    ],
+    "cued": [
+     "nb:poster",
+     "nb:poster",
+     "cur:poster",
+     "nb:poster"
+    ],
+    "playing": [
+     "nb:poster",
+     "nb:poster",
+     "cur:ohne-Poster",
+     "nb:poster"
+    ]
+   },
+   "posterSync": {
+    "pauseVideo": {
+     "vorher": true,
+     "nachherSofort": false
+    },
+    "cueVideoById": {
+     "vorher": true,
+     "nachherSofort": false
+    }
    },
    "latency": {
-    "n": 38,
-    "buffered": 31,
+    "n": 39,
+    "buffered": 32,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000026:100 | Testmoment 26 brain | Boring | - | Video | e91b220 |\n| test0000022:100 | Testmoment 22 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e91b220 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | e91b220 |\n| test0000046:100 | Testmoment 46 body | Wrong | - | Video | e91b220 |\n| test0000011:100 | Testmoment 11 beat | Not for me | - | Video | e91b220 |\n| test0000029:100 | Testmoment 29 brain | Mute speaker | - | Video | e91b220 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000076:100 | Testmoment 76 brain | Weak | - | Video | aae9768 |\n| test0000027:100 | Testmoment 27 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | aae9768 |\n| test0000050:100 | Testmoment 50 body | Already known | - | Video | aae9768 |\n| test0000004:100 | Testmoment 4 beat | Wrong | - | Video | aae9768 |\n| test0000070:100 | Testmoment 70 brain | Not for me | - | Video | aae9768 |\n| test0000029:100 | Testmoment 29 brain | Mute speaker | - | Video | aae9768 |",
    "badWalk": [
     {
      "idx": 2,
@@ -478,7 +609,7 @@
        "rate 1.5",
        "unmute",
        "rate 1.5",
-       "load test0000014 100-200",
+       "load test0000017 100-200",
        "rate 1.5"
       ]
      }
@@ -521,7 +652,7 @@
        "rate 1.5",
        "unmute",
        "rate 1.5",
-       "load test0000021 100-160",
+       "load test0000064 100-180",
        "rate 1.5"
       ]
      }
@@ -564,7 +695,7 @@
        "rate 1.5",
        "unmute",
        "rate 1.5",
-       "load test0000012 100-160",
+       "load test0000015 100-160",
        "rate 1.5"
       ]
      }
@@ -576,50 +707,7 @@
       "full": true,
       "size": 15,
       "lines": 6,
-      "id": "test0000014:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 1180,
-     "exDir": "ltr",
-     "exAr": false,
-     "meta": "SpeakerKanal brain 2EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": false,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 4,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000050 100-200",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000021:100"
+      "id": "test0000017:100"
      },
      "open": true,
      "hook": true,
@@ -644,13 +732,56 @@
      "stClose": 1,
      "after": {
       "st": 1,
+      "idx": 4,
+      "log": [
+       "rate 1.5",
+       "rate 1.5",
+       "unmute",
+       "rate 1.5",
+       "load test0000065 100-200",
+       "rate 1.5"
+      ]
+     }
+    },
+    {
+     "hk": {
+      "step": "1",
+      "clipped": false,
+      "full": true,
+      "size": 15,
+      "lines": 6,
+      "id": "test0000064:100"
+     },
+     "open": true,
+     "hook": true,
+     "exLen": 1180,
+     "exDir": "ltr",
+     "exAr": false,
+     "meta": "SpeakerKanal brain 0EpisodeTestvideoAt1:40AreaBrain",
+     "speaker": true,
+     "ep": true,
+     "at": true,
+     "order": [
+      "DIV",
+      "caption-hook",
+      "caption-excerpt",
+      "caption-meta"
+     ],
+     "playing": true,
+     "stillPlaying": true,
+     "ar": false,
+     "stClose0": 1,
+     "closed": true,
+     "stClose": 1,
+     "after": {
+      "st": 1,
       "idx": 5,
       "log": [
        "rate 1.5",
        "rate 1.5",
        "unmute",
        "rate 1.5",
-       "load test0000053 100-200",
+       "load test0000083 100-200",
        "rate 1.5"
       ]
      }
@@ -662,16 +793,16 @@
    },
    "cards": [
     {
+     "ar": true,
+     "dir": "rtl"
+    },
+    {
+     "ar": true,
+     "dir": "rtl"
+    },
+    {
      "ar": false,
      "dir": "ltr"
-    },
-    {
-     "ar": true,
-     "dir": "rtl"
-    },
-    {
-     "ar": true,
-     "dir": "rtl"
     },
     {
      "ar": true,
@@ -751,6 +882,7 @@
     "textNeverLoadsPlayer": true,
     "audioOnlyAudio": true,
     "audioPlays": true,
+    "hlsDiagPerAttempt": true,
     "audioCoverShown": true,
     "audioBigCaption": true,
     "audioNeverVideo": true,
@@ -776,7 +908,7 @@
     "tapRecorded": true,
     "swipeLeftOpensNote": true,
     "swipeLeftStaysOnMoment": true,
-    "noteSevenChips": true,
+    "noteSixChips": true,
     "noteTextAndDone": true,
     "noteNoSendButton": true,
     "noteChipsLarge": true,
@@ -787,8 +919,8 @@
     "noteSheetClosed": true,
     "noteGoesToNext": true,
     "noteSavedLocally": true,
-    "noteBoringWeakensChannel": true,
-    "noteBoringNoToastNoHeart": true,
+    "noteWeakWeakensChannel": true,
+    "noteWeakNoToastNoHeart": true,
     "noteNothingOpened": true,
     "noteDoneClosesAndNext": true,
     "noteTextSaved": true,
@@ -814,6 +946,8 @@
     "muteSaved": true,
     "noteStillNoNetwork": true,
     "posterWheneverNotPlaying": true,
+    "posterAllStates": true,
+    "posterDropsSynchronously": true,
     "latencyMeasured": true,
     "bufferedUnder300": true,
     "latencyInDiag": true,
@@ -835,8 +969,8 @@
     "issueRowsHaveAllFields": true,
     "issueTitleCount": true,
     "promptMarksSent": true,
-    "greatNoted": true,
-    "greatLearnsNothing": true,
+    "badCutNoted": true,
+    "badCutLearnsNothing": true,
     "newNoteUnsent": true,
     "reviewOnlyOnce": true,
     "promptOncePerDay": true,
@@ -850,7 +984,7 @@
     "cardHasLessRows": true,
     "cardTopicBlocked": true,
     "resetAsks": true,
-    "resetCancelKeeps": false,
+    "resetCancelKeeps": true,
     "cardExpiryLifted": true,
     "resetEmpties": true,
     "resetClearsWeights": true,
@@ -907,12 +1041,12 @@
     "n": 3,
     "before": false,
     "old": false,
-    "dir": "ltr",
-    "qar": false,
+    "dir": "rtl",
+    "qar": true,
     "fullWidth": true,
     "order": [
-     "1",
      "0",
+     "1",
      "0"
     ],
     "cover": true,
@@ -924,12 +1058,12 @@
    "wrongChoice": {
     "states": [
      {
-      "c": "1",
-      "s": "right"
-     },
-     {
       "c": "0",
       "s": "wrong"
+     },
+     {
+      "c": "1",
+      "s": "right"
      },
      {
       "c": "0",
@@ -937,21 +1071,21 @@
      }
     ],
     "col": [
-     "rgb(47, 179, 90)",
      "rgb(229, 72, 77)",
+     "rgb(47, 179, 90)",
      "rgb(58, 61, 69)"
     ],
-    "why": "Because 14 says so.",
+    "why": "لأن هذا ما قيل في المقطع 17.",
     "next": "Next",
     "whyBelow": true
    },
    "recall": [
     {
-     "id": "test0000014:100",
-     "due": 1792929603502,
+     "id": "test0000017:100",
+     "due": 1792922405521,
      "results": [
       {
-       "at": 1792756803502,
+       "at": 1792749605521,
        "got": false
       }
      ]
@@ -1008,7 +1142,7 @@
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000014:100",
+     "id": "test0000017:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -1027,22 +1161,150 @@
     1.5,
     2
    ],
+   "hlsDiag": [
+    "slot2 hls load cue start=100 rs=0 ns=0 muted=true t=0.0",
+    "slot0 hls loadedmetadata rs=0 ns=0 muted=true t=0.0",
+    "slot0 hls play#1 loadedmetadata rs=0 ns=0 muted=true t=100.0",
+    "slot0 hls play#1 ok rs=0 ns=0 muted=true t=100.0",
+    "slot1 hls loadedmetadata rs=0 ns=0 muted=true t=0.0",
+    "slot2 hls loadedmetadata rs=0 ns=0 muted=true t=0.0"
+   ],
    "tapToFill": {
-    "measured": 32.09999999997672,
-    "recorded": 32
+    "measured": 31.100000001490116,
+    "recorded": 31
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 388,
+    "checksDone": 270,
     "violations": 0,
-    "endedSeen": 189
+    "endedSeen": 31
+   },
+   "posterState": {
+    "idx": 26,
+    "qlen": 49,
+    "end": false,
+    "recall": false,
+    "forYou": false,
+    "text": false,
+    "url": "http://127.0.0.1:4173/core/?now=2026-10-23&seed=3",
+    "cls": "vfeed"
+   },
+   "posterDom": [
+    "<div class=\"vslot\" aria-hidden=\"true\" style=\"--off: 1;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font: 18px sans-serif; background: rgb(17, 34, 51);\">test0000025 t=100 state 2 stumm</div><video muted=\"\" playsinline=\"\" preload=\"auto\" webkit-playsinline=\"\" style=\"position: absolute; inset: 0px; width: 100%; height: 100%; object-fit: contain; background: rgb(0, 0, 0); display: none; pointer-events: none;\"></video><audio muted=\"\" preload=\"auto\" style=\"display: none;\"></audio></div></div><img class=\"vposter\" src=\"https://i.ytimg.com/vi/test0000025/hqdefault.jp",
+    "<div class=\"vslot\" aria-hidden=\"true\" style=\"--off: 2;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font: 18px sans-serif; background: rgb(17, 34, 51);\">test0000013 t=100 state 2 stumm</div><video muted=\"\" playsinline=\"\" preload=\"auto\" webkit-playsinline=\"\" style=\"position: absolute; inset: 0px; width: 100%; height: 100%; object-fit: contain; background: rgb(0, 0, 0); display: none; pointer-events: none;\"></video><audio muted=\"\" preload=\"auto\" style=\"display: none;\"></audio></div></div><img class=\"vposter\" src=\"https://i.ytimg.com/vi/test0000013/hqdefault.jp",
+    "<div class=\"vslot\" aria-hidden=\"false\" style=\"--off: 0;\" data-live=\"\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font: 18px sans-serif; background: rgb(17, 34, 51);\">test0000023 t=100 state 1 TON</div><video muted=\"\" playsinline=\"\" preload=\"auto\" webkit-playsinline=\"\" style=\"position: absolute; inset: 0px; width: 100%; height: 100%; object-fit: contain; background: rgb(0, 0, 0); display: none; pointer-events: none;\"></video><audio muted=\"\" preload=\"auto\" style=\"display: none;\"></audio></div></div><img class=\"vposter\" src=\"https://i.ytimg.com/vi/test0000023/",
+    "<div class=\"vslot vghost\" aria-hidden=\"true\" style=\"--off: -1;\"><img class=\"vposter\" src=\"https://i.ytimg.com/vi/test0000063/hqdefault.jpg\" alt=\"\" draggable=\"false\"></div>"
+   ],
+   "posterRects": [
+    {
+     "p": [
+      0,
+      856,
+      393,
+      221
+     ],
+     "h": [
+      0,
+      856,
+      393,
+      221
+     ],
+     "iw": 393
+    },
+    {
+     "p": [
+      0,
+      1515,
+      393,
+      221
+     ],
+     "h": [
+      0,
+      1515,
+      393,
+      221
+     ],
+     "iw": 393
+    },
+    {
+     "p": [
+      0,
+      197,
+      393,
+      221
+     ],
+     "h": [
+      0,
+      197,
+      393,
+      221
+     ],
+     "iw": 393
+    },
+    {
+     "p": [
+      0,
+      -462,
+      393,
+      221
+     ],
+     "iw": 393
+    }
+   ],
+   "posterAllStates": {
+    "unstarted": [
+     "nb:poster",
+     "nb:poster",
+     "cur:poster",
+     "nb:poster"
+    ],
+    "ended": [
+     "nb:poster",
+     "nb:poster",
+     "cur:poster",
+     "nb:poster"
+    ],
+    "paused": [
+     "nb:poster",
+     "nb:poster",
+     "cur:poster",
+     "nb:poster"
+    ],
+    "buffering": [
+     "nb:poster",
+     "nb:poster",
+     "cur:poster",
+     "nb:poster"
+    ],
+    "cued": [
+     "nb:poster",
+     "nb:poster",
+     "cur:poster",
+     "nb:poster"
+    ],
+    "playing": [
+     "nb:poster",
+     "nb:poster",
+     "cur:ohne-Poster",
+     "nb:poster"
+    ]
+   },
+   "posterSync": {
+    "pauseVideo": {
+     "vorher": true,
+     "nachherSofort": false
+    },
+    "cueVideoById": {
+     "vorher": true,
+     "nachherSofort": false
+    }
    },
    "latency": {
-    "n": 38,
-    "buffered": 31,
+    "n": 37,
+    "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000026:100 | Testmoment 26 brain | Boring | - | Video | e91b220 |\n| test0000022:100 | Testmoment 22 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e91b220 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | e91b220 |\n| test0000046:100 | Testmoment 46 body | Wrong | - | Video | e91b220 |\n| test0000011:100 | Testmoment 11 beat | Not for me | - | Video | e91b220 |\n| test0000029:100 | Testmoment 29 brain | Mute speaker | - | Video | e91b220 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | aae9768 |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | aae9768 |\n| test0000053:100 | Testmoment 53 body | Already known | - | Video | aae9768 |\n| test0000050:100 | Testmoment 50 body | Wrong | - | Video | aae9768 |\n| test0000011:100 | Testmoment 11 beat | Not for me | - | Video | aae9768 |\n| test0000070:100 | Testmoment 70 brain | Mute speaker | - | Video | aae9768 |",
    "badWalk": [
     {
      "idx": 2,
@@ -1168,7 +1430,7 @@
        "rate 1.5",
        "unmute",
        "rate 1.5",
-       "load test0000014 100-200",
+       "load test0000017 100-200",
        "rate 1.5"
       ]
      }
@@ -1211,7 +1473,7 @@
        "rate 1.5",
        "unmute",
        "rate 1.5",
-       "load test0000021 100-160",
+       "load test0000064 100-180",
        "rate 1.5"
       ]
      }
@@ -1254,7 +1516,7 @@
        "rate 1.5",
        "unmute",
        "rate 1.5",
-       "load test0000012 100-160",
+       "load test0000015 100-160",
        "rate 1.5"
       ]
      }
@@ -1266,50 +1528,7 @@
       "full": true,
       "size": 15,
       "lines": 6,
-      "id": "test0000014:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 1180,
-     "exDir": "ltr",
-     "exAr": false,
-     "meta": "SpeakerKanal brain 2EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": false,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 4,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000050 100-200",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000021:100"
+      "id": "test0000017:100"
      },
      "open": true,
      "hook": true,
@@ -1334,13 +1553,56 @@
      "stClose": 1,
      "after": {
       "st": 1,
+      "idx": 4,
+      "log": [
+       "rate 1.5",
+       "rate 1.5",
+       "unmute",
+       "rate 1.5",
+       "load test0000065 100-200",
+       "rate 1.5"
+      ]
+     }
+    },
+    {
+     "hk": {
+      "step": "1",
+      "clipped": false,
+      "full": true,
+      "size": 15,
+      "lines": 6,
+      "id": "test0000064:100"
+     },
+     "open": true,
+     "hook": true,
+     "exLen": 1180,
+     "exDir": "ltr",
+     "exAr": false,
+     "meta": "SpeakerKanal brain 0EpisodeTestvideoAt1:40AreaBrain",
+     "speaker": true,
+     "ep": true,
+     "at": true,
+     "order": [
+      "DIV",
+      "caption-hook",
+      "caption-excerpt",
+      "caption-meta"
+     ],
+     "playing": true,
+     "stillPlaying": true,
+     "ar": false,
+     "stClose0": 1,
+     "closed": true,
+     "stClose": 1,
+     "after": {
+      "st": 1,
       "idx": 5,
       "log": [
        "rate 1.5",
        "rate 1.5",
        "unmute",
        "rate 1.5",
-       "load test0000053 100-200",
+       "load test0000083 100-200",
        "rate 1.5"
       ]
      }
@@ -1352,8 +1614,8 @@
    },
    "cards": [
     {
-     "ar": false,
-     "dir": "ltr"
+     "ar": true,
+     "dir": "rtl"
     },
     {
      "ar": true,
@@ -1379,7 +1641,7 @@
     "noRating": true
    },
    "errors": [],
-   "ok": false
+   "ok": true
   }
  ]
 }

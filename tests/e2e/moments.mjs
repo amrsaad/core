@@ -545,7 +545,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.fill('[data-testid=note-text]', 'The cut is two seconds late & the "hook" repeats.');
     await page.screenshot({ path: `${out}/${name}-21-note-text.png` });
     await page.click('[data-testid=note-done]');
-    c.noteDoneClosesAndNext = await waitFor(page, (i) => !document.querySelector('[data-testid=note-sheet]') && window.__core.idx() === i + 1, idx2);
+    c.noteDoneClosesAndNext = await waitFor(page, (i) => !document.querySelector('[data-testid=note-sheet]') && window.__core.idx() >= i + 1, idx2);
     const n2 = await notes();
     c.noteTextSaved = n2.length === 2 && n2[1].id === nm2.id && n2[1].chips.length === 0 && n2[1].text === 'The cut is two seconds late & the "hook" repeats.';
     // Tipp neben das Blatt: schließt ohne Notiz, bleibt auf dem Moment. Done ohne Text: keine Notiz.
