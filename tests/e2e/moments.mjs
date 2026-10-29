@@ -132,7 +132,8 @@ const skipRecall = async (page, name = 'x', out = 'pipeline/out/e2e-moments') =>
   }
   await page.waitForFunction(() => !document.querySelector('[data-testid=recall-card]'));
 };
-const waitFor = async (page, fn, arg, timeout = 8000) => {
+// Wartet höchstens 20 s, kehrt aber sofort zurück, sobald die Bedingung gilt. Der lange Deckel fängt langsame CI-Läufe (WebKit unter Last) ab, ohne eine Prüfung zu lockern.
+const waitFor = async (page, fn, arg, timeout = 20000) => {
   try { await page.waitForFunction(fn, arg, { timeout }); return true; } catch { return false; }
 };
 
@@ -164,6 +165,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await ctx.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
     await ctx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
     const page = await ctx.newPage();
+    // Der Nachbau spielt 100-fach schnell: ein 60-s-Moment endet nach 0,6 s. Bis zum ersten Tipp läuft die Uhr in Echtzeit, sonst kippt der Tipp auf einem langsamen Runner in die Für-dich-Karte.
+    await page.addInitScript(() => { window.__ytSlow = true; });
     const errors = [];
     page.on('pageerror', (e) => errors.push(String(e)));
 
@@ -210,6 +213,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // Tipp irgendwo: Ton an, Symbol verschwindet
     await page.mouse.click(vp.width / 2, vp.height / 2);
     c.soundOn = await waitFor(page, () => window.__ytlog.includes('unmute'));
+    await page.evaluate(() => { window.__ytSlow = false; });
     c.soundIconGoneAfterTap = await waitFor(page, () => !document.querySelector('[data-testid=sound-off]'));
 
     // 4 Momente durchlaufen: Für dich genau dann, wenn forYou gesetzt ist; Ende genau bei end
@@ -322,6 +326,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.mouse.up();
     c.releaseNormal = await waitFor(page, () => ![...document.querySelectorAll("span")].some((s) => s.textContent === "2x"));
     // Punkt 8: YouTube-Iframe füllt genau das 16:9-Band, ohne Zoom und ohne Beschnitt
+    // Erst messen, wenn der Feed nicht mehr gleitet (sonst steht das erste Band noch versetzt)
+    await waitFor(page, () => document.getAnimations().filter((a) => a instanceof CSSTransition).length === 0);
     r.band = await page.evaluate(() => {
       const band = document.querySelector('.vframe > div');
       const f = document.createElement('iframe');
@@ -746,7 +752,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await skipRecall(ps, name, out);
       await ps.waitForTimeout(150);
       const i0 = await ps.evaluate(() => window.__core.idx());
-      await ps.evaluate(() => window.__core.next());
+      await ps.evaluate(() => { window.__core.markStart(); window.__core.next(); });
       await waitFor(ps, (i) => window.__core.idx() > i, i0);
       return ps.evaluate(() => ({ w: JSON.parse(JSON.stringify(window.__core.weights())), run: window.__core.skipRun() }));
     };

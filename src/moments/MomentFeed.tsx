@@ -1303,6 +1303,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       time: () => current().player?.getCurrentTime?.() ?? 0,
       forYou: () => forYouRef.current,
       next: () => goTo(idxRef.current + 1),
+      // Setzt die Schauzeit des laufenden Moments auf null (Tests prüfen die 3-Sekunden-Regel, ohne von der Geschwindigkeit des Runners abzuhängen)
+      markStart: () => { since.current = Date.now(); },
       diag: () => diag.current.slice(-40),
       diagAll: () => diag.current.filter((x) => /^(replan|reorder|net poor|yt stub|first-frame)/.test(x)),
       slots: () => slots.current.slice(0, SLOTS).map((x) => ({ st: x.st, index: x.index })),
