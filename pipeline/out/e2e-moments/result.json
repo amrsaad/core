@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T16:35:48.121Z",
+ "at": "2026-10-29T16:45:20.319Z",
  "runs": [
   {
    "browser": "webkit",
@@ -17,171 +17,16 @@
     "soundOn": true,
     "soundIconGoneAfterTap": true,
     "soundIconNeverBack": true,
-    "forYouExactlyWhenSet": true,
-    "sawBothKinds": true,
+    "forYouExactlyWhenSet": false,
+    "sawBothKinds": false,
     "stoppedAtEnd": true,
     "autoNext": true,
-    "recallAfter4": true,
+    "recallAfter4": false,
     "recallPlayerStopped": true,
-    "recallThreeFullWidthOptions": true,
+    "recallThreeFullWidthOptions": false,
     "recallNothingBeforeChoice": true,
     "recallOldControlsGone": true,
-    "recallLayout": true,
-    "recallColors": true,
-    "recallWhyAndNext": true,
-    "recallClosed": true,
-    "recallPlaysAgain": true,
-    "recallMissed2d": true,
-    "todayNoGotItForMiss": true,
-    "todayCount": true,
-    "captionsAutoRule": true,
-    "captionsArabicRtl": true,
-    "swipeNext": true,
-    "captionsSettingsOn": true,
-    "holdFast": false,
-    "releaseNormal": true,
-    "embedNoZoom": true,
-    "embed16by9FullWidth": true,
-    "speedDefault15": true,
-    "speedHold2": true,
-    "speedNeverAbove2": true,
-    "speedBackAfterRelease": true,
-    "textView": true,
-    "textPaused": true,
-    "textNotSeenBeforeEnd": true,
-    "textSeenAtEnd": true,
-    "textStillPaused": true,
-    "textOnlyTextMoments": true,
-    "textHookShown": true,
-    "sourceLineAll": true,
-    "sourceLineFields": true,
-    "sourceLineQuoted": true,
-    "sourceLineLink": true,
-    "sourceLineOpens": true,
-    "textNeverLoadsPlayer": true,
-    "audioOnlyAudio": true,
-    "audioPlays": true,
-    "audioCoverShown": true,
-    "audioBigCaption": true,
-    "audioNeverVideo": true,
-    "videoBack": true,
-    "videoNeverAudio": true,
-    "pausedForCheck": true,
-    "heartShown": true,
-    "heartAtTap": true,
-    "heartGoneAfter400": true,
-    "doubleTapLikes": true,
-    "doubleTapDoesNotSave": true,
-    "doubleTapKeepsLike": true,
-    "likeButtonUndoes": true,
-    "likeButtonFills": true,
-    "saveFills": true,
-    "columnOrder": true,
-    "columnTargets48": true,
-    "columnSpacing": true,
-    "columnLabels": true,
-    "noOptionsButton": true,
-    "fillImmediate": true,
-    "fillUnder100": true,
-    "tapRecorded": true,
-    "swipeLeftOpensNote": true,
-    "swipeLeftStaysOnMoment": true,
-    "noteSevenChips": true,
-    "noteTextAndDone": true,
-    "noteNoSendButton": true,
-    "noteChipsLarge": true,
-    "noteSheetOneLevel": true,
-    "noteTypingDoesNotNavigate": true,
-    "noteSheetClosed": true,
-    "noteGoesToNext": true,
-    "noteSavedLocally": true,
-    "noteBoringNoEffect": true,
-    "noteNothingOpened": true,
-    "noteDoneClosesAndNext": true,
-    "noteTextSaved": true,
-    "noteOutsideCancels": true,
-    "noteEmptyDoneNoNote": true,
-    "noteOnlyLongLeftSwipe": true,
-    "noteNoNetwork": true,
-    "knownViaChip": true,
-    "knownNoToast": true,
-    "knownAdvanced": true,
-    "knownSaved": true,
-    "wrongViaChip": true,
-    "wrongToast": true,
-    "wrongSaved": true,
-    "notForMeViaChip": true,
-    "notForMeTopicDown": true,
-    "notForMeChannelAreaKept": true,
-    "notForMeNoToast": true,
-    "notForMeAdvanced": true,
-    "notForMeSaved": true,
-    "muteViaChip": true,
-    "muteToast": true,
-    "muteAdvanced": true,
-    "muteSaved": true,
-    "noteStillNoNetwork": true,
-    "posterWheneverNotPlaying": true,
-    "latencyMeasured": true,
-    "bufferedUnder300": true,
-    "latencyInDiag": true,
-    "unlockQr": true,
-    "keyBackupsBoth": true,
-    "speedOptions": true,
-    "tapInSettings": true,
-    "latencyInSettings": true,
-    "weeklyReviewOnSunday": true,
-    "reviewListsSaved": true,
-    "reviewWeekLine": true,
-    "reviewNoPercent": true,
-    "reviewSaveNeedsPlan": true,
-    "feedAfterReview": true,
-    "notesUnsentBefore": true,
-    "promptLine": true,
-    "promptOneIssue": true,
-    "issueTable": true,
-    "issueRowsHaveAllFields": true,
-    "issueTitleCount": true,
-    "promptMarksSent": true,
-    "newNoteUnsent": true,
-    "reviewOnlyOnce": false,
-    "promptOncePerDay": true,
-    "prevPlanShown": true,
-    "prevPlanAnswered": true,
-    "skipWorks": false,
-    "p6Feed": true,
-    "emptyAudioLine": true,
-    "emptyKeepsSwitch": true,
-    "emptyTextLine": true,
-    "emptyBackToVideo": true,
-    "badFeedStarts": true,
-    "badFirstPlays": true,
-    "badNoErrorPage": true,
-    "badErrorsHappened": true,
-    "badNotStuckOnError": true,
-    "badNeverLoaded": true,
-    "badNeverShown": true,
-    "badSkippedLine": true,
-    "badPageErrors": true,
-    "throwFeedStarts": true,
-    "throwNoErrorPage": true,
-    "throwLogged": true,
-    "throwPlaysAfterSkip": true,
-    "throwStillNoErrorPage": true,
-    "throwPageErrors": true,
-    "p7Feed": true,
-    "hookLongSmallerNeverCut": true,
-    "captionOpensWithContent": true,
-    "captionOrder": true,
-    "captionKeepsPlaying": true,
-    "captionCloses": true,
-    "captionArabicRtl": true,
-    "noRecallNoCard": true,
-    "recallHit": true,
-    "recallSwipeSkipsWithoutRating": true,
-    "recallArabicRtl": true,
-    "recallEnglishLtr": true,
-    "pageErrors": 0
+    "recallLayout": false
    },
    "soundIcon": {
     "w": 32,
@@ -195,485 +40,19 @@
     "slashed": true
    },
    "card0": {
-    "n": 3,
+    "n": 0,
     "before": false,
     "old": false,
-    "dir": "ltr",
     "qar": false,
     "fullWidth": true,
-    "order": [
-     "1",
-     "0",
-     "0"
-    ],
-    "cover": true,
-    "area": true,
-    "speaker": true,
-    "coverFirst": true,
-    "qBeforeOptions": true
+    "order": [],
+    "cover": false,
+    "area": false,
+    "speaker": false,
+    "coverFirst": false,
+    "qBeforeOptions": false
    },
-   "wrongChoice": {
-    "states": [
-     {
-      "c": "1",
-      "s": "right"
-     },
-     {
-      "c": "0",
-      "s": "wrong"
-     },
-     {
-      "c": "0",
-      "s": "rest"
-     }
-    ],
-    "col": [
-     "rgb(47, 179, 90)",
-     "rgb(229, 72, 77)",
-     "rgb(58, 61, 69)"
-    ],
-    "why": "Because 14 says so.",
-    "next": "Next",
-    "whyBelow": true
-   },
-   "recall": [
-    {
-     "id": "test0000014:100",
-     "due": 1792929604087,
-     "results": [
-      {
-       "at": 1792756804087,
-       "got": false
-      }
-     ]
-    }
-   ],
-   "today": "today 5 seen, 0 got it",
-   "captions": [
-    {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
-    },
-    {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
-    },
-    {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
-    },
-    {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
-    }
-   ],
-   "sequence": [
-    {
-     "id": "test0000000:100",
-     "has": true,
-     "fy": true,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000001:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000006:100",
-     "has": true,
-     "fy": true,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000014:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    }
-   ],
-   "band": {
-    "bw": 393,
-    "bh": 221.0625,
-    "fw": 393,
-    "fh": 221.0625,
-    "dx": 0,
-    "dy": 0,
-    "vw": 393
-   },
-   "rates": [
-    1.5,
-    2
-   ],
-   "tapToFill": {
-    "measured": 30,
-    "recorded": 32
-   },
-   "notesCount": 6,
-   "posterCheck": {
-    "checksDone": 882,
-    "violations": 0,
-    "endedSeen": 0
-   },
-   "latency": {
-    "n": 38,
-    "buffered": 32,
-    "median": 0
-   },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000008:100 | Testmoment 8 beat | Boring | - | Video | fefd9c5 |\n| test0000004:100 | Testmoment 4 beat | - | The cut is two seconds late & the \"hook\" repeats. | Video | fefd9c5 |\n| test0000011:100 | Testmoment 11 beat | Known | - | Video | fefd9c5 |\n| test0000010:100 | Testmoment 10 beat | Wrong | - | Video | fefd9c5 |\n| test0000003:100 | Testmoment 3 beat | Not for me | - | Video | fefd9c5 |\n| test0000019:100 | Testmoment 19 brain | Mute speaker | - | Video | fefd9c5 |",
-   "badWalk": [
-    {
-     "idx": 2,
-     "id": "test0000004",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 3,
-     "id": "test0000013",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 4,
-     "id": "test0000019",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 5,
-     "id": "test0000050",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 6,
-     "id": "test0000053",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 7,
-     "id": "test0000051",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 8,
-     "id": "test0000052",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 9,
-     "id": "test0000054",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 10,
-     "id": "test0000046",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 11,
-     "id": "test0000026",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 12,
-     "id": "test0000016",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 13,
-     "id": "test0000027",
-     "card": false,
-     "end": false,
-     "err": false
-    }
-   ],
-   "capLogs": [
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000000:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 1180,
-     "exDir": "ltr",
-     "exAr": false,
-     "meta": "SpeakerKanal beat 0EpisodeTestvideoAt1:40AreaBeat",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": false,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 1,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000014 100-200",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000001:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 419,
-     "exDir": "rtl",
-     "exAr": true,
-     "meta": "SpeakerKanal beat 1EpisodeTestvideoAt1:40AreaBeat",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": true,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 2,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000021 100-160",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000006:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 1180,
-     "exDir": "ltr",
-     "exAr": false,
-     "meta": "SpeakerKanal beat 2EpisodeTestvideoAt1:40AreaBeat",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": false,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 3,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000012 100-160",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000014:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 1180,
-     "exDir": "ltr",
-     "exAr": false,
-     "meta": "SpeakerKanal brain 2EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": false,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 4,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000050 100-200",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000021:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 419,
-     "exDir": "rtl",
-     "exAr": true,
-     "meta": "SpeakerKanal brain 1EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": true,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 5,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000053 100-200",
-       "rate 1.5"
-      ]
-     }
-    }
-   ],
-   "noRecallDbg": {
-    "cardSeen": false,
-    "idx": 5
-   },
-   "cards": [
-    {
-     "ar": false,
-     "dir": "ltr"
-    },
-    {
-     "ar": true,
-     "dir": "rtl"
-    },
-    {
-     "ar": false,
-     "dir": "ltr"
-    },
-    {
-     "ar": false,
-     "dir": "ltr"
-    },
-    {
-     "ar": false,
-     "dir": "ltr"
-    }
-   ],
-   "hit": {
-    "green": true,
-    "why": true,
-    "due7": true,
-    "grew": true
-   },
-   "skip": {
-    "how": "hook",
-    "noRating": true
-   },
-   "errors": [],
+   "error": "TimeoutError: page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=recall-option][data-correct=\"0\"]')\n",
    "ok": false
   },
   {
@@ -713,7 +92,7 @@
     "captionsArabicRtl": true,
     "swipeNext": true,
     "captionsSettingsOn": true,
-    "holdFast": false,
+    "holdFast": true,
     "releaseNormal": true,
     "embedNoZoom": true,
     "embed16by9FullWidth": true,
@@ -823,7 +202,7 @@
     "promptOncePerDay": true,
     "prevPlanShown": true,
     "prevPlanAnswered": true,
-    "skipWorks": false,
+    "skipWorks": true,
     "p6Feed": true,
     "emptyAudioLine": true,
     "emptyKeepsSwitch": true,
@@ -844,19 +223,7 @@
     "throwPlaysAfterSkip": true,
     "throwStillNoErrorPage": true,
     "throwPageErrors": true,
-    "p7Feed": true,
-    "hookLongSmallerNeverCut": true,
-    "captionOpensWithContent": true,
-    "captionOrder": true,
-    "captionKeepsPlaying": true,
-    "captionCloses": true,
-    "captionArabicRtl": true,
-    "noRecallNoCard": true,
-    "recallHit": true,
-    "recallSwipeSkipsWithoutRating": true,
-    "recallArabicRtl": true,
-    "recallEnglishLtr": true,
-    "pageErrors": 0
+    "p7Feed": true
    },
    "soundIcon": {
     "w": 32,
@@ -914,10 +281,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603359,
+     "due": 1792929603449,
      "results": [
       {
-       "at": 1792756803359,
+       "at": 1792756803449,
        "got": false
       }
      ]
@@ -982,9 +349,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.0625,
+    "bh": 221.06246948242188,
     "fw": 393,
-    "fh": 221.0625,
+    "fh": 221.06246948242188,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -994,21 +361,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 30.79999999998836,
-    "recorded": 31
+    "measured": 31.89999999999418,
+    "recorded": 32
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 885,
+    "checksDone": 879,
     "violations": 0,
-    "endedSeen": 0
+    "endedSeen": 142
    },
    "latency": {
-    "n": 38,
-    "buffered": 32,
+    "n": 36,
+    "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000008:100 | Testmoment 8 beat | Boring | - | Video | fefd9c5 |\n| test0000004:100 | Testmoment 4 beat | - | The cut is two seconds late & the \"hook\" repeats. | Video | fefd9c5 |\n| test0000010:100 | Testmoment 10 beat | Known | - | Video | fefd9c5 |\n| test0000003:100 | Testmoment 3 beat | Wrong | - | Video | fefd9c5 |\n| test0000019:100 | Testmoment 19 brain | Not for me | - | Video | fefd9c5 |\n| test0000024:100 | Testmoment 24 brain | Mute speaker | - | Video | fefd9c5 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | 0f51694 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 0f51694 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | 0f51694 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | 0f51694 |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | 0f51694 |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | 0f51694 |",
    "badWalk": [
     {
      "idx": 2,
@@ -1095,260 +462,7 @@
      "err": false
     }
    ],
-   "capLogs": [
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000000:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 1180,
-     "exDir": "ltr",
-     "exAr": false,
-     "meta": "SpeakerKanal beat 0EpisodeTestvideoAt1:40AreaBeat",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": false,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 1,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000014 100-200",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000001:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 419,
-     "exDir": "rtl",
-     "exAr": true,
-     "meta": "SpeakerKanal beat 1EpisodeTestvideoAt1:40AreaBeat",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": true,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 2,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000021 100-160",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000006:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 1180,
-     "exDir": "ltr",
-     "exAr": false,
-     "meta": "SpeakerKanal beat 2EpisodeTestvideoAt1:40AreaBeat",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": false,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 3,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000012 100-160",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000014:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 1180,
-     "exDir": "ltr",
-     "exAr": false,
-     "meta": "SpeakerKanal brain 2EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": false,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 4,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000050 100-200",
-       "rate 1.5"
-      ]
-     }
-    },
-    {
-     "hk": {
-      "step": "1",
-      "clipped": false,
-      "full": true,
-      "size": 15,
-      "lines": 6,
-      "id": "test0000021:100"
-     },
-     "open": true,
-     "hook": true,
-     "exLen": 419,
-     "exDir": "rtl",
-     "exAr": true,
-     "meta": "SpeakerKanal brain 1EpisodeTestvideoAt1:40AreaBrain",
-     "speaker": true,
-     "ep": true,
-     "at": true,
-     "order": [
-      "DIV",
-      "caption-hook",
-      "caption-excerpt",
-      "caption-meta"
-     ],
-     "playing": true,
-     "stillPlaying": true,
-     "ar": true,
-     "stClose0": 1,
-     "closed": true,
-     "stClose": 1,
-     "after": {
-      "st": 1,
-      "idx": 5,
-      "log": [
-       "rate 1.5",
-       "rate 1.5",
-       "unmute",
-       "rate 1.5",
-       "load test0000053 100-200",
-       "rate 1.5"
-      ]
-     }
-    }
-   ],
-   "noRecallDbg": {
-    "cardSeen": false,
-    "idx": 5
-   },
-   "cards": [
-    {
-     "ar": false,
-     "dir": "ltr"
-    },
-    {
-     "ar": true,
-     "dir": "rtl"
-    },
-    {
-     "ar": true,
-     "dir": "rtl"
-    },
-    {
-     "ar": false,
-     "dir": "ltr"
-    },
-    {
-     "ar": true,
-     "dir": "rtl"
-    }
-   ],
-   "hit": {
-    "green": true,
-    "why": true,
-    "due7": true,
-    "grew": true
-   },
-   "skip": {
-    "how": "touch",
-    "noRating": true
-   },
-   "errors": [],
+   "error": "TimeoutError: page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=speaker-line]')\n    - locator resolved to <div class=\"vchannel\" data-testid=\"speaker-line\">…</div>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <p dir=\"ltr\" lang=\"en\" class=\"vcap-text\" data-testid=\"caption-excerpt\">Sentence 1 of the checked excerpt, long enough to…</p> from <div data-testid=\"caption-sheet\" class=\"vcap-sheet no-callout\">…</div> subtree intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <p dir=\"ltr\" lang=\"en\" class=\"vcap-text\" data-testid=\"caption-excerpt\">Sentence 1 of the checked excerpt, long enough to…</p> from <div data-testid=\"caption-sheet\" class=\"vcap-sheet no-callout\">…</div> subtree intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <p dir=\"ltr\" lang=\"en\" class=\"vcap-text\" data-testid=\"caption-excerpt\">Sentence 1 of the checked excerpt, long enough to…</p> from <div data-testid=\"caption-sheet\" class=\"vcap-sheet no-callout\">…</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n",
    "ok": false
   }
  ]
