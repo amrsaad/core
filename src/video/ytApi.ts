@@ -1,6 +1,7 @@
 // YouTube IFrame Player API, Einbettung über youtube-nocookie.com. Kein API-Key.
 import { isYtId } from '../moments/contract';
 import { formOf } from '../moments/form';
+import { localKey } from '../moments/localKey';
 
 export type YTLoad = string | { videoId: string; startSeconds?: number; endSeconds?: number };
 
@@ -17,6 +18,10 @@ export interface YTPlayer {
   getPlayerState(): number;
   setPlaybackRate(rate: number): void;
   destroy(): void;
+  /** Nur Stream-Player: Der angehaltene Moment hat schon Daten für das erste Bild (readyState 3 oder höher) */
+  isBuffered?(): boolean;
+  /** Nur Stream-Player: Der Moment kommt aus dem Offline-Vorrat (Blob-URL) */
+  isLocal?(): boolean;
 }
 
 interface YTNamespace {
@@ -72,6 +77,39 @@ export const registerHls = (items: { videoId: string; hls?: string; audio?: bool
   }
 };
 
+/**
+ * Ausschnitte aus dem Offline-Vorrat (Blob-URL), Schlüssel localKey(videoId, start, end).
+ * offset ist die Tonzeit des ersten Bytes der Quelle: Zeit im Ausschnitt = Zeit in der Quelle minus offset.
+ */
+export interface LocalSrc { url: string; offset: number }
+export const LOCAL = new Map<string, LocalSrc>();
+
+/**
+ * Ersatz, wenn die YouTube-API nicht zu laden ist (offline, blockiert). Streams, Podcasts und Text laufen trotzdem,
+ * YouTube-Momente tun nichts und werden im schlechten Netz ohnehin nach hinten gestellt.
+ */
+export function offlineYT(): YTNamespace {
+  class Stub implements YTPlayer {
+    constructor(_el: HTMLElement, opts: Record<string, unknown>) {
+      const ev = (opts.events ?? {}) as { onReady?: () => void };
+      setTimeout(() => ev.onReady?.(), 0);
+    }
+    loadVideoById() {}
+    cueVideoById() {}
+    playVideo() {}
+    pauseVideo() {}
+    mute() {}
+    unMute() {}
+    isMuted() { return true; }
+    getCurrentTime() { return 0; }
+    getDuration() { return 0; }
+    getPlayerState() { return STATE.UNSTARTED; }
+    setPlaybackRate() {}
+    destroy() {}
+  }
+  return { Player: Stub, PlayerState: { ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 } };
+}
+
 function ytPlayer(YT: YTNamespace, el: HTMLElement, videoId: string | undefined, events: { onReady?: () => void; onState?: (s: number) => void; onError?: (code: number) => void }): YTPlayer {
   return new YT.Player(el, {
     host: 'https://www.youtube-nocookie.com',
@@ -119,6 +157,9 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   let mode: 'yt' | 'hls' = HLS.has(videoId) ? 'hls' : 'yt';
   let hlsState: number = STATE.UNSTARTED;
   let endAt = Infinity;
+  /** Tonzeit des ersten Bytes, wenn der Moment aus dem Vorrat kommt (sonst 0) */
+  let offset = 0;
+  let lastArgs: { id: string; start: number; end: number | undefined; play: boolean } | null = null;
   let readyFired = false;
   const setHlsState = (st: number) => {
     hlsState = st;
@@ -138,7 +179,16 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       }
     });
     el.addEventListener('error', () => {
-      if (mine() && mode === 'hls') events.onError?.(-1);
+      if (!mine() || mode !== 'hls') return;
+      // Ausschnitt aus dem Vorrat nicht abspielbar: einmal vom Netz laden statt zu überspringen
+      if (el.dataset.local === '1' && lastArgs) {
+        const a = lastArgs;
+        LOCAL.delete(localKey(a.id, a.start, a.end));
+        delete el.dataset.src;
+        prepareHls(a.id, a.start, a.end, a.play);
+        return;
+      }
+      events.onError?.(-1);
     });
   }
 
@@ -177,12 +227,16 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       media.playbackRate = old.playbackRate;
     }
     show('hls');
-    endAt = end ?? Infinity;
-    const src = HLS.get(id)!;
+    lastArgs = { id, start, end, play };
+    const loc = LOCAL.get(localKey(id, start, end));
+    offset = loc?.offset ?? 0;
+    media.dataset.local = loc ? '1' : '0';
+    endAt = (end ?? Infinity) - offset;
+    const src = loc?.url ?? HLS.get(id)!;
     const el = media;
     const seek = () => {
       if (el !== media) return; // inzwischen auf das andere Element gewechselt
-      try { el.currentTime = start; } catch { /* iOS setzt erst nach loadedmetadata */ }
+      try { el.currentTime = Math.max(0, start - offset); } catch { /* iOS setzt erst nach loadedmetadata */ }
       if (play) void el.play().catch(() => setHlsState(STATE.PAUSED));
       else setHlsState(STATE.CUED);
     };
@@ -230,8 +284,10 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       yt.unMute();
     },
     isMuted: () => (mode === 'hls' ? media.muted : yt.isMuted()),
-    getCurrentTime: () => (mode === 'hls' ? media.currentTime : yt.getCurrentTime()),
-    getDuration: () => (mode === 'hls' ? media.duration || 0 : yt.getDuration()),
+    getCurrentTime: () => (mode === 'hls' ? media.currentTime + offset : yt.getCurrentTime()),
+    getDuration: () => (mode === 'hls' ? (media.duration || 0) + offset : yt.getDuration()),
+    isBuffered: () => mode === 'hls' && hlsState === STATE.CUED && media.readyState >= 3,
+    isLocal: () => mode === 'hls' && media.dataset.local === '1',
     getPlayerState: () => (mode === 'hls' ? hlsState : yt.getPlayerState()),
     setPlaybackRate: (rate: number) => {
       video.playbackRate = rate;

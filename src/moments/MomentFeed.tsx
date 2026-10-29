@@ -3,7 +3,11 @@ import { createPortal } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
-import { createPlayer, HLS, loadYT, STATE, type YTPlayer } from '../video/ytApi';
+import { createPlayer, HLS, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
+import { isYtId } from './contract';
+import { browserPreloader } from './preloader';
+import { netRank, PRELOAD_COUNT, streamKind } from './preload';
+import { cursorFor, parseSaved, queueKey, releaseTail, reorderByRank, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMomentBlock, SIGNAL, type MomentCursor } from './mix';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
 import { clampRate, DEFAULT_SPEED, HOLD_SPEED, speedOf } from '../lib/state';
@@ -62,6 +66,8 @@ const POLL_MS = 150;
 const TAP_MS = 260;
 const LONG_MS = 520;
 const LOG_MAX = 3000;
+/** Warteschlange beim Start: der Vorrat soll 30 Momente vorhalten, dazu der aktuelle und ein paar Reserve */
+const QUEUE_AHEAD = PRELOAD_COUNT + 2;
 
 const load = (m: Moment) => ({ videoId: m.videoId, startSeconds: m.start, endSeconds: m.end });
 
@@ -94,6 +100,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   const queue = useRef<Moment[]>([]);
   const cursor = useRef<MomentCursor | null>(null);
+  /** Offline-Vorrat (Cache API), null wo es keine Cache API gibt */
+  const pre = useMemo(() => browserPreloader(), []);
+  /** Netz schlecht (offline oder die letzten Starts langsam): die Mischung zieht Vorgeladenes und Text vor, YouTube nach hinten */
+  const poorRef = useRef(false);
+  const lastReplan = useRef(0);
+  /** YouTube-API nicht ladbar (offline): Stub-Player, YouTube-Momente werden übersprungen */
+  const ytStub = useRef(false);
+  const [ytEpoch, setYtEpoch] = useState(0);
+  const [online, setOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
   const idxRef = useRef(0);
   const slots = useRef<Slot[]>(Array.from({ length: 3 }, () => ({ host: null, el: null, player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '' })));
   const soundOn = useRef(false);
@@ -174,18 +189,51 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     window.setTimeout(() => setFlash(null), 900);
   };
 
+  /** Warteschlange ablegen (pro Form und Tag), damit der Vorrat nach einem Neustart noch passt */
+  const saveQueue = () => {
+    try {
+      const ids = queue.current.slice(Math.max(0, idxRef.current)).map((x) => x.id);
+      localStorage.setItem(queueKey(form), JSON.stringify({ day: today, ids }));
+    } catch {
+      /* kein Speicher */
+    }
+  };
+
   const ensureQueue = useCallback(
     (upTo: number) => {
       const s = stateRef.current;
-      cursor.current ??= newMomentCursor(s.momentDay !== today);
+      if (!cursor.current) {
+        // Heutige Warteschlange der letzten Sitzung übernehmen, dann passt der Vorrat noch (auch offline)
+        let saved: Moment[] = [];
+        try {
+          saved = restoreQueue(parseSaved(localStorage.getItem(queueKey(form))), today, pool, { seen: s.momentSeen, mutedChannels: s.mutedChannels }, QUEUE_AHEAD);
+        } catch {
+          /* kein Speicher */
+        }
+        cursor.current = saved.length ? cursorFor(saved, false) : newMomentCursor(s.momentDay !== today);
+        queue.current.push(...saved);
+        poorRef.current = pre?.poor() ?? false;
+      }
+      const rank = poorRef.current && pre ? netRank(pre.has) : undefined;
       while (queue.current.length < upTo) {
-        const b = nextMomentBlock(pool, { areaShares: s.settings.areaShares, weights: s.momentWeights, seen: s.momentSeen, mutedChannels: s.mutedChannels, now: clockNow().getTime() }, cursor.current, rng.current);
+        const b = nextMomentBlock(pool, { areaShares: s.settings.areaShares, weights: s.momentWeights, seen: s.momentSeen, mutedChannels: s.mutedChannels, now: clockNow().getTime(), rank }, cursor.current, rng.current);
         if (!b || !b.length) break;
         queue.current.push(...b.filter((m) => !bad.current.has(m.videoId)));
       }
     },
-    [pool, today],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pool, today, pre, form],
   );
+
+  /** Vorrat bekommt die Warteschlange, Blob-URLs für die nahen Momente werden bereitgehalten */
+  const syncPre = (at: number) => {
+    if (!pre) return;
+    pre.setQueue(queue.current, at);
+    const w = pre.warmSet(queue.current, at);
+    void pre.warm(w);
+    pre.trimWarm(new Set(w.map((x) => x.id)));
+    saveQueue();
+  };
 
   const slotFor = (j: number) => slots.current[single ? 0 : ((j % 3) + 3) % 3];
   const current = () => slotFor(idxRef.current);
@@ -196,6 +244,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     slot.index = j;
     // Text-Momente haben keinen Player
     if (!m || m.form === 'text' || !slot.player || !slot.ready) return;
+    // Ohne YouTube-API (offline) tut ein YouTube-Moment nichts: merken und überspringen, nie hängen bleiben
+    if (ytStub.current && streamKind(m) === 'youtube') {
+      bad.current.add(m.videoId);
+      if (play) window.setTimeout(() => skipRef.current(), 0);
+      return;
+    }
     try {
       // Vorladen ohne Ton, der aktuelle Moment bekommt den gewählten Ton
       if (play) applySound(slot.player);
@@ -281,8 +335,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         queue.current = [...queue.current.slice(0, from), ...clean];
         for (const sl of slots.current) if (sl.index >= from) sl.index = -1;
       }
-      ensureQueue(next + 4);
+      ensureQueue(next + QUEUE_AHEAD);
       if (next >= queue.current.length) return;
+      syncPre(next);
       const prev = idxRef.current;
       const prevM = queue.current[prev];
       // Weitergewischt: Wertung nach geschautem Anteil (learn.ts). Unter 3 s ist ein Skip, zwei Skips desselben Kanals in Folge
@@ -332,7 +387,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       const target = slotFor(next);
       const nm = queue.current[next];
       // Gepuffert heißt: der Vorlade-Player hält genau diesen Moment schon angehalten am Start
-      swipe.current = { j: next, t0: performance.now(), buffered: !single && !!nm && target.ready && target.mid === nm.id && target.st === STATE.PAUSED };
+      // Ein Stream-Moment (Podcast, Vorrat) hält angehalten im Zustand CUED und gilt als geladen, sobald das erste Bild Daten hat
+      const ready = !single && !!nm && target.ready && target.mid === nm.id && (target.st === STATE.PAUSED || (target.st === STATE.CUED && !!target.player?.isBuffered?.()));
+      swipe.current = { j: next, t0: performance.now(), buffered: ready };
       const play = !textRef.current;
       if (single) assign(slots.current[0], next, play);
       else {
@@ -408,19 +465,59 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [goTo]);
 
+  /**
+   * Rest der Warteschlange ab from neu planen (Netz wurde schlecht): Die freigegebenen Momente stehen wieder zur Wahl,
+   * nextMomentBlock füllt mit Rang auf (vorgeladen und Text zuerst, YouTube zuletzt). Blöcke, Anteile und Lernen bleiben wie sonst.
+   */
+  const replanTail = (from: number) => {
+    const tail = queue.current.slice(from);
+    if (!tail.length || !cursor.current) return;
+    releaseTail(cursor.current, tail);
+    queue.current = queue.current.slice(0, from);
+    for (const sl of slots.current) if (sl.index >= from) sl.index = -1;
+    ensureQueue(from + tail.length);
+    if (!single) for (const j of [idxRef.current + 1, idxRef.current + 2]) if (j >= from && j < queue.current.length && slotFor(j).index !== j) assign(slotFor(j), j, false);
+    diag.current.push(`replan from ${from} poor=${poorRef.current}`);
+    syncPre(idxRef.current);
+    rerender();
+  };
+  /** Mitten in der Sitzung: nur umsortieren (siehe reorderByRank), die schon vorgeladenen Momente bleiben in der Warteschlange */
+  const reorderTail = (from: number) => {
+    if (!pre) return;
+    const tail = queue.current.slice(from);
+    if (tail.length < 2) return;
+    queue.current = [...queue.current.slice(0, from), ...reorderByRank(tail, netRank(pre.has))];
+    for (const sl of slots.current) if (sl.index >= from) sl.index = -1;
+    if (!single) for (const j of [idxRef.current + 1, idxRef.current + 2]) if (j >= from && j < queue.current.length && slotFor(j).index !== j) assign(slotFor(j), j, false);
+    diag.current.push(`reorder from ${from}`);
+    syncPre(idxRef.current);
+    rerender();
+  };
+  const replanRef = useRef(replanTail);
+  replanRef.current = replanTail;
+  const reorderRef = useRef(reorderTail);
+  reorderRef.current = reorderTail;
+
+  /** Nach dem Wechsel von Stub zu echter YouTube-API: gesperrte YouTube-Momente wieder zulassen, Player neu anlegen */
+  const ytBack = () => {
+    if (!ytStub.current) return;
+    ytStub.current = false;
+    for (const id of [...bad.current]) if (isYtId(id)) bad.current.delete(id);
+    setYtEpoch((e) => e + 1);
+  };
+
   // Player anlegen
   useEffect(() => {
     let cancelled = false;
-    ensureQueue(6);
+    ensureQueue(QUEUE_AHEAD);
     if (!queue.current.length) return;
-    // Nur wenn die YouTube-API selbst nicht lädt, gibt es die Fehlerseite. Alles danach betrifft einzelne Momente und wird übersprungen.
-    loadYT().then(
-      (YT) => {
+    const begin = (YT: Awaited<ReturnType<typeof loadYT>>) => {
         if (cancelled) return;
         const failedCurrent: number[] = [];
         for (let s = 0; s < SLOTS; s++) {
           const slot = slots.current[s];
-          const j = single ? 0 : s;
+          const base = idxRef.current;
+          const j = single ? base : base + ((((s - base) % 3) + 3) % 3);
           const m = queue.current[j];
           if (!slot.host || !m) continue;
           slot.index = j;
@@ -454,7 +551,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                 if (st === STATE.PLAYING && sw && slot.index === sw.j && sw.j === idxRef.current) {
                   swipe.current = null;
                   const ms = Math.round(performance.now() - sw.t0);
-                  diag.current.push(`first-frame ${ms}ms ${sw.buffered ? 'buffered' : 'cold'}`);
+                  diag.current.push(`first-frame ${ms}ms ${sw.buffered ? 'buffered' : 'cold'}${slot.player?.isLocal?.() ? ' local' : ''}`);
+                  pre?.recordStart(ms, sw.buffered);
                   update((x) => ({ ...x, playLatency: addSample(x.playLatency, { ms, buffered: sw.buffered, at: Date.now() }) }));
                 }
                 // Standardtempo nach Fundament-Regel 11 (1,5x), gehaltenes 2x bleibt bis zum Loslassen
@@ -489,9 +587,36 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           }
         }
         if (failedCurrent.length) goTo(idxRef.current + 1);
-      },
-      (e: Error) => setError(e.message),
-    );
+    };
+    void (async () => {
+      if (pre) {
+        // Vorrat gelesen: war das Netz schon beim Start schlecht (offline), kommen Vorgeladene und Text zuerst
+        await pre.whenReady();
+        poorRef.current = pre.poor();
+        if (poorRef.current && idxRef.current === 0) replanRef.current(0);
+        syncPre(idxRef.current);
+        // Die nächsten Momente als Blob-URL bereit, bevor die Player ihre Quelle bekommen (höchstens 300 ms warten)
+        await Promise.race([pre.warm(pre.warmSet(queue.current, idxRef.current)), new Promise<void>((r) => window.setTimeout(r, 300))]);
+      }
+      if (cancelled) return;
+      // Ohne erreichbare YouTube-API (offline, blockiert) laufen Streams, Podcasts und Text trotzdem. Es gibt keine Fehlerseite mehr.
+      const ready = loadYT();
+      let YT: Awaited<ReturnType<typeof loadYT>> | null = null;
+      try {
+        YT = poorRef.current ? await Promise.race([ready, new Promise<null>((r) => window.setTimeout(() => r(null), 4000))]) : await ready;
+      } catch {
+        YT = null;
+      }
+      if (cancelled) return;
+      if (YT) ytStub.current = false;
+      else {
+        ytStub.current = true;
+        diag.current.push('yt stub');
+        YT = offlineYT();
+        ready.then(() => !cancelled && ytBack(), () => {});
+      }
+      begin(YT);
+    })();
     return () => {
       cancelled = true;
       for (const s of slots.current) {
@@ -501,7 +626,38 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [single, pool.length > 0]);
+  }, [single, pool.length > 0, ytEpoch]);
+
+  // Netz: offline-Symbol, schlechtes Netz erkennen (offline oder die letzten Starts langsam), YouTube-API nachladen, sobald es wieder geht
+  useEffect(() => {
+    const check = () => {
+      if (!pre) return;
+      const poor = pre.poor();
+      if (poor === poorRef.current) return;
+      poorRef.current = poor;
+      diag.current.push(`net poor=${poor}`);
+      // Beim Wechsel ins schlechte Netz den Rest umsortieren, höchstens alle 20 s. Der Rückweg ändert nichts (kein Hin und Her).
+      if (poor && Date.now() - lastReplan.current > 20_000) {
+        lastReplan.current = Date.now();
+        reorderRef.current(idxRef.current + 1);
+      }
+    };
+    const onNet = () => {
+      setOnline(navigator.onLine);
+      check();
+      if (navigator.onLine && ytStub.current) loadYT().then(() => ytBack(), () => {});
+    };
+    window.addEventListener('online', onNet);
+    window.addEventListener('offline', onNet);
+    const off = pre?.subscribe(check);
+    check();
+    return () => {
+      window.removeEventListener('online', onNet);
+      window.removeEventListener('offline', onNet);
+      off?.();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pre]);
 
   // Ende genau bei end (Polling zusätzlich zu endSeconds), Fortschritt, Feed-Zeit
   useEffect(() => {
@@ -714,6 +870,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     }));
     if (fx && FEEDBACK_OF[fx]) log(m, { feedback: FEEDBACK_OF[fx]! });
     if (fx === 'mute') muteChannel(m);
+    if (fx === 'notForMe') dropTopic(m);
     setConfirm(confirmLine(fx, m));
     confirmRef.current = true;
     const done = () => {
@@ -752,6 +909,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     stateRef.current = { ...stateRef.current, mutedChannels: { ...stateRef.current.mutedChannels, [m.channel]: m.channel } };
     const keep = queue.current.slice(0, idxRef.current + 1);
     queue.current = [...keep, ...queue.current.slice(idxRef.current + 1).filter((x) => x.channel !== m.channel)];
+    for (const sl of slots.current) if (sl.index > idxRef.current) sl.index = -1;
+  };
+
+  /** Not for me: Momente desselben Themas fliegen sofort aus der tiefen Warteschlange, sonst hätte die Wertung viele Wischer lang keine Wirkung */
+  const dropTopic = (m: Moment) => {
+    const keep = queue.current.slice(0, idxRef.current + 1);
+    queue.current = [...keep, ...queue.current.slice(idxRef.current + 1).filter((x) => x.topic !== m.topic)];
     for (const sl of slots.current) if (sl.index > idxRef.current) sl.index = -1;
   };
 
@@ -1140,6 +1304,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       forYou: () => forYouRef.current,
       next: () => goTo(idxRef.current + 1),
       diag: () => diag.current.slice(-40),
+      diagAll: () => diag.current.filter((x) => /^(replan|reorder|net poor|yt stub|first-frame)/.test(x)),
       slots: () => slots.current.slice(0, SLOTS).map((x) => ({ st: x.st, index: x.index })),
       latency: () => stateRef.current.playLatency ?? [],
       seen: (id: string) => !!stateRef.current.momentSeen[id],
@@ -1155,10 +1320,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       skipRun: () => stateRef.current.skipRun ?? null,
       openNote: () => openNote(),
       recall: () => ({ open: recallRef.current, state: stateRef.current.recall ?? {}, sessionSeen: sessionSeen.current }),
+      queue: () => queue.current.map((x) => x.id),
+      preload: () => ({ ids: pre?.ids() ?? [], stats: pre?.stats() ?? { n: 0, bytes: 0 }, poor: poorRef.current, log: pre?.log.slice(-200) ?? [], net: pre?.netSamples() ?? [], local: slots.current.slice(0, SLOTS).map((x) => !!x.player?.isLocal?.()) }),
     };
   });
 
-  if (pool.length && !queue.current.length) ensureQueue(6);
+  if (pool.length && !queue.current.length) ensureQueue(QUEUE_AHEAD);
 
   useLayoutEffect(() => {
     // Hook nie kürzen: mehr als drei Zeilen in Normalgröße, dann eine Stufe kleiner
@@ -1219,6 +1386,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
       <div className="vtrack" />
       <FormSwitch form={form} setForm={setForm} />
+      {!online && (
+        <div className="voffline pointer-events-none" data-testid="offline" role="img" aria-label="Offline">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8a15 15 0 0 0-9.4-4.7M5.5 12.6a10 10 0 0 1 3.1-1.8M18.5 12.6a10 10 0 0 0-4.2-2.3M8.9 16.4a5 5 0 0 1 6.2 0M12 20h.01M3 3l18 18" />
+          </svg>
+        </div>
+      )}
       {form === 'text' && m && !forYou && (
         <div
           ref={textBox}

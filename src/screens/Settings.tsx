@@ -14,6 +14,8 @@ import { tapStats, TAP_TARGET_MS, type TapSample } from '../moments/actions';
 import { LATENCY_TARGET_MS, latencyStats, type LatencySample } from '../moments/latency';
 import { emptyWeights, learned, weightText, type Learned as LearnedRows, type Row } from '../moments/learn';
 import { speakerLine } from '../moments/speaker';
+import { preloadedLine } from '../moments/preload';
+import { usePreloadStats } from '../moments/usePreload';
 
 const AREAS: Area[] = ['brain', 'body', 'beat'];
 
@@ -159,6 +161,7 @@ export function Settings({ state, update, replace, moments, skipped = 0, sync }:
             onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, playerMode: e.target.checked ? 'single' : 'slots' } }))}
           />
         </label>
+        <PreloadLine />
         <Latency samples={state.playLatency} />
         <span className="t-meta" data-testid="moments-skipped">Moments skipped: {skipped}</span>
         <TapReaction samples={state.tapMs} />
@@ -272,6 +275,12 @@ function CoreTime({ feedTime }: { feedTime: Record<string, number> }) {
       ))}
     </div>
   );
+}
+
+/** Offline-Vorrat: wie viele Momente als Ausschnitt auf dem Gerät liegen */
+function PreloadLine() {
+  const p = usePreloadStats();
+  return <span className="t-meta" data-testid="preloaded">{preloadedLine(p.n, p.bytes)}</span>;
 }
 
 /** Wisch bis erstes Bild, getrennt nach gepuffert und nicht gepuffert. Ziel unter 300 ms bei gepuffertem Moment. */

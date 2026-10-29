@@ -28,6 +28,12 @@ export interface MomentPrefs {
   mutedChannels: Record<string, string>;
   /** Jetzt in ms, für die Abläufe der Gewichte. Fehlt es, gilt die Systemzeit. */
   now?: number;
+  /**
+   * Optional, nur im schlechten Netz: kleinerer Rang kommt eher (0 vorgeladen oder Text, 1 sonstiger Stream, 2 YouTube).
+   * Er engt nur die Kandidaten innerhalb des gewählten Bereichs ein. Blöcke, Bereichsanteile, Beat zuerst, 20 % Neues
+   * und Top-Rate bleiben wie ohne Rang.
+   */
+  rank?: (m: Moment) => number;
 }
 
 export interface MomentCursor {
@@ -91,8 +97,12 @@ export function nextMomentBlock(pool: Moment[], p0: MomentPrefs, c: MomentCursor
   const inArea = free.filter((m) => m.area === area);
   const block: Moment[] = [];
   for (let i = 0; i < BLOCK; i++) {
-    const avail = inArea.filter((m) => !block.includes(m));
+    let avail = inArea.filter((m) => !block.includes(m));
     if (!avail.length) break;
+    if (p.rank) {
+      const best = Math.min(...avail.map(p.rank));
+      avail = avail.filter((m) => p.rank!(m) === best);
+    }
     const tops = avail.filter((m) => m.top);
     const normal = avail.filter((m) => !m.top);
     let pick: Moment | undefined;

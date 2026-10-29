@@ -19,10 +19,11 @@ for (let i = 0; i < 12; i++) moments.push({ ...mk(i, 'beat', 'islam', i % 2 === 
 for (let i = 12; i < 40; i++) moments.push(mk(i, 'brain', 'augen'));
 for (let i = 40; i < 55; i++) moments.push(mk(i, 'body', 'kraft'));
 for (const m of moments) m.excerpt = EX;
-// Abrufkarte: jeder Moment hat recall, die richtige Antwort wechselt (i % 3). ungerade Nummern arabisch (rechtsläufig).
+// Abrufkarte: jeder Moment hat recall, die richtige Antwort wechselt (i % 3). Ungerade Nummern und Vielfache von 3 arabisch (rechtsläufig),
+// damit in jeder Reihenfolge der Warteschlange beide Richtungen vorkommen (die Reihenfolge hängt von der Tiefe der Warteschlange ab).
 for (const m of moments) {
   const i = Number(m.videoId.slice(4));
-  const ar = i % 2 === 1;
+  const ar = i % 2 === 1 || i % 3 === 0;
   m.recall = ar
     ? { question: `ما الفكرة الأساسية في المقطع ${i}؟`, options: [`الجواب الصحيح ${i}`, `جواب خاطئ أ ${i}`, `جواب خاطئ ب ${i}`], correct: 0, why: `لأن هذا ما قيل في المقطع ${i}.` }
     : { question: `What follows from moment ${i}?`, options: [`Right ${i}`, `Wrong A ${i}`, `Wrong B ${i}`], correct: 0, why: `Because ${i} says so.` };
@@ -595,7 +596,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const res = await page.evaluate(() => {
         const st = window.__core.slots();
         const dom = [...document.querySelectorAll('.vslot')];
-        return st.map((x, i) => ({ st: x.st, current: dom[i]?.getAttribute('aria-hidden') === 'false', poster: (() => { const p = dom[i]?.querySelector('.vposter'); return !!p && getComputedStyle(p).visibility !== 'hidden'; })() }));
+        const qlen = window.__core.queue().length;
+        // Ein Slot hinter dem Ende der Warteschlange (Pool aufgebraucht) hat keinen Moment und ist leer und verborgen
+        return st.map((x, i) => ({ index: x.index, st: x.st, current: dom[i]?.getAttribute('aria-hidden') === 'false', poster: (() => { const p = dom[i]?.querySelector('.vposter'); return !!p && getComputedStyle(p).visibility !== 'hidden'; })() })).filter((x) => x.index < qlen);
       });
       for (const x of res) {
         checksDone++;
