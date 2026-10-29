@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T17:56:08.461Z",
+ "at": "2026-10-29T18:06:55.030Z",
  "runs": [
   {
    "browser": "webkit",
@@ -258,10 +258,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604672,
+     "due": 1792929604706,
      "results": [
       {
-       "at": 1792756804672,
+       "at": 1792756804706,
        "got": false
       }
      ]
@@ -326,9 +326,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06246948242188,
+    "bh": 221.06253051757812,
     "fw": 393,
-    "fh": 221.06246948242188,
+    "fh": 221.06253051757812,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -338,21 +338,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 30.00000000000182,
-    "recorded": 31
+    "measured": 27,
+    "recorded": 35
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 852,
+    "checksDone": 843,
     "violations": 0,
-    "endedSeen": 266
+    "endedSeen": 263
    },
    "latency": {
     "n": 34,
     "buffered": 28,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | e5d77a8 |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e5d77a8 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | e5d77a8 |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | e5d77a8 |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | e5d77a8 |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | e5d77a8 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | e777c5b |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e777c5b |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | e777c5b |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | e777c5b |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | e777c5b |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | e777c5b |",
    "badWalk": [
     {
      "idx": 2,
@@ -944,10 +944,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603481,
+     "due": 1792929603451,
      "results": [
       {
-       "at": 1792756803481,
+       "at": 1792756803451,
        "got": false
       }
      ]
@@ -1012,9 +1012,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.0625,
+    "bh": 221.06246948242188,
     "fw": 393,
-    "fh": 221.0625,
+    "fh": 221.06246948242188,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -1024,21 +1024,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 32.39999999999418,
+    "measured": 31.899999999965075,
     "recorded": 32
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 867,
+    "checksDone": 846,
     "violations": 0,
-    "endedSeen": 270
+    "endedSeen": 263
    },
    "latency": {
     "n": 34,
     "buffered": 28,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | e5d77a8 |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e5d77a8 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | e5d77a8 |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | e5d77a8 |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | e5d77a8 |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | e5d77a8 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | e777c5b |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e777c5b |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | e777c5b |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | e777c5b |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | e777c5b |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | e777c5b |",
    "badWalk": [
     {
      "idx": 2,
