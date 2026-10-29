@@ -85,6 +85,26 @@ final class Round1Tests: XCTestCase {
         XCTAssertEqual(Actions.line(Actions.stats([])), "no taps measured yet")
     }
 
+    // Endseite (Auftrag 29.10.2026), gleiche Prüfdaten wie tests/moments-form.test.ts
+    func testEndPage() {
+        func m(_ id: String, audio: Bool?, channel: String = "K") -> Moment {
+            Moment(id: id, videoId: id, start: 0, end: 60, channel: channel, videoTitle: nil, area: .brain, topic: "eyes",
+                   hook: "Hook \(id)", forYou: nil, kind: "story", top: false, hls: nil, thumb: nil, url: nil, audio: audio, cues: nil)
+        }
+        XCTAssertEqual(EndPage.line(.video), "You've seen every video moment.")
+        XCTAssertEqual(EndPage.line(.audio), "You've seen every audio moment.")
+        XCTAssertEqual(EndPage.sub, "New ones arrive daily.")
+        XCTAssertEqual(EndPage.others(.video), [.audio, .text])
+        XCTAssertEqual(EndPage.others(.text), [.video, .audio])
+        XCTAssertEqual(EndPage.label(.audio, 412), "Audio, 412 new")
+        XCTAssertEqual(EndPage.label(.text, 230), "Text, 230 new")
+        let pool = [m("a", audio: true), m("b", audio: true), m("c", audio: true, channel: "M"), m("e", audio: nil)]
+        XCTAssertEqual(EndPage.unseen(pool, .audio, seen: [:], muted: [:]), 3)
+        XCTAssertEqual(EndPage.unseen(pool, .audio, seen: ["a": Date()], muted: [:]), 2)
+        XCTAssertEqual(EndPage.unseen(pool, .audio, seen: ["a": Date()], muted: ["M": "x"]), 1)
+        XCTAssertEqual(EndPage.unseen(pool, .video, seen: ["e": Date()], muted: [:]), 0)
+    }
+
     func testFormFilter() {
         // ohne Feld form: audio true heißt audio, sonst video
         XCTAssertEqual(FormFilter.of(form: nil, audio: false), .video)

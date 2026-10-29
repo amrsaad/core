@@ -160,6 +160,21 @@ enum FormFilter {
     static func emptyLine(_ f: FeedForm) -> String { f == .text ? "Text sources coming" : "No \(f.rawValue) moments yet" }
 }
 
+/// Endseite (Max 29.10.2026): Gesehen bleibt gesehen, nie Wiederholung. Ist der Reiter durch, steht eine ruhige Seite mit zwei Knöpfen zu den
+/// anderen Reitern und der Zahl ihrer ungesehenen Momente. Gleiche Regeln und Prüfdaten wie src/moments/form.ts (endLine, unseenCount).
+enum EndPage {
+    /// Kennung der Seite hinter dem letzten Moment
+    static let id = "end-page"
+    static func line(_ f: FeedForm) -> String { "You've seen every \(f.rawValue) moment." }
+    static let sub = "New ones arrive daily."
+    static func others(_ f: FeedForm) -> [FeedForm] { FeedForm.allCases.filter { $0 != f } }
+    /// Nicht gesehen und nicht von einem stummgeschalteten Sprecher
+    static func unseen(_ pool: [Moment], _ f: FeedForm, seen: [String: Date], muted: [String: String]) -> Int {
+        pool.filter { $0.feedForm == f && seen[$0.id] == nil && muted[$0.channel] == nil }.count
+    }
+    static func label(_ f: FeedForm, _ n: Int) -> String { "\(f.label), \(n) new" }
+}
+
 enum FormText {
     /// Der geprüfte Ausschnitt (Zeilenumbrüche bleiben), ohne Ausschnitt die Untertitel als Fließtext
     static func text(excerpt: String?, cues: [String]) -> String {

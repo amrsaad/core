@@ -125,7 +125,8 @@ struct FeedView: View {
                     message(FormFilter.emptyLine(feed.form))
                         .overlay(alignment: .top) { FeedTopBar().padding(.top, 6) }
                 } else if feed.queue.isEmpty {
-                    message("You have seen every moment. New ones arrive with the next daily run.")
+                    endPage
+                        .overlay(alignment: .top) { FeedTopBar().padding(.top, 6) }
                 } else {
                     pager
                 }
@@ -169,6 +170,10 @@ struct FeedView: View {
                         .frame(width: full.width, height: full.height)
                         .id(m.id)
                     }
+                    // Hinter dem letzten Moment: Endseite, nie eine Wiederholung
+                    endPage
+                        .frame(width: full.width, height: full.height)
+                        .id(EndPage.id)
                 }
                 .scrollTargetLayout()
             }
@@ -233,6 +238,36 @@ struct FeedView: View {
         }
     }
 
+    private var endPage: some View {
+        let form = feed.form
+        return VStack(spacing: 8) {
+            Text(EndPage.line(form)).font(.system(size: 20, weight: .semibold)).foregroundStyle(.white).multilineTextAlignment(.center)
+                .accessibilityIdentifier("endLine")
+            Text(EndPage.sub).font(.system(size: 16)).foregroundStyle(Palette.secondary)
+            VStack(spacing: 12) {
+                ForEach(EndPage.others(form), id: \.self) { f in
+                    let n = EndPage.unseen(feed.pool, f, seen: store.state.seen, muted: store.state.muted)
+                    Button { store.state.form = f } label: {
+                        Text(EndPage.label(f, n))
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(n > 0 ? Color.white : Color(hex: 0x6B6B6B))
+                            .frame(maxWidth: .infinity, minHeight: 56)
+                            .background(Color(hex: 0x1F1F1F), in: RoundedRectangle(cornerRadius: 16))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(n == 0)
+                    .accessibilityIdentifier("endButton-\(f.rawValue)")
+                }
+            }
+            .frame(maxWidth: 320)
+            .padding(.top, 28)
+        }
+        .padding(.horizontal, 32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.black)
+        .accessibilityIdentifier("endPage")
+    }
+
     private func message(_ text: String) -> some View {
         Text(text)
             .font(.system(size: 17))
@@ -277,7 +312,7 @@ struct FeedView: View {
         let p = feed.playback(for: m)
         p.pause()
         p.setRate(Float(store.state.speed))
-        let ni = index(of: new) ?? oi
+        let ni = new == EndPage.id ? oi + 1 : (index(of: new) ?? oi)
         let text = store.state.currentForm == .text
         // Im Textmodus gibt es keine Wiedergabezeit, darum kein Zeitsignal
         if ni > oi && !p.ended && !text {
@@ -330,8 +365,10 @@ struct FeedView: View {
 
     private func advance() {
         forYou = nil
-        guard let i = index(of: currentID), i + 1 < feed.queue.count else { return }
-        withAnimation(.easeInOut(duration: 0.25)) { currentID = feed.queue[i + 1].id }
+        guard let i = index(of: currentID) else { return }
+        // Nach dem letzten Moment kommt die Endseite (Abrufkarte und Signale laufen wie bei jedem Wechsel)
+        let next = i + 1 < feed.queue.count ? feed.queue[i + 1].id : EndPage.id
+        withAnimation(.easeInOut(duration: 0.25)) { currentID = next }
     }
 
     /// Wisch nach links: Blatt öffnen, Wiedergabe pausiert nicht (der Ton läuft weiter)
