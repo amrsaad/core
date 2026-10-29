@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T16:56:41.989Z",
+ "at": "2026-10-29T17:11:54.676Z",
  "runs": [
   {
    "browser": "webkit",
@@ -146,10 +146,13 @@
     "noteChipsLarge": true,
     "noteSheetOneLevel": true,
     "noteTypingDoesNotNavigate": true,
+    "noteConfirmLine": true,
+    "noteChipsLockedWhileConfirm": true,
     "noteSheetClosed": true,
     "noteGoesToNext": true,
     "noteSavedLocally": true,
-    "noteBoringNoEffect": true,
+    "noteBoringWeakensChannel": true,
+    "noteBoringNoToastNoHeart": true,
     "noteNothingOpened": true,
     "noteDoneClosesAndNext": true,
     "noteTextSaved": true,
@@ -158,20 +161,19 @@
     "noteOnlyLongLeftSwipe": true,
     "noteNoNetwork": true,
     "knownViaChip": true,
-    "knownNoToast": true,
-    "knownAdvanced": true,
-    "knownSaved": true,
+    "knownTopicCap": true,
+    "knownChannelKept": true,
     "wrongViaChip": true,
-    "wrongToast": true,
-    "wrongSaved": true,
+    "wrongChannelCap": true,
+    "wrongTopicKept": true,
     "notForMeViaChip": true,
-    "notForMeTopicDown": true,
-    "notForMeChannelAreaKept": true,
-    "notForMeNoToast": true,
-    "notForMeAdvanced": true,
-    "notForMeSaved": true,
+    "notForMeTopic02": true,
+    "notForMeChannel05": true,
+    "notForMeAreaKept": true,
+    "notForMeExpiry30Days": true,
     "muteViaChip": true,
-    "muteToast": true,
+    "muteLine": true,
+    "muteNoToast": true,
     "muteAdvanced": true,
     "muteSaved": true,
     "noteStillNoNetwork": true,
@@ -197,12 +199,29 @@
     "issueRowsHaveAllFields": true,
     "issueTitleCount": true,
     "promptMarksSent": true,
+    "greatNoted": true,
+    "greatLearnsNothing": true,
     "newNoteUnsent": true,
     "reviewOnlyOnce": true,
     "promptOncePerDay": true,
     "prevPlanShown": true,
     "prevPlanAnswered": true,
     "skipWorks": true,
+    "cardShown": true,
+    "cardMax5": true,
+    "cardArrows": true,
+    "cardSortedDown": true,
+    "cardHasLessRows": true,
+    "cardTopicBlocked": true,
+    "resetAsks": true,
+    "resetCancelKeeps": true,
+    "cardExpiryLifted": true,
+    "resetEmpties": true,
+    "resetClearsWeights": true,
+    "soloFeed": true,
+    "soloFirstSkip": true,
+    "soloSecondSkip02": true,
+    "soloSecondSkip14Days": true,
     "p6Feed": true,
     "emptyAudioLine": true,
     "emptyKeepsSwitch": true,
@@ -281,10 +300,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603445,
+     "due": 1792929603438,
      "results": [
       {
-       "at": 1792756803445,
+       "at": 1792756803438,
        "got": false
       }
      ]
@@ -349,9 +368,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06253051757812,
+    "bh": 221.06246948242188,
     "fw": 393,
-    "fh": 221.06253051757812,
+    "fh": 221.06246948242188,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -361,21 +380,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 31.70000000001164,
-    "recorded": 31
+    "measured": 31.900000000023283,
+    "recorded": 32
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 867,
+    "checksDone": 849,
     "violations": 0,
-    "endedSeen": 140
+    "endedSeen": 264
    },
    "latency": {
-    "n": 36,
-    "buffered": 30,
+    "n": 34,
+    "buffered": 28,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000054:100 | Testmoment 54 body | Boring | - | Video | 7231c07 |\n| test0000048:100 | Testmoment 48 body | - | The cut is two seconds late & the \"hook\" repeats. | Video | 7231c07 |\n| test0000019:100 | Testmoment 19 brain | Known | - | Video | 7231c07 |\n| test0000026:100 | Testmoment 26 brain | Wrong | - | Video | 7231c07 |\n| test0000046:100 | Testmoment 46 body | Not for me | - | Video | 7231c07 |\n| test0000005:100 | Testmoment 5 beat | Mute speaker | - | Video | 7231c07 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | 25a8fb8 |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 25a8fb8 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | 25a8fb8 |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | 25a8fb8 |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | 25a8fb8 |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | 25a8fb8 |",
    "badWalk": [
     {
      "idx": 2,
@@ -421,42 +440,42 @@
     },
     {
      "idx": 8,
-     "id": "test0000052",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 9,
-     "id": "test0000054",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 10,
-     "id": "test0000046",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 11,
-     "id": "test0000026",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 12,
      "id": "test0000016",
      "card": false,
      "end": false,
      "err": false
     },
     {
+     "idx": 9,
+     "id": "test0000023",
+     "card": false,
+     "end": false,
+     "err": false
+    },
+    {
+     "idx": 10,
+     "id": "test0000021",
+     "card": false,
+     "end": false,
+     "err": false
+    },
+    {
+     "idx": 11,
+     "id": "test0000052",
+     "card": false,
+     "end": false,
+     "err": false
+    },
+    {
+     "idx": 12,
+     "id": "test0000047",
+     "card": false,
+     "end": false,
+     "err": false
+    },
+    {
      "idx": 13,
-     "id": "test0000027",
+     "id": "test0000007",
      "card": false,
      "end": false,
      "err": false
