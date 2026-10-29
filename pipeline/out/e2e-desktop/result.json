@@ -1,9 +1,10 @@
 {
-  "at": "2026-10-29T16:10:08.915Z",
+  "at": "2026-10-29T16:27:07.651Z",
   "checks": {
     "below900Mobile": true,
     "at900Desktop": true,
     "resizeKeepsMoment": true,
+    "soundIconDesk": true,
     "helpShownFirst": true,
     "helpListsKeys": true,
     "helpNoDashes": true,
