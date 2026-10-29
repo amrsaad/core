@@ -723,6 +723,14 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       return;
     }
     if (!wasDown) return;
+    // Jede erste Berührung (auch ein Wisch) gilt dem Browser als Geste: Ton sofort freischalten, damit nach einem
+    // Neuladen der PWA nie ein Tipp nur für den Ton nötig ist und der Hinweis nicht zurückkommt (Max, 29.10.).
+    if (!soundOn.current && !textRef.current) {
+      soundOn.current = true;
+      for (const s of slots.current) s.player?.unMute();
+      soundSeenOn = true;
+      setHint(false);
+    }
     if (r.moved) {
       setDrag(0);
       const sw = swipeOf(r.dx, r.dy);
