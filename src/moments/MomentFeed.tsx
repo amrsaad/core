@@ -1057,11 +1057,11 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
             <div className="vframe">
               <div ref={(el) => (slot.host = el)} />
             </div>
-            {mm && mm.form !== 'text' && !mm.audio && <img className="vposter" src={thumbOf(mm)} alt="" draggable={false} />}
+            {mm && mm.form !== 'text' && !mm.audio && <img key={mm.id} className="vposter" src={thumbOf(mm)} alt="" draggable={false} />}
             {mm && mm.form !== 'text' && mm.audio && (
               <div className="vaudio">
-                <img className="vaudio-bg" src={thumbOf(mm)} alt="" draggable={false} />
-                <img className="vaudio-art" src={thumbOf(mm)} alt="" draggable={false} />
+                <img key={`bg-${mm.id}`} className="vaudio-bg" src={thumbOf(mm)} alt="" draggable={false} />
+                <img key={`art-${mm.id}`} className="vaudio-art" src={thumbOf(mm)} alt="" draggable={false} />
               </div>
             )}
             {isCur && paused && !forYou && (
