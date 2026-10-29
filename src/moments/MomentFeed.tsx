@@ -21,7 +21,7 @@ import { buildIssue, chipEffect, firstOpenOfDay, makeEntry, markSent, promptLine
 import { HOOK_LINE_PT, hookStep } from './hook';
 import { makeRng } from './rng';
 import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
-import { emptyFormLine, filterPool, FORM_LABEL, FORMS, momentText, textEndReached, type Form } from './form';
+import { emptyFormLine, END_SUB, endButtonLabel, endLine, filterPool, FORM_LABEL, FORMS, momentText, otherForms, textEndReached, unseenCount, type Form } from './form';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
 /** Desktop-Modus ab 900 px: Panel rechts, Übersicht, Seitenblatt. Fehlt das Feld, gilt das mobile Verhalten unverändert. */
@@ -264,7 +264,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         for (const sl of slots.current) if (sl.index >= from) sl.index = -1;
       }
       ensureQueue(next + 4);
-      if (next >= queue.current.length) return;
+      // Genau hinter dem letzten Moment liegt die Endseite (idx = Länge). Weiter geht es nicht.
+      if (next > queue.current.length) return;
       const prev = idxRef.current;
       const prevM = queue.current[prev];
       // Weitergewischt: Signal nach geschautem Anteil (unter 5 s Minus, fast ganz geschaut leichtes Plus)
@@ -1047,7 +1048,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       </div>
     );
   if (error) return <Empty text={`${error}. Moments need internet.`} />;
-  if (!queue.current.length) return <Empty text="You have seen every moment. New ones arrive with the next daily run." />;
+  if (!queue.current.length)
+    return (
+      <div className="vfeed" ref={dragEl}>
+        <FormSwitch form={form} setForm={setForm} />
+        <EndPage form={form} counts={Object.fromEntries(otherForms(form).map((f) => [f, unseenCount(allPool, f, state.momentSeen, state.mutedChannels)])) as Record<Form, number>} setForm={setForm} />
+      </div>
+    );
 
   const m = queue.current[idx];
   const recallEl = recall ? <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} rng={rng.current!} onAnswer={answerRecall} onClose={closeRecall} keys={!!desk} ctl={recallCtl} /> : null;
@@ -1244,6 +1251,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </div>
       )}
 
+      {!m && !forYou && idx >= queue.current.length && (
+        <EndPage form={form} counts={Object.fromEntries(otherForms(form).map((f) => [f, unseenCount(allPool, f, state.momentSeen, state.mutedChannels)])) as Record<Form, number>} setForm={setForm} onBack={() => goTo(queue.current.length - 1)} />
+      )}
+
       {flash && (
         <div className="flash pointer-events-none absolute inset-x-0 bottom-40 z-30 flex justify-center">
           <span className="rounded-full bg-black/80 px-4 py-2 text-[15px] text-white">{flash}</span>
@@ -1292,6 +1303,29 @@ function FormSwitch({ form, setForm }: { form: Form; setForm: (f: Form) => void 
             {FORM_LABEL[f]}
           </button>
         ))}
+    </div>
+  );
+}
+
+/** Ruhige Endseite: Satz, zweiter Satz, zwei Knöpfe zu den anderen Reitern. Wisch nach unten geht zurück (nur hinter dem letzten Moment). */
+function EndPage({ form, counts, setForm, onBack }: { form: Form; counts: Record<Form, number>; setForm: (f: Form) => void; onBack?: () => void }) {
+  const y0 = useRef<number | null>(null);
+  return (
+    <div
+      className="vend"
+      data-testid="end-page"
+      onPointerDown={(e) => { y0.current = e.clientY; }}
+      onPointerUp={(e) => { if (onBack && y0.current !== null && e.clientY - y0.current > 60) onBack(); y0.current = null; }}
+    >
+      <p className="vend-line" data-testid="end-line">{endLine(form)}</p>
+      <p className="vend-sub">{END_SUB}</p>
+      <div className="vend-btns">
+        {otherForms(form).map((f) => (
+          <button key={f} type="button" className="vend-btn" data-testid={`end-${f}`} disabled={!counts[f]} onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()} onClick={() => setForm(f)}>
+            {endButtonLabel(f, counts[f])}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

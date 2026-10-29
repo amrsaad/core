@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { emptyFormLine, filterPool, formOf, FORMS, momentText, textEndReached } from '../src/moments/form';
+import { emptyFormLine, endButtonLabel, endLine, END_SUB, filterPool, formOf, FORMS, momentText, otherForms, textEndReached, unseenCount } from '../src/moments/form';
 
 describe('Formwahl (Runde 1, Punkt 3)', () => {
   it('drei Stellungen in fester Reihenfolge', () => expect(FORMS).toEqual(['video', 'audio', 'text']));
@@ -34,5 +34,26 @@ describe('Formwahl (Runde 1, Punkt 3)', () => {
     expect(emptyFormLine('video')).toBe('No video moments yet');
     expect(emptyFormLine('audio')).toBe('No audio moments yet');
     expect(emptyFormLine('text')).toBe('Text sources coming');
+  });
+});
+
+describe('Endseite (Auftrag 29.10.2026)', () => {
+  const mk = (id: string, form: 'video' | 'audio' | 'text', channel = 'K') => ({ id, channel, form });
+  it('Sätze und Knöpfe', () => {
+    expect(endLine('video')).toBe("You've seen every video moment.");
+    expect(endLine('audio')).toBe("You've seen every audio moment.");
+    expect(END_SUB).toBe('New ones arrive daily.');
+    expect(otherForms('video')).toEqual(['audio', 'text']);
+    expect(otherForms('text')).toEqual(['video', 'audio']);
+    expect(endButtonLabel('audio', 412)).toBe('Audio, 412 new');
+    expect(endButtonLabel('text', 230)).toBe('Text, 230 new');
+  });
+  it('ungesehen: nur die Form, nicht gesehen, nicht stummgeschaltet', () => {
+    const pool = [mk('a', 'audio'), mk('b', 'audio'), mk('c', 'audio', 'M'), mk('d', 'text'), mk('e', 'video')];
+    expect(unseenCount(pool, 'audio', {}, {})).toBe(3);
+    expect(unseenCount(pool, 'audio', { a: 1 }, {})).toBe(2);
+    expect(unseenCount(pool, 'audio', { a: 1 }, { M: 'x' })).toBe(1);
+    expect(unseenCount(pool, 'text', {}, {})).toBe(1);
+    expect(unseenCount(pool, 'video', { e: 5 }, {})).toBe(0);
   });
 });

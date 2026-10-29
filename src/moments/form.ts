@@ -31,3 +31,18 @@ export function momentText(m: Pick<Moment, 'cues'> & { excerpt?: string }): stri
 
 /** Im Textmodus zählt "gesehen" erst, wenn das Textende sichtbar war */
 export const textEndReached = (scrollTop: number, clientHeight: number, scrollHeight: number) => scrollTop + clientHeight >= scrollHeight - 4;
+
+/**
+ * Endseite (Auftrag Max 29.10.2026): Gesehen bleibt gesehen, es gibt nie eine Wiederholung. Ist der Reiter durch, steht eine ruhige Seite
+ * mit zwei Knöpfen zu den anderen Reitern und der Zahl ihrer ungesehenen Momente. Kein weiterer Zähler.
+ * Gleiche Regeln in ios/Core (Forms).
+ */
+export const endLine = (f: Form) => `You've seen every ${f} moment.`;
+export const END_SUB = 'New ones arrive daily.';
+export const otherForms = (f: Form): Form[] => FORMS.filter((x) => x !== f);
+/** Ungesehene Momente einer Form: nicht gesehen und nicht von einem stummgeschalteten Sprecher */
+export function unseenCount(pool: Pick<Moment, 'id' | 'channel' | 'audio' | 'form'>[], f: Form, seen: Record<string, number>, muted: Record<string, string>): number {
+  return pool.filter((m) => inForm(m, f) && !seen[m.id] && !muted[m.channel]).length;
+}
+/** "Audio, 412 new" */
+export const endButtonLabel = (f: Form, n: number) => `${FORM_LABEL[f]}, ${n} new`;

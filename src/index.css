@@ -407,3 +407,15 @@ a.dp-source { text-decoration: underline; text-underline-offset: 3px; }
 .desk :is(button, a[href], select, input, textarea, [tabindex]):focus-visible { outline: 2px solid var(--focus, #fff); outline-offset: 2px; }
 .desk :is(button, a[href], select):not(:disabled):hover { box-shadow: inset 0 0 0 999px rgba(127, 127, 127, 0.22); cursor: pointer; }
 .desk :is(button, select):disabled { cursor: default; }
+
+/* Endseite: ruhig, mittig, über Feed und Overlays (Max 29.10.2026) */
+.vend {
+  position: absolute; inset: 0; z-index: 22; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; padding: 0 32px; background: #000; text-align: center;
+}
+.vend-line { color: #fff; font-size: 20px; line-height: 28px; font-weight: 600; }
+.vend-sub { color: #b3b3b3; font-size: 16px; line-height: 24px; }
+.vend-btns { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; width: min(100%, 320px); }
+.vend-btn { min-height: 56px; border-radius: 16px; background: #1f1f1f; color: #fff; font-size: 17px; font-weight: 600; }
+.vend-btn:disabled { color: #6b6b6b; }
+

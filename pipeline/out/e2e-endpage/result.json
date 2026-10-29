@@ -1,0 +1,121 @@
+{
+  "at": "2026-10-29T16:48:35.139Z",
+  "runs": [
+    {
+      "variant": "webkit",
+      "checks": {
+        "feedLoaded": true,
+        "fourVideosShownOnce": true,
+        "recallCardBeforeEnd": true,
+        "cardOverEndPage": true,
+        "endPageAfterCard": true,
+        "endLine": true,
+        "endText": true,
+        "endTwoButtons": true,
+        "endButtonsLarge": true,
+        "endCoversFeed": true,
+        "noMomentOnEnd": true,
+        "upStaysOnEnd": true,
+        "reloadEndPageAtOnce": true,
+        "reloadNoMoment": true,
+        "reloadNoRepeat": true,
+        "audioOpens": true,
+        "audioMarkedSeen": true,
+        "backToVideoEnd": true,
+        "countDropsAfterSeen": true,
+        "textOpens": true,
+        "noPageErrors": true
+      },
+      "shown": [
+        "endp0000000:100",
+        "endp0000003:100",
+        "endp0000001:100",
+        "endp0000002:100"
+      ],
+      "end": {
+        "line": "You've seen every video moment.",
+        "text": "You've seen every video moment. New ones arrive daily. Audio, 5 new Text, 2 new",
+        "b": [
+          {
+            "t": "Audio, 5 new",
+            "id": "end-audio",
+            "h": 56,
+            "w": 320,
+            "dis": false
+          },
+          {
+            "t": "Text, 2 new",
+            "id": "end-text",
+            "h": 56,
+            "w": 320,
+            "dis": false
+          }
+        ],
+        "full": true
+      },
+      "afterAudio": [
+        "Audio, 2 new",
+        "Text, 2 new"
+      ],
+      "seenAudio": 3
+    },
+    {
+      "variant": "chromium",
+      "checks": {
+        "feedLoaded": true,
+        "fourVideosShownOnce": true,
+        "recallCardBeforeEnd": true,
+        "cardOverEndPage": true,
+        "endPageAfterCard": true,
+        "endLine": true,
+        "endText": true,
+        "endTwoButtons": true,
+        "endButtonsLarge": true,
+        "endCoversFeed": true,
+        "noMomentOnEnd": true,
+        "upStaysOnEnd": true,
+        "reloadEndPageAtOnce": true,
+        "reloadNoMoment": true,
+        "reloadNoRepeat": true,
+        "audioOpens": true,
+        "audioMarkedSeen": true,
+        "backToVideoEnd": true,
+        "countDropsAfterSeen": true,
+        "textOpens": true,
+        "noPageErrors": true
+      },
+      "shown": [
+        "endp0000000:100",
+        "endp0000003:100",
+        "endp0000001:100",
+        "endp0000002:100"
+      ],
+      "end": {
+        "line": "You've seen every video moment.",
+        "text": "You've seen every video moment. New ones arrive daily. Audio, 5 new Text, 2 new",
+        "b": [
+          {
+            "t": "Audio, 5 new",
+            "id": "end-audio",
+            "h": 56,
+            "w": 320,
+            "dis": false
+          },
+          {
+            "t": "Text, 2 new",
+            "id": "end-text",
+            "h": 56,
+            "w": 320,
+            "dis": false
+          }
+        ],
+        "full": true
+      },
+      "afterAudio": [
+        "Audio, 2 new",
+        "Text, 2 new"
+      ],
+      "seenAudio": 3
+    }
+  ]
+}
