@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T17:42:44.313Z",
+ "at": "2026-10-29T17:56:08.461Z",
  "runs": [
   {
    "browser": "webkit",
@@ -11,14 +11,14 @@
     "firstArea": "beat",
     "firstPlaying": true,
     "hookShortNormal": true,
-    "soundIconShownWhileMuted": false,
-    "soundIconBottomRightOfBand": false,
-    "noSoundPill": false,
-    "soundOn": false,
-    "soundIconGoneAfterTap": false,
-    "soundIconNeverBack": false,
+    "soundIconShownWhileMuted": true,
+    "soundIconBottomRightOfBand": true,
+    "noSoundPill": true,
+    "soundOn": true,
+    "soundIconGoneAfterTap": true,
+    "soundIconNeverBack": true,
     "forYouExactlyWhenSet": true,
-    "sawBothKinds": false,
+    "sawBothKinds": true,
     "stoppedAtEnd": true,
     "autoNext": true,
     "recallAfter4": true,
@@ -202,7 +202,17 @@
     "recallEnglishLtr": true,
     "pageErrors": 0
    },
-   "soundIcon": null,
+   "soundIcon": {
+    "w": 32,
+    "h": 32,
+    "text": "",
+    "right": 12,
+    "fromBandBottom": 11.9947509765625,
+    "inBand": true,
+    "centered": false,
+    "pillText": false,
+    "slashed": true
+   },
    "card0": {
     "n": 3,
     "before": false,
@@ -248,10 +258,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929710815,
+     "due": 1792929604672,
      "results": [
       {
-       "at": 1792756910815,
+       "at": 1792756804672,
        "got": false
       }
      ]
@@ -267,11 +277,11 @@
      "align": ""
     },
     {
-     "ar": false,
-     "shown": false,
-     "rtl": false,
-     "size": 0,
-     "align": ""
+     "ar": true,
+     "shown": true,
+     "rtl": true,
+     "size": 21,
+     "align": "right"
     },
     {
      "ar": false,
@@ -290,25 +300,25 @@
    ],
    "sequence": [
     {
-     "id": "test0000021:100",
+     "id": "test0000000:100",
+     "has": true,
+     "fy": true,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000001:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000021:100",
-     "has": false,
-     "fy": false,
+     "id": "test0000006:100",
+     "has": true,
+     "fy": true,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000021:100",
-     "has": false,
-     "fy": false,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000021:100",
+     "id": "test0000014:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -316,9 +326,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.0625,
+    "bh": 221.06246948242188,
     "fw": 393,
-    "fh": 221.0625,
+    "fh": 221.06246948242188,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -328,21 +338,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 28,
+    "measured": 30.00000000000182,
     "recorded": 31
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 816,
+    "checksDone": 852,
     "violations": 0,
-    "endedSeen": 254
+    "endedSeen": 266
    },
    "latency": {
     "n": 34,
     "buffered": 28,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | 4e13f77 |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 4e13f77 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | 4e13f77 |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | 4e13f77 |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | 4e13f77 |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | 4e13f77 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | e5d77a8 |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e5d77a8 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | e5d77a8 |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | e5d77a8 |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | e5d77a8 |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | e5d77a8 |",
    "badWalk": [
     {
      "idx": 2,
@@ -675,7 +685,7 @@
     "noRating": true
    },
    "errors": [],
-   "ok": false
+   "ok": true
   },
   {
    "browser": "chromium",
@@ -934,10 +944,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603447,
+     "due": 1792929603481,
      "results": [
       {
-       "at": 1792756803447,
+       "at": 1792756803481,
        "got": false
       }
      ]
@@ -1014,21 +1024,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 31.29999999998836,
-    "recorded": 31
+    "measured": 32.39999999999418,
+    "recorded": 32
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 825,
+    "checksDone": 867,
     "violations": 0,
-    "endedSeen": 256
+    "endedSeen": 270
    },
    "latency": {
     "n": 34,
     "buffered": 28,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | 4e13f77 |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 4e13f77 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | 4e13f77 |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | 4e13f77 |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | 4e13f77 |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | 4e13f77 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | e5d77a8 |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e5d77a8 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | e5d77a8 |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | e5d77a8 |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | e5d77a8 |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | e5d77a8 |",
    "badWalk": [
     {
      "idx": 2,
