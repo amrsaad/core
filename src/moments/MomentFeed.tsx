@@ -213,25 +213,17 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   // Erkennt, ob der Browser die Wiedergabe mit Ton verweigert hat. Puffern (langsames Netz, Podcast-Stream) ist keine
   // Verweigerung, sonst stand "Tap for sound" bei laufendem Ton (28.10.). Dann später noch einmal prüfen.
+  // Nach dem ersten Tipp bleibt der Ton an. Startet ein Moment nicht von selbst, wird noch einmal angestoßen und
+  // der Zustand protokolliert. Nie mehr stummschalten, nie mehr "Tap for sound" zurückholen (Max, 28. und 29.10.).
   const soundGuard = (j: number, attempt = 0) => {
     window.setTimeout(() => {
       const sl = slotFor(j);
       if (idxRef.current !== j || userPaused.current || !sl.player || forYouRef.current || recallRef.current) return;
       if (sl.st === STATE.PLAYING || !soundOn.current) return;
-      // Eigener Stream (Podcast, Cybersight, TED): Bis die Metadaten da sind, bleibt der Zustand bei CUED, nicht BUFFERING.
-      // Eine echte Verweigerung meldet sich dort als PAUSED (play() abgelehnt). Alles andere ist Laden, also warten.
-      const m = queue.current[j];
-      const ownStream = !!m && HLS.has(m.videoId);
-      const loading = sl.st === STATE.BUFFERING || (ownStream && sl.st !== STATE.PAUSED);
-      if (loading && attempt < 6) {
-        soundGuard(j, attempt + 1);
-        return;
-      }
-      sl.player.mute();
-      sl.player.playVideo();
-      soundOn.current = false;
-      setHint(true);
-    }, attempt === 0 ? 1500 : 2000);
+      diag.current.push(`soundGuard slot${sl.index} st=${sl.st} attempt=${attempt}`);
+      try { sl.player.playVideo(); } catch { /* Player noch nicht bereit */ }
+      if (attempt < 3) soundGuard(j, attempt + 1);
+    }, attempt === 0 ? 1500 : 2500);
   };
 
   const [recall, setRecall] = useState<{ m: Moment; review: boolean } | null>(null);
