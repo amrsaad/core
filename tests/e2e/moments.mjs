@@ -810,6 +810,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.resetAsks = await waitFor(p5, () => !!document.querySelector('[data-testid=reset-ask]'));
     await p5.screenshot({ path: `${out}/${name}-26-reset-ask.png` });
     await p5.click('[data-testid=reset-cancel]');
+    await waitFor(p5, () => !document.querySelector('[data-testid=reset-ask]'));
     c.resetCancelKeeps = !(await p5.$('[data-testid=reset-ask]')) && JSON.stringify(await cardRows(p5)) === JSON.stringify(k1);
     // Frist abgelaufen (App-Zeit 30 Tage später): das Thema ist wieder auf dem Gewicht davor, ohne dass etwas läuft.
     // Erste Seite zuerst schließen: zwei offene Tabs würden sich gegenseitig den gespeicherten Zustand überschreiben.

@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T19:34:49.336Z",
+ "at": "2026-10-29T19:26:06.023Z",
  "runs": [
   {
    "browser": "webkit",
@@ -43,9 +43,9 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "writeDelayMs": 10053,
+   "writeDelayMs": 10025,
    "hosts": [
-    "127.0.0.1:4173",
+    "127.0.0.1:4176",
     "fonts.googleapis.com",
     "www.youtube.com",
     "api.github.com"
@@ -68,7 +68,7 @@
     "tokenNotInFile": true,
     "noWriteBefore10s": true,
     "writeAfter10s": true,
-    "writeDelayAbout10s": true,
+    "writeDelayAbout10s": false,
     "captionInFile": true,
     "debounceOneWrite": true,
     "debounceFromLast": true,
@@ -95,9 +95,9 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "writeDelayMs": 10032,
+   "writeDelayMs": 14396,
    "hosts": [
-    "127.0.0.1:4173",
+    "127.0.0.1:4176",
     "fonts.googleapis.com",
     "www.youtube.com",
     "api.github.com"
@@ -106,6 +106,8 @@
    "errors": []
   }
  ],
- "failed": [],
+ "failed": [
+  "chromium.writeDelayAbout10s"
+ ],
  "exceptions": []
 }
