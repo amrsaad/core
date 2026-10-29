@@ -60,6 +60,8 @@ writeFileSync('dist/moments/pool.enc', await encPool(moments));
 const LONG = ' and the hook keeps going, because a real hook is a full sentence that must never be cut off with three dots at the end of the second line, not even when it needs more than three lines on a phone screen.';
 const AREX = Array.from({ length: 6 }, (_, i) => `الجملة ${i + 1} من المقطع المفحوص، طويلة بما يكفي ليحتاج الشاشة إلى التمرير.`).join('\n');
 const poolNoRecall = await encPool(moments.map(({ recall, ...m }) => ({ ...m, hook: m.hook + LONG, ...(Number(m.videoId.slice(4)) % 2 === 1 ? { excerpt: AREX } : {}) })));
+// Pool mit einem einzigen Kanal und Thema: zwei Skips in Folge treffen sicher denselben Kanal
+const poolSolo = await encPool(Array.from({ length: 10 }, (_, i) => ({ ...mk(200 + i, 'brain', 'augen'), channel: 'Kanal solo', excerpt: EX })));
 const poolVideoOnly = await encPool(moments.filter((m) => !m.audio && m.form !== 'text'));
 // Pool mit fehlerhaften Momenten (Vertrag): Text ohne excerpt, Podcast ohne hls, Video mit pod-ID.
 // Dazu vier Momente mit gültiger ID, die YouTube mit Fehler 150 ablehnt (Nachbau, IDs errorvid...). Der Feed muss trotzdem laufen.
@@ -489,13 +491,19 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.fill('[data-testid=note-text]', 'typed only to test the keyboard keys: jjj kkk');
     c.noteTypingDoesNotNavigate = (await page.evaluate(() => window.__core.idx())) === idxBefore;
     await page.fill('[data-testid=note-text]', '');
-    // Tipp auf Boring: speichert sofort, Blatt zu, nächster Moment, kein Toast, kein Browser, Herz unverändert
+    // Tipp auf Boring: speichert sofort, Bestätigungszeile am Blatt, nach etwa 0,9 s Blatt zu und nächster Moment, kein Toast, kein Browser, Herz unverändert
+    const wBoring0 = await page.evaluate(() => JSON.parse(JSON.stringify(window.__core.weights())));
     await page.click('[data-testid="note-chip-Boring"]');
+    c.noteConfirmLine = await waitFor(page, (t) => document.querySelector('[data-testid=note-confirm]')?.textContent === t && !!document.querySelector('[data-testid=note-sheet]'), `Less ${nm.channel}`);
+    const wBoring = await page.evaluate(() => JSON.parse(JSON.stringify(window.__core.weights())));
+    c.noteChipsLockedWhileConfirm = await page.evaluate(() => [...document.querySelectorAll('[data-testid^=note-chip-]')].every((b) => b.disabled));
+    await page.screenshot({ path: `${out}/${name}-23-note-bestaetigung.png` });
     c.noteSheetClosed = await waitFor(page, () => !document.querySelector('[data-testid=note-sheet]'));
     c.noteGoesToNext = await waitFor(page, (i) => window.__core.idx() === i + 1, idxBefore);
     const n1 = await notes();
     c.noteSavedLocally = n1.length === 1 && n1[0].id === nm.id && n1[0].chips.join() === 'Boring' && n1[0].hook === nm.hook && n1[0].tab === 'Video' && /^[0-9a-f]{7}$|^dev$/.test(n1[0].commit) && n1[0].sent === undefined;
-    c.noteBoringNoEffect = !(await page.evaluate(() => !!document.querySelector('.flash'))) && (await page.evaluate((id) => window.__core.liked(id), nm.id)) === likedBefore;
+    c.noteBoringWeakensChannel = (wBoring.channel[nm.channel] ?? 1) <= 0.7 + 0.001 && (wBoring.topic[nm.topic] ?? 1) === (wBoring0.topic[nm.topic] ?? 1);
+    c.noteBoringNoToastNoHeart = !(await page.evaluate(() => !!document.querySelector('.flash'))) && (await page.evaluate((id) => window.__core.liked(id), nm.id)) === likedBefore;
     c.noteNothingOpened = (await page.evaluate(() => window.__opened)).length === 0 && gh.length === 0;
     // Nur Text, dann Done: speichert den Text ohne Chip, schließt, nächster Moment
     const nm2 = await page.evaluate(() => window.__core.moment());
@@ -526,41 +534,53 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.noteOnlyLongLeftSwipe = !(await page.$('[data-testid=note-sheet]'));
     c.noteNoNetwork = gh.length === 0;
 
-    // Known: kein Toast. Wrong und Mute: Toast. Alle drei wirken wie das frühere Menü und werden zusätzlich als Notiz gespeichert.
-    const chip = async (label) => { if (!(await openSheet())) return false; await page.click(`[data-testid="note-chip-${label}"]`); return true; };
-    const idxK = await page.evaluate(() => window.__core.idx());
-    const nK = (await notes()).length;
-    c.knownViaChip = await chip('Known');
-    await page.waitForTimeout(350);
-    c.knownNoToast = await page.evaluate(() => !document.querySelector('.flash'));
-    c.knownAdvanced = await waitFor(page, (i) => window.__core.idx() > i, idxK);
-    c.knownSaved = (await notes()).length === nK + 1 && (await notes()).at(-1).chips.join() === 'Known';
-    await page.waitForTimeout(300);
-    c.wrongViaChip = await chip('Wrong');
-    c.wrongToast = await waitFor(page, () => document.querySelector('.flash')?.textContent === 'Wrong');
-    c.wrongSaved = (await notes()).at(-1).chips.join() === 'Wrong';
-    await page.waitForTimeout(1000);
-    // Not for me: Gewicht des Themas runter (0,7), Kanal und Bereich bleiben, kein Toast, weiter, als Notiz gespeichert
-    const idxN = await page.evaluate(() => window.__core.idx());
-    const nm3 = await page.evaluate(() => window.__core.moment());
-    const wBefore = await page.evaluate(() => JSON.parse(JSON.stringify(window.__core.weights())));
-    c.notForMeViaChip = await chip('Not for me');
-    await page.waitForTimeout(350);
-    const wAfter = await page.evaluate(() => JSON.parse(JSON.stringify(window.__core.weights())));
-    // Beim Weiterblättern wirkt zusätzlich das Wegwischsignal (höchstens 0,9). Not for me allein ist 0,7. Weak auf Kanal und Bereich wäre 0,7 und 0,84.
-    const ratio = (a, b) => (a ?? 1) / (b ?? 1);
-    const rT = ratio(wAfter.topic[nm3.topic], wBefore.topic[nm3.topic]);
-    c.notForMeTopicDown = rT <= 0.7 + 0.001 && rT >= 0.7 * 0.9 * 0.9 - 0.001;
-    c.notForMeChannelAreaKept = ratio(wAfter.channel[nm3.channel], wBefore.channel[nm3.channel]) >= 0.9 - 0.001 && ratio(wAfter.area[nm3.area], wBefore.area[nm3.area]) >= Math.sqrt(0.9) - 0.001;
-    c.notForMeNoToast = await page.evaluate(() => !document.querySelector('.flash'));
-    c.notForMeAdvanced = await waitFor(page, (i) => window.__core.idx() > i, idxN);
-    c.notForMeSaved = (await notes()).at(-1).chips.join() === 'Not for me' && (await notes()).at(-1).id === nm3.id;
-    await page.waitForTimeout(1000);
+    // Alle Chips: Bestätigungszeile am Blatt (kein Toast), dann weiter, als Notiz gespeichert. Gewichte nach den Regeln (Deckel, nicht Faktoren).
+    const shot = async (label, n) => { await page.screenshot({ path: `${out}/${name}-${n}-chip-${label.replace(/ /g, '-')}.png` }); };
+    const wNow = () => page.evaluate(() => JSON.parse(JSON.stringify(window.__core.weights())));
+    const flow = async (label, line) => {
+      const opened = await openSheet();
+      // Moment erst lesen, wenn das Blatt offen ist (die Abrufkarte davor kann den Moment weiterschalten)
+      const m = await page.evaluate(() => window.__core.moment());
+      const idx = await page.evaluate(() => window.__core.idx());
+      const n0 = (await notes()).length;
+      const w0 = await wNow();
+      await page.click(`[data-testid="note-chip-${label}"]`);
+      const shown = await waitFor(page, (t) => document.querySelector('[data-testid=note-confirm]')?.textContent === t, typeof line === 'function' ? line(m) : line);
+      // Gewichte, solange das Blatt mit der Bestätigung offen ist: nur die Wirkung des Chips, noch kein Signal des nächsten Moments
+      const w = await wNow();
+      const noToast = await page.evaluate(() => !document.querySelector('.flash'));
+      await shot(label, 24);
+      const advanced = await waitFor(page, (i) => !document.querySelector('[data-testid=note-sheet]') && window.__core.idx() > i, idx);
+      const saved = (await notes()).length === n0 + 1 && (await notes()).at(-1).chips.join() === label && (await notes()).at(-1).id === m.id;
+      await page.waitForTimeout(1000);
+      return { m, w0, ok: opened && shown && noToast && advanced && saved, w, until: w.until ?? {} };
+    };
+    // Known ("Already known"): nur das Thema auf höchstens 0,7. Der Kanal kommt nicht dazu.
+    let f = await flow('Known', (m) => `Less ${m.topic.charAt(0).toUpperCase()}${m.topic.slice(1)}`);
+    c.knownViaChip = f.ok;
+    c.knownTopicCap = Math.abs((f.w.topic[f.m.topic] ?? 1) - Math.min(0.7, f.w0.topic[f.m.topic] ?? 1)) < 0.001;
+    c.knownChannelKept = Math.abs((f.w.channel[f.m.channel] ?? 1) - (f.w0.channel[f.m.channel] ?? 1)) < 0.001;
+    // Wrong: nur der Kanal auf höchstens 0,5
+    f = await flow('Wrong', (m) => `Less ${m.channel}`);
+    c.wrongViaChip = f.ok;
+    c.wrongChannelCap = Math.abs((f.w.channel[f.m.channel] ?? 1) - Math.min(0.5, f.w0.channel[f.m.channel] ?? 1)) < 0.001;
+    c.wrongTopicKept = Math.abs((f.w.topic[f.m.topic] ?? 1) - (f.w0.topic[f.m.topic] ?? 1)) < 0.001;
+    // Not for me: Thema 0,2 für 30 Tage (Ablauf als Zeitstempel), Kanal auf höchstens 0,5, Bereich bleibt
+    f = await flow('Not for me', (m) => `Less ${m.topic.charAt(0).toUpperCase()}${m.topic.slice(1)}`);
+    c.notForMeViaChip = f.ok;
+    c.notForMeTopic02 = Math.abs((f.w.topic[f.m.topic] ?? 1) - 0.2) < 0.001;
+    c.notForMeChannel05 = (f.w.channel[f.m.channel] ?? 1) <= 0.5 + 0.001;
+    c.notForMeAreaKept = (f.w.area[f.m.area] ?? 1) >= (f.w0.area[f.m.area] ?? 1) - 0.001;
+    const uT = f.until[`t:${f.m.topic}`];
+    c.notForMeExpiry30Days = !!uT && Math.abs((uT.at - Date.parse('2026-10-23T12:00:00')) / 86400000 - 30) < 1.5 && uT.back <= 1;
+    // Mute speaker: Zeile "<Sprecher> muted", Kanal verschwindet aus der Warteschlange, kein Toast
+    c.muteViaChip = await openSheet();
     const idxM = await page.evaluate(() => window.__core.idx());
     const mutedMoment = await page.evaluate(() => window.__core.moment());
-    c.muteViaChip = await chip('Mute speaker');
-    c.muteToast = await waitFor(page, () => /muted$/.test(document.querySelector('.flash')?.textContent ?? ''));
-    c.muteAdvanced = await waitFor(page, (i) => window.__core.idx() > i, idxM);
+    await page.click('[data-testid="note-chip-Mute speaker"]');
+    c.muteLine = await waitFor(page, (t) => document.querySelector('[data-testid=note-confirm]')?.textContent === t, `${mutedMoment.channel} muted`);
+    c.muteNoToast = await page.evaluate(() => !document.querySelector('.flash'));
+    c.muteAdvanced = await waitFor(page, (i) => !document.querySelector('[data-testid=note-sheet]') && window.__core.idx() > i, idxM);
     c.muteSaved = (await notes()).at(-1).chips.join() === 'Mute speaker' && (await notes()).at(-1).id === mutedMoment.id;
     c.noteStillNoNetwork = gh.length === 0 && (await page.evaluate(() => window.__opened)).length === 0;
     r.notesCount = (await notes()).length;
@@ -571,6 +591,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     let checksDone = 0, violations = 0, endedSeen = 0;
     const t0 = Date.now();
     while (Date.now() - t0 < 12000) {
+      await skipRecall(page, name, out);
       const res = await page.evaluate(() => {
         const st = window.__core.slots();
         const dom = [...document.querySelectorAll('.vslot')];
@@ -648,7 +669,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.promptMarksSent = await waitFor(p2, () => window.__core.notes().every((x) => typeof x.sent === 'number') && !document.querySelector('[data-testid=notes-prompt]'));
     // Nach dem Senden: neue Notiz bleibt ungesendet, und am selben Tag kommt die Zeile nicht noch einmal
     await p2.evaluate(() => window.__core.openNote());
+    const wG0 = await p2.evaluate(() => JSON.stringify(window.__core.weights()));
     await p2.click('[data-testid="note-chip-Great"]');
+    // Bad cut und Great lernen nichts: Zeile "Noted", Gewichte unverändert
+    c.greatNoted = await waitFor(p2, () => document.querySelector('[data-testid=note-confirm]')?.textContent === 'Noted');
+    c.greatLearnsNothing = (await p2.evaluate(() => JSON.stringify(window.__core.weights()))) === wG0;
     await p2.waitForTimeout(800); // Zustand wird verzögert gespeichert
     c.newNoteUnsent = await p2.evaluate(() => window.__core.notes().filter((x) => x.sent === undefined).length === 1);
     await p2.close();
@@ -667,9 +692,71 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await p5.screenshot({ path: `${out}/${name}-13-vorwoche.png` });
     await p5.click('text=Skip this week');
     c.skipWorks = await waitFor(p5, () => !!window.__core?.moment());
-    // Leerer Filter: eine Zeile statt leerem Feed, Schalter bleibt bedienbar
+    // Karte "What Core learned" (App-Zeit 1.11.): Zeilen mit Gewicht und Pfeil, laufende Fristen, Reset mit Rückfrage
+    await p5.click('nav [aria-label=Settings]');
+    await p5.locator('[data-testid=learned-card]').scrollIntoViewIfNeeded();
+    const cardRows = async (pg) => pg.evaluate(() => ({
+      empty: !!document.querySelector('[data-testid=learned-empty]'),
+      lists: Object.fromEntries(['channel-up', 'channel-down', 'topic-up', 'topic-down'].map((id) => [id, [...document.querySelectorAll(`[data-testid=learned-${id}] [data-testid=learned-row]`)].map((r) => ({ text: r.textContent, w: Number(r.querySelector('[data-weight]').dataset.weight) }))])),
+    }));
+    const k1 = await cardRows(p5);
+    c.cardShown = !!(await p5.$('[data-testid=learned-card]')) && /What Core learned/.test(await p5.textContent('[data-testid=learned-card]'));
+    c.cardMax5 = Object.values(k1.lists).every((l) => l.length <= 5);
+    c.cardArrows = Object.entries(k1.lists).every(([id, l]) => l.every((x) => (id.endsWith('up') ? x.w > 1 && x.text.includes('↑') : x.w < 1 && x.text.includes('↓') && /\d\.\d\d ↓/.test(x.text))));
+    c.cardSortedDown = Object.entries(k1.lists).every(([id, l]) => l.every((x, i) => i === 0 || (id.endsWith('up') ? l[i - 1].w >= x.w : l[i - 1].w <= x.w)));
+    c.cardHasLessRows = k1.lists['channel-down'].length > 0 && k1.lists['topic-down'].length > 0;
+    c.cardTopicBlocked = k1.lists['topic-down'].some((x) => x.w < 0.5 && /until Nov 2\d/.test(x.text));
+    await p5.screenshot({ path: `${out}/${name}-25-learned-card.png` });
+    // Reset learning fragt nach. Abbrechen ändert nichts.
+    await p5.click('[data-testid=reset-learning]');
+    c.resetAsks = await waitFor(p5, () => !!document.querySelector('[data-testid=reset-ask]'));
+    await p5.screenshot({ path: `${out}/${name}-26-reset-ask.png` });
+    await p5.click('[data-testid=reset-cancel]');
+    c.resetCancelKeeps = !(await p5.$('[data-testid=reset-ask]')) && JSON.stringify(await cardRows(p5)) === JSON.stringify(k1);
+    // Frist abgelaufen (App-Zeit 30 Tage später): das Thema ist wieder auf dem Gewicht davor, ohne dass etwas läuft.
+    // Erste Seite zuerst schließen: zwei offene Tabs würden sich gegenseitig den gespeicherten Zustand überschreiben.
+    await p5.waitForTimeout(500);
     await p5.close();
+    const pCard = await ctx.newPage();
+    await pCard.goto(url + '?now=2026-12-05');
+    await waitFor(pCard, () => !!window.__core?.moment());
+    await skipRecall(pCard, name, out);
+    await pCard.click('nav [aria-label=Settings]');
+    await pCard.locator('[data-testid=learned-card]').scrollIntoViewIfNeeded();
+    const k7 = await cardRows(pCard);
+    c.cardExpiryLifted = !k7.lists['topic-down'].some((x) => x.w === 0.2) && !k7.lists['channel-down'].some((x) => x.w === 0.2) && !/until/.test(await pCard.textContent('[data-testid=learned-card]'));
+    await pCard.screenshot({ path: `${out}/${name}-27-learned-nach-ablauf.png` });
+    await pCard.click('[data-testid=reset-learning]');
+    await pCard.click('[data-testid=reset-confirm]');
+    c.resetEmpties = await waitFor(pCard, () => !!document.querySelector('[data-testid=learned-empty]'));
+    c.resetClearsWeights = await pCard.evaluate(() => { const w = window.__core?.weights?.(); return !w || (Object.keys(w.area).length + Object.keys(w.channel).length + Object.keys(w.topic).length === 0 && !w.until); });
+    await pCard.screenshot({ path: `${out}/${name}-28-learned-reset.png` });
+    await pCard.waitForTimeout(800);
+    await pCard.close();
+    // Leerer Filter: eine Zeile statt leerem Feed, Schalter bleibt bedienbar
     // Eigener Kontext: im geteilten wären je nach Verlauf der Abschnitte davor schon fast alle Momente gesehen
+    // Zweiter Skip desselben Kanals in Folge: Kanal 0,2 für 14 Tage, danach zurück auf 0,6 (eigener Pool mit einem Kanal)
+    const fs = await freshPage(browser, url, k, poolSolo, '?now=2026-10-23');
+    const ps = fs.pg;
+    c.soloFeed = await waitFor(ps, () => !!window.__core?.moment());
+    const skipNow = async () => {
+      await skipRecall(ps, name, out);
+      await ps.waitForTimeout(150);
+      const i0 = await ps.evaluate(() => window.__core.idx());
+      await ps.evaluate(() => window.__core.next());
+      await waitFor(ps, (i) => window.__core.idx() > i, i0);
+      return ps.evaluate(() => ({ w: JSON.parse(JSON.stringify(window.__core.weights())), run: window.__core.skipRun() }));
+    };
+    const s1 = await skipNow();
+    c.soloFirstSkip = Math.abs((s1.w.channel['Kanal solo'] ?? 1) - 0.6) < 0.001 && Math.abs((s1.w.topic.augen ?? 1) - 0.6) < 0.001 && s1.run?.channel === 'Kanal solo' && s1.run?.n === 1 && !s1.w.until && Object.keys(s1.w.area).length === 0;
+    const s2 = await skipNow();
+    const u2 = s2.w.until?.['c:Kanal solo'];
+    c.soloSecondSkip02 = Math.abs((s2.w.channel['Kanal solo'] ?? 1) - 0.2) < 0.001 && s2.run?.n === 2 && Math.abs((s2.w.topic.augen ?? 1) - 0.6) < 0.001;
+    c.soloSecondSkip14Days = !!u2 && Math.abs((u2.at - Date.parse('2026-10-23T12:00:00')) / 86400000 - 14) < 1.5 && Math.abs(u2.back - 0.6) < 0.001;
+    await ps.screenshot({ path: `${out}/${name}-29-zweiter-skip.png` });
+    await ps.waitForTimeout(800);
+    await ps.close();
+    await fs.cx.close();
     const f6 = await freshPage(browser, url, k, poolVideoOnly, '?now=2026-10-23');
     const p6 = f6.pg;
     c.p6Feed = await waitFor(p6, () => !!window.__core?.moment());
