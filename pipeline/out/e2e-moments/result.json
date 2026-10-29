@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T18:19:37.517Z",
+ "at": "2026-10-29T18:31:40.039Z",
  "runs": [
   {
    "browser": "webkit",
@@ -258,10 +258,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929710553,
+     "due": 1792929710571,
      "results": [
       {
-       "at": 1792756910553,
+       "at": 1792756910571,
        "got": false
       }
      ]
@@ -326,9 +326,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06246948242188,
+    "bh": 221.06253051757812,
     "fw": 393,
-    "fh": 221.06246948242188,
+    "fh": 221.06253051757812,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -338,21 +338,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 30.999999999985448,
-    "recorded": 30
+    "measured": 30,
+    "recorded": 31
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 846,
+    "checksDone": 378,
     "violations": 0,
-    "endedSeen": 265
+    "endedSeen": 183
    },
    "latency": {
-    "n": 34,
-    "buffered": 28,
+    "n": 38,
+    "buffered": 31,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | b2c0fab |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | b2c0fab |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | b2c0fab |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | b2c0fab |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | b2c0fab |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | b2c0fab |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000026:100 | Testmoment 26 brain | Boring | - | Video | c0bba99 |\n| test0000022:100 | Testmoment 22 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | c0bba99 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | c0bba99 |\n| test0000046:100 | Testmoment 46 body | Wrong | - | Video | c0bba99 |\n| test0000011:100 | Testmoment 11 beat | Not for me | - | Video | c0bba99 |\n| test0000029:100 | Testmoment 29 brain | Mute speaker | - | Video | c0bba99 |",
    "badWalk": [
     {
      "idx": 2,
@@ -377,14 +377,14 @@
     },
     {
      "idx": 5,
-     "id": "test0000050",
+     "id": "test0000049",
      "card": false,
      "end": false,
      "err": false
     },
     {
      "idx": 6,
-     "id": "test0000053",
+     "id": "test0000054",
      "card": false,
      "end": false,
      "err": false
@@ -398,42 +398,42 @@
     },
     {
      "idx": 8,
-     "id": "test0000016",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 9,
      "id": "test0000023",
      "card": false,
      "end": false,
      "err": false
     },
     {
+     "idx": 9,
+     "id": "test0000025",
+     "card": false,
+     "end": false,
+     "err": false
+    },
+    {
      "idx": 10,
-     "id": "test0000021",
+     "id": "test0000012",
      "card": false,
      "end": false,
      "err": false
     },
     {
      "idx": 11,
-     "id": "test0000052",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 12,
      "id": "test0000047",
      "card": false,
      "end": false,
      "err": false
     },
     {
+     "idx": 12,
+     "id": "test0000052",
+     "card": false,
+     "end": false,
+     "err": false
+    },
+    {
      "idx": 13,
-     "id": "test0000007",
+     "id": "test0000050",
      "card": false,
      "end": false,
      "err": false
@@ -670,8 +670,12 @@
      "dir": "rtl"
     },
     {
-     "ar": false,
-     "dir": "ltr"
+     "ar": true,
+     "dir": "rtl"
+    },
+    {
+     "ar": true,
+     "dir": "rtl"
     }
    ],
    "hit": {
@@ -944,10 +948,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603416,
+     "due": 1792929603436,
      "results": [
       {
-       "at": 1792756803416,
+       "at": 1792756803436,
        "got": false
       }
      ]
@@ -1024,21 +1028,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 32,
+    "measured": 32.29999999998836,
     "recorded": 32
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 846,
+    "checksDone": 396,
     "violations": 0,
-    "endedSeen": 264
+    "endedSeen": 190
    },
    "latency": {
-    "n": 34,
-    "buffered": 28,
+    "n": 38,
+    "buffered": 31,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | b2c0fab |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | b2c0fab |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | b2c0fab |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | b2c0fab |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | b2c0fab |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | b2c0fab |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000026:100 | Testmoment 26 brain | Boring | - | Video | c0bba99 |\n| test0000022:100 | Testmoment 22 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | c0bba99 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | c0bba99 |\n| test0000046:100 | Testmoment 46 body | Wrong | - | Video | c0bba99 |\n| test0000011:100 | Testmoment 11 beat | Not for me | - | Video | c0bba99 |\n| test0000029:100 | Testmoment 29 brain | Mute speaker | - | Video | c0bba99 |",
    "badWalk": [
     {
      "idx": 2,
@@ -1063,14 +1067,14 @@
     },
     {
      "idx": 5,
-     "id": "test0000050",
+     "id": "test0000049",
      "card": false,
      "end": false,
      "err": false
     },
     {
      "idx": 6,
-     "id": "test0000053",
+     "id": "test0000054",
      "card": false,
      "end": false,
      "err": false
@@ -1084,42 +1088,42 @@
     },
     {
      "idx": 8,
-     "id": "test0000016",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 9,
      "id": "test0000023",
      "card": false,
      "end": false,
      "err": false
     },
     {
+     "idx": 9,
+     "id": "test0000025",
+     "card": false,
+     "end": false,
+     "err": false
+    },
+    {
      "idx": 10,
-     "id": "test0000021",
+     "id": "test0000012",
      "card": false,
      "end": false,
      "err": false
     },
     {
      "idx": 11,
-     "id": "test0000052",
-     "card": false,
-     "end": false,
-     "err": false
-    },
-    {
-     "idx": 12,
      "id": "test0000047",
      "card": false,
      "end": false,
      "err": false
     },
     {
+     "idx": 12,
+     "id": "test0000052",
+     "card": false,
+     "end": false,
+     "err": false
+    },
+    {
      "idx": 13,
-     "id": "test0000007",
+     "id": "test0000050",
      "card": false,
      "end": false,
      "err": false
@@ -1356,8 +1360,12 @@
      "dir": "rtl"
     },
     {
-     "ar": false,
-     "dir": "ltr"
+     "ar": true,
+     "dir": "rtl"
+    },
+    {
+     "ar": true,
+     "dir": "rtl"
     }
    ],
    "hit": {

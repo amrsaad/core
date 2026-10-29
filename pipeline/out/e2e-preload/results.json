@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-29T18:02:20.487Z",
+  "at": "2026-10-29T18:41:52.650Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -50,49 +50,49 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1708,
+        "coldStartMs": 1668,
         "preloadedMoments": 30,
         "preloadedBytes": 6289236,
         "bytesPerMoment": 209641,
         "swipes": 10,
         "cachedStartMs": [
-          4,
-          9,
-          6,
-          4,
-          4,
-          7,
+          3,
           5,
-          7,
-          5,
-          4
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
         ],
-        "cachedStartMax": 9,
-        "cachedStartMedian": 5,
+        "cachedStartMax": 5,
+        "cachedStartMedian": 3,
         "firstFrames": [
-          "first-frame 6ms buffered",
           "first-frame 4ms buffered",
-          "first-frame 9ms buffered local",
-          "first-frame 6ms buffered local",
-          "first-frame 4ms buffered local",
-          "first-frame 4ms buffered local",
-          "first-frame 7ms buffered local",
+          "first-frame 3ms buffered",
           "first-frame 5ms buffered local",
-          "first-frame 7ms buffered local",
-          "first-frame 5ms buffered local",
-          "first-frame 4ms buffered local"
+          "first-frame 3ms buffered local",
+          "first-frame 3ms buffered local",
+          "first-frame 3ms buffered local",
+          "first-frame 3ms buffered local",
+          "first-frame 3ms buffered local",
+          "first-frame 3ms buffered local",
+          "first-frame 3ms buffered local",
+          "first-frame 3ms buffered local"
         ],
         "settingsText": "Preloaded: 37 moments, 7.4 MB",
         "offlineStartMs": [
-          5,
-          5,
           4,
+          3,
+          3,
           4
         ],
         "offlineRestartStartMs": [
           4,
           4,
-          6
+          3
         ],
         "poorFirst12Youtube": 0,
         "normalFirst12Youtube": 6
