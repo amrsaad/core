@@ -241,6 +241,66 @@
    "urlChecks": {
     "https://quran.com/2/209": 200
    }
+  },
+  {
+   "sourceId": "quran:2:210",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/210",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:210?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:210",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "هَلْ يَنظُرُونَ إِلَّآ أَن يَأْتِيَهُمُ ٱللَّهُ فِى ظُلَلٍ مِّنَ ٱلْغَمَامِ وَٱلْمَلَـٰٓئِكَةُ وَقُضِىَ ٱلْأَمْرُ ۚ وَإِلَى ٱللَّهِ تُرْجَعُ ٱلْأُمُورُ",
+    "translation": "Erwarten sie (etwas anderes), als daß Allah in Schattendächern aus Wolken zu ihnen kommt und die Engel? Doch dann wird die Angelegenheit entschieden sein. Und zu Allah werden (all) die Angelegenheiten zurückgebracht.",
+    "tafsir_muyassar": "ما ينتظر هؤلاء المعاندون الكافرون بعد قيام الأدلة البينة إلا أن يأتيهم الله عز وجل على الوجه اللائق به سبحانه في ظُلَل من السحاب يوم القيامة; ليفصل بينهم بالقضاء العادل، وأن تأتي الملائكة، وحينئذ يقضي الله تعالى فيهم قضاءه. وإليه وحده ترجع أمور الخلائق جميعها.",
+    "tafsir_ibnkathir": "<h2>Do not delay embracing the Faith</h2><div class=\"arabic uthmani\">هَلْ يَنظُرُونَ إِلاَّ أَن يَأْتِيَهُمُ اللَّهُ فِي ظُلَلٍ مِّنَ الْغَمَامِ وَالْمَلَـئِكَةُ</div><p>(Do they then wait for anything other than that Allah should come to them over the shadows of the clouds and the angels) on the Day of Resurrection to judge the early and the latter creations. Allah shall then reward each according to his or her deeds; and whoever does good shall see it, and whoever does evil shall see it. This is why Allah said: </p><div class=\"arabic uthmani\">وَقُضِىَ الأَمْرُ وَإِلَى اللَّهِ تُرْجَعُ الأُمُورُ</div><p>((Then) the case would be already judged. And to Allah return all matters (for decision).) </p><p>Similarly, Allah said: </p><div class=\"arabic uthmani\">كَلاَّ إِذَا دُكَّتِ الاٌّرْضُ دَكّاً دَكّاً - وَجَآءَ رَبُّكَ وَالْمَلَكُ صَفّاً صَفّاً - وَجِىءَ يَوْمَئِذٍ بِجَهَنَّمَ يَوْمَئِذٍ يَتَذَكَّرُ الإِنسَـنُ وَأَنَّى لَهُ الذِّكْرَى </div><p>(Nay! When the earth is ground to powder. And your Lord comes with the angels in rows. And Hell will be brought near that Day. On that Day will man remember, but how will that remembrance (then) avail him) (89:21-23) and: </p><div class=\"arabic uthmani\">هَلْ يَنظُرُونَ إِلاَ أَن تَأْتِيهُمُ الْمَلَـئِكَةُ أَوْ يَأْتِىَ رَبُّكَ أَوْ يَأْتِىَ بَعْضُ ءَايَـتِ رَبِّكَ</div><p>(Do they then wait for anything other than that the angels should come to them, or that your Lord (Allah) should come, or that some of the signs of your Lord should come (i. e., portents of the Hour, e.g., rising of the sun from the west)!) (6:158) </p><p>Abu Ja`far Razi reported that Abu Al-`Aliyah narrated that: </p><div class=\"arabic uthmani\">هَلْ يَنظُرُونَ إِلاَّ أَن يَأْتِيَهُمُ اللَّهُ فِي ظُلَلٍ مِّنَ الْغَمَامِ وَالْمَلَـئِكَةُ</div><p>(Do they then wait for anything other than that Allah should come to them over the shadows of the clouds and the angels) means, the angels will descend on the shadows of clouds, while Allah comes as He wills. Some of the reciters read it, </p><div class=\"arabic uthmani\">هَلْ يَنظُرُونَ إِلاَّ أَن يَأْتِيَهُمُ اللَّهُوَالْمَلَـئِكَةُفِي ظُلَلٍ مِّنَ الْغَمَامِ</div><p>Do they then wait for anything other than that Allah should come to them and also the angels over the shadows of the clouds. This is similar to Allah's other statement: </p><div class=\"arabic uthmani\">وَيَوْمَ تَشَقَّقُ السَّمَآءُ بِالْغَمَـمِ وَنُزِّلَ الْمَلَـئِكَةُ تَنزِيلاً </div><p>(And (remember) the Day when the heaven shall be rent asunder with clouds, and the angels will be sent down, with a grand descending.) (25:25) </p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:210"
+   },
+   "fetchedAt": "2026-10-29T16:44:09.773Z",
+   "urlChecks": {
+    "https://quran.com/2/210": 200
+   }
+  },
+  {
+   "sourceId": "quran:2:211",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/211",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:211?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:211",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "سَلْ بَنِىٓ إِسْرَٰٓءِيلَ كَمْ ءَاتَيْنَـٰهُم مِّنْ ءَايَةٍۭ بَيِّنَةٍ ۗ وَمَن يُبَدِّلْ نِعْمَةَ ٱللَّهِ مِنۢ بَعْدِ مَا جَآءَتْهُ فَإِنَّ ٱللَّهَ شَدِيدُ ٱلْعِقَابِ",
+    "translation": "Frage die Kinder Isra’ils, wie viele klare Beweise Wir ihnen gegeben haben. Wenn aber einer die Gunst Allahs abändert, nachdem sie ihm zuteil geworden ist -, dann ist Allah streng im Bestrafen.",
+    "tafsir_muyassar": "سل -أيها الرسول-<span class=\"blue\"> بني إسرائيل المعاندين لك:</span> كم أعطيناهم من آيات واضحات في كتبهم تهديهم إلى الحق، فكفروا بها كلها، وأعرضوا عنها، وحَرَّفوها عن مواضعها. ومن يبدل نعمة الله -وهي دينه- ويكفر بها من بعد معرفتها، وقيام الحجة عليه بها، فإن الله تعالى شديد العقاب له.",
+    "tafsir_ibnkathir": "<h2>The Punishment for changing Allah's Favor and mocking the Believers</h2><p>Allah mentioned that the Children of Israel, were witnesses to many clear signs that attest to the truth of Moses regarding what he was sent with for them. They witnessed his hand (when it became lit with light), his parting the sea, his striking the rock (and water flowed from the rock), the clouds that shaded them during the intense heat, the manna and the quails, and so forth. These signs attested to the existence of the Creator and the truth of Moses by whose hand these signs appeared. Yet, so many among them changed Allah's favor, by preferring disbelief to faith and by ignoring Allah's favors, </p><div class=\"arabic uthmani\">وَمَن يُبَدِّلْ نِعْمَةَ اللَّهِ مِن بَعْدِ مَا جَآءَتْهُ فَإِنَّ اللَّهَ شَدِيدُ الْعِقَابِ</div><p>(And whoever changes Allah's favor after it had come to him, then surely, Allah is severe in punishment.) </p><p>Similarly, Allah said about the disbelievers of Quraysh: </p><div class=\"arabic uthmani\">أَلَمْ تَرَ إِلَى الَّذِينَ بَدَّلُواْ نِعْمَتَ اللَّهِ كُفْرًا وَأَحَلُّواْ قَوْمَهُمْ دَارَ الْبَوَارِ - جَهَنَّمَ يَصْلَوْنَهَا وَبِئْسَ الْقَرَارُ </div><p>(Have you not seen those who have changed the blessings of Allah into disbelief, and caused their people to dwell in the house of destruction Hell, in which they will burn, ـ and what an evil place to settle in!) (14:28, 29) </p><p>Then Allah states that He has made the life of this world beautiful for the disbelievers who are satisfied with it, who collect wealth, but refrain from spending it on what they have been commanded, which could earn them Allah's pleasure. Instead, they ridicule the believers who ignore this life and who spend whatever they earn on what pleases their Lord. The believers spend seeking Allah's Face, and this is why they have gained the ultimate happiness and the best share on the Day of the Return. Therefore, they will be exalted above the disbelievers at the Gathering Place, when they are gathered, during the resurrection and in their final destination. The believers will reside in the highest grades in the utmost highs, while the disbelievers will reside in the lowest of lows (in the Fire). </p><p>This is why Allah said: </p><div class=\"arabic uthmani\">وَاللَّهُ يَرْزُقُ مَن يَشَآءُ بِغَيْرِ حِسَابٍ</div><p>(And Allah gives to whom He wills without limit.) </p><p>This Ayah indicates that Allah gives sustenance to whomever He wills of His servants without count or limit in this and the Hereafter. A Hadith has stated (that Allah said): </p><div class=\"arabic uthmani\">«ابْنَ آدَمَ أَنْفِقْ أُنْفِقْ عَلَيْك»</div><p>(O son of Adam! Spend (in Allah's cause) and I (Allah) will spend on you.) The Prophet said: </p><div class=\"arabic uthmani\">«أَنْفِقْ بِلَالُ وَلَا تَخْشَ مِنْ ذِي الْعَرْشِ إِقْلَالًا»</div><p>(O Bilal! Spend and do not fear deprivation from the Owner of the Throne.) </p><p>Allah said: </p><div class=\"arabic uthmani\">وَمَآ أَنفَقْتُمْ مِّن شَىْءٍ فَهُوَ يُخْلِفُهُ</div><p>(...and whatsoever you spend of anything (in Allah's cause), He will replace it.) (34:39) In addition, it is reported in the Sahih (that the Prophet said): </p><div class=\"arabic uthmani\">«أَنَّ مَلَكَيْنِ يَنْزِلَانِ مِنَ السَّمَاءِ صَبِيحَةَ كُلِّ يَوْمٍ فَيَقُولُ أحَدُهُمَا:اللَّهُمَّ أَعْطِ مُنْفِقًا خَلَفًا، وَيَقُولُ الآخَرُ: اللَّهُمَّ أعْطِ مُمْسِكًا تَلَفًا»</div><p>(Every day two angels come down from heavens and one of them says, `O Allah! Compensate every person who spends in Your cause,' and the other (angel) says, `O Allah! Destroy every miser.') Also in the Sahih: </p><div class=\"arabic uthmani\">«يَقُولُ ابْنُ آدَمَ: مَالِي مَالِي. وَهَلْ لَكَ مِنْ مَالِكَ إِلَّا مَا أَكَلْتَ فَأَفْنَيْتَ، وَمَا لَبِسْتَ فَأَبْلَيْتَ، وَمَا تَصَدَّقْتَ فَأَمْضَيْتَ، وَمَا سِوَى ذلِكَ فَذَاهِبٌ وَتَارِكُهُ لِلنَّاس»</div><p>(The son of Adam says, `My money, my money!' Yet, what is your money except that which you eat and use up, wear and tear, and spend in charity and thus keep (in your record). Other than that, it will go away and will be left for the people (the inheritors).) </p><p>In addition, Imam Ahmad reported that the Prophet said: </p><div class=\"arabic uthmani\">«الدُّنْيَا دَارُ مَنْ لَا دَارَ لَهُ، وَمَالُ مَنْ لَا مَالَ لَهُ، وَلَهَا يَجْمَعُ مَنْ لَا عَقْلَ لَه»</div><p>(The Dunya (life of this world) is the residence of those who have no residence, the wealth of those who have no wealth, and it is harvested by those who have no sense of reason.) </p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:211"
+   },
+   "fetchedAt": "2026-10-29T16:44:09.773Z",
+   "urlChecks": {
+    "https://quran.com/2/211": 200
+   }
   }
  ]
 }
