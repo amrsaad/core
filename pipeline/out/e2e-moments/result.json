@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T19:59:22.614Z",
+ "at": "2026-10-29T21:44:34.227Z",
  "runs": [
   {
    "browser": "webkit",
@@ -125,7 +125,7 @@
     "muteSaved": true,
     "noteStillNoNetwork": true,
     "posterWheneverNotPlaying": true,
-    "posterAllStates": true,
+    "posterAllStates": false,
     "posterDropsSynchronously": true,
     "latencyMeasured": true,
     "bufferedUnder300": true,
@@ -261,10 +261,10 @@
    "recall": [
     {
      "id": "test0000017:100",
-     "due": 1792929606922,
+     "due": 1792929606275,
      "results": [
       {
-       "at": 1792756806922,
+       "at": 1792756806275,
        "got": false
       }
      ]
@@ -350,17 +350,17 @@
    ],
    "tapToFill": {
     "measured": 30,
-    "recorded": 29
+    "recorded": 30
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 276,
+    "checksDone": 273,
     "violations": 0,
-    "endedSeen": 59
+    "endedSeen": 30
    },
    "posterState": {
-    "idx": 26,
-    "qlen": 52,
+    "idx": 25,
+    "qlen": 49,
     "end": false,
     "recall": false,
     "forYou": false,
@@ -369,22 +369,22 @@
     "cls": "vfeed"
    },
    "posterDom": [
-    "<div class=\"vslot\" aria-hidden=\"true\" style=\"--off: 1;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-style: normal; font-variant-caps: normal; font-weight: normal; font-width: normal; font-size: 18px; line-height: normal; font-family: sans-serif; font-size-adjust: none; font-kerning: auto; font-variant-alternates: normal; font-variant-ligatures: normal; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-position: normal; font-variant-emoji: normal; font-feature-settings: normal; font-optical-sizing: auto; font-variation-settings:",
     "<div class=\"vslot\" aria-hidden=\"true\" style=\"--off: 2;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-style: normal; font-variant-caps: normal; font-weight: normal; font-width: normal; font-size: 18px; line-height: normal; font-family: sans-serif; font-size-adjust: none; font-kerning: auto; font-variant-alternates: normal; font-variant-ligatures: normal; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-position: normal; font-variant-emoji: normal; font-feature-settings: normal; font-optical-sizing: auto; font-variation-settings:",
     "<div class=\"vslot\" aria-hidden=\"false\" style=\"--off: 0;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-style: normal; font-variant-caps: normal; font-weight: normal; font-width: normal; font-size: 18px; line-height: normal; font-family: sans-serif; font-size-adjust: none; font-kerning: auto; font-variant-alternates: normal; font-variant-ligatures: normal; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-position: normal; font-variant-emoji: normal; font-feature-settings: normal; font-optical-sizing: auto; font-variation-settings",
-    "<div class=\"vslot vghost\" aria-hidden=\"true\" style=\"--off: -1;\"><img class=\"vposter\" src=\"https://i.ytimg.com/vi/test0000010/hqdefault.jpg\" alt=\"\" draggable=\"false\"></div>"
+    "<div class=\"vslot\" aria-hidden=\"true\" style=\"--off: 1;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-style: normal; font-variant-caps: normal; font-weight: normal; font-width: normal; font-size: 18px; line-height: normal; font-family: sans-serif; font-size-adjust: none; font-kerning: auto; font-variant-alternates: normal; font-variant-ligatures: normal; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-position: normal; font-variant-emoji: normal; font-feature-settings: normal; font-optical-sizing: auto; font-variation-settings:",
+    "<div class=\"vslot vghost\" aria-hidden=\"true\" style=\"--off: -1;\"><img class=\"vposter\" src=\"https://i.ytimg.com/vi/test0000046/hqdefault.jpg\" alt=\"\" draggable=\"false\"></div>"
    ],
    "posterRects": [
     {
      "p": [
       0,
-      205,
+      856,
       393,
       221
      ],
      "h": [
       0,
-      205,
+      856,
       393,
       221
      ],
@@ -393,13 +393,13 @@
     {
      "p": [
       0,
-      864,
+      1515,
       393,
       221
      ],
      "h": [
       0,
-      864,
+      1515,
       393,
       221
      ],
@@ -408,13 +408,13 @@
     {
      "p": [
       0,
-      -454,
+      197,
       393,
       221
      ],
      "h": [
       0,
-      -454,
+      197,
       393,
       221
      ],
@@ -423,7 +423,7 @@
     {
      "p": [
       0,
-      -1113,
+      -462,
       393,
       221
      ],
@@ -433,14 +433,14 @@
    "posterAllStates": {
     "unstarted": [
      "nb:poster",
-     "nb:poster",
      "cur:poster",
+     "nb:poster",
      "nb:poster"
     ],
     "ended": [
      "nb:poster",
      "nb:poster",
-     "cur:poster",
+     "cur:KEIN-POSTER",
      "nb:poster"
     ],
     "paused": [
@@ -479,11 +479,11 @@
     }
    },
    "latency": {
-    "n": 39,
-    "buffered": 32,
+    "n": 37,
+    "buffered": 29,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000076:100 | Testmoment 76 brain | Weak | - | Video | 04d8a74 |\n| test0000027:100 | Testmoment 27 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 04d8a74 |\n| test0000050:100 | Testmoment 50 body | Already known | - | Video | 04d8a74 |\n| test0000011:100 | Testmoment 11 beat | Wrong | - | Video | 04d8a74 |\n| test0000070:100 | Testmoment 70 brain | Not for me | - | Video | 04d8a74 |\n| test0000029:100 | Testmoment 29 brain | Mute speaker | - | Video | 04d8a74 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | e42663d |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e42663d |\n| test0000053:100 | Testmoment 53 body | Already known | - | Video | e42663d |\n| test0000050:100 | Testmoment 50 body | Wrong | - | Video | e42663d |\n| test0000011:100 | Testmoment 11 beat | Not for me | - | Video | e42663d |\n| test0000070:100 | Testmoment 70 brain | Mute speaker | - | Video | e42663d |",
    "badWalk": [
     {
      "idx": 2,
@@ -801,8 +801,8 @@
      "dir": "rtl"
     },
     {
-     "ar": false,
-     "dir": "ltr"
+     "ar": true,
+     "dir": "rtl"
     },
     {
      "ar": true,
@@ -820,7 +820,7 @@
     "noRating": true
    },
    "errors": [],
-   "ok": true
+   "ok": false
   },
   {
    "browser": "chromium",
@@ -1082,10 +1082,10 @@
    "recall": [
     {
      "id": "test0000017:100",
-     "due": 1792929605413,
+     "due": 1792929605371,
      "results": [
       {
-       "at": 1792756805413,
+       "at": 1792756805371,
        "got": false
       }
      ]
@@ -1170,14 +1170,14 @@
     "slot2 hls loadedmetadata rs=0 ns=0 muted=true t=0.0"
    ],
    "tapToFill": {
-    "measured": 32.10000000000582,
+    "measured": 32.39999999999418,
     "recorded": 32
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 285,
+    "checksDone": 288,
     "violations": 0,
-    "endedSeen": 32
+    "endedSeen": 33
    },
    "posterState": {
     "idx": 26,
@@ -1304,7 +1304,7 @@
     "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | 04d8a74 |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 04d8a74 |\n| test0000027:100 | Testmoment 27 brain | Already known | - | Video | 04d8a74 |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | 04d8a74 |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | 04d8a74 |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | 04d8a74 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | e42663d |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e42663d |\n| test0000027:100 | Testmoment 27 brain | Already known | - | Video | e42663d |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | e42663d |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | e42663d |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | e42663d |",
    "badWalk": [
     {
      "idx": 2,
