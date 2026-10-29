@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T17:11:54.676Z",
+ "at": "2026-10-29T17:22:05.588Z",
  "runs": [
   {
    "browser": "webkit",
@@ -300,10 +300,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603438,
+     "due": 1792929603440,
      "results": [
       {
-       "at": 1792756803438,
+       "at": 1792756803440,
        "got": false
       }
      ]
@@ -368,9 +368,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06246948242188,
+    "bh": 221.0625,
     "fw": 393,
-    "fh": 221.06246948242188,
+    "fh": 221.0625,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -380,21 +380,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 31.900000000023283,
+    "measured": 32.19999999998254,
     "recorded": 32
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 849,
+    "checksDone": 870,
     "violations": 0,
-    "endedSeen": 264
+    "endedSeen": 270
    },
    "latency": {
     "n": 34,
     "buffered": 28,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | 25a8fb8 |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 25a8fb8 |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | 25a8fb8 |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | 25a8fb8 |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | 25a8fb8 |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | 25a8fb8 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | 4f2e40a |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 4f2e40a |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | 4f2e40a |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | 4f2e40a |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | 4f2e40a |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | 4f2e40a |",
    "badWalk": [
     {
      "idx": 2,
