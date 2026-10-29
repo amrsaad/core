@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T18:06:55.030Z",
+ "at": "2026-10-29T18:19:37.517Z",
  "runs": [
   {
    "browser": "webkit",
@@ -14,11 +14,11 @@
     "soundIconShownWhileMuted": true,
     "soundIconBottomRightOfBand": true,
     "noSoundPill": true,
-    "soundOn": true,
-    "soundIconGoneAfterTap": true,
-    "soundIconNeverBack": true,
+    "soundOn": false,
+    "soundIconGoneAfterTap": false,
+    "soundIconNeverBack": false,
     "forYouExactlyWhenSet": true,
-    "sawBothKinds": true,
+    "sawBothKinds": false,
     "stoppedAtEnd": true,
     "autoNext": true,
     "recallAfter4": true,
@@ -258,10 +258,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929604706,
+     "due": 1792929710553,
      "results": [
       {
-       "at": 1792756804706,
+       "at": 1792756910553,
        "got": false
       }
      ]
@@ -277,11 +277,11 @@
      "align": ""
     },
     {
-     "ar": true,
-     "shown": true,
-     "rtl": true,
-     "size": 21,
-     "align": "right"
+     "ar": false,
+     "shown": false,
+     "rtl": false,
+     "size": 0,
+     "align": ""
     },
     {
      "ar": false,
@@ -300,25 +300,25 @@
    ],
    "sequence": [
     {
-     "id": "test0000000:100",
-     "has": true,
-     "fy": true,
-     "stoppedAtEnd": true
-    },
-    {
-     "id": "test0000001:100",
+     "id": "test0000021:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000006:100",
-     "has": true,
-     "fy": true,
+     "id": "test0000021:100",
+     "has": false,
+     "fy": false,
      "stoppedAtEnd": true
     },
     {
-     "id": "test0000014:100",
+     "id": "test0000021:100",
+     "has": false,
+     "fy": false,
+     "stoppedAtEnd": true
+    },
+    {
+     "id": "test0000021:100",
      "has": false,
      "fy": false,
      "stoppedAtEnd": true
@@ -326,9 +326,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06253051757812,
+    "bh": 221.06246948242188,
     "fw": 393,
-    "fh": 221.06253051757812,
+    "fh": 221.06246948242188,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -338,21 +338,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 27,
-    "recorded": 35
+    "measured": 30.999999999985448,
+    "recorded": 30
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 843,
+    "checksDone": 846,
     "violations": 0,
-    "endedSeen": 263
+    "endedSeen": 265
    },
    "latency": {
     "n": 34,
     "buffered": 28,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | e777c5b |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e777c5b |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | e777c5b |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | e777c5b |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | e777c5b |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | e777c5b |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | b2c0fab |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | b2c0fab |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | b2c0fab |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | b2c0fab |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | b2c0fab |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | b2c0fab |",
    "badWalk": [
     {
      "idx": 2,
@@ -685,7 +685,7 @@
     "noRating": true
    },
    "errors": [],
-   "ok": true
+   "ok": false
   },
   {
    "browser": "chromium",
@@ -944,10 +944,10 @@
    "recall": [
     {
      "id": "test0000014:100",
-     "due": 1792929603451,
+     "due": 1792929603416,
      "results": [
       {
-       "at": 1792756803451,
+       "at": 1792756803416,
        "got": false
       }
      ]
@@ -1012,9 +1012,9 @@
    ],
    "band": {
     "bw": 393,
-    "bh": 221.06246948242188,
+    "bh": 221.0625,
     "fw": 393,
-    "fh": 221.06246948242188,
+    "fh": 221.0625,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -1024,21 +1024,21 @@
     2
    ],
    "tapToFill": {
-    "measured": 31.899999999965075,
+    "measured": 32,
     "recorded": 32
    },
    "notesCount": 6,
    "posterCheck": {
     "checksDone": 846,
     "violations": 0,
-    "endedSeen": 263
+    "endedSeen": 264
    },
    "latency": {
     "n": 34,
     "buffered": 28,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | e777c5b |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e777c5b |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | e777c5b |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | e777c5b |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | e777c5b |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | e777c5b |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Boring | - | Video | b2c0fab |\n| test0000018:100 | Testmoment 18 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | b2c0fab |\n| test0000049:100 | Testmoment 49 body | Known | - | Video | b2c0fab |\n| test0000053:100 | Testmoment 53 body | Wrong | - | Video | b2c0fab |\n| test0000027:100 | Testmoment 27 brain | Not for me | - | Video | b2c0fab |\n| test0000015:100 | Testmoment 15 brain | Mute speaker | - | Video | b2c0fab |",
    "badWalk": [
     {
      "idx": 2,
