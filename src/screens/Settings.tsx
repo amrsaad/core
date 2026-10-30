@@ -17,6 +17,8 @@ import { emptyWeights, learned, weightText, type Learned as LearnedRows, type Ro
 import { speakerLine } from '../moments/speaker';
 import { preloadedLine } from '../moments/preload';
 import { usePreloadStats } from '../moments/usePreload';
+import { diagLog } from '../lib/diag';
+import { backgroundLine } from '../moments/background';
 
 const AREAS: Area[] = ['brain', 'body', 'beat'];
 
@@ -167,6 +169,7 @@ export function Settings({ state, update, replace, moments, skipped = 0, sync }:
         <span className="t-meta" data-testid="moments-skipped">Moments skipped: {skipped}</span>
         <TapReaction samples={state.tapMs} />
         <SwipeFrames samples={state.swipeFrames} />
+        <Diagnostics state={state} moments={moments} skipped={skipped} sync={sync} />
       </section>
 
       <SyncCard sync={sync} />
@@ -275,6 +278,56 @@ function CoreTime({ feedTime }: { feedTime: Record<string, number> }) {
           <span className="t-meta text-muted">{d.label}</span>
         </div>
       ))}
+    </div>
+  );
+}
+
+/** Diagnose zum Weitergeben (Max, 30.10.2026): Zusammenfassung plus die letzten Protokollzeilen, ohne Schlüssel oder Token. */
+export function diagnosticsText(state: AppState, moments: MomentPool | null, skipped: number, sync: SyncUi): string {
+  const raw = diagLog.raw();
+  const lat = latencyStats(state.playLatency, true);
+  const head = [
+    `Core ${__APP_VERSION__}, ${new Date().toISOString()}`,
+    `pool ${moments?.updatedAt ? new Date(moments.updatedAt).toISOString() : 'unknown'}, ${moments?.moments.length ?? 0} moments, skipped ${skipped}`,
+    `device ${typeof navigator !== 'undefined' ? navigator.userAgent : ''}`,
+    `online ${typeof navigator !== 'undefined' ? navigator.onLine : ''}, standalone ${typeof window !== 'undefined' && window.matchMedia?.('(display-mode: standalone)').matches}`,
+    `sync token ${sync.status.hasToken ? 'yes' : 'no'}, last sync ${sync.status.lastSync ? new Date(sync.status.lastSync).toISOString() : 'never'}${sync.status.error ? `, error ${sync.status.error}` : ''}`,
+    `saved ${Object.keys(state.savedMoments).length}, seen ${Object.keys(state.momentSeen).length}, speed ${speedOf(state.settings)}`,
+    `first frame preloaded: ${lat.n ? `median ${lat.median} ms, p90 ${lat.p90} ms, n ${lat.n}` : 'none'}`,
+    backgroundLine(raw),
+    '',
+    'log (mm:ss since app start):',
+  ];
+  return [...head, ...diagLog.lines().slice(-150)].join('\n');
+}
+
+function Diagnostics({ state, moments, skipped, sync }: { state: AppState; moments: MomentPool | null; skipped: number; sync: SyncUi }) {
+  const [msg, setMsg] = useState('');
+  const copy = async () => {
+    const text = diagnosticsText(state, moments, skipped, sync);
+    try {
+      if (navigator.share && /iPhone|iPad/.test(navigator.userAgent)) {
+        await navigator.share({ title: 'Core diagnostics', text });
+        setMsg('Shared.');
+        return;
+      }
+    } catch {
+      /* Teilen abgebrochen, dann kopieren */
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      setMsg('Copied. Paste it into the chat.');
+    } catch {
+      setMsg('Could not copy. Long-press the text below to select it.');
+    }
+  };
+  return (
+    <div className="flex flex-col gap-2" data-testid="diagnostics">
+      <button className="rounded-xl border border-[var(--line)] px-4 py-3 text-[16px] text-left" onClick={copy} data-testid="copy-diagnostics">
+        Copy diagnostics
+      </button>
+      {msg && <span className="t-meta text-muted">{msg}</span>}
+      {msg.startsWith('Could not') && <textarea readOnly className="t-meta h-32 w-full rounded-xl bg-transparent p-2" value={diagnosticsText(state, moments, skipped, sync)} />}
     </div>
   );
 }

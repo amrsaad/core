@@ -1,3 +1,4 @@
+import { diagLog } from '../lib/diag';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
@@ -126,7 +127,11 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const forYouTimer = useRef(0);
   const feedMs = useRef(0);
   const dragEl = useRef<HTMLDivElement>(null);
-  const diag = useRef<string[]>([]);
+  const diag = useRef<{ push: (l: string) => void; slice: (n: number) => string[]; filter: (f: (x: string) => boolean) => string[] }>({
+    push: (l) => diagLog.push(l),
+    slice: (n) => diagLog.raw().slice(n),
+    filter: (f) => diagLog.raw().filter(f),
+  });
   const bad = useRef(new Set<string>());
   // Hintergrund-Wiedergabe (Entscheidung 13)
   const ledger = useRef(new EndLedger());
