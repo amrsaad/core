@@ -5,6 +5,11 @@
  * im Feed. Ein Tipp darauf öffnet ein einziges vorausgefülltes Issue in core-content, danach gelten die Notizen als gesendet.
  * Kein Token, kein Netzwerkaufruf der App. Reine Regeln, gleiche in ios/Core/Round1.swift (Note).
  * Gleiche Prüfdaten in tests/moments-note.test.ts und ios/CoreTests/Round1Tests.swift.
+ *
+ * Source und Topic (Entscheidung 20, Max 30.10.2026): zwei weitere Chips im Blatt. Ein Tipp öffnet ein Textfeld (Link oder Name bzw. Thema), Absenden legt
+ * eine Notiz ohne Chip an, deren Text mit "source:" bzw. "topic:" beginnt. Beim Senden wird nach diesem Präfix getrennt. Jede solche Notiz wird ein eigenes
+ * Issue mit Label source bzw. topic und steht nicht im Sammel-Issue der normalen Notizen. Ein Tipp auf die Zeile "N notes, send?" öffnet das nächste Issue.
+ * Nur Web (Entscheidung 14), die iOS-Regeln bleiben unverändert.
  */
 import type { Effect } from './learn';
 
@@ -122,6 +127,8 @@ export function issueUrl(title: string, body: string): string {
 }
 
 export interface Built {
+  /** Art des Issues. Fehlt bei Aufrufern, die nur das Sammel-Issue kennen. */
+  kind?: NoteKind;
   url: string;
   /** Schlüssel der Notizen, die in diesem Issue stehen */
   keys: string[];
@@ -133,7 +140,7 @@ export interface Built {
  * hinein wie passen (mindestens eine). Der Rest bleibt ungesendet und geht beim nächsten Mal.
  */
 export function buildIssue(list: NoteEntry[], day: string): Built | null {
-  const all = rows(list);
+  const all = rows(splitNotes(list).feedback);
   if (!all.length) return null;
   let k = all.length;
   const make = (n: number) => issueUrl(issueTitle(day, n), issueBody(all.slice(0, n)));
@@ -146,4 +153,70 @@ export function buildIssue(list: NoteEntry[], day: string): Built | null {
 export function markSent(list: NoteEntry[] | undefined, keys: string[], at: number): NoteEntry[] {
   const cutoff = at - SENT_KEEP_DAYS * 86_400_000;
   return (list ?? []).map((e) => (keys.includes(e.key) ? { ...e, sent: at } : e)).filter((e) => e.sent === undefined || e.sent >= cutoff);
+}
+
+// ---------- Source und Topic (Entscheidung 20) ----------
+
+export const INPUT_CHIPS = ['Source', 'Topic'] as const;
+export type InputChip = (typeof INPUT_CHIPS)[number];
+export type NoteKind = 'feedback' | 'source' | 'topic';
+export const INPUT_PREFIX: Record<InputChip, string> = { Source: 'source:', Topic: 'topic:' };
+export const INPUT_LABEL: Record<InputChip, string> = { Source: 'Source: link or name', Topic: 'Topic' };
+export const INPUT_HINT: Record<InputChip, string> = { Source: 'Link or name', Topic: 'Topic' };
+export const INPUT_BUTTON = 'Add';
+/** Längster Wert im Textfeld, damit Präfix und Wert in TEXT_MAX passen */
+export const INPUT_MAX = TEXT_MAX - Math.max(...INPUT_CHIPS.map((c) => INPUT_PREFIX[c].length)) - 1;
+/** Bestätigungszeile am Blatt, wie bei den anderen Chips */
+export const inputConfirm = (c: InputChip): string => `${c} noted`;
+/** Titel eines Issues ohne Umbruch, höchstens so lang */
+export const ISSUE_TITLE_MAX = 120;
+
+const oneLine = (s: string) => s.replace(/\s*[\r\n]+\s*/g, ' ').replace(/\s{2,}/g, ' ').trim();
+const PREFIX_RE = /^\s*(source|topic):\s*(\S[\s\S]*)$/i;
+
+/** Notiz aus dem Textfeld von Source oder Topic: Text "source: <Wert>" ohne Chip. Ein leerer Wert gibt keine Notiz. */
+export function makeInputEntry(c: NoteContext, chip: InputChip, value: string, at: number): NoteEntry | null {
+  const v = oneLine(value).slice(0, INPUT_MAX).trim();
+  if (!v) return null;
+  return makeEntry(c, [], `${INPUT_PREFIX[chip]} ${v}`, at);
+}
+
+/** Art einer Notiz. Source und Topic nur ohne Chip und mit Präfix am Textanfang, alles andere ist normale Rückmeldung. */
+export function kindOf(e: NoteEntry): NoteKind {
+  if (e.chips.length === 0) {
+    const m = PREFIX_RE.exec(e.text);
+    if (m) return m[1].toLowerCase() as NoteKind;
+  }
+  return 'feedback';
+}
+
+/** Wert hinter dem Präfix, ohne Umbruch */
+export const inputValue = (e: NoteEntry): string => oneLine(PREFIX_RE.exec(e.text)?.[2] ?? e.text);
+
+/** Aufteilung nach Art, Reihenfolge der Liste bleibt */
+export function splitNotes(list: NoteEntry[]): { feedback: NoteEntry[]; source: NoteEntry[]; topic: NoteEntry[] } {
+  const out = { feedback: [] as NoteEntry[], source: [] as NoteEntry[], topic: [] as NoteEntry[] };
+  for (const e of list) out[kindOf(e)].push(e);
+  return out;
+}
+
+/** Ein eigenes Issue für eine Source- oder Topic-Notiz: Titel "source: <Wert>", Label source bzw. topic, Body mit Wert und Herkunft */
+export function inputIssue(e: NoteEntry): Built {
+  const kind = kindOf(e) as 'source' | 'topic';
+  const value = inputValue(e);
+  const title = `${kind}: ${value}`.slice(0, ISSUE_TITLE_MAX).trim();
+  const body = [value, '', `Heard in: ${e.id}`, `Hook: ${oneLine(e.hook)}`, `Tab: ${e.tab}`, `App: ${e.commit}`].join('\n');
+  return { kind, url: `${ISSUE_BASE}?title=${enc(title)}&body=${enc(body)}&labels=${kind}`, keys: [e.key], rows: 1 };
+}
+
+/**
+ * Das nächste Issue aus den ungesendeten Notizen. Zuerst das Sammel-Issue der normalen Rückmeldungen (wie bisher), danach je eine Source- oder
+ * Topic-Notiz, älteste zuerst. Der Browser öffnet pro Tipp nur ein Fenster, deshalb bleibt die Zeile "N notes, send?" stehen, bis nichts mehr offen ist.
+ */
+export function nextIssue(list: NoteEntry[], day: string): Built | null {
+  const parts = splitNotes(list);
+  const fb = buildIssue(parts.feedback, day);
+  if (fb) return { ...fb, kind: 'feedback' };
+  const next = [...parts.source, ...parts.topic].sort((a, b) => a.at - b.at)[0];
+  return next ? inputIssue(next) : null;
 }
