@@ -238,13 +238,20 @@ jobs:
           npx vite preview --host 127.0.0.1 --port 4185 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4185/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/recallqueue.mjs http://127.0.0.1:4185/core/ pipeline/out/e2e-recallqueue
+      - name: Audio-Reiter testen (Issue 11, 13, 14, 15; erste Geste, Hintergrund, Abrufkarte, Tempo 2x, Untertitel; WebKit und Chromium)
+        if: always()
+        timeout-minutes: 12
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4187 --strictPort &
+          node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4187/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
+          node tests/e2e/audiotab.mjs http://127.0.0.1:4187/core/ pipeline/out/e2e-audiotab
       - name: Ergebnisse committen
         if: always()
         run: |
-          [ -d pipeline/out/e2e-loudness ] || [ -d pipeline/out/e2e-moments ] || [ -d pipeline/out/e2e-keyrestore ] || [ -d pipeline/out/e2e-desktop ] || [ -d pipeline/out/e2e-sync ] || [ -d pipeline/out/e2e-digest ] || [ -d pipeline/out/e2e-background ] || [ -d pipeline/out/e2e-preload ] || [ -d pipeline/out/e2e-endpage ] || [ -d pipeline/out/e2e-swipe ] || [ -d pipeline/out/e2e-offline ] || [ -d pipeline/out/e2e-tempo ] || [ -d pipeline/out/e2e-tempoperf ] || [ -d pipeline/out/e2e-recallqueue ] || { echo "Keine E2E-Ergebnisse."; exit 0; }
+          [ -d pipeline/out/e2e-loudness ] || [ -d pipeline/out/e2e-moments ] || [ -d pipeline/out/e2e-keyrestore ] || [ -d pipeline/out/e2e-desktop ] || [ -d pipeline/out/e2e-sync ] || [ -d pipeline/out/e2e-digest ] || [ -d pipeline/out/e2e-background ] || [ -d pipeline/out/e2e-preload ] || [ -d pipeline/out/e2e-endpage ] || [ -d pipeline/out/e2e-swipe ] || [ -d pipeline/out/e2e-offline ] || [ -d pipeline/out/e2e-tempo ] || [ -d pipeline/out/e2e-tempoperf ] || [ -d pipeline/out/e2e-recallqueue ] || [ -d pipeline/out/e2e-audiotab ] || { echo "Keine E2E-Ergebnisse."; exit 0; }
           git config user.name "core-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pipeline/out/e2e-loudness pipeline/out/e2e-moments pipeline/out/e2e-keyrestore pipeline/out/e2e-desktop pipeline/out/e2e-sync pipeline/out/e2e-digest pipeline/out/e2e-background pipeline/out/e2e-preload pipeline/out/e2e-endpage pipeline/out/e2e-swipe pipeline/out/e2e-offline pipeline/out/e2e-tempo pipeline/out/e2e-tempoperf pipeline/out/e2e-recallqueue 2>/dev/null || true
+          git add pipeline/out/e2e-loudness pipeline/out/e2e-moments pipeline/out/e2e-keyrestore pipeline/out/e2e-desktop pipeline/out/e2e-sync pipeline/out/e2e-digest pipeline/out/e2e-background pipeline/out/e2e-preload pipeline/out/e2e-endpage pipeline/out/e2e-swipe pipeline/out/e2e-offline pipeline/out/e2e-tempo pipeline/out/e2e-tempoperf pipeline/out/e2e-recallqueue pipeline/out/e2e-audiotab 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "e2e: Momente-Feed $(date -u +%FT%H:%M)"
           for i in 1 2 3; do git pull --rebase -q origin "${{ github.ref_name }}" && git push origin "HEAD:${{ github.ref_name }}" && break; sleep 5; done
