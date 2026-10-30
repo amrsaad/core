@@ -1,0 +1,789 @@
+{
+ "source": "arxiv",
+ "date": "2026-10-30",
+ "records": [
+  {
+   "sourceId": "arxiv:2610.39483",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39483",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Does Federated Training Degrade Explainability? A Comparative Analysis of Grad-CAM Faithfulness in Centralized vs. Federated Deepfake Detection",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Does Federated Training Degrade Explainability? A Comparative Analysis of Grad-CAM Faithfulness in Centralized vs. Federated Deepfake Detection",
+    "abstract": "Automated detection has become the essential safeguard against realistic synthetic media, but deploying it at scale requires training on sensitive data from multiple organizations, putting privacy and the transparency demanded by forensic review in direct conflict. Federated learning resolves the privacy side by sharing only model updates rather than raw data, but whether this comes at the cost of trustworthy gradient-based explanations, which analysts rely on to decide whether or not to trust a flagged clip, has not been studied. We present the systematic study of Grad-CAM explanation faithfulness under federated deepfake detection, evaluating an EfficientNet-B4 detector on FaceForensics++ across five federated clients under varying degrees of data heterogeneity. We find that the relationship between federation and explanation quality is non-monotonic: at near-IID (Independent and Identically Distributed Data) and moderate heterogeneity, federated models match or exceed the faithfulness of a centralized baseline, but at extreme heterogeneity, explanations break down entirely, becoming spatially incoherent and, on average, causally misleading. This degradation is not a general cost of federated training but a threshold effect tied to client heterogeneity, and we offer practical guidance for identifying when privacy-preserving deepfake detection can be deployed safely and when its explanations can no longer be trusted. Code and data partitions are available for reproducibility."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T06:49:14Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z"
+  },
+  {
+   "sourceId": "arxiv:2610.39468",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39468",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Soei: Structured Observability of Evidence and Intent for Multi-Agent AI Software Engineering",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Soei: Structured Observability of Evidence and Intent for Multi-Agent AI Software Engineering",
+    "abstract": "AI coding agents now do long, multi-step and multi-session software work with little supervision. When a developer comes back to that work, the useful question is not what the model said but what was actually done, by whom, and whether it is finished. We study this in three parts. First, we verify Agenttrail, an open-source local observability tool for coding agents, against its source at commit e4ba2da: nine documented constants and mechanisms hold at file-and-line level, two event pipelines are never unified, and its Map service has an unauthenticated local mutation surface. Second, we run a prototype of our system on 45 real coding-agent sessions (102,233 records, 20,577 tool executions, 2,336 human-to-agent episodes). With a blind-audited classifier (precision 83.3% and 96.7%) we estimate that 23.4% (95% CI 17.1 to 35.7) of code-editing episodes end with no independent check after the last edit, and that 57.8% of to-dos the agent marked complete after editing had no proof in between. A 10-minute timing heuristic for session hand-offs recovers 6 of the 24 session pairs that content lineage links. 42% of sessions run longer than 24 hours, 48.1% of transcript bytes lie past a 2 MiB replay bound, and 1,326 records in 16 sessions contain credential-like strings. Third, we propose Soei (Structured Observability of Evidence and Intent): an acknowledgement-aware event schema, a hash-chained local ledger, a W3C PROV-aligned graph, calibrated inference for attribution and lineage, and a verification layer that keeps a claim of completion apart from proof. On the same corpus the ledger is 20% of raw size, holds no content or credentials, verifies at about 126k events/s, detects tampering and replays deterministically. We position the work against concurrent 2026 proposals and define autonomy levels with evidence gates and harness metrics baselined on our data."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T06:40:12Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z"
+  },
+  {
+   "sourceId": "arxiv:2610.39464",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39464",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Integrating Heterogeneous Echocardiography AI Outputs in Language Space: Learnable Late Fusion with a Supervised LLM",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Integrating Heterogeneous Echocardiography AI Outputs in Language Space: Learnable Late Fusion with a Supervised LLM",
+    "abstract": "View- and target-specific echocardiography AI models capture useful but complementary information and may not achieve sufficient predictive performance in isolation. A learned ensemble is a natural way to combine these outputs, but heterogeneous models typically require each output to be converted into a binary decision, probability, confidence score, or fixed-length feature vector. We developed a supervised large language model (LLM)-based late-fusion module that directly aggregates view-specific predicted finding statements and predicted measurements in language space and learns a case-level fusion function. In patient-level three-fold cross-validation of 859 examinations from 646 patients, the proposed method integrated heterogeneous outputs within a single framework, performed comparably to the best-performing reference strategy evaluated, and outperformed a general-purpose LLM without task-specific training. These results suggest that a supervised LLM can combine multiple upstream models without model-specific output conversion or feature engineering that requires medical knowledge."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T06:36:39Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39464": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39455",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39455",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Sparse Fine-Tuning for Parameter-Efficient Adversarial Training",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Sparse Fine-Tuning for Parameter-Efficient Adversarial Training",
+    "abstract": "Deep neural networks achieve strong performance across many tasks but remain vulnerable to adversarial perturbations. Adversarial training (AT) is one of the most effective defenses, yet it suffers from high memory cost on large models and the persistent clean-robust accuracy trade-off. Recent work introduces parameter-efficient fine-tuning, such as LoRA, into AT, but this constraint induces a notable robustness gap relative to full-parameter AT. In this work, we revisit parameter-efficient adversarial fine-tuning from a parameter space perspective. Through gradient analysis, we find that adversarial optimization is highly concentrated on a small subset of parameters, which we call Robustness-Critical Parameters (RCPs), suggesting that robustness is encoded in a sparse subspace. Building on this observation, we propose Sparse Adversarial Fine-Tuning (SAFT), which identifies RCPs via adversarial gradient saliency and performs AT by updating only these parameters while freezing the rest. Across architectures and datasets, SAFT outperforms LoRA-based methods in both clean and robust accuracy with fewer trainable parameters, and approaches or surpasses full parameter AT in robustness while updating only about 5\\% of parameters."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T06:27:35Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39455": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39454",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39454",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Kairos: Semantics-Aware Orchestration of Planning Engines across Classical, Numeric, Temporal and Hybrid PDDL",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Kairos: Semantics-Aware Orchestration of Planning Engines across Classical, Numeric, Temporal and Hybrid PDDL",
+    "abstract": "Planning at run time, as in robots that re-plan while they act, needs a planner that reads the PDDL its users write (durative actions, numeric resources, time windows, continuous change), answers quickly, and delivers only validated plans. Specialised planners are strong on individual fragments of PDDL, but they differ in coverage, latency and in what their failures mean. We study whether selecting heterogeneous engines from the semantics of each task can give broad coverage of PDDL, from STRIPS to PDDL+, while remaining competitive with specialised planners and making explicit what each answer guarantees. Kairos profiles each task to decide which of five engines apply (ground heuristic search, compressed and snap-action temporal search, time steps for hybrid dynamics, lifted search) and schedules them under one budget of time and memory. Every candidate plan is checked by a validator independent of the planner's transformations, and \"unsolvable\" is reported only when a search whose exhaustion is a proof exhausts its space. On 1,756 tasks from nine comparative suites, Kairos solves more tasks at the full limits than the strongest evaluated planner of each suite, with the largest differences on numeric, temporal, PDDL3 and PDDL+ planning, and it also solves the most tasks at 100 ms and 1 s. Resampling over domains, the gain is above zero in six of the nine suites, while on classical planning against LAMA it is within the noise. A further 450 feature-oriented tasks and 26 one-feature probes show that Kairos handles all seventeen features probed, where no other planner evaluated handles more than eight. Ablations identify compressed temporal search and the novelty fallback as major contributors, and a comparison with VAL traces every disagreement to a PDDL+ convention or to a documented VAL defect. Planner and benchmark are open source."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T06:25:01Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z"
+  },
+  {
+   "sourceId": "arxiv:2610.39439",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39439",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Timbre: Reliability-aware harmonic consensus for label-free multimodal test-time rexinforcement learning",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Timbre: Reliability-aware harmonic consensus for label-free multimodal test-time rexinforcement learning",
+    "abstract": "Label-free test-time reinforcement learning adapts vision--language models using rewards derived from their own predictions. However, misinterpreted visual evidence and sensitivity to textual formulation can produce a consistent but incorrect consensus that majority voting reinforces. Cross-view aggregation can expose such errors, but image and text transformations may themselves degrade task-relevant evidence to different extents. We introduce \\method, a reliability-aware harmonic consensus framework for multimodal test-time reinforcement learning. \\method constructs a $2\\times2$ grid combining original and perturbed images with direct-solving and reframing modes, selects pseudo-labels through weighted harmonic aggregation, and adapts modality-level weights using batch-averaged, temporally smoothed shifts in pseudo-label confidence as a heuristic reliability signal. We formulate consensus as a weighted $χ^2$-barycenter problem whose unique minimizer is the normalized weighted harmonic aggregate, without requiring correct-answer invariance. An exact support--dispersion decomposition characterizes when harmonic aggregation preserves or corrects arithmetic rankings, while a sensitivity analysis establishes how modality reweighting changes pairwise ranking margins, informing interpretation of the heuristic updates. Across six benchmarks and three Qwen3-VL model scales, \\method outperforms TTRV in 16 of 18 benchmark--model settings on adaptation instances and 17 of 18 settings on held-out instances under matched estimation and optimization rollout counts. These results demonstrate improved target-task adaptation and transfer to unseen instances without further updates."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T06:15:35Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z"
+  },
+  {
+   "sourceId": "arxiv:2610.39438",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39438",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "ATLAS-Bench: An Agentic Tool-Use Benchmark for Local Area Search",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "ATLAS-Bench: An Agentic Tool-Use Benchmark for Local Area Search",
+    "abstract": "Reliable local search is essential for LLM agents to support everyday decisions and longer plans by finding places that meet users' needs at given times and locations. Yet existing benchmarks provide limited coverage of whether search results satisfy mandatory requirements, account for preferences, and ground factual and experiential judgments in place attributes and reviews. We introduce ATLAS-Bench, a benchmark of 1,200 queries across three regions, expanded from real search events using place attributes, reviews, and existing user profiles from the platform. Each query distinguishes mandatory requirements from preferences and factual conditions from subjective judgments, with supporting evidence and criteria for checking each requirement. Queries are validated through iterative assertion checks and cross-model review. We also introduce ATLASBox, a standardized evaluation environment with search tools and a fixed point-of-interest (POI) knowledge base. Given a query, timestamp, and location, an agent searches place attributes and reviews to recommend evidence-supported options or report that no place meets all mandatory requirements. We evaluate answer quality, trajectory quality, and execution cost. Across 14 configurations of 11 models, GPT-6-Luna achieves the highest constraint satisfaction rate among returned recommendations (71.5%) and factual accuracy (95.6%). However, it returns at least one acceptable recommendation for fewer satisfiable queries than GLM-5.3 (67.3% versus 85.3%). These results highlight the challenge of satisfying individual requirements while providing usable recommendations across queries."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T06:14:52Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39438": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39435",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39435",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Verifiable LLM-Guided Focal SMT Solving for Quantified Arrays",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Verifiable LLM-Guided Focal SMT Solving for Quantified Arrays",
+    "abstract": "Large language models can often identify useful semantic structure in formal artifacts, but their outputs cannot be trusted as proofs or solver decisions. We study whether LLMs can instead guide formal reasoning systems through a narrow, solver-verifiable interface. We instantiate this idea in quantified array SMT solving, where modern instantiation-based techniques can fail when key ground terms and equalities are hidden by auxiliary variables, axiom guards, and nested array terms. We observe that many instances are largely driven by a small set of focal ground terms or constraints, similar to the backdoor sets in SAT solving. Building on this, we present LinguaArray, a framework where an LLM proposes a small Semantic Focus Set (ground terms/constraints), while a conventional SMT solver remains the sole proof engine and certifies all results. LinguaArray uses these LLM-suggested, solver-validated finite sets to significantly enhance solver capability, solving additional satisfiable and unsatisfiable instances that the backend alone fails to solve. It interacts within a finite time and then falls back to the backend solver to mitigate potential regressions. Evaluation on 1015 SMT-LIB instances across five logics under 1200s timeout (including LLM latency) shows that LinguaArray solves up to 69.1% of instances and increases solved-instance counts by 105%--397% over the corresponding backends."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T06:13:59Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39435": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39433",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39433",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "ARBITRA: Robust Document-Level ATT&CK Extraction via Multi-Expert Argumentation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "ARBITRA: Robust Document-Level ATT&CK Extraction via Multi-Expert Argumentation",
+    "abstract": "Cyber threat intelligence (CTI) reports describe adversary behavior in natural language, but converting them into structured MITRE ATT&CK mappings remains difficult: existing methods decompose reports to sentence-level granularity for extraction, while modern LLMs can work with full reports in a single pass but with noticeable performance degradation. We present ARBITRA, which orchestrates multiple role-specialized LLM experts that propose candidate ATT&CK entities from the full report, which are then verified through a per-candidate quantitative bipolar argumentation framework (QBAF) grounded in document evidence and rationales. We additionally construct reasoning-specialized corpora for fine-tuning so experts can act as effective participants during this verification process. Across ATT&CK extraction benchmarks, ARBITRA reaches a stronger precision-oriented operating point than sentence-level pipelines, recent LLM-based extraction systems, and frontier models including GPT-5.5. Under adversarial perturbations simulating conflicting TTP statements, cross-report contamination, and semantic poisoning, ARBITRA limits mean precision degradation to roughly half that of frontier-model baselines for a more robust extraction."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T06:09:41Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39433": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39423",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39423",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "FDSML: Formula-Driven Supervised Metric Learning with Parameter-Aware Triplet Loss",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "FDSML: Formula-Driven Supervised Metric Learning with Parameter-Aware Triplet Loss",
+    "abstract": "Formula-Driven Supervised Learning (FDSL) enables vision pre-training without real images, but existing methods cast pre-training as classification on discretized labels, discarding continuity in the generative process. We propose Formula-Driven Supervised Metric Learning (FDSML), which derives relational supervision from image-generation parameters beyond discrete class labels. FDSML combines FineFractalDB, our refined fractal dataset with higher intra-class variation and more stable structures, with a Parameter-Aware Triplet (PA-Triplet) Loss that assigns positives and negatives according to distances in the underlying Iterated Function System parameter space. This objective trains embeddings to respect parameter-derived relative similarity orderings. Experiments show that FDSML improves transferability to image retrieval while remaining competitive on downstream classification and improving robustness under several corruption settings. On ResNet-50, Recall@1 improves from 65.6% to 74.0% on Stanford Online Products and from 56.2% to 78.4% on Stanford Cars over FDSL pre-training. These results suggest that parameter-derived relational supervision provides a stronger synthetic pre-training signal than label-based classification for transfer beyond recognition."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T06:02:45Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39423": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39419",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39419",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Diagnosing the Reference Gap: What Visual Scaffolds Can and Cannot Fix in Multimodal Reasoning",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Diagnosing the Reference Gap: What Visual Scaffolds Can and Cannot Fix in Multimodal Reasoning",
+    "abstract": "Multimodal large language models can recognize visual content yet struggle to reason reliably over it across multiple steps. In counting, a model may see all objects but lose track of which ones it has counted. We argue that such failures, commonly attributed to perception, reveal a reference gap: the failure to bind language to the relevant visual entities, regions, or locations. Motivated by the theory of visual routines, we test whether external references such as numbering can narrow this gap. We introduce ReGap-Bench, a paired benchmark of five visual reasoning tasks in which the scene, question, and answer are fixed and only the reference varies. Results show that task-matched references improve accuracy by up to 25\\%, while mismatched references provide little benefit or even hurt performance. These findings identify the reference gap as a bottleneck distinct from visual perception and show that constructing task-appropriate visual references can serve as a training-free visual skill for improving multimodal reasoning."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T06:00:35Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39419": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39417",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39417",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Well-Specified and Well-Tested? Assessing SWE-bench-Style Datasets with a Self-Evolving Agent",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Well-Specified and Well-Tested? Assessing SWE-bench-Style Datasets with a Self-Evolving Agent",
+    "abstract": "Large language models (LLMs) have shown strong performance on software engineering (SE) tasks, driving the need for high-quality datasets for reliable training and evaluation. SWE-bench-style datasets (SWE datasets) are widely used to evaluate LLM-based coding agents on real-world software issues, where task clarity and test coverage directly affect whether instances are solvable and verifiable. However, quality issues persist in existing SWE datasets, and manual annotation is costly and labor-intensive, motivating LLM-based annotation. Existing approaches typically rely on static, overly general rubrics, limiting their ability to handle diverse and nuanced scenarios and often yielding high false positive rates. In contrast, human annotators draw on accumulated experience to make context-aware judgments. Inspired by this, we propose ExLabel, an LLM-based, self-evolving, experience-guided assistant for task clarity and test coverage assessment in SWE datasets. ExLabel maintains an evolving experience bank that distills cross-instance knowledge into stable yet adaptive judgment criteria and reuses relevant experience to guide the assessment of new instances. For systematic evaluation, we construct SWE-TQ, a new benchmark spanning eight programming languages, by cleaning human annotations from SWE-bench and Multi-SWE-bench. Experiments with three backbone LLMs show that ExLabel achieves the best F1 across all settings, with relative improvements of 44.2%/49.9% and 24.0%/18.4% over the best baseline for task clarity and test coverage assessment on the Python/Multilingual subsets, respectively. Moreover, a coding model fine-tuned on SWE-rebench data filtered by ExLabel resolves 66.2% of issues on SWE-bench Verified, outperforming the model trained on data filtered by the best baseline by 14.5%."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T05:59:36Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z"
+  },
+  {
+   "sourceId": "arxiv:2610.39413",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39413",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "How Specific Do I Need to Be? Effects of User Query Underspecification on Deep Research Agents",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "How Specific Do I Need to Be? Effects of User Query Underspecification on Deep Research Agents",
+    "abstract": "Deep research agents (DRAs) conduct long-horizon reasoning, search, and literature synthesis to provide long-form answers to complex, domain-specific questions. These agents are typically trained and evaluated on fully specified user queries. However, real-world user queries can often be underspecified. We introduce UNDERSPEC-DR, a framework for systematically evaluating how underspecified queries affect agents' final answer quality and intermediate search behavior. Across three DRAs we evaluated, underspecification substantially reduces how well DRA's answers fulfill users' information needs, even though they remain grounded in cited evidence. Our analysis of intermediate search behavior suggests a possible explanation: DRAs conduct broader searches that draw less on the original user query but rely more on their learned prior during training, which can be misaligned with users' intent. Our findings reveal the vulnerability of current DRAs to underspecified user queries and inform future efforts to build DRAs that proactively recognize when additional user input is needed to reliably complete deep research tasks."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T05:55:00Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z"
+  },
+  {
+   "sourceId": "arxiv:2610.39410",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39410",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Retaining Repair Hypotheses for Cost-Aware Execution",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Retaining Repair Hypotheses for Cost-Aware Execution",
+    "abstract": "Several corrections of an executable model can fit the same observations while predicting different execution outcomes. We study a repair-to-execution interface that retains compatible finite guard repairs, conditions their weights on diagnostic and ordinary-execution observations, and uses their predictions to choose routes, priced tests, or a backup. On 24 synthetic two-stage devices, an equal mixture of a language-model-generated repair and a uniform belief over compatible repairs (the AI-weighted belief) lowers no-test cost by 2.14 percent relative to committing to the generated repair. Access charges can erase the benefit of diagnosis on isolated tasks, while repeated work can recover it under the AI-weighted belief. With normal-execution learning in every repeated-work arm, workload-valued testing costs 3.33 percent less than same-budget random selection under the AI-weighted belief. Weighting changes the comparison: uniform normal learning costs 540.75 less than AI-weighted normal learning on this cohort, with a device-paired interval excluding zero. Testing recovers part of that gap, but uniform normal learning still has a lower aggregate cost than AI-weighted workload-valued selection. Under uniform beliefs, information-gain selection has the lowest total among the compared selectors, while workload-valued testing costs more than normal learning. These results support retaining alternatives to a generated repair and evaluating diagnostic selection together with repair weighting and learning from execution."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T05:49:54Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39410": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39409",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39409",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Safe Multi-Objective Reinforcement Learning: Zero Constraint Violation and Primal-Averaging Convergence",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Safe Multi-Objective Reinforcement Learning: Zero Constraint Violation and Primal-Averaging Convergence",
+    "abstract": "Many applications of multi-objective reinforcement learning (MORL) require policies that balance conflicting objectives while satisfying safety constraints. We study safe MORL with zero constraint violation throughout learning, covering both cumulative and stepwise constraints. A key challenge is to explore sufficiently under unknown dynamics and constraint costs without violating the constraints. For a given preference over objectives, we develop an algorithm to learn a safe Pareto optimal policy by combining optimistic reward estimates with pessimistic cost bounds. With high probability, every policy executed over $T$ episodes incurs zero constraint violation. The algorithm returns a safe Markov policy induced by the averaged occupancy measure and achieves an $\\widetilde{O}(1/\\sqrt{T})$ suboptimality gap under smooth Tchebycheff scalarization. We further develop a preference-free algorithm that first explores safely without a prespecified preference and then computes a safe policy for any given preference without further interaction. Over $T$ exploration episodes and $K$ planning iterations, it retains the same safety guarantee and achieves an $\\widetilde{O}(1/\\sqrt{T}+1/\\sqrt{K})$ suboptimality gap. Both algorithms require knowledge of a policy that strictly satisfies the constraints and its costs. We then relax these requirements, incurring at most constant cumulative violation. To our knowledge, we provide the first sample-efficient MORL algorithms that guarantee safety for every executed policy."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T05:47:57Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39409": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39403",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39403",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "SymKL: A Unified Representation-Space Measure of Signal Degradation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "SymKL: A Unified Representation-Space Measure of Signal Degradation",
+    "abstract": "Quantifying degradation between a pristine signal and its degraded observation is fundamental to signal processing, yet existing full-reference measures are inherently modality-specific. We introduce SymKL, a unified full-reference degradation measure based on implicit neural representations (INRs). An INR is fitted once to the pristine reference and characterized by its diagonal Fisher information, which captures the local information geometry of the learned representation. Evaluating the Fisher information with the pristine reference and a degraded observation yields two parameter-sensitivity profiles whose symmetric KL divergence defines the degradation score. The proposed formulation requires only the reference and degraded observation, without knowledge of the corruption process or degradation severity, making it applicable across images, audio, and 3D data. We further derive an exact closed-form expression for the diagonal Fisher of SIREN, enabling efficient computation. Experiments on image, speech, and volumetric 3D benchmarks demonstrate that SymKL accurately tracks degradation severity, remains monotonic where conventional metrics saturate or fail, and provides a unified modality-agnostic measure of signal degradation. Code will be made publicly available after the review process."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T05:40:24Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39403": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39398",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39398",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Robustness of Chatbot LLM Judgments of Presidential Actions and Hypothetical Reforms",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Robustness of Chatbot LLM Judgments of Presidential Actions and Hypothetical Reforms",
+    "abstract": "Chatbots are increasingly consulted about public affairs, and their judgments of policies are useful only if they are robust. We measure this robustness in the setting of an ordinary user, through consumer chat interfaces. For 30 days, five chatbot configurations (Mistral, Gemini Flash, Claude Sonnet, and Claude Opus at two effort settings) were asked twice a day to score the long-term effect on the United States of 40 actions of the last four presidential administrations and of 15 hypothetical reforms, each with a confidence and a short comment. The judgments are robust: all configurations agree on the sign and the ranking of the administrations' mean scores, and two different configurations asked on the same day give opposite signs to the same action in about 4% of cases. Responses from different days differ more than same-day responses, but the difference grows slowly over the month, except where the service itself changed. We identify three such changes, which shifted the judgments while leaving little or no trace in the interface. Treating the comments as a retrieval task, we find them specific to each item and consistent across runs and chatbots, with lexical and embedding similarities agreeing. We release the dataset of 16,500 judgments."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T05:32:29Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39398": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39395",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39395",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "OPERA: OPamp Design by an Expert-Taught Reasoning Agent, from Specifications to Layout",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "OPERA: OPamp Design by an Expert-Taught Reasoning Agent, from Specifications to Layout",
+    "abstract": "Analog flows from specifications to a signed-off layout rarely run without manual iteration. Recent large language model (LLM) agents size circuits with optimizer loops over the device dimensions and stop at the schematic. We present OPERA (OPamp design by an Expert-taught Reasoning Agent), in which a general-purpose LLM agent designs CMOS opamps from specifications to post-layout sign-off with open-source tools. First, the designer teaches the agent the gm/ID method: map the specifications to transconductances and minimum currents, choose gm/ID per device role from characterized lookup tables, and size from equations, leaving a few knobs to search and an explainable design. Second, the agent learns the gLayout framework and taught layout practice, and writes a reusable layout generator that closes the layout and extraction loop at designer-approved gates. In SKY130, the agent designed a shared constant-gm bias and six opamps (5T, folded-cascode and telescopic OTAs; Miller, folded-cascode and telescopic two-stage) for fun >= 50 MHz, PM >= 60 degrees, SR 25 V/μs into 1 pF and a minimum dc gain of 30 to 60 dB. All six layouts are DRC-clean and LVS-matched, and their extracted netlists meet every target at all 15 PVT corners ( fun >= 53.7 MHz, PM >= 62.1 degrees, SR >= 27.9 V/μs). The benchmark netlists are released at https://github.com/AMPICLab/AMPICBench."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T05:29:47Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39395": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39385",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39385",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "UMI-Live for In-The-Wild Bimanual Robotics Data Collection",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "UMI-Live for In-The-Wild Bimanual Robotics Data Collection",
+    "abstract": "Universal Manipulation Interface (UMI) devices allow human experts to demonstrate tasks for robot learning without teleoperating physical robots. Using these demonstrations as training data still requires a consistent hardware setup, calibration, and data processing. We present UMI-Live, a full-stack open-source bimanual UMI system for in-the-wild data collection. We design our custom UMI-Live hardware to integrate camera and LiDAR--inertial sensing, onboard compute, and power, without external tracking equipment or calibration within the collection environment. We implement a simple user interface for recording data while an asynchronous pipeline performs parallel SLAM reconstruction and publishes training-ready datasets. We also release software that supports dual-YAM teleoperation and VLA policy training and inference. We validate UMI-Live data quality by fine-tuning $π_{0.5}$ and MolmoAct2, achieving success rates of 10/10 and 8/10, respectively on a bimanual pick-and-place task. Furthermore, we release 40 hours of UMI-Live data across three tasks, and complete hardware designs, software, and reproduction guides at our $\\href{https://umi-live.github.io/}{\\text{project website}}$."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T05:18:16Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39385": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39380",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39380",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Learning to Formulate: Agentic Hardware-Software Co-Design of AI Infrastructure through Progressive Optimization and Verification",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Learning to Formulate: Agentic Hardware-Software Co-Design of AI Infrastructure through Progressive Optimization and Verification",
+    "abstract": "AI infrastructure, the chips and software that train and serve AI models, is designed in layers. Layers make the system manageable, but they also fix which choices an optimizer can consider. Gains that need the chip and its software to change together are excluded before optimization begins: the formulation leaves them out. Language-model agents make it possible to revisit these boundaries, but an agent's proposal cannot show by itself that a design is correct or optimal. We present Formulaic, a flow that divides the work. The agent writes the formulation, a mathematical solver optimizes within it, and verification and measurement check its assumptions and results. The agent refines the problem step by step, from the computation graph toward the chip. Each step is a template: a family of programs with the conditions under which they are correct. Wall relaxation searches the chip by pricing the hardware limits that bind the software. This paper takes a first step, through separate studies rather than one end-to-end run. On NVIDIA GB10, templates the agent wrote run complete Qwen3-8B layers $1.075\\times$ faster than SGLang. In a simulated Ventus GPU study, joint design cuts the worst-scenario cycles of Qwen2.5-0.5B to 0.428 of the reference, against 0.934 for software alone. On a five-step GEMM refinement chain, reusing proofs makes checking $2.51\\times$ faster."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T05:15:00Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39380": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39377",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39377",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "AgentDecept: Benchmarking Deceptive Behavior in Tool-Using LLM Agents under Pressure",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "AgentDecept: Benchmarking Deceptive Behavior in Tool-Using LLM Agents under Pressure",
+    "abstract": "LLM agents increasingly carry out multi-turn tasks across everyday applications, yet users often see only the agent's report rather than the observations, API calls, and state changes behind it. Existing deception benchmarks have studied long-horizon interactions and tool-use settings, but whether agents faithfully report their actions across realistic, stateful application workflows remains underexplored. To address this gap, we introduce AgentDecept, an executable benchmark for evaluating behavioral deception under pressure. AgentDecept contains 477 pressure variants derived from 257 source tasks across six pressure sources, each paired with a pressure-free counterpart. Interventions enter through event messages, task context, application state, tool responses, and service quotas, spanning explicit events and implicit task or environment changes. Our evidence-grounded protocol evaluates full trajectories by relating user-facing claims to time-ordered observations and executed outcomes, distinguishing falsification, concealment, and equivocation from honest failure and disclosed limitations. The resulting behavioral labels also provide a setting for testing existing activation-based probes. AgentDecept enables controlled analysis of when multi-turn agents' reports diverge from execution in realistic application interactions."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T05:08:22Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39377": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39373",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39373",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "What Makes Medical Examination Items Difficult? Using Large Language Models to Explore Patterns Associated With Empirical Item Difficulty",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "What Makes Medical Examination Items Difficult? Using Large Language Models to Explore Patterns Associated With Empirical Item Difficulty",
+    "abstract": "Research on medical item difficulty has largely focused on prediction rather than on identifying interpretable patterns associated with empirical difficulty. This study used empirical difficulty labels to guide large language models (LLMs) in inducing difficulty rubrics and examined how rubric guidance affected LLM difficulty judgments. Using training items and their empirical difficulty estimates from the United States Medical Licensing Examination (USMLE) and the Physician Assistant National Certifying Examination (PANCE), Claude Opus 5 induced separate rubrics for absolute and pairwise difficulty judgment. None of the induced rubrics treated surface features, such as stem length, option count, or images, as major sources of difficulty. Several patterns emerged across both examinations, including cue convergence, misleading cues, and option competition, although their specific forms differed. Retrieval of knowledge that could not be derived from the stem was particularly prominent in the PANCE rubrics, whereas the USMLE rubrics placed greater emphasis on integrating multiple clinical cues. We compared commercial and open-weight LLMs on held-out items under unguided and rubric-guided conditions. Rubric guidance changed how models used the difficulty scale but did not consistently improve performance. In absolute judgments, guidance encouraged broader use of the scale and generally improved coarse-grained agreement, without consistently improving rank ordering. In pairwise comparisons, its effects varied across models and examinations, and judgments became more sensitive to presentation order. These findings suggest that the value of label-guided rubric induction may lie more in generating interpretable, testable hypotheses from empirical difficulty data than in reliably improving difficulty judgments."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T05:04:10Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z"
+  },
+  {
+   "sourceId": "arxiv:2610.39372",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39372",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Cord: Confidence-Anchored Order Residual Decoding for Masked Diffusion Language Models",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Cord: Confidence-Anchored Order Residual Decoding for Masked Diffusion Language Models",
+    "abstract": "The decoding order of masked diffusion language models (dLLMs) can substantially affect generation quality, yet common decoders typically apply the same reveal rule throughout generation. Confidence provides a strong default, but it measures how decisively a position can be predicted now, not how useful revealing that position will be for subsequent decoding. We propose Cord, a lightweight prompt-conditioned policy that retains confidence decoding as a stable reference and learns when and how to depart from it through geometric residuals over generation direction, proximity to revealed context, and two-sided infilling. The residuals adapt to both the prompt and the evolving partial response. Rather than sampling a new policy action at every decoding step, Cord samples a single low-dimensional coefficient matrix per rollout, which induces an entire state-dependent reveal trajectory. This yields a contextual-bandit formulation trained directly from sequence-level rewards, without step-level credit assignment or backbone updates. Across three dLLMs and five reasoning, code, and constraint-satisfaction benchmarks, Cord improves average task success from 32.0% under confidence decoding to 48.2%, and further improves over the best per-domain fixed residual. Behavioral audits show that the learned residuals induce substantial, task-dependent changes in reveal locality and two-sided infilling. Cord adds only $0.53$M trainable parameters, requires no additional backbone forward passes, and incurs only 5.39% inference latency overhead."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T05:03:29Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39372": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39358",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39358",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Before the Next Rollout: Diagnosing Skill Utility Shifts from Policy Updates",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Before the Next Rollout: Diagnosing Skill Utility Shifts from Policy Updates",
+    "abstract": "Skill-evolution methods typically analyze execution trajectories to guide agent skill refinement. However, policy updates can change the behavioral effects and marginal utility of an unchanged skill. Attribution based on earlier trajectories may therefore no longer reflect the skill's contribution under the updated policy. Moreover, trajectory failures can arise from multiple factors, making individual skill contributions difficult to isolate. We evaluate whether policy-update signals contain predictive information about changes in skill marginal utility. At fixed contexts from pre-update training rollouts, we measure how policy updates change the contrast in token preferences between skill and control conditions. Combining these interaction shifts with advantage estimates yields reward-directed readouts for diagnosing utility changes. The readouts reuse existing training rollouts and require only forward passes for single-step action scoring, without additional post-update rollout evaluation. Our experiments show that policy updates can alter skill marginal utility and that policy-update readouts carry diagnostic information for identifying skills with declining utility. Integrating readout-guided prioritization into skill evolution improves downstream performance while reducing policy and editor token consumption."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T04:50:24Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39358": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39356",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39356",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Semantic Mismapping in Generalized Category Discovery: Evaluation and Mitigation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Semantic Mismapping in Generalized Category Discovery: Evaluation and Mitigation",
+    "abstract": "Generalized Category Discovery (GCD) aims to perform old-category recognition and novel-category discovery in the same unlabeled set. Early methods address both objectives through clustering and evaluate the exchangeable predicted indices with global Hungarian (GH) matching. Recent methods adopt trainable parametric heads, using supervision for old-category recognition and discovery-oriented objectives for new categories. In this way, the output space becomes partially exchangeable: old indices are semantically anchored, while new indices remain exchangeable. However, these methods still apply global matching, which can reassign anchored old indices to other categories and hide some prediction errors. Empirically, we are surprised to observe that this reassignment can induce an overestimation of new-category accuracy by up to 25.63 points. We term this phenomenon semantic mismapping and further derive a permutation-cycle condition that characterizes when semantic mismapping can increase the global matching score. To fix this issue, we propose Semantics-Preserving Evaluation (SPE), which preserves the supervised semantics of old indices and restricts Hungarian matching to the new region. Furthermore, we propose Mismapping-Mitigating Optimization (MMO) to alleviate the prediction errors that can give rise to semantic mismapping, combining a region-balance loss (RBL) for old/new routing with a novel-diversity loss (NDL) that encourages orthogonality among new prototypes. Theoretically, we show that minimizing the two losses can tighten an upper bound on spurious accuracy gains from semantic mismapping, with controllable residual terms. Empirical results under both GH and SPE demonstrate the effectiveness of our proposed method."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T04:49:17Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39356": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39353",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39353",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "CoToan: Executable Rules and a Representation Contract for Reproducible Game AI Evaluation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "CoToan: Executable Rules and a Representation Contract for Reproducible Game AI Evaluation",
+    "abstract": "Game AI results are comparable only when different implementations expose the same decision problem. Yet seemingly minor representation choices can silently change that problem by altering action probabilities or collapsing states with different outcomes. We study this issue through CoToan, an executable specification and representation contract for Vietnamese Mathematical Chess connecting the Game Description Language (GDL) with OpenSpiel. The game provides a useful case because a single capture may have multiple arithmetic justifications, while outcomes can depend on scoring rules and a finite playing horizon. CoToan therefore represents actions by their state transitions rather than by arithmetic witnesses, and treats time and victory configuration as part of task identity. Cross-representation tests show agreement in legal actions, successor states, and terminal outcomes across hundreds of sampled and constructed positions, complemented by exhaustive checks of all 32 operator masks and 512 opposing-material subsets. Controlled diagnostics further show that uniform witness-level sampling alters endpoint-action probabilities, while omitting remaining time or victory settings can merge states with different terminal behavior. These results show that action semantics, time, and victory configuration are not merely implementation details. They are part of the experimental task itself and must be represented explicitly for reproducible game AI."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T04:46:53Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39353": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39341",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39341",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "RetroChessBench: A Benchmark for Reconstructing and Proving Chess Histories",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "RetroChessBench: A Benchmark for Reconstructing and Proving Chess Histories",
+    "abstract": "Frontier language models such as GPT 6 Astra have contributed to research mathematics, demonstrating substantial reasoning capabilities. Yet serious reasoning failures persist even in tasks governed by explicit rules. We demonstrate this in retrograde chess which is a playground for pure reasoning, where solvers reconstruct legal histories and distinguish possible events from forced ones. We introduce RetroChessBench, a 12-task benchmark covering exact-length constructions, unique endings, and exhaustive answer sets, with references, rubrics, and a terminal-reward environment. In two trials per task and condition, GPT 6 Astra High fails to produce the required final answer in 22/24 attempts without tools and 18/24 with code execution; mean terminal RL rewards are 14.75% and 27.19%, respectively. The examples identify faulty deductions: failed responses reject legal histories and treat temporary obstructions as permanent. Online retrograde archives often provide puzzles and final move sequences without detailed derivations. We hypothesize that limited exposure to these missing explanations in web-derived training data contributes to the observed reasoning failures. This questions how far frontier mathematical reasoning really generalizes beyond familiar solution patterns. Claims of general intelligence require evidence that models can transfer learnt principles to areas with few worked examples."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T04:32:11Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39341": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39339",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39339",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Does the Citation Matter? Quality, Grounding, and Physician-Rubric Accuracy of Google's AI Overviews for Medical Information",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Does the Citation Matter? Quality, Grounding, and Physician-Rubric Accuracy of Google's AI Overviews for Medical Information",
+    "abstract": "Google's AI Overviews (AIOs) are the first result users encounter when searching the web, shifting the work of selecting and evaluating sources from the user to Gemini. This may be especially consequential for health information, given that Google's traditional algorithm was designed to prioritize quality sources, and inaccurate information carries health risks. We evaluated 3,611 benchmark health questions, comparing each AIO against that question's top five traditional results on source selection and quality. We also evaluated the AIOs' statement grounding in their cited sources and how accurate AIOs were against physician-written rubrics. Overviews appeared for 96.4% of questions but drew on substantially different evidence than traditional search: only 44.4% of the top five results were cited by the corresponding AIO, which instead overrepresented commercial health publishers (e.g., WebMD, Healthline) at the expense of academic and government sources (e.g., Cleveland Clinic, National Health Service). AIO-cited pages scored lower than traditional results on four of six well-established credibility criteria. The grounding of AIO statements to their sources was poor: after correcting for classifier error, an estimated 56.7% of cited statements were supported by their cited page, and a further 20.8% of all statements were factual claims with no citation at all. When AIOs were graded against physicians' rubrics, they earned 38.2% of all available points (e.g., accuracy 54.2%, completeness 21.6%), and among the subset of AIOs whose physician rubric anticipated a specific inaccurate or potentially harmful claim, 22.2% of AIOs contained the harmful content. Notably, the accuracy of AIOs was unrelated to the grounding of their statements. We recommend AIO literacy interventions for users and holding AIOs at least to Google's own health-ranking standards."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T04:31:44Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z"
+  },
+  {
+   "sourceId": "arxiv:2610.39331",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39331",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Telling Is Not Seeing: Textual Personas Rarely Make Vision-Language Models Answer Like the People They Describe",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Telling Is Not Seeing: Textual Personas Rarely Make Vision-Language Models Answer Like the People They Describe",
+    "abstract": "Vision-language models (VLMs) are increasingly prompted with personas, such as \"You have low vision\", to stand in for people in user studies. We ask whether a persona makes a model see like the person it describes. We compare persona answers with measured people with low vision, color blindness or hearing loss, and with simple rules that use only the facts the persona states. The persona never beats these rules, and it erases the real differences between groups and individuals. Describing blur leaves recognition unchanged in all 14 models we test, while blurring the photo lowers it as it does for people. Inside open models, the description changes neither the image information nor the answer probabilities. Yet the models know the effects they fail to show: they can estimate how blur and illusions affect people. Telling is not seeing: a persona makes a model say what it knows about people, not see what they see."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T04:26:29Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.39331": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.39308",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.39308",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Unlimited OCR Works 2",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Unlimited OCR Works 2",
+    "abstract": "Unlimited OCR ushers the era of long-horizon parsing, substantially mitigating the growth of working memory as document lengthens. However, as document length scales to hundreds of pages, the visual context grows substantially, sharply increasing the computational cost of each decoding step and limiting the scalability of ultra-long document parsing. Inspired by human book transcription via localized focus without re-scanning preceding pages, we introduce Unlimited OCR 2, a document parsing model that looks only at what it transcribes. Building on Unlimited OCR, we upgrade all the decoder attention modules to Sparse Reference Sliding Window Attention (SR-SWA), bounding active reference tokens to a fixed capacity and thus sustaining constant computational costs across arbitrarily long documents. By combining SR-SWA with Unlimited-Horizon Decoding Paradigm, Unlimited OCR 2 enables document parsing over virtually unlimited lengths without prohibitive memory overhead. At the hundred-page scale, Unlimited OCR 2 achieves 7.0$\\times$ and 5.6$\\times$ per-step speedups over Full Attention and R-SWA, respectively. Furthermore, it delivers state-of-the-art end-to-end performance on both MPDocBench and MarathonDocBench, our newly proposed benchmark targeting hundred-page document parsing. Ultimately, the capacity for uninterrupted, one-shot document parsing signifies a fundamental paradigm shift into the OCR 3.0 era."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T03:55:21Z"
+   },
+   "fetchedAt": "2026-10-30T03:51:11.754Z"
+  }
+ ]
+}

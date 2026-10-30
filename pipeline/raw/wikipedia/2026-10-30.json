@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-10-30",
+ "records": [
+  {
+   "sourceId": "wiki:de:Krefeld Pinguine",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Krefeld_Pinguine",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/30",
+    "status": 200
+   },
+   "title": "Krefeld Pinguine",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Krefeld Pinguine sind ein Krefelder Eishockey-Club, der die offizielle Bezeichnung KEV Pinguine Eishockey GmbH trägt. Der KEV war als Gründungsmitglied der Deutschen Eishockey Liga (DEL) von 1994 bis 2022 in der höchsten Spielklasse vertreten. Nach dem Abstieg in die DEL2 zur Saison 2022/23 kehrt der Verein zur Saison 2026/27 wieder in die DEL zurück. 1952 und 2003 gewann die Mannschaft die deutsche Meisterschaft im Eishockey."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-10-30T03:51:17.820Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Krefeld_Pinguine": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Madrider Konferenz",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Madrider_Konferenz",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/30",
+    "status": 200
+   },
+   "title": "Madrider Konferenz",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Friedenskonferenz von Madrid war ein Versuch der internationalen Gemeinschaft, einen Friedensprozess für den Nahostkonflikt in Gang zu bringen, indem Israel, Syrien, Libanon, Jordanien und die Palästinenser an den Verhandlungstisch geholt wurden. Sie wurde durch die Regierung Spaniens unter Mitwirkung der Vereinigten Staaten und der Sowjetunion abgehalten. Die Konferenz begann am 30. Oktober 1991 und dauerte drei Tage."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-30T03:51:17.820Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Madrider_Konferenz": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Ungarischer Volksaufstand",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Ungarischer_Volksaufstand",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/30",
+    "status": 200
+   },
+   "title": "Ungarischer Volksaufstand",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Der Ungarische Volksaufstand bezeichnet die bürgerlich-demokratische Revolution und den Freiheitskampf von 1956 in der Volksrepublik Ungarn, bei denen sich breite gesellschaftliche Kräfte gegen die Regierung der kommunistischen Partei und der sowjetischen Besatzungsmacht erhoben."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-30T03:51:17.820Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Ungarischer_Volksaufstand": 200
+   }
+  }
+ ]
+}
