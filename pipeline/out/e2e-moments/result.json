@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T21:44:34.227Z",
+ "at": "2026-10-30T00:18:23.580Z",
  "runs": [
   {
    "browser": "webkit",
@@ -125,7 +125,7 @@
     "muteSaved": true,
     "noteStillNoNetwork": true,
     "posterWheneverNotPlaying": true,
-    "posterAllStates": false,
+    "posterAllStates": true,
     "posterDropsSynchronously": true,
     "latencyMeasured": true,
     "bufferedUnder300": true,
@@ -261,10 +261,10 @@
    "recall": [
     {
      "id": "test0000017:100",
-     "due": 1792929606275,
+     "due": 1792929606829,
      "results": [
       {
-       "at": 1792756806275,
+       "at": 1792756806829,
        "got": false
       }
      ]
@@ -349,18 +349,18 @@
     "slot2 hls loadedmetadata rs=0 ns=0 muted=true t=0.0"
    ],
    "tapToFill": {
-    "measured": 30,
-    "recorded": 30
+    "measured": 32,
+    "recorded": 31
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 273,
+    "checksDone": 267,
     "violations": 0,
     "endedSeen": 30
    },
    "posterState": {
     "idx": 25,
-    "qlen": 49,
+    "qlen": 52,
     "end": false,
     "recall": false,
     "forYou": false,
@@ -372,19 +372,19 @@
     "<div class=\"vslot\" aria-hidden=\"true\" style=\"--off: 2;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-style: normal; font-variant-caps: normal; font-weight: normal; font-width: normal; font-size: 18px; line-height: normal; font-family: sans-serif; font-size-adjust: none; font-kerning: auto; font-variant-alternates: normal; font-variant-ligatures: normal; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-position: normal; font-variant-emoji: normal; font-feature-settings: normal; font-optical-sizing: auto; font-variation-settings:",
     "<div class=\"vslot\" aria-hidden=\"false\" style=\"--off: 0;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-style: normal; font-variant-caps: normal; font-weight: normal; font-width: normal; font-size: 18px; line-height: normal; font-family: sans-serif; font-size-adjust: none; font-kerning: auto; font-variant-alternates: normal; font-variant-ligatures: normal; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-position: normal; font-variant-emoji: normal; font-feature-settings: normal; font-optical-sizing: auto; font-variation-settings",
     "<div class=\"vslot\" aria-hidden=\"true\" style=\"--off: 1;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-style: normal; font-variant-caps: normal; font-weight: normal; font-width: normal; font-size: 18px; line-height: normal; font-family: sans-serif; font-size-adjust: none; font-kerning: auto; font-variant-alternates: normal; font-variant-ligatures: normal; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-position: normal; font-variant-emoji: normal; font-feature-settings: normal; font-optical-sizing: auto; font-variation-settings:",
-    "<div class=\"vslot vghost\" aria-hidden=\"true\" style=\"--off: -1;\"><img class=\"vposter\" src=\"https://i.ytimg.com/vi/test0000046/hqdefault.jpg\" alt=\"\" draggable=\"false\"></div>"
+    "<div class=\"vslot vghost\" aria-hidden=\"true\" style=\"--off: -1;\"><img class=\"vposter\" src=\"https://i.ytimg.com/vi/test0000063/hqdefault.jpg\" alt=\"\" draggable=\"false\"></div>"
    ],
    "posterRects": [
     {
      "p": [
       0,
-      856,
+      217,
       393,
       221
      ],
      "h": [
       0,
-      856,
+      217,
       393,
       221
      ],
@@ -393,13 +393,13 @@
     {
      "p": [
       0,
-      1515,
+      876,
       393,
       221
      ],
      "h": [
       0,
-      1515,
+      876,
       393,
       221
      ],
@@ -408,13 +408,13 @@
     {
      "p": [
       0,
-      197,
+      -442,
       393,
       221
      ],
      "h": [
       0,
-      197,
+      -442,
       393,
       221
      ],
@@ -423,7 +423,7 @@
     {
      "p": [
       0,
-      -462,
+      -1101,
       393,
       221
      ],
@@ -440,7 +440,7 @@
     "ended": [
      "nb:poster",
      "nb:poster",
-     "cur:KEIN-POSTER",
+     "cur:poster",
      "nb:poster"
     ],
     "paused": [
@@ -479,11 +479,11 @@
     }
    },
    "latency": {
-    "n": 37,
+    "n": 38,
     "buffered": 29,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | e42663d |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e42663d |\n| test0000053:100 | Testmoment 53 body | Already known | - | Video | e42663d |\n| test0000050:100 | Testmoment 50 body | Wrong | - | Video | e42663d |\n| test0000011:100 | Testmoment 11 beat | Not for me | - | Video | e42663d |\n| test0000070:100 | Testmoment 70 brain | Mute speaker | - | Video | e42663d |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | 7fd3a94 |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 7fd3a94 |\n| test0000053:100 | Testmoment 53 body | Already known | - | Video | 7fd3a94 |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | 7fd3a94 |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | 7fd3a94 |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | 7fd3a94 |",
    "badWalk": [
     {
      "idx": 2,
@@ -801,12 +801,12 @@
      "dir": "rtl"
     },
     {
-     "ar": true,
-     "dir": "rtl"
+     "ar": false,
+     "dir": "ltr"
     },
     {
-     "ar": true,
-     "dir": "rtl"
+     "ar": false,
+     "dir": "ltr"
     }
    ],
    "hit": {
@@ -820,7 +820,7 @@
     "noRating": true
    },
    "errors": [],
-   "ok": false
+   "ok": true
   },
   {
    "browser": "chromium",
@@ -1082,10 +1082,10 @@
    "recall": [
     {
      "id": "test0000017:100",
-     "due": 1792929605371,
+     "due": 1792929605466,
      "results": [
       {
-       "at": 1792756805371,
+       "at": 1792756805466,
        "got": false
       }
      ]
@@ -1170,12 +1170,12 @@
     "slot2 hls loadedmetadata rs=0 ns=0 muted=true t=0.0"
    ],
    "tapToFill": {
-    "measured": 32.39999999999418,
+    "measured": 32,
     "recorded": 32
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 288,
+    "checksDone": 285,
     "violations": 0,
     "endedSeen": 33
    },
@@ -1304,7 +1304,7 @@
     "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | e42663d |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | e42663d |\n| test0000027:100 | Testmoment 27 brain | Already known | - | Video | e42663d |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | e42663d |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | e42663d |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | e42663d |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | 7fd3a94 |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 7fd3a94 |\n| test0000027:100 | Testmoment 27 brain | Already known | - | Video | 7fd3a94 |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | 7fd3a94 |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | 7fd3a94 |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | 7fd3a94 |",
    "badWalk": [
     {
      "idx": 2,
