@@ -498,11 +498,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await page.mouse.up();
     };
     const openSheet = async () => {
-      // Im Zeitraffer kann der Moment unter dem Wisch enden (Abrufkarte, Wechsel): bis zu dreimal neu ansetzen
+      // Im Zeitraffer kann der Moment unter dem Wisch enden (Abrufkarte, Wechsel): bis zu zwölfmal neu ansetzen
       let ok = false;
-      for (let k = 0; k < 3 && !ok; k++) {
+      for (let k = 0; k < 12 && !ok; k++) {
         await settled(page); await skipRecall(page, name, out); await swipeLeft();
-        ok = await waitFor(page, () => !!document.querySelector('[data-testid=note-sheet]'), undefined, 3000);
+        ok = await waitFor(page, () => !!document.querySelector('[data-testid=note-sheet]'), undefined, 1500);
       }
       if (!ok) r.openDbg = await page.evaluate(() => ({ moving: !!document.querySelector('.vfeed[data-moving]'), card: !!document.querySelector('[data-testid=recall-card]'), idx: window.__core.idx(), tr: document.querySelector('.vstage')?.style.transform, fy: window.__core.forYou(), recall: window.__core.recall().open }));
       return ok;
@@ -573,6 +573,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const flow = async (label, line) => {
       const opened = await openSheet();
       // Moment erst lesen, wenn das Blatt offen ist (die Abrufkarte davor kann den Moment weiterschalten)
+      // Solange das Blatt offen ist, läuft die Uhr in Echtzeit: im Zeitraffer endet der Moment zwischen Lesen und Tipp und sein Ende-Signal (1,1) verfälscht den Vorher-Nachher-Vergleich
+      await page.evaluate(() => { window.__ytSlow = true; });
       const m = await page.evaluate(() => window.__core.moment());
       const idx = await page.evaluate(() => window.__core.idx());
       const n0 = (await notes()).length;
@@ -584,6 +586,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const noToast = await page.evaluate(() => !document.querySelector('.flash'));
       await shot(label, 24);
       const advanced = await waitFor(page, (i) => !document.querySelector('[data-testid=note-sheet]') && window.__core.idx() > i, idx);
+      await page.evaluate(() => { window.__ytSlow = false; });
       const saved = (await notes()).length === n0 + 1 && (await notes()).at(-1).chips.join() === label && (await notes()).at(-1).id === m.id;
       await page.waitForTimeout(1000);
       return { m, w0, ok: opened && shown && noToast && advanced && saved, w, until: w.until ?? {} };
@@ -668,9 +671,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     for (const [label, st] of [['unstarted', -1], ['ended', 0], ['paused', 2], ['buffering', 3], ['cued', 5]]) {
       // Der soundGuard der App startet einen stehenden aktuellen Moment von selbst neu: trifft das genau in die 60 ms, noch einmal erzwingen
       let res = [];
-      for (let k = 0; k < 3; k++) {
+      for (let k = 0; k < 8; k++) {
         await force(st);
-        await page.waitForTimeout(60);
+        await page.waitForTimeout(k === 0 ? 60 : 150);
         res = await poster(st);
         if (res.every((x) => x.vis && x.covers && x.noZoom && !(x.live && st !== 1))) break;
       }
@@ -679,9 +682,14 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       for (const x of res) if (!x.vis || !x.covers || !x.noZoom || (x.live && st !== 1)) posterBad++;
     }
     // PLAYING am aktuellen Slot: Poster weg, IFrame sichtbar. Nachbarn bleiben unter dem Poster.
-    await page.evaluate(() => { const sl = [...document.querySelectorAll('.vslot')].find((x) => x.getAttribute('aria-hidden') === 'false'); sl?.querySelector('.vframe > div')?.firstChild?.__player?.__force(1); });
-    await page.waitForTimeout(60);
-    const playingRes = await poster(1);
+    let playingRes = [];
+    for (let k = 0; k < 8; k++) {
+      await page.evaluate(() => { const sl = [...document.querySelectorAll('.vslot')].find((x) => x.getAttribute('aria-hidden') === 'false'); sl?.querySelector('.vframe > div')?.firstChild?.__player?.__force(1); });
+      await page.waitForTimeout(k === 0 ? 60 : 150);
+      playingRes = await poster(1);
+      const cp = playingRes.find((x) => x.current);
+      if (cp && !cp.vis && playingRes.filter((x) => !x.current).every((x) => x.vis)) break;
+    }
     const curP = playingRes.find((x) => x.current);
     posterRuns.playing = playingRes.map((x) => `${x.current ? 'cur' : 'nb'}:${x.vis ? 'poster' : 'ohne-Poster'}`);
     c.posterAllStates = posterBad === 0 && !!curP && !curP.vis && playingRes.filter((x) => !x.current).every((x) => x.vis);
@@ -762,7 +770,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const lines = bodyN.split('\n');
     const momentsN = new Set(allNotes.map((x) => x.id));
     c.issueTable = lines[0] === '| Moment | Hook | Chips | Text | Tab | App |' && lines.length === 2 + momentsN.size;
-    c.issueRowsHaveAllFields = [[nm, 'Weak', '-'], [nm2, '-', 'The cut is two seconds late & the "hook" repeats.'], [mutedMoment, 'Mute speaker', '-']].every(([m, chipsCell, textCell]) => lines.some((l) => l.startsWith(`| ${m.id} | ${m.hook} | ${chipsCell} | ${textCell} | Video | `) && /\| ([0-9a-f]{7}|dev) \|$/.test(l)));
+    // Landet der Feed bei einem späteren Chip noch einmal auf demselben Moment (gesehen zählt erst am Ende), führt die App dessen Notiz zu einer Zeile zusammen: dann prüft die Zeile Chip und Text einzeln
+    const distinctN = new Set([nm.id, nm2.id, mutedMoment.id]).size === 3;
+    c.issueRowsHaveAllFields = [[nm, 'Weak', '-'], [nm2, '-', 'The cut is two seconds late & the "hook" repeats.'], [mutedMoment, 'Mute speaker', '-']].every(([m, chipsCell, textCell]) =>
+      lines.some((l) => /\| ([0-9a-f]{7}|dev) \|$/.test(l) && (distinctN ? l.startsWith(`| ${m.id} | ${m.hook} | ${chipsCell} | ${textCell} | Video | `) : l.startsWith(`| ${m.id} | ${m.hook} | `) && (chipsCell === '-' || l.includes(chipsCell)) && (textCell === '-' || l.includes(textCell)) && l.includes('| Video | '))));
     c.issueTitleCount = (uN?.searchParams.get('title') ?? '') === `Core feedback 2026-10-25, ${momentsN.size} moments`;
     c.promptMarksSent = await waitFor(p2, () => window.__core.notes().every((x) => typeof x.sent === 'number') && !document.querySelector('[data-testid=notes-prompt]'));
     // Nach dem Senden: neue Notiz bleibt ungesendet, und am selben Tag kommt die Zeile nicht noch einmal
@@ -783,6 +794,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // Nächster Sonntag: Plan der Vorwoche mit "Did it happen?", dann Skip
     await p3.close();
     const p5 = await ctx.newPage();
+    // Echtzeit-Uhr: im Zeitraffer enden die Momente hinter den Einstellungen und ihre Signale verändern die Gewichte, die die Karte zeigt
+    await p5.addInitScript(() => { window.__ytSlow = true; });
     await p5.goto(url + '?now=2026-11-01');
     c.prevPlanShown = await waitFor(p5, () => document.querySelector('[data-testid=prev-plan]')?.textContent?.includes('When I finish the OCT clinic on Tuesday, I will explain one saved moment to a colleague.'));
     await p5.click('[data-testid=prev-plan] >> text=Yes');
