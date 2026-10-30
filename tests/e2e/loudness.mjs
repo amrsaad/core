@@ -80,7 +80,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await cx.route(/^https:\/\/trial\.test\//, (x) => (x.request().resourceType() === 'fetch' ? x.abort() : x.fulfill(media)));
       const pg = await cx.newPage();
       pg.on('pageerror', (e) => errors.push(String(e)));
-      await pg.addInitScript(() => { window.__ytSlow = true; });
+      // Angleichen ist seit 30.10.2026 standardmäßig aus (Issue 13), der Test schaltet es ein
+      await pg.addInitScript(() => { window.__ytSlow = true; try { localStorage.setItem('core.level.on', '1'); } catch {} });
       const body = await encPool(list);
       await pg.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body }));
       await pg.goto(`${url}${query}#k=${k}`);
@@ -206,12 +207,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.screenshot({ path: `${out}/${name}-settings-loudness.png` });
     // Schalter aus: wirkt ab dem nächsten Laden
     await page.click('[data-testid=level-toggle]');
-    c.toggleStored = (await page.evaluate(() => localStorage.getItem('core.level.off'))) === '1';
+    c.toggleStored = (await page.evaluate(() => localStorage.getItem('core.level.on'))) !== '1';
     await cx.close();
 
     // ---------- Schalter aus: alles unverändert ----------
     const off = await open(moments);
-    await off.pg.evaluate(() => localStorage.setItem('core.level.off', '1'));
+    await off.pg.evaluate(() => localStorage.removeItem('core.level.on'));
     await off.pg.reload();
     await off.pg.waitForSelector('[data-testid=form-switch]');
     await off.pg.click('[data-testid=form-switch] >> text=Audio');

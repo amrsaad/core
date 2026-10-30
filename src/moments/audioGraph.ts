@@ -4,7 +4,7 @@
 import { diagLog } from '../lib/diag';
 import { dbToLinear, LIMITER, type HostState } from './loudness';
 
-const KEY_OFF = 'core.level.off';
+const KEY_ON = 'core.level.on';
 const KEY_CORS = 'core.level.cors';
 
 const store = (): Storage | null => {
@@ -21,12 +21,12 @@ let broken: string | null = null;
 const unlockListeners = new Set<() => void>();
 const stateListeners = new Set<(s: AudioContextState | 'interrupted') => void>();
 
-/** Angleichen eingeschaltet (Settings, nur dieses Gerät). Standard an. */
-export const levelOn = (): boolean => store()?.getItem(KEY_OFF) !== '1';
+/** Angleichen eingeschaltet (Settings, nur dieses Gerät). Standard AUS seit 30.10.2026 (Max: mit Web Audio stockt und hakt die App auf dem iPhone, Issue 13). */
+export const levelOn = (): boolean => store()?.getItem(KEY_ON) === '1';
 export function setLevelOn(on: boolean): void {
   try {
-    if (on) store()?.removeItem(KEY_OFF);
-    else store()?.setItem(KEY_OFF, '1');
+    if (on) store()?.setItem(KEY_ON, '1');
+    else store()?.removeItem(KEY_ON);
   } catch { /* Speicher gesperrt: gilt nur für diese Sitzung nicht, kein Fehler */ }
 }
 export const levelEnabled = (): boolean => !broken && levelOn();
