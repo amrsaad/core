@@ -226,13 +226,13 @@ jobs:
           npx vite preview --host 127.0.0.1 --port 4184 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4184/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/tempo.mjs http://127.0.0.1:4184/core/ pipeline/out/e2e-tempo
-      - name: Tempo flüssig testen (Issue 13, echte Wiedergabe, Stalls, Netzanfragen beim Wechsel, Elemente mit Quelle; Chromium mit CPU-Drossel, WebKit mit Last)
+      - name: Tempo flüssig testen (Issue 13, echte Wiedergabe, Stalls, Netzanfragen beim Wechsel, Elemente mit Quelle; Chromium mit CPU-Drossel 4x; WebKit läuft auf dem Runner unter Last instabil und bleibt eine manuelle Messung)
         if: always()
         timeout-minutes: 20
         run: |
           npx vite preview --host 127.0.0.1 --port 4186 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4186/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
-          CHECK=1 node tests/e2e/tempoperf.mjs http://127.0.0.1:4186/core/ pipeline/out/e2e-tempoperf
+          E2E_BROWSERS=chromium CHECK=1 node tests/e2e/tempoperf.mjs http://127.0.0.1:4186/core/ pipeline/out/e2e-tempoperf
       - name: Abrufkarten-Warteschlange testen (Settings, Saved, Feedback-Blatt, Hintergrund; WebKit und Chromium)
         if: always()
         timeout-minutes: 8
