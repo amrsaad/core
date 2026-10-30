@@ -77,7 +77,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       r.notes.queued = queued;
       c.queuedOne = queued.length === 1;
       const id = queued[0]?.id;
-      c.diagQueued = (await page.evaluate(() => window.__core.diag())).some((x) => x === `recall: queued ${id}`);
+      c.diagQueued = (await page.evaluate(() => window.__core.diag())).some((x) => x === `recall: queued ${id}` || x === `recall: queued ${id} (bg)`);
       c.soundAndFeedContinue = (await page.evaluate(() => window.__core.idx())) === idxBefore + 1;
       // Zurück: die Karte erscheint sofort, ohne dass gewischt wird
       await sc.close(page);

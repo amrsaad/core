@@ -5,6 +5,8 @@ import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { audioDeck, createPlayer, deckClipOf, HLS, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
+import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, onGesture, type Gesture } from './gesture';
+import { hintVisible, SOUND_NONE } from './soundHint';
 import { errorAction, resumePos } from './netrecover';
 import { isYtId } from './contract';
 import { contextForTest, levelEnabled, probeHost, setTempo, unlockAudio } from './audioGraph';
@@ -17,10 +19,11 @@ import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from 
 import { clampRate, DEFAULT_RATE, nextRate, rateOf, type Rate } from '../lib/state';
 import { addSample } from './latency';
 import { captionsShown } from './captions';
+import { CueClock, cueIndexAt } from './cueClock';
 import { countGotIt, countSeen, todayLine } from './today';
 import { answer, cardDue, pickRecall, type Recent } from './recall';
 import { RecallCard, type RecallCtl } from './RecallCard';
-import { canShowRecall, onReturn, onSwipe, type QueueEntry } from './recallqueue';
+import { canShowRecall, onReturn, onSwipe, requeueOpen, type QueueEntry } from './recallqueue';
 import { CaptionSheet } from './CaptionSheet';
 import { sourceLine } from './source';
 import { askUrl, markAsked } from './ask';
@@ -85,8 +88,8 @@ const LOG_MAX = 3000;
 
 const load = (m: Moment) => ({ videoId: m.videoId, startSeconds: m.start, endSeconds: m.end, gainDb: m.gainDb });
 
-/** Das Symbol "Ton aus" erscheint nur, solange in dieser Sitzung noch nie Ton an war. Danach nie wieder (Max, 29.10.2026). */
-let soundSeenOn = false;
+/** Anzahl der Medien-Elemente mit gesetzter Quelle (Vorgabe: höchstens 3 gleichzeitig) */
+const mediaWithSrc = (): number => (typeof document === 'undefined' ? 0 : [...document.querySelectorAll('audio,video')].filter((e) => !!e.getAttribute('src')).length);
 
 export function MomentFeed({ pool: allPool, state, update, active, onPausedChange, desk }: Props) {
   const single = state.settings.playerMode === 'single';
@@ -99,6 +102,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   deskRef.current = desk;
   /** Abrufkarte beantwortet (Enter ist dann Next) */
   const recallAnswered = useRef(false);
+  /** Eintrag der offenen Abrufkarte (für den Wechsel in den Hintergrund) */
+  const recallEntry = useRef<QueueEntry | null>(null);
   const recallCtl = useRef<RecallCtl | null>(null);
   const noteCtl = useRef<NoteCtl | null>(null);
   /** Das 2x kommt von der Tastatur (Shift+. gehalten) */
@@ -126,7 +131,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const [online, setOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
   const idxRef = useRef(0);
   const slots = useRef<Slot[]>(Array.from({ length: 3 }, newSlot));
-  const soundOn = useRef(false);
+  /** Ton gewünscht. Hat es auf der Seite schon irgendwo eine Geste gegeben (Reiter, Leiste), startet ein neu gebauter Feed mit Ton. */
+  const soundOn = useRef(gestureSeen());
   const userPaused = useRef(false);
   const since = useRef(Date.now());
   const endedAt = useRef(-1);
@@ -182,12 +188,21 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const [, setTick] = useState(0);
   const rerender = () => setTick((t) => t + 1);
   const [progress, setProgress] = useState(0);
-  const [hint, setHint] = useState(!soundSeenOn);
+  /** Hinweis "Ton aus": nur aus dem Zustand des spielenden Elements (muted oder play abgelehnt), nie aus einem Berührungs-Flag */
+  const [hint, setHint] = useState(false);
+  const syncHint = () => {
+    const p = slotFor(idxRef.current).player;
+    const v = !!p && hintVisible(p.sound?.() ?? SOUND_NONE);
+    setHint((h) => (h === v ? h : v));
+  };
+  const syncHintRef = useRef(syncHint);
+  syncHintRef.current = syncHint;
   const [paused, setPaused] = useState(false);
   const rateRef = useRef<Rate>(DEFAULT_RATE);
   /** Tempo auf alle Slots legen (Streams: Media-Element, YouTube: setPlaybackRate). Läuft auch für Slots, die gerade pausieren. */
   const applyRate = () => {
-    for (const sl of slots.current) sl.player?.setPlaybackRate(clampRate(rateRef.current));
+    // Nur das eine spielende Element. Die anderen Slots bekommen das Tempo mit ihrer Quelle (getRate), nie ein Schreibzugriff auf ein Element ohne Quelle.
+    slotFor(idxRef.current).player?.setPlaybackRate(clampRate(rateRef.current));
   };
   /** Pfeiler 17: 1x, 1.5x, 2x, 1x. Wert sofort in den Refs und in den Playern, dann in den State (Sync). */
   const cycleRate = () => {
@@ -195,6 +210,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     rateRef.current = next;
     setTempo(clampRate(next));
     applyRate();
+    // Der Vorrat lädt nach Zeit voraus: bei 2x doppelt so weit
+    syncPre(idxRef.current);
     update((s) => ({ ...s, settings: { ...s.settings, playbackRate: next } }));
     diag.current.push(`rate: ${next}x`);
   };
@@ -222,6 +239,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const [flash, setFlash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [caption, setCaption] = useState('');
+  // Untertitel (Issue 15): Uhr aus der Zeit des Elements, das Ton ausgibt, und Index der gezeigten Cue
+  const clock = useRef(new CueClock());
+  const shownCue = useRef(-2);
   const [loading, setLoading] = useState(false);
   const waitSince = useRef(0);
   rateRef.current = rateOf(state.settings);
@@ -420,6 +440,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const closeRecall = () => {
     recallRef.current = false;
     recallAnswered.current = false;
+    recallEntry.current = null;
     setRecall(null);
     since.current = Date.now();
     if (!textRef.current && active && !userPaused.current) current().player?.playVideo();
@@ -453,6 +474,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!queue.current[j]) ensureQueue(j + 1);
     const nm = successorOf(queue.current, idxRef.current, bad.current);
     audioDeck.arm(nm && formOf(nm) === 'audio' ? deckClipOf(nm) : null);
+    // Der Nachfolger kommt wenn möglich als Blob aus dem Vorrat: sein Start im Hintergrund dauert dann Millisekunden statt Sekunden (Issue 14)
+    if (nm && pre) void pre.warm([nm]);
+  };
+  /** Der Nachfolger muss bestimmt sein, bevor der aktuelle Moment endet: stimmt der gesetzte nicht mit dem berechneten überein, neu setzen (Warteschlange, Fehler, Umsortieren) */
+  const armCheck = () => {
+    if (form !== 'audio') return;
+    const nm = successorOf(queue.current, idxRef.current, bad.current);
+    const want = nm && formOf(nm) === 'audio' ? deckClipOf(nm) : null;
+    if ((want?.key ?? null) !== audioDeck.armedKey) armDeck();
   };
 
   /** Media Session: Zustand setzen und jeden Wechsel mit Grund ins Protokoll (Issue 13: pausiert die App die Session im Hintergrund?) */
@@ -475,6 +505,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!rm) return false;
     recallRef.current = true;
     recallAnswered.current = false;
+    recallEntry.current = e;
     current().player?.pauseVideo();
     setRecall({ m: rm, review: e.review });
     if (fromQueue) diag.current.push(`recall: shown ${e.id} from queue`);
@@ -493,7 +524,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     let step = onSwipe(q0, s0.recall ?? {}, pick, canShowRecall(recallCtx()), clockNow().getTime());
     // Eine Karte, deren Moment nicht mehr im Pool ist, kann nicht erscheinen: nächste aus der Warteschlange
     while (step.show && !findMoment(step.show.id)) step = onSwipe(step.queue, step.recall, null, true, clockNow().getTime());
-    if (pick && step.queue.some((x) => x.id === pick.id)) diag.current.push(`recall: queued ${pick.id}`);
+    if (pick && step.queue.some((x) => x.id === pick.id)) diag.current.push(`recall: queued ${pick.id}${isBackground(document.visibilityState) ? ' (bg)' : ''}`);
     if (step.queue !== q0 || step.recall !== (s0.recall ?? {})) putQueue(step.queue, step.recall);
     if (step.show) openRecall(step.show, step.fromQueue);
   };
@@ -543,6 +574,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       const backM = queue.current[next];
       if (next < prev && backM) update((s) => ({ ...s, momentWeights: signal(s.momentWeights, backM, SIGNAL.back, nowMs), skipRun: undefined }));
       setCaption('');
+      shownCue.current = -2;
+      clock.current.reset();
       waitSince.current = 0;
       setLoading(false);
       // Für die Abrufkarte: geschauter Anteil des verlassenen Moments (Video: Position, Text: Ende erreicht)
@@ -589,6 +622,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       // Pfeiler 19: nie eine Karte, solange der Feed nicht im Vordergrund und sichtbar ist. Dann Warteschlange, je eine Karte pro Wisch.
       if (next > prev && prevM) stepRecall(recallNow);
       armDeck();
+      syncHint();
+      const nSrc = mediaWithSrc();
+      if (nSrc > 3) diag.current.push(`media: ${nSrc} elements with src (limit 3)`);
       setIdx(next);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -753,6 +789,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
             slot.host!.replaceChildren(target);
             const pl = createPlayer(YT, target, id, {
               onDiag: (line) => diag.current.push(`slot${s} ${line}`),
+              getRate: () => clampRate(rateRef.current),
+              onTime: (t, rate, playing) => {
+                if (slot.index === idxRef.current) clock.current.sample(t, performance.now(), rate, playing);
+              },
+              onSound: () => {
+                if (slot.index === idxRef.current) syncHintRef.current();
+              },
               onReady: () => {
                 slot.ready = true;
                 slot.player!.mute();
@@ -788,7 +831,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                   update((x) => ({ ...x, playLatency: addSample(x.playLatency, { ms, buffered: sw.buffered, at: Date.now() }) }));
                 }
                 // Gespeichertes Tempo (Pfeiler 17) bei jedem Start, auch nach Neuaufbau oder Wiederaufnahme eines Players
-                if (st === STATE.PLAYING) slot.player?.setPlaybackRate(clampRate(rateRef.current));
+                if (st === STATE.PLAYING && slot.index === idxRef.current) slot.player?.setPlaybackRate(clampRate(rateRef.current));
+                if (slot.index === idxRef.current) syncHintRef.current();
                 if (st === STATE.ENDED && slot.index === idxRef.current) finish();
                 if (st === STATE.PLAYING && (slot.index !== idxRef.current || forYouRef.current || textRef.current || recallRef.current)) slot.player?.pauseVideo();
                 if (moving()) pendingRender.current = true;
@@ -935,6 +979,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     let flushed = 0;
     const t = window.setInterval(() => {
       if (moving()) return;
+      armCheck();
       const sl = current();
       const p = sl.player;
       const m = queue.current[idxRef.current];
@@ -963,10 +1008,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       if ((sl.st === STATE.PLAYING || sl.st === STATE.PAUSED) && c >= m.start - 0.5) {
         if (sl.st === STATE.PLAYING) sl.pos = c;
         setProgress(Math.min(1, Math.max(0, (c - m.start) / (m.end - m.start))));
-        const rel = c - m.start;
-        let cue = '';
-        if (m.cues) for (const [t, text] of m.cues) if (t <= rel + 0.1) cue = text; else break;
-        setCaption(cue);
+        // Untertitel kommen aus der Uhr (rAF-Schleife unten). Die Abfrage misst nur nach, das ist für YouTube die einzige Quelle.
+        clock.current.sample(c, performance.now(), clampRate(rateRef.current), sl.st === STATE.PLAYING);
       }
       ytRebuildRef.current();
       // Im Hintergrund wechselt im Audio-Reiter das Audio-Element selbst am Ende. Die Abfrage (gedrosselt) greift nur noch als Netz, wenn der Wechsel ausblieb.
@@ -984,6 +1027,29 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     return () => window.clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finish, today]);
+
+  // Untertitel: Cue-Auswahl nur aus der Zeit des Elements, das Ton ausgibt (timeupdate-Messung plus Weiterrechnen mit playbackRate pro Bild), nie aus Date.now
+  useEffect(() => {
+    let raf = 0;
+    const frame = () => {
+      raf = requestAnimationFrame(frame);
+      if (textRef.current || forYouRef.current || recallRef.current || moving()) return;
+      const sl = current();
+      const m = queue.current[idxRef.current];
+      if (!m?.cues || !sl.player || !sl.ready || !clock.current.seen) return;
+      if (sl.st !== STATE.PLAYING && sl.st !== STATE.PAUSED) return;
+      const t = clock.current.now(performance.now());
+      // Eine Stelle vor dem Start des Moments ist eine Quelle, die gerade neu lädt: Untertitel bleiben, wie sie waren
+      if (t < m.start - 0.5) return;
+      const i = cueIndexAt(m.cues, t - m.start);
+      if (i === shownCue.current) return;
+      shownCue.current = i;
+      setCaption(i >= 0 ? m.cues[i][1] : '');
+    };
+    raf = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!active) current().player?.pauseVideo();
@@ -1172,8 +1238,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       p.playVideo();
       userPaused.current = false;
       setPaused(false);
-      soundSeenOn = true;
-      setHint(false);
+      syncHint();
       return;
     }
     if (current().st === STATE.PLAYING) {
@@ -1445,14 +1510,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!wasDown) return;
     // Jede erste Berührung (auch ein Wisch) gilt dem Browser als Geste: Ton sofort freischalten, damit nach einem
     // Neuladen der PWA nie ein Tipp nur für den Ton nötig ist und der Hinweis nicht zurückkommt (Max, 29.10.).
-    const firstTouch = !soundOn.current && !textRef.current;
+    // Die erste Geste irgendwo im Dokument hat den Ton schon freigeschaltet (gesture.ts). Dieselbe Berührung ist hier trotzdem kein Pausentipp.
+    const firstTouch = !textRef.current && (!soundOn.current || e.pointerId === firstGesturePointer());
+    if (e.pointerId === firstGesturePointer()) clearFirstGesturePointer();
     if (form === 'audio') audioDeck.unlock();
     if (firstTouch) {
       soundOn.current = true;
       unlockLevel();
       for (const s of slots.current) s.player?.unMute();
-      soundSeenOn = true;
-      setHint(false);
+      syncHint();
     }
     if (dragging.current) {
       dragging.current = false;
@@ -1571,8 +1637,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       if (on) sl.player?.unMute();
       else sl.player?.mute();
     }
-    soundSeenOn = true;
-    setHint(false);
+    syncHint();
     show(on ? 'Sound on' : 'Muted');
   };
 
@@ -1712,6 +1777,20 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!active) return;
     const m = queue.current[idxRef.current];
     if (!m) return;
+    if (isBackground(vis) && recallRef.current) {
+      // Eine offene Karte hielte den Ton an, und im gesperrten Telefon beantwortet sie niemand: zurück in die Warteschlange (Rückkehr zeigt sie), Ton läuft weiter
+      const e = recallEntry.current;
+      if (e && !recallAnswered.current) {
+        const r = requeueOpen(stateRef.current.recallQueue ?? [], stateRef.current.recall ?? {}, e);
+        putQueue(r.queue, r.recall);
+        diag.current.push(`recall: queued ${e.id} (bg)`);
+      }
+      recallRef.current = false;
+      recallAnswered.current = false;
+      recallEntry.current = null;
+      setRecall(null);
+      if (!textRef.current && !userPaused.current && !forYouRef.current) current().player?.playVideo();
+    }
     const playable = !textRef.current && !forYouRef.current && !recallRef.current;
     if (isBackground(vis)) {
       diag.current.push(`bg: left ${m.id}`);
@@ -1747,6 +1826,24 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     document.addEventListener('visibilitychange', on);
     return () => document.removeEventListener('visibilitychange', on);
   }, []);
+
+  // Erste Geste irgendwo im Dokument (auch auf den Reitern und der Leiste) schaltet den Ton frei, nicht nur ein Tipp im Feed (gesture.ts).
+  // Jede weitere Geste hebt eine vom Browser verworfene Stummschaltung auf (iOS zählt erst touchend und click, pointerdown reicht dafür nicht).
+  const gestureRef = useRef<(g: Gesture) => void>(() => {});
+  gestureRef.current = (g) => {
+    if (g.first) {
+      soundOn.current = true;
+      unlockLevel();
+      for (const sl of slots.current) sl.player?.unMute();
+      const cs = current();
+      if (cs.st !== STATE.PLAYING && !userPaused.current && !textRef.current && activeRef.current && !forYouRef.current && !recallRef.current) cs.player?.playVideo();
+    } else if (soundOn.current) {
+      const cp = current().player;
+      if (cp?.isMuted?.()) cp.unMute();
+    }
+    syncHint();
+  };
+  useEffect(() => onGesture((g) => gestureRef.current(g)), []);
 
   // Fenstertitel (Desktop) und Medien-Anzeige des Betriebssystems: am Desktop immer, mobil im Audio-Reiter (Sperrbildschirm)
   const msOn = !!desk || form === 'audio';
@@ -1812,6 +1909,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       slots: () => slots.current.slice(0, SLOTS).map((x) => ({ st: x.st, index: x.index })),
       // Audio-Reiter: Schlüssel der Ausschnitte, die das eine Audio-Element geladen hat, und ob es vorhanden ist (Tests)
       deck: () => ({ history: [...audioDeck.history], exists: audioDeck.exists, armed: audioDeck.armedKey }),
+      /** Medien-Elemente mit gesetzter Quelle (Vorgabe höchstens 3) und der Hinweis "Ton aus" aus dem Zustand des Elements */
+      media: () => mediaWithSrc(),
+      /** Untertitel (Issue 15): Index der gezeigten Cue, Index laut Elementzeit, Elementzeit und Tempo */
+      cue: () => {
+        const m = queue.current[idxRef.current];
+        const t = current().player?.getCurrentTime?.() ?? 0;
+        return { shown: shownCue.current, byElement: m ? cueIndexAt(m.cues, t - m.start) : -1, t, rel: m ? t - m.start : 0, rate: clampRate(rateRef.current) };
+      },
+      hint: () => hintVisible(slotFor(idxRef.current).player?.sound?.() ?? SOUND_NONE),
       slotInfo: () => slots.current.slice(0, SLOTS).map((x) => ({ index: x.index, mid: x.mid, st: x.st, muted: x.player?.isMuted?.() ?? null, t: x.player?.getCurrentTime?.() ?? 0 })),
       latency: () => stateRef.current.playLatency ?? [],
       seen: (id: string) => !!stateRef.current.momentSeen[id],

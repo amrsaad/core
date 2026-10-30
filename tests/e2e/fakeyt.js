@@ -46,12 +46,13 @@ window.onYouTubeIframeAPIReady && window.onYouTubeIframeAPIReady();
   const timers = new WeakMap();
   const emit = (el, n) => el.dispatchEvent(new Event(n));
   const def = (k, d) => Object.defineProperty(P, k, { configurable: true, ...d });
-  def('currentTime', { get() { return this.__t || 0; }, set(v) { this.__t = v; } });
+  // Nur mit window.__cont (Audio-Reiter-Test): die Zeit läuft stetig mit playbackRate wie in einem echten Browser, timeupdate kommt nur alle window.__tuMs (Standard 250 ms)
+  def('currentTime', { get() { return window.__cont && this.__p === false ? (this.__t || 0) + ((performance.now() - (this.__at || 0)) / 1000) * (this.__pr ?? 1) : this.__t || 0; }, set(v) { this.__t = v; this.__at = performance.now(); } });
   def('paused', { get() { return this.__p !== false; } });
   def('ended', { get() { return !!this.__e; } });
   def('duration', { get() { return 600; } });
   // Tempo ebenfalls nachgebaut: ein echtes playbackRate auf einem Element ohne Medium bringt WebKit im Runner bei aktiver Media Session zum Absturz
-  def('playbackRate', { get() { return this.__pr ?? 1; }, set(v) { this.__pr = v; } });
+  def('playbackRate', { get() { return this.__pr ?? 1; }, set(v) { if (window.__cont && this.__p === false) { this.__t = this.currentTime; this.__at = performance.now(); } this.__pr = v; } });
   def('defaultPlaybackRate', { get() { return this.__dpr ?? 1; }, set(v) { this.__dpr = v; } });
   def('src', { get() { return this.__src || ''; }, set(v) { this.__src = v; } });
   def('error', { get() { return this.__err || null; } });
@@ -77,9 +78,12 @@ window.onYouTubeIframeAPIReady && window.onYouTubeIframeAPIReady();
     live.add(this);
     clearInterval(timers.get(this));
     this.__p = false; this.__e = false;
-    timers.set(this, setInterval(() => { this.__t = (this.__t || 0) + (window.__ytSlow ? 0.1 : 10); emit(this, 'timeupdate'); }, 100));
+    if (window.__cont) {
+      this.__at = performance.now();
+      timers.set(this, setInterval(() => emit(this, 'timeupdate'), window.__tuMs ?? 250));
+    } else timers.set(this, setInterval(() => { this.__t = (this.__t || 0) + (window.__ytSlow ? 0.1 : 10); emit(this, 'timeupdate'); }, 100));
     emit(this, 'playing');
     return Promise.resolve();
   };
-  P.pause = function () { clearInterval(timers.get(this)); if (this.__p === false) { this.__p = true; emit(this, 'pause'); } };
+  P.pause = function () { clearInterval(timers.get(this)); if (this.__p === false) { if (window.__cont) this.__t = this.currentTime; this.__p = true; emit(this, 'pause'); } };
 })();

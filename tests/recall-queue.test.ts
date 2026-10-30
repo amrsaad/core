@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { applyDoc, canon, mergeDocs, stampChanges, toDoc, tsKey } from '../src/lib/sync/merge';
 import { emptyState } from '../src/lib/state';
 import { DAY_MS, type RecallState } from '../src/moments/recall';
-import { canShowRecall, enqueue, onReturn, onSwipe, QUEUE_MAX, type QueueEntry } from '../src/moments/recallqueue';
+import { canShowRecall, enqueue, onReturn, onSwipe, QUEUE_MAX, requeueOpen, type QueueEntry } from '../src/moments/recallqueue';
+import { AudioDeck, type DeckClip, type DeckEl } from '../src/video/audioDeck';
 
 const T = 1_000_000_000_000;
 const e = (id: string, review = false, dueAt = T): QueueEntry => ({ id, review, dueAt });
@@ -104,5 +105,61 @@ describe('Abrufkarten-Warteschlange (Pfeiler 19)', () => {
     expect(other.recallQueue).toEqual([]);
     // ein Gerät ohne Warteschlange behält die des anderen
     expect(mergeDocs(toDoc(a), toDoc(base)).state.recallQueue).toEqual([e('a'), e('b')]);
+  });
+});
+
+describe('Abrufkarte im Auto-Weiter des Audio-Reiters (Issue 11)', () => {
+  it('Karte fällig, Seite hidden, Ende des Ausschnitts: recallQueue plus 1, das Deck spielt den nächsten Moment, keine Karte', () => {
+    // Nachbau des Elements wie in audio-deck.test.ts
+    const listeners = new Map<string, (() => void)[]>();
+    const calls: string[] = [];
+    let src = '';
+    const el = {
+      get src() { return src; },
+      set src(v: string) { src = v; calls.push(`src:${v}`); },
+      currentTime: 0, paused: true, ended: false, readyState: 0, duration: 600, muted: false, playbackRate: 1, defaultPlaybackRate: 1,
+      removeAttribute() { src = ''; },
+      addEventListener(t: string, f: () => void) { listeners.set(t, [...(listeners.get(t) ?? []), f]); },
+      emit(t: string) { for (const f of listeners.get(t) ?? []) f(); },
+      play() { calls.push('play'); this.paused = false; this.emit('playing'); return Promise.resolve(); },
+      pause() { if (!this.paused) { this.paused = true; this.emit('pause'); } },
+      load() { calls.push('load'); this.currentTime = 0; },
+    };
+    const deck = new AudioDeck({ local: () => undefined, dropLocal: () => {}, make: () => el as unknown as DeckEl, hidden: () => true });
+    const clip = (id: string): DeckClip => ({ key: `${id}|0|4`, id, url: `https://pod.test/${id}.mp3`, start: 0, end: 4 });
+    const sink = { state: () => {}, error: () => {} };
+    deck.load(clip('a'), sink, { play: true, muted: false });
+    deck.arm(clip('b'));
+    // Die App entscheidet im onAdvance wie beim Wisch: Karte im Hintergrund nie zeigen, nur einreihen
+    let queue: QueueEntry[] = [];
+    let shown: QueueEntry | null = null;
+    deck.onAdvance = () => {
+      const step = onSwipe(queue, {}, { id: 'a', review: false }, canShowRecall(bg), T);
+      queue = step.queue;
+      shown = step.show;
+    };
+    el.currentTime = 4;
+    el.emit('timeupdate');
+    expect(queue.map((x) => x.id)).toEqual(['a']);
+    expect(shown).toBeNull();
+    expect(deck.clip?.id).toBe('b');
+    expect(el.paused).toBe(false);
+    expect(calls.filter((c) => c.startsWith('src:'))).toEqual(['src:https://pod.test/a.mp3', 'src:https://pod.test/b.mp3']);
+    expect(calls.lastIndexOf('play')).toBeGreaterThan(calls.indexOf('src:https://pod.test/b.mp3'));
+  });
+
+  it('offene Karte beim Wechsel in den Hintergrund: zurück in die Warteschlange, vor allem anderen nicht verloren', () => {
+    const r = requeueOpen([e('x', false, T + 5)], {}, e('open', false, T));
+    expect(r.queue.map((x) => x.id)).toEqual(['open', 'x']);
+    // Schon enthalten: nicht doppelt
+    expect(requeueOpen([e('open', false, T)], {}, e('open', false, T)).queue).toHaveLength(1);
+  });
+
+  it('voll: der älteste wird um einen Tag verschoben, nie verworfen', () => {
+    const q = [e('a', false, T + 1), e('b', false, T + 2), e('c', false, T + 3)];
+    const r = requeueOpen(q, {}, e('open', false, T));
+    expect(r.queue).toHaveLength(QUEUE_MAX);
+    expect(r.queue.map((x) => x.id)).toEqual(['a', 'b', 'c']);
+    expect(r.recall.open?.due).toBe(T + DAY_MS);
   });
 });

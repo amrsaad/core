@@ -5,6 +5,8 @@ import { localKey } from '../moments/localKey';
 import { audioRunning, breakLevel, chainFor, hostState, levelWanted, markHost, onContextState, onUnlock, tempoNow, type Chain } from '../moments/audioGraph';
 import { clampGain, laneFor, youtubeVolume, type LoudInfo } from '../moments/loudness';
 import { AudioDeck, type DeckClip, type DeckSink } from './audioDeck';
+import { isSilent, reduceSound, SOUND_NONE, type SoundObs } from '../moments/soundHint';
+import { installGestures, onGesture } from '../moments/gesture';
 
 /** gainDb: Anpassung der Lautheit des Moments in dB (Entscheidung 16), fehlt sie, bleibt der Moment unverändert */
 export type YTLoad = string | { videoId: string; startSeconds?: number; endSeconds?: number; gainDb?: number };
@@ -26,6 +28,8 @@ export interface YTPlayer {
   destroy(): void;
   /** Lautheit, die auf dem laufenden Moment wirklich angewendet ist (Diagnose, Tests) */
   loud?(): LoudInfo;
+  /** Ton und Wiedergabe des Elements, das gerade spielt (Hinweis "Ton aus": nur aus diesem Zustand, nie aus einem Berührungs-Flag) */
+  sound?(): SoundObs;
   /** Nur Stream-Player: Der angehaltene Moment hat schon Daten für das erste Bild (readyState 3 oder höher) */
   isBuffered?(): boolean;
   /** Nur Stream-Player: Der Moment kommt aus dem Offline-Vorrat (Blob-URL) */
@@ -106,7 +110,7 @@ export const LOCAL = new Map<string, LocalSrc>();
  * Mit Lautheit (Entscheidung 16) gibt es dazu höchstens ein zweites, fest stehendes für die geregelte Spur. Beide werden per Geste
  * freigeschaltet, der Wechsel zwischen ihnen geschieht wie jeder Quellwechsel synchron im Ereignis-Handler.
  */
-export const audioDeck = new AudioDeck({
+export const audioDeck: AudioDeck = new AudioDeck({
   local: (key) => LOCAL.get(key),
   dropLocal: (key) => {
     LOCAL.delete(key);
@@ -122,8 +126,28 @@ export const audioDeck = new AudioDeck({
   host: (url, state) => markHost(url, state),
   running: audioRunning,
   broken: breakLevel,
+  playbackState: (st, why) => setMediaState(st, why),
 });
+
+/** Media Session des Betriebssystems setzen. Im Hintergrund steht jede Änderung im Protokoll (Hintergrund-Diagnose, Frage 2). */
+let msLast = '';
+export function setMediaState(st: 'playing' | 'paused', why: string): void {
+  try {
+    if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
+    if (navigator.mediaSession.playbackState !== st) navigator.mediaSession.playbackState = st;
+    const line = `bg: ms playbackState ${st} (${why})`;
+    if (line !== msLast && typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+      msLast = line;
+      audioDeck.diag(line);
+    }
+  } catch {
+    /* Media Session nicht verfügbar */
+  }
+}
 if (typeof window !== 'undefined') {
+  // Jede erste Geste im Dokument (auch auf den Reitern) schaltet das Deck-Element frei, nicht nur ein Tipp im Feed
+  installGestures();
+  onGesture(() => audioDeck.unlock());
   onUnlock(() => levelWanted() && audioDeck.prime());
   // iOS unterbricht den Kontext (Sperrbildschirm, Anruf): läuft er nicht mehr, spielt der Audio-Reiter unverändert weiter
   onContextState((s) => audioDeck.contextChanged(s));
@@ -218,7 +242,7 @@ function silentWav(): string {
  * entscheidet laneFor (loudness.ts). Jeder Fehler der geregelten Spur führt zurück auf die unveränderte, nie zu Stille.
  * Für Audio-Momente gilt dasselbe im audioDeck.
  */
-export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, events: { onReady?: () => void; onState?: (s: number) => void; onError?: (code: number) => void; onDiag?: (line: string) => void }): YTPlayer {
+export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, events: { onReady?: () => void; onState?: (s: number) => void; onError?: (code: number) => void; onDiag?: (line: string) => void; /** Tempo, das ein neu gestarteter Moment sofort bekommt */ getRate?: () => number; /** Ton oder Wiedergabe des Elements hat sich geändert */ onSound?: () => void; /** Messung am Element, das Ton ausgibt (Untertitel, Issue 15): Quellzeit, Tempo, Ton läuft */ onTime?: (t: number, rate: number, playing: boolean) => void }): YTPlayer {
   const host = el.parentElement!;
   host.style.position = 'relative';
   const mkVideo = (level: boolean) => {
@@ -229,6 +253,8 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     video.muted = true;
     video.playsInline = true;
     video.preload = 'auto';
+    video.preservesPitch = true;
+    (video as unknown as { webkitPreservesPitch?: boolean }).webkitPreservesPitch = true;
     video.setAttribute('playsinline', '');
     video.setAttribute('webkit-playsinline', '');
     // Nur die geregelte Spur fordert CORS an, sonst gäbe Web Audio für Quellen ohne Freigabe Stille aus
@@ -268,6 +294,9 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   let ytLoud: LoudInfo = { db: 0, how: 'unchanged: no value' };
   /** Quelle, die in der geregelten Spur nicht lud. Lädt sie danach unverändert, gilt der Host als ohne CORS. */
   let trialFailed: string | null = null;
+  /** Ton und Wiedergabe des laufenden Stream-Elements (volumechange, playing, pause), YouTube liest den Hinweis aus dem Player */
+  let hlsSnd: SoundObs = SOUND_NONE;
+  const soundChanged = () => events.onSound?.();
   const setHlsState = (st: number) => {
     hlsState = st;
     if (mode === 'hls') events.onState?.(st);
@@ -277,6 +306,12 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     state: (st) => setHlsState(st),
     error: () => {
       if (mode === 'hls') events.onError?.(-1);
+    },
+    sound: () => {
+      if (mode === 'hls' && deckMode) soundChanged();
+    },
+    time: (t, rate, playing) => {
+      if (mode === 'hls' && deckMode) events.onTime?.(t, rate, playing);
     },
   };
   const leaveDeck = () => {
@@ -288,13 +323,33 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   for (const el of all) {
     // Ereignisse der gerade nicht benutzten Elemente zählen nicht, im Audio-Reiter gehört der Ton dem audioDeck
     const mine = () => !deckMode && el === media;
+    // Messung für die Untertitel: Zeit des Elements, das Ton ausgibt (Video-Reiter: der Slot)
+    const tick = () => {
+      if (mine() && mode === 'hls') events.onTime?.(el.currentTime + offset, el.playbackRate || 1, !el.paused && el.readyState >= 3);
+    };
+    el.addEventListener('timeupdate', tick);
+    el.addEventListener('playing', tick);
+    el.addEventListener('waiting', tick);
+    el.addEventListener('pause', tick);
+    el.addEventListener('volumechange', () => {
+      if (!mine()) return;
+      hlsSnd = reduceSound(hlsSnd, 'volumechange', el);
+      soundChanged();
+    });
     el.addEventListener('playing', () => {
       if (!mine()) return;
+      hlsSnd = reduceSound(hlsSnd, 'playing', el);
       setHlsState(STATE.PLAYING);
+      soundChanged();
       // Web Audio läuft nicht (iOS hat den Kontext unterbrochen): die geregelte Spur wäre stumm, darum zurück auf die unveränderte
       if (isLevel(el)) window.setTimeout(() => mine() && !el.paused && !audioRunning() && (breakLevel('context not running'), bail('context not running')), 700);
     });
-    el.addEventListener('pause', () => mine() && setHlsState(el.ended ? STATE.ENDED : STATE.PAUSED));
+    el.addEventListener('pause', () => {
+      if (!mine()) return;
+      hlsSnd = reduceSound(hlsSnd, 'pause', el);
+      setHlsState(el.ended ? STATE.ENDED : STATE.PAUSED);
+      soundChanged();
+    });
     el.addEventListener('waiting', () => mine() && setHlsState(STATE.BUFFERING));
     el.addEventListener('ended', () => mine() && setHlsState(STATE.ENDED));
     el.addEventListener('timeupdate', () => {
@@ -368,6 +423,10 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       (e: unknown) => {
         const name = e instanceof Error ? e.name : String(e);
         diag(`hls play#${n} refused ${name} ${vstate()}`);
+        if (name === 'NotAllowedError') {
+          hlsSnd = reduceSound(hlsSnd, 'refused', media);
+          soundChanged();
+        }
         // Die geregelte Spur ist nie entsperrt worden: auf die unveränderte wechseln, die den bewährten Weg hat
         if (name === 'NotAllowedError' && isLevel(media) && lastArgs) bail('play refused');
         else if (name === 'NotAllowedError' && !media.muted) {
@@ -387,6 +446,22 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     const running = !media.paused || a.play;
     delete media.dataset.src;
     prepareHls(a.id, a.start, a.end, running, a.gain, true, Math.max(a.start, at), why);
+  };
+
+  /** Quelle freigeben und load(), damit der Speicher frei wird. Nie src = '' (löst einen Fehler aus). */
+  const releaseEl = (e: HTMLMediaElement) => {
+    if (!e.getAttribute('src')) return;
+    e.pause();
+    e.removeAttribute('src');
+    delete e.dataset.src;
+    delete e.dataset.local;
+    e.load();
+  };
+  /** Tempo nur auf ein Element mit Quelle schreiben und nur, wenn es abweicht. load() setzt es auf den Standard zurück, darum beides. */
+  const applyRateTo = (e: HTMLMediaElement, rate = events.getRate?.() ?? 1) => {
+    if (!e.getAttribute('src')) return;
+    if (e.defaultPlaybackRate !== rate) e.defaultPlaybackRate = rate;
+    if (e.playbackRate !== rate) e.playbackRate = rate;
   };
 
   const pending = new WeakMap<HTMLMediaElement, () => void>();
@@ -423,6 +498,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       delete old.dataset.src;
       old.removeAttribute('src');
       old.load();
+      hlsSnd = { muted: isSilent(media), playing: false, refused: false };
     }
     show('hls');
     lastArgs = { id, start, end, play, gain, from: seekTo };
@@ -472,6 +548,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       });
       el.src = src;
       el.load();
+      applyRateTo(el);
       diag(`hls load ${play ? 'play' : 'cue'} start=${start} lane=${isLevel(el) ? 'level' : 'plain'} ${vstate()}`);
     } else onMeta();
   };
@@ -479,7 +556,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   /** Audio-Moment: Ausschnitt merken. Mit play übernimmt dieser Player das gemeinsame Element, ohne play bleibt es unberührt. */
   const prepareDeck = (id: string, start: number, end: number | undefined, play: boolean, gain: number) => {
     try { yt.pauseVideo(); } catch { /* noch nicht bereit */ }
-    for (const e of all) e.pause();
+    for (const e of all) releaseEl(e);
     deckMode = true;
     show('hls');
     lastArgs = { id, start, end, play, gain, from: start };
@@ -488,7 +565,10 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     else setHlsState(STATE.CUED);
   };
   const deckLoad = (play: boolean) => {
-    if (deckClip) audioDeck.load(deckClip, sink, { play, muted: wantMuted });
+    if (!deckClip) return;
+    // Das Tempo steht vor dem Start fest, das Element bekommt es mit der Quelle (nie danach per Neuladen)
+    if (events.getRate) audioDeck.setRate(events.getRate());
+    audioDeck.load(deckClip, sink, { play, muted: wantMuted });
   };
   const deckPlay = () => {
     if (!deckClip) return;
@@ -512,12 +592,12 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       else prepareHls(id, o.startSeconds ?? 0, o.endSeconds, play, gain);
     } else if (!isYtId(id)) {
       // Kein Stream und keine YouTube-ID (Text-Moment oder Podcast ohne hls): nichts laden, nichts werfen
-      for (const e of all) e.pause();
+      for (const e of all) releaseEl(e);
       leaveDeck();
       try { yt.pauseVideo(); } catch { /* noch nicht bereit */ }
       show('yt');
     } else {
-      for (const e of all) e.pause();
+      for (const e of all) releaseEl(e);
       leaveDeck();
       show('yt');
       applyYtVolume(gain);
@@ -572,16 +652,27 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       else media.pause();
     },
     mute: () => {
-      for (const e of all) e.muted = true;
+      for (const e of all) if (!e.muted) e.muted = true;
       wantMuted = true;
       audioDeck.setMuted(sink, true);
       yt.mute();
+      soundChanged();
     },
     unMute: () => {
-      for (const e of all) e.muted = false;
+      for (const e of all) if (e.muted) e.muted = false;
       wantMuted = false;
       audioDeck.setMuted(sink, false);
       yt.unMute();
+      soundChanged();
+    },
+    sound: () => {
+      if (mode === 'yt') {
+        let muted = true;
+        try { muted = yt.isMuted(); } catch { /* Player noch nicht bereit */ }
+        return { muted, playing: yt.getPlayerState() === STATE.PLAYING, refused: false };
+      }
+      if (deckMode) return audioDeck.sound(sink) ?? { muted: wantMuted, playing: false, refused: false };
+      return hlsSnd;
     },
     isMuted: () => (mode === 'hls' ? (deckMode ? wantMuted : media.muted) : yt.isMuted()),
     getCurrentTime: () => (mode === 'hls' ? (deckMode ? audioDeck.time(sink) ?? deckClip?.start ?? 0 : media.currentTime + offset) : yt.getCurrentTime()),

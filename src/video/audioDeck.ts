@@ -11,6 +11,8 @@
 // Diese Datei kennt weder React noch die Warteschlange und importiert nichts aus ytApi (kein Kreis). Die Quelle aus dem Offline-Vorrat
 // kommt über local(key), die Zeitzählung der Zustände entspricht den YouTube-Werten (0 Ende, 1 spielt, 2 Pause, 3 puffert).
 
+import { isSilent, reduceSound, SOUND_NONE, type SoundObs } from '../moments/soundHint';
+
 const ENDED = 0;
 const PLAYING = 1;
 const PAUSED = 2;
@@ -46,6 +48,10 @@ export interface DeckSink {
   /** Zustand des Elements, solange dieser Player es besitzt */
   state(st: number): void;
   error(): void;
+  /** Ton oder Wiedergabe des Elements hat sich geändert (volumechange, playing, pause, abgelehntes play): Hinweis neu lesen */
+  sound?(): void;
+  /** Messung am Element für die Untertitel (Issue 15): Quellzeit, Tempo, Ton läuft. Bei Quell- und Spurwechsel bleibt die Zeit stehen (playing false). */
+  time?(t: number, rate: number, playing: boolean): void;
 }
 
 export interface LocalClip {
@@ -63,8 +69,11 @@ export interface DeckEl {
   readonly readyState: number;
   readonly duration: number;
   muted: boolean;
+  readonly volume?: number;
   playbackRate: number;
   defaultPlaybackRate: number;
+  preservesPitch?: boolean;
+  removeAttribute?(name: string): void;
   readonly error?: { code: number } | null;
   play(): Promise<void> | undefined;
   pause(): void;
@@ -91,11 +100,16 @@ export interface DeckDeps {
   broken?: (why: string) => void;
   /** Steht die Seite im Hintergrund (Standard: visibilityState hidden) */
   hidden?: () => boolean;
+  /** Media Session des Betriebssystems setzen (Standard: navigator.mediaSession.playbackState), why für die Diagnose */
+  playbackState?: (s: 'playing' | 'paused', why: string) => void;
 }
 
 const defaultMake = (level: boolean): DeckEl => {
   const a = document.createElement('audio');
   a.preload = 'auto';
+  // Tonhöhe bleibt bei Tempo 1.5x und 2x erhalten
+  a.preservesPitch = true;
+  (a as unknown as { webkitPreservesPitch?: boolean }).webkitPreservesPitch = true;
   // Nur die geregelte Spur fordert CORS an, sonst gäbe Web Audio für Quellen ohne Freigabe Stille aus
   if (level) a.crossOrigin = 'anonymous';
   a.dataset.lane = level ? 'level' : 'plain';
@@ -148,6 +162,8 @@ export class AudioDeck {
   private hiddenStats = { tu: 0, ended: 0, ends: 0, plays: 0, at: 0 };
   /** Letzter Wechsel im Hintergrund, bis das Element des Nachfolgers spielt (Diagnose) */
   private adv: { to: string; t0: number } | null = null;
+  /** Ton und Wiedergabe des aktuellen Elements, getrieben von volumechange, playing und pause (Hinweis "Ton aus") */
+  private snd: SoundObs = SOUND_NONE;
   /** Schlüssel aller Ausschnitte, die geladen wurden (Tests, Diagnose) */
   readonly history: string[] = [];
   /** Beim automatischen Weiter im Hintergrund: der Wechsel ist schon geschehen, jetzt die Buchführung */
@@ -204,7 +220,10 @@ export class AudioDeck {
       }
       this.live = true;
       this.played = true;
+      this.snd = reduceSound(this.snd, 'playing', el);
       this.sink?.state(PLAYING);
+      this.sink?.sound?.();
+      this.tick(el);
       // Web Audio läuft nicht (iOS hat den Kontext unterbrochen): die geregelte Spur wäre stumm, darum zurück auf die unveränderte
       if (this.lane === 'level' && this.deps.running) {
         window.setTimeout(() => {
@@ -219,15 +238,28 @@ export class AudioDeck {
       if (!mine()) return;
       this.live = false;
       this.sink?.state(BUFFERING);
+      this.tick(el);
     });
     el.addEventListener('pause', () => {
       const by = this.pauseBy.get(el);
       this.pauseBy.delete(el);
       if (mine()) this.note(`pause event by=${by ?? (el.ended ? 'media end' : 'system')} hidden=${this.hidden()} done=${this.done} ${this.stateText(el)}`);
+      if (!mine()) return;
+      this.snd = reduceSound(this.snd, 'pause', el);
+      this.sink?.sound?.();
+      this.tick(el);
       // Ein Pause-Ereignis, das einem Quellwechsel vorausging, ist veraltet: das Element spielt schon wieder
-      if (!mine() || !el.paused || this.done) return;
+      if (!el.paused || this.done) return;
+      // Am Ende der Quelle kommt pause vor ended. Das ist kein Anhalten: sonst meldet die App Pause, die Media Session steht auf paused,
+      // und der Sperrbildschirm zeigt Pause, während der Ende-Handler gleich den nächsten Moment startet.
+      if (el.ended) return;
       this.live = false;
       this.sink?.state(PAUSED);
+    });
+    el.addEventListener('volumechange', () => {
+      if (!mine()) return;
+      this.snd = reduceSound(this.snd, 'volumechange', el);
+      this.sink?.sound?.();
     });
     // Ein ended ohne vorheriges playing dieses Ausschnitts stammt vom vorigen Inhalt (zum Beispiel der Stille der Freischaltung) und zählt nicht
     el.addEventListener('ended', () => {
@@ -236,6 +268,7 @@ export class AudioDeck {
       if (mine() && this.played) this.clipEnd('ended');
     });
     el.addEventListener('timeupdate', () => {
+      if (mine()) this.tick(el);
       const c = this.clip;
       if (mine() && this.hidden()) this.hiddenStats.tu++;
       if (!mine() || !c || c.end === undefined || el.paused) return;
@@ -262,7 +295,7 @@ export class AudioDeck {
     });
     el.addEventListener('error', () => {
       const c = this.clip;
-      if (!mine() || !c) return;
+      if (!mine() || !c || this.done) return;
       if (this.isLocal) {
         // Ausschnitt aus dem Vorrat nicht abspielbar: einmal vom Netz laden statt zu überspringen
         this.deps.dropLocal(c.key);
@@ -315,9 +348,10 @@ export class AudioDeck {
     this.loudLinear = chain ? chain.linear : null;
     this.loudInfo = chain ? { db: clip.gain ?? 0, how: 'web audio' } : { db: 0, how: `unchanged: ${why}` };
     if (old && old !== target) {
-      // Spurwechsel: das alte Element anhalten, Ton übernehmen (das Tempo setzt applyRate gleich)
+      // Spurwechsel: das alte Element anhalten und die Quelle freigeben (höchstens 3 Elemente mit Quelle), Ton übernehmen (das Tempo setzt applyRate gleich)
       target.muted = old.muted;
       this.halt(old, 'app: lane switch');
+      this.clearSrc(old);
     }
     const el = target;
     this.clip = clip;
@@ -332,12 +366,22 @@ export class AudioDeck {
     this.target = Math.max(0, from - this.offset);
     this.history.push(clip.key);
     if (this.history.length > 200) this.history.shift();
+    this.snd = { muted: isSilent(el), playing: false, refused: false };
+    // Untertitel (Issue 15): bei Quell- und Spurwechsel die Zeit übernehmen und halten, bis das Element selbst wieder misst
+    this.sink?.time?.(from, el.playbackRate || 1, false);
+    // Eine Zeile je Start: kam die Quelle aus dem Offline-Vorrat (Blob) oder aus dem Netz (Issue 14)
+    this.diag(`deck: src ${loc ? 'local' : 'net'} ${clip.id}`);
     el.src = loc?.url ?? withStart(clip.url, from);
     el.load();
     // load() setzt das Tempo auf den Standard zurück: Standard und aktuelles Tempo gemeinsam setzen
     this.applyRate(el);
     this.seek(false);
     if (play) this.kick('start');
+  }
+
+  /** Messung für die Untertitel: Quellzeit des Elements (currentTime plus Versatz), Tempo, und ob es gerade Ton liefert */
+  private tick(el: DeckEl) {
+    this.sink?.time?.(el.currentTime + this.offset, el.playbackRate || 1, !el.paused && this.live);
   }
 
   private stateText(el: DeckEl) {
@@ -376,6 +420,10 @@ export class AudioDeck {
       this.diag(`loud: level lane refused ${name}, playing unchanged`);
       this.bail('play refused');
       return;
+    }
+    if (name === 'NotAllowedError' && this.el) {
+      this.snd = reduceSound(this.snd, 'refused', this.el);
+      this.sink?.sound?.();
     }
     if (c && this.refusedKey !== c.key) {
       this.refusedKey = c.key;
@@ -456,6 +504,8 @@ export class AudioDeck {
         this.adv = null;
         if (this.el) this.note(`advance to ${next.id}: NOT playing after 3 s, ${this.stateText(this.el)} error ${this.el.error?.code ?? 'none'}`);
       }, 3000);
+      // Die Media Session steht sofort auf playing, nicht erst nach dem ersten Ton der neuen Quelle
+      this.deps.playbackState?.('playing', 'switch');
       try {
         this.onAdvance(from, next);
       } catch (e) {
@@ -464,12 +514,14 @@ export class AudioDeck {
       return;
     }
     // Vordergrund oder kein Nachfolger: anhalten und das Ende melden, die App entscheidet (Für-dich-Karte, Wisch)
+    if (hid) this.diag(`bg: end without switch ${c.id} (armed ${next?.id ?? 'none'}, onAdvance ${this.onAdvance ? 'yes' : 'no'}), element stops`);
     this.halt(el, 'app: clip end in foreground');
     this.sink?.state(ENDED);
   }
 
   /** Nachfolger vorbereiten. null, wenn es keinen gibt. */
   arm(clip: DeckClip | null) {
+    if ((clip?.key ?? null) !== (this.armed?.key ?? null)) this.diag(`bg: arm ${clip ? `${clip.id} (${this.deps.local(clip.key) ? 'local' : 'net'})` : 'none'}`);
     this.armed = clip;
   }
 
@@ -485,7 +537,23 @@ export class AudioDeck {
     this.sink = null;
     this.want = false;
     this.done = true;
-    for (const e of this.all()) this.halt(e, 'app: release');
+    for (const e of this.all()) {
+      this.halt(e, 'app: release');
+      this.clearSrc(e);
+    }
+  }
+
+  /** Quelle freigeben (höchstens 3 Medien-Elemente mit Quelle). Nur über removeAttribute, ein leeres src löst einen Fehler aus. */
+  private clearSrc(el: DeckEl) {
+    try {
+      el.pause();
+      if (el.removeAttribute) {
+        el.removeAttribute('src');
+        el.load();
+      }
+    } catch {
+      /* Element schon weg */
+    }
   }
 
   // ---- Schnittstelle für die Player ----
@@ -551,8 +619,16 @@ export class AudioDeck {
 
   /** Nur schreiben, was abweicht: unnötige Schreibzugriffe auf playbackRate lassen WebKit mit aktiver Media Session abstürzen (im Testrunner beobachtet) */
   private applyRate(el: DeckEl) {
+    // Ein Element ohne Quelle bleibt unberührt
+    if (!el.src) return;
+    if (el.preservesPitch === false) el.preservesPitch = true;
     if (el.defaultPlaybackRate !== this.rate) el.defaultPlaybackRate = this.rate;
     if (el.playbackRate !== this.rate) el.playbackRate = this.rate;
+  }
+
+  /** Ton und Wiedergabe des Elements, solange dieser Player es besitzt (Hinweis "Ton aus") */
+  sound(sink: DeckSink): SoundObs | null {
+    return this.sink === sink && this.el ? this.snd : null;
   }
 
   /** Lautheit, die auf dem laufenden Ausschnitt wirklich angewendet ist (Diagnose, Tests) */
@@ -571,7 +647,7 @@ export class AudioDeck {
       if (!el.src) el.src = SILENT;
       const p = el.play();
       const done = () => {
-        if (el !== this.el) el.pause();
+        if (el !== this.el) this.clearSrc(el);
       };
       p?.then?.(done, done);
     } catch {
@@ -616,13 +692,28 @@ export class AudioDeck {
     }
   }
 
+  /** Audio-Sitzung auf playback: Ton läuft auch bei gesperrtem Bildschirm und mit Stumm-Schalter (iOS 17 und neuer) */
+  private session() {
+    try {
+      const s = typeof navigator !== 'undefined' ? (navigator as unknown as { audioSession?: { type: string } }).audioSession : undefined;
+      if (s && s.type !== 'playback') {
+        s.type = 'playback';
+        this.diag(`bg: audioSession type ${s.type}`);
+      }
+    } catch {
+      /* nicht unterstützt */
+    }
+  }
+
   /** Aus einer Geste heraus aufrufen: schaltet das Element für späteres play() ohne Geste frei. Wirkt nur einmal je Seite. */
   unlock() {
+    this.session();
     if (this.unlocked) return;
     const el = this.ensure('plain');
     // Läuft oder wartet schon ein echter Ausschnitt, kommt die Freischaltung von dessen play(). Ein vom Menschen angehaltener bleibt angehalten.
     if (this.clip && !this.done) {
-      if (this.want) this.kick('unlock');
+      // Jede Geste ruft unlock: nur anstoßen, was wirklich steht
+      if (this.want && this.el?.paused) this.kick('unlock');
       return;
     }
     if (!el.src) el.src = SILENT;

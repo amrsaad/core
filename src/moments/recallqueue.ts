@@ -83,3 +83,18 @@ export function onReturn(queue: QueueEntry[], canShow: boolean): { show: QueueEn
   if (!canShow || !queue.length) return { show: null, queue };
   return { show: queue[0], queue: queue.slice(1) };
 }
+
+/**
+ * Die Seite geht in den Hintergrund, während eine unbeantwortete Karte offen ist (Issue 11, Max 30.10.2026): die Karte hält den Ton an,
+ * und im gesperrten Telefon wäre niemand da, sie zu beantworten. Sie geht zurück in die Warteschlange, der Ton läuft weiter, bei der Rückkehr
+ * erscheint sie vor dem nächsten Wisch. Bei mehr als QUEUE_MAX Einträgen wird der älteste (kleinstes dueAt) um einen Tag verschoben, nie verworfen.
+ */
+export function requeueOpen(queue: QueueEntry[], recall: RecallState, e: QueueEntry): { queue: QueueEntry[]; recall: RecallState } {
+  let q = [...queue.filter((x) => x.id !== e.id), e].sort((a, b) => a.dueAt - b.dueAt);
+  let r = recall;
+  while (q.length > QUEUE_MAX) {
+    r = postpone(r, q[0]);
+    q = q.slice(1);
+  }
+  return { queue: q, recall: r };
+}
