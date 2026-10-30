@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-30T10:06:24.883Z",
+  "at": "2026-10-30T11:31:19.746Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -50,49 +50,49 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1623,
+        "coldStartMs": 1594,
         "preloadedMoments": 30,
         "preloadedBytes": 6289236,
         "bytesPerMoment": 209641,
         "swipes": 10,
         "cachedStartMs": [
-          10,
-          10,
-          10,
+          23,
+          9,
           8,
-          10,
+          16,
+          8,
           9,
+          7,
+          7,
           9,
-          10,
-          9,
-          9
+          8
         ],
-        "cachedStartMax": 10,
-        "cachedStartMedian": 10,
+        "cachedStartMax": 23,
+        "cachedStartMedian": 9,
         "firstFrames": [
-          "first-frame 9ms buffered local",
-          "first-frame 10ms buffered local",
-          "first-frame 10ms buffered local",
-          "first-frame 10ms buffered local",
           "first-frame 8ms buffered local",
-          "first-frame 10ms buffered local",
+          "first-frame 23ms buffered local",
           "first-frame 9ms buffered local",
+          "first-frame 8ms buffered local",
+          "first-frame 16ms buffered local",
+          "first-frame 8ms buffered local",
           "first-frame 9ms buffered local",
-          "first-frame 10ms buffered local",
+          "first-frame 7ms buffered local",
+          "first-frame 7ms buffered local",
           "first-frame 9ms buffered local",
-          "first-frame 9ms buffered local"
+          "first-frame 8ms buffered local"
         ],
         "settingsText": "Preloaded: 37 moments, 7.4 MB",
         "offlineStartMs": [
-          10,
-          10,
           9,
-          9
-        ],
-        "offlineRestartStartMs": [
           10,
           8,
-          10
+          8
+        ],
+        "offlineRestartStartMs": [
+          7,
+          7,
+          8
         ],
         "poorFirst12Youtube": 0,
         "normalFirst12Youtube": 6
