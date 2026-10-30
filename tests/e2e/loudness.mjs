@@ -81,27 +81,31 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const pg = await cx.newPage();
       pg.on('pageerror', (e) => errors.push(String(e)));
       // Angleichen ist seit 30.10.2026 standardmäßig aus (Issue 13), der Test schaltet es ein
-      await pg.addInitScript(() => { window.__ytSlow = true; try { localStorage.setItem('core.level.on', '1'); } catch {} });
+      await pg.addInitScript(() => { window.__ytSlow = true; try { if (!sessionStorage.getItem('t.off')) localStorage.setItem('core.level.on', '1'); } catch {} });
+      // Nachbau der CORS-Absage von Anfang an (seit Issue 11 entsteht der AudioContext schon mit dem Tipp auf den Reiter, der erste Moment läuft sofort geregelt):
+      // ein Element mit crossOrigin bekommt für nocors.test und trial.test einen Fehler statt loadedmetadata. Die Nachbauten der Elemente (fakeyt.js)
+      // setzen P.load erst später, darum hängt der Wächter an der Zuweisung.
+      await pg.addInitScript(() => {
+        const P = HTMLMediaElement.prototype;
+        let wrapped = P.load;
+        const wrap = (f) => function () {
+          if (this.crossOrigin === 'anonymous' && /(nocors|trial)\.test/.test(this.src)) {
+            setTimeout(() => {
+              Object.defineProperty(this, 'error', { configurable: true, get: () => ({ code: 4 }) });
+              this.dispatchEvent(new Event('error'));
+            }, 20);
+            return;
+          }
+          return f.call(this);
+        };
+        wrapped = wrap(wrapped);
+        Object.defineProperty(P, 'load', { configurable: true, get: () => wrapped, set: (f) => { wrapped = wrap(f); } });
+      });
       const body = await encPool(list);
       await pg.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body }));
       await pg.goto(`${url}${query}#k=${k}`);
       return { cx, pg };
     };
-    // Nachbau der CORS-Absage: ein Element mit crossOrigin bekommt für nocors.test und trial.test einen Fehler statt loadedmetadata
-    const patchCors = (pg) => pg.evaluate(() => {
-      const P = HTMLMediaElement.prototype;
-      const orig = P.load;
-      P.load = function () {
-        if (this.crossOrigin === 'anonymous' && /(nocors|trial)\.test/.test(this.src)) {
-          setTimeout(() => {
-            Object.defineProperty(this, 'error', { configurable: true, get: () => ({ code: 4 }) });
-            this.dispatchEvent(new Event('error'));
-          }, 20);
-          return;
-        }
-        return orig.call(this);
-      };
-    });
     const gainNow = (pg) => pg.evaluate(() => {
       const g = window.__core.gain().find((x) => x.index === window.__core.idx());
       return g?.loud ?? null;
@@ -118,26 +122,38 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await o.pg.waitForSelector('[data-testid=form-switch]');
       await o.pg.click('[data-testid=form-switch] >> text=Audio');
       await waitFor(o.pg, () => window.__core.state() === 1);
-      await patchCors(o.pg);
       return o;
     };
     const tap = (pg) => pg.mouse.click(vp.width / 2, vp.height / 2);
     const vp = { width: 390, height: 664 };
     const byId = new Map([...moments, ...ytMoments].map((m) => [m.id, m]));
+    // Erwartete Spur eines Moments im Audio-Reiter, wenn der Kontext läuft: geregelt bei Messwert auf einem Host mit Freigabe, sonst unverändert
+    const laneOk = (m, loud) => {
+      if (!m || !loud) return false;
+      const level = !!m.gainDb && m.gainDb !== 0 && /stream\.test/.test(m.hls);
+      return level ? loud.how === 'web audio' && loud.db === m.gainDb : loud.how.startsWith('unchanged') && loud.db === 0 && loud.linear === undefined;
+    };
 
     // ---------- Podcast-Reiter (Audio): GainNode ----------
     const { cx, pg: page } = await open(moments);
     await page.waitForSelector('[data-testid=form-switch]');
+    // Ohne Geste gibt es keinen AudioContext (kein Kontext im Audio-Reiter, bevor jemand getippt hat)
+    c.noContextBeforeGesture = !(await page.evaluate(() => !!window.__core.ctx()));
     await page.click('[data-testid=form-switch] >> text=Audio');
     c.audioStarted = await waitFor(page, () => window.__core.state() === 1);
-    // Vor der ersten Berührung gibt es keinen AudioContext: der Moment spielt unverändert
+    // Die erste Geste im Dokument ist der Tipp auf den Reiter (Issue 13): er schaltet das Deck-Element frei und legt den AudioContext an.
+    // Ein Moment mit Messwert auf einem Host mit Freigabe läuft ab dem ersten Ton geregelt, über das Element der geregelten Spur des Decks.
     const first = await page.evaluate(() => {
       const m = window.__core.moment();
       const g = window.__core.gain().find((x) => x.index === window.__core.idx());
       return { id: m.id, loud: g?.loud ?? null };
     });
-    c.beforeTouchUnchanged = !!first.loud && first.loud.how.startsWith('unchanged') && first.loud.db === 0 && first.loud.linear === undefined;
-    await patchCors(page);
+    c.tabTapStartsLevelled = laneOk(byId.get(first.id), first.loud);
+    r.deckEls = await page.evaluate(() => [...document.querySelectorAll('audio[data-core=audio-deck]')].map((a) => ({ lane: a.dataset.lane, paused: a.paused, src: !!(a.currentSrc || a.src), cross: a.crossOrigin })));
+    c.levelElementPlays = r.deckEls.some((e) => e.lane === 'level' && e.cross === 'anonymous' && !e.paused);
+    c.tempoOneByDefault = (await page.evaluate(() => window.__core.rate())) === 1;
+    c.atMostThreeMedia = (await page.evaluate(() => window.__core.media())) <= 3;
+    c.deckSrcLine = await page.evaluate(() => window.__core.diag().some((x) => /^deck: src (local|net) /.test(x)));
     await page.mouse.click(vp.width / 2, vp.height / 2); // erste Berührung: Ton an, AudioContext entsteht
     c.contextRunning = await waitFor(page, () => window.__core.sound() === true);
     await page.evaluate(() => { window.__ytSlow = false; });
@@ -212,7 +228,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
 
     // ---------- Schalter aus: alles unverändert ----------
     const off = await open(moments);
-    await off.pg.evaluate(() => localStorage.removeItem('core.level.on'));
+    await off.pg.evaluate(() => { sessionStorage.setItem('t.off', '1'); localStorage.removeItem('core.level.on'); });
     await off.pg.reload();
     await off.pg.waitForSelector('[data-testid=form-switch]');
     await off.pg.click('[data-testid=form-switch] >> text=Audio');
@@ -224,7 +240,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await off.pg.waitForTimeout(300);
     }
     const offSeen = await off.pg.evaluate(() => window.__core.gain().map((g) => g.loud));
-    c.switchOffUnchanged = offSeen.filter(Boolean).every((l) => l.db === 0 && l.how.startsWith('unchanged') && l.linear === undefined);
+    c.switchOffUnchanged = offSeen.filter(Boolean).length > 0 && offSeen.filter(Boolean).every((l) => l.db === 0 && l.how.startsWith('unchanged') && l.linear === undefined);
+    c.switchOffNoContext = !(await off.pg.evaluate(() => !!window.__core.ctx()));
     await off.cx.close();
 
     // ---------- Video-Reiter mit YouTube: nur absenken ----------
@@ -262,11 +279,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const sm = [audio(0, 'stream.test', -22), audio(1, 'stream.test', -10), audio(2, 'stream.test', -18.4)];
     const A = await startAudio(sm);
     const a0 = await gainNow(A.pg);
-    c.tapA_beforeUnchanged = !!a0 && a0.how.startsWith('unchanged') && a0.db === 0;
-    await tap(A.pg);
     const curId = await A.pg.evaluate(() => window.__core.moment().id);
+    c.tapA_levelAtStart = laneOk(sm.find((m) => m.id === curId), a0);
+    await tap(A.pg);
     const wantDb = sm.find((m) => m.id === curId).gainDb;
-    c.firstTapAttachesRunningMoment = await waitFor(A.pg, (db) => {
+    c.firstTapKeepsRunningMomentLevelled = await waitFor(A.pg, (db) => {
       const g = window.__core.gain().find((x) => x.index === window.__core.idx())?.loud;
       return g?.how === 'web audio' && g.db === db;
     }, wantDb, 6000);
@@ -318,18 +335,16 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
     await B.cx.close();
 
-    // ---------- Host ohne Urteil (Probe bricht ab): der Versuch scheitert beim Tippen, Position bleibt, Moment spielt unverändert weiter ----------
+    // ---------- Host ohne Urteil (Probe bricht ab): der Versuch scheitert beim Start in der geregelten Spur, Position bleibt, Moment spielt unverändert weiter ----------
     const tm = [audio(11, 'trial.test', -21), audio(12, 'trial.test', -23)];
     const T = await startAudio(tm);
-    await T.pg.waitForTimeout(600);
-    c.noVerdictWithoutProbe = !(await storeOf(T.pg)).includes('trial.test');
-    await tap(T.pg);
     c.trialFallsBack = await waitFor(T.pg, () => {
       const g = window.__core.gain().find((x) => x.index === window.__core.idx())?.loud;
       return g?.how === 'unchanged: skipped cors';
-    }, undefined, 6000);
+    }, undefined, 8000);
     c.trialHostMarked = await waitFor(T.pg, () => (localStorage.getItem('core.level.cors') ?? '').includes('"trial.test":"bad"'), undefined, 6000);
     r.trialStore = await storeOf(T.pg);
+    c.trialNeverOk = !r.trialStore.includes('"trial.test":"ok"');
     c.trialStillPlaying = await waitFor(T.pg, () => window.__core.state() === 1 || window.__core.state() === 5, undefined, 3000);
     await T.cx.close();
   } catch (e) {
