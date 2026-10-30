@@ -5,6 +5,7 @@ import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { audioDeck, createPlayer, deckClipOf, HLS, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
+import { errorAction, resumePos } from './netrecover';
 import { isYtId } from './contract';
 import { contextForTest, levelEnabled, probeHost, unlockAudio } from './audioGraph';
 import { loudLine, recordLoud } from './loudness';
@@ -13,17 +14,18 @@ import { netRank, PRELOAD_COUNT, streamKind } from './preload';
 import { cursorFor, parseSaved, queueKey, releaseTail, reorderByRank, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMomentBlock, SIGNAL, type MomentCursor } from './mix';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
-import { clampRate, DEFAULT_SPEED, HOLD_SPEED, speedOf } from '../lib/state';
+import { clampRate, DEFAULT_RATE, nextRate, rateOf, type Rate } from '../lib/state';
 import { addSample } from './latency';
 import { captionsShown } from './captions';
 import { countGotIt, countSeen, todayLine } from './today';
 import { answer, cardDue, pickRecall, type Recent } from './recall';
 import { RecallCard, type RecallCtl } from './RecallCard';
+import { canShowRecall, onReturn, onSwipe, type QueueEntry } from './recallqueue';
 import { CaptionSheet } from './CaptionSheet';
 import { sourceLine } from './source';
 import { askUrl, markAsked } from './ask';
 import { NoteSheet, type NoteCtl } from './NoteSheet';
-import { createWheel, deskKey, endsFast, TAB_KEYS, wheelPx, type DeskAction } from './desktop';
+import { createWheel, deskKey, TAB_KEYS, wheelPx, type DeskAction } from './desktop';
 import { DeskPanel } from './DeskShell';
 import { speakerLine } from './speaker';
 import { buildIssue, chipEffect, CONFIRM_SHEET_MS, firstOpenOfDay, makeEntry, markSent, promptLine, unsent, type Chip } from './note';
@@ -64,13 +66,20 @@ interface Slot {
   st: number;
   /** Moment-ID, die gerade im Player steckt */
   mid: string;
+  /** Netzfehler im Player: der Slot bleibt stehen und wird bei der Rückkehr an derselben Stelle wieder aufgenommen (Issue 9) */
+  broken: boolean;
+  /** Wiederaufnahmen seit dem letzten Spielen, danach gilt der Moment als nicht abspielbar */
+  tries: number;
+  /** Letzte gute Position im laufenden Moment (Quellzeit) */
+  pos: number;
 }
+const newSlot = (): Slot => ({ host: null, el: null, player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0 });
 
 const END_GUARD = 0.3;
 const FOR_YOU_MS = 6000;
 const POLL_MS = 150;
 const TAP_MS = 260;
-const LONG_MS = 520;
+const LONG_MS = 500;
 const LOG_MAX = 3000;
 /** Warteschlange beim Start: der Vorrat soll 30 Momente vorhalten, dazu der aktuelle und ein paar Reserve */
 const QUEUE_AHEAD = PRELOAD_COUNT + 2;
@@ -85,6 +94,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const SLOTS = single ? 1 : 3;
   const stateRef = useRef(state);
   stateRef.current = state;
+  const activeRef = useRef(active);
+  activeRef.current = active;
   const deskRef = useRef(desk);
   deskRef.current = desk;
   /** Abrufkarte beantwortet (Enter ist dann Next) */
@@ -92,7 +103,6 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const recallCtl = useRef<RecallCtl | null>(null);
   const noteCtl = useRef<NoteCtl | null>(null);
   /** Das 2x kommt von der Tastatur (Shift+. gehalten) */
-  const keyFast = useRef(false);
   const spaceHandled = useRef(false);
   const actRef = useRef<(a: DeskAction) => void>(() => {});
   const playRef = useRef<(want: boolean) => void>(() => {});
@@ -116,7 +126,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const [ytEpoch, setYtEpoch] = useState(0);
   const [online, setOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
   const idxRef = useRef(0);
-  const slots = useRef<Slot[]>(Array.from({ length: 3 }, () => ({ host: null, el: null, player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '' })));
+  const slots = useRef<Slot[]>(Array.from({ length: 3 }, newSlot));
   const soundOn = useRef(false);
   const userPaused = useRef(false);
   const since = useRef(Date.now());
@@ -135,11 +145,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     slice: (n) => diagLog.raw().slice(n),
     filter: (f) => diagLog.raw().filter(f),
   });
+  /** Zeitpunkt des letzten Netzwechsels (online oder offline), für die Schonfrist der Hänge-Überwachung */
+  const netAt = useRef(0);
+  /** YouTube-API wieder erreichbar, der Neuaufbau der Player wartet, bis der laufende Moment nicht mehr spielt */
+  const ytPending = useRef(false);
+  /** Stelle, an der ein Moment nach dem Neuaufbau der Player weiterläuft */
+  const resume = useRef<{ mid: string; pos: number } | null>(null);
   const bad = useRef(new Set<string>());
   // Hintergrund-Wiedergabe (Entscheidung 13)
   const ledger = useRef(new EndLedger());
-  /** Abrufkarte, die im Hintergrund fällig wurde: kommt bei der Rückkehr */
-  const pendingRecall = useRef<{ id: string; review: boolean } | null>(null);
   /** Beim Verlassen der Seite angehalten (YouTube, Text), nicht vom Menschen */
   const leftPaused = useRef(false);
   const bgStarted = useRef(new Set<string>());
@@ -171,13 +185,18 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const [progress, setProgress] = useState(0);
   const [hint, setHint] = useState(!soundSeenOn);
   const [paused, setPaused] = useState(false);
-  const [fast, setFast] = useState(false);
-  const rateRef = useRef(DEFAULT_SPEED);
-  const fastRef = useRef(false);
-  const endFast = () => {
-    fastRef.current = false;
+  const rateRef = useRef<Rate>(DEFAULT_RATE);
+  /** Tempo auf alle Slots legen (Streams: Media-Element, YouTube: setPlaybackRate). Läuft auch für Slots, die gerade pausieren. */
+  const applyRate = () => {
     for (const sl of slots.current) sl.player?.setPlaybackRate(clampRate(rateRef.current));
-    setFast(false);
+  };
+  /** Pfeiler 17: 1x, 1.5x, 2x, 1x. Wert sofort in den Refs und in den Playern, dann in den State (Sync). */
+  const cycleRate = () => {
+    const next = nextRate(rateRef.current);
+    rateRef.current = next;
+    applyRate();
+    update((s) => ({ ...s, settings: { ...s.settings, playbackRate: next } }));
+    diag.current.push(`rate: ${next}x`);
   };
   const [forYou, setForYou] = useState<Moment | null>(null);
   /** Herz an der Tippstelle (400 ms) und kurze Bestätigung am Knopf (150 ms) */
@@ -205,7 +224,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const [caption, setCaption] = useState('');
   const [loading, setLoading] = useState(false);
   const waitSince = useRef(0);
-  rateRef.current = speedOf(state.settings);
+  rateRef.current = rateOf(state.settings);
+  // Tempo aus Sync, Desktop-Leiste oder Settings erreicht auch pausierte und wartende Slots
+  useEffect(() => {
+    applyRate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rateOf(state.settings)]);
 
   const today = dayKey(clockNow());
   const show = (t: string) => {
@@ -327,10 +351,17 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       if (slot.mid !== m.id) {
         slot.mid = m.id;
         slot.st = STATE.UNSTARTED;
-        if (play) slot.player.loadVideoById(load(m));
+        slot.broken = false;
+        slot.tries = 0;
+        // Nach dem Neuaufbau der Player (YouTube-API kam zurück) läuft der Moment an derselben Stelle weiter, nicht von vorn
+        const at = resume.current?.mid === m.id ? resume.current.pos : undefined;
+        if (at !== undefined) resume.current = null;
+        slot.pos = at ?? m.start;
+        const arg = at === undefined ? load(m) : { ...load(m), startSeconds: resumePos(at, m) };
+        if (play) slot.player.loadVideoById(arg);
         // YouTube lädt bei cue nur das Vorschaubild. Darum stumm laden, der Player hält beim ersten Bild an (siehe onState).
-        else if (!HLS.has(m.videoId)) slot.player.loadVideoById(load(m));
-        else slot.player.cueVideoById(load(m));
+        else if (!HLS.has(m.videoId)) slot.player.loadVideoById(arg);
+        else slot.player.cueVideoById(arg);
       } else if (play) slot.player.playVideo();
       else slot.player.pauseVideo();
     } catch (e) {
@@ -424,6 +455,48 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     navigator.mediaSession.metadata = new MediaMetadata({ title: cur.hook, artist: speakerLine(cur.channel), album: AREA_LABEL[cur.area], artwork: [{ src: thumbOf(cur) }] });
   };
 
+  /** Darf jetzt eine Abrufkarte erscheinen? Feed-Reiter offen, Seite sichtbar, kein Blatt, keine Übersicht (Pfeiler 19) */
+  const recallCtx = () => ({ active: activeRef.current, visible: !isBackground(document.visibilityState), note: !!noteRef.current, sheet: !!(deskRef.current?.help || deskRef.current?.sheet) });
+  const openRecall = (e: QueueEntry, fromQueue: boolean) => {
+    const rm = findMoment(e.id);
+    if (!rm) return false;
+    recallRef.current = true;
+    recallAnswered.current = false;
+    current().player?.pauseVideo();
+    setRecall({ m: rm, review: e.review });
+    if (fromQueue) diag.current.push(`recall: shown ${e.id} from queue`);
+    return true;
+  };
+  /** Warteschlange und Wiedervorlage in den State, sofort auch in stateRef (mehrere Schritte im selben Takt) */
+  const putQueue = (queue: QueueEntry[], recall: AppState['recall']) => {
+    stateRef.current = { ...stateRef.current, recallQueue: queue, recall };
+    update((s) => ({ ...s, recallQueue: queue, recall }));
+  };
+  /** Ein Wisch nach vorn: neue Karte (oder keine) und Warteschlange in einem Schritt */
+  const stepRecall = (pick: { id: string; review: boolean } | null) => {
+    const s0 = stateRef.current;
+    const q0 = s0.recallQueue ?? [];
+    if (!pick && !q0.length) return;
+    let step = onSwipe(q0, s0.recall ?? {}, pick, canShowRecall(recallCtx()), clockNow().getTime());
+    // Eine Karte, deren Moment nicht mehr im Pool ist, kann nicht erscheinen: nächste aus der Warteschlange
+    while (step.show && !findMoment(step.show.id)) step = onSwipe(step.queue, step.recall, null, true, clockNow().getTime());
+    if (pick && step.queue.some((x) => x.id === pick.id)) diag.current.push(`recall: queued ${pick.id}`);
+    if (step.queue !== q0 || step.recall !== (s0.recall ?? {})) putQueue(step.queue, step.recall);
+    if (step.show) openRecall(step.show, step.fromQueue);
+  };
+  /** Zurück im Feed: eine Karte sofort, vor dem nächsten Wisch */
+  const showFromQueue = () => {
+    if (recallRef.current || forYouRef.current) return;
+    let q = stateRef.current.recallQueue ?? [];
+    while (q.length) {
+      const r = onReturn(q, canShowRecall(recallCtx()));
+      if (!r.show) return;
+      q = r.queue;
+      putQueue(q, stateRef.current.recall ?? {});
+      if (openRecall(r.show, true)) return;
+    }
+  };
+
   const goTo = useCallback(
     (next: number) => {
       if (next < 0 || next === idxRef.current) return;
@@ -457,7 +530,6 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       const backM = queue.current[next];
       if (next < prev && backM) update((s) => ({ ...s, momentWeights: signal(s.momentWeights, backM, SIGNAL.back, nowMs), skipRun: undefined }));
       setCaption('');
-      endFast();
       waitSince.current = 0;
       setLoading(false);
       // Für die Abrufkarte: geschauter Anteil des verlassenen Moments (Video: Position, Text: Ende erreicht)
@@ -471,7 +543,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         sessionSeen.current += 1;
         if (cardDue(sessionSeen.current)) {
           const s0 = stateRef.current;
-          recallNow = pickRecall(s0.recall ?? {}, recent.current, clockNow().getTime(), (id) => !!findMoment(id)?.recall);
+          const queued = new Set((s0.recallQueue ?? []).map((x) => x.id));
+          recallNow = pickRecall(s0.recall ?? {}, recent.current, clockNow().getTime(), (id) => !queued.has(id) && !!findMoment(id)?.recall);
         }
       }
       if (prevM && endedAt.current !== prev) log(prevM, {});
@@ -500,20 +573,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       textSeen.current = -1;
       if (textBox.current) textBox.current.scrollTop = 0;
       if (!textRef.current) soundGuard(next);
-      if (recallNow && isBackground(document.visibilityState)) {
-        // Abrufkarte erst bei der Rückkehr, sonst bliebe der Ton im Hintergrund stehen
-        pendingRecall.current = recallNow;
-        recallNow = null;
-      }
-      if (recallNow) {
-        const rm = findMoment(recallNow.id);
-        if (rm) {
-          recallRef.current = true;
-          recallAnswered.current = false;
-          current().player?.pauseVideo();
-          setRecall({ m: rm, review: recallNow.review });
-        }
-      }
+      // Pfeiler 19: nie eine Karte, solange der Feed nicht im Vordergrund und sichtbar ist. Dann Warteschlange, je eine Karte pro Wisch.
+      if (next > prev && prevM) stepRecall(recallNow);
       armDeck();
       setIdx(next);
     },
@@ -608,10 +669,55 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   /** Nach dem Wechsel von Stub zu echter YouTube-API: gesperrte YouTube-Momente wieder zulassen, Player neu anlegen */
   const ytBack = () => {
     if (!ytStub.current) return;
+    ytPending.current = true;
+    tryYtRebuild();
+  };
+  /**
+   * Der Neuaufbau zerstört alle Player und bringt neue Elemente, auf denen iOS den Ton nicht ohne neuen Tipp freigibt. Darum
+   * wartet er, bis der Moment nicht mehr spielt (Pause, Ende, Text) oder ein YouTube-Moment dran ist, den der Ersatz ohnehin nicht spielen kann.
+   * Der Moment läuft danach an derselben Stelle weiter (resume).
+   */
+  const tryYtRebuild = () => {
+    if (!ytPending.current || !ytStub.current) return;
+    const cs = current();
+    const cm = queue.current[idxRef.current];
+    const idle = !cm || textRef.current || cs.st === STATE.PAUSED || cs.st === STATE.ENDED || streamKind(cm) === 'youtube';
+    if (!idle) return;
+    ytPending.current = false;
     ytStub.current = false;
+    if (cm && cs.mid === cm.id && cs.pos > cm.start) resume.current = { mid: cm.id, pos: cs.pos };
     for (const id of [...bad.current]) if (isYtId(id)) bad.current.delete(id);
+    diag.current.push('net: players rebuilt');
     setYtEpoch((e) => e + 1);
   };
+  const ytRebuildRef = useRef(tryYtRebuild);
+  ytRebuildRef.current = tryYtRebuild;
+  const ytBackRef = useRef(ytBack);
+  ytBackRef.current = ytBack;
+
+  /** Slot nach einem Netzfehler an derselben Stelle wieder aufnehmen: gleicher Moment, gleiches Cover, gleiche Untertitel, gleicher Ton */
+  const recoverSlot = (slot: Slot, why: string) => {
+    const n = slots.current.indexOf(slot);
+    const m = queue.current[slot.index];
+    if (!slot.player || !slot.ready || !m || m.form === 'text' || !slot.mid || slot.mid !== m.id) return;
+    const isCur = slot.index === idxRef.current;
+    const play = isCur && active && !userPaused.current && !textRef.current && !forYouRef.current && !recallRef.current;
+    try {
+      if (!slot.player.recoverAt) throw new Error('no recoverAt');
+      if (play) applySound(slot.player);
+      else slot.player.mute();
+      slot.player.recoverAt(resumePos(slot.pos, m), play);
+      slot.broken = false;
+      diag.current.push(`net: recover slot${n} ${m.id} ok`);
+      if (play) soundGuard(slot.index);
+    } catch (e) {
+      slot.broken = true;
+      diag.current.push(`net: recover slot${n} ${m.id} fail`);
+      diag.current.push(`recover cause ${why}: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  };
+  const recoverRef = useRef(recoverSlot);
+  recoverRef.current = recoverSlot;
 
   // Player anlegen
   useEffect(() => {
@@ -646,7 +752,11 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                 slot.st = st;
                 // Vorschaubild bleibt bis zum ersten Bild: ohne Umweg über React, damit kein Frame der YouTube-Oberfläche durchrutscht
                 slot.el?.toggleAttribute('data-live', st === STATE.PLAYING);
-                if (st === STATE.PLAYING) everPlayed.current = true;
+                if (st === STATE.PLAYING) {
+                  everPlayed.current = true;
+                  slot.broken = false;
+                  slot.tries = 0;
+                }
                 if (st === STATE.PLAYING && slot.index === idxRef.current) noteLoud(slot, s);
                 if (st === STATE.PLAYING && slot.index === idxRef.current && isBackground(document.visibilityState) && !bgStarted.current.has(slot.mid)) {
                   bgStarted.current.add(slot.mid);
@@ -664,8 +774,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                   pre?.recordStart(ms, sw.buffered);
                   update((x) => ({ ...x, playLatency: addSample(x.playLatency, { ms, buffered: sw.buffered, at: Date.now() }) }));
                 }
-                // Standardtempo nach Fundament-Regel 11 (1,5x), gehaltenes 2x bleibt bis zum Loslassen
-                if (st === STATE.PLAYING && !fastRef.current) slot.player?.setPlaybackRate(clampRate(rateRef.current));
+                // Gespeichertes Tempo (Pfeiler 17) bei jedem Start, auch nach Neuaufbau oder Wiederaufnahme eines Players
+                if (st === STATE.PLAYING) slot.player?.setPlaybackRate(clampRate(rateRef.current));
                 if (st === STATE.ENDED && slot.index === idxRef.current) finish();
                 if (st === STATE.PLAYING && (slot.index !== idxRef.current || forYouRef.current || textRef.current || recallRef.current)) slot.player?.pauseVideo();
                 if (moving()) pendingRender.current = true;
@@ -674,6 +784,20 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
               onError: (code) => {
                 const m2 = queue.current[slot.index];
                 diag.current.push(`slot${s} ${slot.mid} error ${code}`);
+                // Netzfehler setzen den Slot nicht zurück und wechseln den Moment nie (Issue 9): warten oder an derselben Stelle weiter.
+                // Nur Inhaltsfehler und wiederholtes Scheitern überspringen den Moment.
+                const act = errorAction(code, navigator.onLine, slot.tries);
+                if (act !== 'skip') {
+                  slot.broken = true;
+                  if (act === 'recover') {
+                    slot.tries++;
+                    const mid = slot.mid;
+                    window.setTimeout(() => {
+                      if (slot.mid === mid && slot.broken) recoverRef.current(slot, 'error');
+                    }, 1000 * slot.tries);
+                  }
+                  return;
+                }
                 if (m2) bad.current.add(m2.videoId);
                 armDeck();
                 // Einzelne Fehler überspringen nur. Die Fehlerseite gibt es erst, wenn nie ein Video lief und acht Momente scheiterten.
@@ -735,7 +859,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         ytStub.current = true;
         diag.current.push('yt stub');
         YT = offlineYT();
-        ready.then(() => !cancelled && ytBack(), () => {});
+        ready.then(() => !cancelled && ytBackRef.current(), () => {});
       }
       begin(YT);
     })();
@@ -744,7 +868,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       for (const s of slots.current) {
         s.player?.destroy();
         s.el?.removeAttribute('data-live');
-        Object.assign(s, { player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '' });
+        Object.assign(s, { player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0 });
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -765,9 +889,21 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       }
     };
     const onNet = () => {
-      setOnline(navigator.onLine);
+      const on = navigator.onLine;
+      setOnline(on);
+      netAt.current = Date.now();
       check();
-      if (navigator.onLine && ytStub.current) loadYT().then(() => ytBack(), () => {});
+      if (!on) return;
+      if (ytStub.current) loadYT().then(() => ytBackRef.current(), () => {});
+      // Ein Slot mit Netzfehler läuft sofort an derselben Stelle weiter. Ein Slot, der nur stehen blieb (Puffern), bekommt kurz Zeit und wird dann angestoßen.
+      for (const sl of slots.current) if (sl.broken) recoverRef.current(sl, 'online');
+      for (const wait of [2000, 8000]) {
+        window.setTimeout(() => {
+          const cs = current();
+          if (!navigator.onLine || userPaused.current || textRef.current || forYouRef.current || recallRef.current || !queue.current[idxRef.current]) return;
+          if (cs.st !== STATE.PLAYING && cs.st !== STATE.ENDED && cs.st !== STATE.PAUSED) recoverRef.current(cs, 'stalled');
+        }, wait);
+      }
     };
     window.addEventListener('online', onNet);
     window.addEventListener('offline', onNet);
@@ -797,6 +933,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         setLoading(false);
       } else {
         waitSince.current ||= Date.now();
+        // Ohne Netz, mit Netzfehler im Slot oder kurz nach einem Netzwechsel läuft die Hänge-Überwachung nicht: der Moment wartet, er wird nie übersprungen (Issue 9)
+        if (!navigator.onLine || sl.broken || Date.now() - netAt.current < 20_000) waitSince.current = Date.now() - 1000;
         const waited = Date.now() - waitSince.current;
         setLoading(waited > 400);
         // Nur wenn in dieser Sitzung schon etwas lief (sonst blockiert z.B. der Stromsparmodus Autoplay und alles würde übersprungen)
@@ -808,13 +946,16 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           return;
         }
       }
-      if (sl.st === STATE.PLAYING || sl.st === STATE.PAUSED) {
+      // Eine Stelle vor dem Start des Moments ist eine Quelle, die gerade neu lädt: Untertitel und Fortschritt bleiben, wie sie waren
+      if ((sl.st === STATE.PLAYING || sl.st === STATE.PAUSED) && c >= m.start - 0.5) {
+        if (sl.st === STATE.PLAYING) sl.pos = c;
         setProgress(Math.min(1, Math.max(0, (c - m.start) / (m.end - m.start))));
         const rel = c - m.start;
         let cue = '';
         if (m.cues) for (const [t, text] of m.cues) if (t <= rel + 0.1) cue = text; else break;
         setCaption(cue);
       }
+      ytRebuildRef.current();
       // Im Hintergrund wechselt im Audio-Reiter das Audio-Element selbst am Ende. Die Abfrage (gedrosselt) greift nur noch als Netz, wenn der Wechsel ausblieb.
       const deckBg = form === 'audio' && isBackground(document.visibilityState);
       if (sl.st === STATE.PLAYING && c >= (deckBg ? m.end + 0.5 : m.end - END_GUARD)) finish();
@@ -1222,9 +1363,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     r.long = window.setTimeout(() => {
       r.fired = true;
       navigator.vibrate?.(10);
-      current().player?.setPlaybackRate(clampRate(HOLD_SPEED));
-      fastRef.current = true;
-      setFast(true);
+      // Abrufkarte, Text-Reiter und For-you-Karte bleiben unberührt (Pfeiler 17)
+      if (textRef.current || recallRef.current || forYouRef.current) return;
+      cycleRate();
     }, LONG_MS);
   };
   const onMove = (e: React.PointerEvent) => {
@@ -1254,7 +1395,6 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     r.t = 0;
     if (r.fired) {
       r.fired = false;
-      endFast();
       if (dragging.current) {
         dragging.current = false;
         paint(0);
@@ -1298,6 +1438,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       return;
     }
     stopMeter(false);
+    // Tipp auf die Tempo-Anzeige: die Anzeige selbst nimmt keine Zeiger an (CSS), damit Wische über ihr durchgehen. Der Tipp wird hier erkannt.
+    const chipEl = document.querySelector('[data-testid=rate]');
+    if (chipEl) {
+      const b = chipEl.getBoundingClientRect();
+      if (e.clientX >= b.left && e.clientX <= b.right && e.clientY >= b.top && e.clientY <= b.bottom) {
+        cycleRate();
+        return;
+      }
+    }
     // Ein Tipp, der nur den Ton freischaltet, pausiert nicht und zählt nicht als Doppeltipp (wie vor dem Freischalten bei jeder Berührung)
     if (firstTouch) {
       const p = current().player;
@@ -1388,14 +1537,6 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     show(on ? 'Sound on' : 'Muted');
   };
 
-  /** Shift+. gehalten: 2x bis zum Loslassen, nie darüber (Regel 11) */
-  const startFast = () => {
-    if (fastRef.current || textRef.current) return;
-    current().player?.setPlaybackRate(clampRate(HOLD_SPEED));
-    fastRef.current = true;
-    setFast(true);
-  };
-
   /** Esc schließt die oberste Ebene: Übersicht, Seitenblatt, Rückmeldung, Abrufkarte (ohne Wertung), Caption */
   const closeTop = () => {
     const d = deskRef.current;
@@ -1438,9 +1579,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         return ask(noteRef.current);
       case 'caption':
         return setCapOpen((o) => !o);
-      case 'fastOn':
-        keyFast.current = true;
-        return startFast();
+      case 'tempo':
+        if (textRef.current || recallRef.current) return;
+        return cycleRate();
       case 'noteText':
         return noteCtl.current?.focusText();
       case 'recallNext':
@@ -1478,33 +1619,22 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       // Die Taste gehört dem Feed: kein Klick auf einen fokussierten Knopf, kein Scrollen
       e.preventDefault();
       if (a === 'pause' && e.code === 'Space') spaceHandled.current = true;
-      if (e.repeat && a !== 'fastOn') return;
+      if (e.repeat) return;
       actRef.current(a);
     };
     const up = (e: KeyboardEvent) => {
       if (!deskRef.current) return;
-      if (keyFast.current && endsFast(e)) {
-        keyFast.current = false;
-        endFast();
-      }
       if (e.code === 'Space' && spaceHandled.current) {
         spaceHandled.current = false;
         e.preventDefault();
       }
     };
-    const blur = () => {
-      if (!keyFast.current) return;
-      keyFast.current = false;
-      endFast();
-    };
     window.addEventListener('keydown', key);
     window.addEventListener('keyup', up);
-    window.addEventListener('blur', blur);
     return () => {
       window.removeEventListener('keydown', key);
       window.removeEventListener('keyup', up);
-      window.removeEventListener('blur', blur);
-    };
+      };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, goTo]);
 
@@ -1555,15 +1685,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     diag.current.push(`bg: back ${m.id}`);
     // Der laufende Moment ist jetzt zu sehen: gesehen (einmal), dann Karte oder Ton wieder aufnehmen
     if (!textRef.current) markSeen(m);
-    const pr = pendingRecall.current;
-    if (pr) {
-      pendingRecall.current = null;
-      const rm = findMoment(pr.id);
-      if (rm) {
-        recallRef.current = true;
-        recallAnswered.current = false;
-        current().player?.pauseVideo();
-        setRecall({ m: rm, review: pr.review });
+    if (!recallRef.current && (stateRef.current.recallQueue?.length ?? 0) > 0) {
+      showFromQueue();
+      if (recallRef.current) {
         leftPaused.current = false;
         return;
       }
@@ -1574,6 +1698,11 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     // Angehalten beim Verlassen, vom Betriebssystem pausiert oder im Hintergrund nicht gestartet: weiter am Stand
     if (wasLeft || current().st !== STATE.PLAYING) current().player?.playVideo();
   };
+  // Pfeiler 19: Settings, Saved, Feedback-Blatt oder Übersicht zu: eine Karte aus der Warteschlange sofort, vor dem nächsten Wisch
+  useEffect(() => {
+    if (queue.current.length) showFromQueue();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, !!note, !!desk?.help, !!desk?.sheet, queue.current.length > 0]);
   useEffect(() => {
     const on = () => visRef.current(document.visibilityState);
     document.addEventListener('visibilitychange', on);
@@ -1639,6 +1768,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       slots: () => slots.current.slice(0, SLOTS).map((x) => ({ st: x.st, index: x.index })),
       // Audio-Reiter: Schlüssel der Ausschnitte, die das eine Audio-Element geladen hat, und ob es vorhanden ist (Tests)
       deck: () => ({ history: [...audioDeck.history], exists: audioDeck.exists, armed: audioDeck.armedKey }),
+      slotInfo: () => slots.current.slice(0, SLOTS).map((x) => ({ index: x.index, mid: x.mid, st: x.st, muted: x.player?.isMuted?.() ?? null, t: x.player?.getCurrentTime?.() ?? 0 })),
       latency: () => stateRef.current.playLatency ?? [],
       seen: (id: string) => !!stateRef.current.momentSeen[id],
       liked: (id: string) => !!stateRef.current.momentLiked?.[id],
@@ -1648,12 +1778,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       swipeFrames: () => stateRef.current.swipeFrames ?? [],
       skipRecall: () => closeRecall(),
       sound: () => soundOn.current,
-      fast: () => fastRef.current,
+      rate: () => rateRef.current,
       closeCaption: () => setCapOpen(false),
       notes: () => stateRef.current.feedbackNotes ?? [],
       weights: () => stateRef.current.momentWeights,
       skipRun: () => stateRef.current.skipRun ?? null,
       openNote: () => openNote(),
+      recallQueue: () => stateRef.current.recallQueue ?? [],
       recall: () => ({ open: recallRef.current, state: stateRef.current.recall ?? {}, sessionSeen: sessionSeen.current }),
       queue: () => queue.current.map((x) => x.id),
       preload: () => ({ ids: pre?.ids() ?? [], stats: pre?.stats() ?? { n: 0, bytes: 0 }, poor: poorRef.current, log: pre?.log.slice(-200) ?? [], net: pre?.netSamples() ?? [], local: slots.current.slice(0, SLOTS).map((x) => !!x.player?.isLocal?.()) }),
@@ -1695,7 +1826,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   if (!pool.length)
     return (
       <div className="vfeed" ref={dragEl}>
-        <FormSwitch form={form} setForm={setForm} />
+        <FormSwitch form={form} setForm={setForm} rate={rateOf(state.settings)} onRate={cycleRate} />
         <Empty text={emptyFormLine(form)} />
       </div>
     );
@@ -1703,7 +1834,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   if (!queue.current.length)
     return (
       <div className="vfeed" ref={dragEl}>
-        <FormSwitch form={form} setForm={setForm} />
+        <FormSwitch form={form} setForm={setForm} rate={rateOf(state.settings)} onRate={cycleRate} />
         <EndPage form={form} counts={Object.fromEntries(otherForms(form).map((f) => [f, unseenCount(allPool, f, state.momentSeen, state.mutedChannels)])) as Record<Form, number>} setForm={setForm} />
       </div>
     );
@@ -1750,7 +1881,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       </div>
 
       <div className="vtrack" />
-      <FormSwitch form={form} setForm={setForm} />
+      <FormSwitch form={form} setForm={setForm} rate={rateOf(state.settings)} onRate={cycleRate} />
       {!online && (
         <div className="voffline pointer-events-none" data-testid="offline" role="img" aria-label="Offline">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -1824,7 +1955,6 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         onPointerMove={onMove}
         onPointerUp={onUp}
         onPointerCancel={() => {
-          if (g.current.fired) endFast();
           g.current.fired = false;
           g.current.t = 0;
           window.clearTimeout(g.current.long);
@@ -1920,12 +2050,6 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </div>
       )}
 
-      {fast && (
-        <div className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+16px)] z-30 flex justify-center">
-          <span className="rounded-full bg-black/70 px-3 py-1 text-[14px] font-semibold text-white">2x</span>
-        </div>
-      )}
-
 
       {flash && (
         <div className="flash pointer-events-none absolute inset-x-0 bottom-40 z-30 flex justify-center">
@@ -1967,7 +2091,7 @@ function ActionButton({ label, aria, testid, onClick, on, fill = true, children 
   );
 }
 
-function FormSwitch({ form, setForm }: { form: Form; setForm: (f: Form) => void }) {
+function FormSwitch({ form, setForm, rate, onRate }: { form: Form; setForm: (f: Form) => void; rate: Rate; onRate: () => void }) {
   return (
     <div className="vform" role="radiogroup" aria-label="Form" data-testid="form-switch" onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
         {FORMS.map((f) => (
@@ -1975,6 +2099,11 @@ function FormSwitch({ form, setForm }: { form: Form; setForm: (f: Form) => void 
             {FORM_LABEL[f]}
           </button>
         ))}
+        {rate > 1 && form !== 'text' && (
+          <button type="button" className="vrate" data-testid="rate" aria-label={`Speed ${rate}x, tap to change`} onClick={onRate}>
+            {rate}x
+          </button>
+        )}
     </div>
   );
 }
@@ -1982,13 +2111,30 @@ function FormSwitch({ form, setForm }: { form: Form; setForm: (f: Form) => void 
 /** Vorschaubild eines Moments: Video über dem IFrame, Audio mit Cover. Text hat keins. */
 function posterOf(mm: Moment | undefined) {
   if (!mm || mm.form === 'text') return null;
-  if (!mm.audio) return <img className="vposter" src={thumbOf(mm)} alt="" draggable={false} />;
+  if (!mm.audio) return <Cover className="vposter" src={thumbOf(mm)} />;
   return (
     <div className="vaudio">
-      <img className="vaudio-bg" src={thumbOf(mm)} alt="" draggable={false} />
-      <img className="vaudio-art" src={thumbOf(mm)} alt="" draggable={false} />
+      <Cover className="vaudio-bg" src={thumbOf(mm)} />
+      <Cover className="vaudio-art" src={thumbOf(mm)} />
     </div>
   );
+}
+
+/** Cover mit derselben Adresse nach einem Netzabbruch: Ein Bild, das ohne Netz nicht kam, lädt bei der Rückkehr noch einmal (Issue 9) */
+function Cover({ src, className }: { src: string; className: string }) {
+  const [k, setK] = useState(0);
+  const failed = useRef(false);
+  useEffect(() => {
+    failed.current = false;
+    const on = () => {
+      if (!failed.current) return;
+      failed.current = false;
+      setK((x) => x + 1);
+    };
+    window.addEventListener('online', on);
+    return () => window.removeEventListener('online', on);
+  }, [src]);
+  return <img key={k} className={className} src={src} alt="" draggable={false} onError={() => { failed.current = true; }} />;
 }
 
 /** Ruhige Endseite: Satz, zweiter Satz, zwei Knöpfe zu den anderen Reitern. Wisch nach unten geht zurück (nur hinter dem letzten Moment). */

@@ -334,12 +334,13 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.keyboard.press(' ');
     c.captionsSettingsOn = await waitFor(page, () => !!document.querySelector('[data-testid=caption] span')?.textContent);
     await page.screenshot({ path: `${out}/${name}-7-untertitel-an.png` });
-    // Gedrückt halten: 2x, Loslassen: normal
+    // Pfeiler 17: Halten für 2x ist weg. Langes Drücken schaltet 1.5x ein (Anzeige 1.5x), der Rest steht in tempo.mjs.
     await page.mouse.move(vp.width / 2, vp.height * 0.5);
     await page.mouse.down();
-    c.holdFast = await waitFor(page, () => [...document.querySelectorAll("span")].some((s) => s.textContent === "2x"));
+    await new Promise((x) => setTimeout(x, 800));
     await page.mouse.up();
-    c.releaseNormal = await waitFor(page, () => ![...document.querySelectorAll("span")].some((s) => s.textContent === "2x"));
+    c.longPressRate15 = await waitFor(page, () => [...document.querySelectorAll('[data-testid=rate]')].some((s) => s.textContent === '1.5x'));
+    c.noHoldFastBadge = !(await page.evaluate(() => [...document.querySelectorAll('span')].some((s) => s.textContent === '2x')));
     // Punkt 8: YouTube-Iframe füllt genau das 16:9-Band, ohne Zoom und ohne Beschnitt
     // Erst messen, wenn der Feed nicht mehr gleitet (sonst steht das erste Band noch versetzt)
     await waitFor(page, () => document.getAnimations().filter((a) => a instanceof CSSTransition).length === 0);
@@ -354,13 +355,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.embedNoZoom = Math.abs(r.band.fw - r.band.bw) < 1 && Math.abs(r.band.fh - r.band.bh) < 1 && Math.abs(r.band.dx) < 1 && Math.abs(r.band.dy) < 1;
     c.embed16by9FullWidth = Math.abs(r.band.bw - r.band.vw) < 1 && Math.abs(r.band.bh - (r.band.vw * 9) / 16) < 1;
 
-    // Punkt 2: Standard 1,5x, Halten 2x, nie über 2x
+    // Pfeiler 17: Standard 1x, nach dem langen Drücken 1.5x, nie über 2x
     const rates = await page.evaluate(() => window.__ytlog.filter((x) => x.startsWith('rate ')).map((x) => Number(x.slice(5))));
     r.rates = [...new Set(rates)];
-    c.speedDefault15 = rates.includes(1.5);
-    c.speedHold2 = rates.includes(2);
-    c.speedNeverAbove2 = rates.length > 0 && rates.every((x) => x <= 2);
-    c.speedBackAfterRelease = rates.lastIndexOf(1.5) > rates.indexOf(2);
+    c.speedDefault1 = rates.length === 0 || rates[0] === 1;
+    c.speed15AfterLongPress = rates.includes(1.5);
+    c.speedNeverAbove2 = rates.every((x) => x <= 2);
 
     // Punkt 3: Formwahl. Text hält den Player an, "gesehen" erst am Textende, Wahl bleibt gespeichert
     await skipRecall(page, name, out);
@@ -766,7 +766,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.unlockQr = await waitFor(page, () => !!document.querySelector('[data-testid=unlock-qr] svg'));
     c.keyBackupsBoth = await waitFor(page, () => /IndexedDB yes .* offline cache yes/.test(document.querySelector('[data-testid=key-backups]')?.textContent ?? ''));
     await page.screenshot({ path: `${out}/${name}-8-geraet-freischalten.png` });
-    c.speedOptions = await page.evaluate(() => [...document.querySelectorAll('[data-testid=speed] option')].map((o) => o.value).join(',') === '1,1.5');
+    c.speedOptions = await page.evaluate(() => [...document.querySelectorAll('[data-testid=speed] option')].map((o) => o.value).join(',') === '1,1.5,2');
     c.tapInSettings = await waitFor(page, () => /Median \d+ ms/.test(document.querySelector('[data-testid=tap-reaction]')?.textContent ?? ''));
     c.latencyInSettings = await waitFor(page, () => /Preloaded: median \d+ ms/.test(document.querySelector('[data-testid=latency]')?.textContent ?? ''));
     await page.locator('[data-testid=latency]').scrollIntoViewIfNeeded();
@@ -819,14 +819,24 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // Bad cut lernt nichts: Zeile "Noted", Gewichte unverändert
     c.badCutNoted = await waitFor(p2, () => document.querySelector('[data-testid=note-confirm]')?.textContent === 'Noted');
     c.badCutLearnsNothing = (await p2.evaluate(() => JSON.stringify(window.__core.weights()))) === wG0;
-    await p2.waitForTimeout(800); // Zustand wird verzögert gespeichert
+    // Zustand wird verzögert gespeichert (250 ms bis 1 s nach der Änderung, während eines Wischs später): warten, bis IndexedDB dieselben Notizen hält wie der Speicher.
+    // Ein Schließen davor verliert die letzte Änderung (WebKit meldet pagehide beim Schließen nicht zuverlässig).
+    for (let q = 0; q < 40; q++) {
+      const same = await p2.evaluate(() => new Promise((res) => { const rq = indexedDB.open('core'); rq.onerror = () => res(false); rq.onsuccess = () => { try { const g = rq.result.transaction('kv').objectStore('kv').get('state'); g.onsuccess = () => res(JSON.stringify(g.result?.feedbackNotes ?? []) === JSON.stringify(window.__core.notes())); g.onerror = () => res(false); } catch { res(false); } }; }));
+      if (same) break;
+      await p2.waitForTimeout(250);
+    }
     c.newNoteUnsent = await p2.evaluate(() => window.__core.notes().filter((x) => x.sent === undefined).length === 1);
+    const notesP2 = await p2.evaluate(() => JSON.stringify(window.__core.notes()));
     await p2.close();
     const p3 = await ctx.newPage();
     await p3.goto(url + '?now=2026-10-25');
     c.reviewOnlyOnce = await waitFor(p3, () => !!window.__core?.moment()) && !(await p3.$('[data-testid="weekly-review"]'));
     await p3.waitForTimeout(500);
-    c.promptOncePerDay = !(await p3.$('[data-testid=notes-prompt]')) && (await p3.evaluate(() => window.__core.notes().filter((x) => x.sent === undefined).length)) === 1;
+    r.promptDbg = { prompt: !!(await p3.$('[data-testid=notes-prompt]')), notes: await p3.evaluate(() => JSON.stringify(window.__core.notes())) };
+    // Am selben Tag kommt die Zeile nicht noch einmal, und der gespeicherte Stand der Notizen ist genau der von eben (landet die neue Chip-Notiz auf einem Moment mit gesendeter Notiz, wird sie dort zusammengeführt, darum kein fester Zähler)
+    r.promptDbg.notesP2 = notesP2;
+    c.promptOncePerDay = !r.promptDbg.prompt && r.promptDbg.notes === notesP2;
     // Nächster Sonntag: Plan der Vorwoche mit "Did it happen?", dann Skip
     await p3.close();
     const p5 = await ctx.newPage();

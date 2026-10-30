@@ -127,10 +127,15 @@ try {
   // ---- 3. Wischen: Start aus dem Vorrat, gemessen als playLatency (buffered true) ----
   const n0 = (await latency(page)).length;
   // Ein echter Wisch mit der Maus, die übrigen über den Test-Hook
+  // Standardtempo ist 1x (Pfeiler 17): der erste Moment endet später und kann mitten in den Wisch laufen. Erst abwarten, bis die Bühne ruht.
+  await waitFor(page, () => !window.__core.motion().busy && window.__core.state() === 1, null, 20000);
+  await sleep(400);
+  await waitFor(page, () => !window.__core.motion().busy, null, 5000);
   const idxBefore = await page.evaluate(() => window.__core.idx());
-  await page.mouse.move(200, 600);
+  // Mitte der Bühne statt der unteren Textzeilen: dort liegen je nach Untertitel Tippflächen (Sprecherzeile), der Wisch muss auf der Gesten-Ebene beginnen
+  await page.mouse.move(200, 420);
   await page.mouse.down();
-  await page.mouse.move(200, 380, { steps: 8 });
+  await page.mouse.move(200, 200, { steps: 8 });
   await page.mouse.up();
   c.realSwipeMoves = await waitFor(page, (i) => window.__core.idx() === i + 1, idxBefore, 5000);
   await waitFor(page, () => window.__core.state() === 1, null, 5000);

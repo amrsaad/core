@@ -155,7 +155,7 @@ describe('Sync Steuerung', () => {
     await advance(retryDelay(1) + 10);
     expect(api.puts).toBe(1);
     expect(a.sync.status().error).toBeNull();
-    expect([retryDelay(1), retryDelay(2), retryDelay(3), retryDelay(4), retryDelay(9)]).toEqual([30_000, 60_000, 120_000, 240_000, 300_000]);
+    expect([retryDelay(1), retryDelay(2), retryDelay(3), retryDelay(4), retryDelay(9)]).toEqual([15_000, 60_000, 300_000, 300_000, 300_000]);
   });
 
   it('ungültiges Token: eine Zeile Fehler, keine automatische Wiederholung', async () => {
@@ -215,5 +215,101 @@ describe('Sync Steuerung', () => {
     await a.sync.syncNow();
     expect(a.sync.status().error).toMatch(/newer version/);
     expect(api.puts).toBe(0);
+  });
+});
+
+describe('Netzabbruch (Issue 9)', () => {
+  it('Wiederholung nach 15 s, 1 min, 5 min, Token und Last sync bleiben', async () => {
+    const api = fakeApi();
+    const a = device(api);
+    await a.sync.start();
+    await advance(10);
+    const first = a.sync.status().lastSync;
+    expect(first).not.toBeNull();
+    expect(api.puts).toBe(1);
+    api.failNext.push(503, 503, 503);
+    a.change(saveMoment('r1'));
+    await advance(WRITE_DELAY_MS + 1);
+    const n = api.calls.length;
+    expect(a.sync.status().error).toMatch(/503/);
+    expect(a.sync.status().hasToken).toBe(true);
+    expect(a.sync.status().lastSync).toBe(first);
+    await advance(14_000);
+    expect(api.calls.length).toBe(n);
+    await advance(1_100);
+    expect(api.calls.length).toBe(n + 1);
+    await advance(59_000);
+    expect(api.calls.length).toBe(n + 1);
+    await advance(1_100);
+    expect(api.calls.length).toBe(n + 2);
+    await advance(299_000);
+    expect(api.calls.length).toBe(n + 2);
+    expect(a.sync.status().lastSync).toBe(first);
+    await advance(1_100);
+    expect(api.puts).toBe(2);
+    expect(a.sync.status().error).toBeNull();
+    expect(a.sync.status().lastSync).toBeGreaterThan(first!);
+  });
+
+  it('Offline pausiert den Sync, online startet ihn sofort wie Sync now', async () => {
+    const api = fakeApi();
+    const a = device(api);
+    await a.sync.start();
+    await advance(10);
+    const ls = a.sync.status().lastSync;
+    a.sync.offline();
+    a.change(saveMoment('p1'));
+    const calls = api.calls.length;
+    await advance(WRITE_DELAY_MS + 60_000);
+    expect(api.calls.length).toBe(calls);
+    expect(a.sync.status().lastSync).toBe(ls);
+    expect(a.sync.status().hasToken).toBe(true);
+    a.sync.online();
+    await advance(10);
+    expect(api.puts).toBe(2);
+    expect(a.sync.status().lastSync).toBeGreaterThan(ls!);
+    expect(a.sync.status().error).toBeNull();
+  });
+
+  it('Kein Netz löscht weder Token noch Last sync noch den lokalen Stand', async () => {
+    const api = fakeApi();
+    const a = device(api);
+    await a.sync.start();
+    await advance(10);
+    const ls = a.sync.status().lastSync;
+    api.offline = true;
+    a.change(saveMoment('k1'));
+    await advance(WRITE_DELAY_MS + 1);
+    expect(a.sync.status().error).toMatch(/No connection/);
+    expect(a.sync.status().hasToken).toBe(true);
+    expect(a.sync.status().lastSync).toBe(ls);
+    expect(a.state.momentSeen.k1).toBeDefined();
+    api.offline = false;
+    a.sync.online();
+    await advance(10);
+    expect(api.puts).toBe(2);
+    expect(a.sync.status().error).toBeNull();
+    expect(a.state.momentSeen.k1).toBeDefined();
+  });
+
+  it('Ein Token, das kurz nicht lesbar ist, gilt nie als entfernt', async () => {
+    const api = fakeApi();
+    let tok: string | null = TOKEN;
+    const s = createSync({ getState: () => emptyState(), adopt: () => {}, getKey: () => rawKey(5), getToken: async () => tok, fetchImpl: api.fetch, now: () => Date.now() });
+    running.push(s);
+    await s.start();
+    await advance(10);
+    const ls = s.status().lastSync;
+    expect(s.status().hasToken).toBe(true);
+    tok = null;
+    s.poke();
+    await advance(WRITE_DELAY_MS + 1);
+    expect(s.status().hasToken).toBe(true);
+    expect(s.status().error).toMatch(/token could not be read/);
+    expect(s.status().lastSync).toBe(ls);
+    tok = TOKEN;
+    await advance(15_100);
+    expect(s.status().error).toBeNull();
+    expect(s.status().hasToken).toBe(true);
   });
 });

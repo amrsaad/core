@@ -2,7 +2,7 @@
  * Desktop-Modus ab 900 px Breite (Auftrag Max 28.10.2026). Reine Regeln, ohne React und ohne DOM, damit sie sich ohne Browser prüfen lassen.
  * Mobil bleibt unverändert. Was hier steht, gilt nur, wenn die Breite mindestens DESKTOP_MIN beträgt.
  *
- * Tasten: Pfeile oder J und K blättern, Leertaste Pause, M stumm, Shift+. gehalten 2x, L Herz, S Save, O Source,
+ * Tasten: Pfeile oder J und K blättern, Leertaste Pause, M stumm, Shift+. schaltet das Tempo, L Herz, S Save, O Source,
  * F Rückmeldung (1 bis 6 Chips, Enter Text), A Ask (auch bei offenem Blatt), 1 2 3 Reiter, C Caption, Esc schließt, bei der Abrufkarte 1 2 3 Antwort und
  * Enter Next, ? zeigt die Übersicht.
  * Trackpad: zwei Finger senkrecht blättert (ein Wisch ist ein Schritt, der Nachlauf zählt nicht), zwei Finger nach links öffnet die Rückmeldung.
@@ -56,7 +56,7 @@ export type DeskAction =
   | 'caption'
   | 'close'
   | 'help'
-  | 'fastOn'
+  | 'tempo'
   | 'noteText'
   | 'recallNext'
   | 'tab1'
@@ -96,7 +96,7 @@ export function deskKey(ctx: DeskCtx, k: KeyIn): DeskAction | null {
     return ctx.recall === 'answered' && key === 'Enter' ? 'recallNext' : null;
   }
   // Shift+. hängt an der Taste, nicht am Zeichen (auf der Schweizer Tastatur ist Shift+. ein Doppelpunkt)
-  if (k.shift && k.code === 'Period') return 'fastOn';
+  if (k.shift && k.code === 'Period') return 'tempo';
   if (k.code === 'Space' || key === ' ') return 'pause';
   switch (key) {
     case 'ArrowDown':
@@ -132,9 +132,6 @@ export function deskKey(ctx: DeskCtx, k: KeyIn): DeskAction | null {
   }
 }
 
-/** Beim Loslassen von . oder Shift endet das gehaltene 2x */
-export const endsFast = (k: Pick<KeyIn, 'key' | 'code'>): boolean => k.code === 'Period' || k.key === 'Shift';
-
 /** Die Übersicht erscheint genau einmal, beim ersten Start im Desktop-Modus */
 export const deskHelpDue = (seen: boolean | undefined): boolean => !seen;
 
@@ -144,7 +141,7 @@ export const HELP_ROWS: { keys: string; text: string }[] = [
   { keys: 'Up or K', text: 'Previous moment' },
   { keys: 'Space', text: 'Pause or play' },
   { keys: 'M', text: 'Mute or unmute' },
-  { keys: 'Shift + .', text: 'Hold for 2x' },
+  { keys: 'Shift + .', text: 'Speed: 1x, 1.5x, 2x' },
   { keys: 'L', text: 'More like this' },
   { keys: 'S', text: 'Save' },
   { keys: 'O', text: 'Open the source' },

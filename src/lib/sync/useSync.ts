@@ -42,13 +42,17 @@ export function useSync(state: AppState | null, access: SyncAccess, enabled: boo
     sync.current = s;
     const vis = () => s.visible(document.visibilityState === 'visible');
     const on = () => s.online();
+    const off = () => s.offline();
     document.addEventListener('visibilitychange', vis);
     window.addEventListener('online', on);
+    window.addEventListener('offline', off);
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) s.offline();
     (window as unknown as { __sync?: unknown }).__sync = { status: () => s.status(), syncNow: () => s.syncNow() };
     void s.start();
     return () => {
       document.removeEventListener('visibilitychange', vis);
       window.removeEventListener('online', on);
+      window.removeEventListener('offline', off);
       s.stop();
       sync.current = null;
     };

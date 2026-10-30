@@ -29,6 +29,11 @@ window.YT = { PlayerState: { ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED
   this.destroy = () => clearInterval(timer);
   // Nur für Tests: Zustand erzwingen (Puffern, Cue, Pause, Ende), ohne Zeitraffer anzuhalten oder zu starten
   this.__force = (s) => { if (s !== 1) clearInterval(timer); set(s); };
+  // Nur mit window.__netFaults (Offline-Test): wie der echte Player stockt er ohne Netz (Puffern) und läuft nach der Rückkehr von selbst weiter
+  if (window.__netFaults) {
+    window.addEventListener('offline', () => { if (st === 1) { clearInterval(timer); this.__stalled = true; set(3); } });
+    window.addEventListener('online', () => { if (this.__stalled) { this.__stalled = false; play(); } });
+  }
   setTimeout(() => ev.onReady && ev.onReady(), 30);
 }};
 window.onYouTubeIframeAPIReady && window.onYouTubeIframeAPIReady();
@@ -49,9 +54,27 @@ window.onYouTubeIframeAPIReady && window.onYouTubeIframeAPIReady();
   def('playbackRate', { get() { return this.__pr ?? 1; }, set(v) { this.__pr = v; } });
   def('defaultPlaybackRate', { get() { return this.__dpr ?? 1; }, set(v) { this.__dpr = v; } });
   def('src', { get() { return this.__src || ''; }, set(v) { this.__src = v; } });
-  // Wie die Spezifikation: load() hält ein laufendes Element an (paused wird true), ohne pause-Ereignis
-  P.load = function () { clearInterval(timers.get(this)); this.__p = true; setTimeout(() => emit(this, 'loadedmetadata'), 20); };
+  def('error', { get() { return this.__err || null; } });
+  // Nur mit window.__netFaults (Offline-Test): Ein Element, dessen Quelle ohne Netz nicht nachlädt, meldet nach window.__netErrAfterMs
+  // (Standard 4 s) einen Netzfehler (MEDIA_ERR_NETWORK, Code 2). Der Fehler ist wie im Browser endgültig, bis load() neu lädt.
+  const live = new Set();
+  if (window.__netFaults) {
+    window.addEventListener('offline', () => {
+      for (const el of live) {
+        if (el.__p !== false) continue;
+        clearInterval(timers.get(el)); emit(el, 'waiting');
+        el.__stall = setTimeout(() => { el.__err = { code: 2 }; el.__p = true; emit(el, 'error'); }, window.__netErrAfterMs ?? 4000);
+      }
+    });
+    window.addEventListener('online', () => {
+      for (const el of live) if (el.__stall && !el.__err) { clearTimeout(el.__stall); el.__stall = 0; el.play(); }
+    });
+  }
+  // Wie die Spezifikation: load() hält ein laufendes Element an (paused wird true, ohne pause-Ereignis) und löscht einen Fehler
+  P.load = function () { this.__err = null; clearInterval(timers.get(this)); this.__p = true; setTimeout(() => emit(this, 'loadedmetadata'), 20); };
   P.play = function () {
+    if (this.__err) return Promise.reject(new DOMException('The media resource is not supported', 'NotSupportedError'));
+    live.add(this);
     clearInterval(timers.get(this));
     this.__p = false; this.__e = false;
     timers.set(this, setInterval(() => { this.__t = (this.__t || 0) + (window.__ytSlow ? 0.1 : 10); emit(this, 'timeupdate'); }, 100));

@@ -156,11 +156,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bHasTokenFromQr = await waitFor(B, () => !!document.querySelector('[data-testid=sync-last]'));
     c.bGotCaptionsFromA = await poll(async () => (await B.inputValue('[data-testid=captions]').catch(() => '')) === 'auto' && api.gets >= 2);
     // B setzt Abdeckung: andere Einstellung, die A noch nicht hat
-    await B.selectOption('[data-testid=speed]', '1');
+    await B.selectOption('[data-testid=speed]', '2');
     const p3 = api.puts.length;
     c.bWrites = await poll(() => api.puts.length === p3 + 1, 16000);
     await A.evaluate(() => window.__sync.syncNow());
-    c.aGetsSpeedFromB = await poll(async () => (await A.inputValue('[data-testid=speed]').catch(() => '')) === '1');
+    c.aGetsSpeedFromB = await poll(async () => (await A.inputValue('[data-testid=speed]').catch(() => '')) === '2');
     await B.screenshot({ path: `${out}/${name}-3-geraet-b.png`, fullPage: true });
 
     // Konflikt: ein drittes Gerät schreibt zwischen Lesen und Schreiben von A

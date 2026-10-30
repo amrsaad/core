@@ -22,12 +22,13 @@ import type { NoteEntry } from '../../moments/note';
 import type { WeekPlan } from '../../moments/review';
 import { parseUntilKey, type Until } from '../../moments/learn';
 import type { DigestTap } from '../../moments/digest';
+import type { QueueEntry } from '../../moments/recallqueue';
 
 export const SYNC_VERSION = 1;
 /** wie LOG_MAX in MomentFeed.tsx */
 export const LOG_MAX = 3000;
 /** Einstellungen, die zwischen Geräten wandern. playerMode, captions und alles Messtechnische bleibt am Gerät. */
-export const SYNC_SETTINGS = ['areaShares', 'captionMode', 'form', 'playbackSpeed'] as const;
+export const SYNC_SETTINGS = ['areaShares', 'captionMode', 'form', 'playbackRate'] as const;
 export type SyncSettingKey = (typeof SYNC_SETTINGS)[number];
 export type SyncSettings = Partial<Pick<Settings, SyncSettingKey>>;
 
@@ -41,6 +42,8 @@ export interface SyncState {
   feedbackNotes: NoteEntry[];
   notesPromptDay?: string;
   momentDay?: string;
+  /** Pfeiler 19: Warteschlange der Abrufkarten. Als Ganzes, der jüngste Stand gewinnt (Zeitstempel tsKey.recallQueue). Fehlt bei Geräten ohne Warteschlange. */
+  recallQueue?: QueueEntry[];
   momentLiked: Record<string, number>;
   momentAsked: Record<string, number>;
   mutedChannels: Record<string, string>;
@@ -91,6 +94,7 @@ export const tsKey = {
   plan: (week: string) => `plan:${week}`,
   setting: (k: string) => `set:${k}`,
   digest: (k: string) => `digest:${k}`,
+  recallQueue: 'rq',
 };
 
 // ---------- Hilfen ----------
@@ -318,7 +322,17 @@ export function mergeDocs(a: SyncDoc, b: SyncDoc): SyncDoc {
   if (npd !== undefined) out.state.notesPromptDay = npd;
   const md = maxStr(x.momentDay, y.momentDay);
   if (md !== undefined) out.state.momentDay = md;
+  const rq = mergeQueue(x.recallQueue, y.recallQueue, num(a.ts[tsKey.recallQueue]), num(b.ts[tsKey.recallQueue]));
+  if (rq !== undefined) out.state.recallQueue = rq;
   return out;
+}
+
+/** Warteschlange der Abrufkarten: der jüngere Stand gewinnt, bei Gleichstand die größere kanonische Form (gleiches Ergebnis in jeder Reihenfolge) */
+function mergeQueue(p: QueueEntry[] | undefined, q: QueueEntry[] | undefined, tp: number, tq: number): QueueEntry[] | undefined {
+  if (p === undefined) return q;
+  if (q === undefined) return p;
+  if (tp !== tq) return tp > tq ? p : q;
+  return cmp(canon(p), canon(q)) >= 0 ? p : q;
 }
 
 /** gesehen: der frühere Zeitpunkt */
@@ -356,6 +370,7 @@ export function toDoc(s: AppState): SyncDoc {
   };
   if (s.notesPromptDay !== undefined) doc.state.notesPromptDay = s.notesPromptDay;
   if (s.momentDay !== undefined) doc.state.momentDay = s.momentDay;
+  if (s.recallQueue !== undefined) doc.state.recallQueue = s.recallQueue;
   // Vereinigung mit dem leeren Dokument bringt Reihenfolge und Kürzungen in die gemeinsame Form
   return mergeDocs(doc, emptyDoc());
 }
@@ -385,6 +400,7 @@ export function applyDoc(s: AppState, d: SyncDoc): AppState {
   set('digestTaps', next.digestTaps, eq(cur.digestTaps, next.digestTaps));
   if (next.notesPromptDay !== undefined && next.notesPromptDay !== s.notesPromptDay) out.notesPromptDay = next.notesPromptDay;
   if (next.momentDay !== undefined && next.momentDay !== s.momentDay) out.momentDay = next.momentDay;
+  if (next.recallQueue !== undefined && !eq(next.recallQueue, s.recallQueue)) out.recallQueue = next.recallQueue;
   if (!eq(cur.settings, next.settings)) {
     const settings = { ...s.settings };
     for (const k of SYNC_SETTINGS) {
@@ -429,6 +445,10 @@ export function stampChanges(prev: AppState, next: AppState, now: number): AppSt
   changed = diffKeys(prev.mutedChannels, next.mutedChannels, tsKey.muted, ts, now) || changed;
   changed = diffKeys(prev.plans, next.plans, tsKey.plan, ts, now) || changed;
   changed = diffKeys(prev.digestTaps, next.digestTaps, tsKey.digest, ts, now) || changed;
+  if (prev.recallQueue !== next.recallQueue && canon(prev.recallQueue) !== canon(next.recallQueue)) {
+    ts[tsKey.recallQueue] = now;
+    changed = true;
+  }
   if (prev.settings !== next.settings) {
     for (const k of SYNC_SETTINGS) {
       const a = prev.settings[k];
@@ -454,6 +474,7 @@ export function syncedChanged(a: AppState, b: AppState): boolean {
     a.feedbackNotes !== b.feedbackNotes ||
     a.notesPromptDay !== b.notesPromptDay ||
     a.momentDay !== b.momentDay ||
+    a.recallQueue !== b.recallQueue ||
     a.momentLiked !== b.momentLiked ||
     a.momentAsked !== b.momentAsked ||
     a.mutedChannels !== b.mutedChannels ||

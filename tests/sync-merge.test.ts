@@ -149,9 +149,9 @@ const CASES: Case[] = [
   },
   {
     name: 'Einstellungen: je Schlüssel der jüngste Zeitstempel, Gleichstand das Größere',
-    a: doc({ settings: { playbackSpeed: 1, form: 'audio', captionMode: 'on' } }, { [tsKey.setting('playbackSpeed')]: 100, [tsKey.setting('form')]: 400, [tsKey.setting('captionMode')]: 50 }),
-    b: doc({ settings: { playbackSpeed: 1.5, form: 'text', captionMode: 'off' } }, { [tsKey.setting('playbackSpeed')]: 200, [tsKey.setting('form')]: 300, [tsKey.setting('captionMode')]: 50 }),
-    expected: doc({ settings: { playbackSpeed: 1.5, form: 'audio', captionMode: 'on' } }, { [tsKey.setting('playbackSpeed')]: 200, [tsKey.setting('form')]: 400, [tsKey.setting('captionMode')]: 50 }),
+    a: doc({ settings: { playbackRate: 1, form: 'audio', captionMode: 'on' } }, { [tsKey.setting('playbackRate')]: 100, [tsKey.setting('form')]: 400, [tsKey.setting('captionMode')]: 50 }),
+    b: doc({ settings: { playbackRate: 1.5, form: 'text', captionMode: 'off' } }, { [tsKey.setting('playbackRate')]: 200, [tsKey.setting('form')]: 300, [tsKey.setting('captionMode')]: 50 }),
+    expected: doc({ settings: { playbackRate: 1.5, form: 'audio', captionMode: 'on' } }, { [tsKey.setting('playbackRate')]: 200, [tsKey.setting('form')]: 400, [tsKey.setting('captionMode')]: 50 }),
   },
   {
     name: 'Einstellungen: Mix gehört zusammen, der jüngere gewinnt',
@@ -298,8 +298,8 @@ export function randomDoc(r: () => number): SyncDoc {
     stamp(tsKey.digest(k));
   }
   if (r() < 0.5) {
-    s.settings.playbackSpeed = pickOf([1, 1.5]);
-    stamp(tsKey.setting('playbackSpeed'));
+    s.settings.playbackRate = pickOf([1.5, 2] as const);
+    stamp(tsKey.setting('playbackRate'));
   }
   if (r() < 0.5) {
     s.settings.form = pickOf(['video', 'audio', 'text'] as const);
@@ -402,11 +402,11 @@ describe('Zeitstempel beim Ändern', () => {
         momentLiked: { m1: 1 },
         mutedChannels: { c: 'c' },
         plans: { w: { when: 'abc', will: 'def' } },
-        settings: { ...s.settings, form: 'audio', playbackSpeed: 1 },
+        settings: { ...s.settings, form: 'audio', playbackRate: 2 },
       },
       777,
     );
-    expect(n.syncTs).toEqual({ [tsKey.weight('area', 'brain')]: 777, [tsKey.weight('channel', 'c')]: 777, [tsKey.weight('topic', 't')]: 777, [tsKey.saved('m1')]: 777, [tsKey.liked('m1')]: 777, [tsKey.muted('c')]: 777, [tsKey.plan('w')]: 777, [tsKey.setting('form')]: 777, [tsKey.setting('playbackSpeed')]: 777 });
+    expect(n.syncTs).toEqual({ [tsKey.weight('area', 'brain')]: 777, [tsKey.weight('channel', 'c')]: 777, [tsKey.weight('topic', 't')]: 777, [tsKey.saved('m1')]: 777, [tsKey.liked('m1')]: 777, [tsKey.muted('c')]: 777, [tsKey.plan('w')]: 777, [tsKey.setting('form')]: 777, [tsKey.setting('playbackRate')]: 777 });
   });
   it('Taps auf der Wochenkarte bekommen die Zeit der Änderung', () => {
     const s = base();
@@ -448,7 +448,7 @@ describe('Dokument und Zustand', () => {
     const s = base({ momentSeen: { a: 1 }, deskHelpSeen: true, playLatency: [{ ms: 1, buffered: true, at: 1 }] as never, tapMs: [{ ms: 1, at: 1 }] as never, settings: { ...emptyState().settings, playerMode: 'single' } });
     const d = toDoc(s);
     expect(Object.keys(d.state).sort()).toEqual(['dayCount', 'digestTaps', 'feedTime', 'feedbackNotes', 'momentAsked', 'momentLiked', 'momentLog', 'momentSeen', 'momentWeights', 'mutedChannels', 'plans', 'recall', 'savedMoments', 'settings', 'weekReviewShown']);
-    expect(Object.keys(d.state.settings).sort()).toEqual(['areaShares', 'captionMode', 'playbackSpeed']);
+    expect(Object.keys(d.state.settings).sort()).toEqual(['areaShares', 'captionMode', 'playbackRate']);
     expect(JSON.stringify(d)).not.toMatch(/playerMode|deskHelpSeen|playLatency|tapMs/);
   });
   it('applyDoc übernimmt Fremdes, behält Gerätespezifisches und eigene Änderungen', () => {

@@ -15,8 +15,9 @@ import type { DigestLatest } from '../../moments/digest';
 
 export const WRITE_DELAY_MS = 10_000;
 export const MAX_ATTEMPTS = 4;
-/** Wartezeit nach einem Fehler, der sich von selbst erledigen kann: 30 s, 1 min, 2 min, dann alle 5 min */
-export const retryDelay = (fails: number) => Math.min(5 * 60_000, 30_000 * 2 ** Math.max(0, fails - 1));
+/** Wartezeit nach einem Fehler, der sich von selbst erledigen kann: 15 s, 1 min, 5 min, dann alle 5 min (Issue 9) */
+export const RETRY_DELAYS = [15_000, 60_000, 5 * 60_000] as const;
+export const retryDelay = (fails: number) => RETRY_DELAYS[Math.min(Math.max(1, fails), RETRY_DELAYS.length) - 1];
 
 export interface SyncStatus {
   hasToken: boolean;
@@ -51,6 +52,9 @@ export interface Sync {
   syncNow(): Promise<void>;
   /** App kommt in den Vordergrund (true) oder geht (false) */
   visible(v: boolean): void;
+  /** Netz ist weg: Sync pausiert (Token, Last sync und lokaler Stand bleiben). Mit syncNow geht es von Hand trotzdem. */
+  offline(): void;
+  /** Netz ist zurück: Sync läuft sofort wieder an (wie Sync now) */
   online(): void;
   /** Token wurde neu gesetzt oder entfernt */
   tokenChanged(): Promise<void>;
@@ -70,6 +74,8 @@ export function createSync(deps: SyncDeps): Sync {
   let active: Promise<void> | null = null;
   let again = false;
   let stopped = false;
+  /** Offline-Ereignis: keine automatischen Läufe, bis das Netz zurück ist */
+  let paused = false;
   /** Version der zuletzt gelesenen Wochenkarte, damit dieselbe Datei nicht noch einmal entschlüsselt wird */
   let digestSha: string | null = null;
 
@@ -86,6 +92,9 @@ export function createSync(deps: SyncDeps): Sync {
 
   async function attempt(): Promise<void> {
     const token = await deps.getToken();
+    // Ein Token, das eben noch da war und jetzt nicht lesbar ist (Speicher kurz gestört), gilt nie als entfernt:
+    // nur tokenChanged() (Nutzer setzt oder entfernt es) ändert hasToken. Hier nur später noch einmal versuchen.
+    if (!token && st.hasToken) throw new SyncError('offline', 'The token could not be read just now. Will retry.');
     set({ hasToken: !!token });
     if (!token) {
       set({ error: null });
@@ -151,8 +160,8 @@ export function createSync(deps: SyncDeps): Sync {
     }
   }
 
-  async function run(): Promise<void> {
-    if (stopped) return;
+  async function run(force = false): Promise<void> {
+    if (stopped || (paused && !force)) return;
     if (active) {
       again = true;
       return active;
@@ -203,15 +212,25 @@ export function createSync(deps: SyncDeps): Sync {
       clearTimeout(timer);
       timer = setTimeout(() => void run(), WRITE_DELAY_MS);
     },
-    syncNow: () => run(),
+    syncNow: () => run(true),
     visible(v) {
       if (stopped) return;
       // Beim Verlassen sofort schreiben, was noch wartet. Beim Zurückkommen laden, was das andere Gerät geschrieben hat.
       if (!v && !pending && !timer) return;
       void run();
     },
+    offline() {
+      if (stopped) return;
+      paused = true;
+      // Wartende Schreib- und Wiederholungstimer ruhen. pending bleibt stehen, der Lauf nach der Rückkehr holt alles nach.
+      clearTimers();
+    },
     online() {
-      if (!stopped && (pending || st.error)) void run();
+      if (stopped) return;
+      paused = false;
+      fails = 0;
+      clearTimers();
+      if (st.hasToken) void run();
     },
     async tokenChanged() {
       fails = 0;

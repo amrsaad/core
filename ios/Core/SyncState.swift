@@ -109,7 +109,7 @@ enum SyncWire {
         set["areaShares"] = nums(s.areaShares)
         if let c = s.captionMode { set["captionMode"] = .str(c.rawValue) }
         if let f = s.form { set["form"] = .str(f.rawValue) }
-        if let v = s.playbackSpeed { set["playbackSpeed"] = .num(v) }
+        if let v = s.playbackSpeed { set["playbackRate"] = .num(v) }
         st["settings"] = .obj(set)
         if let d = s.notesPromptDay { st["notesPromptDay"] = .str(d) }
         if let d = s.momentDay { st["momentDay"] = .str(d) }
@@ -200,7 +200,7 @@ enum SyncWire {
             if let shares = set?["areaShares"], !numbers(shares).isEmpty { out.areaShares = numbers(shares) }
             out.captionMode = set?["captionMode"]?.string.flatMap { CaptionMode(rawValue: $0) }
             out.form = set?["form"]?.string.flatMap { FeedForm(rawValue: $0) }
-            out.playbackSpeed = set?["playbackSpeed"]?.number
+            out.playbackSpeed = set?["playbackRate"]?.number
         }
         if let day = next["notesPromptDay"]?.string, day != s.notesPromptDay { out.notesPromptDay = day }
         if let day = next["momentDay"]?.string, day != s.momentDay { out.momentDay = day }
@@ -235,7 +235,7 @@ enum SyncWire {
         if old.areaShares != new.areaShares { ts[SyncMerge.tsKey(setting: "areaShares")] = t; changed = true }
         if old.captionMode != new.captionMode { ts[SyncMerge.tsKey(setting: "captionMode")] = t; changed = true }
         if old.form != new.form { ts[SyncMerge.tsKey(setting: "form")] = t; changed = true }
-        if old.playbackSpeed != new.playbackSpeed { ts[SyncMerge.tsKey(setting: "playbackSpeed")] = t; changed = true }
+        if old.playbackSpeed != new.playbackSpeed { ts[SyncMerge.tsKey(setting: "playbackRate")] = t; changed = true }
         guard changed else { return new }
         var out = new
         out.syncTs = ts

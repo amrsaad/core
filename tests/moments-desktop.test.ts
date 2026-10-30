@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createWheel, deskHelpDue, deskKey, endsFast, HELP_ROWS, DESKTOP_MIN, DESKTOP_QUERY, wheelPx, WHEEL_PX, WHEEL_QUIET_MS, type DeskCtx, type KeyIn } from '../src/moments/desktop';
+import { createWheel, deskHelpDue, deskKey, HELP_ROWS, DESKTOP_MIN, DESKTOP_QUERY, wheelPx, WHEEL_PX, WHEEL_QUIET_MS, type DeskCtx, type KeyIn } from '../src/moments/desktop';
 
 const base: DeskCtx = { typing: false, help: false, sheet: false, note: false, recall: null };
 const k = (key: string, o: Partial<KeyIn> = {}): KeyIn => ({ key, code: o.code ?? '', shift: false, ctrl: false, meta: false, alt: false, ...o });
@@ -32,14 +32,9 @@ describe('Tasten im Feed', () => {
     expect(act('4')).toBeNull();
   });
   it('Shift+. an der Taste, auch wenn das Zeichen ein Doppelpunkt ist', () => {
-    expect(act('>', {}, { shift: true, code: 'Period' })).toBe('fastOn');
-    expect(act(':', {}, { shift: true, code: 'Period' })).toBe('fastOn');
+    expect(act('>', {}, { shift: true, code: 'Period' })).toBe('tempo');
+    expect(act(':', {}, { shift: true, code: 'Period' })).toBe('tempo');
     expect(act('.', {}, { code: 'Period' })).toBeNull();
-  });
-  it('Loslassen von . oder Shift beendet das 2x', () => {
-    expect(endsFast({ key: '.', code: 'Period' })).toBe(true);
-    expect(endsFast({ key: 'Shift', code: 'ShiftLeft' })).toBe(true);
-    expect(endsFast({ key: 'j', code: 'KeyJ' })).toBe(false);
   });
   it('Medientasten steuern Pause, nächster und voriger Moment', () => {
     expect(act('MediaPlayPause')).toBe('pause');

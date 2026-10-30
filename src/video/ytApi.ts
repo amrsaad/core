@@ -32,6 +32,13 @@ export interface YTPlayer {
   isLocal?(): boolean;
   /** Nur Stream-Player: Läuft der Moment unverändert, weil es noch keinen Web-Audio-Kontext gab, jetzt an die geregelte Spur hängen (erste Berührung) */
   relevel?(): void;
+  /** YouTube-Player: an eine Stelle springen */
+  seekTo?(seconds: number, allowSeekAhead?: boolean): void;
+  /**
+   * Nach einem Netzfehler an derselben Stelle weiter (Issue 9): Stream neu laden und bei pos ansetzen, YouTube springen und spielen.
+   * Moment, Ton und Tempo bleiben, der Slot wird nicht neu gebaut. play false: nur bereitstellen (Vorlade-Slot).
+   */
+  recoverAt?(pos: number, play: boolean): void;
 }
 
 interface YTNamespace {
@@ -586,6 +593,24 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       if (a.end !== undefined && a.end - at < 4) return;
       diag(`loud: attaching running moment at ${at.toFixed(1)} s (${pick.why})`);
       prepareHls(a.id, a.start, a.end, !media.paused || a.play, a.gain, false, Math.max(a.start, at));
+    },
+    recoverAt: (pos, play) => {
+      const a = lastArgs;
+      if (mode === 'hls' && deckMode) {
+        // Audio-Reiter: das gemeinsame Element macht dort weiter, wo der Ausschnitt steht (kein eigener Start bei pos, E2E deckt diesen Weg nicht ab)
+        deckLoad(play);
+      } else if (mode === 'hls' && a) {
+        // Nach einem Netzfehler (Issue 9): Quelle neu setzen, ein Element mit Netzfehler lädt nur nach load() wieder. Ton (muted) und Tempo hängen am Element und bleiben.
+        delete media.dataset.src;
+        prepareHls(a.id, a.start, a.end, play, a.gain, false, Math.min(Math.max(pos, a.start), a.end ?? pos));
+      } else if (mode === 'yt') {
+        try {
+          yt.seekTo?.(pos, true);
+          if (play) yt.playVideo();
+        } catch {
+          /* noch nicht bereit */
+        }
+      }
     },
     getPlayerState: () => (mode === 'hls' ? hlsState : yt.getPlayerState()),
     loud: () => {

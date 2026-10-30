@@ -9,6 +9,7 @@ import type { CaptionMode } from '../moments/captions';
 import type { DayCount } from '../moments/today';
 import type { Form } from '../moments/form';
 import type { RecallState } from '../moments/recall';
+import type { QueueEntry } from '../moments/recallqueue';
 import type { WeekPlan } from '../moments/review';
 import type { NoteEntry } from '../moments/note';
 import type { SkipRun } from '../moments/learn';
@@ -40,8 +41,8 @@ export interface Settings {
   captionMode?: CaptionMode;
   /** Darreichungsform im Feed (Punkt 3). Fehlt in alten Ständen, dann video */
   form?: Form;
-  /** Wiedergabetempo (Fundament-Regel 11: Standard 1,5x, Option 2x, nie 2,5x). Fehlt in alten Ständen, dann gilt DEFAULT_SPEED */
-  playbackSpeed?: 1 | 1.5 | 2;
+  /** Wiedergabetempo (Pfeiler 17): 1x, 1.5x, 2x, nie darüber. Langes Drücken schaltet im Kreis, per Sync auf allen Geräten. Fehlt in alten Ständen, dann 1x */
+  playbackRate?: Rate;
 }
 
 export interface SavedMoment {
@@ -116,20 +117,22 @@ export interface AppState {
   digestTaps?: DigestTaps;
   /** Core Digest: zuletzt geladene Wochenkarte (state/digest-latest.enc). Nur an diesem Gerät, kommt bei jedem Sync neu. */
   digestLatest?: DigestLatest;
+  /** Pfeiler 19: fällige Abrufkarten, die nicht gezeigt werden durften (Hintergrund, Settings, Blatt). Höchstens 3, per Sync. */
+  recallQueue?: QueueEntry[];
   /** Geräte-Sync: Zeitpunkt der letzten Änderung je Schlüssel (Gewichte, Gemerktes, Herzen, Stumme, Pläne, Einstellungen), siehe lib/sync/merge.ts */
   syncTs?: Record<string, number>;
 }
 
-export const DEFAULT_SPEED = 1.5;
-/** Gedrückt halten (wie Reels). Nie schneller als 2x (Fundament-Regel 11, Murphy et al. 2022) */
-export const HOLD_SPEED = 2;
-export const MAX_SPEED = 2;
-/** Einstellbar laut Bauliste Runde 1, Punkt 2: 1x und 1,5x. 2x nur per Halten */
-export const SPEED_OPTIONS = [1, 1.5] as const;
-export type Speed = (typeof SPEED_OPTIONS)[number];
-/** Gespeichertes Tempo, alte Stände (2x aus dem Zwischenstand vom 26.10.) fallen auf den Standard zurück */
-export const speedOf = (s: Pick<Settings, 'playbackSpeed'>): Speed => ((SPEED_OPTIONS as readonly number[]).includes(s.playbackSpeed ?? -1) ? (s.playbackSpeed as Speed) : DEFAULT_SPEED);
-export const clampRate = (r: number) => Math.min(MAX_SPEED, Math.max(0.25, r));
+/** Pfeiler 17: Tempo ist eine gespeicherte Einstellung. Der Kreis ist 1x, 1.5x, 2x, 1x. Nie schneller als 2x (Murphy et al. 2022). */
+export const RATES = [1, 1.5, 2] as const;
+export type Rate = (typeof RATES)[number];
+export const DEFAULT_RATE: Rate = 1;
+export const MAX_RATE = 2;
+/** Gespeichertes Tempo. Fehlende oder unbekannte Werte (auch der alte Schlüssel playbackSpeed) fallen auf 1x zurück */
+export const rateOf = (s: Pick<Settings, 'playbackRate'>): Rate => ((RATES as readonly number[]).includes(s.playbackRate ?? -1) ? (s.playbackRate as Rate) : DEFAULT_RATE);
+/** Nächster Wert im Kreis: 1x, 1.5x, 2x, 1x */
+export const nextRate = (r: Rate): Rate => RATES[(RATES.indexOf(r) + 1) % RATES.length];
+export const clampRate = (r: number) => Math.min(MAX_RATE, Math.max(0.25, r));
 
 export const DEFAULT_SETTINGS: Settings = {
   dailyRoundLimit: 5,
@@ -137,7 +140,7 @@ export const DEFAULT_SETTINGS: Settings = {
   playerMode: 'slots',
   captions: true,
   captionMode: 'auto',
-  playbackSpeed: DEFAULT_SPEED,
+  playbackRate: DEFAULT_RATE,
 };
 
 export function emptyState(): AppState {

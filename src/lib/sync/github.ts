@@ -46,28 +46,32 @@ export function failure(status: number, rateLimited = false): SyncError {
 
 const net = (): SyncError => new SyncError('offline', 'No connection to GitHub. Will retry.');
 
+/** Eine Anfrage, die nach einem Netzabbruch hängt, blockiert sonst jeden weiteren Lauf. Nach 20 s zählt sie als kein Netz. */
+export const REQUEST_TIMEOUT_MS = 20_000;
+async function req(f: Fetch, url: string, init: RequestInit): Promise<Response> {
+  const c = new AbortController();
+  const t = setTimeout(() => c.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    return await f(url, { ...init, signal: c.signal });
+  } catch {
+    throw net();
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 const rateLimited = (r: Response) => r.headers.get('x-ratelimit-remaining') === '0';
 
 /** null, wenn die Datei noch nicht existiert */
 export async function readRemote(token: string, f: Fetch = fetch, path: string = STATE_PATH): Promise<{ text: string; sha: string } | null> {
-  let r: Response;
-  try {
-    r = await f(`${API_HOST}/repos/${REPO}/contents/${path}`, { headers: headers(token), cache: 'no-store' });
-  } catch {
-    throw net();
-  }
+  const r = await req(f, `${API_HOST}/repos/${REPO}/contents/${path}`, { headers: headers(token), cache: 'no-store' });
   if (r.status === 404) return null;
   if (!r.ok) throw failure(r.status, rateLimited(r));
   const j = (await r.json()) as { sha?: string; size?: number; content?: string; encoding?: string };
   if (!j.sha) throw new SyncError('format', 'GitHub sent an unexpected answer.');
   if (j.encoding === 'base64' && typeof j.content === 'string' && (j.content.length > 0 || j.size === 0)) return { text: utf8(j.content), sha: j.sha };
   // Dateien über 1 MB liefert die Contents API ohne Inhalt, dann über den Blob
-  let b: Response;
-  try {
-    b = await f(`${API_HOST}/repos/${REPO}/git/blobs/${j.sha}`, { headers: headers(token), cache: 'no-store' });
-  } catch {
-    throw net();
-  }
+  const b = await req(f, `${API_HOST}/repos/${REPO}/git/blobs/${j.sha}`, { headers: headers(token), cache: 'no-store' });
   if (!b.ok) throw failure(b.status, rateLimited(b));
   const blob = (await b.json()) as { content?: string; encoding?: string };
   if (blob.encoding !== 'base64' || typeof blob.content !== 'string') throw new SyncError('format', 'GitHub sent an unexpected answer.');
@@ -75,17 +79,12 @@ export async function readRemote(token: string, f: Fetch = fetch, path: string =
 }
 
 export async function writeRemote(token: string, text: string, sha: string | null, message: string, f: Fetch = fetch): Promise<string> {
-  let r: Response;
-  try {
-    r = await f(`${API_HOST}/repos/${REPO}/contents/${STATE_PATH}`, {
-      method: 'PUT',
-      headers: { ...headers(token), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, content: toB64(text), ...(sha ? { sha } : {}) }),
-      cache: 'no-store',
-    });
-  } catch {
-    throw net();
-  }
+  const r = await req(f, `${API_HOST}/repos/${REPO}/contents/${STATE_PATH}`, {
+    method: 'PUT',
+    headers: { ...headers(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, content: toB64(text), ...(sha ? { sha } : {}) }),
+    cache: 'no-store',
+  });
   if (!r.ok) throw failure(r.status, rateLimited(r));
   const j = (await r.json()) as { content?: { sha?: string } };
   return j.content?.sha ?? '';

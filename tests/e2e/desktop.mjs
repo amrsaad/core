@@ -195,13 +195,24 @@ try {
   await press(pg, 'M', 150);
   c.keyM = sound0 !== sound1 && (await pg.evaluate(() => window.__core.sound())) === sound0;
 
-  // Shift+. halten: 2x, Loslassen beendet
-  await pg.keyboard.down('Shift');
-  await pg.keyboard.down('Period');
-  c.fastOn = await waitFor(pg, () => window.__core.fast() === true, undefined, 2000) && (await pg.evaluate(() => window.__ytlog.some((x) => x === 'rate 2')));
-  await pg.keyboard.up('Period');
-  await pg.keyboard.up('Shift');
-  c.fastOff = await waitFor(pg, () => window.__core.fast() === false, undefined, 2000) && (await pg.evaluate(() => { const r = window.__ytlog.filter((x) => x.startsWith('rate ')); return r.length > 1 && r[r.length - 1] !== 'rate 2'; }));
+  // Shift+. schaltet das Tempo im Kreis: 1.5x, 2x, 1x. Anzeige in der Leiste, Wert im State, Player folgen.
+  const pressTempo = async () => {
+    await pg.keyboard.down('Shift');
+    await pg.keyboard.down('Period');
+    await pg.keyboard.up('Period');
+    await pg.keyboard.up('Shift');
+  };
+  await pressTempo();
+  c.tempo15 = await waitFor(pg, () => window.__core.rate() === 1.5 && document.querySelector('[data-testid=desk-rate]')?.textContent === '1.5x', undefined, 2000) && (await pg.evaluate(() => window.__ytlog.some((x) => x === 'rate 1.5')));
+  await pressTempo();
+  c.tempo2 = await waitFor(pg, () => window.__core.rate() === 2 && document.querySelector('[data-testid=desk-rate]')?.textContent === '2x', undefined, 2000) && (await pg.evaluate(() => window.__ytlog.some((x) => x === 'rate 2')));
+  await pg.click('[data-testid=desk-rate]');
+  c.tempoTapBackTo1 = await waitFor(pg, () => window.__core.rate() === 1 && !document.querySelector('[data-testid=desk-rate]'), undefined, 2000);
+  await pressTempo();
+  c.tempoKeyHeldDoesNotRepeat = await waitFor(pg, () => window.__core.rate() === 1.5, undefined, 2000);
+  await pressTempo();
+  await pressTempo();
+  c.tempoCycleBackTo1 = await waitFor(pg, () => window.__core.rate() === 1, undefined, 2000);
 
   // L Herz, S Save
   const mid0 = await pg.evaluate(() => window.__core.moment().id);

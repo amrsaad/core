@@ -54,6 +54,13 @@ class HttpError extends Error {
   }
 }
 
+/** Antwort kürzer als angekündigt. Kein TypeError: sie zählt nicht gegen den Host (CORS, Range), nur als Fehlversuch dieses Moments. */
+export class TruncatedError extends Error {
+  constructor(got: number, announced: number) {
+    super(`truncated ${got}/${announced}`);
+  }
+}
+
 const hostOf = (u: string) => {
   try {
     return new URL(u).host;
@@ -232,6 +239,9 @@ export class Preloader {
         throw new HttpError(res.status);
       }
       const bytes = new Uint8Array(await res.arrayBuffer());
+      // Abgebrochene Übertragung (Netz weg mitten in der Antwort): kürzer als angekündigt gilt als nicht geladen, nie als Teilstück im Vorrat
+      const announced = Number(res.headers.get('content-length'));
+      if (Number.isFinite(announced) && announced > 0 && bytes.length !== announced) throw new TruncatedError(bytes.length, announced);
       // Antwortzeit als zweites Maß für das Netz (Starts aus dem Vorrat sagen darüber nichts)
       this.net = addNet(this.net, { k: 'probe', ms: ttfb });
       this.emit();
@@ -289,12 +299,15 @@ export class Preloader {
       // Nahe Momente sofort als Blob-URL bereithalten
       if (job.rank <= WARM_AHEAD) await this.warm([m]);
     } catch (e) {
+      // Kein halber Eintrag: was nicht vollständig im Index steht, fliegt auch aus dem Cache (Netz weg mitten im Schreiben)
+      if (!this.entries.has(m.id)) void this.cache?.delete(this.keyFor(m.id)).catch(() => {});
       if (e instanceof DOMException && e.name === 'AbortError') return;
       if (e instanceof Mp3Error) {
         this.unsupported.set(m.id, e.reason);
         this.note(`unsupported ${m.id} ${e.reason}`);
       } else {
-        this.fails.set(m.id, (this.fails.get(m.id) ?? 0) + 1);
+        // Ein Abruf, der scheitert, weil das Netz weg ist, ist kein Fehler des Moments und zählt nicht (Issue 9)
+        if (this.d.online()) this.fails.set(m.id, (this.fails.get(m.id) ?? 0) + 1);
         // Netzfehler ohne Antwort bei bestehender Verbindung: meist CORS oder Range nicht erlaubt
         if (e instanceof TypeError && this.d.online()) this.hostStrikes.set(host, (this.hostStrikes.get(host) ?? 0) + 1);
         this.note(`fail ${m.id} ${e instanceof Error ? e.message : String(e)}`);

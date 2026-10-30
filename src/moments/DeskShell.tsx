@@ -25,7 +25,7 @@ function Icon({ children }: { children: ReactNode }) {
   );
 }
 
-export function DeskBar({ form, setForm, todayText, tab, setTab, onHelp }: { form: Form; setForm: (f: Form) => void; todayText: string; tab: DeskTab; setTab: (t: DeskTab) => void; onHelp: () => void }) {
+export function DeskBar({ form, setForm, todayText, tab, setTab, onHelp, rate, onRate }: { form: Form; setForm: (f: Form) => void; todayText: string; tab: DeskTab; setTab: (t: DeskTab) => void; onHelp: () => void; rate: number; onRate: () => void }) {
   return (
     <header className="dbar" data-testid="desk-bar" data-nowheel>
       <div className="dbar-left">
@@ -40,6 +40,11 @@ export function DeskBar({ form, setForm, todayText, tab, setTab, onHelp }: { for
         ))}
       </div>
       <div className="dbar-right">
+        {rate > 1 && (
+          <button type="button" className="dbar-rate" data-testid="desk-rate" aria-label={`Speed ${rate}x, tap to change`} title="Speed (Shift + .)" onClick={onRate}>
+            {rate}x
+          </button>
+        )}
         <span className="dbar-today" data-testid="desk-today">
           {todayText}
         </span>

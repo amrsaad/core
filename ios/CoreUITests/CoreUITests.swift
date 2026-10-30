@@ -623,7 +623,7 @@ final class CoreUITests: XCTestCase {
         app.buttons["syncNow"].tap()
         XCTAssertTrue(until(15) { self.mockPuts() == p2 + 1 }, "offline change was not caught up")
         XCTAssertTrue(until(10) { !self.app.staticTexts["syncError"].exists }, "error line stays")
-        XCTAssertEqual((mockState()["settings"] as? [String: Any])?["playbackSpeed"] as? Double, 1)
+        XCTAssertEqual((mockState()["settings"] as? [String: Any])?["playbackRate"] as? Double, 1)
 
         // Token abgelehnt: eine Zeile, ohne Token
         setMockMode("unauthorized")

@@ -3,7 +3,7 @@ import type { Area } from '../types';
 import type { MomentPool } from '../moments/types';
 import { exportJson, parseImport } from '../lib/db';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
-import { SPEED_OPTIONS, speedOf, type AppState, type Speed } from '../lib/state';
+import { RATES, rateOf, type AppState, type Rate } from '../lib/state';
 import { dayKey, isTimeShifted, now } from '../lib/clock';
 import type { CaptionMode } from '../moments/captions';
 import { UnlockDevice } from './UnlockDevice';
@@ -149,15 +149,14 @@ export function Settings({ state, update, replace, moments, skipped = 0, sync }:
           <span>Playback speed</span>
           <select
             data-testid="speed"
-            value={speedOf(s)}
-            onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, playbackSpeed: Number(e.target.value) as Speed } }))}
+            value={rateOf(s)}
+            onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, playbackRate: Number(e.target.value) as Rate } }))}
           >
-            {SPEED_OPTIONS.map((v) => (
+            {RATES.map((v) => (
               <option key={v} value={v}>{v}x</option>
             ))}
           </select>
         </label>
-        <p className="t-meta m-0 text-muted">Hold the video for 2x. Never faster than 2x.</p>
         <label className="flex items-center justify-between gap-3 text-[16px]">
           <span>Single player mode (if iOS turns the sound off when swiping)</span>
           <input
@@ -295,7 +294,7 @@ export function diagnosticsText(state: AppState, moments: MomentPool | null, ski
     `device ${typeof navigator !== 'undefined' ? navigator.userAgent : ''}`,
     `online ${typeof navigator !== 'undefined' ? navigator.onLine : ''}, standalone ${typeof window !== 'undefined' && window.matchMedia?.('(display-mode: standalone)').matches}`,
     `sync token ${sync.status.hasToken ? 'yes' : 'no'}, last sync ${sync.status.lastSync ? new Date(sync.status.lastSync).toISOString() : 'never'}${sync.status.error ? `, error ${sync.status.error}` : ''}`,
-    `saved ${Object.keys(state.savedMoments).length}, seen ${Object.keys(state.momentSeen).length}, speed ${speedOf(state.settings)}`,
+    `saved ${Object.keys(state.savedMoments).length}, seen ${Object.keys(state.momentSeen).length}, speed ${rateOf(state.settings)}x`,
     `first frame preloaded: ${lat.n ? `median ${lat.median} ms, p90 ${lat.p90} ms, n ${lat.n}` : 'none'}`,
     backgroundLine(raw),
     `loudness leveling ${levelOn() ? 'on' : 'off'}${levelBroken() ? ` (stopped this session: ${levelBroken()})` : ''}, audio context ${contextState()}`,

@@ -23,6 +23,8 @@ interface World {
   clock: number;
   perf: number;
   delayMs: number;
+  /** Netz weg mitten in der Antwort: Länge angekündigt, aber weniger Bytes geliefert */
+  truncate?: boolean;
 }
 
 function setup(): { w: World; cache: FakeCache; store: Map<string, string>; make: () => Preloader; revoked: string[] } {
@@ -47,6 +49,7 @@ function setup(): { w: World; cache: FakeCache; store: Map<string, string>; make
     const body = file.slice(from, to + 1);
     w.bytesServed += body.length;
     w.perf += w.delayMs;
+    if (w.truncate && body.length > 100) return new Response(body.slice(0, body.length - 50), { status: 206, headers: { 'content-length': String(body.length) } });
     return new Response(body, { status: 206 });
   }) as unknown as typeof fetch;
   const deps: PreloaderDeps = {
@@ -177,6 +180,20 @@ describe('Preloader: Ausschnitte in die Cache API', () => {
     await until(() => p.has('m1'));
     expect(p.has('m1')).toBe(true);
     expect(p.poor()).toBe(false);
+  });
+
+  it('abgebrochene Antwort wird nie als Teilstück abgelegt und zählt nicht gegen den Host (Issue 9)', async () => {
+    const { w, cache, make } = setup();
+    w.files.set('https://cdn.test/ep1.mp3', synthMp3({ frames: 20_000 }).bytes);
+    w.truncate = true;
+    const p = make();
+    p.setQueue([mom(0), mom(1)], 0);
+    await settle(p, 40);
+    expect(p.has('m1')).toBe(false);
+    expect(cache.map.size).toBe(0);
+    expect(p.log.some((l) => /fail m1 truncated/.test(l))).toBe(true);
+    // Der Host bleibt offen: ein abgebrochener Abruf ist kein CORS- oder Range-Problem
+    expect(p.whyNot(mom(1))).not.toBe('host');
   });
 
   it('Index und Cache überleben einen Neustart, Verwaiste werden geräumt', async () => {

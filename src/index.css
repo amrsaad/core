@@ -156,6 +156,8 @@ body {
 }
 .vform button { min-height: 36px; min-width: 64px; padding: 0 12px; border-radius: 999px; color: #b3b3b3; font-size: 14px; font-weight: 600; }
 .vform button.on { background: #fff; color: #000; }
+/* Tempo (Pfeiler 17): neben den Reitern, nur bei 1.5x und 2x, Ziel 48 pt. pointer-events none: Wische über der Anzeige gehen zur Gesten-Ebene, der Tipp wird dort erkannt (onUp). */
+.vform .vrate { position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: 6px; min-width: 48px; min-height: 48px; padding: 0 10px; background: rgba(0, 0, 0, 0.55); color: #fff; pointer-events: none; }
 .vtext {
   position: absolute; inset: 0; z-index: 12; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
   background: #000; color: #fff; padding: calc(env(safe-area-inset-top) + 76px) 88px calc(env(safe-area-inset-bottom) + 96px) calc(env(safe-area-inset-left) + 16px);
@@ -350,6 +352,7 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 /* Die rechte Gruppe darf nach links in die Mitte reichen, wenn die Spalte (Textreiter) die Panelspalte schmal macht. Die Reiter bleiben klickbar. */
 .dbar-right { grid-column: 2 / 4; grid-row: 1; justify-self: stretch; display: flex; align-items: center; justify-content: flex-end; gap: 20px; padding: 0 24px; min-width: 0; pointer-events: none; }
 .dbar-right > * { pointer-events: auto; }
+.dbar-rate { min-width: 48px; min-height: 48px; border-radius: 999px; padding: 0 12px; background: #17191e; color: #fff; font-size: 14px; font-weight: 600; }
 .dbar-today { font-size: 13px; line-height: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.72); white-space: nowrap; }
 .dbar-actions { display: flex; gap: 8px; }
 .dbar-actions button { min-height: 34px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; border: 1px solid #2a2d35; color: #d8d8d8; font-size: 13px; line-height: 18px; font-weight: 600; }

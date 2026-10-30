@@ -17,6 +17,7 @@ import type { MomentPool } from './moments/types';
 import { WeeklyReview } from './moments/WeeklyReview';
 import { Settings } from './screens/Settings';
 import type { Form } from './moments/form';
+import { nextRate, rateOf } from './lib/state';
 
 // v1 (Karten) und v2 (Shorts) bleiben im Code, sind aber nicht mehr in der Navigation.
 type Tab = 'feed' | 'saved' | 'settings';
@@ -99,7 +100,7 @@ export default function App() {
   const setForm = (f: Form) => update((s) => ({ ...s, settings: { ...s.settings, form: f } }));
   return (
     <div className={desk ? 'desk' : 'relative h-[100dvh] overflow-hidden'} data-form={desk ? form : undefined} style={{ ['--nav-h' as string]: !desk && tab === 'feed' && showBar ? `${NAV_H}px` : '0px' }}>
-      {desk && <DeskBar form={form} setForm={setForm} todayText={todayLine(state.dayCount?.[dayKey(clockNow())], true)} tab={tab} setTab={setTab} onHelp={() => setHelp((h) => !h)} />}
+      {desk && <DeskBar form={form} setForm={setForm} todayText={todayLine(state.dayCount?.[dayKey(clockNow())], true)} tab={tab} setTab={setTab} onHelp={() => setHelp((h) => !h)} rate={form === 'text' ? 1 : rateOf(state.settings)} onRate={() => update((s) => ({ ...s, settings: { ...s.settings, playbackRate: nextRate(rateOf(s.settings)) } }))} />}
       <div className={desk ? 'dmain' : tab === 'feed' ? '' : 'hidden'}>
         <MomentFeed
           key={state.settings.form ?? 'video'}
