@@ -1,5 +1,5 @@
 {
- "at": "2026-10-30T07:59:53.411Z",
+ "at": "2026-10-30T08:31:10.387Z",
  "runs": [
   {
    "browser": "webkit",
@@ -273,10 +273,10 @@
    "recall": [
     {
      "id": "test0000017:100",
-     "due": 1792929606725,
+     "due": 1792929607479,
      "results": [
       {
-       "at": 1792756806725,
+       "at": 1792756807479,
        "got": false
       }
      ]
@@ -364,7 +364,7 @@
    "askPrompt": "Core moment from Kanal body 1, Testvideo, at 1:40.\nHook: Testmoment 53 body\nExcerpt: Sentence 1 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 2 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 3 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 4 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 5 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 6 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 7 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 8…\nContext: Context sentence one for Testmoment 53 body. Context sentence two names a term.\nSource: https://www.youtube.com/watch?v=test0000053&t=100\n\nMy question: ",
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 273,
+    "checksDone": 264,
     "violations": 0,
     "endedSeen": 30
    },
@@ -388,13 +388,13 @@
     {
      "p": [
       0,
-      211,
+      220,
       393,
       221
      ],
      "h": [
       0,
-      211,
+      220,
       393,
       221
      ],
@@ -403,13 +403,13 @@
     {
      "p": [
       0,
-      870,
+      879,
       393,
       221
      ],
      "h": [
       0,
-      870,
+      879,
       393,
       221
      ],
@@ -418,13 +418,13 @@
     {
      "p": [
       0,
-      -448,
+      -439,
       393,
       221
      ],
      "h": [
       0,
-      -448,
+      -439,
       393,
       221
      ],
@@ -433,7 +433,7 @@
     {
      "p": [
       0,
-      -1107,
+      -1098,
       393,
       221
      ],
@@ -493,7 +493,7 @@
     "buffered": 29,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | ddc6814 |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | ddc6814 |\n| test0000053:100 | Testmoment 53 body | Already known | - | Video | ddc6814 |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | ddc6814 |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | ddc6814 |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | ddc6814 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | f0535db |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | f0535db |\n| test0000053:100 | Testmoment 53 body | Already known | - | Video | f0535db |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | f0535db |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | f0535db |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | f0535db |",
    "badWalk": [
     {
      "idx": 2,
@@ -1150,10 +1150,10 @@
    "recall": [
     {
      "id": "test0000017:100",
-     "due": 1792929605415,
+     "due": 1792929605462,
      "results": [
       {
-       "at": 1792756805415,
+       "at": 1792756805462,
        "got": false
       }
      ]
@@ -1235,18 +1235,18 @@
     "deck loadedmetadata rs=0 muted=true t=100.0"
    ],
    "tapToFill": {
-    "measured": 31.79999999998836,
+    "measured": 31.89999999999418,
     "recorded": 32
    },
    "askPrompt": "Core moment from Kanal brain 3, Testvideo, at 1:40.\nHook: Testmoment 27 brain\nExcerpt: Sentence 1 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 2 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 3 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 4 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 5 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 6 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 7 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 8…\nContext: Context sentence one for Testmoment 27 brain. Context sentence two names a term.\nSource: https://www.youtube.com/watch?v=test0000027&t=100\n\nMy question: ",
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 288,
+    "checksDone": 282,
     "violations": 0,
     "endedSeen": 32
    },
    "posterState": {
-    "idx": 26,
+    "idx": 25,
     "qlen": 52,
     "end": false,
     "recall": false,
@@ -1256,10 +1256,10 @@
     "cls": "vfeed"
    },
    "posterDom": [
-    "<div class=\"vslot\" aria-hidden=\"true\" style=\"--off: 1;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font: 18px sans-serif; background: rgb(17, 34, 51);\">test0000074 t=100 state 2 stumm</div><video muted=\"\" playsinline=\"\" preload=\"auto\" webkit-playsinline=\"\" style=\"position: absolute; inset: 0px; width: 100%; height: 100%; object-fit: contain; background: rgb(0, 0, 0); display: none; pointer-events: none;\"></video><video muted=\"\" playsinline=\"\" preload=\"auto\" webkit-playsinline=\"\" crossorigin=\"anonymous\" style=\"position: absolute; inset: 0px; width: 100%; hei",
-    "<div class=\"vslot\" aria-hidden=\"true\" style=\"--off: 2;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font: 18px sans-serif; background: rgb(17, 34, 51);\">test0000013 t=100 state 2 stumm</div><video muted=\"\" playsinline=\"\" preload=\"auto\" webkit-playsinline=\"\" style=\"position: absolute; inset: 0px; width: 100%; height: 100%; object-fit: contain; background: rgb(0, 0, 0); display: none; pointer-events: none;\"></video><video muted=\"\" playsinline=\"\" preload=\"auto\" webkit-playsinline=\"\" crossorigin=\"anonymous\" style=\"position: absolute; inset: 0px; width: 100%; hei",
-    "<div class=\"vslot\" aria-hidden=\"false\" style=\"--off: 0;\" data-live=\"\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font: 18px sans-serif; background: rgb(17, 34, 51);\">test0000025 t=100 state 1 TON</div><video muted=\"\" playsinline=\"\" preload=\"auto\" webkit-playsinline=\"\" style=\"position: absolute; inset: 0px; width: 100%; height: 100%; object-fit: contain; background: rgb(0, 0, 0); display: none; pointer-events: none;\"></video><video muted=\"\" playsinline=\"\" preload=\"auto\" webkit-playsinline=\"\" crossorigin=\"anonymous\" style=\"position: absolute; inset: 0px; widt",
-    "<div class=\"vslot vghost\" aria-hidden=\"true\" style=\"--off: -1;\"><img class=\"vposter\" src=\"https://i.ytimg.com/vi/test0000023/hqdefault.jpg\" alt=\"\" draggable=\"false\"></div>"
+    "<div class=\"vslot\" aria-hidden=\"true\" style=\"--off: 2;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font: 18px sans-serif; background: rgb(17, 34, 51);\">test0000074 t=100 state 2 stumm</div><video muted=\"\" playsinline=\"\" preload=\"auto\" webkit-playsinline=\"\" style=\"position: absolute; inset: 0px; width: 100%; height: 100%; object-fit: contain; background: rgb(0, 0, 0); display: none; pointer-events: none;\"></video><video muted=\"\" playsinline=\"\" preload=\"auto\" webkit-playsinline=\"\" crossorigin=\"anonymous\" style=\"position: absolute; inset: 0px; width: 100%; hei",
+    "<div class=\"vslot\" aria-hidden=\"false\" style=\"--off: 0;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font: 18px sans-serif; background: rgb(17, 34, 51);\">test0000023 t=200 state 0 TON</div><video muted=\"\" playsinline=\"\" preload=\"auto\" webkit-playsinline=\"\" style=\"position: absolute; inset: 0px; width: 100%; height: 100%; object-fit: contain; background: rgb(0, 0, 0); display: none; pointer-events: none;\"></video><video muted=\"\" playsinline=\"\" preload=\"auto\" webkit-playsinline=\"\" crossorigin=\"anonymous\" style=\"position: absolute; inset: 0px; width: 100%; heig",
+    "<div class=\"vslot\" aria-hidden=\"true\" style=\"--off: 1;\"><div class=\"vframe\"><div style=\"position: relative;\"><div style=\"width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font: 18px sans-serif; background: rgb(17, 34, 51);\">test0000025 t=100 state 2 stumm</div><video muted=\"\" playsinline=\"\" preload=\"auto\" webkit-playsinline=\"\" style=\"position: absolute; inset: 0px; width: 100%; height: 100%; object-fit: contain; background: rgb(0, 0, 0); display: none; pointer-events: none;\"></video><video muted=\"\" playsinline=\"\" preload=\"auto\" webkit-playsinline=\"\" crossorigin=\"anonymous\" style=\"position: absolute; inset: 0px; width: 100%; hei",
+    "<div class=\"vslot vghost\" aria-hidden=\"true\" style=\"--off: -1;\"><img class=\"vposter\" src=\"https://i.ytimg.com/vi/test0000063/hqdefault.jpg\" alt=\"\" draggable=\"false\"></div>"
    ],
    "posterRects": [
     {
@@ -1367,10 +1367,10 @@
    },
    "latency": {
     "n": 37,
-    "buffered": 30,
+    "buffered": 29,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | ddc6814 |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | ddc6814 |\n| test0000027:100 | Testmoment 27 brain | Already known | - | Video | ddc6814 |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | ddc6814 |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | ddc6814 |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | ddc6814 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | f0535db |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | f0535db |\n| test0000027:100 | Testmoment 27 brain | Already known | - | Video | f0535db |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | f0535db |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | f0535db |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | f0535db |",
    "badWalk": [
     {
      "idx": 2,
