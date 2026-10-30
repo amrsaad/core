@@ -194,6 +194,41 @@ jobs:
               r = subprocess.run(['python3', 'pipeline/sources/transcribe.py', 'refine', '${{ matrix.audio }}', out, str(s), str(e), os.environ['LANG_HINT']], capture_output=True, text=True)
               print(s, e, r.returncode, r.stdout.strip()[-120:], r.stderr.strip()[-200:] if r.returncode else '')
           PY
+          python3 - <<'PY'
+          # Echte Sprechpausen aus dem Audio (Whisper-Wortzeiten im Arabischen sind lückenlos und zeigen keine Pausen):
+          # 10-ms-Pegel, Referenz = 95. Perzentil, Stille = Pegel mindestens REL dB darunter, Mindestlänge 0.2 s. Drei Schwellen, die Wahl trifft das Zusammensetzen.
+          import json, os, sys
+          import numpy as np
+          sys.path.insert(0, 'pipeline/sources')
+          import transcribe as T
+          out = 'work/${{ matrix.id }}.json'
+          d = json.load(open(out))
+          sil = {'24': [], '30': [], '36': []}
+          for s, e in json.loads(os.environ['WINDOWS']):
+              a, b = max(0.0, s - 8), e + 8
+              x = T.load('${{ matrix.audio }}', a, b)
+              n = len(x) // 160
+              if n < 100:
+                  continue
+              db = 20 * np.log10(np.sqrt((x[:n * 160].reshape(n, 160) ** 2).mean(axis=1)) + 1e-7)
+              ref = np.percentile(db, 95)
+              for rel in (24, 30, 36):
+                  low = db < ref - rel
+                  i = 0
+                  while i < n:
+                      if low[i]:
+                          j = i
+                          while j < n and low[j]:
+                              j += 1
+                          if j - i >= 20:
+                              sil[str(rel)].append([round(a + i * 0.01, 2), round(a + j * 0.01, 2)])
+                          i = j
+                      else:
+                          i += 1
+              print('Referenzpegel', round(float(ref), 1), 'dB,', {k: len(v) for k, v in sil.items()})
+          d['sil'] = sil
+          json.dump(d, open(out, 'w'), ensure_ascii=False)
+          PY
           python3 -c "import json;t=json.load(open('$OUT'));print(len(t['events']),'Segmente',t.get('refined'))"
       - uses: actions/upload-artifact@v4
         if: always()
