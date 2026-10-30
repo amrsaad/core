@@ -170,7 +170,7 @@ const pickMoment = (x: Moment, y: Moment): Moment => {
   return c >= 0 ? x : y;
 };
 
-const combineSaved = (x: SavedMoment, y: SavedMoment): SavedMoment => {
+export const combineSaved = (x: SavedMoment, y: SavedMoment): SavedMoment => {
   const out: SavedMoment = { moment: pickMoment(x.moment, y.moment), savedAt: cmp(x.savedAt, y.savedAt) <= 0 ? x.savedAt : y.savedAt };
   if (x.done || y.done) out.done = true;
   return out;
@@ -189,7 +189,7 @@ const combinePlan = (x: WeekPlan, y: WeekPlan): WeekPlan => {
 };
 
 /** Das Protokoll hat je Moment und Tag einen Eintrag (MomentFeed.log). Gemeinsame Einträge: Ende zählt, wenn eines es hat, Weitergeschautes das Maximum. */
-function mergeLog(a: MomentLogEntry[], b: MomentLogEntry[]): MomentLogEntry[] {
+export function mergeLog(a: MomentLogEntry[], b: MomentLogEntry[]): MomentLogEntry[] {
   const m = new Map<string, MomentLogEntry>();
   for (const e of [...a, ...b]) {
     const k = `${e.day}\u0000${e.id}`;
@@ -207,7 +207,7 @@ function mergeLog(a: MomentLogEntry[], b: MomentLogEntry[]): MomentLogEntry[] {
 }
 
 /** Notizen je Schlüssel, "gesendet" bleibt (der spätere Zeitpunkt) */
-function mergeNotes(a: NoteEntry[], b: NoteEntry[]): NoteEntry[] {
+export function mergeNotes(a: NoteEntry[], b: NoteEntry[]): NoteEntry[] {
   const m = new Map<string, NoteEntry>();
   for (const e of [...a, ...b]) {
     const x = m.get(e.key);
@@ -227,7 +227,7 @@ function mergeNotes(a: NoteEntry[], b: NoteEntry[]): NoteEntry[] {
 
 const lastAt = (i: RecallItem) => i.results.reduce((mx, r) => Math.max(mx, r.at), 0);
 
-function mergeRecallItem(x: RecallItem, y: RecallItem): RecallItem {
+export function mergeRecallItem(x: RecallItem, y: RecallItem): RecallItem {
   const seen = new Set<string>();
   const results: RecallResult[] = [];
   for (const r of [...x.results, ...y.results].sort((p, q) => p.at - q.at || Number(p.got) - Number(q.got))) {

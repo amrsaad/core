@@ -1,9 +1,10 @@
 import { registerHls } from './video/ytApi';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { dayKey, now as clockNow } from './lib/clock';
 import { useAppState } from './lib/useAppState';
 import { useSync } from './lib/sync/useSync';
 import { decryptJson, storeKeyFrom, unlockKey } from './lib/vault';
+import { buildAliasIndex, migrateDoc, migrateState, NO_ALIASES } from './moments/aliases';
 import { validateMoments } from './moments/contract';
 import { MomentFeed } from './moments/MomentFeed';
 import { DeskBar, DeskHelp, DeskSheet } from './moments/DeskShell';
@@ -41,7 +42,15 @@ export default function App() {
   const [panel, setPanel] = useState<HTMLElement | null>(null);
   const [help, setHelp] = useState(false);
   // Geräte-Sync: sobald Zustand und Pool-Schlüssel da sind
-  const sync = useSync(state, access, !!state && vault.status === 'open');
+  // Alte Moment-IDs (aliases im Pool) auf aktuelle umstellen: Saves, Gesehen, Protokoll, Herzen, Notizen, Abrufplan. Auch für den Stand vom anderen Gerät.
+  const aliases = useMemo(() => (vault.status === 'open' ? buildAliasIndex(vault.pool.moments) : NO_ALIASES), [vault]);
+  const resolveDoc = useCallback((d: Parameters<typeof migrateDoc>[0]) => migrateDoc(d, aliases), [aliases]);
+  const sync = useSync(state, access, !!state && vault.status === 'open', resolveDoc);
+  const stateReady = !!state;
+  useEffect(() => {
+    // Einmal pro Pool, ohne neue Zeitstempel (adopt). Danach ist der Stand migriert und die Funktion tut nichts mehr.
+    if (stateReady) access.adopt((s) => migrateState(s, aliases));
+  }, [stateReady, aliases, access]);
 
   useEffect(() => {
     (async () => {

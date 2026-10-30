@@ -67,6 +67,7 @@ function cleaned(m: Record<string, unknown>): Moment {
   if ('recall' in out && !validRecall(out.recall)) delete out.recall;
   if ('audio' in out && typeof out.audio !== 'boolean') delete out.audio;
   if ('top' in out && typeof out.top !== 'boolean') delete out.top;
+  if ('aliases' in out && !(Array.isArray(out.aliases) && out.aliases.every((a) => typeof a === 'string'))) delete out.aliases;
   return out as unknown as Moment;
 }
 

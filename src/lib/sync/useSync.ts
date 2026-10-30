@@ -4,7 +4,7 @@ import type { SyncAccess } from '../useAppState';
 import { loadSyncMeta, saveSyncMeta } from '../db';
 import { clearToken, loadToken, saveToken, syncKey } from '../vault';
 import { createSync, type Sync, type SyncStatus } from './controller';
-import { canon, syncedChanged } from './merge';
+import { canon, syncedChanged, type SyncDoc } from './merge';
 import type { DigestLatest } from '../../moments/digest';
 
 export interface SyncUi {
@@ -18,16 +18,20 @@ export interface SyncUi {
 const IDLE: SyncStatus = { hasToken: false, lastSync: null, error: null, running: false };
 
 /** Hängt den Sync an den App-Zustand. enabled erst, wenn Zustand und Pool-Schlüssel da sind. */
-export function useSync(state: AppState | null, access: SyncAccess, enabled: boolean): SyncUi {
+export function useSync(state: AppState | null, access: SyncAccess, enabled: boolean, resolve?: (d: SyncDoc) => SyncDoc): SyncUi {
   const [status, setStatus] = useState<SyncStatus>(IDLE);
   const sync = useRef<Sync | null>(null);
   const prev = useRef<AppState | null>(null);
+  // Der Sync wird nicht neu gebaut, wenn sich die Alias-Auflösung ändert: er liest immer die jüngste
+  const resolveRef = useRef(resolve);
+  resolveRef.current = resolve;
 
   useEffect(() => {
     if (!enabled) return;
     const s = createSync({
       getState: access.getState,
       adopt: access.adopt,
+      resolve: (d) => (resolveRef.current ? resolveRef.current(d) : d),
       getKey: syncKey,
       getToken: loadToken,
       adoptDigest: (l: DigestLatest) => access.adopt((st) => (st.digestLatest && canon(st.digestLatest) === canon(l) ? st : { ...st, digestLatest: l })),

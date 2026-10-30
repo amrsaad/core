@@ -33,6 +33,8 @@ export interface SyncDeps {
   adopt(fn: (s: AppState) => AppState): void;
   getKey(): Promise<CryptoKey | null>;
   getToken(): Promise<string | null>;
+  /** Alte Moment-IDs im Dokument auf aktuelle umstellen (moments/aliases.ts). Wird auf lokalen und fremden Stand angewendet, vor dem Zusammenführen. */
+  resolve?: (d: SyncDoc) => SyncDoc;
   /** Core Digest: neue Wochenkarte von GitHub (state/digest-latest.enc). Ohne diese Funktion wird sie nicht geladen. */
   adoptDigest?(latest: DigestLatest): void;
   fetchImpl?: typeof fetch;
@@ -94,6 +96,9 @@ export function createSync(deps: SyncDeps): Sync {
     for (let i = 0; i < MAX_ATTEMPTS; i++) {
       const remote = await readRemote(token, deps.fetchImpl);
       let remoteDoc: SyncDoc | null = null;
+      /** Stand auf GitHub, wie er liegt (kann alte IDs haben): nur dann entfällt das Schreiben, wenn der zusammengeführte Stand genau so schon dort liegt */
+      let rawKey = '';
+      const fix = (d: SyncDoc) => (deps.resolve ? deps.resolve(d) : d);
       if (remote) {
         try {
           remoteDoc = await decryptDoc(key, remote.text);
@@ -102,21 +107,23 @@ export function createSync(deps: SyncDeps): Sync {
           throw e;
         }
         if (remoteDoc.v > SYNC_VERSION) throw new SyncError('format', 'The sync file is from a newer version of Core. Update the app.');
+        rawKey = canon(remoteDoc);
+        remoteDoc = fix(remoteDoc);
       }
       const cur = deps.getState();
       if (!cur) return;
-      const local = toDoc(cur);
+      const local = fix(toDoc(cur));
       const merged = remoteDoc ? mergeDocs(local, remoteDoc) : local;
       const mergedKey = canon(merged);
       // Lokal fehlt etwas von GitHub: übernehmen. Die Funktion rechnet gegen den neuesten Zustand, nicht gegen den von eben.
       if (remoteDoc && mergedKey !== canon(local)) {
         const r = remoteDoc;
         deps.adopt((s) => {
-          const m = mergeDocs(toDoc(s), r);
+          const m = mergeDocs(fix(toDoc(s)), r);
           return canon(m) === canon(toDoc(s)) ? s : applyDoc(s, m);
         });
       }
-      if (remoteDoc && mergedKey === canon(remoteDoc)) return;
+      if (remoteDoc && mergedKey === rawKey) return;
       try {
         await writeRemote(token, await encryptDoc(key, merged), remote?.sha ?? null, `core state ${new Date(now()).toISOString()}`, deps.fetchImpl);
         return;

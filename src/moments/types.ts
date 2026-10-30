@@ -47,6 +47,8 @@ export interface Moment {
   ref?: string;
   /** Ausschnitt als Text für die Textform, Satzgrenzen (Arabisch: Sprechpausen) als Zeilenumbruch */
   excerpt?: string;
+  /** Frühere IDs dieses Moments (Neueinordnung im Audio, Issue 7). Gespeicherte Stände mit alter ID werden auf die aktuelle umgestellt, siehe aliases.ts. */
+  aliases?: string[];
 }
 
 export interface MomentPool {
