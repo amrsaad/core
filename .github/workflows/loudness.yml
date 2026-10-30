@@ -1,0 +1,101 @@
+name: loudness
+# Misst die integrierte Lautheit (EBU R128, LUFS) je Moment-Fenster. Auftrag in jobs/loudness.json:
+# [{"id":"<hash>","audio":"<url>","windows":[[start,end],...]}]
+# Je Fenster nur der Ausschnitt start bis end (ffmpeg -ss/-t, ebur128), nicht die ganze Datei.
+# Ergebnis je Quelle als Artefakt "loud-<id>" mit <id>.json: {"id":..,"results":[{"start":..,"end":..,"lufs":-18.3|null,"err":".."}]} und stats.json.
+# lufs ist null, wenn die Messung scheitert, das Fenster zu kurz ist oder nur Stille liegt (-70 LUFS oder darunter).
+on:
+  push:
+    branches: [claude/compute]
+    paths: ['jobs/loudness.json']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: m
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          jobs = json.load(open('jobs/loudness.json'))
+          print('matrix=' + json.dumps({'include': [{'id': j['id'], 'audio': j['audio'], 'windows': json.dumps(j['windows'])} for j in jobs]}))
+          PY
+
+  run:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - name: Werkzeuge
+        run: command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null)
+      - name: Fenster messen
+        env:
+          AUDIO: ${{ matrix.audio }}
+          WINDOWS: ${{ matrix.windows }}
+        run: |
+          mkdir -p work
+          cat > measure.py <<'PYEOF'
+          #!/usr/bin/env python3
+          """Integrierte Lautheit je Fenster. ffmpeg liest nur start bis end (Suchen per -ss vor -i, Dauer per -t), Filter ebur128.
+          Zusammenfassung am Ende der Ausgabe: "I: -18.3 LUFS". Stille ergibt -70 oder "-inf", das zählt als kein Wert."""
+          import json, os, re, subprocess, sys, time
+
+          audio, out, job_id = os.environ['AUDIO'], sys.argv[1], sys.argv[2]
+          windows = json.loads(os.environ['WINDOWS'])
+          I_RE = re.compile(r'Integrated loudness:\s+I:\s+(-?inf|-?[\d.]+) LUFS')
+
+
+          def measure(start, end):
+              cmd = ['ffmpeg', '-hide_banner', '-nostats', '-nostdin', '-ss', str(start), '-i', audio, '-t', str(round(end - start, 3)),
+                     '-vn', '-af', 'ebur128=peak=none', '-f', 'null', '-']
+              err = ''
+              for attempt in range(3):
+                  try:
+                      r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+                  except subprocess.TimeoutExpired:
+                      err = 'timeout'
+                      continue
+                  m = I_RE.search(r.stderr)
+                  if m:
+                      v = m.group(1)
+                      if 'inf' in v:
+                          return None, 'silence'
+                      x = float(v)
+                      # -70 LUFS ist die Untergrenze des Messgeräts: Stille
+                      return (None, 'silence') if x <= -69.9 else (round(x, 1), '')
+                  err = (r.stderr.strip().splitlines() or ['no output'])[-1][:160]
+                  time.sleep(2 * (attempt + 1))
+              return None, err
+
+
+          res, ok = [], 0
+          for s, e in windows:
+              if e - s < 1.0:
+                  res.append({'start': s, 'end': e, 'lufs': None, 'err': 'too short'})
+                  continue
+              v, err = measure(s, e)
+              ok += v is not None
+              res.append({'start': s, 'end': e, 'lufs': v, **({'err': err} if err else {})})
+              print(s, e, v, err)
+          json.dump({'id': job_id, 'results': res}, open(out, 'w'))
+          json.dump({'id': job_id, 'windows': len(windows), 'measured': ok}, open(os.path.join(os.path.dirname(out), 'stats.json'), 'w'))
+          print(f'{ok} von {len(windows)} Fenstern gemessen')
+          PYEOF
+          python3 measure.py work/${{ matrix.id }}.json ${{ matrix.id }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: loud-${{ matrix.id }}
+          path: work/*.json
+          retention-days: 3
