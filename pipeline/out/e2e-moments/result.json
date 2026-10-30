@@ -1,5 +1,5 @@
 {
- "at": "2026-10-30T05:02:32.306Z",
+ "at": "2026-10-30T06:37:54.254Z",
  "runs": [
   {
    "browser": "webkit",
@@ -261,10 +261,10 @@
    "recall": [
     {
      "id": "test0000017:100",
-     "due": 1792929606904,
+     "due": 1792929606394,
      "results": [
       {
-       "at": 1792756806904,
+       "at": 1792756806394,
        "got": false
       }
      ]
@@ -349,14 +349,14 @@
     "slot2 hls loadedmetadata rs=0 ns=0 muted=true t=0.0"
    ],
    "tapToFill": {
-    "measured": 30,
+    "measured": 31,
     "recorded": 30
    },
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 267,
+    "checksDone": 273,
     "violations": 0,
-    "endedSeen": 32
+    "endedSeen": 30
    },
    "posterState": {
     "idx": 25,
@@ -378,13 +378,13 @@
     {
      "p": [
       0,
-      856,
+      346,
       393,
       221
      ],
      "h": [
       0,
-      856,
+      346,
       393,
       221
      ],
@@ -393,13 +393,13 @@
     {
      "p": [
       0,
-      1515,
+      1005,
       393,
       221
      ],
      "h": [
       0,
-      1515,
+      1005,
       393,
       221
      ],
@@ -408,13 +408,13 @@
     {
      "p": [
       0,
-      197,
+      -313,
       393,
       221
      ],
      "h": [
       0,
-      197,
+      -313,
       393,
       221
      ],
@@ -423,7 +423,7 @@
     {
      "p": [
       0,
-      -462,
+      -972,
       393,
       221
      ],
@@ -439,8 +439,8 @@
     ],
     "ended": [
      "nb:poster",
-     "cur:poster",
      "nb:poster",
+     "cur:poster",
      "nb:poster"
     ],
     "paused": [
@@ -479,11 +479,11 @@
     }
    },
    "latency": {
-    "n": 37,
-    "buffered": 30,
+    "n": 38,
+    "buffered": 29,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | 82be085 |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 82be085 |\n| test0000053:100 | Testmoment 53 body | Already known | - | Video | 82be085 |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | 82be085 |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | 82be085 |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | 82be085 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | 98c523f |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 98c523f |\n| test0000053:100 | Testmoment 53 body | Already known | - | Video | 98c523f |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | 98c523f |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | 98c523f |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | 98c523f |",
    "badWalk": [
     {
      "idx": 2,
@@ -1082,10 +1082,10 @@
    "recall": [
     {
      "id": "test0000017:100",
-     "due": 1792929605466,
+     "due": 1792929605327,
      "results": [
       {
-       "at": 1792756805466,
+       "at": 1792756805327,
        "got": false
       }
      ]
@@ -1170,7 +1170,7 @@
     "slot2 hls loadedmetadata rs=0 ns=0 muted=true t=0.0"
    ],
    "tapToFill": {
-    "measured": 32.10000000000582,
+    "measured": 31.89999999999418,
     "recorded": 32
    },
    "notesCount": 6,
@@ -1304,7 +1304,7 @@
     "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | 82be085 |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 82be085 |\n| test0000027:100 | Testmoment 27 brain | Already known | - | Video | 82be085 |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | 82be085 |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | 82be085 |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | 82be085 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | 98c523f |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 98c523f |\n| test0000027:100 | Testmoment 27 brain | Already known | - | Video | 98c523f |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | 98c523f |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | 98c523f |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | 98c523f |",
    "badWalk": [
     {
      "idx": 2,
