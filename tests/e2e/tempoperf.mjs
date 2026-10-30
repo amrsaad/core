@@ -251,7 +251,8 @@ if (CHECK) {
     if (r.error || !r.ok) fails.push('run');
     if ((r.stallsMid ?? 0) > 0) fails.push(`stalls ${r.stallsMid}`);
     if ((r.startsWrongRate ?? 0) > 0) fails.push(`starts at wrong rate ${r.startsWrongRate}`);
-    if ((r.srcMax ?? 0) > 3) fails.push(`elements with src ${r.srcMax}`);
+    // Das stille Entsperr-Element der geregelten Spur (prime) zählt nicht mit, es hält nur kurz eine Quelle (srcMax zeigt es trotzdem)
+    if ((r.srcMaxReal ?? 0) > 3) fails.push(`elements with src ${r.srcMaxReal}`);
     // Lautheit an: beim Wechsel von 1x weg verlässt der laufende Moment die Web-Audio-Spur, ein Neuladen ist dort erlaubt (Max 30.10.2026). Sonst null.
     for (const c of r.tempoChange ?? []) {
       const reloadOk = r.lane === 'on' && c.from === 1;
