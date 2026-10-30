@@ -1,5 +1,5 @@
 {
- "at": "2026-10-30T18:54:22.685Z",
+ "at": "2026-10-30T19:35:01.987Z",
  "runs": [
   {
    "browser": "webkit",
@@ -13,11 +13,13 @@
     "idbRewritten": true,
     "runsWithoutCache": true,
     "cacheRewritten": true,
-    "noPageErrors": true
+    "noPageErrors": false
    },
    "deleteIdb": "ok",
-   "errors": [],
-   "ok": true
+   "errors": [
+    "TypeError: W.getPlayerState is not a function. (In 'W.getPlayerState()', 'W.getPlayerState' is undefined)"
+   ],
+   "ok": false
   },
   {
    "browser": "webkit",
@@ -31,11 +33,14 @@
     "idbRewritten": true,
     "runsWithoutCache": true,
     "cacheRewritten": true,
-    "noPageErrors": true
+    "noPageErrors": false
    },
    "deleteIdb": "ok",
-   "errors": [],
-   "ok": true
+   "errors": [
+    "TypeError: W.getPlayerState is not a function. (In 'W.getPlayerState()', 'W.getPlayerState' is undefined)",
+    "TypeError: W.getPlayerState is not a function. (In 'W.getPlayerState()', 'W.getPlayerState' is undefined)"
+   ],
+   "ok": false
   },
   {
    "browser": "webkit",
@@ -49,11 +54,14 @@
     "idbRewritten": true,
     "runsWithoutCache": true,
     "cacheRewritten": true,
-    "noPageErrors": true
+    "noPageErrors": false
    },
    "deleteIdb": "ok",
-   "errors": [],
-   "ok": true
+   "errors": [
+    "TypeError: W.getPlayerState is not a function. (In 'W.getPlayerState()', 'W.getPlayerState' is undefined)",
+    "TypeError: W.getPlayerState is not a function. (In 'W.getPlayerState()', 'W.getPlayerState' is undefined)"
+   ],
+   "ok": false
   },
   {
    "browser": "chromium",
