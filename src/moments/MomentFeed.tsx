@@ -6,6 +6,8 @@ import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { createPlayer, HLS, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
 import { isYtId } from './contract';
+import { unlockAudio } from './audioGraph';
+import { loudLine, recordLoud } from './loudness';
 import { browserPreloader } from './preloader';
 import { netRank, PRELOAD_COUNT, streamKind } from './preload';
 import { cursorFor, parseSaved, queueKey, releaseTail, reorderByRank, restoreQueue } from './queue';
@@ -73,7 +75,7 @@ const LOG_MAX = 3000;
 /** Warteschlange beim Start: der Vorrat soll 30 Momente vorhalten, dazu der aktuelle und ein paar Reserve */
 const QUEUE_AHEAD = PRELOAD_COUNT + 2;
 
-const load = (m: Moment) => ({ videoId: m.videoId, startSeconds: m.start, endSeconds: m.end });
+const load = (m: Moment) => ({ videoId: m.videoId, startSeconds: m.start, endSeconds: m.end, gainDb: m.gainDb });
 
 /** Das Symbol "Ton aus" erscheint nur, solange in dieser Sitzung noch nie Ton an war. Danach nie wieder (Max, 29.10.2026). */
 let soundSeenOn = false;
@@ -255,6 +257,34 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     void pre.warm(w);
     pre.trimWarm(new Set(w.map((x) => x.id)));
     saveQueue();
+  };
+
+  /** Pro gespieltem Moment eine Zeile "loud: lufs X, gain Y dB": gemessen und wirklich angewendet. Ändert sich der Weg (Rückfall), kommt die neue Zeile dazu. */
+  const loudSeen = useRef(new Map<string, string>());
+  const noteLoud = (slot: Slot, s: number) => {
+    const m = queue.current[slot.index];
+    if (!m || m.form === 'text') return;
+    const info = slot.player?.loud?.();
+    const line = loudLine(m.lufs, info?.db ?? 0, info?.how ?? 'unchanged');
+    if (loudSeen.current.get(m.id) === line) return;
+    loudSeen.current.set(m.id, line);
+    recordLoud(m.id, line);
+    diag.current.push(`slot${s} ${m.id} ${line}`);
+  };
+
+  /**
+   * Erste Berührung: Web Audio starten. Die Slots, die schon vor der Berührung vorbereitet wurden und noch nicht laufen, bekommen ihren Moment
+   * danach neu, damit auch sie auf die geregelte Spur kommen. Der laufende Moment bleibt unverändert, ein Wechsel mitten im Satz wäre hörbar.
+   */
+  const unlockLevel = () => {
+    void unlockAudio().then(() => {
+      for (const sl of slots.current) {
+        const nm = queue.current[sl.index];
+        if (!sl.player || !sl.ready || sl.index <= idxRef.current || !nm?.gainDb || !HLS.has(nm.videoId)) continue;
+        sl.mid = '';
+        assign(sl, sl.index, false);
+      }
+    });
   };
 
   const slotFor = (j: number) => slots.current[single ? 0 : ((j % 3) + 3) % 3];
@@ -566,6 +596,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                 // Vorschaubild bleibt bis zum ersten Bild: ohne Umweg über React, damit kein Frame der YouTube-Oberfläche durchrutscht
                 slot.el?.toggleAttribute('data-live', st === STATE.PLAYING);
                 if (st === STATE.PLAYING) everPlayed.current = true;
+                if (st === STATE.PLAYING && slot.index === idxRef.current) noteLoud(slot, s);
                 if (st === STATE.PLAYING && slot.index === idxRef.current && isBackground(document.visibilityState) && !bgStarted.current.has(slot.mid)) {
                   bgStarted.current.add(slot.mid);
                   diag.current.push(`bg: started ${slot.mid}`);
@@ -923,6 +954,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!p) return;
     if (!soundOn.current) {
       soundOn.current = true;
+      unlockLevel();
       for (const s of slots.current) s.player?.unMute();
       p.playVideo();
       userPaused.current = false;
@@ -1178,6 +1210,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     const firstTouch = !soundOn.current && !textRef.current;
     if (firstTouch) {
       soundOn.current = true;
+      unlockLevel();
       for (const s of slots.current) s.player?.unMute();
       soundSeenOn = true;
       setHint(false);
@@ -1285,6 +1318,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (textRef.current) return;
     const on = !soundOn.current;
     soundOn.current = on;
+    if (on) unlockLevel();
     for (const sl of slots.current) {
       if (on) sl.player?.unMute();
       else sl.player?.mute();
@@ -1539,6 +1573,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       motion: () => ({ busy: mot.current.busy, drag: dragging.current, raf: mot.current.raf, y: mot.current.y }),
       markStart: () => { since.current = Date.now(); },
       diag: () => diag.current.slice(-40),
+      /** Angewendete Lautheit je Slot (Tests, Entscheidung 16) */
+      gain: () => slots.current.slice(0, SLOTS).map((x) => ({ index: x.index, loud: x.player?.loud?.() ?? null })),
       diagAll: () => diag.current.filter((x) => /^(replan|reorder|net poor|yt stub|first-frame)/.test(x)),
       slots: () => slots.current.slice(0, SLOTS).map((x) => ({ st: x.st, index: x.index })),
       latency: () => stateRef.current.playLatency ?? [],

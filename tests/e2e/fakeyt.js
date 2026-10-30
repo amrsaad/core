@@ -24,6 +24,8 @@ window.YT = { PlayerState: { ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED
   this.pauseVideo = () => { clearInterval(timer); if (st === 1) set(2); };
   this.mute = () => { muted = true; paint(); }; this.unMute = () => { muted = false; window.__ytlog.push('unmute'); paint(); }; this.isMuted = () => muted;
   this.getCurrentTime = () => t; this.getDuration = () => 600; this.getPlayerState = () => st; this.seekTo = (s) => { t = s; }; this.setPlaybackRate = (r) => { window.__ytlog.push('rate ' + r); };
+  // Lautheit (Entscheidung 16): YouTube kann nur absenken, der Test liest die Lautstärke aus dem Protokoll
+  this.setVolume = (v) => { window.__ytlog.push('volume ' + v); };
   this.destroy = () => clearInterval(timer);
   // Nur für Tests: Zustand erzwingen (Puffern, Cue, Pause, Ende), ohne Zeitraffer anzuhalten oder zu starten
   this.__force = (s) => { if (s !== 1) clearInterval(timer); set(s); };

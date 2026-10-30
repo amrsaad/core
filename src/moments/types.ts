@@ -41,6 +41,10 @@ export interface Moment {
   audio?: boolean;
   /** Untertitel [Sekunden ab start, Text] */
   cues?: [number, string][];
+  /** Gemessene integrierte Lautheit des Ausschnitts in LUFS (Pipeline, ffmpeg ebur128), eine Dezimalstelle. Fehlt sie, ist der Moment nicht gemessen. */
+  lufs?: number;
+  /** Anpassung in dB auf das Ziel -16 LUFS, begrenzt auf -12 bis +12 (Entscheidung 16). Fehlt sie, bleibt der Moment unverändert (0 dB). */
+  gainDb?: number;
   /** Nur form text: Quelle der Passage, Namensnennung und Link in der App */
   sourceUrl?: string;
   license?: string;

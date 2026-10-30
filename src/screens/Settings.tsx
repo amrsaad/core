@@ -19,6 +19,8 @@ import { preloadedLine } from '../moments/preload';
 import { usePreloadStats } from '../moments/usePreload';
 import { diagLog } from '../lib/diag';
 import { backgroundLine } from '../moments/background';
+import { levelBroken, levelOn, setLevelOn } from '../moments/audioGraph';
+import { loudLog } from '../moments/loudness';
 
 const AREAS: Area[] = ['brain', 'body', 'beat'];
 
@@ -165,6 +167,7 @@ export function Settings({ state, update, replace, moments, skipped = 0, sync }:
           />
         </label>
         <PreloadLine />
+        <Loudness />
         <Latency samples={state.playLatency} />
         <span className="t-meta" data-testid="moments-skipped">Moments skipped: {skipped}</span>
         <TapReaction samples={state.tapMs} />
@@ -295,6 +298,8 @@ export function diagnosticsText(state: AppState, moments: MomentPool | null, ski
     `saved ${Object.keys(state.savedMoments).length}, seen ${Object.keys(state.momentSeen).length}, speed ${speedOf(state.settings)}`,
     `first frame preloaded: ${lat.n ? `median ${lat.median} ms, p90 ${lat.p90} ms, n ${lat.n}` : 'none'}`,
     backgroundLine(raw),
+    `loudness leveling ${levelOn() ? 'on' : 'off'}${levelBroken() ? ` (stopped this session: ${levelBroken()})` : ''}`,
+    ...loudLog(),
     '',
     'log (mm:ss since app start):',
   ];
@@ -328,6 +333,26 @@ function Diagnostics({ state, moments, skipped, sync }: { state: AppState; momen
       </button>
       {msg && <span className="t-meta text-muted">{msg}</span>}
       {msg.startsWith('Could not') && <textarea readOnly className="t-meta h-32 w-full rounded-xl bg-transparent p-2" value={diagnosticsText(state, moments, skipped, sync)} />}
+    </div>
+  );
+}
+
+/**
+ * Gleiche Lautheit (Entscheidung 16): die letzten gespielten Momente mit gemessener und angewendeter Lautheit ("loud: lufs X, gain Y dB")
+ * und ein Schalter für dieses Gerät. Dieselben Zeilen stehen in "Copy diagnostics" (diagnosticsText).
+ */
+function Loudness() {
+  const [on, setOn] = useState(levelOn);
+  const [msg, setMsg] = useState('');
+  const lines = loudLog(5);
+  return (
+    <div className="t-meta flex flex-col gap-1" data-testid="loudness">
+      <label className="flex items-center justify-between gap-3 text-[16px]">
+        <span>Even out loudness (this device)</span>
+        <input type="checkbox" data-testid="level-toggle" checked={on} onChange={(e) => { setLevelOn(e.target.checked); setOn(e.target.checked); setMsg('Applies from the next moment, reload the app to fully apply'); }} />
+      </label>
+      {lines.length === 0 ? <span>no moments played yet</span> : lines.map((l) => <span key={l} data-testid="loud-line">{l}</span>)}
+      {msg && <span className="text-muted">{msg}</span>}
     </div>
   );
 }

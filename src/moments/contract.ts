@@ -1,5 +1,6 @@
 import type { Area } from '../types';
 import type { Moment } from './types';
+import { clampGain } from './loudness';
 
 /**
  * Vertrag zwischen Pool und App. Reines Modul ohne Browserzugriff.
@@ -67,6 +68,9 @@ function cleaned(m: Record<string, unknown>): Moment {
   if ('recall' in out && !validRecall(out.recall)) delete out.recall;
   if ('audio' in out && typeof out.audio !== 'boolean') delete out.audio;
   if ('top' in out && typeof out.top !== 'boolean') delete out.top;
+  // Lautheit: ein falscher Wert darf nie einen Moment anheben oder absenken, also entfernen. Gültige Werte werden auf -12 bis +12 dB begrenzt.
+  for (const k of ['lufs', 'gainDb'] as const) if (k in out && !isNum(out[k])) delete out[k];
+  if ('gainDb' in out) out.gainDb = clampGain(out.gainDb);
   if ('aliases' in out && !(Array.isArray(out.aliases) && out.aliases.every((a) => typeof a === 'string'))) delete out.aliases;
   return out as unknown as Moment;
 }

@@ -19,7 +19,7 @@ export function MomentModal({ moment, onClose }: { moment: Moment; onClose: () =
       player.current = createPlayer(YT, t, moment.videoId, {
         onReady: () => {
           player.current?.unMute();
-          player.current?.loadVideoById({ videoId: moment.videoId, startSeconds: moment.start, endSeconds: moment.end });
+          player.current?.loadVideoById({ videoId: moment.videoId, startSeconds: moment.start, endSeconds: moment.end, gainDb: moment.gainDb });
         },
         onState: (s) => {
           setPlaying(s === STATE.PLAYING);
