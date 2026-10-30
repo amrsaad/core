@@ -249,11 +249,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   // Tempo aus Sync, Desktop-Leiste oder Settings erreicht auch pausierte und wartende Slots
   useEffect(() => {
     applyRate();
-    // Das Vorrat-Fenster ist ein Zeitfenster (Issue 13): bei neuem Tempo Warteschlange und Vorladen neu anlegen
-    if (queue.current.length) {
-      ensureQueue(idxRef.current + queueAhead(rateRef.current));
-      syncPre(idxRef.current);
-    }
+    // Das Vorrat-Fenster ist ein Zeitfenster (Issue 13): bei neuem Tempo das Vorladen neu planen. Die Warteschlange selbst wächst
+    // erst mit dem nächsten Moment (goTo ruft ensureQueue mit dem Vorlauf zum Tempo), sonst verbraucht ein Tempowechsel allein den Tagesvorrat.
+    if (queue.current.length) syncPre(idxRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rateOf(state.settings)]);
 
