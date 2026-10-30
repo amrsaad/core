@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-30T19:45:26.030Z",
+  "at": "2026-10-30T22:01:57.510Z",
   "runs": [
     {
       "browser": "chromium",
@@ -7,7 +7,7 @@
         "noContextBeforeGesture": true,
         "audioStarted": true,
         "tabTapStartsLevelled": true,
-        "levelElementPlays": false,
+        "levelElementPlays": true,
         "tempoOneByDefault": true,
         "atMostThreeMedia": true,
         "deckSrcLine": true,
@@ -53,84 +53,85 @@
       "deckEls": [
         {
           "lane": "plain",
-          "paused": false,
+          "paused": true,
           "src": true,
           "cross": null
         },
         {
           "lane": "level",
-          "paused": true,
+          "paused": false,
           "src": true,
           "cross": "anonymous"
         }
       ],
       "seen": [
         {
-          "id": "pod-loud8:100",
-          "idx": 0,
-          "db": 0,
-          "how": "unchanged: skipped cors"
-        },
-        {
-          "id": "pod-loud14:100",
-          "idx": 1,
-          "db": 1.5,
-          "how": "web audio",
-          "linear": 1.1885021924972534
-        },
-        {
           "id": "pod-loud5:100",
-          "idx": 2,
+          "idx": 0,
           "db": 12,
           "how": "web audio",
           "linear": 3.981071710586548
         },
         {
-          "id": "pod-loud3:100",
-          "idx": 3,
-          "db": 0,
-          "how": "unchanged: no value"
+          "id": "pod-loud11:100",
+          "idx": 1,
+          "db": -2.8,
+          "how": "web audio",
+          "linear": 0.7244359850883484
         },
         {
-          "id": "pod-loud6:100",
-          "idx": 4,
-          "db": -12,
+          "id": "pod-loud14:100",
+          "idx": 2,
+          "db": 1.5,
           "how": "web audio",
-          "linear": 0.25118863582611084
+          "linear": 1.1885021924972534
+        },
+        {
+          "id": "pod-loud9:100",
+          "idx": 3,
+          "db": 0,
+          "how": "unchanged: skipped cors"
         },
         {
           "id": "pod-loud12:100",
-          "idx": 5,
+          "idx": 4,
           "db": 10,
           "how": "web audio",
           "linear": 3.1622776985168457
         },
         {
-          "id": "pod-loud1:100",
-          "idx": 6,
-          "db": -6,
+          "id": "pod-loud6:100",
+          "idx": 5,
+          "db": -12,
           "how": "web audio",
-          "linear": 0.5011872053146362
+          "linear": 0.25118863582611084
         },
         {
           "id": "pod-loud13:100",
-          "idx": 7,
+          "idx": 6,
           "db": -1,
           "how": "web audio",
           "linear": 0.8912509083747864
         },
         {
-          "id": "pod-loud4:100",
-          "idx": 8,
-          "db": -3.5,
+          "id": "pod-loud10:100",
+          "idx": 7,
+          "db": 3,
           "how": "web audio",
-          "linear": 0.6683439016342163
+          "linear": 1.4125375747680664
         },
         {
-          "id": "pod-loud9:100",
+          "id": "pod-loud1:100",
+          "idx": 8,
+          "db": -6,
+          "how": "web audio",
+          "linear": 0.5011872053146362
+        },
+        {
+          "id": "pod-loud3:100",
           "idx": 9,
           "db": 0,
-          "how": "unchanged: skipped cors"
+          "how": "unchanged: no value"
         },
         {
           "id": "pod-loud15:100",
@@ -147,11 +148,11 @@
           "linear": 1.9952622652053833
         },
         {
-          "id": "pod-loud10:100",
+          "id": "pod-loud4:100",
           "idx": 12,
-          "db": 3,
+          "db": -3.5,
           "how": "web audio",
-          "linear": 1.4125375747680664
+          "linear": 0.6683439016342163
         },
         {
           "id": "pod-loud7:100",
@@ -164,12 +165,12 @@
       "settingsLines": [
         "pod-loud15:100 loud: lufs -9.0, gain -7.0 dB (web audio)",
         "pod-loud0:100 loud: lufs -22.0, gain +6.0 dB (web audio)",
-        "pod-loud10:100 loud: lufs -19.0, gain +3.0 dB (web audio)",
+        "pod-loud4:100 loud: lufs -12.5, gain -3.5 dB (web audio)",
         "pod-loud7:100 loud: lufs -20.0, gain 0.0 dB (unchanged: hls)",
         "pod-loud2:100 loud: lufs -18.4, gain +2.4 dB (web audio)"
       ],
       "copied": [
-        "Core 1.0.0, 2026-10-30T19:45:29.097Z",
+        "Core 1.0.0, 2026-10-30T22:02:00.428Z",
         "pool 2026-10-23T00:00:00.000Z, 16 moments, skipped 0",
         "device Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1",
         "online true, standalone false",
@@ -178,13 +179,13 @@
         "first frame preloaded: none",
         "background: started 0, ended 0, next 0, rejected 0",
         "loudness leveling on, audio context running",
-        "pod-loud8:100 loud: skipped cors, lufs -21.0, gain 0.0 dB (unchanged: skipped cors)",
-        "pod-loud14:100 loud: lufs -17.5, gain +1.5 dB (web audio)",
-        "pod-loud5:100 loud: lufs -45.0, gain +12.0 dB (web audio)"
+        "pod-loud5:100 loud: lufs -45.0, gain +12.0 dB (web audio)",
+        "pod-loud11:100 loud: lufs -13.2, gain -2.8 dB (web audio)",
+        "pod-loud14:100 loud: lufs -17.5, gain +1.5 dB (web audio)"
       ],
       "ytVolumes": {
-        "ytloud00002": 100,
         "ytloud00005": 100,
+        "ytloud00002": 100,
         "ytloud00000": 50,
         "ytloud00003": 71,
         "ytloud00004": 100,

@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-30T19:41:59.885Z",
+  "at": "2026-10-30T21:58:33.421Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -50,49 +50,49 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1633,
+        "coldStartMs": 1625,
         "preloadedMoments": 30,
         "preloadedBytes": 6289236,
         "bytesPerMoment": 209641,
         "swipes": 10,
         "cachedStartMs": [
-          11,
-          10,
-          9,
-          18,
-          11,
-          9,
+          8,
           9,
           10,
-          9,
-          10
+          8,
+          8,
+          8,
+          7,
+          7,
+          7,
+          7
         ],
-        "cachedStartMax": 18,
-        "cachedStartMedian": 10,
+        "cachedStartMax": 10,
+        "cachedStartMedian": 8,
         "firstFrames": [
-          "first-frame 11ms buffered local",
-          "first-frame 11ms buffered local",
-          "first-frame 10ms buffered local",
-          "first-frame 9ms buffered local",
-          "first-frame 18ms buffered local",
-          "first-frame 11ms buffered local",
-          "first-frame 9ms buffered local",
+          "first-frame 8ms buffered local",
+          "first-frame 8ms buffered local",
           "first-frame 9ms buffered local",
           "first-frame 10ms buffered local",
-          "first-frame 9ms buffered local",
-          "first-frame 10ms buffered local"
+          "first-frame 8ms buffered local",
+          "first-frame 8ms buffered local",
+          "first-frame 8ms buffered local",
+          "first-frame 7ms buffered local",
+          "first-frame 7ms buffered local",
+          "first-frame 7ms buffered local",
+          "first-frame 7ms buffered local"
         ],
         "settingsText": "Preloaded: 37 moments, 7.4 MB",
         "offlineStartMs": [
-          11,
-          8,
-          10,
-          9
+          7,
+          9,
+          7,
+          7
         ],
         "offlineRestartStartMs": [
-          10,
-          8,
-          9
+          7,
+          7,
+          7
         ],
         "poorFirst12Youtube": 0,
         "normalFirst12Youtube": 6
