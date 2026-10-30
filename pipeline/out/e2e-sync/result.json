@@ -1,5 +1,5 @@
 {
- "at": "2026-10-30T11:24:44.476Z",
+ "at": "2026-10-30T11:54:42.900Z",
  "runs": [
   {
    "browser": "webkit",
@@ -43,7 +43,7 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "writeDelayMs": 10020,
+   "writeDelayMs": 10027,
    "hosts": [
     "127.0.0.1:4176",
     "fonts.googleapis.com",
@@ -75,8 +75,8 @@
     "bUnlocked": true,
     "bHasTokenFromQr": true,
     "bGotCaptionsFromA": true,
-    "bWrites": true,
-    "aGetsSpeedFromB": true,
+    "bWrites": false,
+    "aGetsSpeedFromB": false,
     "conflictResolved": true,
     "conflictMergedBoth": true,
     "conflictNoErrorLine": true,
@@ -95,7 +95,7 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "writeDelayMs": 10015,
+   "writeDelayMs": 10021,
    "hosts": [
     "127.0.0.1:4176",
     "fonts.googleapis.com",
@@ -106,6 +106,9 @@
    "errors": []
   }
  ],
- "failed": [],
+ "failed": [
+  "chromium.bWrites",
+  "chromium.aGetsSpeedFromB"
+ ],
  "exceptions": []
 }
