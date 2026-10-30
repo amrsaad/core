@@ -19,6 +19,7 @@ import { answer, cardDue, pickRecall, type Recent } from './recall';
 import { RecallCard, type RecallCtl } from './RecallCard';
 import { CaptionSheet } from './CaptionSheet';
 import { sourceLine } from './source';
+import { askUrl, markAsked } from './ask';
 import { NoteSheet, type NoteCtl } from './NoteSheet';
 import { createWheel, deskKey, endsFast, TAB_KEYS, wheelPx, type DeskAction } from './desktop';
 import { DeskPanel } from './DeskShell';
@@ -1092,6 +1093,25 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (href) window.open(href, '_blank', 'noopener');
   };
 
+  /**
+   * Ask (Entscheidung 18): öffnet claude.ai mit vorausgefülltem Prompt zu diesem Moment (iPhone: die Claude-App, falls installiert).
+   * Zählt wie More (markAsked), setzt askedAt im Zustand (wandert per Sync) und schließt das Blatt. Der Moment bleibt stehen
+   * und angehalten, wie bei Source, der Feed geht nicht weiter. Das Fenster öffnet im selben Klick, sonst blockt es der Browser.
+   */
+  const ask = (target?: Moment | null) => {
+    const m = target ?? queue.current[idxRef.current];
+    if (!m || forYouRef.current || recallRef.current || confirmRef.current) return;
+    navigator.vibrate?.(10);
+    window.open(askUrl(m), '_blank', 'noopener');
+    update((s) => markAsked(s, m, Date.now(), clockNow().getTime()));
+    if (m === queue.current[idxRef.current]) {
+      current().player?.pauseVideo();
+      userPaused.current = true;
+      setPaused(true);
+    }
+    setNote(null);
+  };
+
   const onDown = (e: React.PointerEvent) => {
     const r = g.current;
     // Der Seitenwechsel wird gerade übernommen (eine Zeichnung lang): kein neuer Griff
@@ -1320,6 +1340,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         return openFull();
       case 'note':
         return openNote();
+      case 'ask':
+        return ask(noteRef.current);
       case 'caption':
         return setCapOpen((o) => !o);
       case 'fastOn':
@@ -1522,6 +1544,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       latency: () => stateRef.current.playLatency ?? [],
       seen: (id: string) => !!stateRef.current.momentSeen[id],
       liked: (id: string) => !!stateRef.current.momentLiked?.[id],
+      asked: (id: string) => stateRef.current.momentAsked?.[id] ?? 0,
       saved: (id: string) => !!stateRef.current.savedMoments[id],
       tapMs: () => stateRef.current.tapMs ?? [],
       swipeFrames: () => stateRef.current.swipeFrames ?? [],
@@ -1818,7 +1841,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </button>
       )}
 
-      {note && <NoteSheet key={note.id} m={note} speaker={speakerLine(note.channel)} onChip={(c, t) => saveNote(note, c, t)} onDone={(t) => saveNote(note, null, t)} onCancel={cancelNote} confirm={confirmText} keys={!!desk} ctl={noteCtl} />}
+      {note && <NoteSheet key={note.id} m={note} speaker={speakerLine(note.channel)} onChip={(c, t) => saveNote(note, c, t)} onDone={(t) => saveNote(note, null, t)} onAsk={() => ask(note)} onCancel={cancelNote} confirm={confirmText} keys={!!desk} ctl={noteCtl} />}
     </div>
   );
 }

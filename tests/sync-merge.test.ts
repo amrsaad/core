@@ -447,7 +447,7 @@ describe('Dokument und Zustand', () => {
   it('toDoc nimmt nur Synchronisiertes, Gerätespezifisches bleibt draußen', () => {
     const s = base({ momentSeen: { a: 1 }, deskHelpSeen: true, playLatency: [{ ms: 1, buffered: true, at: 1 }] as never, tapMs: [{ ms: 1, at: 1 }] as never, settings: { ...emptyState().settings, playerMode: 'single' } });
     const d = toDoc(s);
-    expect(Object.keys(d.state).sort()).toEqual(['dayCount', 'digestTaps', 'feedTime', 'feedbackNotes', 'momentLiked', 'momentLog', 'momentSeen', 'momentWeights', 'mutedChannels', 'plans', 'recall', 'savedMoments', 'settings', 'weekReviewShown']);
+    expect(Object.keys(d.state).sort()).toEqual(['dayCount', 'digestTaps', 'feedTime', 'feedbackNotes', 'momentAsked', 'momentLiked', 'momentLog', 'momentSeen', 'momentWeights', 'mutedChannels', 'plans', 'recall', 'savedMoments', 'settings', 'weekReviewShown']);
     expect(Object.keys(d.state.settings).sort()).toEqual(['areaShares', 'captionMode', 'playbackSpeed']);
     expect(JSON.stringify(d)).not.toMatch(/playerMode|deskHelpSeen|playLatency|tapMs/);
   });

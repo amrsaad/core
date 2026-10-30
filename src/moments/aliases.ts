@@ -40,7 +40,7 @@ const res = (idx: AliasIndex, id: string) => idx.map[id] ?? id;
 const has = (idx: AliasIndex, id: string) => id in idx.map;
 
 /** Zeitstempel-Schlüssel mit Moment-ID: saved:<id> und liked:<id> */
-const TS_PREFIXES = ['saved:', 'liked:'] as const;
+const TS_PREFIXES = ['saved:', 'liked:', 'asked:'] as const;
 
 function renameKeys<T>(o: Record<string, T>, idx: AliasIndex, combine: (a: T, b: T) => T): Record<string, T> {
   const out: Record<string, T> = {};
@@ -94,6 +94,7 @@ function touches(d: SyncDoc, idx: AliasIndex): boolean {
     Object.keys(s.momentSeen).some((k) => has(idx, k)) ||
     Object.keys(s.savedMoments).some((k) => has(idx, k)) ||
     Object.keys(s.momentLiked).some((k) => has(idx, k)) ||
+    Object.keys(s.momentAsked ?? {}).some((k) => has(idx, k)) ||
     Object.keys(s.recall).some((k) => has(idx, k) || has(idx, s.recall[k].id)) ||
     s.momentLog.some((e) => has(idx, e.id)) ||
     s.feedbackNotes.some((n) => has(idx, n.id)) ||
@@ -107,6 +108,7 @@ export function migrateDoc(d: SyncDoc, idx: AliasIndex): SyncDoc {
   const s = d.state;
   const sv = resolveLww<SavedMoment>('saved:', s.savedMoments, d.ts, idx, combineSaved);
   const lk = resolveLww<number>('liked:', s.momentLiked, d.ts, idx, Math.max);
+  const ak = resolveLww<number>('asked:', s.momentAsked ?? {}, d.ts, idx, Math.max);
   const saved = sv.obj;
   // Gemerkte Momente zeigen das Abbild aus dem Pool (Start, Ende und Untertitel der aktuellen Fassung)
   for (const [k, v] of Object.entries(saved)) {
@@ -128,10 +130,10 @@ export function migrateDoc(d: SyncDoc, idx: AliasIndex): SyncDoc {
     }),
     [],
   );
-  // Alle Zeitstempel außer saved:/liked: bleiben; diese zwei Familien kommen aus resolveLww
+  // Alle Zeitstempel außer saved:/liked:/asked: bleiben; diese drei Familien kommen aus resolveLww
   const ts: Record<string, number> = {};
   for (const [k, v] of Object.entries(d.ts)) if (!TS_PREFIXES.some((p) => k.startsWith(p))) ts[k] = v;
-  Object.assign(ts, sv.ts, lk.ts);
+  Object.assign(ts, sv.ts, lk.ts, ak.ts);
   return {
     ...d,
     state: {
@@ -143,6 +145,7 @@ export function migrateDoc(d: SyncDoc, idx: AliasIndex): SyncDoc {
       ),
       savedMoments: saved,
       momentLiked: lk.obj,
+      momentAsked: ak.obj,
       recall,
       feedbackNotes: notes,
     },

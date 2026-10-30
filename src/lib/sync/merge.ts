@@ -42,6 +42,7 @@ export interface SyncState {
   notesPromptDay?: string;
   momentDay?: string;
   momentLiked: Record<string, number>;
+  momentAsked: Record<string, number>;
   mutedChannels: Record<string, string>;
   feedTime: Record<string, number>;
   weekReviewShown: Record<string, boolean>;
@@ -68,6 +69,7 @@ export const emptyDoc = (): SyncDoc => ({
     recall: {},
     feedbackNotes: [],
     momentLiked: {},
+    momentAsked: {},
     mutedChannels: {},
     feedTime: {},
     weekReviewShown: {},
@@ -84,6 +86,7 @@ export const tsKey = {
   weight: (fam: keyof Weights, k: string) => `w:${fam}:${k}`,
   saved: (id: string) => `saved:${id}`,
   liked: (id: string) => `liked:${id}`,
+  asked: (id: string) => `asked:${id}`,
   muted: (ch: string) => `muted:${ch}`,
   plan: (week: string) => `plan:${week}`,
   setting: (k: string) => `set:${k}`,
@@ -301,6 +304,7 @@ export function mergeDocs(a: SyncDoc, b: SyncDoc): SyncDoc {
       recall: mergeRecall(x.recall, y.recall),
       feedbackNotes: mergeNotes(x.feedbackNotes, y.feedbackNotes),
       momentLiked: lww(x.momentLiked, y.momentLiked, a.ts, b.ts, tsKey.liked, (p, q) => Math.max(p, q)),
+      momentAsked: lww(x.momentAsked, y.momentAsked, a.ts, b.ts, tsKey.asked, (p, q) => Math.max(p, q)),
       mutedChannels: lww(x.mutedChannels, y.mutedChannels, a.ts, b.ts, tsKey.muted, (p, q) => (cmp(p, q) >= 0 ? p : q)),
       feedTime: maxMap(x.feedTime, y.feedTime),
       weekReviewShown: orMap(x.weekReviewShown, y.weekReviewShown),
@@ -340,6 +344,7 @@ export function toDoc(s: AppState): SyncDoc {
       recall: s.recall ?? {},
       feedbackNotes: s.feedbackNotes ?? [],
       momentLiked: s.momentLiked ?? {},
+      momentAsked: s.momentAsked ?? {},
       mutedChannels: s.mutedChannels,
       feedTime: s.feedTime,
       weekReviewShown: s.weekReviewShown,
@@ -372,6 +377,7 @@ export function applyDoc(s: AppState, d: SyncDoc): AppState {
   set('recall', next.recall, eq(cur.recall, next.recall));
   set('feedbackNotes', next.feedbackNotes, eq(cur.feedbackNotes, next.feedbackNotes));
   set('momentLiked', next.momentLiked, eq(cur.momentLiked, next.momentLiked));
+  set('momentAsked', next.momentAsked, eq(cur.momentAsked, next.momentAsked));
   set('mutedChannels', next.mutedChannels, eq(cur.mutedChannels, next.mutedChannels));
   set('feedTime', next.feedTime, eq(cur.feedTime, next.feedTime));
   set('weekReviewShown', next.weekReviewShown, eq(cur.weekReviewShown, next.weekReviewShown));
@@ -419,6 +425,7 @@ export function stampChanges(prev: AppState, next: AppState, now: number): AppSt
   changed = diffKeys(prev.momentWeights?.until, next.momentWeights?.until, untilTsKey, ts, now) || changed;
   changed = diffKeys(prev.savedMoments, next.savedMoments, tsKey.saved, ts, now) || changed;
   changed = diffKeys(prev.momentLiked, next.momentLiked, tsKey.liked, ts, now) || changed;
+  changed = diffKeys(prev.momentAsked, next.momentAsked, tsKey.asked, ts, now) || changed;
   changed = diffKeys(prev.mutedChannels, next.mutedChannels, tsKey.muted, ts, now) || changed;
   changed = diffKeys(prev.plans, next.plans, tsKey.plan, ts, now) || changed;
   changed = diffKeys(prev.digestTaps, next.digestTaps, tsKey.digest, ts, now) || changed;
@@ -448,6 +455,7 @@ export function syncedChanged(a: AppState, b: AppState): boolean {
     a.notesPromptDay !== b.notesPromptDay ||
     a.momentDay !== b.momentDay ||
     a.momentLiked !== b.momentLiked ||
+    a.momentAsked !== b.momentAsked ||
     a.mutedChannels !== b.mutedChannels ||
     a.feedTime !== b.feedTime ||
     a.weekReviewShown !== b.weekReviewShown ||

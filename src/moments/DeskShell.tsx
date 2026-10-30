@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
+import { ContextLine } from './CaptionSheet';
 import { HELP_ROWS } from './desktop';
 import { FORM_LABEL, FORMS, momentText, type Form } from './form';
 import { atTime } from './hook';
@@ -133,6 +134,7 @@ export function DeskPanel({ m, speaker, form, capOpen, onCaption, onSource, reca
                 {text}
               </p>
             )}
+            <ContextLine text={m.context} testid="desk-context" />
             <dl className="vcap-meta" data-testid="desk-meta">
               <div>
                 <dt>Speaker</dt>

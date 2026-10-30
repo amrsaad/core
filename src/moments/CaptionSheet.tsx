@@ -4,9 +4,22 @@ import { atTime, closesCaption } from './hook';
 import { momentText } from './form';
 import { isArabic, type Moment } from './types';
 
+/** Kontext zur Stelle (zwei Sätze), klein und gedämpft unter dem Ausschnitt. Fehlt das Feld oder ist es leer, wird nichts gezeigt. */
+export function ContextLine({ text, testid }: { text?: string; testid: string }) {
+  const t = text?.trim();
+  if (!t) return null;
+  const ar = isArabic(t);
+  return (
+    <div className="vcap-context" data-testid={testid}>
+      <span className="vcap-ctx-label">Context</span>
+      <p className="vcap-ctx-text" dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'} style={ar ? { textAlign: 'right' } : undefined}>{t}</p>
+    </div>
+  );
+}
+
 /**
  * Aufgeklappte Caption wie bei Instagram: oben der Hook, darunter der excerpt als Lesetext (Arabisch rechtsläufig),
- * darunter Sprecher, Folge, Stelle. Das Video läuft darüber weiter, nichts wird pausiert.
+ * darunter der Kontext (falls vorhanden), dann Sprecher, Folge, Stelle. Das Video läuft darüber weiter, nichts wird pausiert.
  * Zu: Tipp außerhalb oder Wischen nach unten.
  */
 export function CaptionSheet({ m, speaker, onClose }: { m: Moment; speaker: string; onClose: () => void }) {
@@ -35,6 +48,7 @@ export function CaptionSheet({ m, speaker, onClose }: { m: Moment; speaker: stri
         {t && (
           <p className="vcap-text" data-testid="caption-excerpt" dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'} style={ar ? { textAlign: 'right' } : undefined}>{t}</p>
         )}
+        <ContextLine text={m.context} testid="caption-context" />
         <dl className="vcap-meta" data-testid="caption-meta">
           <div><dt>Speaker</dt><dd>{speaker}</dd></div>
           <div><dt>Episode</dt><dd>{m.videoTitle}</dd></div>

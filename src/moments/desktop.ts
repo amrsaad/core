@@ -3,7 +3,7 @@
  * Mobil bleibt unverändert. Was hier steht, gilt nur, wenn die Breite mindestens DESKTOP_MIN beträgt.
  *
  * Tasten: Pfeile oder J und K blättern, Leertaste Pause, M stumm, Shift+. gehalten 2x, L Herz, S Save, O Source,
- * F Rückmeldung (1 bis 6 Chips, Enter Text), 1 2 3 Reiter, C Caption, Esc schließt, bei der Abrufkarte 1 2 3 Antwort und
+ * F Rückmeldung (1 bis 6 Chips, Enter Text), A Ask (auch bei offenem Blatt), 1 2 3 Reiter, C Caption, Esc schließt, bei der Abrufkarte 1 2 3 Antwort und
  * Enter Next, ? zeigt die Übersicht.
  * Trackpad: zwei Finger senkrecht blättert (ein Wisch ist ein Schritt, der Nachlauf zählt nicht), zwei Finger nach links öffnet die Rückmeldung.
  */
@@ -52,6 +52,7 @@ export type DeskAction =
   | 'save'
   | 'source'
   | 'note'
+  | 'ask'
   | 'caption'
   | 'close'
   | 'help'
@@ -87,6 +88,7 @@ export function deskKey(ctx: DeskCtx, k: KeyIn): DeskAction | null {
   if (ctx.help || ctx.sheet) return null;
   if (ctx.note) {
     if (/^[1-6]$/.test(key)) return `chip${key}` as DeskAction;
+    if (key === 'a') return 'ask';
     return key === 'Enter' ? 'noteText' : null;
   }
   if (ctx.recall) {
@@ -117,6 +119,8 @@ export function deskKey(ctx: DeskCtx, k: KeyIn): DeskAction | null {
       return 'source';
     case 'f':
       return 'note';
+    case 'a':
+      return 'ask';
     case 'c':
       return 'caption';
     case '1':
@@ -145,6 +149,7 @@ export const HELP_ROWS: { keys: string; text: string }[] = [
   { keys: 'S', text: 'Save' },
   { keys: 'O', text: 'Open the source' },
   { keys: 'F', text: 'Feedback, then 1 to 6 for a chip or Enter for text' },
+  { keys: 'A', text: 'Ask Claude about this moment' },
   { keys: '1 2 3', text: 'Video, Audio, Text' },
   { keys: 'C', text: 'Caption' },
   { keys: 'Esc', text: 'Close' },

@@ -22,6 +22,8 @@ for (let i = 40; i < 55; i++) moments.push(mk(i, 'body', ['kraft', 'schlaf'][i %
 // Reserve: weitere Video-Momente, damit der Pool trotz Chips, Mute und Not for me nicht vor dem Ende der Prüfungen leerläuft
 for (let i = 61; i < 91; i++) moments.push(mk(i, ['brain', 'body'][i % 2], ['augen', 'retina', 'kraft', 'schlaf'][i % 4]));
 for (const m of moments) m.excerpt = EX;
+// Kontext (Entscheidung 18): jeder fünfte Moment ohne Feld, damit auch "fehlt es, wird nichts angezeigt" geprüft wird
+for (const [i, m] of moments.entries()) if (i % 5 !== 4) m.context = `Context sentence one for ${m.hook}. Context sentence two names a term.`;
 // Abrufkarte: jeder Moment hat recall, die richtige Antwort wechselt (i % 3). Ungerade Nummern und Vielfache von 3 arabisch (rechtsläufig),
 // damit in jeder Reihenfolge der Warteschlange beide Richtungen vorkommen (die Reihenfolge hängt von der Tiefe der Warteschlange ab).
 for (const m of moments) {
@@ -570,6 +572,36 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.noteOnlyLongLeftSwipe = !(await page.$('[data-testid=note-sheet]'));
     c.noteNoNetwork = gh.length === 0;
 
+    // Ask (Entscheidung 18): Knopf oberhalb der Chips, öffnet claude.ai/new mit Prompt, zählt wie More, setzt askedAt, schließt das Blatt, keine Notiz
+    {
+      await page.evaluate(() => { window.__opened = []; });
+      const okAsk = await openSheet();
+      const notesBefore = (await notes()).length;
+      c.askButtonAboveChips = okAsk && (await page.evaluate(() => {
+        const b = document.querySelector('[data-testid=note-ask]');
+        const chips = document.querySelector('.note-chips');
+        return !!b && !!chips && b.textContent.trim() === 'Ask' && !!(b.compareDocumentPosition(chips) & Node.DOCUMENT_POSITION_FOLLOWING) && b.getBoundingClientRect().bottom <= chips.getBoundingClientRect().top + 1;
+      }));
+      const wBefore = await page.evaluate(() => JSON.stringify(window.__core.weights()));
+      await page.click('[data-testid=note-ask]');
+      c.askOpensClaude = await waitFor(page, () => window.__opened.length === 1);
+      const op = await page.evaluate(() => window.__opened);
+      const decoded = op.length ? decodeURIComponent(op[0].u.slice('https://claude.ai/new?q='.length)) : '';
+      const num = /\nHook: Testmoment (\d+) /.exec(decoded)?.[1];
+      const askId = num ? `test${num.padStart(7, '0')}:100` : '';
+      r.askPrompt = decoded;
+      c.askUrlHasHook = op.length === 1 && op[0].u.startsWith('https://claude.ai/new?q=') && !!num && decoded.startsWith('Core moment from Kanal ') && decoded.endsWith('\n\nMy question: ') && decoded.length < 1500 && op[0].t === '_blank';
+      c.askUrlEncoded = op.length === 1 && !/[\s"<>]/.test(op[0].u) && op[0].u.includes('%0A');
+      c.askClosesSheet = await waitFor(page, () => !document.querySelector('[data-testid=note-sheet]'));
+      c.askSetsAskedAt = !!askId && (await page.evaluate((id) => window.__core.asked(id), askId)) > 0;
+      c.askLearns = (await page.evaluate(() => JSON.stringify(window.__core.weights()))) !== wBefore;
+      c.askNoHeartNoNote = !!askId && !(await page.evaluate((id) => window.__core.liked(id), askId)) && (await notes()).length === notesBefore;
+      await page.waitForTimeout(300);
+      c.askPausesMoment = (await page.evaluate(() => window.__core.state())) !== 1;
+      // Die spätere Prüfung noteStillNoNetwork erwartet, dass bis dahin kein Fenster geöffnet wurde
+      await page.evaluate(() => { window.__opened = []; });
+    }
+
     // Alle Chips: Bestätigungszeile am Blatt (kein Toast), dann weiter, als Notiz gespeichert. Gewichte nach den Regeln (Deckel, nicht Faktoren).
     const shot = async (label, n) => { await page.screenshot({ path: `${out}/${name}-${n}-chip-${label.replace(/ /g, '-')}.png` }); };
     const wNow = () => page.evaluate(() => JSON.parse(JSON.stringify(window.__core.weights())));
@@ -952,11 +984,23 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const ex = q('caption-excerpt');
         const meta = q('caption-meta')?.textContent ?? '';
         const kids = [...q('caption-sheet').children].map((e) => e.dataset.testid ?? e.tagName);
-        return { hook: q('caption-hook')?.textContent === m.hook, exLen: ex?.textContent.length, exDir: ex?.getAttribute('dir'), exAr: /[\u0600-\u06FF]/.test(ex?.textContent ?? ''), meta, speaker: meta.includes(m.channel.replace(/^(.*?)\s*\((.+)\)$/, '$1 · $2')), ep: meta.includes('Testvideo'), at: meta.includes('1:40'), order: kids, playing: window.__core.state() === 1 };
+        const cx = q('caption-context');
+        const cxText = cx?.querySelector('.vcap-ctx-text');
+        const cxLabel = cx?.querySelector('.vcap-ctx-label');
+        const css = (e, p) => (e ? getComputedStyle(e)[p] : null);
+        return { ctx: cx?.textContent ?? null, mctx: m.context ?? null, ctxPx: parseFloat(css(cxText, 'fontSize')) || 0, exPx: parseFloat(css(ex, 'fontSize')) || 0, ctxColor: css(cxText, 'color'), exColor: css(ex, 'color'), ctxCaps: css(cxLabel, 'textTransform'), ctxLabel: cxLabel?.textContent ?? null, hook: q('caption-hook')?.textContent === m.hook, exLen: ex?.textContent.length, exDir: ex?.getAttribute('dir'), exAr: /[\u0600-\u06FF]/.test(ex?.textContent ?? ''), meta, speaker: meta.includes(m.channel.replace(/^(.*?)\s*\((.+)\)$/, '$1 · $2')), ep: meta.includes('Testvideo'), at: meta.includes('1:40'), order: kids, playing: window.__core.state() === 1 };
       });
       await p7.waitForTimeout(400);
       const stillPlaying = await p7.evaluate(() => window.__core.state() === 1);
       if (n === 0) await p7.screenshot({ path: `${out}/${name}-18-caption-auf.png` });
+      // Kontext sichtbar machen: das Blatt bis zum Kontext scrollen (die Test-Ausschnitte sind lang), einmal je Lauf
+      if (cs.ctx && !capLogs.some((x) => x.ctxShot)) {
+        await p7.evaluate(() => document.querySelector('[data-testid=caption-sheet]')?.scrollTo(0, 1e5));
+        await p7.waitForTimeout(150);
+        await p7.screenshot({ path: `${out}/${name}-18b-caption-context.png` });
+        await p7.evaluate(() => document.querySelector('[data-testid=caption-sheet]')?.scrollTo(0, 0));
+        capLogs[n].ctxShot = true;
+      }
       if (cs.exAr && !capLogs.some((x) => x.ar)) await p7.screenshot({ path: `${out}/${name}-19-caption-arabisch.png` });
       Object.assign(capLogs[n], { open, ...cs, stillPlaying, ar: cs.exAr });
       if (n % 2 === 0) {
@@ -997,7 +1041,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     r.capLogs = capLogs;
     c.hookLongSmallerNeverCut = capLogs.every((x) => x.hk.step === '1' && !x.hk.clipped && x.hk.full && x.hk.size === 15);
     c.captionOpensWithContent = capLogs.every((x) => x.open && x.hook && x.exLen > 50 && x.speaker && x.ep && x.at);
-    c.captionOrder = capLogs.every((x) => x.order.join() === 'DIV,caption-hook,caption-excerpt,caption-meta');
+    c.captionOrder = capLogs.every((x) => x.order.filter((t) => t !== 'caption-context').join() === 'DIV,caption-hook,caption-excerpt,caption-meta');
+    // Kontext (Entscheidung 18): unter dem Ausschnitt, kleiner und gedämpft, Überschrift wie die anderen Meta-Zeilen (Großbuchstaben, gesperrt), kein eigenes Blatt, fehlt das Feld, fehlt die Zeile
+    c.captionShowsContext = capLogs.some((x) => x.mctx) && capLogs.every((x) => (x.mctx ? !!x.ctx && x.ctx.startsWith('Context') && x.ctx.includes(x.mctx) : x.ctx === null));
+    c.captionContextBelowExcerpt = capLogs.filter((x) => x.mctx).every((x) => x.order.indexOf('caption-context') === x.order.indexOf('caption-excerpt') + 1 && x.order.indexOf('caption-context') < x.order.indexOf('caption-meta'));
+    c.captionContextMutedSmall = capLogs.filter((x) => x.mctx).every((x) => x.ctxPx > 0 && x.ctxPx < x.exPx && x.ctxColor !== x.exColor && x.ctxCaps === 'uppercase' && x.ctxLabel === 'Context');
     c.captionKeepsPlaying = capLogs.every((x) => x.playing && x.stillPlaying);
     c.captionCloses = capLogs.every((x) => x.closed);
     c.captionArabicRtl = capLogs.some((x) => x.exAr) && capLogs.filter((x) => x.exAr).every((x) => x.exDir === 'rtl') && capLogs.filter((x) => !x.exAr).every((x) => x.exDir === 'ltr');

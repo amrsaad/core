@@ -23,6 +23,8 @@ export interface Moment {
   topic: string;
   hook: string;
   forYou?: string;
+  /** Kontext zur Stelle, zwei Sätze (Entscheidung 18 in core-content). Fehlt das Feld, wird nichts angezeigt. */
+  context?: string;
   kind: Kind;
   recall?: Recall;
   /** Core Digest (Know oder Rule): Abrufkarte nach 1, 4 und 14 Tagen statt 2, 7 und 21 */

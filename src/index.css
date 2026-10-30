@@ -261,6 +261,10 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 .vcap-hook { margin: 0 0 12px; font-size: 20px; line-height: 27px; font-weight: 700; }
 .vcap-text { margin: 0 0 16px; white-space: pre-line; font-size: 17px; line-height: 26px; color: #e0e0e0; }
 .vcap-text[dir='rtl'] { font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', sans-serif; font-size: 20px; line-height: 34px; }
+.vcap-context { margin: 0 0 16px; }
+.vcap-ctx-label { display: block; margin-bottom: 2px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #8a8f98; }
+.vcap-ctx-text { margin: 0; font-size: 14px; line-height: 20px; color: #a3a3a3; }
+.vcap-ctx-text[dir='rtl'] { font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', sans-serif; font-size: 16px; line-height: 26px; }
 .vcap-meta { margin: 0; border-top: 1px solid #262931; padding-top: 12px; display: grid; gap: 6px; font-size: 14px; line-height: 20px; }
 .vcap-meta > div { display: flex; gap: 12px; }
 .vcap-meta dt { width: 64px; flex: none; color: #8a8a8a; }
@@ -303,6 +307,9 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 .vfeed img, .vfeed video, .vfeed iframe { pointer-events: none; }
 .note-confirm { min-height: 24px; margin-bottom: 8px; font-size: 17px; line-height: 24px; font-weight: 600; color: #fff; }
 .note-chip:disabled { opacity: .35; }
+.note-ask { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 60px; margin-bottom: 10px; padding: 0 16px; border-radius: 16px; border: 1px solid #3a3d45; background: #1a1c21; color: #fff; font-size: 18px; font-weight: 600; }
+.note-ask:active { background: #fff; color: #000; border-color: #fff; }
+.note-ask:disabled { opacity: .35; }
 .note-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
 .note-chip { min-height: 60px; padding: 0 16px; border-radius: 16px; border: 1px solid #3a3d45; background: #1a1c21; color: #fff; font-size: 18px; font-weight: 600; }
 .note-chip:last-child:nth-child(odd) { grid-column: 1 / -1; }

@@ -98,6 +98,8 @@ export interface AppState {
   swipeFrames?: FrameSample[];
   /** Momente mit gefülltem Herz (More like this) */
   momentLiked?: Record<string, number>;
+  /** Momente, zu denen Ask benutzt wurde: Moment-ID auf askedAt (ms). Wandert per Sync, der Digest liest es. */
+  momentAsked?: Record<string, number>;
   /** Rückmeldung: jede Notiz (Chip oder Text) wird lokal gesammelt und einmal am Tag gesammelt als Issue gesendet */
   feedbackNotes?: NoteEntry[];
   /** Tag (lokal), an dem die Zeile "N notes, send?" zuletzt gezeigt wurde */

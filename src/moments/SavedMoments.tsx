@@ -22,6 +22,7 @@ export function SavedMoments({ state, update }: { state: AppState; update: (fn: 
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <span className="t-meta" style={{ color: AREA_COLOR[m.area] }}>
                 {AREA_LABEL[m.area]} <span className="text-muted">· {m.channel}{done ? ' · applied' : ''}</span>
+                {state.momentAsked?.[m.id] ? <span className="saved-asked text-muted" data-testid="saved-asked" title="You asked Claude about this moment"> · asked</span> : null}
               </span>
               <span className="text-[16px] font-semibold leading-[22px]">{m.hook}</span>
               {m.forYou && <span className="text-[14px] leading-[20px] text-muted">{m.forYou}</span>}

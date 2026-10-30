@@ -10,12 +10,12 @@ export interface NoteCtl {
 }
 
 /**
- * Rückmeldung in einer Ebene. Ein Tipp auf einen Chip speichert sofort (mit dem Text, falls schon einer im Feld steht) und
+ * Rückmeldung in einer Ebene. Oben der Knopf Ask (Claude mit Prompt zu diesem Moment, Taste A). Ein Tipp auf einen Chip speichert sofort (mit dem Text, falls schon einer im Feld steht) und
  * schließt das Blatt. Done speichert nur den Text. Ein Tipp neben das Blatt schließt es ohne Notiz. Kein Send-Knopf.
  * Desktop (keys): die Chips tragen die Nummern 1 bis 6, Enter springt ins Textfeld, Enter im Textfeld speichert (Shift+Enter
  * macht eine neue Zeile).
  */
-export function NoteSheet({ m, speaker, onChip, onDone, onCancel, confirm, keys, ctl }: { m: Moment; speaker: string; onChip: (chip: Chip, text: string) => void; onDone: (text: string) => void; onCancel: () => void; /** Bestätigungszeile nach einem Chip (z.B. "Less Barbell Medicine"), solange sie steht sind die Chips gesperrt */ confirm?: string | null; keys?: boolean; ctl?: MutableRefObject<NoteCtl | null> }) {
+export function NoteSheet({ m, speaker, onChip, onDone, onAsk, onCancel, confirm, keys, ctl }: { m: Moment; speaker: string; onChip: (chip: Chip, text: string) => void; onDone: (text: string) => void; /** Ask: öffnet Claude mit vorausgefülltem Prompt, schließt das Blatt */ onAsk: () => void; onCancel: () => void; /** Bestätigungszeile nach einem Chip (z.B. "Less Barbell Medicine"), solange sie steht sind die Chips gesperrt */ confirm?: string | null; keys?: boolean; ctl?: MutableRefObject<NoteCtl | null> }) {
   const [text, setText] = useState('');
   const field = useRef<HTMLTextAreaElement>(null);
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
@@ -35,6 +35,10 @@ export function NoteSheet({ m, speaker, onChip, onDone, onCancel, confirm, keys,
           <span>{speaker}</span>
         </div>
         <div className="note-confirm" data-testid="note-confirm" role="status" aria-live="polite">{confirm ?? ''}</div>
+        <button type="button" className="note-ask" data-testid="note-ask" disabled={!!confirm} onClick={onAsk}>
+          Ask
+          {keys && <kbd className="note-key" aria-hidden="true">A</kbd>}
+        </button>
         <div className="note-chips" role="group" aria-label="Feedback">
           {CHIPS.map((c, i) => (
             <button key={c} type="button" className="note-chip" data-testid={`note-chip-${c}`} disabled={!!confirm} onClick={() => onChip(c, text)}>

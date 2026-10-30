@@ -15,6 +15,7 @@ const mk = (i, area, extra = {}) => ({
   id: `test${String(i).padStart(7, '0')}:100`, videoId: `test${String(i).padStart(7, '0')}`, start: 100, end: 160 + (i % 3) * 20,
   channel: `Kanal ${area} (Dr. Test ${i % 4})`, videoTitle: `Testvideo ${i}`, area, topic: 'augen', hook: `Testmoment ${i} ${area}`, kind: 'regel',
   createdAt: '2026-10-20T00:00:00Z', cues: [[0, 'Untertitel eins, a marketing message'], [2, 'Untertitel zwei']], excerpt: EX,
+  context: `Context sentence one for moment ${i}. Context sentence two names a term.`,
   recall: { question: `What follows from moment ${i}?`, options: [`Wrong A ${i}`, `Right ${i}`, `Wrong B ${i}`], correct: 1, why: `Because ${i} says so.` }, ...extra,
 });
 const moments = [];
@@ -216,6 +217,14 @@ try {
   await press(pg, 'c', 150);
   const capOpen = await has(pg, 'desk-caption');
   c.keyC = !capBefore && capOpen && (await E(pg, 'desk-meta').innerText()).includes('Testvideo');
+  // Kontext im Panel, unter dem Ausschnitt, mit der Überschrift "Context"
+  const deskCtx = await pg.evaluate(() => {
+    const e = document.querySelector('[data-testid=desk-context]');
+    const m = window.__core.moment();
+    const ex = document.querySelector('[data-testid=desk-excerpt]');
+    return { text: e?.textContent ?? null, m: m.context, below: !!ex && !!e && !!(ex.compareDocumentPosition(e) & Node.DOCUMENT_POSITION_FOLLOWING), label: e?.querySelector('.vcap-ctx-label')?.textContent };
+  });
+  c.deskCaptionContext = deskCtx.label === 'Context' && deskCtx.text.includes(deskCtx.m) && deskCtx.below;
   await pg.screenshot({ path: `${out}/03-panel-caption.png` });
   await press(pg, 'j', 300);
   c.captionStaysOpenOnNext = await has(pg, 'desk-caption');
@@ -261,6 +270,24 @@ try {
   await press(pg, 'f', 200);
   await press(pg, 'Escape', 150);
   c.escClosesNote = !(await has(pg, 'note-sheet'));
+
+  // A Ask: öffnet claude.ai/new mit Prompt zum laufenden Moment (auch ohne Blatt), Taste und Knopf im Blatt, Saved zeigt "asked"
+  await pg.evaluate(() => { window.__opened = []; window.open = (u, t, f) => { window.__opened.push({ u, t, f }); return null; }; });
+  const am = await pg.evaluate(() => window.__core.moment());
+  await press(pg, 's', 150);
+  await press(pg, 'a', 250);
+  const askOpened = await pg.evaluate(() => window.__opened);
+  c.keyA = askOpened.length === 1 && askOpened[0].u.startsWith('https://claude.ai/new?q=') && decodeURIComponent(askOpened[0].u.slice('https://claude.ai/new?q='.length)).includes(`Hook: ${am.hook}`) && (await pg.evaluate((id) => window.__core.asked(id), am.id)) > 0;
+  c.keyAContext = decodeURIComponent(askOpened[0]?.u ?? '').includes(`Context: ${am.context}`);
+  await E(pg, 'desk-saved').click();
+  c.savedShowsAsked = await waitFor(pg, () => !!document.querySelector('[data-testid=saved-asked]'));
+  await press(pg, 'Escape', 200);
+  await press(pg, 's', 150);
+  await press(pg, 'f', 200);
+  c.noteSheetHasAsk = (await has(pg, 'note-ask')) && (await E(pg, 'note-ask').locator('.note-key').innerText()) === 'A' && (await E(pg, 'note-sheet').locator('.note-chip .note-key').count()) === 6;
+  await press(pg, 'a', 250);
+  c.keyAInSheet = (await pg.evaluate(() => window.__opened.length)) === 2 && !(await has(pg, 'note-sheet'));
+  await press(pg, 'j', 300);
 
   // Reiter 1 2 3
   await press(pg, '2', 600);

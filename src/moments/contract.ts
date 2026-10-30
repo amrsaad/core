@@ -26,7 +26,7 @@ const AREAS: readonly string[] = ['beat', 'body', 'brain'] satisfies Area[];
 const FORMS_OK: readonly string[] = ['video', 'audio', 'text'];
 
 /** Optionale Textfelder: ein Feld mit falschem Typ wird entfernt, der Moment bleibt */
-const OPTIONAL_TEXT = ['videoTitle', 'topic', 'forYou', 'thumb', 'url', 'sourceUrl', 'license', 'author', 'ref', 'excerpt', 'hls'] as const;
+const OPTIONAL_TEXT = ['videoTitle', 'topic', 'forYou', 'context', 'thumb', 'url', 'sourceUrl', 'license', 'author', 'ref', 'excerpt', 'hls'] as const;
 
 const isObj = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null && !Array.isArray(x);
 const isText = (x: unknown): x is string => typeof x === 'string' && x.trim().length > 0;
