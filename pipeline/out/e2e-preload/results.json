@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-30T13:45:49.389Z",
+  "at": "2026-10-30T16:58:26.285Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -50,49 +50,49 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1639,
+        "coldStartMs": 1632,
         "preloadedMoments": 30,
         "preloadedBytes": 6289236,
         "bytesPerMoment": 209641,
         "swipes": 10,
         "cachedStartMs": [
+          9,
+          9,
+          9,
+          9,
+          16,
           11,
+          9,
           10,
-          11,
-          10,
-          17,
-          10,
-          10,
-          11,
-          11,
+          9,
           9
         ],
-        "cachedStartMax": 17,
-        "cachedStartMedian": 11,
+        "cachedStartMax": 16,
+        "cachedStartMedian": 9,
         "firstFrames": [
+          "first-frame 10ms buffered local",
           "first-frame 9ms buffered local",
+          "first-frame 9ms buffered local",
+          "first-frame 9ms buffered local",
+          "first-frame 9ms buffered local",
+          "first-frame 16ms buffered local",
           "first-frame 11ms buffered local",
+          "first-frame 9ms buffered local",
           "first-frame 10ms buffered local",
-          "first-frame 11ms buffered local",
-          "first-frame 10ms buffered local",
-          "first-frame 17ms buffered local",
-          "first-frame 10ms buffered local",
-          "first-frame 10ms buffered local",
-          "first-frame 11ms buffered local",
-          "first-frame 11ms buffered local",
+          "first-frame 9ms buffered local",
           "first-frame 9ms buffered local"
         ],
         "settingsText": "Preloaded: 37 moments, 7.4 MB",
         "offlineStartMs": [
+          12,
           10,
           10,
-          10,
-          10
+          9
         ],
         "offlineRestartStartMs": [
-          13,
-          9,
-          10
+          10,
+          8,
+          9
         ],
         "poorFirst12Youtube": 0,
         "normalFirst12Youtube": 6

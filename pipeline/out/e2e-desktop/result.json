@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-30T13:38:26.919Z",
+  "at": "2026-10-30T16:50:55.967Z",
   "checks": {
     "below900Mobile": true,
     "at900Desktop": true,
@@ -53,61 +53,7 @@
     "noteConfirmLine": true,
     "notForMeKeyTopic02": true,
     "noteChipByNumber": true,
-    "noteEnterFocusesText": true,
-    "typingKeysStayText": true,
-    "noteEnterSaves": true,
-    "escClosesNote": true,
-    "keyA": true,
-    "keyAContext": true,
-    "savedShowsAsked": true,
-    "noteSheetHasAsk": true,
-    "keyAInSheet": true,
-    "tab2Audio": true,
-    "tab3Text": true,
-    "textWidth65ch": true,
-    "barFitsWindowText": true,
-    "barTabsClickableText": true,
-    "textSourceInPanel": true,
-    "tab1Video": true,
-    "recallAppears": true,
-    "recallInPanel": true,
-    "recallNoOverlay": true,
-    "recallShowsNumbers": true,
-    "recallBlocksNext": true,
-    "recallPickByNumber": true,
-    "recallWhy": true,
-    "recallDigitsIgnoredAfterAnswer": true,
-    "recallEnterNext": true,
-    "escClosesRecall": true,
-    "trackpadDown": true,
-    "trackpadUp": true,
-    "trackpadLeftOpensNote": true,
-    "trackpadRightNothing": true,
-    "wheelOnPanelIgnored": true,
-    "hoverSettings": true,
-    "hoverTab": true,
-    "hoverAction": true,
-    "hoverOpenSource": true,
-    "focusRingOnAllButtons": true,
-    "sheetOpens": true,
-    "sheetIsSideSheet": true,
-    "sheetClosesOnOutsideClick": true,
-    "sheetBlocksKeys": true,
-    "escClosesSheet": true,
-    "savedAsSheet": true,
-    "sheetCloseButton": true,
-    "questionOpensHelp": true,
-    "helpClosesAgain": true,
-    "helpButtonOpens": true,
-    "mediaMetadata": true,
-    "mediaHandlersSet": true,
-    "mediaPause": true,
-    "mediaPlay": true,
-    "mediaNext": true,
-    "mediaPrevious": true,
-    "noPageErrors": true,
-    "pwaInstallable": true,
-    "pwaManifest": true
+    "noteEnterFocusesText": false
   },
   "notes": {
     "geo": {
@@ -142,77 +88,11 @@
         "h": 270
       },
       "scrollW": 1440
-    },
-    "text": {
-      "w": 701.53125,
-      "ch65": 701.546875,
-      "col": 821.53125
-    },
-    "ring": [
-      {
-        "tag": "BUTTON",
-        "ok": true
-      },
-      {
-        "tag": "BUTTON",
-        "ok": true
-      },
-      {
-        "tag": "BUTTON",
-        "ok": true
-      },
-      {
-        "tag": "BUTTON",
-        "ok": true
-      },
-      {
-        "tag": "BUTTON",
-        "ok": true
-      },
-      {
-        "tag": "BUTTON",
-        "ok": true
-      },
-      {
-        "tag": "BUTTON",
-        "ok": true
-      },
-      null,
-      {
-        "tag": "BUTTON",
-        "ok": true
-      },
-      {
-        "tag": "BUTTON",
-        "ok": true
-      },
-      {
-        "tag": "BUTTON",
-        "ok": true
-      },
-      {
-        "tag": "BUTTON",
-        "ok": true
-      }
-    ],
-    "media": {
-      "meta": true,
-      "title": "Testmoment 35 body",
-      "artist": "Kanal body · Dr. Test 3",
-      "state": "playing"
-    },
-    "installability": [],
-    "manifest": {
-      "name": "Core",
-      "display": "standalone",
-      "start_url": "/core/",
-      "icons": [
-        "192x192",
-        "512x512",
-        "512x512"
-      ]
     }
   },
-  "ok": true,
-  "failed": []
+  "fatal": "locator.inputValue: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"note-text\"]')\n\n    at /__w/core/core/tests/e2e/desktop.mjs:276:52",
+  "ok": false,
+  "failed": [
+    "noteEnterFocusesText"
+  ]
 }
