@@ -252,7 +252,11 @@ if (CHECK) {
     if ((r.stallsMid ?? 0) > 0) fails.push(`stalls ${r.stallsMid}`);
     if ((r.startsWrongRate ?? 0) > 0) fails.push(`starts at wrong rate ${r.startsWrongRate}`);
     if ((r.srcMax ?? 0) > 3) fails.push(`elements with src ${r.srcMax}`);
-    for (const c of r.tempoChange ?? []) if (c.requests || c.loadstart || c.emptied || c.momentChanged || !c.playing) fails.push(`tempo change ${c.from}->${c.to} ${JSON.stringify(c)}`);
+    // Lautheit an: beim Wechsel von 1x weg verlässt der laufende Moment die Web-Audio-Spur, ein Neuladen ist dort erlaubt (Max 30.10.2026). Sonst null.
+    for (const c of r.tempoChange ?? []) {
+      const reloadOk = r.lane === 'on' && c.from === 1;
+      if ((!reloadOk && (c.requests || c.loadstart || c.emptied)) || c.momentChanged || !c.playing) fails.push(`tempo change ${c.from}->${c.to} ${JSON.stringify(c)}`);
+    }
     if (fails.length) { bad++; console.log('FAIL', r.browser, r.form, r.lane, r.rate, fails.join('; ')); }
   }
 }
