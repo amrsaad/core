@@ -1,5 +1,5 @@
 {
- "at": "2026-10-30T06:37:54.254Z",
+ "at": "2026-10-30T06:53:14.383Z",
  "runs": [
   {
    "browser": "webkit",
@@ -107,6 +107,15 @@
     "noteEmptyDoneNoNote": true,
     "noteOnlyLongLeftSwipe": true,
     "noteNoNetwork": true,
+    "askButtonAboveChips": true,
+    "askOpensClaude": true,
+    "askUrlHasHook": true,
+    "askUrlEncoded": true,
+    "askClosesSheet": true,
+    "askSetsAskedAt": true,
+    "askLearns": true,
+    "askNoHeartNoNote": true,
+    "askPausesMoment": true,
     "knownViaChip": true,
     "knownTopicCap": true,
     "knownChannelKept": true,
@@ -195,6 +204,9 @@
     "hookLongSmallerNeverCut": true,
     "captionOpensWithContent": true,
     "captionOrder": true,
+    "captionShowsContext": true,
+    "captionContextBelowExcerpt": true,
+    "captionContextMutedSmall": true,
     "captionKeepsPlaying": true,
     "captionCloses": true,
     "captionArabicRtl": true,
@@ -261,10 +273,10 @@
    "recall": [
     {
      "id": "test0000017:100",
-     "due": 1792929606394,
+     "due": 1792929606307,
      "results": [
       {
-       "at": 1792756806394,
+       "at": 1792756806307,
        "got": false
       }
      ]
@@ -349,14 +361,15 @@
     "slot2 hls loadedmetadata rs=0 ns=0 muted=true t=0.0"
    ],
    "tapToFill": {
-    "measured": 31,
+    "measured": 29.00000000000182,
     "recorded": 30
    },
+   "askPrompt": "Core moment from Kanal body 1, Testvideo, at 1:40.\nHook: Testmoment 53 body\nExcerpt: Sentence 1 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 2 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 3 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 4 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 5 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 6 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 7 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 8…\nContext: Context sentence one for Testmoment 53 body. Context sentence two names a term.\nSource: https://www.youtube.com/watch?v=test0000053&t=100\n\nMy question: ",
    "notesCount": 6,
    "posterCheck": {
     "checksDone": 273,
     "violations": 0,
-    "endedSeen": 30
+    "endedSeen": 29
    },
    "posterState": {
     "idx": 25,
@@ -378,13 +391,13 @@
     {
      "p": [
       0,
-      346,
+      210,
       393,
       221
      ],
      "h": [
       0,
-      346,
+      210,
       393,
       221
      ],
@@ -393,13 +406,13 @@
     {
      "p": [
       0,
-      1005,
+      869,
       393,
       221
      ],
      "h": [
       0,
-      1005,
+      869,
       393,
       221
      ],
@@ -408,13 +421,13 @@
     {
      "p": [
       0,
-      -313,
+      -449,
       393,
       221
      ],
      "h": [
       0,
-      -313,
+      -449,
       393,
       221
      ],
@@ -423,7 +436,7 @@
     {
      "p": [
       0,
-      -972,
+      -1108,
       393,
       221
      ],
@@ -483,7 +496,7 @@
     "buffered": 29,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | 98c523f |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 98c523f |\n| test0000053:100 | Testmoment 53 body | Already known | - | Video | 98c523f |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | 98c523f |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | 98c523f |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | 98c523f |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | db5b546 |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | db5b546 |\n| test0000053:100 | Testmoment 53 body | Already known | - | Video | db5b546 |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | db5b546 |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | db5b546 |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | db5b546 |",
    "badWalk": [
     {
      "idx": 2,
@@ -580,7 +593,16 @@
       "lines": 6,
       "id": "test0000000:100"
      },
+     "ctxShot": true,
      "open": true,
+     "ctx": "ContextContext sentence one for Testmoment 0 beat. Context sentence two names a term.",
+     "mctx": "Context sentence one for Testmoment 0 beat. Context sentence two names a term.",
+     "ctxPx": 14,
+     "exPx": 17,
+     "ctxColor": "rgb(163, 163, 163)",
+     "exColor": "rgb(224, 224, 224)",
+     "ctxCaps": "uppercase",
+     "ctxLabel": "Context",
      "hook": true,
      "exLen": 1180,
      "exDir": "ltr",
@@ -593,6 +615,7 @@
       "DIV",
       "caption-hook",
       "caption-excerpt",
+      "caption-context",
       "caption-meta"
      ],
      "playing": true,
@@ -624,6 +647,14 @@
       "id": "test0000001:100"
      },
      "open": true,
+     "ctx": "ContextContext sentence one for Testmoment 1 beat. Context sentence two names a term.",
+     "mctx": "Context sentence one for Testmoment 1 beat. Context sentence two names a term.",
+     "ctxPx": 14,
+     "exPx": 20,
+     "ctxColor": "rgb(163, 163, 163)",
+     "exColor": "rgb(224, 224, 224)",
+     "ctxCaps": "uppercase",
+     "ctxLabel": "Context",
      "hook": true,
      "exLen": 419,
      "exDir": "rtl",
@@ -636,6 +667,7 @@
       "DIV",
       "caption-hook",
       "caption-excerpt",
+      "caption-context",
       "caption-meta"
      ],
      "playing": true,
@@ -667,6 +699,14 @@
       "id": "test0000006:100"
      },
      "open": true,
+     "ctx": "ContextContext sentence one for Testmoment 6 beat. Context sentence two names a term.",
+     "mctx": "Context sentence one for Testmoment 6 beat. Context sentence two names a term.",
+     "ctxPx": 14,
+     "exPx": 17,
+     "ctxColor": "rgb(163, 163, 163)",
+     "exColor": "rgb(224, 224, 224)",
+     "ctxCaps": "uppercase",
+     "ctxLabel": "Context",
      "hook": true,
      "exLen": 1180,
      "exDir": "ltr",
@@ -679,6 +719,7 @@
       "DIV",
       "caption-hook",
       "caption-excerpt",
+      "caption-context",
       "caption-meta"
      ],
      "playing": true,
@@ -710,6 +751,14 @@
       "id": "test0000017:100"
      },
      "open": true,
+     "ctx": "ContextContext sentence one for Testmoment 17 brain. Context sentence two names a term.",
+     "mctx": "Context sentence one for Testmoment 17 brain. Context sentence two names a term.",
+     "ctxPx": 14,
+     "exPx": 20,
+     "ctxColor": "rgb(163, 163, 163)",
+     "exColor": "rgb(224, 224, 224)",
+     "ctxCaps": "uppercase",
+     "ctxLabel": "Context",
      "hook": true,
      "exLen": 419,
      "exDir": "rtl",
@@ -722,6 +771,7 @@
       "DIV",
       "caption-hook",
       "caption-excerpt",
+      "caption-context",
       "caption-meta"
      ],
      "playing": true,
@@ -753,6 +803,14 @@
       "id": "test0000064:100"
      },
      "open": true,
+     "ctx": "ContextContext sentence one for Testmoment 64 brain. Context sentence two names a term.",
+     "mctx": "Context sentence one for Testmoment 64 brain. Context sentence two names a term.",
+     "ctxPx": 14,
+     "exPx": 17,
+     "ctxColor": "rgb(163, 163, 163)",
+     "exColor": "rgb(224, 224, 224)",
+     "ctxCaps": "uppercase",
+     "ctxLabel": "Context",
      "hook": true,
      "exLen": 1180,
      "exDir": "ltr",
@@ -765,6 +823,7 @@
       "DIV",
       "caption-hook",
       "caption-excerpt",
+      "caption-context",
       "caption-meta"
      ],
      "playing": true,
@@ -928,6 +987,15 @@
     "noteEmptyDoneNoNote": true,
     "noteOnlyLongLeftSwipe": true,
     "noteNoNetwork": true,
+    "askButtonAboveChips": true,
+    "askOpensClaude": true,
+    "askUrlHasHook": true,
+    "askUrlEncoded": true,
+    "askClosesSheet": true,
+    "askSetsAskedAt": true,
+    "askLearns": true,
+    "askNoHeartNoNote": true,
+    "askPausesMoment": true,
     "knownViaChip": true,
     "knownTopicCap": true,
     "knownChannelKept": true,
@@ -1016,6 +1084,9 @@
     "hookLongSmallerNeverCut": true,
     "captionOpensWithContent": true,
     "captionOrder": true,
+    "captionShowsContext": true,
+    "captionContextBelowExcerpt": true,
+    "captionContextMutedSmall": true,
     "captionKeepsPlaying": true,
     "captionCloses": true,
     "captionArabicRtl": true,
@@ -1082,10 +1153,10 @@
    "recall": [
     {
      "id": "test0000017:100",
-     "due": 1792929605327,
+     "due": 1792929605395,
      "results": [
       {
-       "at": 1792756805327,
+       "at": 1792756805395,
        "got": false
       }
      ]
@@ -1170,9 +1241,10 @@
     "slot2 hls loadedmetadata rs=0 ns=0 muted=true t=0.0"
    ],
    "tapToFill": {
-    "measured": 31.89999999999418,
+    "measured": 32,
     "recorded": 32
    },
+   "askPrompt": "Core moment from Kanal brain 3, Testvideo, at 1:40.\nHook: Testmoment 27 brain\nExcerpt: Sentence 1 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 2 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 3 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 4 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 5 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 6 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 7 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 8…\nContext: Context sentence one for Testmoment 27 brain. Context sentence two names a term.\nSource: https://www.youtube.com/watch?v=test0000027&t=100\n\nMy question: ",
    "notesCount": 6,
    "posterCheck": {
     "checksDone": 285,
@@ -1304,7 +1376,7 @@
     "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | 98c523f |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 98c523f |\n| test0000027:100 | Testmoment 27 brain | Already known | - | Video | 98c523f |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | 98c523f |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | 98c523f |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | 98c523f |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | db5b546 |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | db5b546 |\n| test0000027:100 | Testmoment 27 brain | Already known | - | Video | db5b546 |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | db5b546 |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | db5b546 |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | db5b546 |",
    "badWalk": [
     {
      "idx": 2,
@@ -1401,7 +1473,16 @@
       "lines": 6,
       "id": "test0000000:100"
      },
+     "ctxShot": true,
      "open": true,
+     "ctx": "ContextContext sentence one for Testmoment 0 beat. Context sentence two names a term.",
+     "mctx": "Context sentence one for Testmoment 0 beat. Context sentence two names a term.",
+     "ctxPx": 14,
+     "exPx": 17,
+     "ctxColor": "rgb(163, 163, 163)",
+     "exColor": "rgb(224, 224, 224)",
+     "ctxCaps": "uppercase",
+     "ctxLabel": "Context",
      "hook": true,
      "exLen": 1180,
      "exDir": "ltr",
@@ -1414,6 +1495,7 @@
       "DIV",
       "caption-hook",
       "caption-excerpt",
+      "caption-context",
       "caption-meta"
      ],
      "playing": true,
@@ -1445,6 +1527,14 @@
       "id": "test0000001:100"
      },
      "open": true,
+     "ctx": "ContextContext sentence one for Testmoment 1 beat. Context sentence two names a term.",
+     "mctx": "Context sentence one for Testmoment 1 beat. Context sentence two names a term.",
+     "ctxPx": 14,
+     "exPx": 20,
+     "ctxColor": "rgb(163, 163, 163)",
+     "exColor": "rgb(224, 224, 224)",
+     "ctxCaps": "uppercase",
+     "ctxLabel": "Context",
      "hook": true,
      "exLen": 419,
      "exDir": "rtl",
@@ -1457,6 +1547,7 @@
       "DIV",
       "caption-hook",
       "caption-excerpt",
+      "caption-context",
       "caption-meta"
      ],
      "playing": true,
@@ -1488,6 +1579,14 @@
       "id": "test0000006:100"
      },
      "open": true,
+     "ctx": "ContextContext sentence one for Testmoment 6 beat. Context sentence two names a term.",
+     "mctx": "Context sentence one for Testmoment 6 beat. Context sentence two names a term.",
+     "ctxPx": 14,
+     "exPx": 17,
+     "ctxColor": "rgb(163, 163, 163)",
+     "exColor": "rgb(224, 224, 224)",
+     "ctxCaps": "uppercase",
+     "ctxLabel": "Context",
      "hook": true,
      "exLen": 1180,
      "exDir": "ltr",
@@ -1500,6 +1599,7 @@
       "DIV",
       "caption-hook",
       "caption-excerpt",
+      "caption-context",
       "caption-meta"
      ],
      "playing": true,
@@ -1531,6 +1631,14 @@
       "id": "test0000017:100"
      },
      "open": true,
+     "ctx": "ContextContext sentence one for Testmoment 17 brain. Context sentence two names a term.",
+     "mctx": "Context sentence one for Testmoment 17 brain. Context sentence two names a term.",
+     "ctxPx": 14,
+     "exPx": 20,
+     "ctxColor": "rgb(163, 163, 163)",
+     "exColor": "rgb(224, 224, 224)",
+     "ctxCaps": "uppercase",
+     "ctxLabel": "Context",
      "hook": true,
      "exLen": 419,
      "exDir": "rtl",
@@ -1543,6 +1651,7 @@
       "DIV",
       "caption-hook",
       "caption-excerpt",
+      "caption-context",
       "caption-meta"
      ],
      "playing": true,
@@ -1574,6 +1683,14 @@
       "id": "test0000064:100"
      },
      "open": true,
+     "ctx": "ContextContext sentence one for Testmoment 64 brain. Context sentence two names a term.",
+     "mctx": "Context sentence one for Testmoment 64 brain. Context sentence two names a term.",
+     "ctxPx": 14,
+     "exPx": 17,
+     "ctxColor": "rgb(163, 163, 163)",
+     "exColor": "rgb(224, 224, 224)",
+     "ctxCaps": "uppercase",
+     "ctxLabel": "Context",
      "hook": true,
      "exLen": 1180,
      "exDir": "ltr",
@@ -1586,6 +1703,7 @@
       "DIV",
       "caption-hook",
       "caption-excerpt",
+      "caption-context",
       "caption-meta"
      ],
      "playing": true,

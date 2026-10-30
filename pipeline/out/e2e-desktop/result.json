@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-30T06:39:41.070Z",
+  "at": "2026-10-30T06:55:04.835Z",
   "checks": {
     "below900Mobile": true,
     "at900Desktop": true,
@@ -40,6 +40,7 @@
     "keyS": true,
     "keySToggles": true,
     "keyC": true,
+    "deskCaptionContext": true,
     "captionStaysOpenOnNext": true,
     "escClosesCaption": true,
     "keyO": true,
@@ -53,6 +54,11 @@
     "typingKeysStayText": true,
     "noteEnterSaves": true,
     "escClosesNote": true,
+    "keyA": true,
+    "keyAContext": true,
+    "savedShowsAsked": true,
+    "noteSheetHasAsk": true,
+    "keyAInSheet": true,
     "tab2Audio": true,
     "tab3Text": true,
     "textWidth65ch": true,
@@ -160,15 +166,15 @@
         "tag": "BUTTON",
         "ok": true
       },
+      {
+        "tag": "BUTTON",
+        "ok": true
+      },
+      {
+        "tag": "BUTTON",
+        "ok": true
+      },
       null,
-      {
-        "tag": "BUTTON",
-        "ok": true
-      },
-      {
-        "tag": "BUTTON",
-        "ok": true
-      },
       {
         "tag": "BUTTON",
         "ok": true
@@ -188,8 +194,8 @@
     ],
     "media": {
       "meta": true,
-      "title": "Testmoment 37 body",
-      "artist": "Kanal body · Dr. Test 1",
+      "title": "Testmoment 35 body",
+      "artist": "Kanal body · Dr. Test 3",
       "state": "playing"
     },
     "installability": [],
