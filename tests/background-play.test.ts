@@ -1,6 +1,6 @@
 // Entscheidung 13 (core-content/docs/fundament.md): Hintergrund-Wiedergabe. Dieselben Regeln wie ios/CoreTests/BackgroundTests.swift.
 import { describe, expect, it } from 'vitest';
-import { atEnd, backgroundLine, countsSeenAtStart, EndLedger, isBackground, nextIn, onLeave, previousIn } from '../src/moments/background';
+import { atEnd, backgroundLine, countsSeenAtStart, EndLedger, isBackground, nextIn, onLeave, previousIn, successorOf } from '../src/moments/background';
 import { formOf } from '../src/moments/form';
 import { newMomentCursor, nextMomentBlock, type MomentPrefs } from '../src/moments/mix';
 import { AUDIO_ONLY, HLS, registerHls } from '../src/video/ytApi';
@@ -130,10 +130,28 @@ describe('Audio-Element nur für die Audio-Form', () => {
   });
 });
 
+describe('Nachfolger vor dem Ende', () => {
+  it('successorOf ist die Stelle idx + 1, gescheiterte Momente werden übersprungen (wie das Bereinigen in goTo)', () => {
+    const q = ['a', 'b', 'c', 'd'].map((id) => mk(id));
+    expect(successorOf(q, 0, new Set())?.id).toBe('b');
+    expect(successorOf(q, 0, new Set(['b']))?.id).toBe('c');
+    expect(successorOf(q, 0, new Set(['b', 'c']))?.id).toBe('d');
+    expect(successorOf(q, 0, new Set(['b', 'c', 'd']))).toBeUndefined();
+    expect(successorOf(q, 3, new Set())).toBeUndefined();
+  });
+  it('gleiches Ergebnis wie die bereinigte Warteschlange beim Wisch', () => {
+    const q = ['a', 'b', 'c', 'd', 'e'].map((id) => mk(id));
+    const bad = new Set(['b', 'd']);
+    const idx = 0;
+    const pruned = [...q.slice(0, idx + 1), ...q.slice(idx + 1).filter((m) => !bad.has(m.videoId))];
+    expect(successorOf(q, idx, bad)?.id).toBe(pruned[idx + 1].id);
+  });
+});
+
 describe('Diagnose', () => {
-  it('zählt started, ended und next', () => {
-    const log = ['bg: started m1', 'bg: ended m1', 'bg: next m2', 'bg: started m2', 'bg: stalled at m2', 'bg: left m2'];
-    expect(backgroundLine(log)).toBe('background: started 2, ended 1, next 1');
-    expect(backgroundLine([])).toBe('background: started 0, ended 0, next 0');
+  it('zählt started, ended, next und rejected', () => {
+    const log = ['bg: started m1', 'bg: ended m1', 'bg: next m2', 'bg: started m2', 'bg: play rejected NotAllowedError', 'bg: left m2'];
+    expect(backgroundLine(log)).toBe('background: started 2, ended 1, next 1, rejected 1');
+    expect(backgroundLine([])).toBe('background: started 0, ended 0, next 0, rejected 0');
   });
 });

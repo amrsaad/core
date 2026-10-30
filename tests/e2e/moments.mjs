@@ -413,9 +413,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.audioOnlyAudio = await waitFor(page, () => window.__core.moment()?.audio === true && !document.querySelector('[data-testid=text-view]'));
     c.audioPlays = await waitFor(page, () => window.__core.state() === 1);
     // Eigener Stream: jeder Startversuch steht mit Ergebnis im Protokoll (Metadaten, play, ok oder abgelehnt)
-    const hlsDiag = await page.evaluate(() => window.__core.diag().filter((l) => / hls /.test(l)));
+    await waitFor(page, () => window.__core.diag().some((l) => /deck loadedmetadata/.test(l)));
+    const hlsDiag = await page.evaluate(() => window.__core.diag().filter((l) => /deck /.test(l)));
     r.hlsDiag = hlsDiag.slice(-6);
-    c.hlsDiagPerAttempt = hlsDiag.some((l) => /hls loadedmetadata/.test(l)) && hlsDiag.some((l) => /hls play#\d+ loadedmetadata rs=\d ns=\d muted=\w+/.test(l)) && hlsDiag.some((l) => /hls play#\d+ ok/.test(l));
+    c.hlsDiagPerAttempt = hlsDiag.some((l) => /deck loadedmetadata rs=\d muted=\w+/.test(l)) && hlsDiag.some((l) => /deck play#\d+ start rs=\d muted=\w+/.test(l)) && hlsDiag.some((l) => /deck play#\d+ ok/.test(l));
     c.audioCoverShown = await waitFor(page, () => !!document.querySelector('.vslot[aria-hidden=false] .vaudio-art'));
     c.audioBigCaption = await waitFor(page, () => { const el = document.querySelector('[data-testid=caption] span'); return !!el?.textContent && parseFloat(getComputedStyle(el).fontSize) >= 22; });
     await page.screenshot({ path: `${out}/${name}-10-audio.png` });

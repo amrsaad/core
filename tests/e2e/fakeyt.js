@@ -35,6 +35,9 @@ window.onYouTubeIframeAPIReady && window.onYouTubeIframeAPIReady();
 // Eigene Streams (hls) laufen im Runner nicht: das <video>-Element verhält sich wie die nachgebaute API (gleicher Zeitraffer, kein Netz).
 (() => {
   const P = HTMLMediaElement.prototype;
+  // Kann schon früh eingebaut sein (background.mjs): dann nicht ein zweites Mal, sonst laufen die alten Zeitgeber weiter
+  if (P.__fake) return;
+  P.__fake = true;
   const timers = new WeakMap();
   const emit = (el, n) => el.dispatchEvent(new Event(n));
   const def = (k, d) => Object.defineProperty(P, k, { configurable: true, ...d });
@@ -42,8 +45,12 @@ window.onYouTubeIframeAPIReady && window.onYouTubeIframeAPIReady();
   def('paused', { get() { return this.__p !== false; } });
   def('ended', { get() { return !!this.__e; } });
   def('duration', { get() { return 600; } });
+  // Tempo ebenfalls nachgebaut: ein echtes playbackRate auf einem Element ohne Medium bringt WebKit im Runner bei aktiver Media Session zum Absturz
+  def('playbackRate', { get() { return this.__pr ?? 1; }, set(v) { this.__pr = v; } });
+  def('defaultPlaybackRate', { get() { return this.__dpr ?? 1; }, set(v) { this.__dpr = v; } });
   def('src', { get() { return this.__src || ''; }, set(v) { this.__src = v; } });
-  P.load = function () { setTimeout(() => emit(this, 'loadedmetadata'), 20); };
+  // Wie die Spezifikation: load() hält ein laufendes Element an (paused wird true), ohne pause-Ereignis
+  P.load = function () { clearInterval(timers.get(this)); this.__p = true; setTimeout(() => emit(this, 'loadedmetadata'), 20); };
   P.play = function () {
     clearInterval(timers.get(this));
     this.__p = false; this.__e = false;

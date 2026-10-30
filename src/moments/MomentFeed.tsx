@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
-import { createPlayer, HLS, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
+import { audioDeck, createPlayer, deckClipOf, HLS, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
 import { isYtId } from './contract';
 import { unlockAudio } from './audioGraph';
 import { loudLine, recordLoud } from './loudness';
@@ -33,7 +33,7 @@ import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
 import { addFrames, atRest, commitVelocity, dragY, frameSample, release, SPRING_BACK, SPRING_COMMIT, stepSpring, Velocity, type Spring, type SpringState } from './swipe';
 import { saveGate } from '../lib/useAppState';
 import { emptyFormLine, END_SUB, endButtonLabel, endLine, filterPool, formOf, FORM_LABEL, FORMS, momentText, otherForms, textEndReached, unseenCount, type Form } from './form';
-import { atEnd, BG_STALL_MS, countsSeenAtStart, EndLedger, isBackground, onLeave } from './background';
+import { atEnd, countsSeenAtStart, EndLedger, isBackground, onLeave, successorOf } from './background';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
 /** Desktop-Modus ab 900 px: Panel rechts, Übersicht, Seitenblatt. Fehlt das Feld, gilt das mobile Verhalten unverändert. */
@@ -376,17 +376,41 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     setForYou(null);
   };
 
+  /** Gescheiterte Momente aus dem Rest der Warteschlange nehmen (Wisch und Auto-Weiter lesen danach dieselbe Stelle) */
+  const pruneBad = () => {
+    const from = idxRef.current + 1;
+    const rest = queue.current.slice(from);
+    const clean = rest.filter((x) => !bad.current.has(x.videoId));
+    if (clean.length !== rest.length) {
+      queue.current = [...queue.current.slice(0, from), ...clean];
+      for (const sl of slots.current) if (sl.index >= from) sl.index = -1;
+    }
+  };
+
+  /**
+   * Audio-Reiter (Issue 11): den Nachfolger schon vor dem Ende bestimmen und dem Audio-Element geben. Im Ende-Handler passieren dann nur
+   * noch src und play. Der Nachfolger ist derselbe wie beim Wisch (Stelle idx + 1 der Warteschlange der Mischung).
+   */
+  const armDeck = () => {
+    if (form !== 'audio') return;
+    pruneBad();
+    const j = idxRef.current + 1;
+    if (!queue.current[j]) ensureQueue(j + 1);
+    const nm = successorOf(queue.current, idxRef.current, bad.current);
+    audioDeck.arm(nm && formOf(nm) === 'audio' ? deckClipOf(nm) : null);
+  };
+
+  /** Anzeige des Betriebssystems (Sperrbildschirm) sofort setzen, nicht erst nach dem nächsten Rendern, das im Hintergrund gedrosselt wird */
+  const setMeta = (cur: Moment | undefined) => {
+    if (!cur || !('mediaSession' in navigator) || typeof MediaMetadata === 'undefined') return;
+    navigator.mediaSession.metadata = new MediaMetadata({ title: cur.hook, artist: speakerLine(cur.channel), album: AREA_LABEL[cur.area], artwork: [{ src: thumbOf(cur) }] });
+  };
+
   const goTo = useCallback(
     (next: number) => {
       if (next < 0 || next === idxRef.current) return;
       closeForYou();
-      const from = idxRef.current + 1;
-      const rest = queue.current.slice(from);
-      const clean = rest.filter((x) => !bad.current.has(x.videoId));
-      if (clean.length !== rest.length) {
-        queue.current = [...queue.current.slice(0, from), ...clean];
-        for (const sl of slots.current) if (sl.index >= from) sl.index = -1;
-      }
+      pruneBad();
       ensureQueue(next + QUEUE_AHEAD);
       // Genau hinter dem letzten Moment liegt die Endseite (idx = Länge). Weiter geht es nicht.
       if (next > queue.current.length) return;
@@ -435,6 +459,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       if (prevM && endedAt.current !== prev) log(prevM, {});
       current().player?.pauseVideo();
       idxRef.current = next;
+      if (msOnRef.current) setMeta(queue.current[next]);
       since.current = Date.now();
       endedAt.current = -1;
       userPaused.current = false;
@@ -471,6 +496,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           setRecall({ m: rm, review: recallNow.review });
         }
       }
+      armDeck();
       setIdx(next);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -500,19 +526,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       return;
     }
     if (bg) {
-      // Auto-Weiter im Hintergrund: derselbe Weg wie der Wisch, ohne Für-dich-Karte. Gelingt der Start nicht, hält der Feed sauber an.
+      // Auto-Weiter im Hintergrund: derselbe Weg wie der Wisch, ohne Für-dich-Karte. Im Audio-Reiter hat das Audio-Element den Wechsel schon vollzogen.
       const j = idxRef.current + 1;
       goTo(j);
       const nm = queue.current[idxRef.current];
       diag.current.push(idxRef.current === j && nm ? `bg: next ${nm.id}` : `bg: stalled at ${m.id} (no next)`);
-      if (idxRef.current === j) {
-        window.setTimeout(() => {
-          if (!isBackground(document.visibilityState) || idxRef.current !== j || userPaused.current || current().st === STATE.PLAYING) return;
-          diag.current.push(`bg: stalled at ${queue.current[j]?.id}`);
-          current().player?.pauseVideo();
-          if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-        }, BG_STALL_MS);
-      }
+      // Kein Stopp-Zeitgeber mehr (Issue 11). Verweigert der Browser play(), steht "bg: play rejected" im Protokoll und die Rückkehr startet sofort.
     } else if (m.forYou) {
       forYouRef.current = true;
       setForYou(m);
@@ -520,6 +539,18 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     } else navRef.current(idxRef.current + 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [goTo]);
+  const finishRef = useRef(finish);
+  finishRef.current = finish;
+
+  // Audio-Reiter (Issue 11): das eine Audio-Element wechselt im Hintergrund selbst zum Nachfolger, danach folgt hier die Buchführung
+  // (gesehen beim Ende, Signale, Warteschlange). Beim Verlassen des Reiters gibt der Feed das Element frei.
+  useEffect(() => {
+    if (form !== 'audio') return;
+    audioDeck.diag = (line) => diag.current.push(line);
+    audioDeck.onAdvance = () => finishRef.current();
+    return () => audioDeck.release();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
    * Rest der Warteschlange ab from neu planen (Netz wurde schlecht): Die freigegebenen Momente stehen wieder zur Wahl,
@@ -535,6 +566,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!single) for (const j of [idxRef.current + 1, idxRef.current + 2]) if (j >= from && j < queue.current.length && slotFor(j).index !== j) assign(slotFor(j), j, false);
     diag.current.push(`replan from ${from} poor=${poorRef.current}`);
     syncPre(idxRef.current);
+    armDeck();
     rerender();
   };
   /** Mitten in der Sitzung: nur umsortieren (siehe reorderByRank), die schon vorgeladenen Momente bleiben in der Warteschlange */
@@ -547,6 +579,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!single) for (const j of [idxRef.current + 1, idxRef.current + 2]) if (j >= from && j < queue.current.length && slotFor(j).index !== j) assign(slotFor(j), j, false);
     diag.current.push(`reorder from ${from}`);
     syncPre(idxRef.current);
+    armDeck();
     rerender();
   };
   const replanRef = useRef(replanTail);
@@ -624,6 +657,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                 const m2 = queue.current[slot.index];
                 diag.current.push(`slot${s} ${slot.mid} error ${code}`);
                 if (m2) bad.current.add(m2.videoId);
+                armDeck();
                 // Einzelne Fehler überspringen nur. Die Fehlerseite gibt es erst, wenn nie ein Video lief und acht Momente scheiterten.
                 if (!everPlayed.current && bad.current.size >= 8) setError(`YouTube spielt gerade keine Videos ab (Fehler ${code})`);
                 else if (slot.index === idxRef.current) goTo(idxRef.current + 1);
@@ -656,6 +690,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           }
         }
         if (failedCurrent.length) goTo(idxRef.current + 1);
+        armDeck();
     };
     void (async () => {
       if (pre) {
@@ -762,7 +797,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         if (m.cues) for (const [t, text] of m.cues) if (t <= rel + 0.1) cue = text; else break;
         setCaption(cue);
       }
-      if (sl.st === STATE.PLAYING && c >= m.end - END_GUARD) finish();
+      // Im Hintergrund wechselt im Audio-Reiter das Audio-Element selbst am Ende. Die Abfrage (gedrosselt) greift nur noch als Netz, wenn der Wechsel ausblieb.
+      const deckBg = form === 'audio' && isBackground(document.visibilityState);
+      if (sl.st === STATE.PLAYING && c >= (deckBg ? m.end + 0.5 : m.end - END_GUARD)) finish();
       if (sl.st === STATE.PLAYING && document.visibilityState === 'visible') {
         feedMs.current += POLL_MS;
         if (feedMs.current - flushed >= 10_000) {
@@ -814,7 +851,11 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, form]);
 
-  const setForm = (f: Form) => update((s) => ({ ...s, settings: { ...s.settings, form: f } }));
+  const setForm = (f: Form) => {
+    // Der Tipp auf den Reiter ist die Geste, die das Audio-Element für späteres play() ohne Geste freischaltet (Hintergrund, Sperrbildschirm)
+    if (f === 'audio') audioDeck.unlock();
+    update((s) => ({ ...s, settings: { ...s.settings, form: f } }));
+  };
   // Text: Wischen wechselt erst am Textende (oben am Anfang zurück), sonst scrollt der Text
   const tt = useRef({ x: 0, y: 0, top: false, end: false });
 
@@ -1208,6 +1249,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     // Jede erste Berührung (auch ein Wisch) gilt dem Browser als Geste: Ton sofort freischalten, damit nach einem
     // Neuladen der PWA nie ein Tipp nur für den Ton nötig ist und der Hinweis nicht zurückkommt (Max, 29.10.).
     const firstTouch = !soundOn.current && !textRef.current;
+    if (form === 'audio') audioDeck.unlock();
     if (firstTouch) {
       soundOn.current = true;
       unlockLevel();
@@ -1528,9 +1570,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!msOn) return;
     const cur = queue.current[idx];
     if (desk) document.title = cur ? cur.hook : 'core';
-    if (cur && 'mediaSession' in navigator && typeof MediaMetadata !== 'undefined') {
-      navigator.mediaSession.metadata = new MediaMetadata({ title: cur.hook, artist: speakerLine(cur.channel), album: AREA_LABEL[cur.area], artwork: [{ src: thumbOf(cur) }] });
-    }
+    setMeta(cur);
     return () => {
       if (desk) document.title = 'core';
     };
@@ -1572,11 +1612,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       // Setzt die Schauzeit des laufenden Moments auf null (Tests prüfen die 3-Sekunden-Regel, ohne von der Geschwindigkeit des Runners abzuhängen)
       motion: () => ({ busy: mot.current.busy, drag: dragging.current, raf: mot.current.raf, y: mot.current.y }),
       markStart: () => { since.current = Date.now(); },
-      diag: () => diag.current.slice(-40),
+      diag: () => diag.current.slice(-400),
       /** Angewendete Lautheit je Slot (Tests, Entscheidung 16) */
       gain: () => slots.current.slice(0, SLOTS).map((x) => ({ index: x.index, loud: x.player?.loud?.() ?? null })),
       diagAll: () => diag.current.filter((x) => /^(replan|reorder|net poor|yt stub|first-frame)/.test(x)),
       slots: () => slots.current.slice(0, SLOTS).map((x) => ({ st: x.st, index: x.index })),
+      // Audio-Reiter: Schlüssel der Ausschnitte, die das eine Audio-Element geladen hat, und ob es vorhanden ist (Tests)
+      deck: () => ({ history: [...audioDeck.history], exists: audioDeck.exists, armed: audioDeck.armedKey }),
       latency: () => stateRef.current.playLatency ?? [],
       seen: (id: string) => !!stateRef.current.momentSeen[id],
       liked: (id: string) => !!stateRef.current.momentLiked?.[id],

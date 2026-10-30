@@ -1,5 +1,6 @@
-// Hintergrund-Wiedergabe (Entscheidung 13 in core-content/docs/fundament.md). Dieselben Regeln wie ios/Core/BackgroundAudio.swift.
-// Audio-Reiter: der Ton läuft weiter, am Ende kommt der nächste Moment aus der Mischung (Web: Versuch, keine Zusage).
+// Hintergrund-Wiedergabe (Entscheidung 13 in core-content/docs/fundament.md, Web seit Issue 11). Dieselben Regeln wie ios/Core/BackgroundAudio.swift.
+// Audio-Reiter: der Ton läuft weiter, am Ende kommt der nächste Moment aus der Mischung. Im Web wechselt das eine dauerhafte Audio-Element
+// die Quelle synchron im Ende-Handler (src/video/audioDeck.ts), der Nachfolger steht vorher fest (successorOf).
 // Video-Reiter: ein eigener Stream läuft bis zum Ende des Moments und stoppt dann. YouTube und Text pausieren.
 import type { Moment } from './types';
 import type { Form } from './form';
@@ -40,11 +41,17 @@ export function previousIn(queue: readonly Moment[], id: string | undefined): Mo
   return i > 0 ? queue[i - 1] : undefined;
 }
 
-/** Wartezeit, bis ein Auto-Weiter im Hintergrund als gescheitert gilt (der Browser verweigert Play ohne Geste) */
-export const BG_STALL_MS = 4000;
+/**
+ * Nachfolger für Wisch und Auto-Weiter: der erste Moment hinter idx, der nicht gescheitert ist. goTo nimmt gescheiterte Momente aus dem Rest der
+ * Warteschlange, danach steht dieser Moment an Stelle idx + 1. Der Audio-Reiter berechnet ihn vor dem Ende, damit im Ende-Handler nur src und play bleiben.
+ */
+export function successorOf<T extends { videoId: string }>(queue: readonly T[], idx: number, bad: ReadonlySet<string>): T | undefined {
+  for (let j = idx + 1; j < queue.length; j++) if (!bad.has(queue[j].videoId)) return queue[j];
+  return undefined;
+}
 
-/** Zeile für die Diagnose: wie oft started, ended und next im Protokoll stehen */
+/** Zeile für die Diagnose: wie oft started, ended, next und rejected (play vom Browser verweigert) im Protokoll stehen */
 export function backgroundLine(lines: readonly string[]): string {
   const n = (key: string) => lines.filter((l) => l.startsWith(`bg: ${key} `)).length;
-  return `background: started ${n('started')}, ended ${n('ended')}, next ${n('next')}`;
+  return `background: started ${n('started')}, ended ${n('ended')}, next ${n('next')}, rejected ${n('play rejected')}`;
 }

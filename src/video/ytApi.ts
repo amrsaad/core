@@ -4,6 +4,7 @@ import { formOf } from '../moments/form';
 import { localKey } from '../moments/localKey';
 import { audioRunning, breakLevel, chainFor, hostState, levelEnabled, markHost, onContextState, onUnlock, type Chain } from '../moments/audioGraph';
 import { clampGain, laneFor, youtubeVolume, type LoudInfo } from '../moments/loudness';
+import { AudioDeck, type DeckClip, type DeckSink } from './audioDeck';
 
 /** gainDb: Anpassung der Lautheit des Moments in dB (Entscheidung 16), fehlt sie, bleibt der Moment unverändert */
 export type YTLoad = string | { videoId: string; startSeconds?: number; endSeconds?: number; gainDb?: number };
@@ -73,7 +74,7 @@ export function loadYT(): Promise<YTNamespace> {
 /** Momente aus anderen Quellen (z.B. TED) mit eigenem HLS-Stream statt YouTube. Schlüssel ist videoId. */
 export const HLS = new Map<string, string>();
 export { isYtId } from '../moments/contract';
-/** HLS-Momente der Audio-Form laufen auf einem <audio>-Element: iOS Safari spielt es bei gesperrtem Bildschirm weiter (Entscheidung 13) */
+/** Momente der Audio-Form laufen auf dem dauerhaften <audio>-Element des audioDeck: iOS Safari spielt es bei gesperrtem Bildschirm weiter (Entscheidung 13, Issue 11) */
 export const AUDIO_ONLY = new Set<string>();
 export const registerHls = (items: { videoId: string; hls?: string; audio?: boolean; form?: 'video' | 'audio' | 'text' }[]) => {
   for (const m of items) {
@@ -90,6 +91,36 @@ export const registerHls = (items: { videoId: string; hls?: string; audio?: bool
  */
 export interface LocalSrc { url: string; offset: number }
 export const LOCAL = new Map<string, LocalSrc>();
+
+/**
+ * Das Audio-Element des Audio-Reiters (Issue 11, Entscheidung 13). Es überlebt Reiterwechsel und wird nie ersetzt.
+ * Mit Lautheit (Entscheidung 16) gibt es dazu höchstens ein zweites, fest stehendes für die geregelte Spur. Beide werden per Geste
+ * freigeschaltet, der Wechsel zwischen ihnen geschieht wie jeder Quellwechsel synchron im Ereignis-Handler.
+ */
+export const audioDeck = new AudioDeck({
+  local: (key) => LOCAL.get(key),
+  dropLocal: (key) => {
+    LOCAL.delete(key);
+  },
+  lane: (clip, local, forcePlain) =>
+    laneFor({ enabled: levelEnabled(), running: audioRunning(), gainDb: clampGain(clip.gain), local, url: clip.url, host: local ? undefined : hostState(clip.url), forcePlain }),
+  chain: (el, gainDb) => {
+    const c = chainFor(el as unknown as HTMLMediaElement);
+    if (!c) return null;
+    c.setDb(clampGain(gainDb));
+    return { linear: () => c.linear() };
+  },
+  host: (url, state) => markHost(url, state),
+  running: audioRunning,
+  broken: breakLevel,
+});
+if (typeof window !== 'undefined') onUnlock(() => levelEnabled() && audioDeck.prime());
+
+/** Ausschnitt eines Audio-Moments für das Element, null wenn der Moment nicht über das Audio-Element läuft */
+export const deckClipOf = (m: { videoId: string; start: number; end: number; gainDb?: number }): DeckClip | null => {
+  const url = HLS.get(m.videoId);
+  return url && AUDIO_ONLY.has(m.videoId) ? { key: localKey(m.videoId, m.start, m.end), id: m.videoId, url, start: m.start, end: m.end, gain: clampGain(m.gainDb) } : null;
+};
 
 /**
  * Ersatz, wenn die YouTube-API nicht zu laden ist (offline, blockiert). Streams, Podcasts und Text laufen trotzdem,
@@ -160,12 +191,15 @@ function silentWav(): string {
 }
 
 /**
- * Ein Player pro Slot, der je nach Moment YouTube (IFrame) oder einen HLS-Stream (<video>, iOS spielt HLS nativ) nutzt.
- * Nach außen dieselbe Schnittstelle wie der YouTube-Player, damit Feed und Modal unverändert bleiben.
+ * Ein Player pro Slot, der je nach Moment YouTube (IFrame), einen HLS-Stream (<video>, iOS spielt HLS nativ) oder das gemeinsame
+ * Audio-Element des Audio-Reiters (audioDeck) nutzt. Nach außen dieselbe Schnittstelle wie der YouTube-Player, damit Feed und Modal unverändert bleiben.
+ * Audio-Momente haben hier kein eigenes Element: cueVideoById merkt sich nur den Ausschnitt, erst loadVideoById oder playVideo
+ * übernimmt das gemeinsame Element (src und play, synchron).
  *
- * Lautheit (Entscheidung 16): Es gibt je Art zwei Elemente. Die unveränderte Spur (video, audio) spielt wie bisher.
- * Die geregelte Spur (videoL, audioL) hängt über Web Audio an einem GainNode mit Begrenzer. Welche Spur ein Moment bekommt,
+ * Lautheit (Entscheidung 16): Für Streams mit Bild gibt es zwei Elemente. Die unveränderte Spur (video) spielt wie bisher.
+ * Die geregelte Spur (videoL) hängt über Web Audio an einem GainNode mit Begrenzer. Welche Spur ein Moment bekommt,
  * entscheidet laneFor (loudness.ts). Jeder Fehler der geregelten Spur führt zurück auf die unveränderte, nie zu Stille.
+ * Für Audio-Momente gilt dasselbe im audioDeck.
  */
 export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, events: { onReady?: () => void; onState?: (s: number) => void; onError?: (code: number) => void; onDiag?: (line: string) => void }): YTPlayer {
   const host = el.parentElement!;
@@ -186,24 +220,10 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     host.appendChild(video);
     return video;
   };
-  // Audio-Form: eigenes <audio>-Element ohne Bild. Das Bild des Moments zeigt die Seite selbst (vaudio).
-  const mkAudio = (level: boolean) => {
-    const audio = document.createElement('audio');
-    audio.setAttribute('muted', '');
-    audio.defaultMuted = true;
-    audio.muted = true;
-    audio.preload = 'auto';
-    if (level) audio.crossOrigin = 'anonymous';
-    audio.style.display = 'none';
-    host.appendChild(audio);
-    return audio;
-  };
   const video = mkVideo(false);
-  const audio = mkAudio(false);
   const videoL = mkVideo(true);
-  const audioL = mkAudio(true);
-  const all = [video, audio, videoL, audioL];
-  const isLevel = (e: HTMLMediaElement) => e === videoL || e === audioL;
+  const all = [video, videoL];
+  const isLevel = (e: HTMLMediaElement) => e === videoL;
   /** Das Element des laufenden HLS-Moments. Die anderen sind angehalten. */
   let media: HTMLMediaElement = video;
   const hideNativeCaptions = (v: HTMLVideoElement) => () => {
@@ -221,6 +241,11 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   let offset = 0;
   let lastArgs: { id: string; start: number; end: number | undefined; play: boolean; gain: number } | null = null;
   let readyFired = false;
+  /** Der laufende Moment ist ein Audio-Moment und gehört dem gemeinsamen Audio-Element */
+  let deckMode = false;
+  let deckClip: DeckClip | null = null;
+  /** Ton gewünscht (mute und unMute), gilt für das Element, sobald dieser Player es besitzt */
+  let wantMuted = true;
   /** Lautheit des laufenden Moments, je nach Weg (HLS-Stream oder YouTube) */
   let hlsLoud: LoudInfo = { db: 0, how: 'unchanged: no value' };
   let ytLoud: LoudInfo = { db: 0, how: 'unchanged: no value' };
@@ -231,9 +256,21 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     if (mode === 'hls') events.onState?.(st);
   };
   const diag = (line: string) => events.onDiag?.(line);
+  const sink: DeckSink = {
+    state: (st) => setHlsState(st),
+    error: () => {
+      if (mode === 'hls') events.onError?.(-1);
+    },
+  };
+  const leaveDeck = () => {
+    if (!deckMode) return;
+    audioDeck.drop(sink);
+    deckMode = false;
+    deckClip = null;
+  };
   for (const el of all) {
-    // Ereignisse der gerade nicht benutzten Elemente zählen nicht
-    const mine = () => el === media;
+    // Ereignisse der gerade nicht benutzten Elemente zählen nicht, im Audio-Reiter gehört der Ton dem audioDeck
+    const mine = () => !deckMode && el === media;
     el.addEventListener('playing', () => {
       if (!mine()) return;
       setHlsState(STATE.PLAYING);
@@ -290,7 +327,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   const iframe = () => host.querySelector('iframe') as HTMLElement | null;
   const show = (m: 'yt' | 'hls') => {
     mode = m;
-    for (const v of [video, videoL]) v.style.display = m === 'hls' && media === v ? 'block' : 'none';
+    for (const v of [video, videoL]) v.style.display = m === 'hls' && !deckMode && media === v ? 'block' : 'none';
     const f = iframe();
     if (f) f.style.visibility = m === 'yt' ? 'visible' : 'hidden';
   };
@@ -339,18 +376,18 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
 
   const prepareHls = (id: string, start: number, end: number | undefined, play: boolean, gain: number, forcePlain = false, seekTo = start) => {
     try { yt.pauseVideo(); } catch { /* noch nicht bereit */ }
+    leaveDeck();
     const loc = LOCAL.get(localKey(id, start, end));
     const src = loc?.url ?? HLS.get(id)!;
-    const kind = AUDIO_ONLY.has(id) ? 'audio' : 'video';
     // Spurwahl: geregelte Spur nur, wenn Web Audio läuft und die Quelle sicher durchgelassen wird (laneFor)
     const pick = laneFor({ enabled: levelEnabled(), running: audioRunning(), gainDb: gain, local: !!loc, url: src, host: loc ? undefined : hostState(src), forcePlain });
-    let next = kind === 'audio' ? (pick.lane === 'level' ? audioL : audio) : pick.lane === 'level' ? videoL : video;
+    let next = pick.lane === 'level' ? videoL : video;
     let chain: Chain | null = null;
     let why = pick.why;
     if (pick.lane === 'level') {
       chain = chainFor(next);
       if (!chain) {
-        next = kind === 'audio' ? audio : video;
+        next = video;
         why = 'no audio graph';
       } else chain.setDb(gain);
     }
@@ -415,6 +452,27 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     } else onMeta();
   };
 
+  /** Audio-Moment: Ausschnitt merken. Mit play übernimmt dieser Player das gemeinsame Element, ohne play bleibt es unberührt. */
+  const prepareDeck = (id: string, start: number, end: number | undefined, play: boolean, gain: number) => {
+    try { yt.pauseVideo(); } catch { /* noch nicht bereit */ }
+    for (const e of all) e.pause();
+    deckMode = true;
+    show('hls');
+    lastArgs = { id, start, end, play, gain };
+    deckClip = { key: localKey(id, start, end), id, url: HLS.get(id)!, start, end, gain };
+    if (play) deckLoad(true);
+    else setHlsState(STATE.CUED);
+  };
+  const deckLoad = (play: boolean) => {
+    if (deckClip) audioDeck.load(deckClip, sink, { play, muted: wantMuted });
+  };
+  const deckPlay = () => {
+    if (!deckClip) return;
+    // Läuft der Ausschnitt schon in diesem Element, geht es dort weiter. Sonst wird er geladen (Wisch auf einen vorgemerkten Moment).
+    if (audioDeck.owns(sink) && audioDeck.holds(deckClip.key)) audioDeck.play(sink);
+    else deckLoad(true);
+  };
+
   /** YouTube kann nur absenken. Bei Anhebung bleibt es bei 100. */
   const applyYtVolume = (gain: number) => {
     ytLoud = gain < 0 ? { db: gain, how: 'youtube volume' } : { db: 0, how: gain > 0 ? 'unchanged: youtube cannot raise' : 'unchanged: no value' };
@@ -426,14 +484,17 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     const gain = typeof arg === 'string' ? 0 : clampGain(arg.gainDb);
     if (HLS.has(id)) {
       const o = typeof arg === 'string' ? { startSeconds: 0, endSeconds: undefined } : arg;
-      prepareHls(id, o.startSeconds ?? 0, o.endSeconds, play, gain);
+      if (AUDIO_ONLY.has(id)) prepareDeck(id, o.startSeconds ?? 0, o.endSeconds, play, gain);
+      else prepareHls(id, o.startSeconds ?? 0, o.endSeconds, play, gain);
     } else if (!isYtId(id)) {
       // Kein Stream und keine YouTube-ID (Text-Moment oder Podcast ohne hls): nichts laden, nichts werfen
       for (const e of all) e.pause();
+      leaveDeck();
       try { yt.pauseVideo(); } catch { /* noch nicht bereit */ }
       show('yt');
     } else {
       for (const e of all) e.pause();
+      leaveDeck();
       show('yt');
       applyYtVolume(gain);
       // gainDb gehört nicht an die YouTube-API
@@ -445,7 +506,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
 
   // Erste Berührung: die geregelten Elemente einmal mit Stille starten, damit iOS ihnen später Ton erlaubt
   const prime = () => {
-    for (const e of [videoL, audioL]) {
+    for (const e of [videoL]) {
       if (e === media || e.dataset.primed || e.dataset.src) continue;
       e.dataset.primed = '1';
       try {
@@ -466,7 +527,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   const offState = onContextState((s) => {
     if (s === 'running') return;
     window.setTimeout(() => {
-      if (isLevel(media) && !media.paused && !audioRunning()) {
+      if (!deckMode && isLevel(media) && !media.paused && !audioRunning()) {
         breakLevel(`context ${s}`);
         bail(`context ${s}`);
       }
@@ -476,29 +537,43 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   return {
     loadVideoById: (arg) => route(arg, true),
     cueVideoById: (arg) => route(arg, false),
-    playVideo: () => (mode === 'hls' ? tryPlay('playVideo') : yt.playVideo()),
-    pauseVideo: () => (mode === 'hls' ? media.pause() : yt.pauseVideo()),
+    playVideo: () => {
+      if (mode !== 'hls') yt.playVideo();
+      else if (deckMode) deckPlay();
+      else tryPlay('playVideo');
+    },
+    pauseVideo: () => {
+      if (mode !== 'hls') yt.pauseVideo();
+      else if (deckMode) audioDeck.pause(sink);
+      else media.pause();
+    },
     mute: () => {
       for (const e of all) e.muted = true;
+      wantMuted = true;
+      audioDeck.setMuted(sink, true);
       yt.mute();
     },
     unMute: () => {
       for (const e of all) e.muted = false;
+      wantMuted = false;
+      audioDeck.setMuted(sink, false);
       yt.unMute();
     },
-    isMuted: () => (mode === 'hls' ? media.muted : yt.isMuted()),
-    getCurrentTime: () => (mode === 'hls' ? media.currentTime + offset : yt.getCurrentTime()),
-    getDuration: () => (mode === 'hls' ? (media.duration || 0) + offset : yt.getDuration()),
-    isBuffered: () => mode === 'hls' && hlsState === STATE.CUED && media.readyState >= 3,
-    isLocal: () => mode === 'hls' && media.dataset.local === '1',
+    isMuted: () => (mode === 'hls' ? (deckMode ? wantMuted : media.muted) : yt.isMuted()),
+    getCurrentTime: () => (mode === 'hls' ? (deckMode ? audioDeck.time(sink) ?? deckClip?.start ?? 0 : media.currentTime + offset) : yt.getCurrentTime()),
+    getDuration: () => (mode === 'hls' ? (deckMode ? audioDeck.duration(sink) ?? 0 : (media.duration || 0) + offset) : yt.getDuration()),
+    isBuffered: () => mode === 'hls' && hlsState === STATE.CUED && (deckMode ? !!deckClip && LOCAL.has(deckClip.key) : media.readyState >= 3),
+    isLocal: () => mode === 'hls' && (deckMode ? audioDeck.local(sink) : media.dataset.local === '1'),
     getPlayerState: () => (mode === 'hls' ? hlsState : yt.getPlayerState()),
     loud: () => {
       if (mode !== 'hls') return ytLoud;
+      if (deckMode) return audioDeck.loud(sink) ?? hlsLoud;
       const c = isLevel(media) ? chainFor(media) : null;
       return c ? { ...hlsLoud, db: c.db(), linear: c.linear() } : hlsLoud;
     },
     setPlaybackRate: (rate: number) => {
       for (const e of all) e.playbackRate = rate;
+      audioDeck.setRate(rate);
       try {
         yt.setPlaybackRate(rate);
       } catch {
@@ -508,6 +583,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     destroy: () => {
       offUnlock();
       offState();
+      leaveDeck();
       for (const e of all) {
         e.pause();
         e.removeAttribute('src');

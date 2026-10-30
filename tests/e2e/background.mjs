@@ -9,6 +9,7 @@ import { chromium, devices, webkit } from 'playwright';
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-background'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
 const FAKE = readFileSync(new URL('./fakeyt.js', import.meta.url), 'utf8');
+const FAKE_MEDIA = FAKE.slice(FAKE.indexOf('// Eigene Streams'));
 
 const raw = crypto.getRandomValues(new Uint8Array(32));
 const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt']);
@@ -19,7 +20,7 @@ const encPool = async (list) => {
 };
 const k = Buffer.from(raw).toString('base64url');
 const waitFor = async (page, fn, arg, timeout = 8000) => {
-  try { await page.waitForFunction(fn, arg, { timeout }); return true; } catch { return false; }
+  try { await page.waitForFunction(fn, arg, { timeout, polling: 100 }); return true; } catch { return false; }
 };
 const freshPage = async (browser, url, k, poolBody, query) => {
   const cx = await browser.newContext({ ...devices['iPhone 15'], serviceWorkers: 'block' });
@@ -27,6 +28,8 @@ const freshPage = async (browser, url, k, poolBody, query) => {
   await cx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
   const pg = await cx.newPage();
   await pg.addInitScript(() => { window.__ytSlow = true; });
+  // Das nachgebaute Medien-Element muss vor dem ersten Gebrauch da sein: die Freischaltung per Geste spielt schon vor dem ersten Moment, ein echtes Element würde danach ein spätes ended liefern
+  await pg.addInitScript(FAKE_MEDIA);
   await pg.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBody }));
   await pg.goto(`${url}${query}#k=${k}`);
   return { cx, pg };
@@ -84,29 +87,67 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bgEndedOnce = aLog.filter((x) => x === `bg: ended ${a0}`).length === 1;
     // Der Nachfolger kommt aus derselben Mischung wie beim Wisch (gleiche Eingaben, gleicher Zufall)
     const bgNext = aLog.filter((x) => x.startsWith('bg: next ')).map((x) => x.slice(9)).slice(0, 2);
-    const fs = await freshPage(browser, url, k, poolBgAudio, '?now=2026-10-23&seed=3');
-    await fs.pg.waitForSelector('[data-testid=form-switch]');
-    await fs.pg.click('[data-testid=form-switch] >> text=Audio');
-    await waitFor(fs.pg, () => window.__core.state() === 1 && window.__core.moment()?.audio === true);
-    const swipeIds = [];
-    for (let i = 0; i < 2; i++) { await fs.pg.evaluate(() => window.__core.next()); await fs.pg.waitForTimeout(250); swipeIds.push(await fs.pg.evaluate(() => window.__core.moment().id)); }
+    let fs, swipeIds;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      fs = await freshPage(browser, url, k, poolBgAudio, '?now=2026-10-23&seed=3');
+      await fs.pg.waitForSelector('[data-testid=form-switch]');
+      await fs.pg.click('[data-testid=form-switch] >> text=Audio');
+      await waitFor(fs.pg, () => window.__core.state() === 1 && window.__core.moment()?.audio === true);
+      swipeIds = [];
+      for (let i = 0; i < 2; i++) { await fs.pg.evaluate(() => window.__core.next()); await fs.pg.waitForTimeout(250); swipeIds.push(await fs.pg.evaluate(() => window.__core.idx() + ':' + window.__core.moment().id)); }
+      // Lief der erste Moment im Vordergrund schon von selbst weiter (langsamer Runner), zählt der Versuch nicht
+      if (swipeIds[0].startsWith('1:') && swipeIds[1].startsWith('2:')) break;
+      await fs.cx.close();
+    }
+    swipeIds = swipeIds.map((x) => x.slice(2));
     c.bgAutoNextEqualsSwipe = bgNext.length === 2 && bgNext.every((id, i) => id === swipeIds[i]);
     await fs.cx.close();
     await fa.cx.close();
 
-    // Auto-Weiter scheitert im Hintergrund (Browser verweigert Play): sauber anhalten, bei der Rückkehr weiter
+    // Fünf Momente in Folge im Hintergrund (Entscheidung 13): dasselbe Audio-Element, die Quelle wechselt, nie ein zweites Element, kein Stopp
+    const fr = await freshPage(browser, url, k, poolBgAudio, '?now=2026-10-23&seed=3');
+    const pr = fr.pg;
+    await pr.waitForSelector('[data-testid=form-switch]');
+    await pr.click('[data-testid=form-switch] >> text=Audio');
+    await waitFor(pr, () => window.__core.state() === 1 && window.__core.moment()?.audio === true);
+    await pr.evaluate(() => { window.__node = document.querySelector('audio'); window.__srcs = new Set(); setInterval(() => window.__srcs.add(window.__node.src), 20); });
+    await setVisibility(pr, 'hidden');
+    c.bgFiveInARow = await waitFor(pr, () => window.__core.diag().filter((x) => x.startsWith('bg: next ')).length >= 5 && window.__core.state() === 1, undefined, 45000);
+    const row = await pr.evaluate(() => ({
+      same: window.__node === document.querySelector('audio'),
+      count: document.querySelectorAll('audio').length,
+      srcs: window.__srcs.size,
+      history: window.__core.deck().history,
+      diag: window.__core.diag().filter((x) => x.startsWith('bg: ')),
+    }));
+    r.bgRowLog = row.diag;
+    c.bgRowSameNode = row.same;
+    c.bgRowOneAudioElement = row.count === 1;
+    c.bgRowSrcChanges = row.srcs >= 5 && new Set(row.history).size >= 6;
+    c.bgRowEndedNext = row.diag.filter((x) => x.startsWith('bg: ended ')).length >= 5 && row.diag.filter((x) => x.startsWith('bg: next ')).length >= 5;
+    c.bgRowNoRejected = !row.diag.some((x) => x.startsWith('bg: play rejected'));
+    await setVisibility(pr, 'visible');
+    await pr.waitForTimeout(200);
+    c.bgRowStillPlayingBack = (await pr.evaluate(() => window.__core.state())) === 1;
+    await fr.cx.close();
+
+    // Browser verweigert play() im Hintergrund: kein Stopp nach Zeit, Diagnose mit Fehlername, bei der Rückkehr sofort weiter
     const fe = await freshPage(browser, url, k, poolBgAudio, '?now=2026-10-23&seed=3');
     const pe = fe.pg;
     await pe.waitForSelector('[data-testid=form-switch]');
     await pe.click('[data-testid=form-switch] >> text=Audio');
     await waitFor(pe, () => window.__core.state() === 1 && window.__core.moment()?.audio === true);
-    await pe.evaluate(() => { const P = HTMLMediaElement.prototype, o = P.play; P.play = function () { if (window.__denyBg && document.visibilityState === 'hidden') return Promise.reject(new DOMException('blocked', 'NotAllowedError')); return o.call(this); }; window.__denyBg = true; });
+    await pe.evaluate(() => { window.__denyBg = true; const P = HTMLMediaElement.prototype, o = P.play; P.play = function () { if (window.__denyBg && document.visibilityState === 'hidden') return Promise.reject(new DOMException('blocked', 'NotAllowedError')); return o.call(this); }; });
     await setVisibility(pe, 'hidden');
-    c.bgStallLogged = await waitFor(pe, () => window.__core.diag().some((x) => x.startsWith('bg: stalled at')), undefined, 14000);
-    c.bgStallStopsClean = (await pe.evaluate(() => window.__core.state())) !== 1 && (await pe.evaluate(() => window.__core.idx())) === 1;
+    c.bgRejectLogged = await waitFor(pe, () => window.__core.diag().some((x) => x === 'bg: play rejected NotAllowedError'), undefined, 14000);
+    const atReject = await pe.evaluate(() => window.__core.idx());
+    await pe.waitForTimeout(6000);
+    const held = await pe.evaluate(() => ({ st: window.__core.state(), idx: window.__core.idx(), diag: window.__core.diag() }));
+    c.bgRejectNoTimerStop = !held.diag.some((x) => x.startsWith('bg: stalled') || x.startsWith('bg: stop after'));
+    c.bgRejectStaysOnNext = atReject >= 1 && held.idx === atReject && held.st !== 1;
     await pe.evaluate(() => { window.__denyBg = false; });
     await setVisibility(pe, 'visible');
-    c.bgStallResumesOnReturn = await waitFor(pe, () => window.__core.state() === 1 && window.__core.idx() === 1, undefined, 4000);
+    c.bgRejectResumesOnReturn = await waitFor(pe, (idx) => window.__core.state() === 1 && window.__core.idx() === idx, atReject, 4000);
     await fe.cx.close();
 
     // Video-Reiter mit eigenem Stream: läuft im Hintergrund bis zum Ende, dann Stopp ohne Auto-Weiter
