@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-30T00:26:51.151Z",
+  "at": "2026-10-30T01:40:15.816Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -50,41 +50,41 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1706,
+        "coldStartMs": 1688,
         "preloadedMoments": 30,
         "preloadedBytes": 6289236,
         "bytesPerMoment": 209641,
         "swipes": 10,
         "cachedStartMs": [
           4,
-          6,
-          3,
-          4,
+          5,
           3,
           3,
           3,
           3,
           3,
-          3
+          3,
+          3,
+          4
         ],
-        "cachedStartMax": 6,
+        "cachedStartMax": 5,
         "cachedStartMedian": 3,
         "firstFrames": [
           "first-frame 4ms buffered",
           "first-frame 4ms buffered",
-          "first-frame 6ms buffered local",
-          "first-frame 3ms buffered local",
-          "first-frame 4ms buffered local",
+          "first-frame 5ms buffered local",
           "first-frame 3ms buffered local",
           "first-frame 3ms buffered local",
           "first-frame 3ms buffered local",
           "first-frame 3ms buffered local",
           "first-frame 3ms buffered local",
-          "first-frame 3ms buffered local"
+          "first-frame 3ms buffered local",
+          "first-frame 3ms buffered local",
+          "first-frame 4ms buffered local"
         ],
         "settingsText": "Preloaded: 37 moments, 7.4 MB",
         "offlineStartMs": [
-          3,
+          4,
           3,
           3,
           3
@@ -92,7 +92,7 @@
         "offlineRestartStartMs": [
           4,
           3,
-          4
+          5
         ],
         "poorFirst12Youtube": 0,
         "normalFirst12Youtube": 6
