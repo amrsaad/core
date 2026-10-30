@@ -80,7 +80,7 @@ describe('Spurwahl: Web Audio nur, wo es sicher ist', () => {
   const base = { enabled: true, running: true, gainDb: 4, local: false, url: 'https://cdn.example/a.mp3' };
   it('Standard: geregelte Spur im Versuch', () => expect(laneFor(base)).toEqual({ lane: 'level', why: 'cors trial' }));
   it('bekannter Host mit CORS', () => expect(laneFor({ ...base, host: 'ok' })).toEqual({ lane: 'level', why: 'cors' }));
-  it('Host ohne CORS bleibt unverändert, sonst gäbe Web Audio Stille aus', () => expect(laneFor({ ...base, host: 'bad' })).toEqual({ lane: 'plain', why: 'no cors' }));
+  it('Host ohne CORS bleibt unverändert, sonst gäbe Web Audio Stille aus', () => expect(laneFor({ ...base, host: 'bad' })).toEqual({ lane: 'plain', why: 'skipped cors' }));
   it('Ausschnitt aus dem Vorrat (Blob) ist immer sicher, auch bei Host ohne CORS', () => expect(laneFor({ ...base, local: true, url: 'blob:x', host: 'bad' }).lane).toBe('level'));
   it('natives HLS bleibt unverändert', () => {
     expect(laneFor({ ...base, url: 'https://hls.example/m/manifest.m3u8' })).toEqual({ lane: 'plain', why: 'hls' });

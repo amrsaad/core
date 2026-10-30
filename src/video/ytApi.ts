@@ -30,6 +30,8 @@ export interface YTPlayer {
   isBuffered?(): boolean;
   /** Nur Stream-Player: Der Moment kommt aus dem Offline-Vorrat (Blob-URL) */
   isLocal?(): boolean;
+  /** Nur Stream-Player: Läuft der Moment unverändert, weil es noch keinen Web-Audio-Kontext gab, jetzt an die geregelte Spur hängen (erste Berührung) */
+  relevel?(): void;
 }
 
 interface YTNamespace {
@@ -114,7 +116,11 @@ export const audioDeck = new AudioDeck({
   running: audioRunning,
   broken: breakLevel,
 });
-if (typeof window !== 'undefined') onUnlock(() => levelEnabled() && audioDeck.prime());
+if (typeof window !== 'undefined') {
+  onUnlock(() => levelEnabled() && audioDeck.prime());
+  // iOS unterbricht den Kontext (Sperrbildschirm, Anruf): läuft er nicht mehr, spielt der Audio-Reiter unverändert weiter
+  onContextState((s) => audioDeck.contextChanged(s));
+}
 
 /** Ausschnitt eines Audio-Moments für das Element, null wenn der Moment nicht über das Audio-Element läuft */
 export const deckClipOf = (m: { videoId: string; start: number; end: number; gainDb?: number }): DeckClip | null => {
@@ -239,7 +245,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   let endAt = Infinity;
   /** Tonzeit des ersten Bytes, wenn der Moment aus dem Vorrat kommt (sonst 0) */
   let offset = 0;
-  let lastArgs: { id: string; start: number; end: number | undefined; play: boolean; gain: number } | null = null;
+  let lastArgs: { id: string; start: number; end: number | undefined; play: boolean; gain: number; from: number } | null = null;
   let readyFired = false;
   /** Der laufende Moment ist ein Audio-Moment und gehört dem gemeinsamen Audio-Element */
   let deckMode = false;
@@ -293,7 +299,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
         const a = lastArgs;
         LOCAL.delete(localKey(a.id, a.start, a.end));
         delete el.dataset.src;
-        prepareHls(a.id, a.start, a.end, a.play, a.gain);
+        prepareHls(a.id, a.start, a.end, a.play, a.gain, false, a.from);
         return;
       }
       // Geregelte Spur, Quelle aus dem Netz: meist fehlt die CORS-Freigabe. Dieser Moment läuft unverändert weiter, nie ein Überspringen.
@@ -302,7 +308,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
         trialFailed = el.dataset.src ?? null;
         diag(`loud: level lane failed (code ${el.error?.code ?? '?'}), playing unchanged`);
         delete el.dataset.src;
-        prepareHls(a.id, a.start, a.end, a.play, a.gain, true);
+        prepareHls(a.id, a.start, a.end, a.play, a.gain, true, a.from, 'skipped cors');
         return;
       }
       events.onError?.(-1);
@@ -369,12 +375,12 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     const at = media.currentTime + offset;
     const running = !media.paused || a.play;
     delete media.dataset.src;
-    prepareHls(a.id, a.start, a.end, running, a.gain, true, Math.max(a.start, at));
+    prepareHls(a.id, a.start, a.end, running, a.gain, true, Math.max(a.start, at), why);
   };
 
   const pending = new WeakMap<HTMLMediaElement, () => void>();
 
-  const prepareHls = (id: string, start: number, end: number | undefined, play: boolean, gain: number, forcePlain = false, seekTo = start) => {
+  const prepareHls = (id: string, start: number, end: number | undefined, play: boolean, gain: number, forcePlain = false, seekTo = start, forceWhy?: string) => {
     try { yt.pauseVideo(); } catch { /* noch nicht bereit */ }
     leaveDeck();
     const loc = LOCAL.get(localKey(id, start, end));
@@ -383,7 +389,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     const pick = laneFor({ enabled: levelEnabled(), running: audioRunning(), gainDb: gain, local: !!loc, url: src, host: loc ? undefined : hostState(src), forcePlain });
     let next = pick.lane === 'level' ? videoL : video;
     let chain: Chain | null = null;
-    let why = pick.why;
+    let why = forcePlain && forceWhy ? forceWhy : pick.why;
     if (pick.lane === 'level') {
       chain = chainFor(next);
       if (!chain) {
@@ -401,7 +407,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       media.playbackRate = old.playbackRate;
     }
     show('hls');
-    lastArgs = { id, start, end, play, gain };
+    lastArgs = { id, start, end, play, gain, from: seekTo };
     offset = loc?.offset ?? 0;
     media.dataset.local = loc ? '1' : '0';
     endAt = (end ?? Infinity) - offset;
@@ -458,7 +464,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     for (const e of all) e.pause();
     deckMode = true;
     show('hls');
-    lastArgs = { id, start, end, play, gain };
+    lastArgs = { id, start, end, play, gain, from: start };
     deckClip = { key: localKey(id, start, end), id, url: HLS.get(id)!, start, end, gain };
     if (play) deckLoad(true);
     else setHlsState(STATE.CUED);
@@ -564,6 +570,23 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     getDuration: () => (mode === 'hls' ? (deckMode ? audioDeck.duration(sink) ?? 0 : (media.duration || 0) + offset) : yt.getDuration()),
     isBuffered: () => mode === 'hls' && hlsState === STATE.CUED && (deckMode ? !!deckClip && LOCAL.has(deckClip.key) : media.readyState >= 3),
     isLocal: () => mode === 'hls' && (deckMode ? audioDeck.local(sink) : media.dataset.local === '1'),
+    relevel: () => {
+      if (mode !== 'hls') return;
+      if (deckMode) {
+        if (audioDeck.owns(sink)) audioDeck.relevel();
+        return;
+      }
+      const a = lastArgs;
+      if (!a || isLevel(media) || hlsLoud.how !== 'unchanged: no audio context') return;
+      const loc = LOCAL.get(localKey(a.id, a.start, a.end));
+      const src = loc?.url ?? HLS.get(a.id)!;
+      const pick = laneFor({ enabled: levelEnabled(), running: audioRunning(), gainDb: a.gain, local: !!loc, url: src, host: loc ? undefined : hostState(src) });
+      if (pick.lane !== 'level') return;
+      const at = media.currentTime + offset;
+      if (a.end !== undefined && a.end - at < 4) return;
+      diag(`loud: attaching running moment at ${at.toFixed(1)} s (${pick.why})`);
+      prepareHls(a.id, a.start, a.end, !media.paused || a.play, a.gain, false, Math.max(a.start, at));
+    },
     getPlayerState: () => (mode === 'hls' ? hlsState : yt.getPlayerState()),
     loud: () => {
       if (mode !== 'hls') return ytLoud;

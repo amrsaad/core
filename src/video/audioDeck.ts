@@ -21,6 +21,11 @@ const END_EPS = 0.05;
 /** Abweichung der Position vom Start, ab der nach den Metadaten noch einmal gesprungen wird */
 const SEEK_TOL = 0.75;
 
+/** Läuft ein Ausschnitt schon unverändert und bleiben weniger Sekunden, lohnt der Wechsel auf die geregelte Spur nicht mehr */
+const RELEVEL_MIN_LEFT = 4;
+/** So lange nach einer Unterbrechung des Kontexts warten, bevor auf die unveränderte Spur gewechselt wird (iOS setzt ihn oft von selbst fort) */
+const CONTEXT_GRACE_MS = 1500;
+
 /** Null Sekunden Stille: schaltet das Element durch eine Geste frei, bevor der erste echte Moment kommt */
 const SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
 
@@ -115,6 +120,8 @@ export class AudioDeck {
   /** Quelle, die in der geregelten Spur nicht lud. Lädt sie danach unverändert, gilt der Host als ohne CORS. */
   private trialFailed: string | null = null;
   private levelPrimed = false;
+  /** Stelle (Tonzeit der Quelle), ab der der Ausschnitt zuletzt gestartet wurde: Rückfälle springen dorthin zurück, nie an den Anfang */
+  private resumeFrom = 0;
   /** Der Ausschnitt, der gerade im Element steckt */
   clip: DeckClip | null = null;
   private armed: DeckClip | null = null;
@@ -233,14 +240,14 @@ export class AudioDeck {
         // Ausschnitt aus dem Vorrat nicht abspielbar: einmal vom Netz laden statt zu überspringen
         this.deps.dropLocal(c.key);
         this.diag(`deck local failed ${c.id}, reload from net`);
-        this.start(c, this.want);
+        this.start(c, this.want, false, this.resumeFrom);
         return;
       }
       // Geregelte Spur, Quelle aus dem Netz: meist fehlt die CORS-Freigabe. Dieser Ausschnitt läuft unverändert weiter, nie ein Überspringen.
       if (this.lane === 'level') {
         this.trialFailed = c.url;
         this.diag(`loud: level lane failed (code ${el.error?.code ?? '?'}), playing unchanged`);
-        this.start(c, this.want, true);
+        this.start(c, this.want, true, this.resumeFrom, 'skipped cors');
         return;
       }
       this.diag(`deck error ${c.id}`);
@@ -259,12 +266,12 @@ export class AudioDeck {
   }
 
   /** Quelle setzen und, wenn gewollt, sofort play(). Läuft synchron, auch im Hintergrund. */
-  private start(clip: DeckClip, play: boolean, forcePlain = false, from = clip.start) {
+  private start(clip: DeckClip, play: boolean, forcePlain = false, from = clip.start, forceWhy?: string) {
     const loc = this.deps.local(clip.key);
     // Spurwahl (Lautheit): das Element der Spur, bei Misserfolg der Kette das unveränderte
     const pick = this.deps.lane?.(clip, !!loc, forcePlain) ?? { lane: 'plain' as const, why: 'no value' };
     let lane = pick.lane;
-    let why = pick.why;
+    let why = forcePlain && forceWhy ? forceWhy : pick.why;
     let target = this.ensure(lane);
     let chain: { linear: () => number } | null = null;
     if (lane === 'level') {
@@ -294,6 +301,7 @@ export class AudioDeck {
     this.want = play;
     this.offset = loc?.offset ?? 0;
     this.isLocal = !!loc;
+    this.resumeFrom = from;
     this.target = Math.max(0, from - this.offset);
     this.history.push(clip.key);
     if (this.history.length > 200) this.history.shift();
@@ -357,7 +365,41 @@ export class AudioDeck {
     if (!c || !el || this.done || this.lane !== 'level') return;
     this.diag(`loud: level lane abandoned (${why}), playing unchanged`);
     const at = el.currentTime + this.offset;
-    this.start(c, this.want || !el.paused, true, Math.max(c.start, at));
+    this.start(c, this.want || !el.paused, true, Math.max(c.start, at), why);
+  }
+
+  /**
+   * Erste Berührung (Entscheidung 16): Läuft der Ausschnitt schon unverändert, weil es noch keinen Kontext gab, wird er jetzt an die geregelte Spur
+   * gehängt, an der aktuellen Stelle. Ein Element lässt sich nicht nachträglich an Web Audio hängen (es braucht CORS von Anfang an), darum ein
+   * Quellwechsel mit kurzer Lücke. Das geschieht vor dem Ton (die Berührung schaltet ihn erst frei) und nur, wenn die Spur sicher ist.
+   */
+  relevel(): boolean {
+    const c = this.clip;
+    const el = this.el;
+    if (!c || !el || this.done || this.lane !== 'plain' || this.loudInfo.how !== 'unchanged: no audio context') return false;
+    const pick = this.deps.lane?.(c, this.isLocal, false);
+    if (!pick || pick.lane !== 'level') return false;
+    const at = el.currentTime + this.offset;
+    if (c.end !== undefined && c.end - at < RELEVEL_MIN_LEFT) return false;
+    this.diag(`loud: attaching running clip at ${at.toFixed(1)} s (${pick.why})`);
+    this.start(c, this.want || !el.paused, false, Math.max(c.start, at));
+    return true;
+  }
+
+  /**
+   * Zustand des Web-Audio-Kontexts hat sich geändert (iOS unterbricht ihn bei gesperrtem Bildschirm, Anruf). Läuft er nach kurzer Frist nicht
+   * mehr, ist die geregelte Spur stumm: zurück auf die unveränderte, an der aktuellen Stelle. Der Wechsel braucht Zeit zum Laden, eine Lücke
+   * von dieser Länge bleibt (das unveränderte Element ist durch die Geste freigeschaltet und darf im Hintergrund starten).
+   */
+  contextChanged(state: string) {
+    if (state === 'running') return;
+    window.setTimeout(() => {
+      const el = this.el;
+      if (this.lane === 'level' && !this.done && el && !el.paused && !this.deps.running?.()) {
+        this.deps.broken?.(`context ${state}`);
+        this.bail(`context ${state}`);
+      }
+    }, CONTEXT_GRACE_MS);
   }
 
   /** Ende des Ausschnitts (timeupdate oder ended), höchstens einmal je Ausschnitt */

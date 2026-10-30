@@ -1,6 +1,7 @@
 // Web Audio für die Lautheit (Entscheidung 16). Ein AudioContext, pro Media-Element eine Kette
 // MediaElementSource, GainNode, Begrenzer, Ausgang. Der Kontext entsteht erst bei der ersten Berührung (iOS Safari).
 // Vorher und bei jedem Fehler läuft das Element unverändert. Die Spurwahl steht in loudness.ts (laneFor).
+import { diagLog } from '../lib/diag';
 import { dbToLinear, LIMITER, type HostState } from './loudness';
 
 const KEY_OFF = 'core.level.off';
@@ -35,6 +36,11 @@ export function breakLevel(reason: string): void {
 }
 
 export const audioRunning = (): boolean => !!ctx && ctx.state === 'running';
+/** Zustand des Kontexts für Diagnose: none (noch nicht angelegt), running, suspended oder interrupted (iOS) */
+export const contextState = (): string => (ctx ? ctx.state : 'none');
+/** Nur für Tests: der Kontext, um ihn anzuhalten */
+export const contextForTest = (): AudioContext | null => ctx;
+const bg = () => (typeof document !== 'undefined' ? document.visibilityState : 'visible');
 
 /** Hosts, deren Quellen CORS erlauben (ok) oder nicht (bad). Gilt bis zum nächsten Fehlschlag, bleibt zwischen Sitzungen erhalten. */
 const hostOf = (url: string): string => {
@@ -64,6 +70,52 @@ export function markHost(url: string, s: HostState): void {
   } catch { /* Speicher gesperrt */ }
 }
 
+const probing = new Map<string, Promise<HostState | undefined>>();
+const PROBE_MS = 8000;
+const isStreamUrl = (u: string) => /^(blob|data):/i.test(u) || /\.m3u8(\?|#|$)/i.test(u);
+
+/**
+ * Erlaubt der Host der Quelle CORS? Ein winziger Abruf (Range 0 bis 0, Antwort wird nach den Kopfzeilen verworfen) klärt es, bevor ein Moment
+ * die geregelte Spur versucht. So gibt es keinen Fehlversuch mitten im Ton (im Audio-Reiter teilen sich alle Momente ein Element).
+ * Lesbar: Host ok. Fehler, aber derselbe Abruf ohne CORS erreicht den Host (opaque): Host ohne Freigabe, bad.
+ * Beides scheitert (offline, Zeitüberschreitung): kein Urteil, der Versuch beim Abspielen entscheidet. Ergebnis wird in markHost gemerkt.
+ */
+export function probeHost(url: string, fetchFn: typeof fetch = (...a) => fetch(...a)): Promise<HostState | undefined> {
+  const h = hostOf(url);
+  if (!h || isStreamUrl(url)) return Promise.resolve(undefined);
+  const known = readHosts()[h];
+  if (known) return Promise.resolve(known);
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return Promise.resolve(undefined);
+  const running = probing.get(h);
+  if (running) return running;
+  const once = async (mode: RequestMode): Promise<'readable' | 'opaque' | 'fail' | 'timeout'> => {
+    const ac = new AbortController();
+    let timedOut = false;
+    const t = setTimeout(() => {
+      timedOut = true;
+      ac.abort();
+    }, PROBE_MS);
+    try {
+      const res = await fetchFn(url, { method: 'GET', mode, credentials: 'omit', cache: 'no-store', signal: ac.signal, ...(mode === 'cors' ? { headers: { Range: 'bytes=0-0' } } : {}) });
+      ac.abort(); // Rumpf nicht laden, falls der Server Range ignoriert und die ganze Datei schickt
+      return res.type === 'opaque' ? 'opaque' : 'readable';
+    } catch {
+      return timedOut ? 'timeout' : 'fail';
+    } finally {
+      clearTimeout(t);
+    }
+  };
+  const p = (async (): Promise<HostState | undefined> => {
+    const a = await once('cors');
+    if (a === 'readable') return markHost(url, 'ok'), 'ok';
+    if (a !== 'fail') return undefined;
+    if ((await once('no-cors')) === 'opaque') return markHost(url, 'bad'), 'bad';
+    return undefined;
+  })().finally(() => probing.delete(h));
+  probing.set(h, p);
+  return p;
+}
+
 /** Erste Berührung (dieselbe Stelle wie die Sound-Freischaltung): Kontext anlegen und starten. Mehrfach aufrufbar. Das Versprechen löst sich, sobald der Kontext läuft oder es nicht gelang. */
 export function unlockAudio(): Promise<void> {
   if (typeof window === 'undefined' || !levelEnabled()) return Promise.resolve();
@@ -82,10 +134,15 @@ export function unlockAudio(): Promise<void> {
         if (session) session.type = 'playback';
       } catch { /* nicht unterstützt */ }
       ctx.addEventListener('statechange', () => {
+        // Zeile für die Hintergrund-Prüfung (Entscheidung 13): läuft der Kontext bei gesperrtem Bildschirm oder nicht
+        diagLog.push(`loud: audiocontext ${ctx!.state} (app ${bg()})`);
         for (const f of stateListeners) f(ctx!.state);
       });
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') void ctx?.resume().catch(() => {});
+        diagLog.push(`loud: audiocontext ${ctx?.state ?? 'none'} (app ${bg()})`);
+        // Kurz danach noch einmal: iOS ändert den Zustand oft erst nach dem Sperren
+        window.setTimeout(() => ctx && diagLog.push(`loud: audiocontext ${ctx.state} (app ${bg()}, after 1 s)`), 1000);
       });
     }
     resumed = ctx.resume().catch(() => {});

@@ -57,7 +57,7 @@ export function laneFor(o: { enabled: boolean; running: boolean; gainDb: number;
   if (o.local) return { lane: 'level', why: 'local' };
   // Natives HLS (iOS) liefert über Web Audio keinen Ton
   if (/\.m3u8(\?|#|$)/i.test(o.url)) return { lane: 'plain', why: 'hls' };
-  if (o.host === 'bad') return { lane: 'plain', why: 'no cors' };
+  if (o.host === 'bad') return { lane: 'plain', why: 'skipped cors' };
   return { lane: 'level', why: o.host === 'ok' ? 'cors' : 'cors trial' };
 }
 
@@ -75,7 +75,9 @@ export interface LoudInfo {
 export function loudLine(lufs: unknown, gainDb: unknown, path?: string): string {
   const l = isNum(lufs) ? lufs.toFixed(1) : 'none';
   const g = clampGain(gainDb);
-  return `loud: lufs ${l}, gain ${g > 0 ? '+' : ''}${g.toFixed(1)} dB${path ? ` (${path})` : ''}`;
+  // Quelle ohne CORS-Freigabe: Web Audio würde Stille ausgeben, der Moment läuft unverändert (Max, 30.10.2026)
+  const skipped = path?.includes('skipped cors') ? 'skipped cors, ' : '';
+  return `loud: ${skipped}lufs ${l}, gain ${g > 0 ? '+' : ''}${g.toFixed(1)} dB${path ? ` (${path})` : ''}`;
 }
 
 /** Wiedergegebene Momente der Sitzung, neueste zuletzt. Settings liest daraus. */

@@ -6,7 +6,7 @@ import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { audioDeck, createPlayer, deckClipOf, HLS, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
 import { isYtId } from './contract';
-import { unlockAudio } from './audioGraph';
+import { contextForTest, levelEnabled, probeHost, unlockAudio } from './audioGraph';
 import { loudLine, recordLoud } from './loudness';
 import { browserPreloader } from './preloader';
 import { netRank, PRELOAD_COUNT, streamKind } from './preload';
@@ -249,8 +249,22 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     [pool, today, pre, form],
   );
 
+  /**
+   * Hosts der nächsten Momente auf CORS prüfen, bevor ein Moment sie braucht (ein winziger Abruf je Host, Ergebnis wird gemerkt).
+   * So ist beim Abspielen und beim Anbinden nach der ersten Berührung schon klar, ob die geregelte Spur sicher ist.
+   */
+  const probeAhead = (at: number) => {
+    if (!levelEnabled()) return;
+    for (let j = Math.max(0, at); j <= at + 8 && j < queue.current.length; j++) {
+      const m = queue.current[j];
+      const url = m?.gainDb && m.form !== 'text' ? HLS.get(m.videoId) : undefined;
+      if (url) void probeHost(url);
+    }
+  };
+
   /** Vorrat bekommt die Warteschlange, Blob-URLs für die nahen Momente werden bereitgehalten */
   const syncPre = (at: number) => {
+    probeAhead(at);
     if (!pre) return;
     pre.setQueue(queue.current, at);
     const w = pre.warmSet(queue.current, at);
@@ -273,11 +287,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   };
 
   /**
-   * Erste Berührung: Web Audio starten. Die Slots, die schon vor der Berührung vorbereitet wurden und noch nicht laufen, bekommen ihren Moment
-   * danach neu, damit auch sie auf die geregelte Spur kommen. Der laufende Moment bleibt unverändert, ein Wechsel mitten im Satz wäre hörbar.
+   * Erste Berührung: Web Audio starten. Der laufende Moment wird sofort an die geregelte Spur gehängt (Max, 30.10.2026), an der aktuellen Stelle.
+   * Das ist ein Quellwechsel mit kurzer Lücke, und die Berührung schaltet den Ton ohnehin erst jetzt frei. Die Slots, die schon vor der Berührung
+   * vorbereitet wurden und noch nicht laufen, bekommen ihren Moment neu, damit auch sie auf die geregelte Spur kommen.
    */
   const unlockLevel = () => {
     void unlockAudio().then(() => {
+      const cur = current();
+      const cm = queue.current[cur.index];
+      if (cur.player && cur.index === idxRef.current && cm?.gainDb && HLS.has(cm.videoId)) cur.player.relevel?.();
       for (const sl of slots.current) {
         const nm = queue.current[sl.index];
         if (!sl.player || !sl.ready || sl.index <= idxRef.current || !nm?.gainDb || !HLS.has(nm.videoId)) continue;
@@ -1614,6 +1632,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       markStart: () => { since.current = Date.now(); },
       diag: () => diag.current.slice(-400),
       /** Angewendete Lautheit je Slot (Tests, Entscheidung 16) */
+      /** Nur Tests: der Web-Audio-Kontext, um ihn anzuhalten (iOS-Unterbrechung nachstellen) */
+      ctx: () => contextForTest(),
       gain: () => slots.current.slice(0, SLOTS).map((x) => ({ index: x.index, loud: x.player?.loud?.() ?? null })),
       diagAll: () => diag.current.filter((x) => /^(replan|reorder|net poor|yt stub|first-frame)/.test(x)),
       slots: () => slots.current.slice(0, SLOTS).map((x) => ({ st: x.st, index: x.index })),

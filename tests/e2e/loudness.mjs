@@ -71,6 +71,13 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       if (type === chromium) await cx.grantPermissions(['clipboard-read', 'clipboard-write']).catch(() => {});
       await cx.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
       await cx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
+      // Host-Probe (cors-Range-Abruf): stream.test antwortet mit Freigabe. nocors.test: Playwright ergänzt bei fulfill selbst die Freigabe, darum
+      // scheitert der cors-Abruf (mit Range) per abort und der no-cors-Abruf ist lesbar-opak. trial.test: jeder Abruf bricht ab (kein Urteil).
+      // Medienanfragen der Elemente antworten bei allen Hosts, damit das ungeregelte Element laden kann.
+      const media = { status: 206, headers: { 'content-type': 'audio/mpeg', 'content-range': 'bytes 0-0/10' }, body: 'x' };
+      await cx.route(/^https:\/\/stream\.test\//, (x) => x.fulfill({ ...media, headers: { ...media.headers, 'access-control-allow-origin': '*' } }));
+      await cx.route(/^https:\/\/nocors\.test\//, (x) => (x.request().resourceType() === 'fetch' && x.request().headers().range ? x.abort() : x.fulfill(media)));
+      await cx.route(/^https:\/\/trial\.test\//, (x) => (x.request().resourceType() === 'fetch' ? x.abort() : x.fulfill(media)));
       const pg = await cx.newPage();
       pg.on('pageerror', (e) => errors.push(String(e)));
       await pg.addInitScript(() => { window.__ytSlow = true; });
@@ -79,6 +86,42 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await pg.goto(`${url}${query}#k=${k}`);
       return { cx, pg };
     };
+    // Nachbau der CORS-Absage: ein Element mit crossOrigin bekommt für nocors.test und trial.test einen Fehler statt loadedmetadata
+    const patchCors = (pg) => pg.evaluate(() => {
+      const P = HTMLMediaElement.prototype;
+      const orig = P.load;
+      P.load = function () {
+        if (this.crossOrigin === 'anonymous' && /(nocors|trial)\.test/.test(this.src)) {
+          setTimeout(() => {
+            Object.defineProperty(this, 'error', { configurable: true, get: () => ({ code: 4 }) });
+            this.dispatchEvent(new Event('error'));
+          }, 20);
+          return;
+        }
+        return orig.call(this);
+      };
+    });
+    const gainNow = (pg) => pg.evaluate(() => {
+      const g = window.__core.gain().find((x) => x.index === window.__core.idx());
+      return g?.loud ?? null;
+    });
+    const storeOf = (pg) => pg.evaluate(() => localStorage.getItem('core.level.cors') ?? '');
+    const copyDiag = async (pg) => {
+      await pg.click('nav [aria-label=Settings]');
+      await pg.waitForSelector('[data-testid=copy-diagnostics]');
+      await pg.click('[data-testid=copy-diagnostics]');
+      return pg.evaluate(() => navigator.clipboard.readText());
+    };
+    const startAudio = async (list) => {
+      const o = await open(list);
+      await o.pg.waitForSelector('[data-testid=form-switch]');
+      await o.pg.click('[data-testid=form-switch] >> text=Audio');
+      await waitFor(o.pg, () => window.__core.state() === 1);
+      await patchCors(o.pg);
+      return o;
+    };
+    const tap = (pg) => pg.mouse.click(vp.width / 2, vp.height / 2);
+    const vp = { width: 390, height: 664 };
     const byId = new Map([...moments, ...ytMoments].map((m) => [m.id, m]));
 
     // ---------- Podcast-Reiter (Audio): GainNode ----------
@@ -93,22 +136,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       return { id: m.id, loud: g?.loud ?? null };
     });
     c.beforeTouchUnchanged = !!first.loud && first.loud.how.startsWith('unchanged') && first.loud.db === 0 && first.loud.linear === undefined;
-    // Nachbau der CORS-Absage: ein Element mit crossOrigin bekommt für nocors.test einen Fehler statt loadedmetadata
-    await page.evaluate(() => {
-      const P = HTMLMediaElement.prototype;
-      const orig = P.load;
-      P.load = function () {
-        if (this.crossOrigin === 'anonymous' && /nocors\.test/.test(this.src)) {
-          setTimeout(() => {
-            Object.defineProperty(this, 'error', { configurable: true, get: () => ({ code: 4 }) });
-            this.dispatchEvent(new Event('error'));
-          }, 20);
-          return;
-        }
-        return orig.call(this);
-      };
-    });
-    const vp = page.viewportSize();
+    await patchCors(page);
     await page.mouse.click(vp.width / 2, vp.height / 2); // erste Berührung: Ton an, AudioContext entsteht
     c.contextRunning = await waitFor(page, () => window.__core.sound() === true);
     await page.evaluate(() => { window.__ytSlow = false; });
@@ -168,12 +196,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.waitForSelector('[data-testid=loudness]');
     const lines = await page.$$eval('[data-testid=loud-line]', (els) => els.map((e) => e.textContent));
     r.settingsLines = lines;
-    c.settingsShowsLoudLines = lines.length >= 3 && lines.every((l) => /^\S+ loud: lufs (-?\d+\.\d|none), gain [+-]?\d+\.\d dB( \([a-z: ]+\))?$/.test(l));
+    c.settingsShowsLoudLines = lines.length >= 3 && lines.every((l) => /^\S+ loud: (skipped cors, )?lufs (-?\d+\.\d|none), gain [+-]?\d+\.\d dB( \([a-z: ]+\))?$/.test(l));
     if (type === chromium) {
       await page.click('[data-testid=copy-diagnostics]');
       const copied = await page.evaluate(() => navigator.clipboard.readText());
       r.copied = copied.split('\n').slice(0, 12);
-      c.copyDiagnosticsHasLoud = /loud: lufs -?\d+\.\d, gain [+-]\d+\.\d dB/.test(copied) && copied.includes('loudness leveling on');
+      c.copyDiagnosticsHasLoud = /loud: (skipped cors, )?lufs -?\d+\.\d, gain [+-]?\d+\.\d dB/.test(copied) && copied.includes('loudness leveling on');
     }
     await page.screenshot({ path: `${out}/${name}-settings-loudness.png` });
     // Schalter aus: wirkt ab dem nächsten Laden
@@ -228,6 +256,81 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.ytHasLowered = ytSeen.some((id) => vols.get(id) < 100);
     c.ytNeverAbove100 = log.filter((l) => l.startsWith('volume ')).every((l) => Number(l.slice(7)) <= 100);
     await y.cx.close();
+
+    // ---------- Erster Tipp: der laufende Moment wird sofort angebunden (nicht erst der nächste) ----------
+    const sm = [audio(0, 'stream.test', -22), audio(1, 'stream.test', -10), audio(2, 'stream.test', -18.4)];
+    const A = await startAudio(sm);
+    const a0 = await gainNow(A.pg);
+    c.tapA_beforeUnchanged = !!a0 && a0.how.startsWith('unchanged') && a0.db === 0;
+    await tap(A.pg);
+    const curId = await A.pg.evaluate(() => window.__core.moment().id);
+    const wantDb = sm.find((m) => m.id === curId).gainDb;
+    c.firstTapAttachesRunningMoment = await waitFor(A.pg, (db) => {
+      const g = window.__core.gain().find((x) => x.index === window.__core.idx())?.loud;
+      return g?.how === 'web audio' && g.db === db;
+    }, wantDb, 6000);
+    r.firstTapGain = await gainNow(A.pg);
+    c.firstTapStillPlaying = await waitFor(A.pg, () => window.__core.state() === 1, undefined, 3000);
+    // Hintergrund: sichtbar zu versteckt und zurück schreibt Diag-Zeilen mit dem Zustand des Kontexts
+    await A.pg.evaluate(() => {
+      Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await A.pg.waitForTimeout(1200);
+    await A.pg.evaluate(() => {
+      Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    // iOS-Unterbrechung nachstellen: Kontext suspended, der Ton wechselt selbst auf das ungeregelte Element
+    await A.pg.evaluate(() => window.__core.ctx().suspend());
+    c.suspendFallsBack = await waitFor(A.pg, () => {
+      const g = window.__core.gain().find((x) => x.index === window.__core.idx())?.loud;
+      return !!g && g.how.startsWith('unchanged') && g.db === 0;
+    }, undefined, 6000);
+    r.afterSuspendGain = await gainNow(A.pg);
+    c.suspendKeepsPlaying = await waitFor(A.pg, () => window.__core.state() === 1 || window.__core.state() === 5, undefined, 3000);
+    if (type === chromium) {
+      const dA = await copyDiag(A.pg);
+      r.diagA = dA.split('\n').filter((l) => /loud:/.test(l));
+      c.diagHiddenLine = /loud: audiocontext running \(app hidden\)/.test(dA);
+      c.diagSuspendedLine = /loud: audiocontext suspended \(app visible\)/.test(dA);
+      c.diagAbandonedLine = /loud: level lane abandoned \(context suspended\), playing unchanged/.test(dA);
+      c.diagHeaderContext = /loudness leveling on.*audio context (running|suspended)/.test(dA);
+    }
+    await A.cx.close();
+
+    // ---------- Host ohne CORS: die Probe urteilt vor dem Abspielen, kein Fehlversuch, Diag "skipped cors" ----------
+    const nm = [audio(8, 'nocors.test', -21), audio(9, 'nocors.test', -23), audio(10, 'nocors.test', -19)];
+    const B = await startAudio(nm);
+    c.probeMarksBeforeTap = await waitFor(B.pg, () => (localStorage.getItem('core.level.cors') ?? '').includes('"nocors.test":"bad"'), undefined, 8000);
+    await tap(B.pg);
+    await B.pg.waitForTimeout(800);
+    await B.pg.evaluate(() => window.__core.next());
+    await waitFor(B.pg, () => window.__core.state() === 1 || window.__core.state() === 5, undefined, 6000);
+    await B.pg.waitForTimeout(400);
+    const bg0 = await gainNow(B.pg);
+    c.blockedHostSkipped = !!bg0 && bg0.db === 0 && bg0.how === 'unchanged: skipped cors';
+    if (type === chromium) {
+      const dB = await copyDiag(B.pg);
+      c.noFailedTrialForBlocked = !/level lane failed/.test(dB);
+      c.diagSkippedCors = /loud: skipped cors, lufs -?\d+\.\d, gain \+?0\.0 dB \(unchanged: skipped cors\)/.test(dB);
+    }
+    await B.cx.close();
+
+    // ---------- Host ohne Urteil (Probe bricht ab): der Versuch scheitert beim Tippen, Position bleibt, Moment spielt unverändert weiter ----------
+    const tm = [audio(11, 'trial.test', -21), audio(12, 'trial.test', -23)];
+    const T = await startAudio(tm);
+    await T.pg.waitForTimeout(600);
+    c.noVerdictWithoutProbe = !(await storeOf(T.pg)).includes('trial.test');
+    await tap(T.pg);
+    c.trialFallsBack = await waitFor(T.pg, () => {
+      const g = window.__core.gain().find((x) => x.index === window.__core.idx())?.loud;
+      return g?.how === 'unchanged: skipped cors';
+    }, undefined, 6000);
+    c.trialHostMarked = await waitFor(T.pg, () => (localStorage.getItem('core.level.cors') ?? '').includes('"trial.test":"bad"'), undefined, 6000);
+    r.trialStore = await storeOf(T.pg);
+    c.trialStillPlaying = await waitFor(T.pg, () => window.__core.state() === 1 || window.__core.state() === 5, undefined, 3000);
+    await T.cx.close();
   } catch (e) {
     c.crashed = String(e);
   } finally {

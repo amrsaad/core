@@ -406,7 +406,7 @@ describe('Lautheit: zwei feste Elemente', () => {
     expect(t.plain.calls).toContain('play');
     expect(t.plain.src).toContain('a.mp3');
     expect(t.lines.some((l) => l.startsWith('bg: play rejected'))).toBe(false);
-    expect(t.deck.loud(t.sink)?.how).toBe('unchanged: fallback');
+    expect(t.deck.loud(t.sink)?.how).toBe('unchanged: play refused');
   });
 
   it('Netzquelle lädt in der geregelten Spur nicht (kein CORS): unverändert, Host wird erst nach dem Laden als bad gemerkt', () => {

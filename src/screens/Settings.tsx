@@ -19,7 +19,7 @@ import { preloadedLine } from '../moments/preload';
 import { usePreloadStats } from '../moments/usePreload';
 import { diagLog } from '../lib/diag';
 import { backgroundLine } from '../moments/background';
-import { levelBroken, levelOn, setLevelOn } from '../moments/audioGraph';
+import { contextState, levelBroken, levelOn, setLevelOn } from '../moments/audioGraph';
 import { loudLog } from '../moments/loudness';
 
 const AREAS: Area[] = ['brain', 'body', 'beat'];
@@ -298,7 +298,7 @@ export function diagnosticsText(state: AppState, moments: MomentPool | null, ski
     `saved ${Object.keys(state.savedMoments).length}, seen ${Object.keys(state.momentSeen).length}, speed ${speedOf(state.settings)}`,
     `first frame preloaded: ${lat.n ? `median ${lat.median} ms, p90 ${lat.p90} ms, n ${lat.n}` : 'none'}`,
     backgroundLine(raw),
-    `loudness leveling ${levelOn() ? 'on' : 'off'}${levelBroken() ? ` (stopped this session: ${levelBroken()})` : ''}`,
+    `loudness leveling ${levelOn() ? 'on' : 'off'}${levelBroken() ? ` (stopped this session: ${levelBroken()})` : ''}, audio context ${contextState()}`,
     ...loudLog(),
     '',
     'log (mm:ss since app start):',
