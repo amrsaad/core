@@ -1,0 +1,80 @@
+name: ios
+
+# Prüft die iPhone-App auf einem Mac: Build, Unit-Tests, UI-Tests im Simulator mit Screenshots jedes Screens.
+# Die Screenshots liegen als Artefakt "screenshots" am Lauf. Kein Deploy, keine Signatur.
+# Nur noch von Hand (Fundament Pfeiler 14, 29.10.2026: ab sofort nur Web-App, die native App wird nicht weitergebaut).
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Xcode und Simulator
+        id: sim
+        run: |
+          xcodebuild -version
+          NAME=$(xcrun simctl list devices available -j | python3 -c '
+          import json,sys
+          d=json.load(sys.stdin)["devices"]
+          names=[dev["name"] for rt,devs in d.items() if "iOS" in rt for dev in devs if dev["name"].startswith("iPhone")]
+          pref=[n for n in names if "Pro" in n and "Max" not in n] or names
+          print(sorted(pref)[-1] if pref else "")')
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "Simulator: $NAME"
+          test -n "$NAME"
+
+      - name: Build und Tests
+        run: |
+          cd ios
+          set -o pipefail
+          xcodebuild -project Core.xcodeproj -scheme Core \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
+            -resultBundlePath "$RUNNER_TEMP/Core.xcresult" \
+            CODE_SIGNING_ALLOWED=NO \
+            INFOPLIST_KEY_CoreCommit=$(git rev-parse --short HEAD) \
+            test 2>&1 | tee build.log | grep -E "error:|warning: .*\.swift|Test Case|Executed|BUILD|TEST" || true
+          grep -qE "TEST SUCCEEDED|\*\* TEST SUCCEEDED" build.log
+
+      - name: Screenshots exportieren
+        if: always()
+        run: |
+          OUT="$RUNNER_TEMP/shots"; mkdir -p "$OUT"
+          if [ -d "$RUNNER_TEMP/Core.xcresult" ]; then
+            xcrun xcresulttool export attachments --path "$RUNNER_TEMP/Core.xcresult" --output-path "$OUT" || true
+            python3 - "$OUT" <<'PY'
+          import json,os,shutil,sys
+          out=sys.argv[1]; m=os.path.join(out,"manifest.json")
+          import re
+          keep=set()
+          if os.path.exists(m):
+              for test in json.load(open(m)):
+                  for a in test.get("attachments",[]):
+                      src=os.path.join(out,a["exportedFileName"]); name=a.get("suggestedHumanReadableName") or ""
+                      print("attachment:", a.get("suggestedHumanReadableName"), a["exportedFileName"])
+                      name=re.sub(r"_0_[0-9A-F-]{36}","",name)
+                      mm=re.match(r"^(\d\d[a-z]?-[a-z0-9-]+)(\.\w+)?$", name)
+                      if mm and os.path.exists(src):
+                          ext=".txt" if a["exportedFileName"].endswith(".txt") or "hierarchy" in name or "log" in name else ".png"
+                          dst=os.path.join(out,mm.group(1)+ext); shutil.move(src,dst); keep.add(dst)
+          for f in os.listdir(out):
+              p=os.path.join(out,f)
+              if p not in keep and f!="manifest.json": os.remove(p)
+          print(sorted(os.listdir(out)))
+          PY
+          fi
+          cp ios/build.log "$OUT/" 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: ${{ runner.temp }}/shots
+          retention-days: 14

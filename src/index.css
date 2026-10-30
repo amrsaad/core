@@ -1,0 +1,443 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0e0f12;
+  --surface: #17191e;
+  --fg: #f2f2f2;
+  --muted: #9aa0a6;
+  --line: #262931;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f6f6f4;
+    --surface: #ffffff;
+    --fg: #15171b;
+    --muted: #5f6368;
+    --line: #e2e2de;
+    color-scheme: light;
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.feed {
+  height: 100dvh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+.feed::-webkit-scrollbar {
+  display: none;
+}
+.slide {
+  height: 100dvh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  overflow: hidden;
+}
+
+.pad {
+  padding-top: calc(env(safe-area-inset-top) + 20px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
+  padding-left: calc(env(safe-area-inset-left) + 20px);
+  padding-right: calc(env(safe-area-inset-right) + 20px);
+}
+
+.no-callout {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.t-headline { font-size: 26px; line-height: 32px; font-weight: 600; }
+.t-body { font-size: 18px; line-height: 27px; font-weight: 400; }
+.t-excerpt { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 15px; line-height: 22px; }
+.t-meta { font-size: 12px; line-height: 16px; text-transform: uppercase; letter-spacing: 0.08em; }
+.t-arabic { font-family: 'Amiri Quran', 'Noto Naskh Arabic', serif; font-size: 28px; line-height: 1.9; }
+.t-arabic-sm { font-family: 'Noto Naskh Arabic', 'Amiri Quran', serif; font-style: normal; font-size: 17px; line-height: 1.8; }
+
+.flash { animation: flash 900ms ease-out forwards; }
+@keyframes flash {
+  0% { opacity: 0; transform: translateY(6px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Platz für die Tab-Leiste */
+.pad.pad-nav {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 96px);
+}
+
+/* ---------- Video-Feed (v2) ---------- */
+.vfeed {
+  position: relative;
+  height: 100dvh;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  touch-action: none;
+}
+.vslot {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #000;
+  transform: translateY(calc(var(--off) * 100%));
+}
+/* Bühne und Overlay-Ebene bewegen sich gemeinsam beim Wischen: nur transform (und opacity), nie top, height oder Layout.
+   will-change steht ab dem Aufsetzen des Fingers und fällt nach dem Auslaufen wieder weg: im Ruhezustand kostet eine Vollbild-Ebene
+   nur Speicher und Zeichenarbeit (gemessen: im WebKit-Runner gingen im Stand fast die Hälfte der Frames verloren). */
+.vstage { position: absolute; inset: 0; }
+.vui { position: absolute; inset: 0; z-index: 20; pointer-events: none; }
+.vfeed[data-moving] .vstage, .vfeed[data-moving] .vui { will-change: transform; }
+.vui .vactions, .vui .vend { pointer-events: auto; }
+/* 9:16-Rahmen, füllt den Bildschirm wie Reels (Ränder werden beschnitten) */
+.vframe,
+.vposter {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100vw, calc(100dvh * 9 / 16));
+  height: max(100dvh, calc(100vw * 16 / 9));
+  transform: translate(-50%, -50%);
+}
+/* Bildfläche 16:9 in Bildschirmbreite, mittig. Ohne Zoom (E3, Max 26.10.2026): das ganze Bild ist zu sehen,
+   YouTube-Titelzeile zu Beginn und Logo bleiben sichtbar und werden nicht kaschiert. */
+.vframe > div {
+  position: absolute; left: 50%; top: 31%; width: 100vw; height: calc(100vw * 9 / 16);
+  transform: translateX(-50%); overflow: hidden;
+}
+.vframe iframe {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  border: 0; pointer-events: none;
+}
+.vposter {
+  object-fit: cover; z-index: 1;
+  width: 100vw; height: calc(100vw * 9 / 16); background: #1a1d24;
+  /* Gleiche Rechnung wie .vframe > div (Rahmen mittig, Band bei 31 % der Rahmenhöhe), sonst bleibt bei Bildschirmen unter 9:16 oben ein Streifen
+     des IFrames mit der YouTube-Titelzeile frei (Auftrag Max 29.10.2026, Poster über jedem Zustand außer PLAYING). */
+  top: calc(50% - 0.19 * max(100dvh, 100vw * 16 / 9)); transform: translateX(-50%);
+}
+/* Sichtbar, solange der Slot nicht der aktuelle ist oder sein Player nicht abspielt (data-live setzt der Player-Callback) */
+.vslot[data-live][aria-hidden='false'] .vposter { visibility: hidden; }
+.vtoday {
+  position: absolute; z-index: 19; right: calc(env(safe-area-inset-right) + 16px); top: calc(env(safe-area-inset-top) + 64px);
+  font-size: 13px; line-height: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.72); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.vform {
+  position: absolute; z-index: 25; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top) + 14px);
+  display: flex; gap: 2px; padding: 3px; border-radius: 999px; background: rgba(0, 0, 0, 0.55);
+}
+.voffline {
+  position: absolute; z-index: 26; width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.6);
+  left: calc(env(safe-area-inset-left) + 16px); top: calc(env(safe-area-inset-top) + 16px);
+}
+.vform button { min-height: 36px; min-width: 64px; padding: 0 12px; border-radius: 999px; color: #b3b3b3; font-size: 14px; font-weight: 600; }
+.vform button.on { background: #fff; color: #000; }
+/* Tempo (Pfeiler 17): neben den Reitern, nur bei 1.5x und 2x, Ziel 48 pt. pointer-events none: Wische über der Anzeige gehen zur Gesten-Ebene, der Tipp wird dort erkannt (onUp). */
+.vform .vrate { position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: 6px; min-width: 48px; min-height: 48px; padding: 0 10px; background: rgba(0, 0, 0, 0.55); color: #fff; pointer-events: none; }
+.vtext {
+  position: absolute; inset: 0; z-index: 12; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  background: #000; color: #fff; padding: calc(env(safe-area-inset-top) + 76px) 88px calc(env(safe-area-inset-bottom) + 96px) calc(env(safe-area-inset-left) + 16px);
+}
+.vtext-hook { margin: 4px 0 16px; font-size: 24px; line-height: 31px; font-weight: 700; }
+.vtext-body { margin: 0; white-space: pre-line; font-size: 18px; line-height: 28px; color: #e6e6e6; }
+.vtext-rtl { text-align: right; font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', sans-serif; font-size: 21px; line-height: 36px; }
+.vtext-source { display: block; margin: 20px 0 0; min-height: 44px; font-size: 13px; line-height: 20px; color: #9aa0aa; text-decoration: none; overflow-wrap: anywhere; }
+a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
+.vtext-end { margin-top: 32px; padding-top: 16px; border-top: 1px solid #262931; font-size: 13px; color: #8a8a8a; }
+.vcaption.vcaption-big span { font-size: 22px; line-height: 30px; }
+.vcaption.vcaption-big.vcaption-rtl span { font-size: 25px; line-height: 38px; }
+.recall {
+  position: absolute; inset: 0; z-index: 34; background: #000; color: #fff; overflow-y: auto;
+  padding: calc(env(safe-area-inset-top) + 72px) 20px calc(env(safe-area-inset-bottom) + 24px);
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+.recall-source { display: flex; gap: 12px; align-items: center; }
+.recall-source img { width: 64px; height: 36px; object-fit: cover; border-radius: 6px; background: #1a1d24; flex: none; }
+.recall-area { font-size: 13px; font-weight: 600; }
+.recall-speaker { font-size: 13px; color: #b3b3b3; }
+.recall-q { margin: 12px 0 4px; font-size: 26px; line-height: 33px; font-weight: 700; }
+.recall-options { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.recall-option { width: 100%; min-height: 56px; border-radius: 12px; border: 1px solid #3a3d45; background: #121212; color: #fff; padding: 12px 16px; font-size: 17px; line-height: 23px; font-weight: 600; text-align: start; }
+.recall-option.right { background: #12351f; border-color: #2fb35a; }
+.recall-option.wrong { background: #3d1417; border-color: #e5484d; }
+.recall-option.rest { opacity: 0.55; }
+.recall-why { margin: 4px 0 0; font-size: 17px; line-height: 25px; color: #d8d8d8; }
+.recall-primary { min-height: 52px; border-radius: 12px; background: #fff; color: #000; font-size: 17px; font-weight: 600; }
+.vplay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; opacity: 0.85; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6)); }
+.vgesture { position: absolute; inset: 0; z-index: 10; }
+.vtrack { position: absolute; left: 0; right: 0; top: env(safe-area-inset-top); height: 2px; z-index: 19; background: rgba(255, 255, 255, 0.18); }
+.vprogress {
+  position: absolute; left: 0; right: 0; top: env(safe-area-inset-top); height: 2px; z-index: 20;
+  background: var(--area, #fff); transform-origin: left center;
+}
+.vloading {
+  position: absolute; left: 0; right: 0; top: env(safe-area-inset-top); height: 2px; z-index: 21; overflow: hidden;
+}
+.vloading::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 30%; background: var(--area, #fff);
+  animation: vload 0.9s ease-in-out infinite;
+}
+@keyframes vload { from { left: -30%; } to { left: 100%; } }
+.vhint {
+  position: absolute; inset: 0; z-index: 15; display: flex; align-items: center; justify-content: center;
+}
+.vhint span {
+  background: rgba(0, 0, 0, 0.75); border-radius: 999px; padding: 14px 22px; font-size: 17px; font-weight: 600;
+}
+/* Ton aus: kleines durchgestrichenes Lautsprecher-Symbol unten rechts im Videoband (16:9 ab 31 % der Höhe), kein Text */
+.vsound {
+  position: absolute; z-index: 15; width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.6);
+  right: calc(env(safe-area-inset-right) + 12px);
+  /* gleiche Rechnung wie .vframe: mittig, Höhe max(100dvh, 100vw * 16 / 9), Band ab 31 % davon. 44 px = Symbol 32 px plus 12 px Abstand zur Bandkante */
+  top: calc(50% - max(100dvh, 100vw * 16 / 9) * 0.19 + 100vw * 9 / 16 - 44px);
+}
+.vinfo {
+  position: absolute; left: calc(env(safe-area-inset-left) + 16px); right: 88px; z-index: 20;
+  bottom: calc(env(safe-area-inset-bottom) + var(--nav-h, 0px) + 24px);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); transition: bottom 200ms;
+}
+.vcaption {
+  position: absolute; left: calc(env(safe-area-inset-left) + 16px); right: 88px; z-index: 18; display: flex; justify-content: flex-start;
+  top: calc(31% + 100vw * 9 / 16 + 16px);
+}
+.vcaption span {
+  background: rgba(0, 0, 0, 0.72); color: #fff; border-radius: 8px; padding: 6px 10px;
+  font-size: 17px; line-height: 23px; font-weight: 600; max-width: 100%;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+.vcaption-rtl { justify-content: flex-end; }
+.vcaption-rtl span { direction: rtl; unicode-bidi: plaintext; text-align: right; font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', 'Segoe UI', sans-serif; font-size: 21px; line-height: 32px; }
+.vcaption-audio.vcaption-rtl { justify-content: center; }
+.vcaption-audio.vcaption-rtl span { text-align: center; font-size: 26px; line-height: 38px; }
+.vaudio { position: absolute; inset: 0; z-index: 1; background: #000; }
+.vaudio-bg { display: none; }
+.vaudio-art {
+  position: absolute; left: 50%; top: 16.5%; transform: translateX(-50%);
+  width: min(62vw, 240px); aspect-ratio: 1; object-fit: cover; border-radius: 12px; background: #20242c;
+}
+.vcaption-audio { top: 52%; bottom: auto; right: 24px; left: 24px; justify-content: center; text-align: center; }
+.vcaption-audio span { font-size: 24px; line-height: 32px; background: transparent; padding: 0; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8); }
+.vchannel { display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 18px; font-weight: 600; margin-bottom: 6px; }
+.vdot { width: 8px; height: 8px; border-radius: 4px; background: var(--area); flex-shrink: 0; }
+.vspeaker { color: #b3b3b3; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vtitle {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 17px; line-height: 22px; font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.vtitle[data-step='1'] { font-size: 15px; line-height: 20px; }
+.vinfo-tap { pointer-events: auto; cursor: pointer; }
+.vcap-backdrop { position: absolute; inset: 0; z-index: 36; background: transparent; }
+.vcap-sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 37; max-height: 62%; overflow-y: auto; overscroll-behavior: contain;
+  background: #0a0a0a; color: #fff; border-radius: 18px 18px 0 0;
+  padding: 8px 20px calc(env(safe-area-inset-bottom) + 24px);
+}
+.vcap-grip { width: 36px; height: 4px; border-radius: 2px; background: #444; margin: 0 auto 12px; }
+.vcap-hook { margin: 0 0 12px; font-size: 20px; line-height: 27px; font-weight: 700; }
+.vcap-text { margin: 0 0 16px; white-space: pre-line; font-size: 17px; line-height: 26px; color: #e0e0e0; }
+.vcap-text[dir='rtl'] { font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', sans-serif; font-size: 20px; line-height: 34px; }
+.vcap-context { margin: 0 0 16px; }
+.vcap-ctx-label { display: block; margin-bottom: 2px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #8a8f98; }
+.vcap-ctx-text { margin: 0; font-size: 14px; line-height: 20px; color: #a3a3a3; }
+.vcap-ctx-text[dir='rtl'] { font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', sans-serif; font-size: 16px; line-height: 26px; }
+.vcap-meta { margin: 0; border-top: 1px solid #262931; padding-top: 12px; display: grid; gap: 6px; font-size: 14px; line-height: 20px; }
+.vcap-meta > div { display: flex; gap: 12px; }
+.vcap-meta dt { width: 64px; flex: none; color: #8a8a8a; }
+.vcap-meta dd { margin: 0; color: #d0d0d0; min-width: 0; overflow-wrap: anywhere; }
+.vactions {
+  position: absolute; right: calc(env(safe-area-inset-right) + 12px); z-index: 20; width: 56px;
+  bottom: calc(env(safe-area-inset-bottom) + var(--nav-h, 0px) + 24px);
+  display: flex; flex-direction: column; align-items: center; gap: 22px; transition: bottom 200ms;
+}
+.vbtn[data-on] svg { animation: vpop 150ms ease-out; }
+@keyframes vpop { 0% { transform: scale(0.8); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+.vheart { position: absolute; z-index: 32; filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5)); animation: vheart 400ms ease-out forwards; }
+@keyframes vheart { 0% { opacity: 0; transform: scale(0.5); } 25% { opacity: 1; transform: scale(1.15); } 70% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.05); } }
+.vlabel { font-size: 11px; line-height: 13px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
+
+/* ---------- Für dich (v4) ---------- */
+.foryou {
+  position: absolute; inset: 0; z-index: 35; background: #000; color: #fff;
+  display: flex; flex-direction: column; justify-content: center; gap: 14px;
+  padding: calc(env(safe-area-inset-top) + 24px) calc(env(safe-area-inset-right) + 28px) calc(env(safe-area-inset-bottom) + 96px) calc(env(safe-area-inset-left) + 28px);
+}
+.foryou-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; line-height: 16px; letter-spacing: 0.08em; font-weight: 600; color: var(--area);
+}
+.foryou-label::before { content: ''; width: 8px; height: 8px; border-radius: 4px; background: var(--area); }
+.foryou-text {
+  margin: 0;
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-weight: 500; font-size: 26px; line-height: 34px;
+}
+.foryou-foot {
+  position: absolute; left: calc(env(safe-area-inset-left) + 28px); right: calc(env(safe-area-inset-right) + 28px);
+  bottom: calc(env(safe-area-inset-bottom) + 24px); display: flex; justify-content: space-between;
+  font-size: 13px; line-height: 18px; color: #8a8f98;
+}
+
+/* No browser menu on long press (save image, open link). Holding belongs to the app (2x). */
+.vfeed, .vfeed * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.vfeed img, .vfeed video, .vfeed iframe { pointer-events: none; }
+.note-confirm { min-height: 24px; margin-bottom: 8px; font-size: 17px; line-height: 24px; font-weight: 600; color: #fff; }
+.note-chip:disabled { opacity: .35; }
+.note-ask { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 60px; margin-bottom: 10px; padding: 0 16px; border-radius: 16px; border: 1px solid #3a3d45; background: #1a1c21; color: #fff; font-size: 18px; font-weight: 600; }
+.note-ask:active { background: #fff; color: #000; border-color: #fff; }
+.note-ask:disabled { opacity: .35; }
+.note-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.note-chip { min-height: 60px; padding: 0 16px; border-radius: 16px; border: 1px solid #3a3d45; background: #1a1c21; color: #fff; font-size: 18px; font-weight: 600; }
+.note-chip:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.note-chip:active { background: #fff; color: #000; border-color: #fff; }
+.note-text { width: 100%; border-radius: 12px; border: 1px solid #333; background: #111; color: #fff; padding: 12px; font-size: 17px; line-height: 24px; resize: none; }
+.note-done { width: 100%; min-height: 52px; margin-top: 10px; border-radius: 12px; background: #fff; color: #000; font-size: 17px; font-weight: 600; }
+/* Zeile "N notes, send?" beim ersten Öffnen am Tag, unter dem Formschalter, links neben der Tageszahl */
+.vnotes {
+  position: absolute; z-index: 26; left: calc(env(safe-area-inset-left) + 16px); top: calc(env(safe-area-inset-top) + 64px);
+  min-height: 36px; padding: 0 14px; border-radius: 999px; background: #fff; color: #000; font-size: 14px; font-weight: 600;
+}
+
+/* ---------- Desktop ab 900 px (Auftrag Max 28.10.2026) ----------
+   Alles hängt an .desk, die Klasse setzt die App nur bei mindestens 900 px Breite. Mobile Regeln oben bleiben unberührt.
+   Raster: links frei, Mitte die Spalte (480 px, im Textreiter 65 Zeichen Lesebreite), rechts das feste Panel. Oben die Leiste. */
+.desk {
+  --bar-h: 56px;
+  --col-w: min(480px, calc(100vw - 340px));
+  --desk-cols: minmax(0, 1fr) var(--col-w) minmax(340px, 1fr);
+  --focus: #fff;
+  display: grid;
+  grid-template-columns: var(--desk-cols);
+  grid-template-rows: var(--bar-h) minmax(0, 1fr);
+  height: 100dvh;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+}
+/* ch misst die Schrift des Rasters, darum ist hier die Schrift des Textreiters gesetzt: 65 Zeichen plus Rand links 32 und rechts 88 (Platz für die Spalte mit Herz, Save, Source) */
+.desk[data-form='text'] { font-size: 18px; --col-w: min(calc(65ch + 120px), calc(100vw - 340px)); }
+
+.dbar { grid-column: 1 / -1; grid-row: 1; display: grid; grid-template-columns: var(--desk-cols); grid-template-columns: subgrid; align-items: center; background: #000; border-bottom: 1px solid #1c1e24; z-index: 60; }
+.dbar-left { grid-column: 1; grid-row: 1; padding-left: 24px; }
+.dbar-logo { font-size: 18px; line-height: 24px; font-weight: 700; letter-spacing: 0.02em; }
+.dbar-tabs { grid-column: 2; grid-row: 1; justify-self: center; display: flex; gap: 2px; padding: 3px; border-radius: 999px; background: #17191e; }
+.dbar-tabs button { min-height: 34px; padding: 0 14px; display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; color: #b3b3b3; font-size: 14px; line-height: 20px; font-weight: 600; }
+.dbar-tabs button.on { background: #fff; color: #000; }
+/* Die rechte Gruppe darf nach links in die Mitte reichen, wenn die Spalte (Textreiter) die Panelspalte schmal macht. Die Reiter bleiben klickbar. */
+.dbar-right { grid-column: 2 / 4; grid-row: 1; justify-self: stretch; display: flex; align-items: center; justify-content: flex-end; gap: 20px; padding: 0 24px; min-width: 0; pointer-events: none; }
+.dbar-right > * { pointer-events: auto; }
+.dbar-rate { min-width: 48px; min-height: 48px; border-radius: 999px; padding: 0 12px; background: #17191e; color: #fff; font-size: 14px; font-weight: 600; }
+.dbar-today { font-size: 13px; line-height: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.72); white-space: nowrap; }
+.dbar-actions { display: flex; gap: 8px; }
+.dbar-actions button { min-height: 34px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; border: 1px solid #2a2d35; color: #d8d8d8; font-size: 13px; line-height: 18px; font-weight: 600; }
+.dbar-actions button.on { background: #fff; color: #000; border-color: #fff; }
+.dbar-actions button.icon { width: 34px; padding: 0; justify-content: center; }
+.desk kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 4px; border: 1px solid currentColor; opacity: 0.55; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 11px; line-height: 1; font-weight: 600; }
+
+.dmain { grid-column: 2; grid-row: 2; position: relative; min-height: 0; overflow: hidden; background: #000; }
+.dpanel { grid-column: 3; grid-row: 2; justify-self: end; width: min(100%, 400px); min-height: 0; overflow-y: auto; padding: 24px; background: #0a0a0a; border-left: 1px solid #1c1e24; }
+
+/* Feed in der Spalte */
+.desk .vfeed { height: 100%; width: 100%; }
+.desk .vform, .desk .vtoday { display: none; }
+.desk .vgesture { cursor: pointer; }
+.desk .vframe { left: 0; top: 0; width: 100%; height: 100%; transform: none; }
+.desk .vframe > div { left: 0; top: 50%; width: 100%; height: auto; aspect-ratio: 16 / 9; transform: translateY(-50%); }
+.desk .vposter { left: 0; top: 50%; width: 100%; height: auto; aspect-ratio: 16 / 9; transform: translateY(-50%); }
+.desk .voffline { left: 12px; top: 12px; }
+.desk .vsound { right: 12px; top: calc(50% + var(--col-w) * 9 / 32 - 44px); }
+.desk .vcaption { left: 16px; right: 16px; top: calc(50% + var(--col-w) * 9 / 32 + 16px); }
+.desk .vaudio-art { top: calc(50% - 220px); width: 240px; }
+.desk .vcaption.vcaption-audio { top: calc(50% + 48px); }
+.desk .vnotes { top: 16px; left: 16px; }
+.desk .vtext { padding: 32px 88px 56px 32px; }
+.desk .vtext-body { max-width: 65ch; font-size: 18px; line-height: 29px; }
+.desk .vtext-rtl { font-size: 21px; line-height: 37px; }
+/* Kompakte Spalte statt 48 pt */
+.desk .vactions { right: 12px; bottom: 24px; width: 40px; gap: 10px; }
+.desk .vbtn { min-height: 36px; min-width: 36px; border-radius: 10px; }
+.desk .vbtn svg { width: 22px; height: 22px; }
+.desk .vlabel { font-size: 10px; line-height: 12px; }
+
+/* Rückmeldung und Abrufkarte */
+.desk .note-chip { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.desk .note-done { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.desk .recall { position: static; inset: auto; z-index: auto; overflow: visible; background: transparent; padding: 4px 0 0; gap: 12px; }
+.desk .recall-q { margin: 4px 0 0; font-size: 20px; line-height: 27px; }
+.desk .recall-option, .desk .recall-primary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; font-size: 16px; line-height: 22px; }
+.desk .recall-why { font-size: 15px; line-height: 23px; }
+
+/* Panel */
+.dp { display: flex; flex-direction: column; gap: 16px; }
+.dp-meta { display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 18px; font-weight: 600; }
+.dp-speaker { color: #b3b3b3; font-weight: 400; overflow-wrap: anywhere; }
+.dp-hook { margin: 0; font-size: 22px; line-height: 29px; font-weight: 700; overflow-wrap: anywhere; }
+.dp-sec { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #1c1e24; padding-top: 12px; }
+.dp-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: calc(100% + 16px); min-height: 32px; margin: 0 -8px; padding: 0 8px; border-radius: 8px; text-align: left; font-size: 12px; line-height: 16px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; color: #8a8f98; }
+.dp-head-static { cursor: default; }
+.dp-text { margin: 0 0 12px; white-space: pre-line; font-size: 16px; line-height: 25px; color: #e0e0e0; }
+.dp-text[dir='rtl'] { font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', sans-serif; font-size: 19px; line-height: 32px; }
+.dp-source { margin: 0; font-size: 14px; line-height: 21px; color: #b3b3b3; overflow-wrap: anywhere; }
+a.dp-source { text-decoration: underline; text-underline-offset: 3px; }
+.dp-open { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid #2a2d35; color: #d8d8d8; font-size: 13px; line-height: 18px; font-weight: 600; }
+.dp-open:hover { color: #fff; }
+
+/* Seitenblatt (Settings, Saved) und Übersicht */
+.dsheet-backdrop { position: fixed; left: 0; right: 0; top: var(--bar-h); bottom: 0; z-index: 70; background: rgba(0, 0, 0, 0.35); }
+.dsheet { position: fixed; top: var(--bar-h); right: 0; bottom: 0; z-index: 80; width: min(480px, 100vw); background: var(--bg); color: var(--fg); border-left: 1px solid var(--line); box-shadow: -12px 0 32px rgba(0, 0, 0, 0.45); --focus: var(--fg); animation: dslide 160ms ease-out; }
+@keyframes dslide { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.dsheet-close { position: absolute; top: 16px; right: 16px; z-index: 2; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--fg); }
+.dsheet-body { height: 100%; overflow: hidden; }
+.dsheet-body > .pad { height: 100%; padding-top: 24px; }
+.dsheet h1 { padding-right: 48px; }
+.dhelp-backdrop { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(0, 0, 0, 0.7); }
+.dhelp { width: min(560px, 100%); max-height: calc(100dvh - 48px); overflow-y: auto; padding: 24px; border-radius: 16px; border: 1px solid #2a2d35; background: #121212; color: #fff; }
+.dhelp h2 { margin: 0 0 16px; font-size: 20px; line-height: 27px; font-weight: 700; }
+.dhelp dl { margin: 0; }
+.dhelp dl > div { display: grid; grid-template-columns: 190px 1fr; gap: 16px; padding: 8px 0; border-top: 1px solid #1f2227; font-size: 14px; line-height: 20px; }
+.dhelp dt { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 600; color: #fff; }
+.dhelp dd { margin: 0; color: #b3b3b3; }
+.dhelp-close { margin-top: 16px; min-height: 40px; padding: 0 18px; border-radius: 10px; background: #fff; color: #000; font-size: 15px; font-weight: 600; }
+
+/* Hover und Fokusrahmen auf allen Knöpfen. Der Schatten liegt als Schleier über jeder Fläche, hell wie dunkel. */
+.desk :is(button, a[href], select, input, textarea, [tabindex]):focus-visible { outline: 2px solid var(--focus, #fff); outline-offset: 2px; }
+.desk :is(button, a[href], select):not(:disabled):hover { box-shadow: inset 0 0 0 999px rgba(127, 127, 127, 0.22); cursor: pointer; }
+.desk :is(button, select):disabled { cursor: default; }
+
+/* Endseite: ruhig, mittig, über Feed und Overlays (Max 29.10.2026) */
+.vend {
+  position: absolute; inset: 0; z-index: 22; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; padding: 0 32px; background: #000; text-align: center;
+}
+.vend-line { color: #fff; font-size: 20px; line-height: 28px; font-weight: 600; }
+.vend-sub { color: #b3b3b3; font-size: 16px; line-height: 24px; }
+.vend-btns { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; width: min(100%, 320px); }
+.vend-btn { min-height: 56px; border-radius: 16px; background: #1f1f1f; color: #fff; font-size: 17px; font-weight: 600; }
+.vend-btn:disabled { color: #6b6b6b; }
+

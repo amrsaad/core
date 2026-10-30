@@ -1,0 +1,113 @@
+{
+ "at": "2026-10-30T09:59:36.009Z",
+ "runs": [
+  {
+   "browser": "webkit",
+   "run": 1,
+   "checks": {
+    "unlocked": true,
+    "savedInCache": true,
+    "savedInIdb": true,
+    "idbDeleted": true,
+    "restoredFromCache": true,
+    "idbRewritten": true,
+    "runsWithoutCache": true,
+    "cacheRewritten": true,
+    "noPageErrors": true
+   },
+   "deleteIdb": "ok",
+   "errors": [],
+   "ok": true
+  },
+  {
+   "browser": "webkit",
+   "run": 2,
+   "checks": {
+    "unlocked": true,
+    "savedInCache": true,
+    "savedInIdb": true,
+    "idbDeleted": true,
+    "restoredFromCache": true,
+    "idbRewritten": true,
+    "runsWithoutCache": true,
+    "cacheRewritten": true,
+    "noPageErrors": true
+   },
+   "deleteIdb": "ok",
+   "errors": [],
+   "ok": true
+  },
+  {
+   "browser": "webkit",
+   "run": 3,
+   "checks": {
+    "unlocked": true,
+    "savedInCache": true,
+    "savedInIdb": true,
+    "idbDeleted": true,
+    "restoredFromCache": true,
+    "idbRewritten": true,
+    "runsWithoutCache": true,
+    "cacheRewritten": true,
+    "noPageErrors": true
+   },
+   "deleteIdb": "ok",
+   "errors": [],
+   "ok": true
+  },
+  {
+   "browser": "chromium",
+   "run": 1,
+   "checks": {
+    "unlocked": true,
+    "savedInCache": true,
+    "savedInIdb": true,
+    "idbDeleted": true,
+    "restoredFromCache": true,
+    "idbRewritten": true,
+    "runsWithoutCache": true,
+    "cacheRewritten": true,
+    "noPageErrors": true
+   },
+   "deleteIdb": "ok",
+   "errors": [],
+   "ok": true
+  },
+  {
+   "browser": "chromium",
+   "run": 2,
+   "checks": {
+    "unlocked": true,
+    "savedInCache": true,
+    "savedInIdb": true,
+    "idbDeleted": true,
+    "restoredFromCache": true,
+    "idbRewritten": true,
+    "runsWithoutCache": true,
+    "cacheRewritten": true,
+    "noPageErrors": true
+   },
+   "deleteIdb": "ok",
+   "errors": [],
+   "ok": true
+  },
+  {
+   "browser": "chromium",
+   "run": 3,
+   "checks": {
+    "unlocked": true,
+    "savedInCache": true,
+    "savedInIdb": true,
+    "idbDeleted": true,
+    "restoredFromCache": true,
+    "idbRewritten": true,
+    "runsWithoutCache": true,
+    "cacheRewritten": true,
+    "noPageErrors": true
+   },
+   "deleteIdb": "ok",
+   "errors": [],
+   "ok": true
+  }
+ ]
+}

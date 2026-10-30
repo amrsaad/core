@@ -1,0 +1,109 @@
+{
+  "at": "2026-10-29T16:08:11.798Z",
+  "swipes": 10,
+  "windowMs": "down bis 600 ms nach up",
+  "runs": [
+    {
+      "variant": "webkit",
+      "checks": {
+        "feedLoaded": true,
+        "firstPlaying": true,
+        "refresh60": true,
+        "allSwipesChanged": true,
+        "noPageErrors": true,
+        "underGate": false
+      },
+      "samples": [
+        {
+          "lost": 29,
+          "frames": 29,
+          "ms": 948.0000000000009,
+          "longest": 110,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 27,
+          "frames": 27,
+          "ms": 889,
+          "longest": 151,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 26,
+          "frames": 28,
+          "ms": 920.0000000000009,
+          "longest": 105,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 27,
+          "frames": 29,
+          "ms": 949,
+          "longest": 95,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 26,
+          "frames": 26,
+          "ms": 880,
+          "longest": 99,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 29,
+          "frames": 25,
+          "ms": 924,
+          "longest": 113,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 25,
+          "frames": 29,
+          "ms": 899,
+          "longest": 93,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 25,
+          "frames": 29,
+          "ms": 929,
+          "longest": 98,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 24,
+          "frames": 27,
+          "ms": 876.9999999999982,
+          "longest": 106,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 23,
+          "frames": 29,
+          "ms": 890,
+          "longest": 92,
+          "longTasks": [],
+          "changed": true
+        }
+      ],
+      "idleFrameMs": 16,
+      "hz": 63,
+      "lost": 261,
+      "frames": 278,
+      "lostPct": 48.4,
+      "worstSwipePct": 53.70370370370371,
+      "longestFrameMs": 151,
+      "longTasks": [],
+      "gated": true
+    }
+  ]
+}

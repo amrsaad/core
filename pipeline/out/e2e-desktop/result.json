@@ -1,0 +1,218 @@
+{
+  "at": "2026-10-30T09:59:03.343Z",
+  "checks": {
+    "below900Mobile": true,
+    "at900Desktop": true,
+    "resizeKeepsMoment": true,
+    "soundIconDesk": true,
+    "helpShownFirst": true,
+    "helpListsKeys": true,
+    "helpNoDashes": true,
+    "helpFocusInside": true,
+    "helpBlocksKeys": true,
+    "escClosesHelp": true,
+    "helpOnlyOnce": true,
+    "columnIs480": true,
+    "columnCentered": true,
+    "videoIs16by9": true,
+    "panelFixedRight": true,
+    "barOnTop": true,
+    "noHorizontalScroll": true,
+    "barOneRow": true,
+    "barFitsWindow": true,
+    "barHasTabsAndDay": true,
+    "panelHasHookAndSource": true,
+    "noMobileOverlays": true,
+    "compactButtons": true,
+    "titleShowsHook": true,
+    "keyJ": true,
+    "keyK": true,
+    "keyArrowDown": true,
+    "keyArrowUp": true,
+    "titleFollowsMoment": true,
+    "spacePauses": true,
+    "spaceDidNotClickFocused": true,
+    "spaceResumes": true,
+    "keyM": true,
+    "tempo15": true,
+    "tempo2": true,
+    "tempoTapBackTo1": true,
+    "tempoKeyHeldDoesNotRepeat": true,
+    "tempoCycleBackTo1": true,
+    "keyL": true,
+    "keyS": true,
+    "keySToggles": true,
+    "keyC": true,
+    "deskCaptionContext": true,
+    "captionStaysOpenOnNext": true,
+    "escClosesCaption": true,
+    "keyO": true,
+    "keyF": true,
+    "noteShowsNumbers": true,
+    "noteBlocksNext": true,
+    "noteConfirmLine": true,
+    "notForMeKeyTopic02": true,
+    "noteChipByNumber": true,
+    "noteEnterFocusesText": true,
+    "typingKeysStayText": true,
+    "noteEnterSaves": true,
+    "escClosesNote": true,
+    "keyA": true,
+    "keyAContext": true,
+    "savedShowsAsked": true,
+    "noteSheetHasAsk": true,
+    "keyAInSheet": true,
+    "tab2Audio": true,
+    "tab3Text": true,
+    "textWidth65ch": true,
+    "barFitsWindowText": true,
+    "barTabsClickableText": true,
+    "textSourceInPanel": true,
+    "tab1Video": true,
+    "recallAppears": true,
+    "recallInPanel": true,
+    "recallNoOverlay": true,
+    "recallShowsNumbers": true,
+    "recallBlocksNext": true,
+    "recallPickByNumber": true,
+    "recallWhy": true,
+    "recallDigitsIgnoredAfterAnswer": true,
+    "recallEnterNext": true,
+    "escClosesRecall": true,
+    "trackpadDown": true,
+    "trackpadUp": true,
+    "trackpadLeftOpensNote": true,
+    "trackpadRightNothing": true,
+    "wheelOnPanelIgnored": true,
+    "hoverSettings": true,
+    "hoverTab": true,
+    "hoverAction": true,
+    "hoverOpenSource": true,
+    "focusRingOnAllButtons": true,
+    "sheetOpens": true,
+    "sheetIsSideSheet": true,
+    "sheetClosesOnOutsideClick": true,
+    "sheetBlocksKeys": true,
+    "escClosesSheet": true,
+    "savedAsSheet": true,
+    "sheetCloseButton": true,
+    "questionOpensHelp": true,
+    "helpClosesAgain": true,
+    "helpButtonOpens": true,
+    "mediaMetadata": true,
+    "mediaHandlersSet": true,
+    "mediaPause": true,
+    "mediaPlay": true,
+    "mediaNext": true,
+    "mediaPrevious": true,
+    "noPageErrors": true,
+    "pwaInstallable": true,
+    "pwaManifest": true
+  },
+  "notes": {
+    "geo": {
+      "main": {
+        "x": 480,
+        "y": 56,
+        "w": 480,
+        "h": 844
+      },
+      "panel": {
+        "x": 1065,
+        "y": 80,
+        "w": 351,
+        "h": 260
+      },
+      "aside": {
+        "x": 1040,
+        "y": 56,
+        "w": 400,
+        "h": 844
+      },
+      "bar": {
+        "x": 0,
+        "y": 0,
+        "w": 1440,
+        "h": 56
+      },
+      "video": {
+        "x": 480,
+        "y": 343,
+        "w": 480,
+        "h": 270
+      },
+      "scrollW": 1440
+    },
+    "text": {
+      "w": 701.53125,
+      "ch65": 701.546875,
+      "col": 821.53125
+    },
+    "ring": [
+      {
+        "tag": "BUTTON",
+        "ok": true
+      },
+      {
+        "tag": "BUTTON",
+        "ok": true
+      },
+      {
+        "tag": "BUTTON",
+        "ok": true
+      },
+      {
+        "tag": "BUTTON",
+        "ok": true
+      },
+      {
+        "tag": "BUTTON",
+        "ok": true
+      },
+      {
+        "tag": "BUTTON",
+        "ok": true
+      },
+      {
+        "tag": "BUTTON",
+        "ok": true
+      },
+      null,
+      {
+        "tag": "BUTTON",
+        "ok": true
+      },
+      {
+        "tag": "BUTTON",
+        "ok": true
+      },
+      {
+        "tag": "BUTTON",
+        "ok": true
+      },
+      {
+        "tag": "BUTTON",
+        "ok": true
+      }
+    ],
+    "media": {
+      "meta": true,
+      "title": "Testmoment 35 body",
+      "artist": "Kanal body · Dr. Test 3",
+      "state": "playing"
+    },
+    "installability": [],
+    "manifest": {
+      "name": "Core",
+      "display": "standalone",
+      "start_url": "/core/",
+      "icons": [
+        "192x192",
+        "512x512",
+        "512x512"
+      ]
+    }
+  },
+  "ok": true,
+  "failed": []
+}

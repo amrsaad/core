@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-10-24",
+ "records": [
+  {
+   "sourceId": "wiki:de:Cer",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Cer",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/24",
+    "status": 200
+   },
+   "title": "Cer",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Cer ist ein chemisches Element mit dem Elementsymbol Ce und der Ordnungszahl 58. Im Periodensystem steht es in der Gruppe der Lanthanoide und zählt damit auch zu den Metallen der Seltenen Erden."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-10-24T03:51:54.459Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Cer": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:NASA",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/NASA",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/24",
+    "status": 200
+   },
+   "title": "NASA",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die NASA ist die 1958 gegründete zivile US-Bundesbehörde für Raumfahrt und Flugwissenschaft. Der Hauptsitz befindet sich in Washington, D.C. Zugleich ist die NASA eine wichtige geowissenschaftliche Forschungsinstitution und stellt in den USA die meisten Forschungsgelder für klimawissenschaftliche Forschungsarbeiten bereit."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-24T03:51:54.459Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/NASA": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Schleswig-Holstein",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Schleswig-Holstein",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/24",
+    "status": 200
+   },
+   "title": "Schleswig-Holstein",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Schleswig-Holstein ist eine parlamentarische Republik und ein teilsouveräner Gliedstaat (Land) der Bundesrepublik Deutschland. Die Landeshauptstadt und bevölkerungsreichste Stadt des Landes ist die Großstadt Kiel; weitere Oberzentren sind die Großstadt Lübeck sowie die Mittelstädte Flensburg und Neumünster."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-24T08:07:36.675Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Schleswig-Holstein": 200
+   }
+  }
+ ]
+}

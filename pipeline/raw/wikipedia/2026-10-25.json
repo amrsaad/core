@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-10-25",
+ "records": [
+  {
+   "sourceId": "wiki:de:Deutscher Kaiser",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Deutscher_Kaiser",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/25",
+    "status": 200
+   },
+   "title": "Deutscher Kaiser",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Der Begriff deutscher Kaiser hat drei miteinander verbundene Bedeutungsdimensionen. Ideengeschichtlich verweist er erstens auf die im 19. Jahrhundert wirksam werdende Verbindung von Monarchievorstellungen und nationalen Einheitsideen. Verfassungsgeschichtlich bezeichnet er zweitens das im Staatsaufbau des Deutschen Kaiserreiches verankerte Amt des Kaisers als konstitutionelles Staatsoberhaupt. Ereignisgeschichtlich umfasst er drittens die konkrete historische Ausübung dieses Amtes von der Reichsgründung 1871 bis zum Ende der Monarchie in Deutschland 1918."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-10-25T04:16:21.859Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Deutscher_Kaiser": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Parlamentswahl in Indien 1951–1952",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Parlamentswahl_in_Indien_1951%E2%80%931952",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/25",
+    "status": 200
+   },
+   "title": "Parlamentswahl in Indien 1951–1952",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Parlamentswahl in Indien 1951–1952 war die erste landesweite Wahl zum gesamtindischen Parlament nach Inkrafttreten der Verfassung der Republik Indien am 26. Januar 1950. Die Wahl zog sich über mehrere Monate, verteilt auf verschiedene Tage hin, begann am 25. Oktober 1951 und endete am 21. Februar 1952. Wahlberechtigt waren mehr als 173 Millionen Personen und die Wahlbeteiligung betrug 44,9 %. Die Durchführung der Wahl stellte für das noch junge Staatswesen eine enorme organisatorische und logistische Herausforderung dar, die aber in bemerkenswert geordneter Form bewältigt werden konnte. Da die Verfassung erst kurz zuvor in Kraft getreten war, musste bei der Organisation der Wahl vielfach juristisches und administratives Neuland betreten werden. Hierdurch wurden Standards geschaffen, die zum großen Teil noch heute bei Wahlen in Indien Gültigkeit haben und auch aus diesem Grund wird die Vorbereitung der Wahl im Folgenden ausführlich geschildert."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-25T04:16:21.859Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Parlamentswahl_in_Indien_1951%E2%80%931952": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Günter Malkowski",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/G%C3%BCnter_Malkowski",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/25",
+    "status": 200
+   },
+   "title": "Günter Malkowski",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Günter Malkowski war ein Student der Deutschen Hochschule für Politik und Teilnehmer am Widerstand in der frühen DDR. Er wurde in Weimar zum Tode verurteilt und in Moskau hingerichtet."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-25T08:19:01.511Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/G%C3%BCnter_Malkowski": 200
+   }
+  }
+ ]
+}

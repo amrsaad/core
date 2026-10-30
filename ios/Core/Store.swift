@@ -1,0 +1,301 @@
+import Foundation
+import SwiftUI
+
+/// Ablauf eines Gewichts: bis `at` (ms seit 1970) gilt der Wert in der Tabelle, danach `back`
+struct Until: Codable, Equatable {
+    var at: Double
+    var back: Double
+}
+
+struct Weights: Codable, Equatable {
+    var area: [String: Double] = [:]
+    var channel: [String: Double] = [:]
+    var topic: [String: Double] = [:]
+    /// Abläufe, Schlüssel c:<Kanal> und t:<Thema>. Fehlt, solange keiner läuft (Learn.swift).
+    var until: [String: Until]?
+}
+
+struct SavedMoment: Codable, Identifiable, Equatable {
+    var moment: Moment
+    var savedAt: Date
+    var done: Bool = false
+    var id: String { moment.id }
+}
+
+struct LogEntry: Codable, Equatable {
+    var id: String
+    var day: String
+    var ended: Bool
+    var watched: Double
+    var feedback: String?
+}
+
+/// Everything Core remembers on this phone. Stored as one JSON file.
+struct AppState: Codable, Equatable {
+    var seen: [String: Date] = [:]
+    var weights = Weights()
+    /// Folge von Skips desselben Kanals, nur lokal (nicht im Sync)
+    var skipRun: Learn.SkipRun?
+    var saved: [String: SavedMoment] = [:]
+    var muted: [String: String] = [:]
+    /// seconds in the feed per local day (yyyy-MM-dd)
+    var feedTime: [String: Double] = [:]
+    var log: [LogEntry] = []
+    var momentDay: String?
+    var weekReviewShown: [String: Bool] = [:]
+    var captions: Bool = true
+    var areaShares: [String: Double] = ["brain": 1.0 / 3, "body": 1.0 / 3, "beat": 1.0 / 3]
+    // App Runde 1. Alle optional, damit ein gespeicherter Stand von vorher weiter geladen wird
+    var playbackSpeed: Double?
+    var captionMode: CaptionMode?
+    var form: FeedForm?
+    /// Aufgabe 3: Momente mit gefülltem Herz (More like this) und Tipp bis Füllung am Knopf
+    var liked: [String: Date]?
+    var tapMs: [Actions.Tap]?
+    /// Rückmeldung: jede Notiz (Chip oder Text) wird lokal gesammelt und einmal am Tag gesammelt als Issue gesendet
+    var feedbackNotes: [Note.Entry]?
+    /// Tag (lokal), an dem die Zeile "N notes, send?" zuletzt gezeigt wurde
+    var notesPromptDay: String?
+    var playLatency: [Latency.Sample]?
+    var dayCount: [String: DayCount]?
+    var recall: Recall.State?
+    var plans: [String: WeekPlan]?
+    /// Geräte-Sync: Zeitpunkt (ms) der letzten Änderung je Schlüssel, auch für Löschungen. Schlüssel siehe SyncMerge.tsKey.
+    var syncTs: [String: Double]?
+    /// Core Digest: Taps auf der Wochenkarte (a:<id> done oder drop, c:<id> a oder b). Wandern per Sync, der nächste Lauf sammelt sie ein.
+    var digestTaps: [String: DigestTap]?
+    /// Core Digest: zuletzt geladene Wochenkarte (state/digest-latest.enc). Nur an diesem Gerät, kommt bei jedem Sync neu.
+    var digestLatest: DigestLatest?
+
+    var speed: Double { Speed.of(playbackSpeed) }
+    var currentForm: FeedForm { form ?? .video }
+}
+
+enum Day {
+    static func key(_ date: Date = Date()) -> String {
+        let f = DateFormatter()
+        f.calendar = Calendar(identifier: .gregorian)
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: date)
+    }
+
+    /// Monday of the date's week as yyyy-MM-dd
+    static func weekKey(_ date: Date = Date()) -> String {
+        var cal = Calendar(identifier: .iso8601)
+        cal.timeZone = .current
+        let monday = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)) ?? date
+        return key(monday)
+    }
+}
+
+@MainActor
+final class Store: ObservableObject {
+    @Published var state: AppState {
+        didSet {
+            guard state != oldValue else { return }
+            // Geräte-Sync: jede Änderung an Synchronisiertem bekommt zentral ihren Zeitstempel, keine einzelne Aktion muss daran denken
+            if !adopting {
+                let stamped = SyncWire.stamp(old: oldValue, new: state, now: Date())
+                if stamped.syncTs != state.syncTs { state.syncTs = stamped.syncTs }
+            }
+            save()
+            if !adopting && SyncWire.syncedChanged(oldValue, state) { onSynced?() }
+        }
+    }
+
+    /// Wird gerufen, wenn sich etwas ändert, das zwischen Geräten wandert (startet die 10 Sekunden des Syncs)
+    var onSynced: (() -> Void)?
+    private var adopting = false
+    /// Es gibt nur einen Store. Der Sync greift darüber auf den Zustand zu.
+    static weak var current: Store?
+
+    private static var file: URL {
+        Env.stateDir.appendingPathComponent("state.json")
+    }
+
+    init() {
+        if let data = try? Data(contentsOf: Store.file), let s = try? Self.decoder.decode(AppState.self, from: data) {
+            state = s
+        } else {
+            state = AppState()
+        }
+        Store.current = self
+    }
+
+    // MARK: Geräte-Sync
+
+    /// Dokument des Zustands für den Sync
+    func syncDoc() -> J { SyncWire.doc(from: state) }
+
+    /// Das Dokument von GitHub einarbeiten, ohne neue Zeitstempel. Rechnet gegen den neuesten Zustand.
+    func adopt(_ remote: J) {
+        let merged = SyncMerge.merge(SyncWire.doc(from: state), remote)
+        let next = SyncWire.apply(merged, to: state)
+        guard next != state else { return }
+        adopting = true
+        state = next
+        adopting = false
+    }
+
+    /// Core Digest: neue Wochenkarte von GitHub. Wandert nicht weiter, bekommt keinen Zeitstempel.
+    func adoptDigest(_ latest: DigestLatest) {
+        guard state.digestLatest != latest else { return }
+        adopting = true
+        state.digestLatest = latest
+        adopting = false
+    }
+
+    /// Core Digest: Tap auf Done, Drop, Option A oder B. Ein Tap lässt sich ändern.
+    func tapDigest(_ key: String, _ choice: String) {
+        let next = DigestCard.setTap(state.digestTaps, key: key, choice: choice, now: SyncWire.ms(Date()))
+        if next != state.digestTaps { state.digestTaps = next }
+    }
+
+    private static let decoder: JSONDecoder = {
+        let d = JSONDecoder()
+        d.dateDecodingStrategy = .iso8601
+        return d
+    }()
+
+    private static let encoder: JSONEncoder = {
+        let e = JSONEncoder()
+        e.dateEncodingStrategy = .iso8601
+        return e
+    }()
+
+    private func save() {
+        try? FileManager.default.createDirectory(at: Store.file.deletingLastPathComponent(), withIntermediateDirectories: true)
+        if let data = try? Store.encoder.encode(state) { try? data.write(to: Store.file, options: .atomic) }
+    }
+
+    // MARK: Actions
+
+    /// Faktor auf Kanal, Thema und Bereich. Jede Wertung außer Skip unterbricht die Folge von Skips.
+    func signal(_ m: Moment, _ factor: Double) {
+        state.weights = Learn.signal(state.weights, m.mom, factor: factor, now: Learn.nowMs)
+        state.skipRun = nil
+    }
+
+    /// Skip (unter 3 s weggewischt): Deckel 0,6, zweiter Skip desselben Kanals in Folge 0,2 für 14 Tage
+    func skip(_ m: Moment) {
+        let r = Learn.skip(state.weights, run: state.skipRun, m.mom, now: Learn.nowMs)
+        state.weights = r.weights
+        state.skipRun = r.run
+    }
+
+    /// Wirkung eines Chips auf die Gewichte (Learn.apply), die Folge von Skips endet
+    func apply(_ e: Learn.Effect, _ m: Moment) {
+        state.weights = Learn.apply(state.weights, e, m.mom, now: Learn.nowMs)
+        state.skipRun = nil
+    }
+
+    /// Alles Gelernte zurück auf Standard
+    func resetLearning() {
+        state.weights = Weights()
+        state.skipRun = nil
+    }
+
+    func markSeen(_ m: Moment) {
+        if state.seen[m.id] == nil {
+            state.seen[m.id] = Date()
+            state.dayCount = Today.countSeen(state.dayCount ?? [:], Day.key())
+        }
+        state.momentDay = Day.key()
+    }
+
+    func addLatency(ms: Int, buffered: Bool) {
+        state.playLatency = Latency.add(state.playLatency ?? [], .init(ms: ms, buffered: buffered, at: Date()))
+        Diag.log("first-frame \(ms)ms \(buffered ? "buffered" : "cold")")
+    }
+
+    func answerRecall(_ m: Moment, got: Bool) {
+        state.recall = Recall.answer(state.recall ?? [:], id: m.id, got: got, now: Date(), boost: m.recallBoost == true)
+        if got { state.dayCount = Today.countGotIt(state.dayCount ?? [:], Day.key()) }
+    }
+
+    func captionsShown(_ m: Moment) -> Bool {
+        let form = state.currentForm
+        return form != .text && Captions.shown(form == .audio ? .on : state.captionMode, texts: m.cueTexts, audio: m.isAudio)
+    }
+
+    /// Monday of last week, for the plan of the previous week
+    static func prevWeekKey(_ date: Date = Date()) -> String {
+        Day.weekKey(date.addingTimeInterval(-7 * 86_400))
+    }
+
+    func weekTask(now: Date = Date()) -> (seen: Int, gotIt: Int, applied: Int) {
+        let days = (0..<7).map { Day.key(Calendar.current.date(byAdding: .day, value: -$0, to: now) ?? now) }
+        let since = now.addingTimeInterval(-7 * 86_400)
+        let applied = state.saved.values.filter { $0.done && $0.savedAt >= since }.count
+        return WeekReview.task(dayCount: state.dayCount ?? [:], days: days, applied: applied)
+    }
+
+    func isSaved(_ m: Moment) -> Bool { state.saved[m.id] != nil }
+    func isLiked(_ m: Moment) -> Bool { state.liked?[m.id] != nil }
+
+    /// More like this: Herz setzen oder zurücknehmen, mit dem Gegen-Signal beim Zurücknehmen
+    func setLiked(_ m: Moment, _ on: Bool) {
+        var l = state.liked ?? [:]
+        if on { l[m.id] = Date() } else { l[m.id] = nil }
+        state.liked = l
+        signal(m, on ? Mix.Signal.more : 1 / Mix.Signal.more)
+    }
+
+    static var nowMs: Int { Int((Date().timeIntervalSince1970 * 1000).rounded()) }
+
+    /// Notiz zum Moment sofort lokal speichern. Gibt false zurück, wenn weder Chip noch Text da war.
+    @discardableResult
+    func addNote(_ m: Moment, chip: String?, text: String, tab: String) -> Bool {
+        let ctx = Note.Context(id: m.id, hook: m.hook, tab: tab, commit: Diag.commit)
+        guard let e = Note.makeEntry(ctx, chips: chip.map { [$0] } ?? [], text: text, at: Store.nowMs) else { return false }
+        state.feedbackNotes = (state.feedbackNotes ?? []) + [e]
+        return true
+    }
+
+    func markNotesSent(keys: [String]) {
+        state.feedbackNotes = Note.markSent(state.feedbackNotes, keys: keys, at: Store.nowMs)
+    }
+
+    func addTap(ms: Int) {
+        state.tapMs = Actions.add(state.tapMs ?? [], .init(ms: ms, at: Date()))
+        Diag.log("tap-to-fill \(ms)ms")
+    }
+
+    func save(_ m: Moment) {
+        guard state.saved[m.id] == nil else { return }
+        state.saved[m.id] = SavedMoment(moment: m, savedAt: Date())
+        signal(m, Mix.Signal.save)
+    }
+
+    func unsave(_ m: Moment) {
+        state.saved[m.id] = nil
+    }
+
+    func log(_ m: Moment, watched: Double, ended: Bool = false, feedback: String? = nil) {
+        let day = Day.key()
+        if let i = state.log.firstIndex(where: { $0.id == m.id && $0.day == day }) {
+            state.log[i].watched = max(state.log[i].watched, watched)
+            state.log[i].ended = state.log[i].ended || ended
+            if let feedback { state.log[i].feedback = feedback }
+        } else {
+            state.log.append(LogEntry(id: m.id, day: day, ended: ended, watched: watched, feedback: feedback))
+        }
+        if state.log.count > 3000 { state.log.removeFirst(state.log.count - 3000) }
+    }
+
+    func addFeedTime(_ seconds: Double) {
+        state.feedTime[Day.key(), default: 0] += seconds
+    }
+
+    func mute(_ m: Moment) {
+        state.muted[m.channel] = m.channel
+    }
+
+    /// Sunday, first open, not shown this week yet
+    var reviewDue: Bool {
+        let cal = Calendar(identifier: .gregorian)
+        if Env.testReview { return true }
+        return cal.component(.weekday, from: Date()) == 1 && state.weekReviewShown[Day.weekKey()] != true
+    }
+}

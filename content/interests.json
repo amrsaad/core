@@ -1,0 +1,9 @@
+{
+  "areas": { "brain": 0.55, "body": 0.25, "beat": 0.20 },
+  "topics": {
+    "brain": ["glaukom", "retina", "katarakt", "refraktiv", "cornea", "allgemein", "ki-medizin", "ki-regulierung", "ki-allgemein", "verhandlung", "strategie", "startup", "varia"],
+    "body": ["kraft", "ausdauer", "ernaehrung", "recovery", "schlaf"],
+    "beat": ["koran"]
+  },
+  "dailyRoundLimit": 5
+}

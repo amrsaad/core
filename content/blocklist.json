@@ -1,0 +1,27 @@
+{
+ "_info": "Karten, die das Gate formal bestehen, aber inhaltlich leer sind. Der Builder überspringt diese source.ids.",
+ "ids": {
+  "pmid:42790900": "Protokoll, nur Verbreitungsnotiz",
+  "pmid:42879431": "nur Fragenliste",
+  "pmid:38466174": "nur eine Frage",
+  "pmid:42696273": "kündigt Antworten an, ohne Inhalt",
+  "pmid:41015274": "nur Hoffnungsaussage",
+  "pmid:42846705": "nur Aufruf zu Kooperation",
+  "pmid:42855039": "nur Ausblick",
+  "pmid:42865454": "nur Forschungsagenda",
+  "pmid:40701331": "nur Hintergrund, kein Ergebnis",
+  "pmid:39127408": "Hintergrund und Methode, kein Ergebnis",
+  "pmid:42779134": "nur Umfang des Reviews",
+  "pmid:42435984": "generische Aussage",
+  "pmid:42679926": "generische Rahmenaussage",
+  "pmid:37578094": "nennt gepoolte Werte nicht",
+  "pmid:31868817": "nur allgemeiner Hinweis",
+  "pmid:42871782": "nur vage Rollenbeschreibung",
+  "pmid:42870152": "abgeschnittener Ausblick",
+  "pmid:42530633": "nur Ausblick",
+  "pmid:42815812": "nur Einordnung ohne Ergebnis",
+  "pmid:42898717": "nur Zielbeschreibung",
+  "pmid:42805095": "nur allgemeine Forderung",
+  "pmid:42817067": "nur Zielbeschreibung"
+ }
+}
