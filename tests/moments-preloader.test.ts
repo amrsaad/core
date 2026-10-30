@@ -98,6 +98,30 @@ describe('Preloader: Ausschnitte in die Cache API', () => {
     expect(p.stats().bytes).toBeLessThan(1_700_000);
   });
 
+  it('Tempo 2x: der Vorrat reicht doppelt so weit voraus (Zeitfenster), bei 1x bleibt es bei 30', async () => {
+    const file = synthMp3({ frames: 20_000, bitrate: 128 }).bytes;
+    const q = Array.from({ length: 80 }, (_, i) => mom(i));
+    const ids = async (rate: number) => {
+      const { w, make } = setup();
+      for (const m of q) w.files.set(m.hls!, file);
+      const p = make();
+      p.setQueue(q, 0, rate);
+      await until(() => p.ids().length >= (rate === 1 ? 30 : 60));
+      await settle(p, 70);
+      return p.ids().length;
+    };
+    expect(await ids(1)).toBe(30);
+    expect(await ids(2)).toBe(60);
+  });
+
+  it('Warmset wächst mit dem Tempo: 5 Momente voraus bei 1x, 10 bei 2x', () => {
+    const { make } = setup();
+    const p = make();
+    const q = Array.from({ length: 30 }, (_, i) => mom(i));
+    expect(p.warmSet(q, 10).map((m) => m.id)).toEqual(['m7', 'm8', 'm9', 'm10', 'm11', 'm12', 'm13', 'm14', 'm15']);
+    expect(p.warmSet(q, 10, 2)).toHaveLength(3 + 1 + 10);
+  });
+
   it('Obergrenze 60 MB: nie darüber, das Nächste bleibt, das Ferne wird nicht für Nahes geopfert', async () => {
     const { w, make } = setup();
     const file = synthMp3({ frames: 20_000, bitrate: 320, sampleRate: 44100 }).bytes; // 320 kbps, etwa 8 Minuten

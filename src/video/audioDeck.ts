@@ -142,6 +142,12 @@ export class AudioDeck {
   /** Seit dem Laden dieses Ausschnitts kam mindestens ein playing */
   private played = false;
   private plays = 0;
+  /** Wer ein Element zuletzt angehalten hat (Diagnose, Issue 13): "app: wo". Fehlt der Eintrag beim pause-Ereignis, kam die Pause vom System. */
+  private pauseBy = new WeakMap<DeckEl, string>();
+  /** Ereignisse, die kamen, während die Seite im Hintergrund stand (Diagnose: laufen die Handler dort überhaupt) */
+  private hiddenStats = { tu: 0, ended: 0, ends: 0, plays: 0, at: 0 };
+  /** Letzter Wechsel im Hintergrund, bis das Element des Nachfolgers spielt (Diagnose) */
+  private adv: { to: string; t0: number } | null = null;
   /** Schlüssel aller Ausschnitte, die geladen wurden (Tests, Diagnose) */
   readonly history: string[] = [];
   /** Beim automatischen Weiter im Hintergrund: der Wechsel ist schon geschehen, jetzt die Buchführung */
@@ -176,11 +182,26 @@ export class AudioDeck {
 
   private hidden = () => (this.deps.hidden ?? defaultHidden)();
 
+  /** Diagnosezeile "bg: deck ...": beantwortet im Protokoll, was im Hintergrund mit dem Element geschieht (Issue 13) */
+  private note(line: string) {
+    this.diag(`bg: deck ${line}`);
+  }
+
+  /** Element anhalten und merken, wer es war: kommt das pause-Ereignis ohne diesen Eintrag, hat das System pausiert */
+  private halt(el: DeckEl, by: string) {
+    if (!el.paused) this.pauseBy.set(el, by);
+    el.pause();
+  }
+
   private wire(el: DeckEl) {
     // Ereignisse des gerade nicht benutzten Elements zählen nicht
     const mine = () => el === this.el;
     el.addEventListener('playing', () => {
       if (!mine()) return;
+      if (this.adv && this.adv.to === this.clip?.id) {
+        this.note(`advance to ${this.adv.to}: playing after ${Date.now() - this.adv.t0} ms, rate ${el.playbackRate}, ${this.stateText(el)}`);
+        this.adv = null;
+      }
       this.live = true;
       this.played = true;
       this.sink?.state(PLAYING);
@@ -200,6 +221,9 @@ export class AudioDeck {
       this.sink?.state(BUFFERING);
     });
     el.addEventListener('pause', () => {
+      const by = this.pauseBy.get(el);
+      this.pauseBy.delete(el);
+      if (mine()) this.note(`pause event by=${by ?? (el.ended ? 'media end' : 'system')} hidden=${this.hidden()} done=${this.done} ${this.stateText(el)}`);
       // Ein Pause-Ereignis, das einem Quellwechsel vorausging, ist veraltet: das Element spielt schon wieder
       if (!mine() || !el.paused || this.done) return;
       this.live = false;
@@ -207,10 +231,13 @@ export class AudioDeck {
     });
     // Ein ended ohne vorheriges playing dieses Ausschnitts stammt vom vorigen Inhalt (zum Beispiel der Stille der Freischaltung) und zählt nicht
     el.addEventListener('ended', () => {
+      if (mine() && this.hidden()) this.hiddenStats.ended++;
+      if (mine()) this.note(`ended event played=${this.played} hidden=${this.hidden()} ${this.stateText(el)}`);
       if (mine() && this.played) this.clipEnd('ended');
     });
     el.addEventListener('timeupdate', () => {
       const c = this.clip;
+      if (mine() && this.hidden()) this.hiddenStats.tu++;
       if (!mine() || !c || c.end === undefined || el.paused) return;
       if (el.currentTime >= c.end - this.offset - END_EPS) this.clipEnd('timeupdate');
     });
@@ -290,7 +317,7 @@ export class AudioDeck {
     if (old && old !== target) {
       // Spurwechsel: das alte Element anhalten, Ton übernehmen (das Tempo setzt applyRate gleich)
       target.muted = old.muted;
-      old.pause();
+      this.halt(old, 'app: lane switch');
     }
     const el = target;
     this.clip = clip;
@@ -320,6 +347,7 @@ export class AudioDeck {
   private kick(why: string) {
     const el = this.element;
     const n = ++this.plays;
+    if (this.hidden()) this.hiddenStats.plays++;
     this.diag(`deck play#${n} ${why} ${this.stateText(el)}`);
     let p: Promise<void> | undefined;
     try {
@@ -409,13 +437,25 @@ export class AudioDeck {
     if (!el || !c || this.done) return;
     this.done = true;
     const next = this.armed;
-    if (next && this.onAdvance && this.hidden()) {
+    const hid = this.hidden();
+    if (hid) this.hiddenStats.ends++;
+    const go = !!(next && this.onAdvance && hid);
+    this.note(`clip end via ${why} hidden=${hid} armed=${next?.id ?? 'none'} onAdvance=${!!this.onAdvance} advance=${go ? 'yes' : 'no'} ${this.stateText(el)}`);
+    if (next && this.onAdvance && hid) {
       // Hintergrund: Quelle wechseln und play() im selben Handler. Erst danach die Buchführung der App.
       const from = c;
       this.armed = null;
       this.sink = null;
       this.diag(`deck switch ${from.id} to ${next.id} (${why})`);
       this.start(next, true);
+      // Die Quelle des Nachfolgers wird erst hier gesetzt (nicht schon vor dem Ende), play() folgt im selben Aufruf auf demselben Element
+      this.note(`advance ${from.id} to ${next.id}: src and play() in this handler, same element ${this.el === el}, next from storage ${this.isLocal}, readyState ${this.el?.readyState ?? '?'}`);
+      this.adv = { to: next.id, t0: Date.now() };
+      setTimeout(() => {
+        if (this.adv?.to !== next.id) return;
+        this.adv = null;
+        if (this.el) this.note(`advance to ${next.id}: NOT playing after 3 s, ${this.stateText(this.el)} error ${this.el.error?.code ?? 'none'}`);
+      }, 3000);
       try {
         this.onAdvance(from, next);
       } catch (e) {
@@ -424,7 +464,7 @@ export class AudioDeck {
       return;
     }
     // Vordergrund oder kein Nachfolger: anhalten und das Ende melden, die App entscheidet (Für-dich-Karte, Wisch)
-    el.pause();
+    this.halt(el, 'app: clip end in foreground');
     this.sink?.state(ENDED);
   }
 
@@ -445,7 +485,7 @@ export class AudioDeck {
     this.sink = null;
     this.want = false;
     this.done = true;
-    for (const e of this.all()) e.pause();
+    for (const e of this.all()) this.halt(e, 'app: release');
   }
 
   // ---- Schnittstelle für die Player ----
@@ -469,7 +509,7 @@ export class AudioDeck {
       if (opts.play) {
         if (el.paused) this.kick('resume');
         else if (this.live) sink.state(PLAYING);
-      } else el.pause();
+      } else this.halt(el, 'app: load without play');
       return;
     }
     this.start(clip, opts.play);
@@ -486,7 +526,7 @@ export class AudioDeck {
   pause(sink: DeckSink) {
     if (this.sink !== sink || !this.el) return;
     this.want = false;
-    this.el.pause();
+    this.halt(this.el, 'app: pause (user, media key or lock screen)');
   }
 
   /** Dieser Player gibt das Element frei (destroy) */
@@ -494,7 +534,7 @@ export class AudioDeck {
     if (this.sink !== sink) return;
     this.sink = null;
     this.want = false;
-    this.el?.pause();
+    if (this.el) this.halt(this.el, 'app: drop');
   }
 
   setMuted(sink: DeckSink, muted: boolean) {
@@ -505,6 +545,8 @@ export class AudioDeck {
   setRate(rate: number) {
     this.rate = rate;
     for (const e of this.all()) this.applyRate(e);
+    // Tempo ungleich 1x nie über Web Audio (Issue 13): ein laufender Ausschnitt auf der geregelten Spur wechselt an der Stelle auf die unveränderte
+    if (rate !== 1) this.bail('tempo');
   }
 
   /** Nur schreiben, was abweicht: unnötige Schreibzugriffe auf playbackRate lassen WebKit mit aktiver Media Session abstürzen (im Testrunner beobachtet) */
@@ -547,6 +589,31 @@ export class AudioDeck {
 
   local(sink: DeckSink): boolean {
     return this.sink === sink && this.isLocal;
+  }
+
+  /**
+   * Seitenwechsel (visibilitychange hidden oder visible, pagehide, pageshow): Zustand des Elements und der Media Session ins Protokoll.
+   * Bei hidden folgen Zeilen nach 1, 5 und 15 s, solange die Seite noch im Hintergrund steht (läuft die Zeit weiter, spielt das Element).
+   * Bei visible eine Zeile mit den Ereignissen, die im Hintergrund kamen.
+   */
+  pageEvent(kind: string) {
+    const el = this.el;
+    if (!el) return;
+    const line = (tag: string) => {
+      const ms = typeof navigator !== 'undefined' && 'mediaSession' in navigator ? navigator.mediaSession.playbackState : 'n/a';
+      const s = el.src ?? '';
+      const src = !s ? 'none' : s.startsWith('data:') ? 'silence' : s.startsWith('blob:') ? 'storage' : 'net';
+      return `page ${kind}${tag}: paused=${el.paused} ended=${el.ended} t=${el.currentTime.toFixed(1)} rs=${el.readyState} rate=${el.playbackRate} src=${src} lane=${this.lane} want=${this.want} done=${this.done} mediaSession=${ms}`;
+    };
+    this.note(line(''));
+    if (kind === 'hidden') {
+      this.hiddenStats = { tu: 0, ended: 0, ends: 0, plays: 0, at: Date.now() };
+      for (const sec of [1, 5, 15]) setTimeout(() => this.hidden() && this.note(line(` +${sec} s`)), sec * 1000);
+    } else if (kind === 'visible' && this.hiddenStats.at) {
+      const h = this.hiddenStats;
+      this.note(`while hidden ${Math.round((Date.now() - h.at) / 1000)} s: timeupdate ${h.tu}, ended ${h.ended}, clip ends ${h.ends}, play calls ${h.plays}`);
+      this.hiddenStats.at = 0;
+    }
   }
 
   /** Aus einer Geste heraus aufrufen: schaltet das Element für späteres play() ohne Geste frei. Wirkt nur einmal je Seite. */

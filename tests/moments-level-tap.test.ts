@@ -209,3 +209,53 @@ describe('Diag-Zeile skipped cors', () => {
     expect(loudLine(-21, 5, 'web audio')).toBe('loud: lufs -21.0, gain +5.0 dB (web audio)');
   });
 });
+
+describe('Tempo ungleich 1x: nie Web Audio (Issue 13, Max 30.10.2026)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.stubGlobal('window', globalThis);
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it('laneFor: bei 1.5x und 2x die unveränderte Spur, bei 1x und ohne Angabe die geregelte', () => {
+    const o = { enabled: true, running: true, gainDb: 5, local: false, url: 'https://pod.test/a.mp3' };
+    expect(laneFor({ ...o, rate: 1.5 })).toEqual({ lane: 'plain', why: 'tempo' });
+    expect(laneFor({ ...o, rate: 2 })).toEqual({ lane: 'plain', why: 'tempo' });
+    expect(laneFor({ ...o, rate: 1 }).lane).toBe('level');
+    expect(laneFor(o).lane).toBe('level');
+  });
+
+  it('Tempowechsel auf 2x mitten im Moment: Wechsel auf die unveränderte Spur an der Stelle, Tempo bleibt', () => {
+    const t = setup();
+    t.state.running = true;
+    t.deck.load(clip('a', 6), t.sink, { play: true, muted: false });
+    expect(t.deck.loud(t.sink)?.how).toBe('web audio');
+    vi.advanceTimersByTime(1000);
+    t.level.currentTime = 40;
+    t.deck.setRate(2);
+    expect(t.lines.some((l) => l.includes('level lane abandoned (tempo)'))).toBe(true);
+    expect(t.plain.src).toBe('https://pod.test/a.mp3#t=40');
+    expect(t.plain.calls).toContain('play');
+    expect(t.level.paused).toBe(true);
+    expect(t.plain.defaultPlaybackRate).toBe(2);
+    expect(t.plain.playbackRate).toBe(2);
+    expect(t.deck.loud(t.sink)?.how).toBe('unchanged: tempo');
+  });
+
+  it('Tempo 1x ändert nichts, ein zweites setRate(2) wechselt nicht noch einmal', () => {
+    const t = setup();
+    t.state.running = true;
+    t.deck.load(clip('a', 6), t.sink, { play: true, muted: false });
+    vi.advanceTimersByTime(1000);
+    t.deck.setRate(1);
+    expect(t.deck.loud(t.sink)?.how).toBe('web audio');
+    t.deck.setRate(2);
+    const n = t.lines.filter((l) => l.includes('abandoned (tempo)')).length;
+    t.deck.setRate(2);
+    expect(t.lines.filter((l) => l.includes('abandoned (tempo)')).length).toBe(n);
+    expect(n).toBe(1);
+  });
+});

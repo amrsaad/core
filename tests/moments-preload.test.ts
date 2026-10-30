@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addNet, isPoorNet, mbText, netRank, nextToLoad, planEviction, PRELOAD_CAP_BYTES, PRELOAD_COUNT, preloadedLine, streamKind, windowOf, type NetSample, type Stored } from '../src/moments/preload';
+import { addNet, isPoorNet, mbText, netRank, nextToLoad, planEviction, PRELOAD_CAP_BYTES, PRELOAD_COUNT, preloadedLine, streamKind, windowOf, windowOfTime, PRELOAD_COUNT_MAX, queueAhead, type NetSample, type Stored } from '../src/moments/preload';
 import { newMomentCursor, nextMomentBlock, type MomentPrefs } from '../src/moments/mix';
 import type { Moment } from '../src/moments/types';
 const makeRng = (seed: number) => () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
@@ -176,5 +176,36 @@ describe('Netz-bewusst: Mix-Regeln bleiben, nur die Kandidaten werden enger', ()
     const b = nextMomentBlock(streamsOnly, prefs(netRank(() => false)), c, makeRng(1));
     expect(b).not.toBeNull();
     expect(b!.length).toBeGreaterThan(0);
+  });
+});
+
+describe('Vorrat: Zeitfenster bei Tempo über 1x (Issue 13)', () => {
+  const q = Array.from({ length: 100 }, (_, i) => mp3(String(i), { start: 0, end: 40 }));
+  it('bei 1x genau die nächsten 30, wie bisher', () => {
+    expect(windowOfTime(q, 0, 1).map((r) => r.rank)).toEqual(windowOf(q, 0).map((r) => r.rank));
+    expect(windowOfTime(q, 0, 1)).toHaveLength(30);
+  });
+  it('bei 2x doppelt so viel Inhalt, 1.5x anderthalb mal', () => {
+    expect(windowOfTime(q, 0, 2)).toHaveLength(60);
+    expect(windowOfTime(q, 0, 1.5)).toHaveLength(45);
+    expect(windowOfTime(q, 0, 2)[59].rank).toBe(60);
+  });
+  it('Zeit statt Anzahl: längere Momente weiter hinten verkürzen das Fenster', () => {
+    const mixed = Array.from({ length: 100 }, (_, i) => mp3(String(i), { start: 0, end: i > 30 ? 120 : 40 }));
+    // Inhalt der nächsten 30: 30 * 40 s, bei 2x 2400 s. Ab Rang 31 zählen 120 s je Moment
+    const w = windowOfTime(mixed, 0, 2);
+    expect(w.length).toBeLessThan(60);
+    expect(w.length).toBeGreaterThan(30);
+  });
+  it('höchstens das Doppelte, endet am Ende der Warteschlange, fehlende Längen zählen mit dem Durchschnitt', () => {
+    expect(windowOfTime(q, 0, 4)).toHaveLength(PRELOAD_COUNT_MAX);
+    expect(windowOfTime(q, 90, 2).map((r) => r.rank)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    const noLen = Array.from({ length: 100 }, (_, i) => ({ id: String(i) }));
+    expect(windowOfTime(noLen, 0, 2)).toHaveLength(60);
+  });
+  it('Warteschlangen-Vorlauf wächst mit dem Tempo', () => {
+    expect(queueAhead(1)).toBe(32);
+    expect(queueAhead(1.5)).toBe(47);
+    expect(queueAhead(2)).toBe(62);
   });
 });

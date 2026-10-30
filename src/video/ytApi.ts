@@ -2,7 +2,7 @@
 import { isYtId } from '../moments/contract';
 import { formOf } from '../moments/form';
 import { localKey } from '../moments/localKey';
-import { audioRunning, breakLevel, chainFor, hostState, levelEnabled, markHost, onContextState, onUnlock, type Chain } from '../moments/audioGraph';
+import { audioRunning, breakLevel, chainFor, hostState, levelWanted, markHost, onContextState, onUnlock, tempoNow, type Chain } from '../moments/audioGraph';
 import { clampGain, laneFor, youtubeVolume, type LoudInfo } from '../moments/loudness';
 import { AudioDeck, type DeckClip, type DeckSink } from './audioDeck';
 
@@ -112,7 +112,7 @@ export const audioDeck = new AudioDeck({
     LOCAL.delete(key);
   },
   lane: (clip, local, forcePlain) =>
-    laneFor({ enabled: levelEnabled(), running: audioRunning(), gainDb: clampGain(clip.gain), local, url: clip.url, host: local ? undefined : hostState(clip.url), forcePlain }),
+    laneFor({ enabled: levelWanted(), rate: tempoNow(), running: audioRunning(), gainDb: clampGain(clip.gain), local, url: clip.url, host: local ? undefined : hostState(clip.url), forcePlain }),
   chain: (el, gainDb) => {
     const c = chainFor(el as unknown as HTMLMediaElement);
     if (!c) return null;
@@ -124,9 +124,13 @@ export const audioDeck = new AudioDeck({
   broken: breakLevel,
 });
 if (typeof window !== 'undefined') {
-  onUnlock(() => levelEnabled() && audioDeck.prime());
+  onUnlock(() => levelWanted() && audioDeck.prime());
   // iOS unterbricht den Kontext (Sperrbildschirm, Anruf): läuft er nicht mehr, spielt der Audio-Reiter unverändert weiter
   onContextState((s) => audioDeck.contextChanged(s));
+  // Issue 13: jeder Seitenwechsel mit Zustand des Audio-Elements und der Media Session im Protokoll (Zeilen "bg: deck page ...")
+  document.addEventListener('visibilitychange', () => audioDeck.pageEvent(document.visibilityState));
+  window.addEventListener('pagehide', (e) => audioDeck.pageEvent(`pagehide persisted=${e.persisted}`));
+  window.addEventListener('pageshow', (e) => audioDeck.pageEvent(`pageshow persisted=${e.persisted}`));
 }
 
 /** Ausschnitt eines Audio-Moments für das Element, null wenn der Moment nicht über das Audio-Element läuft */
@@ -393,7 +397,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     const loc = LOCAL.get(localKey(id, start, end));
     const src = loc?.url ?? HLS.get(id)!;
     // Spurwahl: geregelte Spur nur, wenn Web Audio läuft und die Quelle sicher durchgelassen wird (laneFor)
-    const pick = laneFor({ enabled: levelEnabled(), running: audioRunning(), gainDb: gain, local: !!loc, url: src, host: loc ? undefined : hostState(src), forcePlain });
+    const pick = laneFor({ enabled: levelWanted(), rate: tempoNow(), running: audioRunning(), gainDb: gain, local: !!loc, url: src, host: loc ? undefined : hostState(src), forcePlain });
     let next = pick.lane === 'level' ? videoL : video;
     let chain: Chain | null = null;
     let why = forcePlain && forceWhy ? forceWhy : pick.why;
@@ -411,7 +415,14 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       media = next;
       old.pause();
       media.muted = old.muted;
+      media.defaultPlaybackRate = old.defaultPlaybackRate;
       media.playbackRate = old.playbackRate;
+      // Das alte Element gibt seine Quelle frei (Issue 13): höchstens ein Element mit Quelle je Slot, sonst halten drei Slots sechs Puffer
+      pending.get(old)?.();
+      pending.delete(old);
+      delete old.dataset.src;
+      old.removeAttribute('src');
+      old.load();
     }
     show('hls');
     lastArgs = { id, start, end, play, gain, from: seekTo };
@@ -587,7 +598,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       if (!a || isLevel(media) || hlsLoud.how !== 'unchanged: no audio context') return;
       const loc = LOCAL.get(localKey(a.id, a.start, a.end));
       const src = loc?.url ?? HLS.get(a.id)!;
-      const pick = laneFor({ enabled: levelEnabled(), running: audioRunning(), gainDb: a.gain, local: !!loc, url: src, host: loc ? undefined : hostState(src) });
+      const pick = laneFor({ enabled: levelWanted(), rate: tempoNow(), running: audioRunning(), gainDb: a.gain, local: !!loc, url: src, host: loc ? undefined : hostState(src) });
       if (pick.lane !== 'level') return;
       const at = media.currentTime + offset;
       if (a.end !== undefined && a.end - at < 4) return;
@@ -620,8 +631,16 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       return c ? { ...hlsLoud, db: c.db(), linear: c.linear() } : hlsLoud;
     },
     setPlaybackRate: (rate: number) => {
-      for (const e of all) e.playbackRate = rate;
+      // defaultPlaybackRate zuerst: load() setzt playbackRate darauf zurück, sonst startet jeder neue Moment mit 1x (Issue 13)
+      // Nur schreiben, was abweicht: jeder Schreibzugriff löst ratechange aus, auf allen sechs Elementen pro Tempowechsel
+      for (const e of all) {
+        if (e.defaultPlaybackRate !== rate) e.defaultPlaybackRate = rate;
+        if (e.playbackRate !== rate) e.playbackRate = rate;
+      }
       audioDeck.setRate(rate);
+      // Tempo ungleich 1x nie über Web Audio (Issue 13): ein laufender Ausschnitt wechselt an der Stelle auf die unveränderte Spur
+      if (rate !== 1 && mode === 'hls' && isLevel(media)) bail('tempo');
+      if (mode === 'hls') return;
       try {
         yt.setPlaybackRate(rate);
       } catch {

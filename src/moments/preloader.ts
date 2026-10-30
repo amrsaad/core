@@ -3,7 +3,7 @@
 // bei WLAN und Mobilfunk gleich. Die Regeln (Auswahl, Verdrängung, Netzzustand) stehen in preload.ts.
 import { LOCAL } from '../video/ytApi';
 import { Mp3Error, readHead, sliceMp3, type Mp3Head, type RangeFetch } from './mp3range';
-import { addNet, isPoorNet, keyOf, nextToLoad, planEviction, PRELOAD_CAP_BYTES, PRELOAD_COUNT, windowOf, type NetSample, type Ranked, type Stored } from './preload';
+import { addNet, isPoorNet, keyOf, nextToLoad, planEviction, PRELOAD_CAP_BYTES, windowOfTime, type NetSample, type Ranked, type Stored } from './preload';
 import type { Moment } from './types';
 
 export const CACHE_NAME = 'core-preload-v1';
@@ -73,6 +73,8 @@ export class Preloader {
   private cache: CacheLike | null = null;
   private entries = new Map<string, Entry>();
   private win: Ranked<Moment>[] = [];
+  /** Tempo des letzten setQueue, bestimmt wie weit voraus Blob-URLs bereitstehen */
+  private rate = 1;
   private rank = new Map<string, number>();
   private warmed = new Map<string, { key: string; url: string }>();
   private heads = new Map<string, Mp3Head>();
@@ -174,9 +176,10 @@ export class Preloader {
 
   // ---- Fenster und Laden ----
 
-  /** Warteschlange hat sich bewegt oder geändert: die nächsten 30 nach idx */
-  setQueue(queue: Moment[], idx: number) {
-    this.win = windowOf(queue, idx, PRELOAD_COUNT);
+  /** Warteschlange hat sich bewegt oder geändert: die nächsten 30 nach idx, bei Tempo über 1x entsprechend mehr (Zeitfenster) */
+  setQueue(queue: Moment[], idx: number, rate = 1) {
+    this.rate = rate;
+    this.win = windowOfTime(queue, idx, rate);
     this.rank = new Map(this.win.map((r) => [r.m.id, r.rank]));
     this.deferred.clear();
     // Was gerade lädt und nicht mehr im Fenster liegt, abbrechen
@@ -297,7 +300,7 @@ export class Preloader {
       this.note(`stored ${m.id} rank=${job.rank} ${slice.bytes.length}B offset=${slice.offset.toFixed(3)}`);
       this.emit();
       // Nahe Momente sofort als Blob-URL bereithalten
-      if (job.rank <= WARM_AHEAD) await this.warm([m]);
+      if (job.rank <= WARM_AHEAD * (this.rate > 1 ? this.rate : 1)) await this.warm([m]);
     } catch (e) {
       // Kein halber Eintrag: was nicht vollständig im Index steht, fliegt auch aus dem Cache (Netz weg mitten im Schreiben)
       if (!this.entries.has(m.id)) void this.cache?.delete(this.keyFor(m.id)).catch(() => {});
@@ -373,8 +376,9 @@ export class Preloader {
   }
 
   /** Momente um den aktuellen Index, deren Blob-URLs bereitstehen sollen */
-  warmSet(queue: Moment[], idx: number): Moment[] {
-    return queue.slice(Math.max(0, idx - WARM_BACK), idx + WARM_AHEAD + 1);
+  warmSet(queue: Moment[], idx: number, rate = 1): Moment[] {
+    const ahead = Math.ceil(WARM_AHEAD * (rate > 1 ? rate : 1));
+    return queue.slice(Math.max(0, idx - WARM_BACK), idx + ahead + 1);
   }
 
   /** Alles löschen (Tests, Zurücksetzen) */

@@ -7,10 +7,10 @@ import type { AppState } from '../lib/state';
 import { audioDeck, createPlayer, deckClipOf, HLS, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
 import { errorAction, resumePos } from './netrecover';
 import { isYtId } from './contract';
-import { contextForTest, levelEnabled, probeHost, unlockAudio } from './audioGraph';
+import { contextForTest, levelEnabled, probeHost, setTempo, unlockAudio } from './audioGraph';
 import { loudLine, recordLoud } from './loudness';
 import { browserPreloader } from './preloader';
-import { netRank, PRELOAD_COUNT, streamKind } from './preload';
+import { netRank, queueAhead, streamKind } from './preload';
 import { cursorFor, parseSaved, queueKey, releaseTail, reorderByRank, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMomentBlock, SIGNAL, type MomentCursor } from './mix';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
@@ -82,7 +82,6 @@ const TAP_MS = 260;
 const LONG_MS = 500;
 const LOG_MAX = 3000;
 /** Warteschlange beim Start: der Vorrat soll 30 Momente vorhalten, dazu der aktuelle und ein paar Reserve */
-const QUEUE_AHEAD = PRELOAD_COUNT + 2;
 
 const load = (m: Moment) => ({ videoId: m.videoId, startSeconds: m.start, endSeconds: m.end, gainDb: m.gainDb });
 
@@ -194,6 +193,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const cycleRate = () => {
     const next = nextRate(rateRef.current);
     rateRef.current = next;
+    setTempo(clampRate(next));
     applyRate();
     update((s) => ({ ...s, settings: { ...s.settings, playbackRate: next } }));
     diag.current.push(`rate: ${next}x`);
@@ -225,9 +225,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const [loading, setLoading] = useState(false);
   const waitSince = useRef(0);
   rateRef.current = rateOf(state.settings);
+  setTempo(clampRate(rateRef.current));
   // Tempo aus Sync, Desktop-Leiste oder Settings erreicht auch pausierte und wartende Slots
   useEffect(() => {
     applyRate();
+    // Das Vorrat-Fenster ist ein Zeitfenster (Issue 13): bei neuem Tempo Warteschlange und Vorladen neu anlegen
+    if (queue.current.length) {
+      ensureQueue(idxRef.current + queueAhead(rateRef.current));
+      syncPre(idxRef.current);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rateOf(state.settings)]);
 
@@ -254,7 +260,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         // Heutige Warteschlange der letzten Sitzung übernehmen, dann passt der Vorrat noch (auch offline)
         let saved: Moment[] = [];
         try {
-          saved = restoreQueue(parseSaved(localStorage.getItem(queueKey(form))), today, pool, { seen: s.momentSeen, mutedChannels: s.mutedChannels }, QUEUE_AHEAD);
+          saved = restoreQueue(parseSaved(localStorage.getItem(queueKey(form))), today, pool, { seen: s.momentSeen, mutedChannels: s.mutedChannels }, queueAhead(rateRef.current));
         } catch {
           /* kein Speicher */
         }
@@ -290,8 +296,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const syncPre = (at: number) => {
     probeAhead(at);
     if (!pre) return;
-    pre.setQueue(queue.current, at);
-    const w = pre.warmSet(queue.current, at);
+    pre.setQueue(queue.current, at, rateRef.current);
+    const w = pre.warmSet(queue.current, at, rateRef.current);
     void pre.warm(w);
     pre.trimWarm(new Set(w.map((x) => x.id)));
     saveQueue();
@@ -449,6 +455,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     audioDeck.arm(nm && formOf(nm) === 'audio' ? deckClipOf(nm) : null);
   };
 
+  /** Media Session: Zustand setzen und jeden Wechsel mit Grund ins Protokoll (Issue 13: pausiert die App die Session im Hintergrund?) */
+  const setPlaybackState = (s: 'playing' | 'paused', why: string) => {
+    const ms = navigator.mediaSession;
+    if (ms.playbackState !== s) diag.current.push(`bg: mediasession ${ms.playbackState} to ${s} (${why}) hidden=${isBackground(document.visibilityState)}`);
+    ms.playbackState = s;
+  };
+
   /** Anzeige des Betriebssystems (Sperrbildschirm) sofort setzen, nicht erst nach dem nächsten Rendern, das im Hintergrund gedrosselt wird */
   const setMeta = (cur: Moment | undefined) => {
     if (!cur || !('mediaSession' in navigator) || typeof MediaMetadata === 'undefined') return;
@@ -502,7 +515,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       if (next < 0 || next === idxRef.current) return;
       closeForYou();
       pruneBad();
-      ensureQueue(next + QUEUE_AHEAD);
+      ensureQueue(next + queueAhead(rateRef.current));
       // Genau hinter dem letzten Moment liegt die Endseite (idx = Länge). Weiter geht es nicht.
       if (next > queue.current.length) return;
       syncPre(next);
@@ -722,7 +735,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   // Player anlegen
   useEffect(() => {
     let cancelled = false;
-    ensureQueue(QUEUE_AHEAD);
+    ensureQueue(queueAhead(rateRef.current));
     if (!queue.current.length) return;
     const begin = (YT: Awaited<ReturnType<typeof loadYT>>) => {
         if (cancelled) return;
@@ -763,8 +776,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                   diag.current.push(`bg: started ${slot.mid}`);
                 }
                 if (slot.index === idxRef.current && msOnRef.current && 'mediaSession' in navigator) {
-                  if (st === STATE.PLAYING) navigator.mediaSession.playbackState = 'playing';
-                  else if (st === STATE.PAUSED || st === STATE.ENDED) navigator.mediaSession.playbackState = 'paused';
+                  if (st === STATE.PLAYING) setPlaybackState('playing', 'player state playing');
+                  else if (st === STATE.PAUSED || st === STATE.ENDED) setPlaybackState('paused', st === STATE.ENDED ? 'player state ended' : 'player state paused');
                 }
                 const sw = swipe.current;
                 if (st === STATE.PLAYING && sw && slot.index === sw.j && sw.j === idxRef.current) {
@@ -842,7 +855,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         if (poorRef.current && idxRef.current === 0) replanRef.current(0);
         syncPre(idxRef.current);
         // Die nächsten Momente als Blob-URL bereit, bevor die Player ihre Quelle bekommen (höchstens 300 ms warten)
-        await Promise.race([pre.warm(pre.warmSet(queue.current, idxRef.current)), new Promise<void>((r) => window.setTimeout(r, 300))]);
+        await Promise.race([pre.warm(pre.warmSet(queue.current, idxRef.current, rateRef.current)), new Promise<void>((r) => window.setTimeout(r, 300))]);
       }
       if (cancelled) return;
       // Ohne erreichbare YouTube-API (offline, blockiert) laufen Streams, Podcasts und Text trotzdem. Es gibt keine Fehlerseite mehr.
@@ -1761,16 +1774,21 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         /* Aktion nicht unterstützt */
       }
     };
-    set('play', () => playRef.current(true));
-    set('pause', () => playRef.current(false));
-    set('nexttrack', () => goTo(idxRef.current + 1));
-    set('previoustrack', () => goTo(idxRef.current - 1));
+    // Jede Aktion vom Sperrbildschirm oder den Medientasten steht im Protokoll (Issue 13: kommt die Pause vom Betriebssystem?)
+    const act = (a: string, f: () => void) => () => {
+      diag.current.push(`bg: mediasession action ${a} hidden=${isBackground(document.visibilityState)}`);
+      f();
+    };
+    set('play', act('play', () => playRef.current(true)));
+    set('pause', act('pause', () => playRef.current(false)));
+    set('nexttrack', act('nexttrack', () => goTo(idxRef.current + 1)));
+    set('previoustrack', act('previoustrack', () => goTo(idxRef.current - 1)));
     return () => {
       for (const a of ['play', 'pause', 'nexttrack', 'previoustrack'] as MediaSessionAction[]) set(a, null);
     };
   }, [msOn, goTo]);
   useEffect(() => {
-    if (msOn && 'mediaSession' in navigator) navigator.mediaSession.playbackState = paused ? 'paused' : 'playing';
+    if (msOn && 'mediaSession' in navigator) setPlaybackState(paused ? 'paused' : 'playing', `feed paused=${paused}`);
   }, [msOn, paused]);
 
   // Test-Hook für Playwright (liest nur App-Zustand, nicht den Cross-Origin-Player)
@@ -1817,7 +1835,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     };
   });
 
-  if (pool.length && !queue.current.length) ensureQueue(QUEUE_AHEAD);
+  if (pool.length && !queue.current.length) ensureQueue(queueAhead(rateRef.current));
 
   // Neuer Index: die Seiten bekommen neue Versätze, die Bühne geht im selben Commit auf 0. Das Bild bleibt pixelgleich.
   useLayoutEffect(() => {

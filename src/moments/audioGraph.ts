@@ -29,7 +29,18 @@ export function setLevelOn(on: boolean): void {
     else store()?.removeItem(KEY_ON);
   } catch { /* Speicher gesperrt: gilt nur für diese Sitzung nicht, kein Fehler */ }
 }
-export const levelEnabled = (): boolean => !broken && levelOn();
+/** Eingeschaltet und diese Sitzung heil (unabhängig vom Tempo) */
+export const levelWanted = (): boolean => !broken && levelOn();
+/**
+ * Tempo des Feeds (Issue 13, Max 30.10.2026): Mit Tempo ungleich 1x stottert die App auf dem iPhone, sobald ein Element über Web Audio läuft.
+ * Darum bekommt bei Tempo 1.5x und 2x kein Moment die geregelte Spur, und eine laufende wechselt zurück (setPlaybackRate in ytApi.ts).
+ */
+let tempo = 1;
+export function setTempo(rate: number): void {
+  tempo = Number.isFinite(rate) && rate > 0 ? rate : 1;
+}
+export const tempoNow = (): number => tempo;
+export const levelEnabled = (): boolean => levelWanted() && tempo === 1;
 export const levelBroken = (): string | null => broken;
 export function breakLevel(reason: string): void {
   broken ??= reason;
@@ -118,7 +129,8 @@ export function probeHost(url: string, fetchFn: typeof fetch = (...a) => fetch(.
 
 /** Erste Berührung (dieselbe Stelle wie die Sound-Freischaltung): Kontext anlegen und starten. Mehrfach aufrufbar. Das Versprechen löst sich, sobald der Kontext läuft oder es nicht gelang. */
 export function unlockAudio(): Promise<void> {
-  if (typeof window === 'undefined' || !levelEnabled()) return Promise.resolve();
+  // Der Kontext entsteht auch bei Tempo ungleich 1x, damit er bei der Rückkehr auf 1x schon läuft
+  if (typeof window === 'undefined' || !levelWanted()) return Promise.resolve();
   let resumed: Promise<void> = Promise.resolve();
   try {
     if (!ctx) {

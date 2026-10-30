@@ -6,6 +6,8 @@ import { localKey } from './localKey';
 
 /** Wie viele Momente der Warteschlange ab dem nächsten vorgehalten werden */
 export const PRELOAD_COUNT = 30;
+/** Mehr als doppelt so viele werden auch bei 2x nicht vorgehalten (60 MB Obergrenze bleibt) */
+export const PRELOAD_COUNT_MAX = PRELOAD_COUNT * 2;
 /** Obergrenze für alle Ausschnitte zusammen */
 export const PRELOAD_CAP_BYTES = 60 * 1024 * 1024;
 /** Start über dieser Zeit gilt als langsam */
@@ -52,6 +54,40 @@ export function windowOf<T>(queue: T[], idx: number, count = PRELOAD_COUNT): Ran
   for (let r = 1; r <= count && idx + r < queue.length; r++) if (idx + r >= 0) out.push({ m: queue[idx + r], rank: r });
   return out;
 }
+
+/** Länge des Ausschnitts in Sekunden Inhalt, 0 wenn unbekannt */
+const lenOf = (m: unknown): number => {
+  const x = m as { start?: number; end?: number };
+  return typeof x.start === 'number' && typeof x.end === 'number' && x.end > x.start ? x.end - x.start : 0;
+};
+
+/**
+ * Fenster als Zeitfenster (Issue 13): bei Tempo r vergeht die Hörzeit r-mal so schnell, der Vorrat muss r-mal so viel Inhalt vorhalten.
+ * Bei 1x genau die nächsten PRELOAD_COUNT. Sonst so viele, bis ihr Inhalt so lang ist wie der der nächsten PRELOAD_COUNT mal Tempo
+ * (Längen aus start und end der Momente, fehlt eine Länge, zählt der Durchschnitt der bekannten), höchstens PRELOAD_COUNT_MAX.
+ */
+export function windowOfTime<T>(queue: T[], idx: number, rate = 1, count = PRELOAD_COUNT): Ranked<T>[] {
+  const base = windowOf(queue, idx, count);
+  if (!(rate > 1) || base.length === 0) return base;
+  const lens = base.map((r) => lenOf(r.m));
+  const known = lens.filter((l) => l > 0);
+  const avg = known.length ? known.reduce((a, b) => a + b, 0) / known.length : 0;
+  // Ohne jede bekannte Länge bleibt nur die Anzahl, skaliert mit dem Tempo
+  if (avg === 0) return windowOf(queue, idx, Math.min(PRELOAD_COUNT_MAX, Math.ceil(count * rate)));
+  const horizon = lens.reduce((a, l) => a + (l || avg), 0) * rate;
+  const out: Ranked<T>[] = [];
+  let sum = 0;
+  for (let r = 1; sum < horizon && out.length < PRELOAD_COUNT_MAX && idx + r < queue.length; r++) {
+    if (idx + r < 0) continue;
+    const m = queue[idx + r];
+    out.push({ m, rank: r });
+    sum += lenOf(m) || avg;
+  }
+  return out;
+}
+
+/** Wie viele Momente der Feed im Voraus in der Warteschlange hält (Fenster plus Reserve) */
+export const queueAhead = (rate = 1): number => Math.min(PRELOAD_COUNT_MAX, Math.ceil(PRELOAD_COUNT * (rate > 1 ? rate : 1))) + 2;
 
 /** Nächster Moment, der geladen werden muss: nächstgelegener im Fenster, der vorladbar ist und noch fehlt */
 export function nextToLoad<T extends Pick<Moment, 'id' | 'form' | 'hls' | 'videoId'>>(win: Ranked<T>[], have: ReadonlySet<string>, skip: (m: T) => boolean = () => false): Ranked<T> | null {

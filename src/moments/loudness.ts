@@ -48,8 +48,10 @@ export type HostState = 'ok' | 'bad';
  * Ein Element, das einmal an Web Audio hängt, gibt Quellen ohne CORS-Freigabe nur als Stille aus, und das lässt sich nicht
  * mehr lösen. Darum bekommt die geregelte Spur nur Quellen, bei denen das ausgeschlossen ist, alles andere läuft unverändert.
  */
-export function laneFor(o: { enabled: boolean; running: boolean; gainDb: number; local: boolean; url: string; host?: HostState; forcePlain?: boolean }): { lane: Lane; why: string } {
+export function laneFor(o: { enabled: boolean; running: boolean; gainDb: number; local: boolean; url: string; host?: HostState; forcePlain?: boolean; rate?: number }): { lane: Lane; why: string } {
   if (!o.enabled) return { lane: 'plain', why: 'off' };
+  // Tempo ungleich 1x: nie über Web Audio, das Stottern auf dem iPhone (Issue 13, Max 30.10.2026)
+  if (o.rate !== undefined && o.rate !== 1) return { lane: 'plain', why: 'tempo' };
   if (o.gainDb === 0) return { lane: 'plain', why: 'no value' };
   if (o.forcePlain) return { lane: 'plain', why: 'fallback' };
   if (!o.running) return { lane: 'plain', why: 'no audio context' };
