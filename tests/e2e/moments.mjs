@@ -501,10 +501,13 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       // Im Zeitraffer kann der Moment unter dem Wisch enden (Abrufkarte, Wechsel): bis zu zwölfmal neu ansetzen
       let ok = false;
       for (let k = 0; k < 12 && !ok; k++) {
-        await settled(page); await skipRecall(page, name, out); await swipeLeft();
+        await settled(page); await skipRecall(page, name, out);
+        // Fing die Maus eine laufende Feder (im Zeitraffer wechselt der Feed ständig) und ging das Loslassen auf einer anderen Ebene verloren, bleibt der Griff offen: erst loslassen
+        if (await page.evaluate(() => window.__core.motion().drag)) await page.mouse.up();
+        await swipeLeft();
         ok = await waitFor(page, () => !!document.querySelector('[data-testid=note-sheet]'), undefined, 1500);
       }
-      if (!ok) r.openDbg = await page.evaluate(() => ({ moving: !!document.querySelector('.vfeed[data-moving]'), card: !!document.querySelector('[data-testid=recall-card]'), idx: window.__core.idx(), tr: document.querySelector('.vstage')?.style.transform, fy: window.__core.forYou(), recall: window.__core.recall().open }));
+      if (!ok) r.openDbg = await page.evaluate(() => ({ moving: !!document.querySelector('.vfeed[data-moving]'), card: !!document.querySelector('[data-testid=recall-card]'), motion: window.__core.motion(), vis: document.visibilityState, idx: window.__core.idx(), tr: document.querySelector('.vstage')?.style.transform, fy: window.__core.forYou(), recall: window.__core.recall().open }));
       return ok;
     };
     const notes = () => page.evaluate(() => window.__core.notes());

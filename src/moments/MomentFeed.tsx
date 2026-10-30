@@ -152,6 +152,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const pendingRender = useRef(false);
   /** Wechsel mit Feder, auch aus Code, der vor der Definition von navigate steht (useCallback) */
   const navRef = useRef<(next: number) => void>(() => {});
+  const upRef = useRef<(e: React.PointerEvent) => void>(() => {});
   const meter = useRef({ on: false, raf: 0, last: 0, deltas: [] as number[], tail: 0 });
   /** Während Ziehen und Auslaufen keine React-Arbeit: keine Neuzeichnung, kein Speichern, kein Polling */
   const moving = () => mot.current.busy || dragging.current;
@@ -1202,6 +1203,17 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     r.tap = window.setTimeout(togglePlay, TAP_MS);
   };
 
+  upRef.current = onUp;
+  // Der Griff endet immer: geht das Loslassen auf einer Ebene verloren, die es nicht weitergibt (Maus über einer Karte oder Schaltfläche, die sich unter den Zeiger geschoben hat),
+  // bliebe der Wisch offen und der Feed hinge in der Mitte. Das Fenster sieht das Loslassen zuerst; onUp ist danach für dieselbe Geste wirkungslos (r.t ist null).
+  useEffect(() => {
+    const fin = (e: PointerEvent) => {
+      if (g.current.t) upRef.current(e as unknown as React.PointerEvent);
+    };
+    window.addEventListener('pointerup', fin, true);
+    return () => window.removeEventListener('pointerup', fin, true);
+  }, []);
+
   /** Wisch nach links: Blatt für den aktuellen Moment, nicht über Abrufkarte oder For-you-Karte */
   const openNote = () => {
     const m = queue.current[idxRef.current];
@@ -1497,6 +1509,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       forYou: () => forYouRef.current,
       next: () => goTo(idxRef.current + 1),
       // Setzt die Schauzeit des laufenden Moments auf null (Tests prüfen die 3-Sekunden-Regel, ohne von der Geschwindigkeit des Runners abzuhängen)
+      motion: () => ({ busy: mot.current.busy, drag: dragging.current, raf: mot.current.raf, y: mot.current.y }),
       markStart: () => { since.current = Date.now(); },
       diag: () => diag.current.slice(-40),
       diagAll: () => diag.current.filter((x) => /^(replan|reorder|net poor|yt stub|first-frame)/.test(x)),
