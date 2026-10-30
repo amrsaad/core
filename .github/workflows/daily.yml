@@ -17,9 +17,10 @@ permissions:
   pages: write
   id-token: write
 
+# Der neueste Push gewinnt: ein hängender oder überholter Lauf wird abgebrochen, sonst staut sich der Deploy (30.10.2026)
 concurrency:
   group: daily
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -128,7 +129,8 @@ jobs:
     outputs:
       sha: ${{ steps.tested.outputs.sha }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # Die E2E-Schritte summieren sich auf rund 150 Minuten Höchstdauer, 45 waren seit heute zu knapp (jeder Lauf lief in den Timeout)
+    timeout-minutes: 150
     # Offizielles Image: Browser und Systempakete sind vorinstalliert (apt-Installation hing im Runner)
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
