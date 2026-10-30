@@ -1,0 +1,229 @@
+{
+ "at": "2026-10-30T09:30:31.049Z",
+ "runs": [
+  {
+   "browser": "webkit",
+   "scenario": "settings",
+   "checks": {
+    "feedUp": true,
+    "threeSeenNoCard": true,
+    "noCardWhileAway": true,
+    "queuedOne": true,
+    "diagQueued": true,
+    "soundAndFeedContinue": true,
+    "cardOnReturn": true,
+    "cardBeforeNextSwipe": true,
+    "cardIsTheQueuedMoment": true,
+    "queueEmptyAfterShow": true,
+    "diagShown": true,
+    "noSecondCard": true,
+    "noErrors": true
+   },
+   "notes": {
+    "queued": [
+     {
+      "id": "rq000000006:100",
+      "review": false,
+      "dueAt": 1792670402560
+     }
+    ]
+   }
+  },
+  {
+   "browser": "webkit",
+   "scenario": "saved",
+   "checks": {
+    "feedUp": true,
+    "threeSeenNoCard": true,
+    "noCardWhileAway": true,
+    "queuedOne": true,
+    "diagQueued": true,
+    "soundAndFeedContinue": true,
+    "cardOnReturn": true,
+    "cardBeforeNextSwipe": true,
+    "cardIsTheQueuedMoment": true,
+    "queueEmptyAfterShow": true,
+    "diagShown": true,
+    "noSecondCard": true,
+    "noErrors": true
+   },
+   "notes": {
+    "queued": [
+     {
+      "id": "rq000000006:100",
+      "review": false,
+      "dueAt": 1792670402477
+     }
+    ]
+   }
+  },
+  {
+   "browser": "webkit",
+   "scenario": "note",
+   "checks": {
+    "feedUp": true,
+    "threeSeenNoCard": true,
+    "noCardWhileAway": true,
+    "queuedOne": true,
+    "diagQueued": true,
+    "soundAndFeedContinue": true,
+    "cardOnReturn": true,
+    "cardBeforeNextSwipe": true,
+    "cardIsTheQueuedMoment": true,
+    "queueEmptyAfterShow": true,
+    "diagShown": true,
+    "noSecondCard": true,
+    "noErrors": true
+   },
+   "notes": {
+    "queued": [
+     {
+      "id": "rq000000006:100",
+      "review": false,
+      "dueAt": 1792670402409
+     }
+    ]
+   }
+  },
+  {
+   "browser": "webkit",
+   "scenario": "background",
+   "checks": {
+    "feedUp": true,
+    "threeSeenNoCard": true,
+    "noCardWhileAway": true,
+    "queuedOne": true,
+    "diagQueued": true,
+    "soundAndFeedContinue": true,
+    "cardOnReturn": true,
+    "cardBeforeNextSwipe": true,
+    "cardIsTheQueuedMoment": true,
+    "queueEmptyAfterShow": true,
+    "diagShown": true,
+    "noSecondCard": true,
+    "noErrors": true
+   },
+   "notes": {
+    "queued": [
+     {
+      "id": "rq000000006:100",
+      "review": false,
+      "dueAt": 1792670402405
+     }
+    ]
+   }
+  },
+  {
+   "browser": "chromium",
+   "scenario": "settings",
+   "checks": {
+    "feedUp": true,
+    "threeSeenNoCard": true,
+    "noCardWhileAway": true,
+    "queuedOne": true,
+    "diagQueued": true,
+    "soundAndFeedContinue": true,
+    "cardOnReturn": true,
+    "cardBeforeNextSwipe": true,
+    "cardIsTheQueuedMoment": true,
+    "queueEmptyAfterShow": true,
+    "diagShown": true,
+    "noSecondCard": true,
+    "noErrors": true
+   },
+   "notes": {
+    "queued": [
+     {
+      "id": "rq000000006:100",
+      "review": false,
+      "dueAt": 1792670402322
+     }
+    ]
+   }
+  },
+  {
+   "browser": "chromium",
+   "scenario": "saved",
+   "checks": {
+    "feedUp": true,
+    "threeSeenNoCard": true,
+    "noCardWhileAway": true,
+    "queuedOne": true,
+    "diagQueued": true,
+    "soundAndFeedContinue": true,
+    "cardOnReturn": true,
+    "cardBeforeNextSwipe": true,
+    "cardIsTheQueuedMoment": true,
+    "queueEmptyAfterShow": true,
+    "diagShown": true,
+    "noSecondCard": true,
+    "noErrors": true
+   },
+   "notes": {
+    "queued": [
+     {
+      "id": "rq000000006:100",
+      "review": false,
+      "dueAt": 1792670402294
+     }
+    ]
+   }
+  },
+  {
+   "browser": "chromium",
+   "scenario": "note",
+   "checks": {
+    "feedUp": true,
+    "threeSeenNoCard": true,
+    "noCardWhileAway": true,
+    "queuedOne": true,
+    "diagQueued": true,
+    "soundAndFeedContinue": true,
+    "cardOnReturn": true,
+    "cardBeforeNextSwipe": true,
+    "cardIsTheQueuedMoment": true,
+    "queueEmptyAfterShow": true,
+    "diagShown": true,
+    "noSecondCard": true,
+    "noErrors": true
+   },
+   "notes": {
+    "queued": [
+     {
+      "id": "rq000000006:100",
+      "review": false,
+      "dueAt": 1792670402240
+     }
+    ]
+   }
+  },
+  {
+   "browser": "chromium",
+   "scenario": "background",
+   "checks": {
+    "feedUp": true,
+    "threeSeenNoCard": true,
+    "noCardWhileAway": true,
+    "queuedOne": true,
+    "diagQueued": true,
+    "soundAndFeedContinue": true,
+    "cardOnReturn": true,
+    "cardBeforeNextSwipe": true,
+    "cardIsTheQueuedMoment": true,
+    "queueEmptyAfterShow": true,
+    "diagShown": true,
+    "noSecondCard": true,
+    "noErrors": true
+   },
+   "notes": {
+    "queued": [
+     {
+      "id": "rq000000006:100",
+      "review": false,
+      "dueAt": 1792670402243
+     }
+    ]
+   }
+  }
+ ]
+}

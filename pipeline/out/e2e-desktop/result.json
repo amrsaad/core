@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-30T08:49:25.556Z",
+  "at": "2026-10-30T09:11:46.187Z",
   "checks": {
     "below900Mobile": true,
     "at900Desktop": true,
@@ -34,8 +34,11 @@
     "spaceDidNotClickFocused": true,
     "spaceResumes": true,
     "keyM": true,
-    "fastOn": true,
-    "fastOff": true,
+    "tempo15": true,
+    "tempo2": true,
+    "tempoTapBackTo1": true,
+    "tempoKeyHeldDoesNotRepeat": true,
+    "tempoCycleBackTo1": true,
     "keyL": true,
     "keyS": true,
     "keySToggles": true,

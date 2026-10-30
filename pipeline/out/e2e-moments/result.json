@@ -1,5 +1,5 @@
 {
- "at": "2026-10-30T08:47:28.539Z",
+ "at": "2026-10-30T09:09:49.439Z",
  "runs": [
   {
    "browser": "webkit",
@@ -38,14 +38,13 @@
     "captionsArabicRtl": true,
     "swipeNext": true,
     "captionsSettingsOn": true,
-    "holdFast": true,
-    "releaseNormal": true,
+    "longPressRate15": true,
+    "noHoldFastBadge": true,
     "embedNoZoom": true,
     "embed16by9FullWidth": true,
-    "speedDefault15": true,
-    "speedHold2": true,
+    "speedDefault1": true,
+    "speed15AfterLongPress": true,
     "speedNeverAbove2": true,
-    "speedBackAfterRelease": true,
     "textView": true,
     "textPaused": true,
     "textNotSeenBeforeEnd": true,
@@ -273,10 +272,10 @@
    "recall": [
     {
      "id": "test0000017:100",
-     "due": 1792929607015,
+     "due": 1792929607460,
      "results": [
       {
-       "at": 1792756807015,
+       "at": 1792756807460,
        "got": false
       }
      ]
@@ -349,8 +348,8 @@
     "vw": 393
    },
    "rates": [
-    1.5,
-    2
+    1,
+    1.5
    ],
    "hlsDiag": [
     "deck play#1 start rs=0 muted=true t=100.0",
@@ -358,15 +357,15 @@
     "deck loadedmetadata rs=0 muted=true t=100.0"
    ],
    "tapToFill": {
-    "measured": 29,
-    "recorded": 33
+    "measured": 25,
+    "recorded": 26
    },
-   "askPrompt": "Core moment from Kanal body 1, Testvideo, at 1:40.\nHook: Testmoment 53 body\nExcerpt: Sentence 1 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 2 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 3 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 4 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 5 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 6 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 7 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 8…\nContext: Context sentence one for Testmoment 53 body. Context sentence two names a term.\nSource: https://www.youtube.com/watch?v=test0000053&t=100\n\nMy question: ",
+   "askPrompt": "Core moment from Kanal brain 3, Testvideo, at 1:40.\nHook: Testmoment 27 brain\nExcerpt: Sentence 1 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 2 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 3 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 4 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 5 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 6 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 7 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 8…\nContext: Context sentence one for Testmoment 27 brain. Context sentence two names a term.\nSource: https://www.youtube.com/watch?v=test0000027&t=100\n\nMy question: ",
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 267,
+    "checksDone": 264,
     "violations": 0,
-    "endedSeen": 30
+    "endedSeen": 29
    },
    "posterState": {
     "idx": 25,
@@ -388,13 +387,13 @@
     {
      "p": [
       0,
-      213,
+      856,
       393,
       221
      ],
      "h": [
       0,
-      213,
+      856,
       393,
       221
      ],
@@ -403,13 +402,13 @@
     {
      "p": [
       0,
-      872,
+      1515,
       393,
       221
      ],
      "h": [
       0,
-      872,
+      1515,
       393,
       221
      ],
@@ -418,13 +417,13 @@
     {
      "p": [
       0,
-      -446,
+      197,
       393,
       221
      ],
      "h": [
       0,
-      -446,
+      197,
       393,
       221
      ],
@@ -433,7 +432,7 @@
     {
      "p": [
       0,
-      -1105,
+      -462,
       393,
       221
      ],
@@ -449,8 +448,8 @@
     ],
     "ended": [
      "nb:poster",
-     "nb:poster",
      "cur:poster",
+     "nb:poster",
      "nb:poster"
     ],
     "paused": [
@@ -489,11 +488,16 @@
     }
    },
    "latency": {
-    "n": 38,
+    "n": 37,
     "buffered": 29,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | 89b8797 |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 89b8797 |\n| test0000053:100 | Testmoment 53 body | Already known | - | Video | 89b8797 |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | 89b8797 |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | 89b8797 |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | 89b8797 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | 98d97bc |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 98d97bc |\n| test0000027:100 | Testmoment 27 brain | Already known | - | Video | 98d97bc |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | 98d97bc |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | 98d97bc |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | 98d97bc |",
+   "promptDbg": {
+    "prompt": false,
+    "notes": "[{\"key\":\"test0000066:100#1793351405944\",\"id\":\"test0000066:100\",\"hook\":\"Testmoment 66 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351405944,\"sent\":1793351428266},{\"key\":\"test0000076:100#1793351407684\",\"id\":\"test0000076:100\",\"hook\":\"Testmoment 76 brain\",\"chips\":[],\"text\":\"The cut is two seconds late & the \\\"hook\\\" repeats.\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351407684,\"sent\":1793351428266},{\"key\":\"test0000027:100#1793351409653\",\"id\":\"test0000027:100\",\"hook\":\"Testmoment 27 brain\",\"chips\":[\"Already known\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351409653,\"sent\":1793351428266},{\"key\":\"test0000075:100#1793351412911\",\"id\":\"test0000075:100\",\"hook\":\"Testmoment 75 body\",\"chips\":[\"Wrong\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351412911,\"sent\":1793351428266},{\"key\":\"test0000009:100#1793351415930\",\"id\":\"test0000009:100\",\"hook\":\"Testmoment 9 beat\",\"chips\":[\"Not for me\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351415930,\"sent\":1793351428266},{\"key\":\"test0000088:100#1793351418740\",\"id\":\"test0000088:100\",\"hook\":\"Testmoment 88 brain\",\"chips\":[\"Mute speaker\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351418740,\"sent\":1793351428266},{\"key\":\"test0000008:100#1793351428383\",\"id\":\"test0000008:100\",\"hook\":\"Testmoment 8 beat\",\"chips\":[\"Bad cut\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351428383}]",
+    "notesP2": "[{\"key\":\"test0000066:100#1793351405944\",\"id\":\"test0000066:100\",\"hook\":\"Testmoment 66 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351405944,\"sent\":1793351428266},{\"key\":\"test0000076:100#1793351407684\",\"id\":\"test0000076:100\",\"hook\":\"Testmoment 76 brain\",\"chips\":[],\"text\":\"The cut is two seconds late & the \\\"hook\\\" repeats.\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351407684,\"sent\":1793351428266},{\"key\":\"test0000027:100#1793351409653\",\"id\":\"test0000027:100\",\"hook\":\"Testmoment 27 brain\",\"chips\":[\"Already known\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351409653,\"sent\":1793351428266},{\"key\":\"test0000075:100#1793351412911\",\"id\":\"test0000075:100\",\"hook\":\"Testmoment 75 body\",\"chips\":[\"Wrong\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351412911,\"sent\":1793351428266},{\"key\":\"test0000009:100#1793351415930\",\"id\":\"test0000009:100\",\"hook\":\"Testmoment 9 beat\",\"chips\":[\"Not for me\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351415930,\"sent\":1793351428266},{\"key\":\"test0000088:100#1793351418740\",\"id\":\"test0000088:100\",\"hook\":\"Testmoment 88 brain\",\"chips\":[\"Mute speaker\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351418740,\"sent\":1793351428266},{\"key\":\"test0000008:100#1793351428383\",\"id\":\"test0000008:100\",\"hook\":\"Testmoment 8 beat\",\"chips\":[\"Bad cut\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351428383}]"
+   },
    "badWalk": [
     {
      "idx": 2,
@@ -625,12 +629,12 @@
       "st": 1,
       "idx": 1,
       "log": [
-       "rate 1.5",
+       "rate 1",
        "unmute",
-       "rate 1.5",
+       "rate 1",
        "volume 100",
        "load test0000017 100-200",
-       "rate 1.5"
+       "rate 1"
       ]
      }
     },
@@ -677,12 +681,12 @@
       "st": 1,
       "idx": 2,
       "log": [
-       "rate 1.5",
+       "rate 1",
        "unmute",
-       "rate 1.5",
+       "rate 1",
        "volume 100",
        "load test0000064 100-180",
-       "rate 1.5"
+       "rate 1"
       ]
      }
     },
@@ -729,12 +733,12 @@
       "st": 1,
       "idx": 3,
       "log": [
-       "rate 1.5",
+       "rate 1",
        "unmute",
-       "rate 1.5",
+       "rate 1",
        "volume 100",
        "load test0000015 100-160",
-       "rate 1.5"
+       "rate 1"
       ]
      }
     },
@@ -781,12 +785,12 @@
       "st": 1,
       "idx": 4,
       "log": [
-       "rate 1.5",
+       "rate 1",
        "unmute",
-       "rate 1.5",
+       "rate 1",
        "volume 100",
        "load test0000065 100-200",
-       "rate 1.5"
+       "rate 1"
       ]
      }
     },
@@ -833,12 +837,12 @@
       "st": 1,
       "idx": 5,
       "log": [
-       "rate 1.5",
+       "rate 1",
        "unmute",
-       "rate 1.5",
+       "rate 1",
        "volume 100",
        "load test0000083 100-200",
-       "rate 1.5"
+       "rate 1"
       ]
      }
     }
@@ -915,14 +919,13 @@
     "captionsArabicRtl": true,
     "swipeNext": true,
     "captionsSettingsOn": true,
-    "holdFast": true,
-    "releaseNormal": true,
+    "longPressRate15": true,
+    "noHoldFastBadge": true,
     "embedNoZoom": true,
     "embed16by9FullWidth": true,
-    "speedDefault15": true,
-    "speedHold2": true,
+    "speedDefault1": true,
+    "speed15AfterLongPress": true,
     "speedNeverAbove2": true,
-    "speedBackAfterRelease": true,
     "textView": true,
     "textPaused": true,
     "textNotSeenBeforeEnd": true,
@@ -1150,10 +1153,10 @@
    "recall": [
     {
      "id": "test0000017:100",
-     "due": 1792929605506,
+     "due": 1792929605523,
      "results": [
       {
-       "at": 1792756805506,
+       "at": 1792756805523,
        "got": false
       }
      ]
@@ -1226,8 +1229,8 @@
     "vw": 393
    },
    "rates": [
-    1.5,
-    2
+    1,
+    1.5
    ],
    "hlsDiag": [
     "deck play#1 start rs=0 muted=true t=100.0",
@@ -1235,15 +1238,15 @@
     "deck loadedmetadata rs=0 muted=true t=100.0"
    ],
    "tapToFill": {
-    "measured": 31.5,
-    "recorded": 31
+    "measured": 31.699999999982538,
+    "recorded": 32
    },
    "askPrompt": "Core moment from Kanal brain 3, Testvideo, at 1:40.\nHook: Testmoment 27 brain\nExcerpt: Sentence 1 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 2 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 3 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 4 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 5 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 6 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 7 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 8…\nContext: Context sentence one for Testmoment 27 brain. Context sentence two names a term.\nSource: https://www.youtube.com/watch?v=test0000027&t=100\n\nMy question: ",
    "notesCount": 6,
    "posterCheck": {
-    "checksDone": 282,
+    "checksDone": 279,
     "violations": 0,
-    "endedSeen": 33
+    "endedSeen": 35
    },
    "posterState": {
     "idx": 26,
@@ -1370,7 +1373,12 @@
     "buffered": 30,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | 89b8797 |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 89b8797 |\n| test0000027:100 | Testmoment 27 brain | Already known | - | Video | 89b8797 |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | 89b8797 |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | 89b8797 |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | 89b8797 |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000066:100 | Testmoment 66 brain | Weak | - | Video | 98d97bc |\n| test0000076:100 | Testmoment 76 brain | - | The cut is two seconds late & the \"hook\" repeats. | Video | 98d97bc |\n| test0000027:100 | Testmoment 27 brain | Already known | - | Video | 98d97bc |\n| test0000075:100 | Testmoment 75 body | Wrong | - | Video | 98d97bc |\n| test0000009:100 | Testmoment 9 beat | Not for me | - | Video | 98d97bc |\n| test0000088:100 | Testmoment 88 brain | Mute speaker | - | Video | 98d97bc |",
+   "promptDbg": {
+    "prompt": false,
+    "notes": "[{\"key\":\"test0000066:100#1793351463133\",\"id\":\"test0000066:100\",\"hook\":\"Testmoment 66 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351463133,\"sent\":1793351484601},{\"key\":\"test0000076:100#1793351464734\",\"id\":\"test0000076:100\",\"hook\":\"Testmoment 76 brain\",\"chips\":[],\"text\":\"The cut is two seconds late & the \\\"hook\\\" repeats.\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351464734,\"sent\":1793351484601},{\"key\":\"test0000027:100#1793351466867\",\"id\":\"test0000027:100\",\"hook\":\"Testmoment 27 brain\",\"chips\":[\"Already known\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351466867,\"sent\":1793351484601},{\"key\":\"test0000075:100#1793351470000\",\"id\":\"test0000075:100\",\"hook\":\"Testmoment 75 body\",\"chips\":[\"Wrong\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351470000,\"sent\":1793351484601},{\"key\":\"test0000009:100#1793351472966\",\"id\":\"test0000009:100\",\"hook\":\"Testmoment 9 beat\",\"chips\":[\"Not for me\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351472966,\"sent\":1793351484601},{\"key\":\"test0000088:100#1793351475733\",\"id\":\"test0000088:100\",\"hook\":\"Testmoment 88 brain\",\"chips\":[\"Mute speaker\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351475733,\"sent\":1793351484601},{\"key\":\"test0000004:100#1793351484665\",\"id\":\"test0000004:100\",\"hook\":\"Testmoment 4 beat\",\"chips\":[\"Bad cut\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351484665}]",
+    "notesP2": "[{\"key\":\"test0000066:100#1793351463133\",\"id\":\"test0000066:100\",\"hook\":\"Testmoment 66 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351463133,\"sent\":1793351484601},{\"key\":\"test0000076:100#1793351464734\",\"id\":\"test0000076:100\",\"hook\":\"Testmoment 76 brain\",\"chips\":[],\"text\":\"The cut is two seconds late & the \\\"hook\\\" repeats.\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351464734,\"sent\":1793351484601},{\"key\":\"test0000027:100#1793351466867\",\"id\":\"test0000027:100\",\"hook\":\"Testmoment 27 brain\",\"chips\":[\"Already known\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351466867,\"sent\":1793351484601},{\"key\":\"test0000075:100#1793351470000\",\"id\":\"test0000075:100\",\"hook\":\"Testmoment 75 body\",\"chips\":[\"Wrong\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351470000,\"sent\":1793351484601},{\"key\":\"test0000009:100#1793351472966\",\"id\":\"test0000009:100\",\"hook\":\"Testmoment 9 beat\",\"chips\":[\"Not for me\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351472966,\"sent\":1793351484601},{\"key\":\"test0000088:100#1793351475733\",\"id\":\"test0000088:100\",\"hook\":\"Testmoment 88 brain\",\"chips\":[\"Mute speaker\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351475733,\"sent\":1793351484601},{\"key\":\"test0000004:100#1793351484665\",\"id\":\"test0000004:100\",\"hook\":\"Testmoment 4 beat\",\"chips\":[\"Bad cut\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"98d97bc\",\"at\":1793351484665}]"
+   },
    "badWalk": [
     {
      "idx": 2,
@@ -1502,12 +1510,12 @@
       "st": 1,
       "idx": 1,
       "log": [
-       "rate 1.5",
+       "rate 1",
        "unmute",
-       "rate 1.5",
+       "rate 1",
        "volume 100",
        "load test0000017 100-200",
-       "rate 1.5"
+       "rate 1"
       ]
      }
     },
@@ -1554,12 +1562,12 @@
       "st": 1,
       "idx": 2,
       "log": [
-       "rate 1.5",
+       "rate 1",
        "unmute",
-       "rate 1.5",
+       "rate 1",
        "volume 100",
        "load test0000064 100-180",
-       "rate 1.5"
+       "rate 1"
       ]
      }
     },
@@ -1606,12 +1614,12 @@
       "st": 1,
       "idx": 3,
       "log": [
-       "rate 1.5",
+       "rate 1",
        "unmute",
-       "rate 1.5",
+       "rate 1",
        "volume 100",
        "load test0000015 100-160",
-       "rate 1.5"
+       "rate 1"
       ]
      }
     },
@@ -1658,12 +1666,12 @@
       "st": 1,
       "idx": 4,
       "log": [
-       "rate 1.5",
+       "rate 1",
        "unmute",
-       "rate 1.5",
+       "rate 1",
        "volume 100",
        "load test0000065 100-200",
-       "rate 1.5"
+       "rate 1"
       ]
      }
     },
@@ -1710,12 +1718,12 @@
       "st": 1,
       "idx": 5,
       "log": [
-       "rate 1.5",
+       "rate 1",
        "unmute",
-       "rate 1.5",
+       "rate 1",
        "volume 100",
        "load test0000083 100-200",
-       "rate 1.5"
+       "rate 1"
       ]
      }
     }
