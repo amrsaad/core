@@ -1,5 +1,5 @@
 name: refine
-# Verfeinert ausgewählte Fenster parallel (alle Sprachen large-v3-turbo, Issue 10). Auftrag in jobs/refine.json:
+# Verfeinert ausgewählte Fenster parallel (alle Sprachen large-v3-turbo mit Satzzeichen-Prompt, Issue 10). Auftrag in jobs/refine.json:
 # [{"id":"<videoId>","audio":"<url>","lang":"en|de|ar","windows":[[start,end],...]}]
 # Ergebnis je Video als Artefakt "refine-<id>" mit <id>.json (events nur in den Fenstern, Feld refined, je Event Wortzeiten w) und stats.json.
 on:
@@ -70,6 +70,14 @@ jobs:
 
           SR = 16000
 
+          # Kurzer, neutraler Satz mit Satzzeichen als initial_prompt (Issue 10): ohne ihn liefert large-v3-turbo in Podcasts und Arabisch manchmal 25 s Blöcke
+          # in Kleinschreibung ohne Satzzeichen, in denen sich keine Satzgrenze setzen lässt. Mit REFINE_PROMPT=0 abschaltbar.
+          PROMPTS = {
+              'en': "Welcome back. Today we're talking about training, nutrition, and research. Let's get started.",
+              'de': 'Willkommen zurück. Heute sprechen wir über Training, Ernährung und Forschung. Fangen wir an.',
+              'ar': 'أهلاً بكم. في هذه الحلقة نتحدث عن موضوع جديد. فلنبدأ.',
+          }
+
 
           def load(path, start=None, end=None):
               cmd = ['ffmpeg', '-loglevel', 'error']
@@ -82,12 +90,12 @@ jobs:
               return np.frombuffer(subprocess.run(cmd, capture_output=True, check=True).stdout, np.float32)
 
 
-          def run(model, audio, lang, offset=0.0):
+          def run(model, audio, lang, offset=0.0, prompt=None):
               # Arabisch liefert kaum Satzzeichen: dann an Sprechpausen gruppieren (PAUSE in validate.ts zaehlt ab 0,3 s)
               pause_split = lang == 'ar'
               m = WhisperModel(model, device='cpu', compute_type='int8')
               fine = model != 'base'
-              segs, info = m.transcribe(audio, language=lang, vad_filter=True, beam_size=5 if fine else 1, word_timestamps=fine)
+              segs, info = m.transcribe(audio, language=lang, vad_filter=True, beam_size=5 if fine else 1, word_timestamps=fine, initial_prompt=prompt if fine else None)
               segs = list(segs)
               if not fine:
                   ev = [{'start': round(s.start + offset, 2), 'dur': round(s.end - s.start, 2), 'text': s.text.strip()} for s in segs if s.text.strip()]
@@ -135,7 +143,8 @@ jobs:
                   # Alle Sprachen large-v3-turbo (Max, 30.10., Issue 10: small schrieb Englisch oft falsch). Etwa 1,5x Echtzeit. Überschreibbar mit REFINE_MODEL.
                   # Die Wortzeiten (w) bleiben erhalten, sie entstehen im Zweig "fine" von run().
                   model = os.environ.get('REFINE_MODEL') or 'large-v3-turbo'
-                  ev, _ = run(model, load(audio_path, a, b), lang, offset=a)
+                  prompt = None if os.environ.get('REFINE_PROMPT') == '0' else PROMPTS.get(lang)
+                  ev, _ = run(model, load(audio_path, a, b), lang, offset=a, prompt=prompt)
                   # Alte Segmente im Fenster ersetzen
                   keep = [e for e in data['events'] if e['start'] + e['dur'] <= a or e['start'] >= b]
                   data['events'] = sorted(keep + ev, key=lambda e: e['start'])
