@@ -1,5 +1,5 @@
 name: refine
-# Verfeinert ausgewählte Fenster parallel (small bzw. large-v3-turbo bei de/ar). Auftrag in jobs/refine.json:
+# Verfeinert ausgewählte Fenster parallel (alle Sprachen large-v3-turbo, Issue 10). Auftrag in jobs/refine.json:
 # [{"id":"<videoId>","audio":"<url>","lang":"en|de|ar","windows":[[start,end],...]}]
 # Ergebnis je Video als Artefakt "refine-<id>" mit <id>.json (events nur in den Fenstern, Feld refined, je Event Wortzeiten w) und stats.json.
 on:
@@ -49,7 +49,7 @@ jobs:
           scan:   ganze Datei mit dem schnellen Modell "base", für die Auswahl der Stellen
                   python3 transcribe.py scan <audio> <out.json> [sprache]
                   Nur einen Abschnitt: Umgebungsvariablen SCAN_START und SCAN_END (Sekunden).
-          refine: Fenster [start, end] genauer neu transkribieren (small, bei de/ar large-v3-turbo) und in out.json ersetzen
+          refine: Fenster [start, end] genauer neu transkribieren (alle Sprachen large-v3-turbo, Issue 10) und in out.json ersetzen
                   python3 transcribe.py refine <audio> <out.json> <start> <end> [sprache]
           check:  prüft ein fertiges Transkript aus dem Feed gegen die geladene Datei an zwei Stellen (Wortüberlappung)
                   python3 transcribe.py check <audio> <out.json>    Exit 0, wenn beide Stellen passen
@@ -132,8 +132,9 @@ jobs:
                   data = json.load(open(out))
                   lang = sys.argv[6] if len(sys.argv) > 6 else data.get('lang')
                   a, b = max(0.0, start - 8), end + 8
-                  # Deutsch und Arabisch: large-v3-turbo (deutlich genauer, etwa 1,5x Echtzeit), sonst small. Überschreibbar mit REFINE_MODEL.
-                  model = os.environ.get('REFINE_MODEL') or ('large-v3-turbo' if lang in ('de', 'ar') else 'small')
+                  # Alle Sprachen large-v3-turbo (Max, 30.10., Issue 10: small schrieb Englisch oft falsch). Etwa 1,5x Echtzeit. Überschreibbar mit REFINE_MODEL.
+                  # Die Wortzeiten (w) bleiben erhalten, sie entstehen im Zweig "fine" von run().
+                  model = os.environ.get('REFINE_MODEL') or 'large-v3-turbo'
                   ev, _ = run(model, load(audio_path, a, b), lang, offset=a)
                   # Alte Segmente im Fenster ersetzen
                   keep = [e for e in data['events'] if e['start'] + e['dur'] <= a or e['start'] >= b]
