@@ -1,0 +1,841 @@
+{
+ "at": "2026-10-30T17:34:41.929Z",
+ "config": {
+  "MOMENTS": 10,
+  "CONTENT_S": 6,
+  "LOAD": true,
+  "LOAD_WORKERS": 2,
+  "DELAY": 120
+ },
+ "runs": [
+  {
+   "browser": "chromium",
+   "form": "video",
+   "lane": "off",
+   "rate": 1,
+   "ok": true,
+   "notes": {
+    "load": "cdp cpu throttle 4x",
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 58,
+   "stallsMid": 0,
+   "waiting": 0,
+   "stalled": 0,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 3,
+   "srcMaxReal": 3,
+   "framesLostPct": 0,
+   "switchMedianMs": 40,
+   "switchWorstMs": 45,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "tempoChange": [
+    {
+     "from": 1,
+     "to": 1.5,
+     "requests": 0,
+     "loadstart": 0,
+     "emptied": 0,
+     "waiting": 0,
+     "stalled": 0,
+     "ratechange": 12,
+     "momentChanged": false,
+     "playing": true
+    },
+    {
+     "from": 1.5,
+     "to": 2,
+     "requests": 0,
+     "loadstart": 0,
+     "emptied": 0,
+     "waiting": 0,
+     "stalled": 0,
+     "ratechange": 12,
+     "momentChanged": false,
+     "playing": true
+    },
+    {
+     "from": 2,
+     "to": 1,
+     "requests": 0,
+     "loadstart": 0,
+     "emptied": 0,
+     "waiting": 0,
+     "stalled": 0,
+     "ratechange": 12,
+     "momentChanged": false,
+     "playing": true
+    }
+   ],
+   "errors": []
+  },
+  {
+   "browser": "chromium",
+   "form": "video",
+   "lane": "off",
+   "rate": 1.5,
+   "ok": true,
+   "notes": {
+    "load": "cdp cpu throttle 4x",
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 39,
+   "stallsMid": 0,
+   "waiting": 0,
+   "stalled": 0,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 3,
+   "srcMaxReal": 3,
+   "framesLostPct": 0,
+   "switchMedianMs": 37,
+   "switchWorstMs": 45,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "errors": []
+  },
+  {
+   "browser": "chromium",
+   "form": "video",
+   "lane": "off",
+   "rate": 2,
+   "ok": true,
+   "notes": {
+    "load": "cdp cpu throttle 4x",
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 28,
+   "stallsMid": 0,
+   "waiting": 0,
+   "stalled": 0,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 3,
+   "srcMaxReal": 3,
+   "framesLostPct": 0,
+   "switchMedianMs": 38,
+   "switchWorstMs": 47,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "errors": []
+  },
+  {
+   "browser": "chromium",
+   "form": "video",
+   "lane": "on",
+   "rate": 1,
+   "ok": true,
+   "notes": {
+    "load": "cdp cpu throttle 4x",
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 58,
+   "stallsMid": 0,
+   "waiting": 0,
+   "stalled": 0,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 4,
+   "srcMaxReal": 3,
+   "framesLostPct": 0,
+   "switchMedianMs": 39,
+   "switchWorstMs": 46,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "errors": []
+  },
+  {
+   "browser": "chromium",
+   "form": "video",
+   "lane": "on",
+   "rate": 1.5,
+   "ok": true,
+   "notes": {
+    "load": "cdp cpu throttle 4x",
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 39,
+   "stallsMid": 0,
+   "waiting": 0,
+   "stalled": 0,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 4,
+   "srcMaxReal": 3,
+   "framesLostPct": 0,
+   "switchMedianMs": 37,
+   "switchWorstMs": 44,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "errors": []
+  },
+  {
+   "browser": "chromium",
+   "form": "video",
+   "lane": "on",
+   "rate": 2,
+   "ok": true,
+   "notes": {
+    "load": "cdp cpu throttle 4x",
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 28,
+   "stallsMid": 0,
+   "waiting": 0,
+   "stalled": 0,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 4,
+   "srcMaxReal": 3,
+   "framesLostPct": 0,
+   "switchMedianMs": 38,
+   "switchWorstMs": 45,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "errors": []
+  },
+  {
+   "browser": "chromium",
+   "form": "audio",
+   "lane": "off",
+   "rate": 1,
+   "ok": true,
+   "notes": {
+    "load": "cdp cpu throttle 4x",
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 59,
+   "stallsMid": 0,
+   "waiting": 10,
+   "stalled": 0,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 1,
+   "srcMaxReal": 1,
+   "framesLostPct": 0,
+   "switchMedianMs": 77,
+   "switchWorstMs": 86,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "tempoChange": [
+    {
+     "from": 1,
+     "to": 1.5,
+     "requests": 0,
+     "loadstart": 0,
+     "emptied": 0,
+     "waiting": 0,
+     "stalled": 0,
+     "ratechange": 14,
+     "momentChanged": false,
+     "playing": true
+    },
+    {
+     "from": 1.5,
+     "to": 2,
+     "requests": 0,
+     "loadstart": 0,
+     "emptied": 0,
+     "waiting": 0,
+     "stalled": 0,
+     "ratechange": 14,
+     "momentChanged": false,
+     "playing": true
+    },
+    {
+     "from": 2,
+     "to": 1,
+     "requests": 0,
+     "loadstart": 0,
+     "emptied": 0,
+     "waiting": 0,
+     "stalled": 0,
+     "ratechange": 14,
+     "momentChanged": false,
+     "playing": true
+    }
+   ],
+   "errors": []
+  },
+  {
+   "browser": "chromium",
+   "form": "audio",
+   "lane": "off",
+   "rate": 1.5,
+   "ok": true,
+   "notes": {
+    "load": "cdp cpu throttle 4x",
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 39,
+   "stallsMid": 0,
+   "waiting": 10,
+   "stalled": 0,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 1,
+   "srcMaxReal": 1,
+   "framesLostPct": 0,
+   "switchMedianMs": 75,
+   "switchWorstMs": 81,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "errors": []
+  },
+  {
+   "browser": "chromium",
+   "form": "audio",
+   "lane": "off",
+   "rate": 2,
+   "ok": true,
+   "notes": {
+    "load": "cdp cpu throttle 4x",
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 28,
+   "stallsMid": 0,
+   "waiting": 10,
+   "stalled": 0,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 1,
+   "srcMaxReal": 1,
+   "framesLostPct": 0,
+   "switchMedianMs": 73,
+   "switchWorstMs": 78,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "errors": []
+  },
+  {
+   "browser": "chromium",
+   "form": "audio",
+   "lane": "on",
+   "rate": 1,
+   "ok": true,
+   "notes": {
+    "load": "cdp cpu throttle 4x",
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 58,
+   "stallsMid": 0,
+   "waiting": 10,
+   "stalled": 0,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 2,
+   "srcMaxReal": 2,
+   "framesLostPct": 0,
+   "switchMedianMs": 80,
+   "switchWorstMs": 85,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "errors": []
+  },
+  {
+   "browser": "chromium",
+   "form": "audio",
+   "lane": "on",
+   "rate": 1.5,
+   "ok": true,
+   "notes": {
+    "load": "cdp cpu throttle 4x",
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 39,
+   "stallsMid": 0,
+   "waiting": 10,
+   "stalled": 0,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 2,
+   "srcMaxReal": 2,
+   "framesLostPct": 0,
+   "switchMedianMs": 75,
+   "switchWorstMs": 80,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "errors": []
+  },
+  {
+   "browser": "chromium",
+   "form": "audio",
+   "lane": "on",
+   "rate": 2,
+   "ok": true,
+   "notes": {
+    "load": "cdp cpu throttle 4x",
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 28,
+   "stallsMid": 0,
+   "waiting": 10,
+   "stalled": 0,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 2,
+   "srcMaxReal": 2,
+   "framesLostPct": 0,
+   "switchMedianMs": 75,
+   "switchWorstMs": 81,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "errors": []
+  },
+  {
+   "browser": "webkit",
+   "form": "video",
+   "lane": "off",
+   "rate": 1,
+   "ok": true,
+   "notes": {
+    "load": "2 spinner workers",
+    "stuck3": {
+     "st": 1,
+     "t": 12.999999999959183,
+     "idx": 4
+    },
+    "stuck4": {
+     "st": 1,
+     "t": 3.866122448979592,
+     "idx": 5
+    },
+    "stuck5": {
+     "st": 1,
+     "t": 34.8734693877551,
+     "idx": 6
+    },
+    "stuck6": {
+     "st": 1,
+     "t": 55.87591836734694,
+     "idx": 7
+    },
+    "stuck7": {
+     "st": 1,
+     "t": 56.99999999957143,
+     "idx": 8
+    },
+    "stuck8": {
+     "st": 1,
+     "t": 22.857142857142858,
+     "idx": 9
+    },
+    "stuck9": {
+     "st": 1,
+     "t": 99.8661224489796,
+     "idx": 10
+    },
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 100,
+   "stallsMid": 0,
+   "waiting": 0,
+   "stalled": 0,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 3,
+   "srcMaxReal": 3,
+   "framesLostPct": 4.6,
+   "switchMedianMs": 74,
+   "switchWorstMs": 91,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "tempoChange": [
+    {
+     "from": 1,
+     "to": 1.5,
+     "requests": 0,
+     "loadstart": 0,
+     "emptied": 0,
+     "waiting": 0,
+     "stalled": 0,
+     "ratechange": 12,
+     "momentChanged": false,
+     "playing": true
+    },
+    {
+     "from": 1.5,
+     "to": 2,
+     "requests": 0,
+     "loadstart": 0,
+     "emptied": 0,
+     "waiting": 0,
+     "stalled": 0,
+     "ratechange": 12,
+     "momentChanged": false,
+     "playing": true
+    },
+    {
+     "from": 2,
+     "to": 1,
+     "requests": 0,
+     "loadstart": 0,
+     "emptied": 0,
+     "waiting": 0,
+     "stalled": 0,
+     "ratechange": 12,
+     "momentChanged": false,
+     "playing": true
+    }
+   ],
+   "errors": []
+  },
+  {
+   "browser": "webkit",
+   "form": "video",
+   "lane": "off",
+   "rate": 1.5,
+   "ok": true,
+   "notes": {
+    "load": "2 spinner workers",
+    "stuck0": {
+     "st": 3,
+     "t": 100.525428035,
+     "idx": 1
+    },
+    "stuck3": {
+     "st": 1,
+     "t": 12.999999999959183,
+     "idx": 4
+    },
+    "stuck4": {
+     "st": 1,
+     "t": 3.866122448979592,
+     "idx": 5
+    },
+    "stuck5": {
+     "st": 1,
+     "t": 34.999999999755104,
+     "idx": 6
+    },
+    "stuck6": {
+     "st": 1,
+     "t": 55.87591836734694,
+     "idx": 7
+    },
+    "stuck7": {
+     "st": 1,
+     "t": 56.86857142857143,
+     "idx": 8
+    },
+    "stuck8": {
+     "st": 1,
+     "t": 22.857142857142858,
+     "idx": 9
+    },
+    "stuck9": {
+     "st": 1,
+     "t": 99.9999999999796,
+     "idx": 10
+    },
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 89,
+   "stallsMid": 0,
+   "waiting": 0,
+   "stalled": 1,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 3,
+   "srcMaxReal": 3,
+   "framesLostPct": 10.9,
+   "switchMedianMs": 71,
+   "switchWorstMs": 103,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "errors": []
+  },
+  {
+   "browser": "webkit",
+   "form": "video",
+   "lane": "off",
+   "rate": 2,
+   "ok": false,
+   "notes": {
+    "load": "2 spinner workers",
+    "stuck0": {
+     "st": 1,
+     "t": 71.60492023597959,
+     "idx": 2
+    },
+    "stuck2": {
+     "st": 1,
+     "t": 3.999999999979592,
+     "idx": 5
+    },
+    "stuck4": {
+     "st": 1,
+     "t": 55.87591836734694,
+     "idx": 7
+    },
+    "stuck5": {
+     "st": 1,
+     "t": 56.99999999957143,
+     "idx": 8
+    },
+    "stuck6": {
+     "st": 1,
+     "t": 22.857142857142858,
+     "idx": 9
+    },
+    "stuck7": {
+     "st": 1,
+     "t": 99.8661224489796,
+     "idx": 10
+    },
+    "stuck8": {
+     "st": 1,
+     "t": 15.000000000387756,
+     "idx": 11
+    },
+    "stuck9": {
+     "st": 1,
+     "t": 35.86612244897959,
+     "idx": 12
+    },
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 89,
+   "stallsMid": 0,
+   "waiting": 0,
+   "stalled": 1,
+   "stallsPerMin": 0,
+   "starts": 12,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 12,
+   "mediaErrors": 0,
+   "srcMax": 3,
+   "srcMaxReal": 3,
+   "framesLostPct": 11.1,
+   "switchMedianMs": 76,
+   "switchWorstMs": 90,
+   "switchFailed": 1,
+   "swipeFrames": {
+    "frames": 71,
+    "lost": 64
+   },
+   "errors": []
+  },
+  {
+   "browser": "webkit",
+   "form": "video",
+   "lane": "on",
+   "rate": 1,
+   "ok": true,
+   "notes": {
+    "load": "2 spinner workers",
+    "stuck0": {
+     "st": 3,
+     "t": 85.577139648,
+     "idx": 0
+    },
+    "stuck3": {
+     "st": 1,
+     "t": 25.999999999795918,
+     "idx": 3
+    },
+    "stuck4": {
+     "st": 1,
+     "t": 12.999999999959183,
+     "idx": 4
+    },
+    "stuck5": {
+     "st": 1,
+     "t": 3.999999999979592,
+     "idx": 5
+    },
+    "stuck6": {
+     "st": 1,
+     "t": 34.999999999755104,
+     "idx": 6
+    },
+    "stuck7": {
+     "st": 1,
+     "t": 55.87591836734694,
+     "idx": 7
+    },
+    "stuck8": {
+     "st": 1,
+     "t": 56.86857142857143,
+     "idx": 8
+    },
+    "stuck9": {
+     "st": 1,
+     "t": 22.857142857142858,
+     "idx": 9
+    },
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 107,
+   "stallsMid": 0,
+   "waiting": 0,
+   "stalled": 1,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 4,
+   "srcMaxReal": 3,
+   "framesLostPct": 10,
+   "switchMedianMs": 66,
+   "switchWorstMs": 110,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "errors": []
+  }
+ ]
+}

@@ -1,5 +1,5 @@
 {
- "at": "2026-10-30T16:56:47.430Z",
+ "at": "2026-10-30T17:21:38.515Z",
  "runs": [
   {
    "browser": "webkit",
@@ -152,8 +152,8 @@
     "bg: ended bgaudio1:0",
     "bg: started bgaudio5:0",
     "bg: next bgaudio5:0",
-    "bg: deck page visible: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
-    "bg: deck while hidden 8 s: timeupdate 81, ended 0, clip ends 2, play calls 2",
+    "bg: deck page visible: paused=false ended=false t=0.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck while hidden 8 s: timeupdate 80, ended 0, clip ends 2, play calls 2",
     "bg: back bgaudio5:0"
    ],
    "bgRowLog": [
