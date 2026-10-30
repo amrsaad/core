@@ -101,7 +101,12 @@ jobs:
           git commit -m "content: $(date -u +%F) (${videos} Videos, ${cards} Karten)"
           # Ein gleichzeitiger Push (Content-Bot, Entwicklung) darf den Schritt nicht rot machen
           for i in 1 2 3 4 5; do
-            git pull --rebase -q origin "${{ github.ref_name }}" && git push origin "HEAD:${{ github.ref_name }}" && exit 0
+            # Zwei Läufe am selben Tag legen dieselben Rohdateien an (add/add). Dann gilt der Stand auf dem Branch.
+            if ! git pull --rebase -q -X theirs origin "${{ github.ref_name }}"; then
+              git checkout --theirs -- . 2>/dev/null || true
+              git add -A && GIT_EDITOR=true git rebase --continue || git rebase --abort
+            fi
+            git push origin "HEAD:${{ github.ref_name }}" && exit 0
             sleep $((i * 5))
           done
           echo "Push nach 5 Versuchen fehlgeschlagen" >&2
