@@ -77,7 +77,7 @@
    "resolvedTitle": "أحمد الشقيري",
    "verified": false,
    "status": "inactive",
-   "note": "keine Shorts gefunden (UUSH 404, channel-feed 200, shorts-tab 200 (0))"
+   "note": "keine Shorts gefunden (UUSH 404, channel-feed 200, shorts-tab 0 (0))"
   },
   {
    "name": "Omar Abdelkafy",
@@ -206,7 +206,7 @@
    "lang": "en",
    "channelId": null,
    "status": "unresolved",
-   "note": "Suche HTTP 200, Treffer: Uday Devgan | MYLearning | Brandon Ayres"
+   "note": "Suche HTTP 0 (TypeError: fetch failed UND_ERR_HEADERS_OVERFLOW Headers Overflow Error), Treffer: keine"
   },
   {
    "name": "American Academy of Ophthalmology",
@@ -285,7 +285,7 @@
    "resolvedTitle": "AI Explained",
    "verified": true,
    "status": "inactive",
-   "note": "keine Shorts gefunden (UUSH 404, channel-feed 200, shorts-tab 200 (0))"
+   "note": "keine Shorts gefunden (UUSH 404, channel-feed 200, shorts-tab 0 (0))"
   },
   {
    "name": "Anthropic",
@@ -441,7 +441,7 @@
    "resolvedTitle": "Dinge Erklärt – Kurzgesagt",
    "verified": true,
    "status": "inactive",
-   "note": "keine Shorts gefunden (UUSH 404, channel-feed 200, shorts-tab 200 (0))"
+   "note": "keine Shorts gefunden (UUSH 404, channel-feed 200, shorts-tab 0 (0))"
   },
   {
    "name": "Kurzgesagt",
