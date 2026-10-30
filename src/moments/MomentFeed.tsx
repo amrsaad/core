@@ -28,7 +28,7 @@ import { NoteSheet, type NoteCtl } from './NoteSheet';
 import { createWheel, deskKey, TAB_KEYS, wheelPx, type DeskAction } from './desktop';
 import { DeskPanel } from './DeskShell';
 import { speakerLine } from './speaker';
-import { buildIssue, chipEffect, CONFIRM_SHEET_MS, firstOpenOfDay, makeEntry, markSent, promptLine, unsent, type Chip } from './note';
+import { chipEffect, CONFIRM_SHEET_MS, firstOpenOfDay, inputConfirm, makeEntry, makeInputEntry, markSent, nextIssue, promptLine, unsent, type Chip, type InputChip } from './note';
 import { HOOK_LINE_PT, hookStep } from './hook';
 import { makeRng } from './rng';
 import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
@@ -1283,15 +1283,41 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     confirmTimer.current = window.setTimeout(done, CONFIRM_SHEET_MS);
   };
 
+  /**
+   * Source oder Topic (Entscheidung 20): Wert aus dem Textfeld wird eine Notiz mit Präfix "source:" bzw. "topic:", ohne Chip-Wirkung auf die Gewichte.
+   * Das Blatt zeigt die Bestätigungszeile wie bei den anderen Chips und schließt dann. Der Feed bleibt auf dem Moment, die Notiz beurteilt ihn nicht.
+   */
+  const saveInput = (m: Moment, chip: InputChip, value: string) => {
+    if (confirmRef.current) return;
+    const entry = makeInputEntry({ id: m.id, hook: m.hook, tab: FORM_LABEL[form], commit: __APP_COMMIT__ }, chip, value, Date.now());
+    if (!entry) return;
+    navigator.vibrate?.(15);
+    update((s) => ({ ...s, feedbackNotes: [...(s.feedbackNotes ?? []), entry] }));
+    setConfirm(inputConfirm(chip));
+    confirmRef.current = true;
+    const done = () => {
+      window.clearTimeout(confirmTimer.current);
+      if (!confirmRef.current) return;
+      confirmRef.current = false;
+      setConfirm(null);
+      setNote(null);
+    };
+    confirmDone.current = done;
+    confirmTimer.current = window.setTimeout(done, CONFIRM_SHEET_MS);
+  };
+
   /** Blatt schließen (Tipp daneben, Esc): während die Bestätigung steht, geht der Feed trotzdem weiter */
   const cancelNote = () => {
     if (confirmRef.current) confirmDone.current();
     else setNote(null);
   };
 
-  /** Ein einziges vorausgefülltes Issue in core-content aus allen ungesendeten Notizen, danach gelten sie als gesendet */
+  /**
+   * Ein Tipp öffnet ein vorausgefülltes Issue in core-content. Zuerst das Sammel-Issue der normalen Rückmeldungen, danach je Source oder Topic ein eigenes Issue
+   * (Label source bzw. topic). Die Zeile "N notes, send?" bleibt stehen, bis alles gesendet ist, denn der Browser öffnet pro Tipp nur ein Fenster.
+   */
   const sendNotes = () => {
-    const b = buildIssue(unsent(stateRef.current.feedbackNotes), today);
+    const b = nextIssue(unsent(stateRef.current.feedbackNotes), today);
     if (!b) return;
     window.open(b.url, '_blank', 'noopener');
     update((s) => ({ ...s, feedbackNotes: markSent(s.feedbackNotes, b.keys, Date.now()) }));
@@ -2063,7 +2089,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </button>
       )}
 
-      {note && <NoteSheet key={note.id} m={note} speaker={speakerLine(note.channel)} onChip={(c, t) => saveNote(note, c, t)} onDone={(t) => saveNote(note, null, t)} onAsk={() => ask(note)} onCancel={cancelNote} confirm={confirmText} keys={!!desk} ctl={noteCtl} />}
+      {note && <NoteSheet key={note.id} m={note} speaker={speakerLine(note.channel)} onChip={(c, t) => saveNote(note, c, t)} onInput={(c, v) => saveInput(note, c, v)} onDone={(t) => saveNote(note, null, t)} onAsk={() => ask(note)} onCancel={cancelNote} confirm={confirmText} keys={!!desk} ctl={noteCtl} />}
     </div>
   );
 }

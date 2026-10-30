@@ -317,6 +317,9 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 .note-chip:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .note-chip:active { background: #fff; color: #000; border-color: #fff; }
 .note-text { width: 100%; border-radius: 12px; border: 1px solid #333; background: #111; color: #fff; padding: 12px; font-size: 17px; line-height: 24px; resize: none; }
+.note-input-label { margin-bottom: 8px; font-size: 15px; line-height: 20px; color: #b3b3b3; }
+.note-back { width: 100%; min-height: 48px; margin-top: 6px; border-radius: 12px; background: transparent; color: #b3b3b3; font-size: 16px; }
+.note-done:disabled { opacity: .35; }
 .note-done { width: 100%; min-height: 52px; margin-top: 10px; border-radius: 12px; background: #fff; color: #000; font-size: 17px; font-weight: 600; }
 /* Zeile "N notes, send?" beim ersten Öffnen am Tag, unter dem Formschalter, links neben der Tageszahl */
 .vnotes {

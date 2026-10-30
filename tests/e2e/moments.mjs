@@ -520,7 +520,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.swipeLeftOpensNote = await openSheet();
     c.swipeLeftStaysOnMoment = (await page.evaluate(() => window.__core.idx())) === idxBefore;
     const chipsSeen = await page.evaluate(() => [...document.querySelectorAll('[data-testid^=note-chip-]')].map((x) => x.textContent));
-    c.noteSixChips = chipsSeen.join() === 'Already known,Not for me,Weak,Wrong,Bad cut,Mute speaker' && !chipsSeen.includes('Great') && !chipsSeen.includes('Boring');
+    // Sechs Rückmeldungs-Chips, dazu Source und Topic (Entscheidung 20)
+    c.noteEightChips = chipsSeen.join() === 'Already known,Not for me,Weak,Wrong,Bad cut,Mute speaker,Source,Topic' && !chipsSeen.includes('Great') && !chipsSeen.includes('Boring');
     c.noteTextAndDone = !!(await page.$('[data-testid=note-text]')) && (await page.textContent('[data-testid=note-done]')) === 'Done';
     c.noteNoSendButton = !(await page.$('[data-testid=note-send]')) && !(await page.$('text=Send'));
     const chipBox = await page.evaluate(() => [...document.querySelectorAll('[data-testid^=note-chip-]')].map((e) => { const q = e.getBoundingClientRect(); return { w: q.width, h: q.height }; }));
@@ -827,6 +828,77 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await p2.waitForTimeout(250);
     }
     c.newNoteUnsent = await p2.evaluate(() => window.__core.notes().filter((x) => x.sent === undefined).length === 1);
+    // Source und Topic (Entscheidung 20): Chip öffnet ein Textfeld, Add legt die Notiz mit Präfix an, Bestätigungszeile wie bei den anderen Chips,
+    // der Feed bleibt auf dem Moment. Beim Senden geht zuerst das Sammel-Issue, danach je ein eigenes Issue mit Label source bzw. topic.
+    // Langsame Uhr, damit der Moment nicht während der Prüfung endet. Eine offene Für-dich-Karte wird geschlossen, sie hindert das Blatt am Öffnen.
+    await p2.evaluate(() => { window.__ytSlow = true; });
+    for (let q = 0; q < 6; q++) {
+      if (await p2.evaluate(() => !!window.__core.forYou())) await p2.click('[data-testid="foryou"]');
+      if (await waitFor(p2, () => !window.__core.forYou() && !document.querySelector('[data-testid=note-sheet]'), undefined, 1500)) break;
+    }
+    // Ruhe abwarten: Stand und Für-dich-Karte 1,5 s unverändert, sonst läuft noch ein Übergang
+    for (let q = 0; q < 8; q++) {
+      const s0 = await p2.evaluate(() => `${window.__core.idx()}|${!!window.__core.forYou()}|${!!document.querySelector('[data-testid=note-sheet]')}`);
+      await p2.waitForTimeout(1500);
+      const s1 = await p2.evaluate(() => `${window.__core.idx()}|${!!window.__core.forYou()}|${!!document.querySelector('[data-testid=note-sheet]')}`);
+      if (s0 === s1 && s1.endsWith('|false|false')) break;
+      if (s1.includes('|true|')) await p2.click('[data-testid="foryou"]').catch(() => {});
+    }
+    const nS0 = await p2.evaluate(() => window.__core.notes().length);
+    await p2.evaluate(() => window.__core.openNote());
+    await waitFor(p2, () => !!document.querySelector('[data-testid=note-sheet]'));
+    const idxS = await p2.evaluate(() => window.__core.idx()); // Stand bei offenem Blatt
+    await p2.click('[data-testid="note-chip-Source"]');
+    c.sourceInputOpens = await waitFor(p2, () => !!document.querySelector('[data-testid=note-input]') && !document.querySelector('[data-testid="note-chip-Weak"]'));
+    c.sourceLabelAndHint = await p2.evaluate(() => document.querySelector('[data-testid=note-input-label]')?.textContent === 'Source: link or name' && document.querySelector('[data-testid=note-input]').placeholder === 'Link or name');
+    c.sourceAddNeedsText = await p2.evaluate(() => document.querySelector('[data-testid=note-input-send]').disabled === true);
+    await p2.fill('[data-testid=note-input]', 'https://example.org/eyes-podcast');
+    await p2.screenshot({ path: `${out}/${name}-23-source-input.png` });
+    await p2.click('[data-testid=note-input-send]');
+    c.sourceConfirmLine = await waitFor(p2, () => document.querySelector('[data-testid=note-confirm]')?.textContent === 'Source noted' && !!document.querySelector('[data-testid=note-sheet]'));
+    c.sourceSheetCloses = await waitFor(p2, () => !document.querySelector('[data-testid=note-sheet]'));
+    c.sourceStaysOnMoment = (await p2.evaluate(() => window.__core.idx())) === idxS;
+    const nSrc = await p2.evaluate(() => window.__core.notes());
+    c.sourceNoteSaved = nSrc.length === nS0 + 1 && nSrc[nSrc.length - 1].text === 'source: https://example.org/eyes-podcast' && nSrc[nSrc.length - 1].chips.length === 0 && nSrc[nSrc.length - 1].sent === undefined;
+    // Back kehrt zu den Chips zurück und speichert nichts
+    await p2.evaluate(() => window.__core.openNote());
+    await waitFor(p2, () => !!document.querySelector('[data-testid=note-sheet]'));
+    await p2.click('[data-testid="note-chip-Topic"]');
+    await waitFor(p2, () => !!document.querySelector('[data-testid=note-input]'));
+    c.topicLabel = await p2.evaluate(() => document.querySelector('[data-testid=note-input-label]')?.textContent === 'Topic');
+    await p2.fill('[data-testid=note-input]', 'draft that is never saved');
+    await p2.click('[data-testid=note-input-back]');
+    c.sourceBackShowsChips = await waitFor(p2, () => !document.querySelector('[data-testid=note-input]') && !!document.querySelector('[data-testid="note-chip-Weak"]')) && (await p2.evaluate(() => window.__core.notes().length)) === nS0 + 1;
+    // Topic mit Enter
+    await p2.click('[data-testid="note-chip-Topic"]');
+    await waitFor(p2, () => !!document.querySelector('[data-testid=note-input]'));
+    c.topicInputEmptyAfterBack = (await p2.inputValue('[data-testid=note-input]')) === '';
+    await p2.fill('[data-testid=note-input]', 'IOL calculation after SMILE');
+    await p2.press('[data-testid=note-input]', 'Enter');
+    c.topicConfirmLine = await waitFor(p2, () => document.querySelector('[data-testid=note-confirm]')?.textContent === 'Topic noted');
+    await waitFor(p2, () => !document.querySelector('[data-testid=note-sheet]'));
+    const nTop = await p2.evaluate(() => window.__core.notes());
+    c.topicNoteSaved = nTop.length === nS0 + 2 && nTop[nTop.length - 1].text === 'topic: IOL calculation after SMILE' && nTop[nTop.length - 1].chips.length === 0;
+    // Senden: drei ungesendete Notizen (Bad cut, Source, Topic). Ein Tipp öffnet ein Issue, die Zeile bleibt, bis alles gesendet ist.
+    await p2.evaluate(() => { window.__opened = []; });
+    c.sendLineThree = await waitFor(p2, () => document.querySelector('[data-testid=notes-prompt]')?.textContent === '3 notes, send?');
+    await p2.click('[data-testid=notes-prompt]');
+    const o1 = await p2.evaluate(() => window.__opened);
+    const q1 = o1[0] ? new URL(o1[0].u).searchParams : null;
+    c.sendFirstIsFeedback = o1.length === 1 && q1?.get('labels') === 'feedback' && (q1.get('body') ?? '').includes('Bad cut') && !(q1.get('body') ?? '').includes('source:') && !(q1.get('body') ?? '').includes('topic:');
+    c.sendLineStays = await waitFor(p2, () => document.querySelector('[data-testid=notes-prompt]')?.textContent === '2 notes, send?');
+    await p2.click('[data-testid=notes-prompt]');
+    const o2 = await p2.evaluate(() => window.__opened);
+    const q2 = o2[1] ? new URL(o2[1].u).searchParams : null;
+    c.sendSecondIsSource = o2.length === 2 && q2?.get('labels') === 'source' && q2.get('title') === 'source: https://example.org/eyes-podcast' && (q2.get('body') ?? '').startsWith('https://example.org/eyes-podcast\n\nHeard in: ') && o2[1].t === '_blank';
+    c.sendLineOneLeft = await waitFor(p2, () => document.querySelector('[data-testid=notes-prompt]')?.textContent === '1 note, send?');
+    c.sendSplitMarksSent = await p2.evaluate(() => { const n = window.__core.notes(); return n.filter((x) => x.sent === undefined).length === 1 && n.find((x) => x.sent === undefined).text === 'topic: IOL calculation after SMILE'; });
+    // Der Zustand wird verzögert gespeichert: warten, bis IndexedDB dieselben Notizen hält wie der Speicher
+    for (let q = 0; q < 40; q++) {
+      const same = await p2.evaluate(() => new Promise((res) => { const rq = indexedDB.open('core'); rq.onerror = () => res(false); rq.onsuccess = () => { try { const g = rq.result.transaction('kv').objectStore('kv').get('state'); g.onsuccess = () => res(JSON.stringify(g.result?.feedbackNotes ?? []) === JSON.stringify(window.__core.notes())); g.onerror = () => res(false); } catch { res(false); } }; }));
+      if (same) break;
+      await p2.waitForTimeout(250);
+    }
     const notesP2 = await p2.evaluate(() => JSON.stringify(window.__core.notes()));
     await p2.close();
     const p3 = await ctx.newPage();
