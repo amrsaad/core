@@ -1,5 +1,5 @@
 {
- "at": "2026-10-30T17:34:41.929Z",
+ "at": "2026-10-30T18:22:16.920Z",
  "config": {
   "MOMENTS": 10,
   "CONTENT_S": 6,
@@ -31,11 +31,11 @@
    "ratechange": 0,
    "loadstart": 10,
    "mediaErrors": 0,
-   "srcMax": 3,
+   "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 40,
-   "switchWorstMs": 45,
+   "switchMedianMs": 29,
+   "switchWorstMs": 32,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -50,7 +50,7 @@
      "emptied": 0,
      "waiting": 0,
      "stalled": 0,
-     "ratechange": 12,
+     "ratechange": 6,
      "momentChanged": false,
      "playing": true
     },
@@ -62,7 +62,7 @@
      "emptied": 0,
      "waiting": 0,
      "stalled": 0,
-     "ratechange": 12,
+     "ratechange": 6,
      "momentChanged": false,
      "playing": true
     },
@@ -74,7 +74,7 @@
      "emptied": 0,
      "waiting": 0,
      "stalled": 0,
-     "ratechange": 12,
+     "ratechange": 6,
      "momentChanged": false,
      "playing": true
     }
@@ -94,21 +94,21 @@
    "feed": true,
    "firstPlays": true,
    "rateSet": true,
-   "wallS": 39,
+   "wallS": 38,
    "stallsMid": 0,
    "waiting": 0,
    "stalled": 0,
    "stallsPerMin": 0,
    "starts": 10,
-   "startsWrongRate": 0,
-   "ratechange": 0,
+   "startsWrongRate": 2,
+   "ratechange": 8,
    "loadstart": 10,
    "mediaErrors": 0,
-   "srcMax": 3,
+   "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 37,
-   "switchWorstMs": 45,
+   "switchMedianMs": 31,
+   "switchWorstMs": 34,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -135,15 +135,15 @@
    "stalled": 0,
    "stallsPerMin": 0,
    "starts": 10,
-   "startsWrongRate": 0,
-   "ratechange": 0,
+   "startsWrongRate": 2,
+   "ratechange": 8,
    "loadstart": 10,
    "mediaErrors": 0,
-   "srcMax": 3,
+   "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 38,
-   "switchWorstMs": 47,
+   "switchMedianMs": 34,
+   "switchWorstMs": 40,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -177,8 +177,8 @@
    "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 39,
-   "switchWorstMs": 46,
+   "switchMedianMs": 34,
+   "switchWorstMs": 39,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -201,19 +201,19 @@
    "rateSet": true,
    "wallS": 39,
    "stallsMid": 0,
-   "waiting": 0,
+   "waiting": 2,
    "stalled": 0,
    "stallsPerMin": 0,
-   "starts": 10,
-   "startsWrongRate": 0,
+   "starts": 12,
+   "startsWrongRate": 2,
    "ratechange": 0,
-   "loadstart": 10,
+   "loadstart": 12,
    "mediaErrors": 0,
    "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 37,
-   "switchWorstMs": 44,
+   "switchMedianMs": 34,
+   "switchWorstMs": 50,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -236,19 +236,19 @@
    "rateSet": true,
    "wallS": 28,
    "stallsMid": 0,
-   "waiting": 0,
+   "waiting": 2,
    "stalled": 0,
    "stallsPerMin": 0,
-   "starts": 10,
-   "startsWrongRate": 0,
+   "starts": 12,
+   "startsWrongRate": 2,
    "ratechange": 0,
-   "loadstart": 10,
+   "loadstart": 12,
    "mediaErrors": 0,
    "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 38,
-   "switchWorstMs": 45,
+   "switchMedianMs": 37,
+   "switchWorstMs": 52,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -282,8 +282,8 @@
    "srcMax": 1,
    "srcMaxReal": 1,
    "framesLostPct": 0,
-   "switchMedianMs": 77,
-   "switchWorstMs": 86,
+   "switchMedianMs": 78,
+   "switchWorstMs": 85,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -298,7 +298,7 @@
      "emptied": 0,
      "waiting": 0,
      "stalled": 0,
-     "ratechange": 14,
+     "ratechange": 6,
      "momentChanged": false,
      "playing": true
     },
@@ -310,7 +310,7 @@
      "emptied": 0,
      "waiting": 0,
      "stalled": 0,
-     "ratechange": 14,
+     "ratechange": 6,
      "momentChanged": false,
      "playing": true
     },
@@ -322,7 +322,7 @@
      "emptied": 0,
      "waiting": 0,
      "stalled": 0,
-     "ratechange": 14,
+     "ratechange": 6,
      "momentChanged": false,
      "playing": true
     }
@@ -342,21 +342,21 @@
    "feed": true,
    "firstPlays": true,
    "rateSet": true,
-   "wallS": 39,
+   "wallS": 38,
    "stallsMid": 0,
    "waiting": 10,
    "stalled": 0,
    "stallsPerMin": 0,
    "starts": 10,
    "startsWrongRate": 0,
-   "ratechange": 0,
+   "ratechange": 8,
    "loadstart": 10,
    "mediaErrors": 0,
    "srcMax": 1,
    "srcMaxReal": 1,
    "framesLostPct": 0,
-   "switchMedianMs": 75,
-   "switchWorstMs": 81,
+   "switchMedianMs": 73,
+   "switchWorstMs": 79,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -384,14 +384,14 @@
    "stallsPerMin": 0,
    "starts": 10,
    "startsWrongRate": 0,
-   "ratechange": 0,
+   "ratechange": 8,
    "loadstart": 10,
    "mediaErrors": 0,
    "srcMax": 1,
    "srcMaxReal": 1,
    "framesLostPct": 0,
-   "switchMedianMs": 73,
-   "switchWorstMs": 78,
+   "switchMedianMs": 74,
+   "switchWorstMs": 94,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -422,11 +422,11 @@
    "ratechange": 0,
    "loadstart": 10,
    "mediaErrors": 0,
-   "srcMax": 2,
-   "srcMaxReal": 2,
+   "srcMax": 1,
+   "srcMaxReal": 1,
    "framesLostPct": 0,
-   "switchMedianMs": 80,
-   "switchWorstMs": 85,
+   "switchMedianMs": 76,
+   "switchWorstMs": 78,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -454,14 +454,14 @@
    "stallsPerMin": 0,
    "starts": 10,
    "startsWrongRate": 0,
-   "ratechange": 0,
+   "ratechange": 8,
    "loadstart": 10,
    "mediaErrors": 0,
-   "srcMax": 2,
-   "srcMaxReal": 2,
-   "framesLostPct": 0,
-   "switchMedianMs": 75,
-   "switchWorstMs": 80,
+   "srcMax": 1,
+   "srcMaxReal": 1,
+   "framesLostPct": 0.1,
+   "switchMedianMs": 71,
+   "switchWorstMs": 135,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -489,14 +489,14 @@
    "stallsPerMin": 0,
    "starts": 10,
    "startsWrongRate": 0,
-   "ratechange": 0,
+   "ratechange": 8,
    "loadstart": 10,
    "mediaErrors": 0,
-   "srcMax": 2,
-   "srcMaxReal": 2,
+   "srcMax": 1,
+   "srcMaxReal": 1,
    "framesLostPct": 0,
-   "switchMedianMs": 75,
-   "switchWorstMs": 81,
+   "switchMedianMs": 72,
+   "switchWorstMs": 73,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -514,7 +514,7 @@
     "load": "2 spinner workers",
     "stuck3": {
      "st": 1,
-     "t": 12.999999999959183,
+     "t": 12.852244897959183,
      "idx": 4
     },
     "stuck4": {
@@ -539,12 +539,12 @@
     },
     "stuck8": {
      "st": 1,
-     "t": 22.857142857142858,
+     "t": 23.000000000142858,
      "idx": 9
     },
     "stuck9": {
      "st": 1,
-     "t": 99.8661224489796,
+     "t": 99.9999999999796,
      "idx": 10
     },
     "midSample": []
@@ -562,11 +562,11 @@
    "ratechange": 0,
    "loadstart": 10,
    "mediaErrors": 0,
-   "srcMax": 3,
+   "srcMax": 4,
    "srcMaxReal": 3,
-   "framesLostPct": 4.6,
-   "switchMedianMs": 74,
-   "switchWorstMs": 91,
+   "framesLostPct": 1.4,
+   "switchMedianMs": 25,
+   "switchWorstMs": 71,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -581,7 +581,7 @@
      "emptied": 0,
      "waiting": 0,
      "stalled": 0,
-     "ratechange": 12,
+     "ratechange": 6,
      "momentChanged": false,
      "playing": true
     },
@@ -593,7 +593,7 @@
      "emptied": 0,
      "waiting": 0,
      "stalled": 0,
-     "ratechange": 12,
+     "ratechange": 6,
      "momentChanged": false,
      "playing": true
     },
@@ -605,7 +605,7 @@
      "emptied": 0,
      "waiting": 0,
      "stalled": 0,
-     "ratechange": 12,
+     "ratechange": 6,
      "momentChanged": false,
      "playing": true
     }
@@ -622,43 +622,43 @@
     "load": "2 spinner workers",
     "stuck0": {
      "st": 3,
-     "t": 100.525428035,
-     "idx": 1
+     "t": 89.525578025,
+     "idx": 0
     },
     "stuck3": {
      "st": 1,
-     "t": 12.999999999959183,
-     "idx": 4
+     "t": 25.999999999795918,
+     "idx": 3
     },
     "stuck4": {
      "st": 1,
-     "t": 3.866122448979592,
-     "idx": 5
+     "t": 12.852244897959183,
+     "idx": 4
     },
     "stuck5": {
      "st": 1,
-     "t": 34.999999999755104,
-     "idx": 6
+     "t": 3.999999999979592,
+     "idx": 5
     },
     "stuck6": {
+     "st": 1,
+     "t": 34.8734693877551,
+     "idx": 6
+    },
+    "stuck7": {
      "st": 1,
      "t": 55.87591836734694,
      "idx": 7
     },
-    "stuck7": {
-     "st": 1,
-     "t": 56.86857142857143,
-     "idx": 8
-    },
     "stuck8": {
      "st": 1,
-     "t": 22.857142857142858,
-     "idx": 9
+     "t": 56.99999999957143,
+     "idx": 8
     },
     "stuck9": {
      "st": 1,
-     "t": 99.9999999999796,
-     "idx": 10
+     "t": 22.857142857142858,
+     "idx": 9
     },
     "midSample": []
    },
@@ -668,18 +668,18 @@
    "wallS": 89,
    "stallsMid": 0,
    "waiting": 0,
-   "stalled": 1,
+   "stalled": 0,
    "stallsPerMin": 0,
    "starts": 10,
-   "startsWrongRate": 0,
-   "ratechange": 0,
+   "startsWrongRate": 2,
+   "ratechange": 8,
    "loadstart": 10,
    "mediaErrors": 0,
-   "srcMax": 3,
+   "srcMax": 4,
    "srcMaxReal": 3,
-   "framesLostPct": 10.9,
-   "switchMedianMs": 71,
-   "switchWorstMs": 103,
+   "framesLostPct": 8.3,
+   "switchMedianMs": 77,
+   "switchWorstMs": 109,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -695,70 +695,65 @@
    "ok": false,
    "notes": {
     "load": "2 spinner workers",
-    "stuck0": {
-     "st": 1,
-     "t": 71.60492023597959,
-     "idx": 2
-    },
     "stuck2": {
      "st": 1,
-     "t": 3.999999999979592,
-     "idx": 5
+     "t": 12.999999999959183,
+     "idx": 4
     },
     "stuck4": {
+     "st": 1,
+     "t": 34.8734693877551,
+     "idx": 6
+    },
+    "stuck5": {
      "st": 1,
      "t": 55.87591836734694,
      "idx": 7
     },
-    "stuck5": {
+    "stuck6": {
      "st": 1,
-     "t": 56.99999999957143,
+     "t": 56.86857142857143,
      "idx": 8
     },
-    "stuck6": {
+    "stuck7": {
      "st": 1,
      "t": 22.857142857142858,
      "idx": 9
     },
-    "stuck7": {
+    "stuck8": {
      "st": 1,
      "t": 99.8661224489796,
      "idx": 10
     },
-    "stuck8": {
+    "stuck9": {
      "st": 1,
      "t": 15.000000000387756,
      "idx": 11
-    },
-    "stuck9": {
-     "st": 1,
-     "t": 35.86612244897959,
-     "idx": 12
     },
     "midSample": []
    },
    "feed": true,
    "firstPlays": true,
    "rateSet": true,
-   "wallS": 89,
+   "wallS": 87,
    "stallsMid": 0,
    "waiting": 0,
    "stalled": 1,
    "stallsPerMin": 0,
    "starts": 12,
-   "startsWrongRate": 0,
-   "ratechange": 0,
+   "startsWrongRate": 2,
+   "ratechange": 8,
    "loadstart": 12,
    "mediaErrors": 0,
-   "srcMax": 3,
+   "srcMax": 4,
    "srcMaxReal": 3,
-   "framesLostPct": 11.1,
-   "switchMedianMs": 76,
-   "switchWorstMs": 90,
+   "framesLostPct": 7.3,
+   "switchMedianMs": 29,
+   "switchWorstMs": 74,
    "switchFailed": 1,
    "swipeFrames": {
-    "frames": 71,
-    "lost": 64
+    "frames": 75,
+    "lost": 54
    },
    "errors": []
   },
@@ -772,12 +767,12 @@
     "load": "2 spinner workers",
     "stuck0": {
      "st": 3,
-     "t": 85.577139648,
+     "t": 85.5510172,
      "idx": 0
     },
     "stuck3": {
      "st": 1,
-     "t": 25.999999999795918,
+     "t": 25.86122448979592,
      "idx": 3
     },
     "stuck4": {
@@ -787,7 +782,7 @@
     },
     "stuck5": {
      "st": 1,
-     "t": 3.999999999979592,
+     "t": 3.866122448979592,
      "idx": 5
     },
     "stuck6": {
@@ -802,7 +797,7 @@
     },
     "stuck8": {
      "st": 1,
-     "t": 56.86857142857143,
+     "t": 56.99999999957143,
      "idx": 8
     },
     "stuck9": {
@@ -827,15 +822,310 @@
    "mediaErrors": 0,
    "srcMax": 4,
    "srcMaxReal": 3,
-   "framesLostPct": 10,
-   "switchMedianMs": 66,
-   "switchWorstMs": 110,
+   "framesLostPct": 8.3,
+   "switchMedianMs": 59,
+   "switchWorstMs": 79,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
     "lost": 0
    },
    "errors": []
+  },
+  {
+   "browser": "webkit",
+   "form": "video",
+   "lane": "on",
+   "rate": 1.5,
+   "ok": true,
+   "notes": {
+    "load": "2 spinner workers",
+    "stuck3": {
+     "st": 1,
+     "t": 25.999999999795918,
+     "idx": 3
+    },
+    "stuck4": {
+     "st": 1,
+     "t": 12.852244897959183,
+     "idx": 4
+    },
+    "stuck5": {
+     "st": 1,
+     "t": 3.866122448979592,
+     "idx": 5
+    },
+    "stuck6": {
+     "st": 1,
+     "t": 34.999999999755104,
+     "idx": 6
+    },
+    "stuck7": {
+     "st": 1,
+     "t": 55.87591836734694,
+     "idx": 7
+    },
+    "stuck8": {
+     "st": 1,
+     "t": 56.86857142857143,
+     "idx": 8
+    },
+    "stuck9": {
+     "st": 1,
+     "t": 23.000000000142858,
+     "idx": 9
+    },
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 78,
+   "stallsMid": 0,
+   "waiting": 0,
+   "stalled": 0,
+   "stallsPerMin": 0,
+   "starts": 12,
+   "startsWrongRate": 2,
+   "ratechange": 0,
+   "loadstart": 12,
+   "mediaErrors": 0,
+   "srcMax": 4,
+   "srcMaxReal": 3,
+   "framesLostPct": 2.2,
+   "switchMedianMs": 72,
+   "switchWorstMs": 78,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "errors": []
+  },
+  {
+   "browser": "webkit",
+   "form": "video",
+   "lane": "on",
+   "rate": 2,
+   "ok": false,
+   "notes": {
+    "load": "2 spinner workers",
+    "stuck4": {
+     "st": 1,
+     "t": 34.8734693877551,
+     "idx": 6
+    },
+    "stuck5": {
+     "st": 1,
+     "t": 55.87591836734694,
+     "idx": 7
+    },
+    "stuck6": {
+     "st": 1,
+     "t": 56.99999999957143,
+     "idx": 8
+    },
+    "stuck7": {
+     "st": 1,
+     "t": 22.857142857142858,
+     "idx": 9
+    },
+    "stuck8": {
+     "st": 1,
+     "t": 99.9999999999796,
+     "idx": 10
+    },
+    "stuck9": {
+     "st": 1,
+     "t": 15.000000000387756,
+     "idx": 11
+    },
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 81,
+   "stallsMid": 0,
+   "waiting": 0,
+   "stalled": 1,
+   "stallsPerMin": 0,
+   "starts": 13,
+   "startsWrongRate": 2,
+   "ratechange": 0,
+   "loadstart": 14,
+   "mediaErrors": 0,
+   "srcMax": 4,
+   "srcMaxReal": 3,
+   "framesLostPct": 8,
+   "switchMedianMs": 21,
+   "switchWorstMs": 84,
+   "switchFailed": 1,
+   "swipeFrames": {
+    "frames": 79,
+    "lost": 58
+   },
+   "errors": []
+  },
+  {
+   "browser": "webkit",
+   "form": "audio",
+   "lane": "off",
+   "rate": 1,
+   "ok": true,
+   "notes": {
+    "load": "2 spinner workers",
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 59,
+   "stallsMid": 0,
+   "waiting": 10,
+   "stalled": 0,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 1,
+   "srcMaxReal": 1,
+   "framesLostPct": 1.5,
+   "switchMedianMs": 62,
+   "switchWorstMs": 79,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "tempoChange": [
+    {
+     "from": 1,
+     "to": 1.5,
+     "requests": 0,
+     "loadstart": 0,
+     "emptied": 0,
+     "waiting": 0,
+     "stalled": 0,
+     "ratechange": 6,
+     "momentChanged": false,
+     "playing": true
+    },
+    {
+     "from": 1.5,
+     "to": 2,
+     "requests": 0,
+     "loadstart": 0,
+     "emptied": 0,
+     "waiting": 0,
+     "stalled": 0,
+     "ratechange": 6,
+     "momentChanged": false,
+     "playing": true
+    },
+    {
+     "from": 2,
+     "to": 1,
+     "requests": 0,
+     "loadstart": 0,
+     "emptied": 0,
+     "waiting": 0,
+     "stalled": 0,
+     "ratechange": 6,
+     "momentChanged": false,
+     "playing": true
+    }
+   ],
+   "errors": []
+  },
+  {
+   "browser": "webkit",
+   "form": "audio",
+   "lane": "off",
+   "rate": 1.5,
+   "ok": false,
+   "notes": {
+    "load": "2 spinner workers",
+    "stuck0": {
+     "st": 3,
+     "t": 23.445170949,
+     "idx": 0
+    }
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "error": "Error: page.evaluate: Target crashed "
+  },
+  {
+   "browser": "webkit",
+   "form": "audio",
+   "lane": "off",
+   "rate": 2,
+   "ok": false,
+   "notes": {
+    "load": "2 spinner workers"
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "error": "Error: page.evaluate: Target crashed "
+  },
+  {
+   "browser": "webkit",
+   "form": "audio",
+   "lane": "on",
+   "rate": 1,
+   "ok": true,
+   "notes": {
+    "load": "2 spinner workers",
+    "stuck1": {
+     "st": 1,
+     "t": 15.000000000387756,
+     "idx": 1
+    },
+    "midSample": []
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "wallS": 56,
+   "stallsMid": 0,
+   "waiting": 10,
+   "stalled": 0,
+   "stallsPerMin": 0,
+   "starts": 10,
+   "startsWrongRate": 0,
+   "ratechange": 0,
+   "loadstart": 10,
+   "mediaErrors": 0,
+   "srcMax": 1,
+   "srcMaxReal": 1,
+   "framesLostPct": 0.6,
+   "switchMedianMs": 66,
+   "switchWorstMs": 70,
+   "switchFailed": 0,
+   "swipeFrames": {
+    "frames": 0,
+    "lost": 0
+   },
+   "errors": []
+  },
+  {
+   "browser": "webkit",
+   "form": "audio",
+   "lane": "on",
+   "rate": 1.5,
+   "ok": false,
+   "notes": {
+    "load": "2 spinner workers"
+   },
+   "feed": true,
+   "firstPlays": true,
+   "rateSet": true,
+   "error": "Error: page.evaluate: Target crashed "
   }
  ]
 }
