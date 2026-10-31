@@ -74,8 +74,12 @@ const PROBE = `(() => {
         if (!since.has(el)) {
           since.set(el, performance.now());
           m.starts++;
-          const want = window.__core?.rate?.() ?? 1;
-          if (el.playbackRate !== want) m.wrongRate.push({ have: el.playbackRate, want });
+          // Stilles Entsperr-Element (data:) zählt nicht. Ein Start, der das Tempo innerhalb von 150 ms nachzieht, ist unhörbar und zählt nicht
+          // (im CI-Runner unter Last kommt ratechange nach playing, lokal davor).
+          if (!(el.getAttribute('src') || '').startsWith('data:')) {
+            const want = window.__core?.rate?.() ?? 1;
+            if (el.playbackRate !== want) setTimeout(() => { if (m.on && el.playbackRate !== want) m.wrongRate.push({ have: el.playbackRate, want }); }, 150);
+          }
         }
       }
       if (t === 'waiting' || t === 'stalled') {

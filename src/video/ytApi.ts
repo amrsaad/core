@@ -638,6 +638,8 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     }, 1500);
   });
 
+  // Die echte YouTube-API hat ihre Methoden erst nach onReady, vorher wirft getPlayerState (Seitenfehler im Keyrestore-E2E, 30.10.)
+  const ytState = (): number => { try { return typeof yt.getPlayerState === 'function' ? yt.getPlayerState() : STATE.UNSTARTED; } catch { return STATE.UNSTARTED; } };
   return {
     loadVideoById: (arg) => route(arg, true),
     cueVideoById: (arg) => route(arg, false),
@@ -669,7 +671,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       if (mode === 'yt') {
         let muted = true;
         try { muted = yt.isMuted(); } catch { /* Player noch nicht bereit */ }
-        return { muted, playing: yt.getPlayerState() === STATE.PLAYING, refused: false };
+        return { muted, playing: ytState() === STATE.PLAYING, refused: false };
       }
       if (deckMode) return audioDeck.sound(sink) ?? { muted: wantMuted, playing: false, refused: false };
       return hlsSnd;
@@ -714,7 +716,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
         }
       }
     },
-    getPlayerState: () => (mode === 'hls' ? hlsState : yt.getPlayerState()),
+    getPlayerState: () => (mode === 'hls' ? hlsState : ytState()),
     loud: () => {
       if (mode !== 'hls') return ytLoud;
       if (deckMode) return audioDeck.loud(sink) ?? hlsLoud;
