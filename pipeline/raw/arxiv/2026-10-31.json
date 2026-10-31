@@ -1,0 +1,315 @@
+{
+ "source": "arxiv",
+ "date": "2026-10-31",
+ "records": [
+  {
+   "sourceId": "arxiv:2610.40613",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.40613",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "TextSeal2: Distortion-Free LLM Watermarking with Copula Mixing and Memoryless Races",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "TextSeal2: Distortion-Free LLM Watermarking with Copula Mixing and Memoryless Races",
+    "abstract": "We present TextSeal2, a distortion-free watermark for large language models that keeps its signal under speculative decoding: tokens that replace rejected drafts remain watermarked with the same keys, and the acceptance rate is unchanged. It also preserves output diversity and adds no measurable inference latency. Its predecessor, TextSeal, restores diversity in the Gumbel-max scheme by routing each token to one of two keys via a coin flip. This is suboptimal because the detector averages the scores from both keys without knowing which key was used. TextSeal2 instead merges two or more keys into a single virtual key and couples it to fresh noise through AutoMark's Gaussian copula. Any number of keys, including publicly shared keys, can be merged this way without diluting detection. Under speculative decoding, TextSeal2 verifies keyed drafts with one more exponential race, run on the leftovers of the draft races. By memorylessness, this race reproduces block verification, so the output follows the target model exactly. We evaluate TextSeal2 on three LLMs. At equal output token diversity, TextSeal2 detects 8 to 22 percentage points more 100-token answers than TextSeal at a false-positive rate of $10^{-3}$, and is comparable to textGrain while requiring no post-logits optimization. Under speculative decoding, it detects 18 and 22 percentage points more 200-token answers than TextSeal and textGrain, respectively, at the same acceptance rate."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T17:54:12Z"
+   },
+   "fetchedAt": "2026-10-31T04:07:22.652Z"
+  },
+  {
+   "sourceId": "arxiv:2610.40589",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.40589",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Collaborative AI agents for autonomous experimental research with solid-state quantum spins",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Collaborative AI agents for autonomous experimental research with solid-state quantum spins",
+    "abstract": "An autonomous research laboratory could conduct an entire study, from formulating questions to preparing manuscripts. Artificial intelligence (AI) offers one route towards this goal. Recent AI systems take on several research roles, but may draw conclusions that the evidence does not support. Here, we present an autonomous research laboratory in which agents based on large language models assess one another's work and can stop or redirect investigations. They can generate and reject research questions, require separate theoretical checks and conduct experiments designed to challenge their claims. We demonstrate these capabilities by investigating ensembles of quantum spins in diamond. The agents derived the minimum number of calibration settings needed to predict responses to a defined family of microwave pulse sequences. They checked the result computationally and designed experiments to distinguish competing predictions. An initial experiment agreed with the theoretical predictions, but repeated reference measurements showed that the signal was drifting during data collection. The agents therefore treated the result as inconclusive and revised the measurement protocol without relaxing the acceptance criteria. The revised experiment met those criteria and supported the theoretical predictions. This study demonstrates that collaborating AI agents can select research questions, derive theoretical results and test their predictions experimentally."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T17:47:50Z"
+   },
+   "fetchedAt": "2026-10-31T04:07:22.652Z"
+  },
+  {
+   "sourceId": "arxiv:2610.40586",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.40586",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Multistatic ISAC with Deep Learning-Based Clutter Suppression for 5G and Beyond",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Multistatic ISAC with Deep Learning-Based Clutter Suppression for 5G and Beyond",
+    "abstract": "Integrated sensing and communications (ISAC) systems using 5G and beyond signals of opportunity enable joint wireless sensing and communication using shared infrastructure and spectrum resources. While multistatic ISAC can increase sensing coverage with spatially distributed receivers, dense and dynamic clutter can significantly degrade bistatic range and Doppler estimation, leading to errors in target localization and velocity estimation. This paper presents a multistatic ISAC framework with clutter suppression for high-fidelity estimation of target position and velocity. Distributed clutter is modeled with randomly located scatterers with varying Doppler spreads and radar cross sections to capture dense and dynamic clutter effects. A broad range of conventional signal processing baselines are evaluated for clutter suppression, showing limited robustness under strong clutter conditions. To address this limitation, deep learning-based clutter suppression methods are introduced to improve robustness against dense and dynamic clutter by employing residual and attention-enhanced deep neural network architectures that directly enhance target responses from clutter-contaminated observations. These methods substantially outperform conventional approaches in target position and velocity estimation across diverse clutter conditions in multistatic ISAC."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T17:47:02Z"
+   },
+   "fetchedAt": "2026-10-31T04:07:22.652Z"
+  },
+  {
+   "sourceId": "arxiv:2610.40551",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.40551",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Ramanujan Challenge Results: AI-Assisted Evaluation Pipeline for Multi-Format Proofs",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Ramanujan Challenge Results: AI-Assisted Evaluation Pipeline for Multi-Format Proofs",
+    "abstract": "As AI's mathematical capabilities rapidly improve, meaningful benchmarks are shifting from university-level problems and math olympiads to research-level mathematics. The Ramanujan Challenge is a benchmark comprised of research-level problems in number theory, including unpublished results and open conjectures. It presented concrete formulas for mathematical constants whose correctness can be checked numerically, while their proofs may require non-obvious mathematics. Here, we analyze the Challenge submissions, measuring the relative success of different AI models, Computer Algebra Systems (CAS), and formal tools. We find correct submissions that are conceptually distinct from the official solutions, and a proof of one of the published open conjectures. Evaluating the submissions exposed a second challenge: judging complex proofs reliably at scale. We introduce an AI-assisted evaluation pipeline for natural language proofs, CAS code, and Lean formalizations that assesses semantic and logical correctness. Compared with the conventional one-shot LLM judgment, our pipeline reduces false-positive verdicts on natural language proofs from 23% to 6% and improves judgment accuracy on supporting code from 46% to 58%. This approach provides a methodology for evaluating research-level mathematics at scale, with potential applications across mathematics and AI for science."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T17:39:04Z"
+   },
+   "fetchedAt": "2026-10-31T04:07:22.652Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.40551": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.40545",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.40545",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Retrieval as Traversal: Value-Indexed Memory for Stateful Long-Context Agents",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Retrieval as Traversal: Value-Indexed Memory for Stateful Long-Context Agents",
+    "abstract": "Long-context models repeatedly solve closely related retrieval problems. Attention or global retrieval can retain large stores, but each forward pass again searches for what matters. Recurrent compression avoids this search only by deciding earlier what information to preserve. Neither mechanism directly exploits that useful memories at neighbouring retrieval steps may substantially overlap. We propose an alternative in which retrieval is a persistent local traversal through an address space. We separate a memory's content from its address. Utility is defined by the information revealed by retrieving the content, while geometry determines only how cheaply that information can be reached. This leads to a cost-regularised indexing objective that preserves information value inside local neighbourhoods while charging for every memory made locally accessible. Its marginal-value form gives both attractive and exclusion pressures. Thus, complementary memories should be co-retrievable when the additional value exceeds retrieval cost, whereas redundant memories should not occupy the same retrieval set solely because they are individually useful. As a proof of principle, we test only the simplest fixed-geometry instance on MiniGrid Memory. A persistent local traversal head reaches $0.95$ mean return after $0.59$M training steps with a five-token context, compared with $0.94$M for Gaussian absolute addressing and more than $2$M for categorical absolute addressing. The experiment does not test learned geometry or repeated retrieval. Instead, it motivates the hypothesis that stateful retrieval may be easier to learn than stateless. To test the full proposed method further experimentation is necessary."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T17:37:21Z"
+   },
+   "fetchedAt": "2026-10-31T04:07:22.652Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.40545": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.40541",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.40541",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "On the Fundamental Limits of Prefill-Based Decoding Length Prediction",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "On the Fundamental Limits of Prefill-Based Decoding Length Prediction",
+    "abstract": "Predicting how many tokens a large language model (LLM) will decode, using only prefill-phase hidden states, is a key primitive for inference scheduling. We show that current benchmarks conflate predictor quality with task hardness: when the target model, dataset, or sampling configuration changes, reported accuracy collapses even though the predictor is unchanged. We trace this instability to an overlooked error source---the inherent stochasticity of autoregressive decoding---and derive bounds that every prefill-side method must obey. Our analysis treats decoding as a stopped stochastic process. The per-step stopping probability of a response is not constant but ramps up over hundreds of steps, so the decode length inherits a central limit theorem from the many local decisions that determine where a response ends; this yields per-prompt normality with an explicit error term, together with an affine variance law $σ=αμ+b$ whose slope is the coefficient of variation of the number of response segments. Empirically, the normal law reproduces the per-prompt MAE and the central mass of the decode-length distribution to within a few percent, and the residual departures from normality (mild right skew, slight excess kurtosis) are the ones predicted by the sampling-noise correction. Under fixed model, data, and sampling conditions, a broad design space of predictors (MLP, EGTP, FiLM, soft-label, and Mixture-of-Experts variants) converges to similar performance close to the bound, confirming that \\emph{system error dominates model error}. We argue for a benchmarking protocol that fixes the model, data, and sampling parameters and that reports relative-error metrics alongside absolute ones. Code and analysis tools are available at https://github.com/ShwStone/DecodingPredict."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T17:36:01Z"
+   },
+   "fetchedAt": "2026-10-31T04:07:22.652Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.40541": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.40535",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.40535",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Efficient Scalable Oversight via Rewinding",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Efficient Scalable Oversight via Rewinding",
+    "abstract": "Scalable oversight asks how a weak verifier can check the outputs of computations performed by more powerful AI systems. One proposed approach uses relativizing interactive proofs, in which a weak verifier checks the output of a complex oracle-aided computation by interacting with one or more powerful provers. A prominent example is debate, which is highly efficient but assumes that one of two powerful AI models, or provers, is truthful. For certain classes of oracle-aided computations, this assumption can be removed, but at substantially greater computational cost. In this work, we introduce \\emph{rewindable interactive proofs} (RIPs), a new model of relativizing interactive proofs for scalable oversight. In an RIP, the verifier may rewind the prover to an earlier state of the interaction and continue from there. This is possible when the prover is an AI model, since the verifier can save a snapshot of the model's state and later restore it. We construct a relativizing RIP for computations whose outputs are robust to changing a small fraction of oracle answers. Our construction is more efficient than prior relativizing proofs that do not assume a truthful prover, and it uses no cryptography. In our construction the honest prover runs in time linear in that of the original computation, and the verifier, after a one-time preprocessing step, runs in time nearly linear in the input length (which can be much smaller than the computation itself). We implement our protocol, report a preliminary MNIST experiment, and show that an RIP can be faster than a state-of-the-art deployed proof system. RIPs may be of independent interest. Rewinding is possible whenever the verifier controls the prover's machine, for example when the prover runs on trusted hardware or in a virtual machine whose state can be checkpointed."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T17:34:28Z"
+   },
+   "fetchedAt": "2026-10-31T04:07:22.652Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.40535": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.40533",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.40533",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Homebrewed SLMs: Autoregressive and Masked Diffusion Language Models Built at Home for Portuguese",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Homebrewed SLMs: Autoregressive and Masked Diffusion Language Models Built at Home for Portuguese",
+    "abstract": "Building a language model of one's own no longer requires a data centre. This tutorial trains one from scratch, tokenizer included, on one consumer GPU, and shows how to tell whether it is good for the tasks of a specialist domain. It proposes no new method. It releases a tested Python package and two notebooks in Brazilian Portuguese with autoregressive and masked diffusion generation on one network, a preregistered comparison protocol, legal tasks built from text alone with a Kneser-Ney floor and public yardsticks, reference numbers for models of 11 to 12M parameters, and a catalogue of defects that only measurement revealed. On Brazilian prose and federal laws, at minutes per run, the autoregressive mode peaks at 64 epochs over the same text and then memorises it, while masked diffusion improves up to 256. At their best points on test, the diffusion bound exceeds the autoregressive likelihood by 0.06 bits per byte, within the preregistered minimum effect. On held-out laws and on acts published after training, the model ties a 6-gram floor in likelihood on the same windows, and it loses to the floor at continuing those acts. It beats the floor at detecting tampered text, and fills cross-references more often than the floor and public models of 160M and 630M parameters, only in decrees, a genre absent from training, where those scorers stay near or below chance, and in filling the blank only when each group weighs the same, since per item it ties the 630M model. On laws, the public models, trained with about 5x10^2 to 10^5 times its compute, lead in tampered text and continuation. The blind human reading is preregistered and not part of this version."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T17:34:06Z"
+   },
+   "fetchedAt": "2026-10-31T04:07:22.652Z"
+  },
+  {
+   "sourceId": "arxiv:2610.40532",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.40532",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "BURGER: Benchmarking and Understanding Robotic Generalization via Embodied Drawing",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "BURGER: Benchmarking and Understanding Robotic Generalization via Embodied Drawing",
+    "abstract": "How effectively can vision-language-action (VLA) models learn diverse language-conditioned behaviors as training data scales? Investigating this question requires large and varied robot datasets, whose collection on physical robots remains costly. We introduce BURGER, a language-conditioned robotic drawing benchmark with a scalable, prompt-driven pipeline for generating continuous drawing trajectories, both in simulation and the real world. In BURGER, an agent starts from the same blank canvas and controls a robot arm to draw the object or spatial composition specified by language, while each instruction allows an open-ended variety of valid drawings and stroke orders. Using 28,200 simulated demonstrations spanning 282 drawing tasks, we evaluate five representative VLA models across data scales, language grounding, and multimodal behavior. BURGER supports fine-grained analysis of language grounding, spatial composition, and action generation, revealing distinct failure patterns across VLA models. Our experiments suggest that some VLA models can benefit from greater task diversity and demonstration scale, capture multimodal drawing behaviors, and generalize to unseen compositions of familiar objects. Finally, we deploy a trained policy on a Franka Panda arm, demonstrating the ability to draw reactively under human intervention. Project homepage and code can be found at https://siyingzhao.github.io/BURGER/."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T17:34:04Z"
+   },
+   "fetchedAt": "2026-10-31T04:07:22.652Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.40532": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.40518",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.40518",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "IndicIPR-QA: A Benchmark for Extractive Question Answering on Indian IPR Laws",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "IndicIPR-QA: A Benchmark for Extractive Question Answering on Indian IPR Laws",
+    "abstract": "Legal Question Answering (QA) over statutory texts is a challenging task in Natural Language Processing (NLP), especially in low-resource settings with complex legal systems. It requires answers that are precise and grounded in the law. However, to the best of current knowledge, no existing extractive QA benchmark provides exact answer spans from statutory texts across all seven Indian Intellectual Property Rights (IPR) Acts. This paper presents IndicIPR-QA1, an extractive QA benchmark for Indian IPR laws. The proposed dataset contains 4,462 QA pairs from 1,116 statutory contexts across seven Acts. Questions and answers are generated using GPT-4o and validated through nine automatic quality checks, single and multi-model LLM evaluations, and a 200-pair human audit. Section-level partitioning prevents source-context overlap across the training, validation, and test sets. Further analysis examines answer span length, lexical overlap, and multi-clause structure across the corpus and individual Acts. BM25 achieves a token-level F1 score of 20.21, while fine-tuned InLegalBERT reaches 85.02 under a unified sliding-window inference protocol. The large performance gap between BM25 (20.21 F1) and InLegalBERT (85.02 F1) shows that simple word matching is not enough to answer these legal questions. Performance also varies across the seven Acts, indicating substantial differences in answer-extraction performance."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T17:26:39Z"
+   },
+   "fetchedAt": "2026-10-31T04:07:22.652Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.40518": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.40516",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.40516",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "How I Aligned Your Model: Scaling Up Multilingual Safety Training with Templates",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "How I Aligned Your Model: Scaling Up Multilingual Safety Training with Templates",
+    "abstract": "Safety alignment for Large Language Models is heavily focused on English with limited multilingual representation, particularly damaging low-resource language performance. Related open training datasets are often limited in size or do not follow region-localized harmful topics to broaden the scope of alignment beyond cultures. We propose a scalable template-based augmentation pipeline to produce massive multilingual refusal and benign corpora, extracting safe templates from harmful prompts, translating them and then filling in the slots with culturally authentic entities, both harmful and benign. As a result, we release MSafeTemp, a validated corpus spanning 60 languages useful for multilingual safety alignment and evaluation. Using the dataset, we show that English-only evaluation misjudges multilingual safety: for several models, attacks that fail in English succeed once translated, while culturally localized variants expose further failures that translation alone misses. We also confirm that augmenting safety training data through templates allows for higher diversity and quality of alignment, resulting in improved safety performance beyond English. MSafeTemp and the respective pipeline are aimed at facilitating research and development of safer and more responsible models for less-represented cultures."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T17:26:02Z"
+   },
+   "fetchedAt": "2026-10-31T04:07:22.652Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.40516": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.40511",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.40511",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "A Low-Rank Space Captures Linear Alignment Between LLM and Human Neural Activity During Naturalistic Language Listening",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "A Low-Rank Space Captures Linear Alignment Between LLM and Human Neural Activity During Naturalistic Language Listening",
+    "abstract": "Large language models (LLMs) are increasingly used as computational models of human language processing, yet it remains unclear which components of their representations drive alignment with neural activity. Here, we use ridge reduced-rank regression to identify the brain-predictive subspace of LLM representations: the representational directions that support linear prediction of neural responses. Across three naturalistic language-listening datasets spanning intracranial electrophysiology and fMRI, and six model conditions spanning autoregressive, bidirectional masked, and randomly initialized language models, we find that full linear encoding performance can be recovered using only 1-3% of the original embedding dimensionality. These low-dimensional subspaces generalize across held-out participants and, to a lesser extent, across datasets, suggesting that neural predictivity is concentrated in a compact and partially shared representational space. We next compare these brain-predictive directions with the principal axes of variation in the embeddings. Principal component analysis requires substantially more dimensions to recover neural prediction, demonstrating that the directions most useful for predicting neural activity are distinct from those capturing the most overall variance within LLM representations themselves. Finally, characterizing the learned subspaces allows us to surface interpretable features that are overrepresented in neural activity above and beyond the LLM representations. Together, these results show that LLM-brain alignment is supported by a small, structured subset of model representations and provides a framework for better understanding exactly why these representations align. Code can be found at: https://github.com/thefinnlab/low-rank-alignment"
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-29T17:23:44Z"
+   },
+   "fetchedAt": "2026-10-31T04:07:22.652Z"
+  }
+ ]
+}

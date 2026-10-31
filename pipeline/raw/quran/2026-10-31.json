@@ -1,0 +1,66 @@
+{
+ "source": "quran",
+ "date": "2026-10-31",
+ "records": [
+  {
+   "sourceId": "quran:2:236",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/236",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:236?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:236",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "لَّا جُنَاحَ عَلَيْكُمْ إِن طَلَّقْتُمُ ٱلنِّسَآءَ مَا لَمْ تَمَسُّوهُنَّ أَوْ تَفْرِضُوا۟ لَهُنَّ فَرِيضَةً ۚ وَمَتِّعُوهُنَّ عَلَى ٱلْمُوسِعِ قَدَرُهُۥ وَعَلَى ٱلْمُقْتِرِ قَدَرُهُۥ مَتَـٰعًۢا بِٱلْمَعْرُوفِ ۖ حَقًّا عَلَى ٱلْمُحْسِنِينَ",
+    "translation": "Es ist für euch keine Sünde darin, wenn ihr euch von Frauen scheidet, solange ihr sie noch nicht berührt oder euch ihnen gegenüber (zu einer Morgengabe) verpflichtet habt. Doch gewährt ihnen eine Abfindung - der Wohlhabende entsprechend seinen Verhältnissen und der Geringbemittelte entsprechend seinen Verhältnissen -, eine Abfindung in rechtlicher Weise. (Dies ist) eine Pflicht für die Gutes Tuenden.",
+    "tafsir_muyassar": "لا إثم عليكم -أيها الأزواج- إن طلقتم النساء بعد العقد عليهن، وقبل أن تجامعوهن، أو تحددوا مهرًا لهن، ومتِّعوهن بشيء ينتفعن به جبرًا لهن، ودفعًا لوحشة الطلاق، وإزالة للأحقاد.<span class=\"blue\"> وهذه المتعة تجب بحسب حال الرجل المطلِّق:</span> على الغني قَدْر سَعَة رزقه، وعلى الفقير قَدْر ما يملكه، متاعًا على الوجه المعروف شرعًا، وهو حق ثابت على الذين يحسنون إلى المطلقات وإلى أنفسهم بطاعة الله.",
+    "tafsir_ibnkathir": "<h2>Divorce before consummating the Marriage</h2><p>Allah allowed divorce after the marriage contract and before consummating the marriage. Ibn `Abbas, Tawus, Ibrahim and Al-Hasan Al-Basri said that `touched' (mentioned in the Ayah) means sexual intercourse. The husband is allowed to divorce his wife before consummating the marriage or giving the dowry if it was deferred.</p><h2>The Mut`ah (Gift) at the time of Divorce</h2><p>Allah commands the husband to give the wife (whom he divorces before consummating the marriage) a gift of a reasonable amount, the rich according to his means and the poor according to his means, to compensate her for her loss. Al-Bukhari reported in his Sahih that Sahl bin Sa`d and Abu Usayd said that Allah's Messenger ﷺ married Umaymah bint Sharahil. When she was brought to the Prophet he extended his hand to her, but she did not like that. The Prophet then ordered Abu Usayd to provide provisions for her along with a gift of two garments.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:236"
+   },
+   "fetchedAt": "2026-10-31T04:07:39.068Z",
+   "urlChecks": {
+    "https://quran.com/2/236": 200
+   }
+  },
+  {
+   "sourceId": "quran:2:237",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/237",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:237?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:237",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "وَإِن طَلَّقْتُمُوهُنَّ مِن قَبْلِ أَن تَمَسُّوهُنَّ وَقَدْ فَرَضْتُمْ لَهُنَّ فَرِيضَةً فَنِصْفُ مَا فَرَضْتُمْ إِلَّآ أَن يَعْفُونَ أَوْ يَعْفُوَا۟ ٱلَّذِى بِيَدِهِۦ عُقْدَةُ ٱلنِّكَاحِ ۚ وَأَن تَعْفُوٓا۟ أَقْرَبُ لِلتَّقْوَىٰ ۚ وَلَا تَنسَوُا۟ ٱلْفَضْلَ بَيْنَكُمْ ۚ إِنَّ ٱللَّهَ بِمَا تَعْمَلُونَ بَصِيرٌ",
+    "translation": "Aber wenn ihr euch von ihnen scheidet, bevor ihr sie berührt und euch ihnen gegenüber schon (zu einer Morgengabe) verpflichtet habt, dann (händigt) die Hälfte dessen (aus), wozu ihr euch verpflichtet habt, es sei denn, daß sie (es) erlassen oder der, in dessen Hand der Ehebund ist. Und wenn ihr (es) erlaßt, kommt das der Gottesfurcht näher. Und versäumt es nicht, gut zueinander zu sein . Was ihr tut, sieht Allah wohl.",
+    "tafsir_muyassar": "وإن طلَّقتم النساء بعد العقد عليهن، ولم تجامعوهن، ولكنكم ألزمتم أنفسكم بمهر محدد لهن، فيجب عليكم أن تعطوهن نصف المهر المتفق عليه، إلا أنْ تُسامِح المطلقات، فيتركن نصف المهر المستحق لهن، أو يسمح الزوج بأن يترك للمطلقة المهر كله، وتسامحكم أيها الرجال والنساء أقرب إلى خشية الله وطاعته، ولا تنسوا -أيها الناس- الفضل والإحسان بينكم، وهو إعطاء ما ليس بواجب عليكم، والتسامح في الحقوق. إن الله بما تعملون بصير، يُرغِّبكم في المعروف، ويحثُّكم على الفضل.",
+    "tafsir_ibnkathir": "<h2>The Wife gets half of Her Mahr if She is divorced before the Marriage is consummated</h2><p>This honorable Ayah is not a continuation of the Mut`ah (gift) that was mentioned in the previous Ayah (i.e., divorce before the marriage is consummated). This Ayah (2:237) requires the husband to relinquish half of the appointed Mahr if he divorces his wife before the marriage is consummated. If it was discussing any other type of gift, then it would have been mentioned that way, especially when this Ayah follows the previous Ayah related to this subject. Allah knows best. Giving away half of the bridal-money in this case is the agreed practice according to the scholars. So, the husband pays half of the appointed Mahr if he divorces his wife before consummating the marriage. </p><p>Allah then said: </p><div class=\"arabic uthmani\">إَّلا أَن يَعْفُونَ</div><p>(unless they (the women) agree to remit it,) meaning, the wife forfeits the dowry and relieves the husband from further financial responsibility. As-Suddi said that Abu Salih mentioned that Ibn `Abbas commented on Allah's statement: </p><div class=\"arabic uthmani\">إَّلا أَن يَعْفُونَ</div><p>(unless they (the women) agree to remit it,) \"Unless the wife forfeits her right.\"Furthermore, Imam Abu Muhammad bin Abu Hatim said that it was reported that Shurayh, Sa`id bin Musayyib, `Ikrimah, Mujahid, Ash-Sha`bi, Al-Hasan, Nafi`, Qatadah, Jabir bin Zayd, `Ata' Al-Khurasani, Ad-Dahhak, Az-Zuhri, Muqatil bin Hayyan, Ibn Sirin, Ar-Rabi` bin Anas and As-Suddi said similarly. </p><p>Allah then said: </p><div class=\"arabic uthmani\">أَوْ يَعْفُوَاْ الَّذِى بِيَدِهِ عُقْدَةُ النِّكَاحِ</div><p>(...or he (the husband), in whose hands is the marriage tie, agrees to remit it.) </p><p>Ibn Abu Hatim reported that `Amr bin Shu`ayb said that his grandfather narrated that the Prophet said: </p><div class=\"arabic uthmani\">«وَلِيُّ عُقْدَةِ النِّكَاحِ الزَّوْج»</div><p>(The husband is he who has the marriage tie.) </p><p>Ibn Marduwyah also reported this Hadith, and it is the view chosen by Ibn Jarir. The Hadith states that the husband is the person who really holds the marriage tie in his hand, as it is up to him to go on with the marriage or end it. On the other hand, the Wali of the wife is not allowed to give away any of her rightful dues without her permission, especially the dowry. </p><p>Allah then stated: </p><div class=\"arabic uthmani\">وَأَن تَعْفُواْ أَقْرَبُ لِلتَّقْوَى</div><p>(And to remit it is nearer to At-Taqwa (piety, righteousness).) </p><p>Ibn Jarir said, \"Some scholars said that this statement is directed at both men and women.\" Ibn `Abbas said: </p><div class=\"arabic uthmani\">وَأَن تَعْفُواْ أَقْرَبُ لِلتَّقْوَى</div><p>(And to remit it is nearer to At-Taqwa (piety, righteousness).) indicates that the one who forgives, is nearer to At-Taqwa (piety).\" A similar statement was made by Ash-Sha`bi and several other scholars. </p><p>Mujahid, An-Nakha`i, Ad-Dahhak, Muqatil bin Hayyan, Ar-Rabi` bin Anas and Thawri stated that `liberality' mentioned in the Ayah refers to the woman giving away her half Mahr, or the man giving away the full Mahr. This is why Allah said here: </p><div class=\"arabic uthmani\">وَلاَ تَنسَوُاْ الْفَضْلَ بَيْنَكُمْ</div><p>(And do not forget liberality between yourselves.) meaning, kindness (or generosity), as Sa`id has stated. Allah said: </p><div class=\"arabic uthmani\">إِنَّ اللَّهَ بِمَا تَعْمَلُونَ بَصِيرٌ</div><p>(Truly, Allah is All-Seer of what you do.) meaning, none of your affairs ever escapes His perfect Watch, and He will reward each according to his deeds. </p><div class=\"arabic uthmani\">حَـفِظُواْ عَلَى الصَّلَوَتِ والصَّلَوةِ الْوُسْطَى وَقُومُواْ لِلَّهِ قَـنِتِينَ </div>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:237"
+   },
+   "fetchedAt": "2026-10-31T04:07:39.068Z",
+   "urlChecks": {
+    "https://quran.com/2/237": 200
+   }
+  }
+ ]
+}

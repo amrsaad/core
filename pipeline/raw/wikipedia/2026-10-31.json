@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-10-31",
+ "records": [
+  {
+   "sourceId": "wiki:de:Liste der Bachkantaten",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Liste_der_Bachkantaten",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/31",
+    "status": 200
+   },
+   "title": "Liste der Bachkantaten",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Dies ist eine Liste der Kantaten Johann Sebastian Bachs. Neben den großen Passionen, Oratorien und der h-Moll-Messe zählen die Bachkantaten zu seinen bedeutendsten geistlichen Werken. Von den rund 300 Kantaten, die Bach insgesamt komponiert haben soll, sind etwa 200 erhalten."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-10-31T04:07:40.825Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Liste_der_Bachkantaten": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Schweizer Parlamentswahlen 1971",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Schweizer_Parlamentswahlen_1971",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/31",
+    "status": 200
+   },
+   "title": "Schweizer Parlamentswahlen 1971",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Schweizer Parlamentswahlen 1971 fanden am 31. Oktober 1971 statt. Dabei waren die 200 Mandate des Nationalrats sowie 31 der 44 Mandate im Ständerat neu zu vergeben. Diese 39. Legislaturperiode dauerte vier Jahre bis Oktober 1975. Es waren die ersten Nationalratswahlen, bei denen Männer und Frauen stimmberechtigt waren."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-31T04:07:40.825Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Schweizer_Parlamentswahlen_1971": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Pukerua Bay",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Pukerua_Bay",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/10/31",
+    "status": 200
+   },
+   "title": "Pukerua Bay",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Pukerua Bay ist ein Stadtteil von Porirua City in der Region Wellington auf der Nordinsel von Neuseeland."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-10-31T04:07:40.825Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Pukerua_Bay": 200
+   }
+  }
+ ]
+}
