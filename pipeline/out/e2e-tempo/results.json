@@ -1,5 +1,5 @@
 {
- "at": "2026-10-31T04:28:55.144Z",
+ "at": "2026-10-31T10:10:28.027Z",
  "runs": [
   {
    "browser": "webkit",
@@ -52,7 +52,7 @@
      "h": 48,
      "onScreen": true
     },
-    "feedbackMs": 7
+    "feedbackMs": 8
    }
   },
   {
@@ -106,7 +106,7 @@
      "h": 48,
      "onScreen": true
     },
-    "feedbackMs": 7
+    "feedbackMs": 11
    }
   },
   {
@@ -160,7 +160,7 @@
      "h": 48,
      "onScreen": true
     },
-    "feedbackMs": 2
+    "feedbackMs": 4
    }
   },
   {
@@ -214,7 +214,7 @@
      "h": 48,
      "onScreen": true
     },
-    "feedbackMs": 3
+    "feedbackMs": 5
    }
   }
  ]

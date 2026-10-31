@@ -1,5 +1,5 @@
 {
- "at": "2026-10-31T04:16:23.349Z",
+ "at": "2026-10-31T09:57:47.226Z",
  "runs": [
   {
    "browser": "webkit",
@@ -92,7 +92,7 @@
     "bg: arm bgaudio6 (net)",
     "bg: next bgaudio2:0",
     "bg: deck advance to bgaudio2: NOT playing after 3 s, rs=0 muted=false t=2.9 error none",
-    "bg: deck page hidden +15 s: paused=false ended=false t=3.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck page hidden +15 s: paused=false ended=false t=2.9 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: deck clip end via timeupdate hidden=true armed=bgaudio6 onAdvance=true advance=yes rs=0 muted=false t=4.0",
     "bg: deck advance bgaudio2 to bgaudio6: src and play() in this handler, same element true, next from storage false, readyState 0",
     "bg: ended bgaudio2:0",
