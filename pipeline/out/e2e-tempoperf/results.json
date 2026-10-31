@@ -1,5 +1,5 @@
 {
- "at": "2026-10-31T10:11:01.165Z",
+ "at": "2026-10-31T14:30:46.107Z",
  "config": {
   "MOMENTS": 10,
   "CONTENT_S": 6,
@@ -34,8 +34,8 @@
    "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 36,
-   "switchWorstMs": 43,
+   "switchMedianMs": 39,
+   "switchWorstMs": 47,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -107,8 +107,8 @@
    "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 34,
-   "switchWorstMs": 46,
+   "switchMedianMs": 38,
+   "switchWorstMs": 53,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -142,8 +142,8 @@
    "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 34,
-   "switchWorstMs": 49,
+   "switchMedianMs": 40,
+   "switchWorstMs": 54,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -177,8 +177,8 @@
    "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 36,
-   "switchWorstMs": 44,
+   "switchMedianMs": 42,
+   "switchWorstMs": 53,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -212,8 +212,8 @@
    "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 33,
-   "switchWorstMs": 80,
+   "switchMedianMs": 38,
+   "switchWorstMs": 64,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -247,8 +247,8 @@
    "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 34,
-   "switchWorstMs": 58,
+   "switchMedianMs": 38,
+   "switchWorstMs": 62,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -282,8 +282,8 @@
    "srcMax": 1,
    "srcMaxReal": 1,
    "framesLostPct": 0,
-   "switchMedianMs": 75,
-   "switchWorstMs": 79,
+   "switchMedianMs": 77,
+   "switchWorstMs": 81,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -355,8 +355,8 @@
    "srcMax": 1,
    "srcMaxReal": 1,
    "framesLostPct": 0,
-   "switchMedianMs": 77,
-   "switchWorstMs": 92,
+   "switchMedianMs": 74,
+   "switchWorstMs": 86,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -390,8 +390,8 @@
    "srcMax": 1,
    "srcMaxReal": 1,
    "framesLostPct": 0,
-   "switchMedianMs": 78,
-   "switchWorstMs": 86,
+   "switchMedianMs": 74,
+   "switchWorstMs": 88,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -425,8 +425,8 @@
    "srcMax": 1,
    "srcMaxReal": 1,
    "framesLostPct": 0,
-   "switchMedianMs": 79,
-   "switchWorstMs": 83,
+   "switchMedianMs": 76,
+   "switchWorstMs": 81,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -460,8 +460,8 @@
    "srcMax": 1,
    "srcMaxReal": 1,
    "framesLostPct": 0,
-   "switchMedianMs": 76,
-   "switchWorstMs": 82,
+   "switchMedianMs": 75,
+   "switchWorstMs": 84,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -496,7 +496,7 @@
    "srcMaxReal": 1,
    "framesLostPct": 0,
    "switchMedianMs": 74,
-   "switchWorstMs": 85,
+   "switchWorstMs": 89,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
