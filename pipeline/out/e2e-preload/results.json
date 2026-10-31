@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-31T03:07:34.274Z",
+  "at": "2026-10-31T04:18:00.406Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -50,49 +50,49 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1632,
+        "coldStartMs": 1599,
         "preloadedMoments": 30,
         "preloadedBytes": 6289236,
         "bytesPerMoment": 209641,
         "swipes": 10,
         "cachedStartMs": [
-          10,
-          10,
-          11,
-          8,
-          10,
-          10,
-          9,
-          9,
-          8,
-          8
+          7,
+          7,
+          6,
+          6,
+          7,
+          6,
+          7,
+          6,
+          6,
+          6
         ],
-        "cachedStartMax": 11,
-        "cachedStartMedian": 10,
+        "cachedStartMax": 7,
+        "cachedStartMedian": 6,
         "firstFrames": [
-          "first-frame 10ms buffered local",
-          "first-frame 10ms buffered local",
-          "first-frame 10ms buffered local",
-          "first-frame 11ms buffered local",
           "first-frame 8ms buffered local",
-          "first-frame 10ms buffered local",
-          "first-frame 10ms buffered local",
-          "first-frame 9ms buffered local",
-          "first-frame 9ms buffered local",
-          "first-frame 8ms buffered local",
-          "first-frame 8ms buffered local"
+          "first-frame 7ms buffered local",
+          "first-frame 7ms buffered local",
+          "first-frame 6ms buffered local",
+          "first-frame 6ms buffered local",
+          "first-frame 7ms buffered local",
+          "first-frame 6ms buffered local",
+          "first-frame 7ms buffered local",
+          "first-frame 6ms buffered local",
+          "first-frame 6ms buffered local",
+          "first-frame 6ms buffered local"
         ],
         "settingsText": "Preloaded: 37 moments, 7.4 MB",
         "offlineStartMs": [
-          9,
-          9,
-          10,
-          9
+          6,
+          7,
+          6,
+          7
         ],
         "offlineRestartStartMs": [
-          10,
-          8,
-          8
+          6,
+          6,
+          6
         ],
         "poorFirst12Youtube": 0,
         "normalFirst12Youtube": 6
