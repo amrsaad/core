@@ -442,6 +442,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     setRecall(null);
     since.current = Date.now();
     if (!textRef.current && active && !userPaused.current) current().player?.playVideo();
+    // Tempo nach der Karte erneut setzen, YouTube fällt nach Pause auf 1x zurück (Max 31.10.)
+    applyRate();
   };
 
   const closeForYou = () => {
@@ -1813,6 +1815,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!playable || userPaused.current || endedAt.current === idxRef.current) return;
     // Angehalten beim Verlassen, vom Betriebssystem pausiert oder im Hintergrund nicht gestartet: weiter am Stand
     if (wasLeft || current().st !== STATE.PLAYING) current().player?.playVideo();
+    // Tempo nach Rückkehr erneut setzen, YouTube fällt nach App-Wechsel auf 1x zurück (Max 31.10.)
+    applyRate();
   };
   // Pfeiler 19: Settings, Saved, Feedback-Blatt oder Übersicht zu: eine Karte aus der Warteschlange sofort, vor dem nächsten Wisch
   useEffect(() => {
