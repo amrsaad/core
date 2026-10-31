@@ -23,6 +23,9 @@ export interface YTPlayer {
   getDuration(): number;
   getPlayerState(): number;
   setPlaybackRate(rate: number): void;
+  /** Nur YouTube: aktuelles Tempo des Players, zur Nachprüfung (Issue 23) */
+  getPlaybackRate?(): number;
+  getAvailablePlaybackRates?(): number[];
   /** Nur YouTube: Lautstärke 0 bis 100 */
   setVolume?(volume: number): void;
   destroy(): void;
@@ -184,13 +187,15 @@ export function offlineYT(): YTNamespace {
     getDuration() { return 0; }
     getPlayerState() { return STATE.UNSTARTED; }
     setPlaybackRate() {}
+    getPlaybackRate() { return 1; }
+    getAvailablePlaybackRates() { return [1]; }
     setVolume() {}
     destroy() {}
   }
   return { Player: Stub, PlayerState: { ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 } };
 }
 
-function ytPlayer(YT: YTNamespace, el: HTMLElement, videoId: string | undefined, events: { onReady?: () => void; onState?: (s: number) => void; onError?: (code: number) => void }): YTPlayer {
+function ytPlayer(YT: YTNamespace, el: HTMLElement, videoId: string | undefined, events: { onReady?: () => void; onState?: (s: number) => void; onError?: (code: number) => void; onRate?: (rate: number) => void }): YTPlayer {
   return new YT.Player(el, {
     host: 'https://www.youtube-nocookie.com',
     ...(videoId ? { videoId } : {}),
@@ -201,6 +206,7 @@ function ytPlayer(YT: YTNamespace, el: HTMLElement, videoId: string | undefined,
       onReady: () => events.onReady?.(),
       onStateChange: (e: { data: number }) => events.onState?.(e.data),
       onError: (e: { data: number }) => events.onError?.(e.data),
+      onPlaybackRateChange: (e: { data: number }) => events.onRate?.(e.data),
     },
   });
 }
@@ -302,6 +308,31 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     if (mode === 'hls') events.onState?.(st);
   };
   const diag = (line: string) => events.onDiag?.(line);
+  // Gewünschtes Tempo für den YouTube-Pfad und Nachprüfung in Stufen (300, 1000, 2500 ms), weil setPlaybackRate vor dem ersten Bild verworfen wird
+  let wantRate: number | null = null;
+  let rateTimers: ReturnType<typeof setTimeout>[] = [];
+  let ratesLogged = false;
+  const verifyYtRate = () => {
+    rateTimers.forEach(clearTimeout);
+    rateTimers = [];
+    if (wantRate === null) return;
+    const want = wantRate;
+    const tick = (attempt: number) => {
+      try {
+        if (!ratesLogged && typeof yt.getAvailablePlaybackRates === 'function') {
+          ratesLogged = true;
+          diag(`yt rates ${(yt.getAvailablePlaybackRates() ?? []).join(',')}`);
+        }
+        const cur = typeof yt.getPlaybackRate === 'function' ? yt.getPlaybackRate() : null;
+        if (cur === want) return;
+        yt.setPlaybackRate(want);
+        if (attempt === 2) diag(`yt rate stuck at ${cur}, want ${want}`);
+      } catch {
+        /* noch nicht bereit */
+      }
+    };
+    [300, 1000, 2500].forEach((ms, i) => rateTimers.push(setTimeout(() => tick(i), ms)));
+  };
   const sink: DeckSink = {
     state: (st) => setHlsState(st),
     error: () => {
@@ -391,6 +422,13 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     },
     onState: (st) => {
       if (mode === 'yt') events.onState?.(st);
+      // YouTube setzt das Tempo bei jedem neuen Video und auf iOS oft beim ersten Start auf 1x zurück (Max 31.10.): nach PLAYING nachprüfen
+      if (mode === 'yt' && st === STATE.PLAYING) verifyYtRate();
+    },
+    onRate: (r) => {
+      if (mode !== 'yt') return;
+      diag(`yt rate ${r}${wantRate !== null && r !== wantRate ? ` (want ${wantRate})` : ''}`);
+      if (wantRate !== null && r !== wantRate) verifyYtRate();
     },
     onError: (code) => {
       if (mode === 'yt') events.onError?.(code);
@@ -734,13 +772,16 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       // Tempo ungleich 1x nie über Web Audio (Issue 13): ein laufender Ausschnitt wechselt an der Stelle auf die unveränderte Spur
       if (rate !== 1 && mode === 'hls' && isLevel(media)) bail('tempo');
       if (mode === 'hls') return;
+      wantRate = rate;
       try {
         yt.setPlaybackRate(rate);
       } catch {
         /* noch nicht bereit */
       }
+      verifyYtRate();
     },
     destroy: () => {
+      rateTimers.forEach(clearTimeout);
       offUnlock();
       offState();
       leaveDeck();
