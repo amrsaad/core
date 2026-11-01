@@ -11,10 +11,8 @@ import { DeskBar, DeskHelp, DeskSheet } from './moments/DeskShell';
 import { deskHelpDue } from './moments/desktop';
 import { todayLine } from './moments/today';
 import { useDesktop } from './moments/useDesktop';
-import { isReviewDue } from './moments/review';
 import { SavedMoments } from './moments/SavedMoments';
 import type { MomentPool } from './moments/types';
-import { WeeklyReview } from './moments/WeeklyReview';
 import { Settings } from './screens/Settings';
 import type { Form } from './moments/form';
 import { nextRate, rateOf } from './lib/state';
@@ -72,7 +70,8 @@ export default function App() {
 
   // Sonntags beim ersten Öffnen: Wochenrückblick
   useEffect(() => {
-    if (state && review === null) setReview(isReviewDue(state, clockNow()));
+    // Alter Wochenrückblick (alle Saves einzeln abhaken) abgeschafft (Max 01.11.): der Digest sortiert, die Wochenkarte im Saved-Reiter fragt nur bei Actions und Widersprüchen
+    if (state && review === null) setReview(false);
   }, [state, review]);
 
   const onPausedChange = useCallback((p: boolean) => setPaused(p), []);
@@ -92,7 +91,6 @@ export default function App() {
   if (!state || vault.status === 'loading' || review === null) return <div className="h-[100dvh] bg-black" />;
   if (vault.status === 'locked') return <Unlock />;
   if (vault.status === 'error') return <Locked text={`Could not load the pool (${vault.message}). The first start needs internet.`} />;
-  if (review) return <WeeklyReview state={state} update={update} now={clockNow()} onDone={() => setReview(false)} />;
 
   const showBar = tab === 'feed' ? paused : true;
   const dark = tab === 'feed';
