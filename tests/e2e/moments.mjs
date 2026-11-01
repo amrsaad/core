@@ -774,24 +774,15 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.screenshot({ path: `${out}/${name}-5-einstellungen.png` });
     await page.click('nav [aria-label=Feed]');
 
-    // Simulierter Sonntag: Wochenrückblick mit dem gespeicherten Moment.
+    // Simulierter Sonntag: kein Wochenrückblick mehr, Feed startet direkt.
     // Erste Seite schließen: zwei offene Tabs würden sich gegenseitig den gespeicherten Zustand überschreiben.
     await page.waitForTimeout(500);
     await page.close();
     const p2 = await ctx.newPage();
     await p2.goto(url + '?now=2026-10-25');
-    c.weeklyReviewOnSunday = await waitFor(p2, () => !!document.querySelector('[data-testid="weekly-review"]'));
-    c.reviewListsSaved = await p2.evaluate(() => document.querySelectorAll('[data-testid="weekly-review"] li').length >= 1);
-    // Punkt 7: Zahlen nur zur Aufgabe, keine Prozentkacheln, Plan Pflicht oder Skip
-    c.reviewWeekLine = await p2.evaluate(() => /^This week: \d+ seen, \d+ got it, \d+ applied$/.test(document.querySelector('[data-testid=week-line]')?.textContent ?? ''));
-    c.reviewNoPercent = await p2.evaluate(() => !document.querySelector('[data-testid="weekly-review"]').textContent.includes('%'));
-    c.reviewSaveNeedsPlan = await p2.evaluate(() => [...document.querySelectorAll('button')].find((b) => b.textContent === 'Save plan and continue')?.disabled === true);
-    await p2.fill('[data-testid=plan-when]', 'I finish the OCT clinic on Tuesday');
-    await p2.fill('[data-testid=plan-will]', 'explain one saved moment to a colleague');
-    await p2.locator('[data-testid=new-plan]').scrollIntoViewIfNeeded();
-    await p2.screenshot({ path: `${out}/${name}-4-wochenrueckblick.png` });
-    await p2.click('text=Save plan and continue');
+    // Alter Wochenrückblick abgeschafft (Max 01.11., fundament Ergänzung 12): sonntags kommt direkt der Feed, keine Liste zum Abhaken
     c.feedAfterReview = await waitFor(p2, () => !!window.__core?.moment());
+    c.noWeeklyReview = !(await p2.$('[data-testid="weekly-review"]'));
     // Erstes Öffnen an einem neuen Tag mit ungesendeten Notizen (23.10.): Zeile "N notes, send?", ein Tipp öffnet ein einziges Issue mit allen Notizen
     const allNotes = await p2.evaluate(() => window.__core.notes());
     c.notesUnsentBefore = allNotes.length === r.notesCount && allNotes.every((x) => x.sent === undefined);
