@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-01",
+ "records": [
+  {
+   "sourceId": "wiki:de:Gertrud Sievert-Brausewetter",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Gertrud_Sievert-Brausewetter",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/01",
+    "status": 200
+   },
+   "title": "Gertrud Sievert-Brausewetter",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Gertrud Sievert-Brausewetter war eine deutsche Schriftstellerin, Herausgeberin und Vorsitzende des Vaterländischen Frauenvereins des Deutschen Roten Kreuzes."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-01T04:17:36.712Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Gertrud_Sievert-Brausewetter": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Alexander Walterowitsch Litwinenko",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Alexander_Walterowitsch_Litwinenko",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/01",
+    "status": 200
+   },
+   "title": "Alexander Walterowitsch Litwinenko",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Alexander Walterowitsch Litwinenko war ein russischer und später britischer Nachrichtendienstler. Er war Offizier des sowjetischen Geheimdienstes KGB bzw. seines russischen Nachfolgers FSB und ab 2003 als Überläufer des britischen Auslandsgeheimdienstes MI6. Später trat er als Kritiker des russischen Präsidenten Wladimir Putin und Buchautor in Erscheinung. Litwinenko wurde vom russischen Oligarchen Boris Beresowski unterstützt. Litwinenko starb durch eine Vergiftung mit Polonium-210."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-01T04:17:36.712Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Alexander_Walterowitsch_Litwinenko": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Grossbrand von Schweizerhalle",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Grossbrand_von_Schweizerhalle",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/01",
+    "status": 200
+   },
+   "title": "Grossbrand von Schweizerhalle",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Der Grossbrand von Schweizerhalle ereignete sich am 1. November 1986 im Industriegebiet «Schweizerhalle» bei Basel in der Schweiz und löste eine Giftwelle im Rhein aus. Eine Lagerhalle des damaligen Chemiekonzerns Sandoz mit Chemikalien geriet in Brand. In dessen Folge gelangte mit Pflanzenschutzmitteln belastetes Löschwasser in den Rhein, was zu einem Fischsterben flussabwärts bis Mannheim führte. Weithin sichtbar war eine zusätzliche Verschmutzung des Rheinwassers mit einem roten Farbstoff, der jedoch ungiftig war. Der Brand weckte, durch die in Richtung Basel gewehte stinkende Rauchwolke und den in der Region ausgelösten Sirenenalarm, bedrohliche Erinnerungen an die Chemie-Katastrophe von Bhopal vom 3. Dezember 1984."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-01T04:17:36.712Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Grossbrand_von_Schweizerhalle": 200
+   }
+  }
+ ]
+}
