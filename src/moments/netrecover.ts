@@ -3,8 +3,10 @@
 
 /** Fehler, die am Inhalt liegen und nach einem Neuladen bleiben: YouTube 2 (ungültig), 100 (fehlt), 101 und 150 (Einbettung gesperrt) */
 export const PERMANENT_ERRORS: ReadonlySet<number> = new Set([2, 100, 101, 150]);
-/** So viele Wiederaufnahmen an derselben Stelle, dann gilt der Moment als nicht abspielbar und wird übersprungen */
+/** Wiederaufnahmen an derselben Stelle. Ab dieser Zahl wird der Abstand nicht mehr größer (Deckel 10 s). Ein Netzfehler überspringt nie (Max 02.11., Entscheidung 40). */
 export const MAX_RECOVER = 3;
+/** Wartezeit vor der nächsten Wiederaufnahme in Sekunden: 1, 2, 3, dann 10 */
+export const recoverDelay = (tries: number): number => (tries < MAX_RECOVER ? tries + 1 : 10);
 
 export type ErrorAction = 'wait' | 'recover' | 'skip';
 
@@ -13,10 +15,11 @@ export type ErrorAction = 'wait' | 'recover' | 'skip';
  * recover: Netz da, an derselben Stelle neu ansetzen.
  * skip: Inhaltsfehler oder zu viele Versuche, Moment überspringen (wie bisher).
  */
-export function errorAction(code: number, online: boolean, tries: number): ErrorAction {
+export function errorAction(code: number, online: boolean, _tries: number): ErrorAction {
   if (PERMANENT_ERRORS.has(code)) return 'skip';
   if (!online) return 'wait';
-  return tries < MAX_RECOVER ? 'recover' : 'skip';
+  // Schlechtes Netz überspringt nie. Jeder Versuch setzt an derselben Stelle an, bis es spielt oder Max wischt.
+  return 'recover';
 }
 
 /** Stelle, an der ein Slot weiterläuft: die letzte gute Position, nie vor dem Start und nie am Ende */

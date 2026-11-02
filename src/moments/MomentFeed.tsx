@@ -7,7 +7,7 @@ import type { AppState } from '../lib/state';
 import { audioDeck, createPlayer, deckClipOf, HLS, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
 import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, onGesture, type Gesture } from './gesture';
 import { hintVisible, SOUND_NONE } from './soundHint';
-import { errorAction, resumePos } from './netrecover';
+import { errorAction, recoverDelay, resumePos } from './netrecover';
 import { isYtId } from './contract';
 import { contextForTest, levelEnabled, probeHost, setTempo, unlockAudio } from './audioGraph';
 import { loudLine, recordLoud } from './loudness';
@@ -851,7 +851,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                     const mid = slot.mid;
                     window.setTimeout(() => {
                       if (slot.mid === mid && slot.broken) recoverRef.current(slot, 'error');
-                    }, 1000 * slot.tries);
+                    }, 1000 * recoverDelay(slot.tries - 1));
                   }
                   return;
                 }

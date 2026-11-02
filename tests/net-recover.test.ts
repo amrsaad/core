@@ -12,7 +12,8 @@ describe('Netzfehler im Slot (Issue 9)', () => {
 
   it('mit Netz wird an derselben Stelle weitergemacht, erst nach drei Versuchen wird übersprungen', () => {
     for (let t = 0; t < MAX_RECOVER; t++) expect(errorAction(-1, true, t)).toBe('recover');
-    expect(errorAction(-1, true, MAX_RECOVER)).toBe('skip');
+    expect(errorAction(-1, true, MAX_RECOVER)).toBe('recover');
+    expect(errorAction(-1, true, 50)).toBe('recover');
   });
 
   it('Inhaltsfehler von YouTube überspringen sofort, auch mit Netz und auch ohne', () => {
