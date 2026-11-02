@@ -1,5 +1,5 @@
 {
- "at": "2026-11-02T05:11:59.939Z",
+ "at": "2026-11-02T06:22:52.861Z",
  "runs": [
   {
    "browser": "webkit",
@@ -43,7 +43,7 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "writeDelayMs": 10030,
+   "writeDelayMs": 10035,
    "hosts": [
     "127.0.0.1:4176",
     "fonts.googleapis.com",
@@ -95,7 +95,7 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "writeDelayMs": 10015,
+   "writeDelayMs": 10018,
    "hosts": [
     "127.0.0.1:4176",
     "fonts.googleapis.com",
