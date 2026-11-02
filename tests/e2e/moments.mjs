@@ -900,18 +900,14 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // Am selben Tag kommt die Zeile nicht noch einmal, und der gespeicherte Stand der Notizen ist genau der von eben (landet die neue Chip-Notiz auf einem Moment mit gesendeter Notiz, wird sie dort zusammengeführt, darum kein fester Zähler)
     r.promptDbg.notesP2 = notesP2;
     c.promptOncePerDay = !r.promptDbg.prompt && r.promptDbg.notes === notesP2;
-    // Nächster Sonntag: Plan der Vorwoche mit "Did it happen?", dann Skip
+    // Nächster Sonntag: ohne Wochenrückblick (Ergänzung 12), Feed startet direkt
     await p3.close();
     const p5 = await ctx.newPage();
     // Echtzeit-Uhr: im Zeitraffer enden die Momente hinter den Einstellungen und ihre Signale verändern die Gewichte, die die Karte zeigt
     await p5.addInitScript(() => { window.__ytSlow = true; });
     await p5.goto(url + '?now=2026-11-01');
-    c.prevPlanShown = await waitFor(p5, () => document.querySelector('[data-testid=prev-plan]')?.textContent?.includes('When I finish the OCT clinic on Tuesday, I will explain one saved moment to a colleague.'));
-    await p5.click('[data-testid=prev-plan] >> text=Yes');
-    c.prevPlanAnswered = await waitFor(p5, () => document.querySelector('[data-testid=prev-plan] button[aria-pressed=true]')?.textContent === 'Yes');
-    await p5.screenshot({ path: `${out}/${name}-13-vorwoche.png` });
-    await p5.click('text=Skip this week');
     c.skipWorks = await waitFor(p5, () => !!window.__core?.moment());
+    c.noPrevPlan = !(await p5.$('[data-testid=prev-plan]'));
     // Karte "What Core learned" (App-Zeit 1.11.): Zeilen mit Gewicht und Pfeil, laufende Fristen, Reset mit Rückfrage
     await p5.click('nav [aria-label=Settings]');
     await p5.locator('[data-testid=learned-card]').scrollIntoViewIfNeeded();
