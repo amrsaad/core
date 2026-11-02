@@ -61,6 +61,66 @@
    "urlChecks": {
     "https://quran.com/2/247": 200
    }
+  },
+  {
+   "sourceId": "quran:2:248",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/248",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:248?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:248",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "وَقَالَ لَهُمْ نَبِيُّهُمْ إِنَّ ءَايَةَ مُلْكِهِۦٓ أَن يَأْتِيَكُمُ ٱلتَّابُوتُ فِيهِ سَكِينَةٌ مِّن رَّبِّكُمْ وَبَقِيَّةٌ مِّمَّا تَرَكَ ءَالُ مُوسَىٰ وَءَالُ هَـٰرُونَ تَحْمِلُهُ ٱلْمَلَـٰٓئِكَةُ ۚ إِنَّ فِى ذَٰلِكَ لَـَٔايَةً لَّكُمْ إِن كُنتُم مُّؤْمِنِينَ",
+    "translation": "Und ihr Prophet sagte zu ihnen: „Das Zeichen seiner Herrschaft ist, daß die Bundeslade zu euch kommen wird; in ihr ist innere Ruhe von eurem Herrn und ein Rest von dem, was die Sippe Musas und die Sippe Haruns hinterließen, getragen von Engeln. Darin soll wahrlich ein Zeichen für euch sein, wenn ihr gläubig seid.",
+    "tafsir_muyassar": "<span class=\"blue\">وقال لهم نبيهم:</span> إن علامة ملكه أن يأتيكم الصندوق الذي فيه التوراة -وكان أعداؤهم قد انتزعوه منهم- فيه طمأنينة من ربكم تثبت قلوب المخلصين، وفيه بقية من بعض أشياء تركها آل موسى وآل هارون، مثل العصا وفُتات الألواح تحمله الملائكة. إن في ذلك لأعظم برهان لكم على اختيار طالوت ملكًا عليكم بأمر الله، إن كنتم مصدقين بالله ورسله.",
+    "tafsir_ibnkathir": "<p>Their Prophet then proclaimed, \"The sign of the blessings of Talut's kingship over you is that Allah will give you back the Tabut (wooden box) that has been taken from you.\" Allah said: </p><div class=\"arabic uthmani\">فِيهِ سَكِينَةٌ مِّن رَّبِّكُمْ</div><p>(wherein is Sakinah from your Lord) meaning, peace (or grace) and reassurance. `Abdur-Razzaq stated that Qatadah said: </p><div class=\"arabic uthmani\">فِيهِ سَكِينَةٌ</div><p>(wherein is Sakinah) means grace. In addition, Ar-Rabi` said that Sakinah means mercy. This is also the meaning given by Ibn `Abbas, as Al-`Awfi narrated. </p><p>Allah then said: </p><div class=\"arabic uthmani\">وَبَقِيَّةٌ مِّمَّا تَرَكَ ءَالُ مُوسَى وَءَالُ هَـرُونَ</div><p>(...and a remnant of that which Musa (Moses) and Harun (Aaron) left behind,) </p><p>Ibn Jarir related that Ibn `Abbas said about this Ayah: </p><div class=\"arabic uthmani\">وَبَقِيَّةٌ مِّمَّا تَرَكَ ءَالُ مُوسَى وَءَالُ هَـرُونَ</div><p>(...and a remnant of that which Musa (Moses) and Harun (Aaron) left behind, ) Meaning, Moses' staff and the remnants of the Tablets. This is the same Tafsir of Qatadah, As-Suddi, Ar-Rabi` bin Anas and `Ikrimah, who added, \"And also the Torah.\" `Abdur-Razzaq said that he asked Ath-Thawri about the meaning of, </p><div class=\"arabic uthmani\">وَبَقِيَّةٌ مِّمَّا تَرَكَ ءَالُ مُوسَى وَءَالُ هَـرُونَ</div><p>(...and a remnant of that which Musa (Moses) and Harun (Aaron) left behind,) </p><p>Ath-Thawri said, \"Some said that it contained a pot of manna and the remnants of the Tablets, while some others said that it contained (Moses') staff and two shoes (and refer to 20:12).\"</p><p>Allah then said: </p><div class=\"arabic uthmani\">تَحْمِلُهُ الْمَلَـئِكَةُ</div><p>(...carried by the angels.) </p><p>Ibn Jurayj stated that Ibn `Abbas said, \"The angels came down while carrying the Tabut between the sky and the earth, until they placed it before Talut while the people were watching.\" As-Suddi said, \"The Tabut was brought to Talut's house, so the people believed in the prophethood of Sham`un (Simeon) and obeyed Talut\" </p><p>The Prophet then said: </p><div class=\"arabic uthmani\">إِنَّ فِي ذَلِكَ لأَيَةً لَّكُمْ</div><p>(Verily, in this is a sign for you) testifying to my truth in what I was sent with, my prophethood, and my command to you to obey Talut, </p><div class=\"arabic uthmani\">إِن كُنتُم مُّؤْمِنِينَ</div><p>(if you are indeed believers. ) in Allah and the Hereafter.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:248"
+   },
+   "fetchedAt": "2026-11-02T11:10:05.643Z",
+   "urlChecks": {
+    "https://quran.com/2/248": 200
+   }
+  },
+  {
+   "sourceId": "quran:2:249",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/249",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:249?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:249",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "فَلَمَّا فَصَلَ طَالُوتُ بِٱلْجُنُودِ قَالَ إِنَّ ٱللَّهَ مُبْتَلِيكُم بِنَهَرٍ فَمَن شَرِبَ مِنْهُ فَلَيْسَ مِنِّى وَمَن لَّمْ يَطْعَمْهُ فَإِنَّهُۥ مِنِّىٓ إِلَّا مَنِ ٱغْتَرَفَ غُرْفَةًۢ بِيَدِهِۦ ۚ فَشَرِبُوا۟ مِنْهُ إِلَّا قَلِيلًا مِّنْهُمْ ۚ فَلَمَّا جَاوَزَهُۥ هُوَ وَٱلَّذِينَ ءَامَنُوا۟ مَعَهُۥ قَالُوا۟ لَا طَاقَةَ لَنَا ٱلْيَوْمَ بِجَالُوتَ وَجُنُودِهِۦ ۚ قَالَ ٱلَّذِينَ يَظُنُّونَ أَنَّهُم مُّلَـٰقُوا۟ ٱللَّهِ كَم مِّن فِئَةٍ قَلِيلَةٍ غَلَبَتْ فِئَةً كَثِيرَةًۢ بِإِذْنِ ٱللَّهِ ۗ وَٱللَّهُ مَعَ ٱلصَّـٰبِرِينَ",
+    "translation": "Und als nun Talut mit den Heerscharen aufgebrochen war, sagte er: „Allah wird euch mit einem Fluß prüfen. Wer davon trinkt, gehört nicht zu mir. Und wer nicht davon kostet, der gehört zu mir, außer demjenigen, der (nur) eine Handvoll schöpft. Da tranken sie davon - bis auf wenige von ihnen. Und als er ihn überschritten hatte, er und diejenigen, mit ihm glaubten, sagten sie: „Wir haben heute keine Kraft gegen Galut und seine Heerscharen. Diejenigen aber, die glaubten, daß sie Allah begegnen würden, sagten: „Wie so manch eine geringe Schar hat schon mit Allahs Erlaubnis eine große Schar besiegt! Allah ist mit den Standhaften.",
+    "tafsir_muyassar": "<span class=\"blue\">فلما خرج طالوت بجنوده لقتال العمالقة قال لهم:</span> إن الله ممتحنكم على الصبر بنهر أمامكم تعبرونه; ليتميَّز المؤمن من المنافق، فمن شرب منكم من ماء النهر فليس مني، ولا يصلح للجهاد معي، ومن لم يذق الماء فإنه مني; لأنه مطيع لأمري وصالح للجهاد، إلا مَن ترخَّص واغترف غُرْفة واحدة بيده فلا لوم عليه. فلما وصلوا إلى النهر انكبوا على الماء، وأفرطوا في الشرب منه، إلا عددًا قليلا منهم صبروا على العطش والحر، واكتفوا بغُرْفة اليد، وحينئذ تخلف العصاة. ولما عبر طالوت النهر هو والقلة المؤمنة معه -وهم ثلاثمائة وبضعة عشر رجلا- لملاقاة العدو، ورأوا كثرة عدوهم وعدَّتهم،<span class=\"blue\"> قالوا:</span> لا قدرة لنا اليوم بجالوت وجنوده الأشداء، فأجاب الذين يوقنون بلقاء الله،<span class=\"blue\"> يُذَكِّرون إخوانهم بالله وقدرته قائلين:</span> كم من جماعة قليلة مؤمنة صابرة، غلبت بإذن الله وأمره جماعة كثيرة كافرة باغية. والله مع الصابرين بتوفيقه ونصره، وحسن مثوبته.",
+    "tafsir_ibnkathir": "<p>Allah states that Talut, the king of the Children of Israel, marched forth with his soldiers and the Israelites who obeyed him. His army was of eighty thousand then, according to As-Suddi, but Allah knows best. Talut said: </p><div class=\"arabic uthmani\">إِنَّ اللَّهَ مُبْتَلِيكُم</div><p>(Verily, Allah will try you) meaning, He will test you with a river, which flowed between Jordan and Palestine, i.e. , the Shari`ah river, according to Ibn `Abbas and others. He continued, </p><div class=\"arabic uthmani\">فَمَن شَرِبَ مِنْهُ فَلَيْسَ مِنِّي</div><p>(So whoever drinks thereof, he is not of me;) meaning, shall not accompany me today, </p><div class=\"arabic uthmani\">لَّمْ يَطْعَمْهُ فَإِنَّهُ مِنِّى إِلاَّ مَنِ اغْتَرَفَ غُرْفَةً بِيَدِهِ</div><p>(and whoever tastes it not, he is of me, except him who takes (thereof) in the hollow of his hand.) meaning, there is no harm in this case. Allah then said: </p><div class=\"arabic uthmani\">فَشَرِبُواْ مِنْهُ إِلاَّ قَلِيلاً مِّنْهُمْ</div><p>(Yet, they drank thereof, all, except a few of them.) </p><p>Ibn Jurayj stated that Ibn `Abbas commented, \"Whoever took some of it (the river's water) in the hollow of his hand, quenched his thirst; as for those who drank freely from it, their thirst was not quenched.\" </p><p>Ibn Jarir reported that Al-Bara' bin `Azib said, \"We used to say that the Companions of Muhammad who accompanied him on the battle of Badr were more than three hundred and ten, just as many as the soldiers who crossed the river with Talut. Only those who believed crossed the river with him.\" Al-Bukhari also reported this. </p><p>This is why Allah said: </p><div class=\"arabic uthmani\">فَلَمَّا جَاوَزَهُ هُوَ وَالَّذِينَ ءَامَنُواْ مَعَهُ قَالُواْ لاَ طَاقَةَ لَنَا الْيَوْمَ بِجَالُوتَ وَجُنودِهِ</div><p>(So when he had crossed it (the river), he and those who believed with him, they said: \"We have no power this day against Jalut (Goliath) and his hosts.\") </p><p>This Ayah indicates that the Israelites (who remained with Saul) thought that they were few in the face of their enemy who were many then. So, their knowledgeable scholars strengthened their resolve by stating that Allah's promise is true and that triumph comes from Allah Alone, not from the large numbers or the adequacy of the supplies. They said to them: </p><div class=\"arabic uthmani\">كَم مِّن فِئَةٍ قَلِيلَةٍ غَلَبَتْ فِئَةٍ كَثِيرَةً بِإِذْنِ اللَّهِ وَاللَّهُ مَعَ الصَّـبِرِينَ</div><p>(\"How often has a small group overcome a mighty host by Allah's leave\" And Allah is with As-Sabirin (the patient).) </p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:249"
+   },
+   "fetchedAt": "2026-11-02T11:10:05.643Z",
+   "urlChecks": {
+    "https://quran.com/2/249": 200
+   }
   }
  ]
 }

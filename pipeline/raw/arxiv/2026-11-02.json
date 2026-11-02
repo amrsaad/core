@@ -1,5 +1,801 @@
 {
  "source": "arxiv",
  "date": "2026-11-02",
- "records": []
+ "records": [
+  {
+   "sourceId": "arxiv:2610.42149",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42149",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Latent Reasoning in Continuous Space for Unified Multimodal Models",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Latent Reasoning in Continuous Space for Unified Multimodal Models",
+    "abstract": "Unified Multimodal Models (UMMs) achieve remarkable success on diverse multimodal understanding and generation tasks, yet they still struggle to effectively leverage language-based chain-of-thought reasoning for image generation. As a result, existing reasoning-augmented UMMs often fail to inherit the test-time scaling and fine-grained controllability observed in large language models. We attribute this failure to a fundamental modality mismatch: reasoning is performed in a discrete token space, whereas image generation operates in a continuous space. To bridge this gap, we introduce a Latent Reasoning framework in Continuous space (LARC), which alleviates the token-level bottleneck by reasoning over continuous hidden states. Specifically, the training framework consists of two stages: (i) curriculum supervised fine-tuning (SFT), and (ii) information-gain reinforcement learning (RL). First, the curriculum SFT stage gradually converts token-level reasoning into latent reasoning. Subsequently, the information-gain RL stage self-evolves latent reasoning without ground truth supervision. Experiments across diverse text-to-image generation benchmarks show that LARC consistently improves generation quality, prompt following, and compositional fidelity. Notably, LARC achieves state-of-the-art performance on GenEval with a 7%p gain over BAGEL and demonstrates clear test-time scaling behavior, outperforming token-based generation under both parallel and sequential test-time scaling strategies."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T17:59:43Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42149": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42148",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42148",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Flide: Accelerating Decision Inference with Exact State Forking",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Flide: Accelerating Decision Inference with Exact State Forking",
+    "abstract": "Decision models such as Jev have emerged as a highly promising paradigm for LLM agent systems, providing lightweight and reliable categorical reasoning for rapid System One execution. However, existing generation-oriented inference engines fail to support these workloads effectively, suffering from severe prefix recomputation overheads or distorted output probabilities. To address this challenge, we propose Flide, an efficient and exact inference engine that decouples the logical tree structure of a decision request from its physical execution within a single flattened token stream. Through ForkAttention, Flide navigates request dependencies using GPU-resident indices across both standard attention and recurrent Gated DeltaNet layers, guaranteeing in exact arithmetic that every query branch evaluates identically to an isolated forward pass. By expressing branch topologies directly in GPU-resident metadata, Flide accommodates diverse request mixtures with a compact set of pre-recorded execution graphs while enabling expanding agent histories to resume from checkpoints saved in earlier passes. Extensive evaluations on public hybrid and decision models demonstrate that Flide answers queries up to 9.5 times faster than vLLM and SGLang while staying closest to a float32 reference in total variation distance. By unifying physical execution throughput with mathematical exactness, Flide establishes a principled foundation for scalable, latency-critical decision intelligence in agent systems."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T17:59:38Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42148": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42147",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42147",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Latent Sparse Attention: Towards Subquadratic Ultra-Long Context Attention",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Latent Sparse Attention: Towards Subquadratic Ultra-Long Context Attention",
+    "abstract": "Agentic workflows are increasingly shifting towards long-horizon tasks, such as open-ended scientific work, where models benefit from long context windows. However, at ultra-long context (above 1M tokens), full attention is prohibitively expensive. A promising approach is sparse attention, in which a dedicated indexer selects a subset of keys for the attention. Yet current methods of indexing either still have quadratic cost in context size or lose accuracy at ultra-long context scale. We address this with Latent Sparse Attention (LSA), an efficient attention method that maintains accuracy at ultra-long context. In LSA, keys are hierarchically clustered in a learned latent space, and queries score the hierarchy of clusters instead of scoring every key, making prefill, decode and training faster at long context. We propose two variants, Distilled-LSA (D-LSA), which can be applied to pre-trained models via distillation, and Native-LSA (N-LSA), which is trained natively on the next-token loss alone. On GLM-5.3-FLASH (QWEN-3.8-27B) at 10M tokens, D-LSA speeds up one attention layer by 22.7x (72.4x) in prefill and 4.6x (42.5x) in decode over its original sparse attention (full attention), while keeping similar accuracy across a variety of tasks. N-LSA matches the accuracy of full attention with a training speedup of 1.6x per layer at 128k tokens. LSA offers practical and efficient attention for models to benefit from ultra-long context."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T17:59:34Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42147": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42146",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42146",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Hierarchical World Models with Implicit Dynamics",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Hierarchical World Models with Implicit Dynamics",
+    "abstract": "Planning with world models enables test-time adaptation for embodied agents, offering superior generalization over direct policy learning. However, long-horizon tasks remain hindered by cumulative errors and search complexity. Existing hierarchical methods often use rigid macro-actions or latent skills, leading to brittle representations and limited fine-grained control. We introduce ID-WM (Implicit Dynamics World Models), a hierarchical world model that decouples state-space reachability from local control. Our framework utilizes a high-level model to sample feasible transitions across the state manifold and a low-level world model as an inverse dynamics solver to ground these transitions into precise actions. This allows the planner to identify reachable subgoals without being constrained by low-level execution details. By prioritizing local physical feasibility over global behavioral patterns, ID-WM synthesizes novel long-horizon plans from short segments, transcending the specific behavioral modes seen during training. We demonstrate its effectiveness across three navigation and manipulation suites, achieving a 38.5% improvement over state-of-the-art policy and diffusion-based planners. Crucially, by leveraging this hierarchical structure to mitigate compounding errors, our approach yields a 135% performance gain over single-level world model MPC, particularly in complex, unseen configurations for long-horizon tasks. Videos can be viewed at https://id-wm.github.io"
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T17:59:25Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42146": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42141",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42141",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "RoboArchitect: Automating the Design of Robotic Agents with Persistent Memory",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "RoboArchitect: Automating the Design of Robotic Agents with Persistent Memory",
+    "abstract": "Recent work shows that a frozen robot policy performs far better inside an agent harness, where control code decides when to query the policy, consult vision tools, or command the arm directly. Yet today these harnesses are built by hand and redesigned for each new robot or benchmark. We show that harness design can be automated, offering a strong alternative to finetuning on a novel setup. In RoboArchitect, a coding model observes a robot's rollouts, diagnoses failures, and iteratively revises the harness around the frozen policy. The harness evolves on a set of episodes for its optimization and is evaluated on held-out scenes and tasks. Without updating any model weights, RoboArchitect raises average success from 9.7% to 43.3% on unseen scenes (4.5x) and from 12.7% to 40.2% on unseen tasks (3.2x), across multiple benchmarks and policies. The gains are largest where the benchmark is far from the policy's training data: wrapping a general-purpose policy, the evolved harness yields a specialist that often outperforms even the finetuned version. Intuitive control strategies are automatically designed, such as lifting a jammed arm clear or reaching in horizontally when an obstacle blocks the way from above. The harness also evolves its own persistent memory, carrying learned experience, such as effective grasp depths, into later decisions. These results suggest that substantial headroom in robotic manipulation lies in the agent harness, and its design can be effectively automated and optimized without weight updates."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T17:58:48Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42141": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42128",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42128",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "DecisionRank: On-Policy Distillation for Decision-Model Rerankers",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "DecisionRank: On-Policy Distillation for Decision-Model Rerankers",
+    "abstract": "Decision models target structured tasks by directly predicting choices or scores, avoiding autoregressive decoding latency. However, transferring a generative LLM's ranking knowledge to a decision model remains challenging: the teacher expresses preferences through a ranked list of document ID sequences, while the student determines the ranking using scores from the first-token position. To bridge this gap, we introduce DecisionRank, a decision model trained through item-space on-policy distillation (OPD). Item-space OPD constructs the student's rollout by sorting its document scores into a ranked sequence. A generative teacher takes the resulting ranking list as inputs and provides conditional feedback to directly supervise those scores. Combined with offline ranking supervision, DecisionRank achieves state-of-the-art performance on both general and reasoning-intensive retrieval benchmarks such as TREC DL, BEIR, and BRIGHT. Across four benchmarks, item-space OPD consistently outperforms alternative training objectives. Even at 1.7B parameters, DecisionRank surpasses its 27B generative teacher on TREC DL19--23. At 8B, it outperforms its generative listwise counterpart while running $24.5\\times$ faster on TREC DL and $16.7\\times$ faster on BRIGHT."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T17:56:58Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42128": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42116",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42116",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "ACCT: Asymmetric Cross-LLM Context Transfer",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "ACCT: Asymmetric Cross-LLM Context Transfer",
+    "abstract": "In real-world deployments, large language model (LLM) systems are increasingly evolving from single-model invocation toward heterogeneous deployments in which different models are dynamically invoked for inference. When the same context is reused across models, however, each newly selected target model typically has to process it again, repeatedly incurring substantial computational costs. Therefore, we propose ACCT (Asymmetric Cross-LLM Context Transfer), which targets KV cache transfer between models of different scales within the same model family. ACCT transforms the KV cache produced by a source model into sparse KV states that can be directly consumed by a target model, thereby enabling cross-model reuse of context computation and decoupling context computation from downstream inference. ACCT consists of three lightweight components: the Cartographer identifies query-relevant context tokens for each target layer and KV head; the Allocator determines how many context tokens each target layer and KV head retains under a shared total KV budget; and the Compiler transforms selected source KV into sparse target KV. The target model can therefore perform inference using the transferred KV without reprocessing the original context. We evaluate ACCT in two complementary settings comprising five general-capability benchmarks and six highly context-dependent tasks. Experiments show that ACCT matches or exceeds the target model's original inference performance even when reducing the KV cache size by 75%. At a context length of approximately 19K tokens, ACCT's KV conversion achieves a 6.5-21.2 times speedup over target context prefill. These results demonstrate the feasibility of transferring context computation across models under a limited KV budget."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T17:50:49Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42116": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42112",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42112",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Subquadratic Attention with a Hierarchical Tree-Structured Indexer",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Subquadratic Attention with a Hierarchical Tree-Structured Indexer",
+    "abstract": "The quadratic scaling of attention is a fundamental bottleneck limiting the long-context capabilities of large language models (LLMs). A variety of approaches have attempted to circumvent this, but they either fail to match attention's expressiveness (e.g., sliding-window or linear attention variants with fixed-size state) or only achieve constant-factor speedups (e.g., sparse attention methods whose indexers themselves scale quadratically). In this paper, we derive an asymptotically subquadratic sparse attention method based on a hierarchical, tree-structured indexer, which we call Zyphra Hierarchical Attention (ZHA). ZHA constructs a tree of recursively compressed key summaries over the KV cache, which future queries traverse from the top down to retrieve a sparse subset of keys. Crucially, by iteratively growing the tree's depth, the total cost including routing and final attention grows sublinearly in sequence length, resulting in overall subquadratic (but superlinear) scaling for attention. We demonstrate that ZHA can be cheaply applied to existing pretrained models with only a short KL distillation training stage over a few billion tokens, and maintains performance on long-context retrieval and challenging reasoning, mathematical, and agentic coding evaluation tasks. Moreover, we show that our method is highly robust to tree geometry including very deep trees of up to 6 levels. Finally, we develop a detailed performance model and show that our approach scales subquadratically, dramatically outperforms competing methods beyond 1 million context, and ultimately has the potential to extend effective context windows to the hundreds of millions or billions of tokens."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T17:48:37Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42112": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42096",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42096",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "CausalWAM: Learning the Causes of Actions in World Action Models",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "CausalWAM: Learning the Causes of Actions in World Action Models",
+    "abstract": "World action models (WAMs) learn latent variables from observations and use these to both predict the evolution of the scene and to generate actions. The prediction has to be of the whole scene, whereas only a portion of the scene causes actions. WAMs fitted to demonstrations do not, in general, guarantee that they will generate actions solely from the latent causes of the demonstrated actions (the action-relevant latent variables), as the model could just as well learn to imitate in this way whilst entangling the action-relevant latent variables with the nuisance variables. We therefore separate out what causes action from what prediction depends on. We prove that under a sparsity constraint the latent variables used to generate actions are an invertible function of the action-relevant latent variables alone and the true structure is identified up to a permutation of the latent variables. This requires neither sufficient temporal dependence nor any assumptions on how the unobserved regimes evolve and holds even when the action-relevant latent variables are statistically dependent on the rest. We therefore propose CWAM (Causal WAM), which incorporates the constraint into a pretrained WAM by adding a sparse routing path to its action head, with the world modeling objective remaining unchanged. Experiments on both synthetic data and real-world robots validate the theory as well as showcase the improved efficiency in closed-loop success."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T17:40:00Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42096": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42084",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42084",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "RangeSWA: Training-Free Length Extrapolation for Continuous Diffusion Language Models",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "RangeSWA: Training-Free Length Extrapolation for Continuous Diffusion Language Models",
+    "abstract": "Continuous diffusion language models show promising potential in text generation tasks, but are prone to problems such as text repetition, semantic drift, and generation quality degradation when the generation length exceeds the training length. To address these challenges, we propose RangeSWA, a training-free length extrapolation method. The method combines local sliding-window attention, remote block summaries, and dynamic content retrieval to preserve local details and support long-range context access. In addition, generation degradation caused by length extrapolation is mitigated through positional remapping, conditioning attention correction, and denoising-stage-adaptive window scheduling. We conducted experiments on multiple continuous diffusion language models, and the results show that RangeSWA can effectively reduce generative perplexity and text repetition rates in long-text generation."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T17:35:48Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42084": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42066",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42066",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "The Knowledge Layer Model (KLM): Evidence-Visible AI Output, Routing Diagnostics, and Negative Results",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "The Knowledge Layer Model (KLM): Evidence-Visible AI Output, Routing Diagnostics, and Negative Results",
+    "abstract": "AI answers require more than apparent correctness: reviewers need to inspect their recorded basis. We introduce the Knowledge Layer Model (KLM), an open, implementation-neutral specification for inference records with versioned epistemic assessments, evidence relations, and explicit unknowns. SEDIM, the knowledge and evidence architecture of Nage AI OS, is a reference implementation. We reference KLM v0.3 (repository tag v0.3.0). Empirical material consists of separate internal experiments, not end-to-end validation. A historical platform-domain routing benchmark reports 137/150 classifications across 15 classes (91.3%; nominal 95% Wilson interval 85.7-94.9%); the numerator is recovered from a rounded summary, and historical example membership is unverified. A native-model weight-path configuration yielded 0/15 successful answers in a corrected two-source test. A capacity-growth comparison could not establish a reliable effect because of a defective legacy scorer and missing original outputs. Lexical and scoped diagnostics each yielded AUC 0.008 for silent-versus-contradicted examples, below the registered minimum of 0.65. Legacy packing lost gold-containing text in 118/221 selected cases; repaired packing retained it in 221/221. These measure text presence, not answer quality. Python and TypeScript verifiers reportedly agreed on six checks per synthetic fixture; a separate production disclosure was not accepted. Restoration, re-derivation, human-rubric support, boundary isolation, and bounded-response evaluations remain proposed. Findings are internal and author-reported; historical observations are distinguished from later reproductions. Evidence visibility does not establish correctness, causal reliance, security, or regulatory compliance. Independent replication and a complete public audit package remain future work."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T17:26:18Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42066": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42060",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42060",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "PersonaChatBench: Evaluating Chat Assistants with Diverse Simulated Users",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "PersonaChatBench: Evaluating Chat Assistants with Diverse Simulated Users",
+    "abstract": "Conversational assistants are expected to help people with diverse backgrounds, preferences, and communication styles. Yet evaluations centered on a single cooperative user provide limited insight into how reliably an assistant serves users with different personas. We introduce PersonaChatBench, a framework for evaluating task competence and responsiveness to diverse user needs. PersonaChatBench pairs the same underlying task with multiple simulated users, each guided by a private persona card that specifies distinct needs, preferences, and interaction behaviors. By holding the task fixed while varying the user, the framework examines how assistant performance changes across user conditions. We evaluate 20 language models across six domains, separately assessing native task outcomes, fulfillment of expressed persona needs, and simulator fidelity. Our results show that task performance and need fulfillment vary across personas and domains. Strong task performance does not necessarily translate into satisfying individual needs, and models' relative strengths in meeting those needs are not consistent across domains. PersonaChatBench makes these differences measurable, revealing gaps obscured by aggregate scores and helping identify which users an assistant serves well and where adaptation is needed. It provides a basis for evaluating consistency across users and guiding the development of assistants that better accommodate diverse needs in everyday applications."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T17:23:14Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42060": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42054",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42054",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "CRoS: Causality Reward on Scrambled CoTs Improves Accuracy and Reasoning Faithfulness",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "CRoS: Causality Reward on Scrambled CoTs Improves Accuracy and Reasoning Faithfulness",
+    "abstract": "Reinforcement learning with verifiable rewards (RLVR) has become the standard method for training language models to reason. However, RLVR typically relies solely on outcome correctness, which does not guarantee that the CoT causally contributes to the final answer. Without this connection, outcome rewards may fail to reinforce high-quality reasoning. Existing causality metrics assess CoT causality by perturbing the CoT, such as deleting reasoning steps or injecting errors, and measuring changes in the final answer. However, these perturbations inevitably alter information in each step. Consequently, high causality scores may reflect sensitivity to information changes introduced by perturbation rather than true causality. Such confounding effects further induce undesirable reasoning behaviors when these metrics are used as training rewards, including generating less informative CoTs and reducing exploration and self-correction. To address this problem, we propose CRoS (Causality Reward on Scrambled CoTs), a novel CoT causality metric that perturbs the order of reasoning steps without altering content, thereby preserving information within each step. On Reasoning Gym with Gemma-3-4B, CRoS outperforms existing causality and outcome rewards in out-of-domain accuracy, CoT quality, and CoT faithfulness. Specifically, CRoS achieves 46.8% accuracy on five unseen logic and games datasets, outperforming the strongest baseline (43.8%). It also achieves better CoT quality, consistently outperforming baselines in CoT-Pass@K from K=1 to 128, averaging 43.4% vs. 41.4%. For CoT faithfulness, CRoS achieves a hint acknowledgment score of 34.0% vs. 20.2%."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T17:18:35Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42054": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42040",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42040",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Near-Optimal Second-Order Convex Finite-Sum Optimization under Individual Smoothness",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Near-Optimal Second-Order Convex Finite-Sum Optimization under Individual Smoothness",
+    "abstract": "We study the stochastic second-order oracle complexity of solving smooth convex finite-sum optimization with $n$ components. Very recently, Tsedenov \\& Kovalev (2026) showed that the minimax optimal complexity under averaged smoothness and convexity is $\\tildeΘ(n + n^{6/7} ε^{-2/7})$ by establishing nearly matching upper and lower bounds. In this paper, we show that individual smoothness and convexity provably enable further acceleration, where the lower complexity bound is $Ω(n+ n^{5/7} ε^{-2/7})$ under this stronger assumption. Then, by establishing a novel second-order self-bounding inequality, we design a new Taylor-corrected lazy Newton method, which can lead to a better complexity of $\\tilde{\\mathcal{O}}(n + n^{5/7} ε^{-2/7})$ by applying the optimal Monteiro-Svaiter acceleration, matching our lower bound up to only logarithmic factors."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T17:04:25Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42040": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42039",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42039",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Same Question, Different Answers: Auditing Persona-Dependent Variation in Six LLMs on Smoking-Cessation Advice",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Same Question, Different Answers: Auditing Persona-Dependent Variation in Six LLMs on Smoking-Cessation Advice",
+    "abstract": "Hundreds of millions of people now ask large language model (LLM) chatbots for health advice, which raises a question that is simple to pose and hard to answer: does everyone get the same advice? We audit six widely deployed LLMs from four providers on smoking cessation, a domain with codified clini- cal guidance and substantial public-health stakes, by putting the same four cessation questions to twelve user personas that differ in life stage, self-described expertise, and smoking history, for a total of 2,880 responses. What the models say depends on who appears to be asking. Every model named FDA-approved prescription cessation medications less often to teen personas than to adult personas, by 32 to 67 percentage points, and in five of six models a persona presenting health- care expertise received fewer facts than a persona presenting none. We then evaluate one deployable intervention: a short system prompt specifying a factual floor, the set of core med- ical facts every user should receive when they are relevant, while leaving tone, vocabulary, and framing free to adapt. The prompt narrows persona differences in every model, but its effect on overall fact coverage varies in both magnitude and direction across models, so a prompt validated on one system cannot be assumed to transfer to another. Two cautions frame these results. Equal mention rates are not always the correct clinical target, because prescription cessation pharmacother- apy is not recommended for minors, so a defensible factual floor must be age-aware rather than uniform. And because our personas vary on several attributes at once, we report scenario- level differences rather than isolated effects of age or expertise. We release all 2,880 responses and the analysis code."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T17:03:35Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42039": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42036",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42036",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Learning Clean Generative Processes from Noisy Measurements",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Learning Clean Generative Processes from Noisy Measurements",
+    "abstract": "We study how to learn a generative model of clean images using only noisy observations. Diffusion processes and their generalizations to non-Gaussian noise require posterior predictions at every noise level. We first show that it is possible to learn these predictions from independent noisy views using Noise2Noise regression, but only at or above the noise level of the training data. To learn the predictions below that level, needed to generate clean images, we impose consistency: a prediction should equal its expectation after continuing the sampling process. We derive conditions under which consistency uniquely determines the continuation to the clean image distribution and verify them for Poisson, binomial, Gamma, and negative-binomial measurements. Experiments on CIFAR-10, photon-counting microscopy, and synthetic aperture radar show that the required posterior predictions can be learned from noisy views alone and that the consistency relation repairs the continuation beyond the noise level of the data, which severely deteriorates without consistency."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T17:01:25Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42036": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42030",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42030",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "There Is No Free Loop: When Does Looping a Trained Model Pay for Its Inference Compute?",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "There Is No Free Loop: When Does Looping a Trained Model Pay for Its Inference Compute?",
+    "abstract": "Looping re-applies a block of layers so that each token passes through the block more than once. Adding a loop to a trained model is attractive because it leaves the parameter count, and hence the disk size, the memory footprint and the training cost unchanged. Unfortunately, every generated token pays for the loop. Re-applying m of N layers makes each token about (N+m)/N times as expensive. Loops that a model learns during large-scale pretraining justify this price, but whether loops added after pretraining justify this cost remains unclear. We compare a looped model with two simple baselines. We first compare it with the same model trained identically without the loop (equal parameters). Secondly, we compare it with the best unlooped use of the same inference floating-point operations (equal FLOPs). Across Qwen3 and Qwen3.5 models from 0.8B to 9B parameters, only the looped 0.8B model beats both baselines. At 4B and 9B, the looped model does not beat the first baseline, i.e. the same model trained without the loop. This is not because the benchmarks are too easy, since on the same benchmarks the unlooped 9B model still scores up to 13 points higher than the 4B model, showing that there is ample room for improvement. Introducing loops in an already pretrained model therefore only pays for small models with a fixed parameter budget."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T16:56:29Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42030": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42024",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42024",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Know When the Equation Is Wrong: Structural Uncertainty for LLM-Guided Symbolic Regression under Extrapolation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Know When the Equation Is Wrong: Structural Uncertainty for LLM-Guided Symbolic Regression under Extrapolation",
+    "abstract": "Large language models (LLMs) can help discover mathematical equations from data, but most LLM-guided symbolic regression methods focus on a single best equation without quantifying uncertainty over alternative functional forms. This is challenging because distinct equations can fit the observed data similarly while producing substantially different extrapolations. Our experiments on the LLM-SRBench dataset show that standard conformal intervals achieve nominal in-distribution coverage but frequently fail under extrapolation. To tackle this challenge, we introduce LLM-SR-UQ, a framework that retains competing equation structures and uses their disagreement to characterize uncertainty about the underlying functional form. We extend the standard fixed-width conformal approach to quantify structural intervals, which measure disagreement among candidate equations and identify where prediction intervals should widen. Extensive experiments show our framework substantially improves coverage attainment by incorporating structural disagreement while preserving in-distribution coverage. Our approach also shows good generalizability when it is applied to other symbolic-regression methods."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T16:54:16Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42024": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42018",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42018",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Asynchronous Flow Map Language Models",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Asynchronous Flow Map Language Models",
+    "abstract": "The order in which tokens are predicted in language modeling has a profound impact on the quality of generated sequences. Autoregressive and masked diffusion models iteratively fill in tokens and can exploit such orderings across generation steps, but how to leverage an ordering for one-step parallel language modeling is unclear. We introduce asynchronous flow map language models (aFMLMs), which incorporate prediction order into one-step modeling by learning the flow maps of asynchronous flows. These flows specify an ordering through a tokenwise time schedule that controls the relative denoising progress of tokens. We formulate a general class of asynchronous flows that admit both prescribed and learned, state-adaptive schedules, show that they define valid flow maps, and develop new methods for their flow map distillation. The resulting models can generate all tokens in a single forward pass by internalizing the ordering encoded in the flow into their hidden computations. On Sudoku solving and code generation for GSM8K math word problems, aFMLM establishes new state-of-the-art one-step performance."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T16:51:40Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42018": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42010",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42010",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "TurnTurk-GPT: Text-Based Turn-Taking Prediction for Turkish",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "TurnTurk-GPT: Text-Based Turn-Taking Prediction for Turkish",
+    "abstract": "This paper presents TurnTurk-GPT, a text-based turn-taking predictor for Turkish obtained by fine-tuning a Turkish GPT-2 model with the TurnGPT objective on synthetic and real dialogue, and evaluates it on real Turkish conversation against rule baselines, a zero-shot Turkish language model and a widely used multilingual end-of-turn detector. Evaluation uses word-level decision points on unpunctuated, lower-cased text approximating the output of streaming speech recognisers, recording-disjoint and speaker-disjoint folds, nested threshold selection and paired cluster bootstrap tests. TurnTurk-GPT outperforms the multilingual detector under both recording-disjoint and speaker-disjoint evaluation. It outperforms the zero-shot language model only when the test speakers occur in training; on unseen speakers the two are statistically indistinguishable. Removing the suffixes of the turn-final word reduces AP by up to 44%, against 2% for a sentence-internal word, locating the Turkish end-of-turn cue in verb-final morphology. Synthetic dialogue alone yields the weakest trained model, and when a speaker pauses the zero-shot and multilingual baselines remain close to chance. The model and the evaluation protocol are publicly released."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T16:48:32Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42010": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42004",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42004",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "TradeWar: A Benchmark for Execution-Grounded Trade Negotiation with Adaptive LLM Agents",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "TradeWar: A Benchmark for Execution-Grounded Trade Negotiation with Adaptive LLM Agents",
+    "abstract": "Multi-turn negotiation remains a challenging problem for large language model (LLM) agents. While LLMs can conduct natural-language dialogue, existing benchmarks predominantly assess only agreement rates, overlooking whether negotiated commitments actually create value once executed. To address this gap, we introduce TradeWar, a multi-country simulation benchmark that translates negotiation dialogues into concrete tariff and trade-share policies, enforces capacity and network constraints during settlement, and evaluates outcomes via an Economic Health Index (EHI). To solve this execution-grounded task, we propose TACTIC (Trade-aware Adaptive Consolidation and Theory-of-mind for International Commerce), an agent that iteratively refines its negotiation strategy across episodes-without updating base LLM weights-by leveraging prior experience, opponent behavior, and past settlement outcomes. Despite using zero-shot chain-of-thought (CoT) prompting, PromptLLM attains a 75% agreement rate but only 57.1 final EHI (*100), whereas TACTIC reaches 68.8. Across 20 sequential episodes and three seeds, TACTIC's final EHI improves from 58.2 to 73.2, compared with 65.2 for an ablation without cross-episode updates. Under technology-controls and energy-crisis shocks, TACTIC also exhibits smaller performance degradation than PromptLLM and MemoryLLM. These results indicate that CoT deliberation and interaction memory alone do not fully address delayed execution feedback, whereas settlement-grounded adaptation improves long-horizon negotiation in TradeWar."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T16:45:29Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42004": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42001",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42001",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "AutoAnalysis: An automated, self-updating meta-analysis of human-AI collaboration",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "AutoAnalysis: An automated, self-updating meta-analysis of human-AI collaboration",
+    "abstract": "As generative artificial intelligence (AI) becomes more capable and widely used, understanding when and how humans should work with these systems is becoming increasingly important. However, the empirical evidence in this space offers conflicting recommendations, which leaves individuals and organizations without clear guidance on when to combine human and AI capabilities. Existing meta-analyses can help reconcile these findings, but they require substantial manual effort and cannot readily incorporate new evidence as it emerges. To address this challenge, we introduce AutoAnalysis: an automated, self-updating meta-analysis of when humans and AI work better together, and when they work better alone. AutoAnalysis' most recent run synthesizes 1,955 effect sizes from 420 papers. Across this body of work, we found that, on average, human-AI combinations performed significantly better than humans alone, but they performed significantly worse than the better of humans or AI alone. These findings highlight the important distinction between improving human performance and achieving human-AI synergy and underscore the need to evaluate collaboration against both human and AI performance alone. As new studies emerge, AutoAnalysis will integrate their findings into the meta-analysis, providing cumulative evidence about when humans and AI perform better together and how human-AI performance varies across AI agents, tasks, and processes."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T16:44:49Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42001": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.42000",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.42000",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Less Loss, Fixed Weights: Logit Corrections for Forgetting",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Less Loss, Fixed Weights: Logit Corrections for Forgetting",
+    "abstract": "When a language model is fine-tuned to follow instructions, or further pretrained on a new subject, it often gets worse at predicting standard web text. This is known as \"forgetting.\" We ask whether this loss can be undone by simple, fixed adjustments to the model's final token predictions. Across 14 pairs of base and derived models, from 1B to 7B parameters, we fitted a fixed bonus or penalty for each token (a vocabulary bias), alone or together with a temperature. On text held out from correction fitting, the largest top-4K bias recovery estimate is under 10%, with loss conditional on the retained vocabulary. Combining the bias with a temperature recovers up to 36%. Models further pretrained on math lose the most and recover almost nothing. Finally, in a controlled simulation where a model is damaged at random, with no planted bias or temperature change, the bias-plus-temperature fix still recovers 29%. Most of the real-model loss increase stays out of reach of our restricted fits."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T16:44:30Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.42000": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.41998",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.41998",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "SecPO: Principled Adversarial Training for Prompt Injection Security",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "SecPO: Principled Adversarial Training for Prompt Injection Security",
+    "abstract": "Recognized as a top threat to AI agents, prompt injection allows instructions from untrusted data (email, documents, websites) to manipulate the agent's operation. The existing best-defended LLM, Meta-SecAlign, is trained with the DPO loss but still suffers from attack success rates (ASRs) approaching 100% under adaptive prompt injections. One reason is that DPO anchors the model around the undefended reference model, which is insecure. We show an idealized reference model---an injection-invariant, utility-preserving oracle---can nevertheless be approximated, as its output distribution in training is interestingly accessible. This new observation motivates a theoretically principled SecPO loss. Another Meta-SecAlign shortcoming is that it trains on weak simulated attacks. We implement an efficient adversarial training (AT) pipeline that synthesizes strong injected inputs (best@240), and train the model on them. Our AT reduces ASRs by 1.5-14.5$\\times$ across three SoTA adaptive attacks, compared with Meta-SecAlign; the SecPO loss reduces them by a further 2.4-4.6$\\times$ compared with using DPO loss. In agentic workflows, our SecPO + AT Qwen3.6-27B is much more secure than Meta-SecAlign: 8.8% vs. 78.8% AgentDojo ASR@800 under the AttackerMovesSecond attack. Moreover, our defended model shows no noticeable reduction in benign utility in nine benchmarks covering agentic tool calling, instruction following, science, and math. We release our $\\href{//github.com/Sizhe-Chen/SecPO}{\\text{code}}$, $\\href{//huggingface.co/datasets/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-trainset}{\\text{training data}}$ (with optimized injections from AT), and $\\href{//huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO}{\\text{model}}$."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T16:43:17Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.41998": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.41994",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.41994",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "DAMI: Dual-Axis Memory Initialization for Enhanced Long-Context Retrieval in Gated Linear Attention",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "DAMI: Dual-Axis Memory Initialization for Enhanced Long-Context Retrieval in Gated Linear Attention",
+    "abstract": "Linear attention scales linearly with sequence length, but its finite-state memory can limit long-context retrieval. In gated linear recurrences, memory retention depends on state decay, which is shaped jointly by gate parameters A_log and dt_bias and by input activations. In controlled Gated DeltaNet (GDN) experiments, both parameters remain highly correlated with their initial values after training, highlighting the importance of initialization. Therefore, we introduce Dual-Axis Memory Initialization (DAMI), which jointly configures these parameters before training. DAMI assigns geometric timescales across heads for varied retrieval distances and a low-high-low input-sensitivity profile across layers. A small activation sample calibrates the GDN-family implementation to match both behavioral targets without adding trainable parameters. Across GDN, KDA, GDN2, Mamba-2, and RWKV-7, DAMI improves average RULER-style retrieval accuracy by 5.29 to 16.71 percentage points over the corresponding random-initialization baselines. Performance on language modeling, commonsense reasoning, and 2K real-world retrieval remains broadly comparable to those baselines. Our code is available at https://speedai.com/research/dami."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T16:39:37Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z"
+  },
+  {
+   "sourceId": "arxiv:2610.41988",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.41988",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "ID2Pattern: Pretraining Generalizable Identity Behavior Patterns for Transaction Risk Foundation Models",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "ID2Pattern: Pretraining Generalizable Identity Behavior Patterns for Transaction Risk Foundation Models",
+    "abstract": "Large-scale behavioral pretraining offers a promising route to generalizable representations in online payment systems. However, high-cardinality identity fields such as card, device, and account IDs, though rich in behavioral signals, remain underexploited. Their continually growing vocabularies and limited semantic meaning make existing vocabulary-based and semantics-based encodings ill-suited. Their generalizable signal lies not in specific values, but in the identity behavior patterns they exhibit across a transaction sequence. Building on this insight, we propose ID2Pattern, a pretraining framework that brings these patterns into transaction foundation models. ID2Pattern first encodes identity fields with a Local Anonymous ID (LAID) tokenizer, which captures how each identity appears and recurs within the sequence, independent of its specific value. It then pretrains a multi-scale pattern codebook on unlabeled sequences, which abstracts LAID sequences into discrete behavior patterns for downstream prediction. Experiments on an industrial dataset with over 100M sequences and six public datasets show that ID2Pattern consistently outperforms strong baselines, improving industrial by 4.13% and public datasets by 8.83% on average. Notably, ID2Pattern remains equally effective even when all identity values are unseen during training, highlighting its potential to generalize to new users and markets."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T16:35:43Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z"
+  },
+  {
+   "sourceId": "arxiv:2610.41970",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.41970",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "When Does Test-Time Search Help World Action Models? An Empirical Audit of Candidate Selection and Simulator Integrity",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "When Does Test-Time Search Help World Action Models? An Empirical Audit of Candidate Selection and Simulator Integrity",
+    "abstract": "World-action models increasingly apply test-time scaling, spending extra inference computation on candidate selection and adaptive allocation to improve control. Such gains are credible only when candidates carry exploitable signal, nominal compute savings become real speedup, and evaluation stays reliable. We audit all three on Cosmos Policy and RoboCasa with a premise-first, pre-registered methodology. On clean data, a learned value selector is 1.66 pp worse than random; a hindsight oracle gains only 1.40 pp, with an episode-level interval spanning zero; and 82% of states show identical candidate outcomes, leaving little selection headroom. Token pruning cuts per-forward FLOPs by up to 47% but yields at most a measured 1.15$\\times$ end-to-end speedup on the deployed path (1.25$\\times$ on a decode-excluded path), short of a 1.5$\\times$ target, and our adaptive-allocation experiment is inconclusive under a power gate. We further identify and fix a silent rendering corruption whose rate rises sharply along compute-heavy planning paths while leaving the official direct-policy result unaffected, and release a detector, fix, and scripts. These findings show why test-time scaling should be audited as a chain of premises (decision signal, realized efficiency, evaluationintegrity) rather than by success rate alone. Conclusions are scoped to the tested configuration."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T16:21:07Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z"
+  },
+  {
+   "sourceId": "arxiv:2610.41968",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.41968",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Prune Gradually, Adapt Sparsely: Efficient Pruning of Large Language Models at Extreme Sparsity",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Prune Gradually, Adapt Sparsely: Efficient Pruning of Large Language Models at Extreme Sparsity",
+    "abstract": "Weight pruning can reduce the storage and inference cost of large language models (LLMs), but preserving quality at high sparsity levels remains challenging. Existing methods face a quality-cost trade-off in this regime. One-shot pruning is cheap but degrades sharply as sparsity increases, even when followed by post-pruning recovery. A growing line of work instead optimizes the mask directly from the dense model under the end-to-end objective; among these methods, [Lee et al.,2026], the recent state of the art at extreme sparsity, reaches high quality but at the cost of model-sized optimizer state and auxiliary variables. To address this gap, we propose ETAPS, which prunes gradually and adapts sparsely: it tightens a global sparsity constraint in progressive stages while training a sparse delta with a small, fixed budget. Our key observation is that gradual weight removal keeps each pruning step small enough for sparse adaptation to compensate, allowing the adapted model to provide end-to-end gradients that guide the next pruning decision without model-sized optimizer state. Across six models from 125M to 13B parameters, ETAPS achieves lower perplexity than ELSA at every evaluated sparsity from 50% to 90%, with perplexity reductions of up to 42%. ETAPS is also far cheaper: at 90% sparsity, it prunes LLaMA2-7B on a single H200, where ELSA uses four, with $5.0\\times$ smaller total persistent state and 49% fewer GPU-hours. Together, our findings point to a promising direction for achieving high quality in demanding regimes such as extreme sparsity at substantially lower cost."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T16:17:43Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2610.41968": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2610.41956",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.41956",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Chronos-2: A foundation model for multivariate time series forecasting",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Chronos-2: A foundation model for multivariate time series forecasting",
+    "abstract": "Accurate forecasting with uncertainty quantification is critical in a variety of scientific applications ranging from epidemiology and economics to energy systems and earth sciences. Yet most forecasting models still need to be developed and trained separately for each domain-specific dataset. Time series foundation models (TSFMs) aim to remove this limitation and enable the application of the same model across domains through large-scale pretraining. However, most existing TSFMs treat each time series independently and therefore cannot model interactions among time series and external drivers. Here, we introduce Chronos-2, a foundation model for zero-shot forecasting that models the interactions between multivariate time series and heterogeneous covariates, which commonly arise in scientific applications. The model infers relationships among time series directly from historical context and generates probabilistic forecasts without task-specific treatment. Across various benchmarks, Chronos-2 achieves state-of-the-art accuracy on average by improving skill scores by 5.2 percentage points relative to the strongest baselines and increasing win rates by 10 percentage points. Chronos-2 is also computationally efficient, generating forecasts for 100 time series in under one second on a single mid-range GPU, 50x and 1000x faster end-to-end than the best task-specific point and probabilistic forecasters, respectively. In addition, we demonstrate its effectiveness in diverse scientific settings -- including infectious-disease forecasting, macroeconomic modeling, carbon-flux prediction, and runoff simulation -- where the model matches or surpasses specialized methods developed for each domain. These results show that a single pretrained model can capture structure shared across temporal systems."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T16:08:23Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z"
+  },
+  {
+   "sourceId": "arxiv:2610.41951",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2610.41951",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Aligning MLLMs with the Latent Structure of Human Cognition via Behavior-Derived Semantic Dimensions",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Aligning MLLMs with the Latent Structure of Human Cognition via Behavior-Derived Semantic Dimensions",
+    "abstract": "Multimodal Large Language Models (MLLMs) have achieved impressive performance across a wide range of reasoning tasks, yet it remains unclear whether their internal representations and decision criteria align with the latent structure of human cognition. In this work, we propose a novel framework to align MLLMs with the multidimensional mental representations underlying human similarity judgements. We build on a previously established behavior-derived semantic embedding space, in which objects are represented along 66 interpretable dimensions derived from 4.70 million human Odd-One-Out (O1O) judgements. For each triplet, we infer the most salient decision dimension and convert it into a dimension-grounded linguistic rationale. This enables MLLMs to learn both the final choice and a justification consistent with the inferred behavioral criterion. Experimental results demonstrate that our approach improves model consistency with human similarity judgements while retaining competitive performance on standard multimodal benchmarks. Furthermore, using searchlight Representational Similarity Analysis (RSA) on an independent fMRI Natural Scenes Dataset (NSD), we observe increased representational alignment between model and human. Ultimately, our findings point to a data-driven route for incorporating human cognitive structure into MLLMs alignment. The code is available \\href{https://github.com/ening-open/cogalign}{here}."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-10-30T16:06:08Z"
+   },
+   "fetchedAt": "2026-11-02T11:10:02.241Z"
+  }
+ ]
 }
