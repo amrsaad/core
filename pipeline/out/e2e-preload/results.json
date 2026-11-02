@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-02T04:13:24.242Z",
+  "at": "2026-11-02T05:18:41.610Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -50,48 +50,48 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1654,
+        "coldStartMs": 1617,
         "preloadedMoments": 30,
         "preloadedBytes": 6289236,
         "bytesPerMoment": 209641,
         "swipes": 10,
         "cachedStartMs": [
-          11,
-          14,
-          12,
+          8,
+          8,
           9,
-          11,
-          11,
+          8,
           9,
-          10,
           9,
-          9
+          8,
+          7,
+          7,
+          7
         ],
-        "cachedStartMax": 14,
-        "cachedStartMedian": 11,
+        "cachedStartMax": 9,
+        "cachedStartMedian": 8,
         "firstFrames": [
-          "first-frame 10ms buffered local",
-          "first-frame 11ms buffered local",
-          "first-frame 14ms buffered local",
-          "first-frame 12ms buffered local",
+          "first-frame 8ms buffered local",
+          "first-frame 8ms buffered local",
+          "first-frame 8ms buffered local",
           "first-frame 9ms buffered local",
-          "first-frame 11ms buffered local",
-          "first-frame 11ms buffered local",
+          "first-frame 8ms buffered local",
           "first-frame 9ms buffered local",
-          "first-frame 10ms buffered local",
           "first-frame 9ms buffered local",
-          "first-frame 9ms buffered local"
+          "first-frame 8ms buffered local",
+          "first-frame 7ms buffered local",
+          "first-frame 7ms buffered local",
+          "first-frame 7ms buffered local"
         ],
         "settingsText": "Preloaded: 37 moments, 7.4 MB",
         "offlineStartMs": [
-          11,
-          11,
-          10,
-          9
+          7,
+          8,
+          8,
+          8
         ],
         "offlineRestartStartMs": [
-          11,
-          9,
+          8,
+          22,
           8
         ],
         "poorFirst12Youtube": 0,
