@@ -1,0 +1,75 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-02",
+ "records": [
+  {
+   "sourceId": "wiki:de:Kosmographie des Aethicus",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Kosmographie_des_Aethicus",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/02",
+    "status": 200
+   },
+   "title": "Kosmographie des Aethicus",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die sogenannte Kosmographie des Aethicus ist ein im 7. oder 8. Jahrhundert entstandenes mittellateinisches Pseudepigraph, das den im Titel erhobenen Anspruch, eine Kosmographie zu bieten, nur eingeschränkt einlöst. Das Werk gibt vor, auf einer antiken, griechischen Vorlage zu beruhen, die von einem aus Istrien stammenden, heidnischen Philosophen skythischer Herkunft namens Aethicus verfasst worden sein soll. Diese Vorlage sei, so die Angabe des Textes, vom Kirchenvater Hieronymus (348/349–420) kommentiert, paraphrasiert, teilweise übersetzt und unter dem Titel Incipit liber Ethico translato philosophico, edito oraculo Hieronymo presbytero, dilatum ex Chosmografia, id est mundi scriptura veröffentlicht worden."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-02T04:01:31.038Z"
+  },
+  {
+   "sourceId": "wiki:de:Präsidentschaftswahl in den Vereinigten Staaten 1976",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Pr%C3%A4sidentschaftswahl_in_den_Vereinigten_Staaten_1976",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/02",
+    "status": 200
+   },
+   "title": "Präsidentschaftswahl in den Vereinigten Staaten 1976",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die 48. Wahl des Präsidenten der Vereinigten Staaten von Amerika fand am 2. November 1976, statt. Gewählt wurde der Demokrat Jimmy Carter, der den amtierenden Präsidenten Gerald Ford von der Republikanischen Partei in einer recht knappen Wahl schlagen konnte."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-02T04:01:31.038Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Pr%C3%A4sidentschaftswahl_in_den_Vereinigten_Staaten_1976": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Eberhard Taubert",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Eberhard_Taubert",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/02",
+    "status": 200
+   },
+   "title": "Eberhard Taubert",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Eberhard Taubert war ein deutscher Jurist. Von 1933 bis 1945 war er als hoher Funktionär im Reichsministerium für Volksaufklärung und Propaganda an der Durchführung der nationalsozialistischen Politik beteiligt. Er schrieb unter anderem das Drehbuch zu dem antisemitischen Hetzfilm Der ewige Jude und war der Verlagsleiter des zum Gesamtverband Deutscher antikommunistischer Vereinigungen zugehörigen und antisemitisch ausgerichteten Nibelungen-Verlages. Nach 1945 war Taubert in westlichen Geheimdiensten bei Aktivitäten gegen Einflussnahmeversuche der Sowjetunion tätig. Er war Mitarbeiter und Berater des Politikers Franz Josef Strauß in den 1950er bis 1970er Jahren."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-02T04:01:31.038Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Eberhard_Taubert": 200
+   }
+  }
+ ]
+}
