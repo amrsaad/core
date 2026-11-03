@@ -1,5 +1,5 @@
 {
- "at": "2026-11-03T04:33:53.069Z",
+ "at": "2026-11-03T05:11:57.324Z",
  "runs": [
   {
    "browser": "webkit",
@@ -105,76 +105,76 @@
     "tempoPaused": 10,
     "cue": {
      "worst": 0,
-     "n": 623,
+     "n": 622,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.39",
+       "3.33",
        34,
        34
       ],
       [
-       "4.68",
+       "4.62",
        47,
        47
       ],
       [
-       "5.97",
+       "5.90",
        60,
        60
       ],
       [
-       "7.26",
-       73,
-       73
+       "7.19",
+       72,
+       72
       ],
       [
-       "8.54",
-       86,
-       86
+       "8.48",
+       85,
+       85
       ],
       [
-       "9.83",
-       99,
-       99
+       "9.77",
+       98,
+       98
       ],
       [
-       "11.11",
-       112,
-       112
+       "11.06",
+       111,
+       111
       ],
       [
-       "12.40",
-       125,
-       125
+       "12.34",
+       124,
+       124
       ],
       [
-       "13.69",
+       "13.63",
        137,
        137
       ],
       [
-       "14.97",
+       "14.93",
        150,
        150
       ],
       [
-       "16.26",
+       "16.21",
        163,
        163
       ],
       [
-       "17.55",
-       176,
-       176
+       "17.50",
+       175,
+       175
       ]
      ],
      "rate": 2
     },
     "cueTempo": {
-     "worst": 1,
-     "n": 554,
+     "worst": 0,
+     "n": 547,
      "rates": [
       1,
       1.5,
@@ -186,7 +186,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805044
+       "dueAt": 1792756805045
       }
      ],
      "idx": 6,
@@ -216,7 +216,7 @@
       "recall: queued atrecall4:0 (bg)",
       "bg: arm atrecall1 (net)",
       "bg: next atrecall10:0",
-      "bg: deck page hidden +5 s: paused=false ended=false t=1.3 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+      "bg: deck page hidden +5 s: paused=false ended=false t=1.4 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
       "bg: deck advance to atrecall10: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
       "bg: deck clip end via timeupdate hidden=true armed=atrecall1 onAdvance=true advance=yes rs=0 muted=false t=4.0",
       "bg: deck advance atrecall10 to atrecall1: src and play() in this handler, same element true, next from storage false, readyState 0",
@@ -421,7 +421,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804919
+       "dueAt": 1792756804915
       }
      ],
      "idx": 6,
@@ -515,7 +515,7 @@
      "pod-0014:10",
      "pod-0002:34"
     ],
-    "firstSoundMs": 172,
+    "firstSoundMs": 204,
     "diag": [
      "deck: start order head first=pod-0001:22 heads=3",
      "deck: src local pod-0001"
@@ -537,7 +537,7 @@
      "state": "playing",
      "pos": {
       "duration": 25,
-      "position": 0.00048079591836724944,
+      "position": 0,
       "playbackRate": 1
      },
      "cold": 0,

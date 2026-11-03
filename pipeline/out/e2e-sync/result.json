@@ -1,5 +1,5 @@
 {
- "at": "2026-11-03T04:05:14.775Z",
+ "at": "2026-11-03T04:43:15.563Z",
  "runs": [
   {
    "browser": "webkit",
@@ -14,6 +14,10 @@
     "lastSyncShown": true,
     "fileEncrypted": true,
     "tokenNotInFile": true,
+    "diagFlushedOnHide": true,
+    "diagInFile": true,
+    "diagOneDevice": true,
+    "diagNoSecrets": true,
     "noWriteBefore10s": true,
     "writeAfter10s": true,
     "writeDelayAbout10s": true,
@@ -43,7 +47,14 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "writeDelayMs": 10022,
+   "diagLines": 12,
+   "diagSample": [
+    "77vx slot0 sy4:1 state 2",
+    "77vx slot1 sy0:1 state 0",
+    "77vx video: warm ended early slot1 sy0:1",
+    "77vx app: hidden"
+   ],
+   "writeDelayMs": 10023,
    "hosts": [
     "127.0.0.1:4176",
     "fonts.googleapis.com",
@@ -66,6 +77,10 @@
     "lastSyncShown": true,
     "fileEncrypted": true,
     "tokenNotInFile": true,
+    "diagFlushedOnHide": true,
+    "diagInFile": true,
+    "diagOneDevice": true,
+    "diagNoSecrets": true,
     "noWriteBefore10s": true,
     "writeAfter10s": true,
     "writeDelayAbout10s": true,
@@ -95,7 +110,14 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "writeDelayMs": 10016,
+   "diagLines": 10,
+   "diagSample": [
+    "8xtk slot2 sy7:1 state 1",
+    "8xtk slot2 sy7:1 state 2",
+    "8xtk slot0 sy6:1 state 2",
+    "8xtk app: hidden"
+   ],
+   "writeDelayMs": 10015,
    "hosts": [
     "127.0.0.1:4176",
     "fonts.googleapis.com",

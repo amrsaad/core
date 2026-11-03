@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-03T04:11:57.018Z",
+  "at": "2026-11-03T04:49:59.282Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -20,7 +20,7 @@
         "realSwipeMoves": true,
         "tenSwipesMeasured": true,
         "allBuffered": true,
-        "allUnder100": true,
+        "allUnder100": false,
         "startedFromBlob": true,
         "playbackTimeIsSourceTime": true,
         "noMediaStreamRequests": true,
@@ -50,47 +50,47 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1693,
+        "coldStartMs": 1618,
         "preloadedMoments": 30,
         "preloadedBytes": 6289240,
         "bytesPerMoment": 209641,
         "swipes": 10,
         "cachedStartMs": [
-          13,
-          13,
-          12,
-          15,
-          8,
-          15,
-          14,
-          14,
+          135,
           11,
+          14,
+          16,
+          11,
+          16,
+          15,
+          16,
+          12,
           15
         ],
-        "cachedStartMax": 15,
-        "cachedStartMedian": 14,
+        "cachedStartMax": 135,
+        "cachedStartMedian": 15,
         "firstFrames": [
-          "first-frame 15ms buffered local",
-          "first-frame 13ms buffered local",
-          "first-frame 13ms buffered local",
-          "first-frame 12ms buffered local",
-          "first-frame 15ms buffered local",
-          "first-frame 8ms buffered local",
-          "first-frame 15ms buffered local",
-          "first-frame 14ms buffered local",
-          "first-frame 14ms buffered local",
+          "first-frame 9ms buffered local",
+          "first-frame 135ms buffered local",
           "first-frame 11ms buffered local",
+          "first-frame 14ms buffered local",
+          "first-frame 16ms buffered local",
+          "first-frame 11ms buffered local",
+          "first-frame 16ms buffered local",
+          "first-frame 15ms buffered local",
+          "first-frame 16ms buffered local",
+          "first-frame 12ms buffered local",
           "first-frame 15ms buffered local"
         ],
         "settingsText": "Preloaded: 36 moments, 7.2 MB",
         "offlineStartMs": [
+          11,
           10,
-          9,
-          9,
-          8
+          10,
+          14
         ],
         "offlineRestartStartMs": [
-          10,
+          11,
           9,
           7
         ],
