@@ -18,6 +18,7 @@ import { lockMeta, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS 
 import { cursorFor, historyBefore, parseSaved, queueKey, recentFromLog, releaseTail, remixTail, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMoment, sessionSkip, SIGNAL, type MomentCursor } from './mix';
 import { bumpCell, bumpColdNetStart, bumpPair, hourKey } from './signals';
+import { clearFocus, focusActive, focusFilter, inFocus, readFocus, subscribeFocus, type Focus } from './focus';
 import { bumpStart, dropOverStarted, isQuickSkip, markRejected, quickSkip, resumeSaved, setTabCursor, START_MAX } from './tabs';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
 import { clampRate, DEFAULT_RATE, nextRate, rateOf, type Rate } from '../lib/state';
@@ -115,7 +116,24 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const actRef = useRef<(a: DeskAction) => void>(() => {});
   const playRef = useRef<(want: boolean) => void>(() => {});
   const form: Form = state.settings.form ?? 'video';
-  const pool = useMemo(() => filterPool(allPool, form), [allPool, form]);
+  // Temporärer Fokus (Entscheidung 39): harter Filter auf den Pool vor der Mischung, pro Gerät. Gewichte, Anteile und Lernen bleiben.
+  const [focus, setFocus] = useState<Focus | null>(() => readFocus(clockNow().getTime()));
+  const focusRef = useRef(focus);
+  focusRef.current = focus;
+  const formPool = useMemo(() => filterPool(allPool, form), [allPool, form]);
+  const pool = useMemo(() => focusFilter(formPool, focus, clockNow().getTime()), [formPool, focus]);
+  useEffect(() => subscribeFocus(() => setFocus(readFocus(clockNow().getTime()))), []);
+  // Fokus gesetzt, geändert oder gelöscht: der Rest hinter dem laufenden Moment wird aus dem neuen Pool gewählt (Gewichte und Anteile bleiben)
+  const focusFirst = useRef(true);
+  useEffect(() => {
+    if (focusFirst.current) {
+      focusFirst.current = false;
+      return;
+    }
+    if (queue.current.length) replanRef.current(Math.min(queue.current.length, idxRef.current + 1));
+    rerender();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focus]);
   const textRef = useRef(form === 'text');
   textRef.current = form === 'text';
   /** Im Textmodus: Textende des aktuellen Moments war sichtbar */
@@ -469,7 +487,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   };
 
   const [recall, setRecall] = useState<{ m: Moment; review: boolean } | null>(null);
-  const findMoment = (id: string): Moment | undefined => stateRef.current.savedMoments[id]?.moment ?? pool.find((x) => x.id === id);
+  // Abrufkarten nehmen nur Momente aus dem Fokus (Entscheidung 39)
+  const findMoment = (id: string): Moment | undefined => {
+    const m = stateRef.current.savedMoments[id]?.moment ?? pool.find((x) => x.id === id);
+    const f = focusRef.current;
+    return m && focusActive(f, clockNow().getTime()) && !inFocus(m, f) ? undefined : m;
+  };
   const rng = useRef<() => number>();
   rng.current ??= makeRng();
   const answerRecall = (got: boolean) => {
@@ -590,6 +613,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const goTo = useCallback(
     (next: number) => {
       if (next < 0 || next === idxRef.current) return;
+      // Ein abgelaufener Fokus endet bei jedem Wechsel (Entscheidung 39)
+      if (focusRef.current && !focusActive(focusRef.current, clockNow().getTime())) clearFocus();
       closeForYou();
       pruneBad();
       ensureQueue(next + queueAhead(rateRef.current));
@@ -2129,12 +2154,22 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!deskRef.current) setCapOpen(false);
   }, [idx, form]);
 
+  const focusOn = focusActive(focus, clockNow().getTime());
+  const endCounts = Object.fromEntries(otherForms(form).map((f) => [f, unseenCount(allPool, f, state.momentSeen, state.mutedChannels)])) as Record<Form, number>;
   if (!allPool.length) return <Empty text="No moments in the pool yet. The daily run fills it." />;
-  if (!pool.length)
+  if (!formPool.length)
     return (
       <div className="vfeed" ref={dragEl}>
         <FormSwitch form={form} setForm={setForm} rate={rateOf(state.settings)} onRate={cycleRate} />
         <Empty text={emptyFormLine(form)} />
+      </div>
+    );
+  // Leerer Fokus: sauberes Ende mit "Clear focus" (Entscheidung 39)
+  if (!pool.length)
+    return (
+      <div className="vfeed" ref={dragEl}>
+        <FormSwitch form={form} setForm={setForm} rate={rateOf(state.settings)} onRate={cycleRate} />
+        <EndPage form={form} counts={endCounts} setForm={setForm} focus onClearFocus={() => clearFocus()} />
       </div>
     );
   if (error) return <Empty text={`${error}. Moments need internet.`} />;
@@ -2142,7 +2177,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     return (
       <div className="vfeed" ref={dragEl}>
         <FormSwitch form={form} setForm={setForm} rate={rateOf(state.settings)} onRate={cycleRate} />
-        <EndPage form={form} counts={Object.fromEntries(otherForms(form).map((f) => [f, unseenCount(allPool, f, state.momentSeen, state.mutedChannels)])) as Record<Form, number>} setForm={setForm} />
+        <EndPage form={form} counts={endCounts} setForm={setForm} focus={focusOn} onClearFocus={() => clearFocus()} />
       </div>
     );
 
@@ -2182,7 +2217,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       )}
       {!single && form !== 'text' && idx === queue.current.length - 1 && (
         <div className="vslot vghost" style={{ ['--off' as string]: 1 }} aria-hidden="true">
-          <EndPage form={form} counts={Object.fromEntries(otherForms(form).map((f) => [f, unseenCount(allPool, f, state.momentSeen, state.mutedChannels)])) as Record<Form, number>} setForm={setForm} ghost />
+          <EndPage form={form} counts={endCounts} setForm={setForm} focus={focusOn} onClearFocus={() => clearFocus()} ghost />
         </div>
       )}
       </div>
@@ -2334,7 +2369,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       )}
 
       {!m && !forYou && idx >= queue.current.length && (
-        <EndPage form={form} counts={Object.fromEntries(otherForms(form).map((f) => [f, unseenCount(allPool, f, state.momentSeen, state.mutedChannels)])) as Record<Form, number>} setForm={setForm} onBack={() => navRef.current(queue.current.length - 1)} />
+        <EndPage form={form} counts={endCounts} setForm={setForm} focus={focusOn} onClearFocus={() => clearFocus()} onBack={() => navRef.current(queue.current.length - 1)} />
       )}
       </div>
 
@@ -2457,7 +2492,7 @@ function Cover({ src, className }: { src: string; className: string }) {
 }
 
 /** Ruhige Endseite: Satz, zweiter Satz, zwei Knöpfe zu den anderen Reitern. Wisch nach unten geht zurück (nur hinter dem letzten Moment). */
-function EndPage({ form, counts, setForm, onBack, ghost }: { form: Form; counts: Record<Form, number>; setForm: (f: Form) => void; onBack?: () => void; ghost?: boolean }) {
+function EndPage({ form, counts, setForm, onBack, ghost, focus, onClearFocus }: { form: Form; counts: Record<Form, number>; setForm: (f: Form) => void; onBack?: () => void; ghost?: boolean; /** Ein Fokus ist aktiv: Satz dazu und Knopf "Clear focus" (Entscheidung 39) */ focus?: boolean; onClearFocus?: () => void }) {
   const y0 = useRef<number | null>(null);
   return (
     <div
@@ -2467,9 +2502,14 @@ function EndPage({ form, counts, setForm, onBack, ghost }: { form: Form; counts:
       onPointerDown={(e) => { y0.current = e.clientY; }}
       onPointerUp={(e) => { if (onBack && y0.current !== null && e.clientY - y0.current > 60) onBack(); y0.current = null; }}
     >
-      <p className="vend-line" data-testid={ghost ? undefined : 'end-line'}>{endLine(form)}</p>
+      <p className="vend-line" data-testid={ghost ? undefined : 'end-line'}>{focus ? 'Nothing left in your focus.' : endLine(form)}</p>
       <p className="vend-sub">{END_SUB}</p>
       <div className="vend-btns">
+        {focus && onClearFocus && (
+          <button type="button" className="vend-btn" data-testid={ghost ? undefined : 'end-clear-focus'} onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()} onClick={onClearFocus}>
+            Clear focus
+          </button>
+        )}
         {otherForms(form).map((f) => (
           <button key={f} type="button" className="vend-btn" data-testid={ghost ? undefined : `end-${f}`} disabled={!counts[f]} onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()} onClick={() => setForm(f)}>
             {endButtonLabel(f, counts[f])}
