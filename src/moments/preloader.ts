@@ -2,6 +2,7 @@
 // in die Cache API (Name core-preload-v1) und gibt sie dem Player als Blob-URL. Läuft im Hintergrund, ein Abruf nach dem anderen,
 // bei WLAN und Mobilfunk gleich. Die Regeln (Auswahl, Verdrängung, Netzzustand) stehen in preload.ts.
 import { LOCAL } from '../video/ytApi';
+import { connPoor, readConn, type Conn } from './context';
 import { Mp3Error, readHead, sliceMp3, type Mp3Head, type RangeFetch } from './mp3range';
 import { addNet, isPoorNet, keyOf, nextToLoad, planEviction, PRELOAD_CAP_BYTES, windowOfTime, type NetSample, type Ranked, type Stored } from './preload';
 import { headsKey, parseHeads, type Head } from './startHead';
@@ -36,6 +37,8 @@ export interface PreloaderDeps {
   now: () => number;
   perfNow: () => number;
   online: () => boolean;
+  /** navigator.connection (Brief 09, Schritt 6): ein langsamer effectiveType oder downlink unter 1,5 Mbit/s gilt sofort als schlechtes Netz. Fehlt in iOS Safari. */
+  conn?: () => Conn | undefined;
   storage: StorageLike | null;
   createObjectURL: (b: Blob) => string;
   revokeObjectURL: (u: string) => void;
@@ -135,6 +138,11 @@ export class Preloader {
     }
   }
 
+  /** IDs aller Momente im Vorrat (vor dem Ende von init der Index der letzten Sitzung). Für den Start aus dem Vorrat, wenn die Köpfe nicht reichen. */
+  heldIds(): string[] {
+    return this.inited ? [...this.entries.keys()] : [...new Set([...this.indexIds, ...this.entries.keys()])];
+  }
+
   /** Liegt der Moment im Vorrat? Vor dem Ende von init gilt der Index der letzten Sitzung. */
   held(id: string): boolean {
     return this.inited ? this.entries.has(id) : this.indexIds.has(id) || this.entries.has(id);
@@ -222,7 +230,7 @@ export class Preloader {
     this.emit();
   }
   poor() {
-    return isPoorNet(this.net, this.d.online());
+    return isPoorNet(this.net, this.d.online()) || connPoor(this.d.conn?.());
   }
   netSamples() {
     return this.net;
@@ -471,6 +479,7 @@ export function browserPreloader(): Preloader | null {
     now: () => Date.now(),
     perfNow: () => performance.now(),
     online: () => navigator.onLine,
+    conn: readConn,
     storage,
     createObjectURL: (b) => URL.createObjectURL(b),
     revokeObjectURL: (u) => URL.revokeObjectURL(u),

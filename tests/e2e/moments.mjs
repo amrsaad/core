@@ -307,10 +307,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.recallMissed2d = rs.length === 1 && rs[0].results.length === 1 && rs[0].results[0].got === false && Math.round((rs[0].due - rs[0].results[0].at) / 86400000) === 2;
     c.todayNoGotItForMiss = await waitFor(page, () => /, 0 got it$/.test(document.querySelector('[data-testid=today]')?.textContent ?? ''));
 
-    // Punkt 6: Tageszahl oben, zählt jeden neu gezeigten Moment, kein Stopp
+    // Punkt 6: Tageszahl oben, zählt jeden gespielten Moment (Entscheidung 45: erst nach einer Sekunde Wiedergabe, nicht beim Ankommen), kein Stopp
     const todayTxt = await page.evaluate(() => document.querySelector('[data-testid=today]')?.textContent ?? '');
     r.today = todayTxt;
-    c.todayCount = /^today ([5-9]|\d\d) seen, \d+ got it$/.test(todayTxt);
+    c.todayCount = /^today ([3-9]|\d\d) seen, \d+ got it$/.test(todayTxt);
     // Punkt 4: auto heißt Englisch aus, Arabisch an, rechtsläufig, mindestens 20 px
     r.captions = capLog;
     c.captionsAutoRule = capLog.every((x) => x.shown === x.ar);

@@ -22,7 +22,14 @@ const k = Buffer.from(raw).toString('base64url');
 const waitFor = async (page, fn, arg, timeout = 8000) => {
   try { await page.waitForFunction(fn, arg, { timeout, polling: 100 }); return true; } catch { return false; }
 };
-const freshPage = async (browser, url, k, poolBody, query) => {
+// Media-Session-Handler mitschreiben (Chromium legt sie nicht offen), wie in audiotab.mjs
+const MS_SPY = () => {
+  window.__ms = {};
+  const ms = navigator.mediaSession;
+  const orig = ms.setActionHandler.bind(ms);
+  ms.setActionHandler = (a, f) => { if (f) window.__ms[a] = f; else delete window.__ms[a]; return orig(a, f); };
+};
+const freshPage = async (browser, url, k, poolBody, query, extraInit) => {
   const cx = await browser.newContext({ ...devices['iPhone 15'], serviceWorkers: 'block' });
   await cx.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
   await cx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
@@ -30,6 +37,7 @@ const freshPage = async (browser, url, k, poolBody, query) => {
   await pg.addInitScript(() => { window.__ytSlow = true; });
   // Das nachgebaute Medien-Element muss vor dem ersten Gebrauch da sein: die Freischaltung per Geste spielt schon vor dem ersten Moment, ein echtes Element würde danach ein spätes ended liefern
   await pg.addInitScript(FAKE_MEDIA);
+  if (extraInit) await pg.addInitScript(extraInit);
   await pg.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBody }));
   await pg.goto(`${url}${query}#k=${k}`);
   return { cx, pg };
@@ -67,7 +75,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bgAudioElement = await pa.evaluate(() => !!document.querySelector('audio'));
     const a0 = await pa.evaluate(() => window.__core.moment().id);
     c.bgMediaSession = await pa.evaluate(() => !('mediaSession' in navigator) || typeof MediaMetadata === 'undefined' || navigator.mediaSession.metadata?.title === window.__core.moment().hook);
-    c.bgSeenAtStartInForeground = await pa.evaluate((id) => window.__core.seen(id), a0);
+    // Entscheidung 45: gesehen erst nach einer Sekunde Wiedergabe, nicht beim Ankommen
+    c.bgSeenAtStartInForeground = await waitFor(pa, (id) => window.__core.seen(id), a0, 4000);
     await setVisibility(pa, 'hidden');
     await pa.waitForTimeout(400);
     c.bgAudioKeepsPlaying = (await pa.evaluate(() => window.__core.state())) === 1;
@@ -79,6 +88,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await waitFor(pa, () => window.__core.idx() >= 2 && window.__core.state() === 1, undefined, 10000);
     await setVisibility(pa, 'visible');
     await pa.waitForTimeout(200);
+    // Der laufende Moment zählt als gesehen, sobald er in diesem Lauf mindestens eine Sekunde gespielt hat (Entscheidung 45)
+    await waitFor(pa, () => window.__core.seen(window.__core.moment().id), undefined, 4000);
     const aBack = await pa.evaluate(() => ({ id: window.__core.moment().id, st: window.__core.state(), seen: window.__core.seen(window.__core.moment().id) }));
     c.bgBackOnRunningMoment = aBack.st === 1 && aBack.seen;
     const aLog = await bgLog(pa);
@@ -149,6 +160,25 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await setVisibility(pe, 'visible');
     c.bgRejectResumesOnReturn = await waitFor(pe, (idx) => window.__core.state() === 1 && window.__core.idx() === idx, atReject, 4000);
     await fe.cx.close();
+
+    // Brief 09, Ergänzung: Weiter am Sperrbildschirm startet bei verdecktem Bildschirm nie per Netz (iOS lädt dann erst nach der Rückkehr weiter).
+    // Ohne Vorrat bleibt der laufende Moment, die Diagnose sagt es. Das Ziehen eines Vorrats-Moments prüft audiotab.mjs mit echtem Vorrat.
+    const fn = await freshPage(browser, url, k, poolBgAudio, '?now=2026-10-23&seed=3', MS_SPY);
+    const pn = fn.pg;
+    await pn.waitForSelector('[data-testid=form-switch]');
+    await pn.click('[data-testid=form-switch] >> text=Audio');
+    await waitFor(pn, () => window.__core.state() === 1 && window.__core.moment()?.audio === true);
+    c.bgLockNextHandler = await pn.evaluate(() => typeof window.__ms?.nexttrack === 'function');
+    const nxIdx = await pn.evaluate(() => window.__core.idx());
+    const nxNet0 = await pn.evaluate(() => window.__core.diag().filter((x) => /^deck: src net /.test(x)).length);
+    await setVisibility(pn, 'hidden');
+    await pn.evaluate(() => window.__ms.nexttrack());
+    c.bgLockNextStayLine = await waitFor(pn, () => window.__core.diag().some((x) => /^lock next: stay /.test(x)), undefined, 3000);
+    await pn.waitForTimeout(500);
+    const nx = await pn.evaluate(() => ({ idx: window.__core.idx(), st: window.__core.state(), net: window.__core.diag().filter((x) => /^deck: src net /.test(x)).length }));
+    c.bgLockNextNoNetStart = nx.net === nxNet0;
+    c.bgLockNextKeepsMoment = nx.idx === nxIdx && nx.st === 1;
+    await fn.cx.close();
 
     // Video-Reiter mit eigenem Stream: läuft im Hintergrund bis zum Ende, dann Stopp ohne Auto-Weiter
     const fv = await freshPage(browser, url, k, poolBgVideo, '?now=2026-10-23&seed=3');

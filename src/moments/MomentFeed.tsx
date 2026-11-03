@@ -15,8 +15,8 @@ import { loudLine, recordLoud } from './loudness';
 import { browserPreloader } from './preloader';
 import { isPreloadable, keyOf, netRank, queueAhead, streamKind } from './preload';
 import { coldToday, countColdStart, pickHeads, startOrder } from './startHead';
-import { lockMeta, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS } from './lockScreen';
-import { cursorFor, historyBefore, parseSaved, queueKey, recentFromLog, releaseTail, remixTail, restoreQueue } from './queue';
+import { lockMeta, lockNextPlan, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS } from './lockScreen';
+import { cursorFor, historyBefore, parseSaved, pruneAndHeal, queueKey, recentFromLog, releaseTail, remixTail, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMoment, sessionSkip, SIGNAL, type MomentCursor } from './mix';
 import { attentionStep, makeCtx, newAttention, readConn, type Attention } from './context';
 import { addMissed, bumpCell, bumpColdNetStart, bumpPair, hourKey } from './signals';
@@ -44,8 +44,9 @@ import { makeRng } from './rng';
 import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
 import { addFrames, atRest, commitVelocity, dragY, frameSample, release, SPRING_BACK, SPRING_COMMIT, stepSpring, Velocity, type Spring, type SpringState } from './swipe';
 import { saveGate } from '../lib/useAppState';
-import { emptyFormLine, END_SUB, endButtonLabel, endLine, filterPool, formOf, FORM_LABEL, FORMS, momentText, otherForms, textEndReached, unseenCount, type Form } from './form';
-import { atEnd, countsSeenAtStart, EndLedger, isBackground, onLeave, successorOf } from './background';
+import { blockedCount, emptyFormLine, END_SUB, endButtonLabel, endLine, filterPool, formOf, FORM_LABEL, FORMS, momentText, otherForms, textEndReached, unseenCount, waitingLine, type Form } from './form';
+import { atEnd, EndLedger, isBackground, onLeave, successorOf } from './background';
+import { PlayTracker } from './played';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
 /** Desktop-Modus ab 900 px: Panel rechts, Übersicht, Seitenblatt. Fehlt das Feld, gilt das mobile Verhalten unverändert. */
@@ -218,6 +219,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   /** Zum nächsten Moment springen, auch aus Code, der vor goTo definiert ist */
   const skipRef = useRef<() => void>(() => {});
   const everPlayed = useRef(false);
+  /** Entscheidung 45: wie lange jeder Moment wirklich gespielt hat. Gesehen zählt erst nach einer Sekunde Spielzeit (Video und Audio). */
+  const played = useRef(new PlayTracker());
+  const seenMarked = useRef(new Set<string>());
+  const unplayedNoted = useRef(new Set<string>());
   /** Offene Messung Wisch bis erstes Bild */
   const swipe = useRef<{ j: number; t0: number; buffered: boolean } | null>(null);
   /** Messung für die Zeile "video: ..." (Issue 22): Wisch bis Bereitschaft des Players und bis zum ersten PLAYING */
@@ -385,9 +390,14 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           .startHeads()
           .map((h) => pool.find((m) => m.id === h.id))
           .filter((m): m is Moment => !!m && !s.momentSeen[m.id] && !s.mutedChannels[m.channel] && (s.startShown?.[m.id] ?? 0) < START_MAX);
-        const r = startOrder(queue.current, held, heads);
+        // Entscheidung 45: reichen die Köpfe nicht (gesehen, stumm, nicht mehr im Vorrat), kommt irgendein zulässiger Moment aus dem Vorrat
+        const reserve = pre
+          .heldIds()
+          .map((id) => pool.find((m) => m.id === id))
+          .filter((m): m is Moment => !!m && formOf(m) === 'audio' && !s.momentSeen[m.id] && !s.mutedChannels[m.channel] && (s.startShown?.[m.id] ?? 0) < START_MAX);
+        const r = startOrder(queue.current, held, heads, reserve);
         queue.current = r.queue;
-        diag.current.push(`deck: start order ${r.how} first=${queue.current[0]?.id ?? 'none'} heads=${pre.startHeads().length}`);
+        diag.current.push(`deck: start order ${r.how} first=${queue.current[0]?.id ?? 'none'} heads=${pre.startHeads().length} usable=${heads.length} stock=${reserve.length}`);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -649,6 +659,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     update((s) => (s.momentSeen[m.id] ? { ...s, momentDay: today } : bumpCell({ ...s, momentDay: today, momentSeen: { ...s.momentSeen, [m.id]: Date.now() }, dayCount: countSeen(s.dayCount, today) }, today, hourKey(clockNow()), m, 'seen')));
   };
 
+  const markSeenRef = useRef(markSeen);
+  markSeenRef.current = markSeen;
+  /** Ein Moment, der nie gespielt hat (Hänge-Überwachung, Netzfehler, Autoplay verweigert), bleibt ungesehen (Entscheidung 45). Eine Zeile je Moment. */
+  const noteUnplayed = (m: Moment) => {
+    if (played.current.enough(m.id) || stateRef.current.momentSeen[m.id] || unplayedNoted.current.has(m.id)) return;
+    unplayedNoted.current.add(m.id);
+    diag.current.push(`skipped (not seen) ${m.id}`);
+  };
+
   // Erkennt, ob der Browser die Wiedergabe mit Ton verweigert hat. Puffern (langsames Netz, Podcast-Stream) ist keine
   // Verweigerung, sonst stand "Tap for sound" bei laufendem Ton (28.10.). Dann später noch einmal prüfen.
   // Nach dem ersten Tipp bleibt der Ton an. Startet ein Moment nicht von selbst, wird noch einmal angestoßen und
@@ -704,13 +723,51 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     setForYou(null);
   };
 
+  /**
+   * Audio-Reiter, Entscheidung 45: Der Nachfolger kommt aus dem Vorrat, nie vom Netz, solange einer erreichbar ist. Sichtbar innerhalb der nächsten drei,
+   * verdeckt aus dem ganzen Rest. Gibt den Ausgang zurück (held, pulled, net, none) und setzt bei pulled die Warteschlange um.
+   */
+  const pullStock = (hidden: boolean) => {
+    if (form !== 'audio' || !pre) return { how: 'none' as const };
+    const r = lockNextPlan(queue.current, idxRef.current, (m) => pre.held(m.id) || LOCAL.has(keyOf(m)), hidden);
+    if (r.how === 'pulled') {
+      queue.current = r.queue;
+      for (const sl of slots.current) if (sl.index >= idxRef.current + 1) sl.index = -1;
+      if (!single) for (const k of [idxRef.current + 1, idxRef.current + 2]) if (k < queue.current.length && slotFor(k).index !== k) assign(slotFor(k), k, false);
+      syncPre(idxRef.current);
+    }
+    return r;
+  };
+  /** Weiter vom Sperrbildschirm oder der Medientaste (Brief 09, Schritt 5). Verdeckt ohne Vorrat startet nichts vom Netz: der laufende Moment spielt zu Ende. */
+  const lockNext = () => {
+    const hidden = isBackground(document.visibilityState);
+    if (form !== 'audio' || !pre) {
+      goTo(idxRef.current + 1);
+      return;
+    }
+    pruneBad();
+    ensureQueue(idxRef.current + 1 + queueAhead(rateRef.current));
+    const r = pullStock(hidden);
+    if (r.how === 'pulled') diag.current.push(`lock next: pulled ${r.id}`);
+    else if (r.how === 'net') {
+      if (hidden) {
+        diag.current.push(`lock next: stay ${r.id} (no stock, net start refused while hidden)`);
+        return;
+      }
+      diag.current.push(`lock next: net ${r.id}`);
+    } else if (r.how === 'held') diag.current.push(`lock next: held ${r.id}`);
+    goTo(idxRef.current + 1);
+  };
+  const lockNextRef = useRef(lockNext);
+  lockNextRef.current = lockNext;
+
   /** Gescheiterte Momente aus dem Rest der Warteschlange nehmen (Wisch und Auto-Weiter lesen danach dieselbe Stelle) */
   const pruneBad = () => {
     const from = idxRef.current + 1;
-    const rest = queue.current.slice(from);
-    const clean = rest.filter((x) => !bad.current.has(x.videoId));
-    if (clean.length !== rest.length) {
-      queue.current = [...queue.current.slice(0, from), ...clean];
+    // Entscheidung 45: fehlt ein Nachbar an idx+1 oder idx+2, füllt der nächste Moment mit anderem Bereich die Lücke (pruneAndHeal)
+    const next = pruneAndHeal(queue.current, idxRef.current, (x) => bad.current.has(x.videoId));
+    if (next.length !== queue.current.length) {
+      queue.current = next;
       for (const sl of slots.current) if (sl.index >= from) sl.index = -1;
     }
   };
@@ -724,6 +781,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     pruneBad();
     const j = idxRef.current + 1;
     if (!queue.current[j]) ensureQueue(j + 1);
+    // Verdeckt darf nur ein Vorrats-Moment starten (iOS lädt eine Netzquelle erst weiter, wenn die App wieder sichtbar ist): der Nachfolger kommt aus dem Vorrat
+    if (isBackground(document.visibilityState)) pullStock(true);
     const nm = successorOf(queue.current, idxRef.current, bad.current);
     audioDeck.arm(nm && formOf(nm) === 'audio' ? deckClipOf(nm) : null);
     // Der Nachfolger kommt wenn möglich als Blob aus dem Vorrat: sein Start im Hintergrund dauert dann Millisekunden statt Sekunden (Issue 14)
@@ -810,6 +869,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       const prev = idxRef.current;
       diag.current.push(`go ${prev}->${next}`);
       const prevM = queue.current[prev];
+      // Entscheidung 45: der verlassene Moment ist gesehen, wenn er mindestens eine Sekunde gespielt hat, sonst bleibt er ungesehen im Pool
+      if (prevM && !textRef.current) {
+        played.current.set(prevM.id, false);
+        if (played.current.enough(prevM.id)) markSeen(prevM);
+        else noteUnplayed(prevM);
+      }
       // Weitergewischt: Wertung nach geschautem Anteil (learn.ts). Unter 3 s ist ein Skip (Kanal und Thema mal 0,97), zwei Skips derselben
       // Folge in 7 Tagen setzen die Folge 7 Tage auf 0,5 (Entscheidung 38). Im Textmodus gibt es keine Wiedergabezeit,
       // darum keine Zeitwertung. Nach einem Chip ersetzt dessen Wirkung die Wertung (silentLeave).
@@ -823,7 +888,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         const watchedSec = (Date.now() - since.current) / 1000;
         const lv = timed ? leaveOf(watchedSec, prevM.end - prevM.start) : null;
         // Zweimal vor 5 s weggewischt: abgelehnt, gilt als gesehen, kommt nie wieder (Entscheidung 36)
-        if (timed && isQuickSkip(watchedSec)) update((s) => quickSkip(s, prevM, nowMs).state);
+        if (timed && isQuickSkip(watchedSec) && played.current.any(prevM.id)) update((s) => quickSkip(s, prevM, nowMs).state);
         // Drei Skips unter 3 s in Folge: die nächsten 10 Momente ohne lange Momente und ohne Brain-Text (Issue 26), Rest der Schlange neu gewählt
         if (timed) {
           const st = attentionStep(attention.current, lv?.kind === 'skip', prev);
@@ -897,6 +962,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         : swipePlan(next, slots.current.slice(0, SLOTS).map((x): SlotView => ({ index: x.index, warm: x.warm, visited: x.visited, warmPlayedMs: x.warm === 'running' && x.warmAt ? t0 - x.warmAt : 0 })), warmCtxOf);
       vstat.current = { j: next, t0, readyAt: ready ? 0 : null, mode: holds ? (target.warm === 'done' ? 'warm' : target.warm === 'running' ? 'warming' : ready ? 'paused' : 'cold') : 'cold', done: false };
       const play = !textRef.current;
+      // Lief der Vorlade-Player schon (Warmlauf), kommt kein neues PLAYING: die Spielzeit beginnt jetzt
+      if (play && holds && nm && target.st === STATE.PLAYING) played.current.set(nm.id, true);
       if (single) assign(slots.current[0], next, play);
       else {
         assign(slotFor(next), next, play);
@@ -922,8 +989,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         }
         if (plan.promote !== null) promoteWarm(slots.current[plan.promote], plan.promote);
       }
-      // Im Hintergrund zählt erst das Ende (finish), bei der Rückkehr der laufende Moment
-      if (!textRef.current && countsSeenAtStart(isBackground(document.visibilityState))) markSeen(queue.current[next]);
+      // Gesehen zählt nicht beim Ankommen (Entscheidung 45), sondern nach einer Sekunde Spielzeit (Abfrage unten) oder beim Ende (finish)
       textSeen.current = -1;
       if (textBox.current) textBox.current.scrollTop = 0;
       if (!textRef.current) soundGuard(next);
@@ -1146,12 +1212,14 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                 if (vsr && slot.index === vsr.j && vsr.readyAt === null) vsr.readyAt = Math.round(performance.now() - vsr.t0);
                 slot.player!.mute();
                 assign(slot, slot.index, slot.index === idxRef.current && !textRef.current);
-                if (slot.index === idxRef.current && !textRef.current && countsSeenAtStart(isBackground(document.visibilityState))) markSeen(queue.current[slot.index]);
                 rerender();
               },
               onState: (st) => {
                 diag.current.push(`slot${s} ${slot.mid} state ${st}`);
                 slot.st = st;
+                // Spielzeit des aktuellen Moments (Entscheidung 45)
+                const pm = queue.current[slot.index];
+                if (pm && slot.index === idxRef.current && !textRef.current) played.current.set(pm.id, st === STATE.PLAYING);
                 // Vorschaubild bleibt bis zum ersten Bild: ohne Umweg über React, damit kein Frame der YouTube-Oberfläche durchrutscht
                 slot.el?.toggleAttribute('data-live', st === STATE.PLAYING);
                 // Issue 22: Bereitschaft des Zielmoments (erster Zustand nach dem Wisch), Gate der Vorlade-Player, Abdeckfläche, Puffer-Stopps
@@ -1370,6 +1438,11 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       const m = queue.current[idxRef.current];
       if (!p || !sl.ready || !m || forYouRef.current || textRef.current || recallRef.current) return;
       const c = p.getCurrentTime?.() ?? 0;
+      // Gesehen: mindestens eine Sekunde gespielt (Entscheidung 45). Im Hintergrund zählt das Ende (finish) oder die Rückkehr.
+      if (!isBackground(document.visibilityState) && !seenMarked.current.has(m.id) && played.current.enough(m.id)) {
+        seenMarked.current.add(m.id);
+        markSeenRef.current(m);
+      }
       // Laden sichtbar machen, hängende Momente überspringen
       if (sl.st === STATE.PLAYING || userPaused.current) {
         waitSince.current = 0;
@@ -1384,6 +1457,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         if (everPlayed.current && waited > 12_000 && c < m.start + 1) {
           diag.current.push(`watchdog ${m.id}`);
           bad.current.add(m.videoId);
+          // Nie als gesehen: der Moment bekommt nur die Sitzungs-Sperre und kommt wieder, sobald er lädt (Entscheidung 45)
+          noteUnplayed(m);
           waitSince.current = 0;
           goTo(idxRef.current + 1);
           return;
@@ -1454,7 +1529,6 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       checkTextEnd();
     } else if (active && !userPaused.current && !forYouRef.current) {
       p?.playVideo();
-      markSeen(queue.current[idxRef.current]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
@@ -2226,6 +2300,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     const playable = !textRef.current && !forYouRef.current && !recallRef.current;
     if (isBackground(vis)) {
       diag.current.push(`bg: left ${m.id}`);
+      // Der Nachfolger kommt ab jetzt aus dem Vorrat (Entscheidung 45), solange der Bildschirm verdeckt ist
+      if (form === 'audio') armDeck();
       if (playable && onLeave(formOf(m), !HLS.has(m.videoId)) === 'pause' && !userPaused.current) {
         current().player?.pauseVideo();
         leftPaused.current = true;
@@ -2234,7 +2310,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     }
     diag.current.push(`bg: back ${m.id}`);
     // Der laufende Moment ist jetzt zu sehen: gesehen (einmal), dann Karte oder Ton wieder aufnehmen
-    if (!textRef.current) markSeen(m);
+    if (!textRef.current && played.current.enough(m.id)) markSeen(m);
     if (!recallRef.current && (stateRef.current.recallQueue?.length ?? 0) > 0) {
       showFromQueue();
       if (recallRef.current) {
@@ -2312,7 +2388,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     };
     set('play', act('play', () => playRef.current(true)));
     set('pause', act('pause', () => playRef.current(false)));
-    set('nexttrack', act('nexttrack', () => goTo(idxRef.current + 1)));
+    set('nexttrack', act('nexttrack', () => lockNextRef.current()));
     // Audio-Reiter (Entscheidung 24): Zurück speichert, ein zweiter Druck binnen 1,5 s ist More like this. Sonst springt Zurück zum vorigen Moment.
     set('previoustrack', act('previoustrack', () => (form === 'audio' ? lockPrevRef.current() : goTo(idxRef.current - 1))));
     // Keine Sprünge um 10 Sekunden: der Sperrbildschirm zeigt dann Weiter und Zurück
@@ -2428,6 +2504,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   }, [idx, form]);
 
   const focusOn = focusActive(focus, clockNow().getTime());
+  // Entscheidung 45: sind alle ungesehenen Momente der Form in dieser Sitzung gesperrt, wartet die Endseite aufs Netz (Video und Audio)
+  const unseenHere = unseenCount(allPool, form, state.momentSeen, state.mutedChannels);
+  const blockedHere = blockedCount(allPool, form, state.momentSeen, state.mutedChannels, bad.current);
+  const waiting = blockedHere > 0 && blockedHere === unseenHere ? blockedHere : 0;
   const endCounts = Object.fromEntries(otherForms(form).map((f) => [f, unseenCount(allPool, f, state.momentSeen, state.mutedChannels)])) as Record<Form, number>;
   if (!allPool.length) return <Empty text="No moments in the pool yet. The daily run fills it." />;
   if (!formPool.length)
@@ -2442,7 +2522,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     return (
       <div className="vfeed" ref={dragEl}>
         <FormSwitch form={form} setForm={setForm} rate={rateOf(state.settings)} onRate={cycleRate} />
-        <EndPage form={form} counts={endCounts} setForm={setForm} focus onClearFocus={() => clearFocus()} />
+        <EndPage form={form} counts={endCounts} waiting={waiting} setForm={setForm} focus onClearFocus={() => clearFocus()} />
       </div>
     );
   if (error) return <Empty text={`${error}. Moments need internet.`} />;
@@ -2450,7 +2530,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     return (
       <div className="vfeed" ref={dragEl}>
         <FormSwitch form={form} setForm={setForm} rate={rateOf(state.settings)} onRate={cycleRate} />
-        <EndPage form={form} counts={endCounts} setForm={setForm} focus={focusOn} onClearFocus={() => clearFocus()} />
+        <EndPage form={form} counts={endCounts} waiting={waiting} setForm={setForm} focus={focusOn} onClearFocus={() => clearFocus()} />
       </div>
     );
 
@@ -2508,7 +2588,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       )}
       {!single && form !== 'text' && idx === queue.current.length - 1 && (
         <div className="vslot vghost" style={{ ['--off' as string]: 1 }} aria-hidden="true">
-          <EndPage form={form} counts={endCounts} setForm={setForm} focus={focusOn} onClearFocus={() => clearFocus()} ghost />
+          <EndPage form={form} counts={endCounts} waiting={waiting} setForm={setForm} focus={focusOn} onClearFocus={() => clearFocus()} ghost />
         </div>
       )}
       </div>
@@ -2660,7 +2740,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       )}
 
       {!m && !forYou && idx >= queue.current.length && (
-        <EndPage form={form} counts={endCounts} setForm={setForm} focus={focusOn} onClearFocus={() => clearFocus()} onBack={() => navRef.current(queue.current.length - 1)} />
+        <EndPage form={form} counts={endCounts} waiting={waiting} setForm={setForm} focus={focusOn} onClearFocus={() => clearFocus()} onBack={() => navRef.current(queue.current.length - 1)} />
       )}
       </div>
 
@@ -2783,7 +2863,7 @@ function Cover({ src, className }: { src: string; className: string }) {
 }
 
 /** Ruhige Endseite: Satz, zweiter Satz, zwei Knöpfe zu den anderen Reitern. Wisch nach unten geht zurück (nur hinter dem letzten Moment). */
-function EndPage({ form, counts, setForm, onBack, ghost, focus, onClearFocus }: { form: Form; counts: Record<Form, number>; setForm: (f: Form) => void; onBack?: () => void; ghost?: boolean; /** Ein Fokus ist aktiv: Satz dazu und Knopf "Clear focus" (Entscheidung 39) */ focus?: boolean; onClearFocus?: () => void }) {
+function EndPage({ form, counts, waiting, setForm, onBack, ghost, focus, onClearFocus }: { form: Form; counts: Record<Form, number>; /** Zahl gesperrter Momente, wenn nur noch solche übrig sind (Entscheidung 45) */ waiting?: number; setForm: (f: Form) => void; onBack?: () => void; ghost?: boolean; /** Ein Fokus ist aktiv: Satz dazu und Knopf "Clear focus" (Entscheidung 39) */ focus?: boolean; onClearFocus?: () => void }) {
   const y0 = useRef<number | null>(null);
   return (
     <div
@@ -2793,8 +2873,8 @@ function EndPage({ form, counts, setForm, onBack, ghost, focus, onClearFocus }: 
       onPointerDown={(e) => { y0.current = e.clientY; }}
       onPointerUp={(e) => { if (onBack && y0.current !== null && e.clientY - y0.current > 60) onBack(); y0.current = null; }}
     >
-      <p className="vend-line" data-testid={ghost ? undefined : 'end-line'}>{focus ? 'Nothing left in your focus.' : endLine(form)}</p>
-      <p className="vend-sub">{END_SUB}</p>
+      <p className="vend-line" data-testid={ghost ? undefined : 'end-line'}>{focus ? 'Nothing left in your focus.' : waiting ? waitingLine(form, waiting) : endLine(form)}</p>
+      {!waiting && <p className="vend-sub">{END_SUB}</p>}
       <div className="vend-btns">
         {focus && onClearFocus && (
           <button type="button" className="vend-btn" data-testid={ghost ? undefined : 'end-clear-focus'} onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()} onClick={onClearFocus}>

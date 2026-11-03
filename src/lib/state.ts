@@ -123,6 +123,9 @@ export interface AppState {
   momentSkips?: Record<string, number>;
   /** Abgelehnte Momente (Entscheidung 36): ID auf Zeitpunkt. Sie stehen auch in momentSeen. Per Sync, frühester Zeitpunkt. */
   momentRejected?: Record<string, number>;
+  /** Entscheidung 45 (Reparatur): Momente, deren Eintrag in momentSeen gelöscht wurde, weil sie nie gespielt haben. ID auf Zeitpunkt der Löschung.
+   *  Ein Eintrag in momentSeen, der nicht jünger ist als dieser Zeitpunkt, gilt nicht. Per Sync, spätester Zeitpunkt (hält die Löschung gegen das andere Gerät). */
+  momentUnseen?: Record<string, number>;
   /** Wenn-dann-Plan pro Woche (Montag als YYYY-MM-DD), Punkt 7 */
   plans?: Record<string, WeekPlan>;
   /** Desktop-Modus: die Übersicht der Tasten wurde beim ersten Start schon gezeigt */
@@ -171,4 +174,43 @@ export function adjustWeight(state: AppState, topic: string, factor: number): Ap
   const w = state.topicWeights[topic] ?? 1;
   const next = Math.min(WEIGHT_MAX, Math.max(WEIGHT_MIN, w * factor));
   return { ...state, topicWeights: { ...state.topicWeights, [topic]: Number(next.toFixed(4)) } };
+}
+
+// ---------- Reparatur 45 ----------
+
+/** Marker in localStorage: die einmalige Reparatur lief auf diesem Gerät */
+export const REPAIR45_KEY = 'core.repair45.v1';
+const HUNG_LINE = /^(?:watchdog|skipped \(not seen\)) (\S+)/;
+
+/**
+ * Entscheidung 45: Einträge in momentSeen, zu denen kein momentLog-Eintrag mit watched über 0 steht, werden gelöscht (der Moment hat nie gespielt).
+ * Dazu die Momente, die die Hänge-Überwachung im Protokoll hat (Zeilen "watchdog" und "skipped (not seen)"), solange sie nie bis zum Ende liefen:
+ * watched zählt ab dem Ankommen, ein Moment, der 12 s hing, hat dort schon über 0.
+ * Unberührt bleiben abgelehnte Momente, Einträge, die älter sind als das Protokoll (es deckt sie nicht ab), und alles bei leerem Protokoll.
+ * Jede Löschung bekommt einen Zeitpunkt in momentUnseen, damit der Sync den Eintrag nicht vom anderen Gerät zurückholt.
+ */
+export function repair45(s: AppState, now: number): { state: AppState; removed: string[] } {
+  if (!s.momentLog.length) return { state: s, removed: [] };
+  const played = new Set<string>();
+  const ended = new Set<string>();
+  let first = '';
+  for (const e of s.momentLog) {
+    if (e.watched > 0) played.add(e.id);
+    if (e.ended) ended.add(e.id);
+    if (!first || e.day < first) first = e.day;
+  }
+  const covered = new Date(`${first}T00:00:00`).getTime();
+  const hung = new Set<string>();
+  for (const d of s.diag ?? []) {
+    const m = HUNG_LINE.exec(d.l);
+    if (m) hung.add(m[1]);
+  }
+  const removed = Object.entries(s.momentSeen)
+    .filter(([id, at]) => !s.momentRejected?.[id] && at >= covered && (!played.has(id) || (hung.has(id) && !ended.has(id))))
+    .map(([id]) => id);
+  if (!removed.length) return { state: s, removed };
+  const gone = new Set(removed);
+  const momentSeen = Object.fromEntries(Object.entries(s.momentSeen).filter(([id]) => !gone.has(id)));
+  const momentUnseen = { ...(s.momentUnseen ?? {}), ...Object.fromEntries(removed.map((id) => [id, now])) };
+  return { state: { ...s, momentSeen, momentUnseen }, removed };
 }

@@ -46,10 +46,11 @@ describe('startOrder: der erste Moment ist lokal', () => {
 });
 
 describe('Köpfe', () => {
-  it('pickHeads: die nächsten drei vorladbaren nach der Stelle, der laufende zählt nicht', () => {
-    const q = [mom(0), mom(1), mom(2, { hls: 'https://x.test/a.m3u8' }), mom(3), mom(4), mom(5)];
+  it('pickHeads: die nächsten sechs vorladbaren nach der Stelle, der laufende zählt nicht (Brief 09: sechs statt drei)', () => {
+    const q = [mom(0), mom(1), mom(2, { hls: 'https://x.test/a.m3u8' }), mom(3), mom(4), mom(5), mom(6), mom(7), mom(8), mom(9)];
     const heads = pickHeads(q, 0, (m) => !!m.hls?.endsWith('.mp3'), keyOf);
-    expect(heads.map((h) => h.id)).toEqual(['m1', 'm3', 'm4']);
+    expect(HEADS).toBe(6);
+    expect(heads.map((h) => h.id)).toEqual(['m1', 'm3', 'm4', 'm5', 'm6', 'm7']);
     expect(heads).toHaveLength(HEADS);
     expect(heads[0].key).toBe(keyOf(q[1]));
   });

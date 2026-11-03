@@ -44,5 +44,15 @@ export const otherForms = (f: Form): Form[] => FORMS.filter((x) => x !== f);
 export function unseenCount(pool: Pick<Moment, 'id' | 'channel' | 'audio' | 'form'>[], f: Form, seen: Record<string, number>, muted: Record<string, string>): number {
   return pool.filter((m) => inForm(m, f) && !seen[m.id] && !muted[m.channel]).length;
 }
+/**
+ * Entscheidung 45: ungesehene Momente einer Form, die in dieser Sitzung gesperrt sind (Hänge-Überwachung, Netzfehler). Sie zählen in unseenCount
+ * als ungesehen (nie als gesehen markiert), die Sitzungs-Sperre ist keine Eintragung in momentSeen. blocked enthält videoId.
+ */
+export function blockedCount(pool: Pick<Moment, 'id' | 'videoId' | 'channel' | 'audio' | 'form'>[], f: Form, seen: Record<string, number>, muted: Record<string, string>, blocked: ReadonlySet<string>): number {
+  return pool.filter((m) => inForm(m, f) && !seen[m.id] && !muted[m.channel] && blocked.has(m.videoId)).length;
+}
+const WAIT_NOUN: Record<Form, [string, string]> = { video: ['video', 'videos'], audio: ['audio moment', 'audio moments'], text: ['text', 'texts'] };
+/** Endseite, wenn nur noch gesperrte Momente übrig sind: "Waiting for network. 14 videos ready when it's back." */
+export const waitingLine = (f: Form, n: number) => `Waiting for network. ${n} ${WAIT_NOUN[f][n === 1 ? 0 : 1]} ready when it's back.`;
 /** "Audio, 412 new" */
 export const endButtonLabel = (f: Form, n: number) => `${FORM_LABEL[f]}, ${n} new`;

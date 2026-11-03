@@ -1,5 +1,6 @@
 import { openDB, type IDBPDatabase } from 'idb';
-import { emptyState, type AppState } from './state';
+import { emptyState, repair45, REPAIR45_KEY, type AppState } from './state';
+import { diagLog } from './diag';
 
 const DB = 'core';
 const STORE = 'kv';
@@ -23,9 +24,25 @@ export async function loadState(): Promise<AppState> {
     // Alter Standard 55/25/20 wurde am 23.10.2026 durch Gleichverteilung ersetzt (Themenplan mit Max)
     const a = settings.areaShares;
     if (a && a.brain === 0.55 && a.body === 0.25 && a.beat === 0.2) settings.areaShares = { ...emptyState().settings.areaShares };
-    return { ...emptyState(), ...s, settings };
+    const loaded: AppState = { ...emptyState(), ...s, settings };
+    const fixed = runRepair45(loaded);
+    if (fixed !== loaded) await saveState(fixed);
+    return fixed;
   } catch {
     return emptyState();
+  }
+}
+
+/** Einmalige Reparatur (Entscheidung 45): Marker core.repair45.v1, danach nie wieder. Eine Diagnose-Zeile "repair45 removed N". */
+function runRepair45(s: AppState): AppState {
+  try {
+    if (localStorage.getItem(REPAIR45_KEY)) return s;
+    const r = repair45(s, Date.now());
+    localStorage.setItem(REPAIR45_KEY, String(Date.now()));
+    diagLog.push(`repair45 removed ${r.removed.length}`);
+    return r.state;
+  } catch {
+    return s;
   }
 }
 

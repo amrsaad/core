@@ -29,11 +29,18 @@ const PATCH = `
   window.YT.Player = function (el, opts) {
     const host = el.parentNode;
     const ev = opts.events;
-    let isCold = false, since = 0, acc = 0, state = -1;
+    let isCold = false, since = 0, plSince = 0, acc = 0, state = -1, curVid = opts.videoId || null;
+    // Brief 09: tatsächliche Spielzeit je Video (Zustand PLAYING), damit der Test den seen-Zähler dagegen prüfen kann
+    window.__pl = window.__pl || {};
+    const flush = () => { if (state === 1 && curVid) { const n = performance.now(); window.__pl[curVid] = (window.__pl[curVid] || 0) + (n - plSince); plSince = n; } };
+    window.__plNow = () => Object.fromEntries(Object.keys(window.__pl).map((k) => [k, Math.round(window.__pl[k])]));
+    window.__flushAll = () => (window.__flushers || []).forEach((f) => f());
+    (window.__flushers = window.__flushers || []).push(flush);
     const on = () => state !== 1 || acc + (performance.now() - since) < 3000;
     let refresh = () => {};
     const emit = (data) => {
-      if (data === 1) since = performance.now(); else if (state === 1) acc += performance.now() - since;
+      if (state === 1 && data !== 1) flush();
+      if (data === 1) plSince = since = performance.now(); else if (state === 1) acc += performance.now() - since;
       state = data;
       refresh();
       ev.onStateChange({ data });
@@ -45,8 +52,12 @@ const PATCH = `
     const load = this.loadVideoById, cue = this.cueVideoById, seek = this.seekTo;
     // Wie bei YouTube: ein Sprung im laufenden Player puffert kurz (80 bis 160 ms), dann kommt PLAYING wieder
     this.seekTo = (sec, ahead) => { const was = state === 1; seek(sec, ahead); if (was) { emit(3); setTimeout(() => emit(1), 80 + rnd() * 80); } };
-    this.loadVideoById = (a) => { isCold = true; acc = 0; state = -1; load(a); };
-    this.cueVideoById = (a) => { acc = 0; state = -1; cue(a); };
+    const vidOf = (a) => (typeof a === 'string' ? a : a.videoId);
+    // Brief 09: hängende Videos wie im schlechten Netz: der Player kommt nie auf PLAYING (Zustand bleibt bei CUED), window.__hang(videoId) entscheidet
+    this.loadVideoById = (a) => { flush(); curVid = vidOf(a); isCold = true; acc = 0; state = -1; if (window.__hang && window.__hang(curVid)) { cue(a); return; } load(a); };
+    this.cueVideoById = (a) => { flush(); curVid = vidOf(a); acc = 0; state = -1; cue(a); };
+    const playV = this.playVideo;
+    this.playVideo = () => { if (curVid && window.__hang && window.__hang(curVid)) return; playV(); };
     // Einblendung als echte Elemente im Player-Rahmen, damit der Test prüfen kann, ob etwas Eigenes darüberliegt
     const mk = (pos, h) => { const d = document.createElement('div'); d.className = 'ytfake-overlay'; d.style.cssText = 'position:absolute;left:0;right:0;' + pos + ';height:' + h + 'px;background:#c00;color:#fff;font:14px sans-serif;display:none;z-index:1'; d.textContent = 'YOUTUBE'; return d; };
     const top = mk('top:0', 60), bot = mk('bottom:0', 48);
@@ -237,6 +248,82 @@ const runScenario = async (browser, sc) => {
   return r;
 };
 
+// Brief 09 (Entscheidung 45): Slow 3G, ein Teil der Videos hängt (Player kommt nie auf PLAYING). 20 Wischer: der seen-Zähler steigt nur um
+// Momente, die wirklich mindestens eine Sekunde gespielt haben, hängende Momente werden nie gesehen, die Leer-Seite erscheint nicht.
+const HANG = (v) => { const n = Number(String(v).slice(4)); return (n * 7) % 5 < 2; };
+const runSlow3G = async (browser) => {
+  const r = { name: 'slow3g-mobile-20swipes', checks: {}, numbers: {} };
+  const c = r.checks;
+  const ctx = await browser.newContext({ ...devices['iPhone 15'], viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
+  await ctx.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
+  await ctx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await page.addInitScript((hangSrc) => {
+    window.__ytSlow = true;
+    window.__hang = new Function('return (' + hangSrc + ')')();
+    Object.defineProperty(navigator, 'connection', { value: { effectiveType: '3g', downlink: 0.4, rtt: 400 }, configurable: true });
+  }, HANG.toString());
+  await page.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBody }));
+  const cdp = await ctx.newCDPSession(page);
+  await cdp.send('Network.enable');
+  // Slow 3G wie in den Chrome-DevTools: 400 ms Umlaufzeit, 400 kbit/s
+  await cdp.send('Network.emulateNetworkConditions', { offline: false, latency: 400, downloadThroughput: (400 * 1000) / 8, uploadThroughput: (400 * 1000) / 8 });
+  await page.goto(`${url}?now=2026-10-23&seed=5#k=${k}`);
+  c.feedLoaded = await waitFor(page, () => !!window.__core?.moment(), null, 30000);
+  await page.waitForTimeout(3000);
+  // Erst wenn etwas gespielt hat, greift die Hänge-Überwachung (everPlayed). Bis dahin wischen, sonst bleibt der Test an einem hängenden Start stehen.
+  const ids = moments.map((m) => m.id);
+  const seenIds = () => page.evaluate((all) => all.filter((id) => window.__core.seen(id)), ids);
+  const endPage = () => page.evaluate(() => !!document.querySelector('[data-testid=end-page]'));
+  const seen0 = (await seenIds()).length;
+  let endSeen = false;
+  const visited = [];
+  for (let n = 0; n < 20; n++) {
+    const m = await page.evaluate(() => window.__core.moment());
+    visited.push(m.videoId);
+    await page.waitForTimeout(2200);
+    if (await endPage()) endSeen = true;
+    await page.evaluate(() => window.__core.next());
+    await page.waitForTimeout(150);
+  }
+  await page.waitForTimeout(1500);
+  if (await endPage()) endSeen = true;
+  await page.evaluate(() => window.__flushAll());
+  const pl = await page.evaluate(() => window.__plNow());
+  const seen1 = await seenIds();
+  const seenVideos = seen1.map((id) => id.split(':')[0]);
+  const hungVisited = visited.filter(HANG);
+  r.numbers = { seenBefore: seen0, seenAfter: seen1.length, visited: visited.length, hungVisited: hungVisited.length, played1s: Object.values(pl).filter((x) => x >= 1000).length };
+  c.slow3gSomeHungVisited = hungVisited.length > 0;
+  c.slow3gSomePlayed = seen1.length > seen0;
+  // Der Zähler steigt nur um gespielte Momente: jeder gesehene hat mindestens eine Sekunde (mit 100 ms Spielraum) im Zustand PLAYING gehabt
+  c.slow3gSeenOnlyPlayed = seenVideos.every((v) => (pl[v] ?? 0) >= 900);
+  c.slow3gHungNeverSeen = seenVideos.every((v) => !HANG(v));
+  c.slow3gSeenAtMostPlayed = seen1.length - seen0 <= Object.values(pl).filter((x) => x >= 900).length;
+  c.slow3gNoEndPage = !endSeen;
+
+  // Hänge-Überwachung: bis zu einem hängenden Moment wischen und die 12 s abwarten. Danach: Sitzungs-Sperre, aber nie gesehen.
+  let target = null;
+  for (let i = 0; i < 12 && !target; i++) {
+    const m = await page.evaluate(() => window.__core.moment());
+    if (HANG(m.videoId)) target = m; else { await page.evaluate(() => window.__core.next()); await page.waitForTimeout(300); }
+  }
+  if (target) {
+    c.slow3gWatchdogFired = await waitFor(page, (id) => window.__core.diag().some((x) => x === `watchdog ${id}`), target.id, 60000);
+    c.slow3gSkippedNotSeenLine = await page.evaluate((id) => window.__core.diag().some((x) => x === `skipped (not seen) ${id}`), target.id);
+    c.slow3gWatchdogNotSeen = !(await page.evaluate((id) => window.__core.seen(id), target.id));
+    c.slow3gStillNoEndPage = !(await endPage());
+  } else {
+    c.slow3gWatchdogFired = false;
+  }
+  c.pageErrors = errors.length === 0;
+  r.errors = errors.slice(0, 3);
+  await ctx.close();
+  return r;
+};
+
 const scenarios = [];
 for (const dwell of DWELLS) {
   scenarios.push({ name: `mobile-390x844-dwell${dwell}`, desk: false, dwell });
@@ -254,6 +341,14 @@ for (const sc of scenarios) {
     results.runs.push({ name: sc.name, error: String(e), checks: { ran: false } });
     console.log(`${sc.name}: FEHLER ${String(e).slice(0, 200)}`);
   }
+}
+if (!process.env.ONLY || 'slow3g-mobile-20swipes'.includes(process.env.ONLY)) try {
+  const r = await runSlow3G(browser);
+  results.runs.push(r);
+  console.log(`${r.name}: ${JSON.stringify(r.numbers)}`);
+} catch (e) {
+  results.runs.push({ name: 'slow3g-mobile-20swipes', error: String(e), checks: { ran: false } });
+  console.log(`slow3g: FEHLER ${String(e).slice(0, 300)}`);
 }
 await browser.close();
 let bad = 0;

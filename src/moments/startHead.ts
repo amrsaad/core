@@ -3,8 +3,11 @@
 import type { Form } from './form';
 import type { Moment } from './types';
 
-/** So viele Momente bleiben über das Sitzungsende im Vorrat gehalten (nicht verdrängbar) */
-export const HEADS = 3;
+/**
+ * So viele Momente bleiben über das Sitzungsende im Vorrat gehalten (nicht verdrängbar). Sechs statt drei (Brief 09, Ergänzung 03.11.):
+ * eine Sitzung von zehn Minuten am Sperrbildschirm ohne Netz läuft damit durch.
+ */
+export const HEADS = 6;
 /** Das Deck darf innerhalb dieser Zahl nächster Momente der Mischung einen lokalen vorziehen */
 export const PULL_WITHIN = 3;
 /** Wie lange das Deck beim Kaltstart auf die Blob-URL aus dem Vorrat wartet, bevor es vom Netz startet (ms) */
@@ -40,8 +43,9 @@ export function pickHeads(queue: readonly Moment[], idx: number, isPreloadable: 
  * Reihenfolge für den Start. Ist der erste Moment lokal, bleibt alles. Sonst wird innerhalb der nächsten PULL_WITHIN der Mischung der erste
  * lokale nach vorn gezogen. Gibt es dort keinen, kommt ein gehaltener Kopf der letzten Sitzung (heads) an die erste Stelle, wenn er noch
  * in den Pool gehört (nicht gesehen, Kanal nicht stumm: der Aufrufer reicht nur zulässige Momente in headMoments).
+ * Fehlt auch der, kommt irgendein zulässiger Moment aus dem Vorrat (reserve, Entscheidung 45): "none" heißt dann, dass der Vorrat wirklich leer ist.
  */
-export function startOrder(queue: readonly Moment[], held: (m: Moment) => boolean, headMoments: readonly Moment[]): { queue: Moment[]; how: 'first' | 'pulled' | 'head' | 'none' } {
+export function startOrder(queue: readonly Moment[], held: (m: Moment) => boolean, headMoments: readonly Moment[], reserve: readonly Moment[] = []): { queue: Moment[]; how: 'first' | 'pulled' | 'head' | 'reserve' | 'none' } {
   if (!queue.length) return { queue: [], how: 'none' };
   if (held(queue[0])) return { queue: [...queue], how: 'first' };
   const j = queue.slice(0, PULL_WITHIN).findIndex(held);
@@ -53,6 +57,8 @@ export function startOrder(queue: readonly Moment[], held: (m: Moment) => boolea
   }
   const h = headMoments.find((m) => held(m) && !queue.slice(0, PULL_WITHIN).some((x) => x.id === m.id));
   if (h) return { queue: [h, ...queue.filter((x) => x.id !== h.id)], how: 'head' };
+  const r = reserve.find((m) => held(m));
+  if (r) return { queue: [r, ...queue.filter((x) => x.id !== r.id)], how: 'reserve' };
   return { queue: [...queue], how: 'none' };
 }
 

@@ -111,3 +111,29 @@ export function remixTail(tail: Moment[], history: readonly Moment[], p: MomentP
   for (const m of tail) if (!c.used.has(m.id)) out.push(m);
   return out;
 }
+
+/**
+ * Gescheiterte Momente aus dem Rest hinter idx nehmen (Entscheidung 45). Fehlt dabei einer an idx+1 oder idx+2, wird die Lücke mit dem
+ * nächsten Moment aus dem Rest gefüllt, dessen Bereich sich vom Vorgänger und vom Nachfolger unterscheidet. Das ist die Ausnahme zu
+ * Entscheidung 42 (die Nachbarn bleiben stehen): ein Nachbar darf wechseln, wenn er sonst den Bereich wiederholen würde.
+ * Gibt es keinen Moment mit beiden Unterschieden, genügt der Unterschied zum Vorgänger. Gibt es auch den nicht, bleibt die Reihenfolge.
+ */
+export function pruneAndHeal(queue: readonly Moment[], idx: number, isBad: (m: Moment) => boolean): Moment[] {
+  const from = idx + 1;
+  const head = queue.slice(0, from);
+  const rest = queue.slice(from);
+  const out = rest.filter((m) => !isBad(m));
+  if (!rest.slice(0, 2).some(isBad)) return [...head, ...out];
+  for (let p = 0; p < 3 && p < out.length; p++) {
+    const prev = p === 0 ? queue[idx] : out[p - 1];
+    if (!prev || out[p].area !== prev.area) continue;
+    const successor = out[p];
+    let j = -1;
+    for (let k = p + 1; k < out.length && j < 0; k++) if (out[k].area !== prev.area && out[k].area !== successor.area) j = k;
+    for (let k = p + 1; k < out.length && j < 0; k++) if (out[k].area !== prev.area) j = k;
+    if (j < 0) continue;
+    const [m] = out.splice(j, 1);
+    out.splice(p, 0, m);
+  }
+  return [...head, ...out];
+}

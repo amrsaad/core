@@ -12,6 +12,8 @@
  * - Abruftermine: Ergebnisse vereinigt, der Termin kommt vom Eintrag mit dem jüngsten Ergebnis (bei Gleichstand der spätere Termin).
  * - Zähler je Tag (Tageszahl, Zeit im Feed): der größere Wert.
  * - Abgelehnte Momente (Entscheidung 36): vereinigt, frühester Zeitpunkt.
+ * - Gelöschte Gesehen-Einträge (Entscheidung 45, momentUnseen): vereinigt, spätester Zeitpunkt. Ein Eintrag in momentSeen, der nicht jünger ist als der Zeitpunkt
+ *   seiner Löschung, gilt nicht (sonst käme er vom anderen Gerät zurück). Ein späteres, echtes Ansehen (jünger als die Löschung) bleibt.
  * - Signale (moments/signals.ts): Zähler je Feld und Tag der größere Wert, missed vereinigt je Moment-ID mit dem jüngsten Eintrag, höchstens 20.
  * - Diagnose (lib/diag.ts, Entscheidung 31): Zeilen vereinigt nach Zeit, die letzten 500 bleiben. Das Feld löst allein keinen Sync aus (nicht in syncedChanged).
  */
@@ -53,6 +55,8 @@ export interface SyncState {
   signals?: Signals;
   /** Abgelehnte Momente (Entscheidung 36): ID auf Zeitpunkt, frühester gewinnt. Fehlt bei Geräten ohne Ablehnung. */
   momentRejected?: Record<string, number>;
+  /** Entscheidung 45: Zeitpunkt, zu dem ein Gesehen-Eintrag gelöscht wurde (Reparatur). Fehlt bei Geräten ohne Löschung. */
+  momentUnseen?: Record<string, number>;
   /** Diagnose-Zeilen aller Geräte (Entscheidung 31), Ringpuffer mit 500 Zeilen, nach Zeit zusammengeführt. Fehlt bei Geräten ohne Zeilen. */
   diag?: DiagEntry[];
   momentLiked: Record<string, number>;
@@ -313,10 +317,11 @@ function mergeSettings(a: SyncSettings, b: SyncSettings, tsA: Record<string, num
 export function mergeDocs(a: SyncDoc, b: SyncDoc): SyncDoc {
   const x = a.state;
   const y = b.state;
+  const unseen = maxMap(x.momentUnseen, y.momentUnseen);
   const out: SyncDoc = {
     v: SYNC_VERSION,
     state: {
-      momentSeen: Object.fromEntries(Object.entries(maxMapMin(x.momentSeen, y.momentSeen))),
+      momentSeen: Object.fromEntries(Object.entries(maxMapMin(x.momentSeen, y.momentSeen)).filter(([id, at]) => !(id in unseen) || at > unseen[id])),
       momentLog: mergeLog(x.momentLog, y.momentLog),
       dayCount: mergeDayCount(x.dayCount, y.dayCount),
       savedMoments: lww(x.savedMoments, y.savedMoments, a.ts, b.ts, tsKey.saved, combineSaved),
@@ -343,6 +348,7 @@ export function mergeDocs(a: SyncDoc, b: SyncDoc): SyncDoc {
   const sg = mergeSignals(x.signals, y.signals);
   if (!signalsEmpty(sg)) out.state.signals = sg;
   if (x.momentRejected || y.momentRejected) out.state.momentRejected = maxMapMin(x.momentRejected ?? {}, y.momentRejected ?? {});
+  if (Object.keys(unseen).length) out.state.momentUnseen = unseen;
   const dg = mergeDiag(x.diag, y.diag);
   if (dg) out.state.diag = dg;
   return out;
@@ -407,6 +413,7 @@ export function toDoc(s: AppState): SyncDoc {
   if (s.recallQueue !== undefined) doc.state.recallQueue = s.recallQueue;
   if (!signalsEmpty(s.signals)) doc.state.signals = s.signals;
   if (s.momentRejected && Object.keys(s.momentRejected).length) doc.state.momentRejected = s.momentRejected;
+  if (s.momentUnseen && Object.keys(s.momentUnseen).length) doc.state.momentUnseen = s.momentUnseen;
   if (s.diag?.length) doc.state.diag = s.diag;
   // Vereinigung mit dem leeren Dokument bringt Reihenfolge und Kürzungen in die gemeinsame Form
   return mergeDocs(doc, emptyDoc());
@@ -440,6 +447,7 @@ export function applyDoc(s: AppState, d: SyncDoc): AppState {
   if (next.recallQueue !== undefined && !eq(next.recallQueue, s.recallQueue)) out.recallQueue = next.recallQueue;
   if (next.signals !== undefined && !eq(next.signals, cur.signals)) out.signals = next.signals;
   if (next.momentRejected !== undefined && !eq(next.momentRejected, cur.momentRejected)) out.momentRejected = next.momentRejected;
+  if (next.momentUnseen !== undefined && !eq(next.momentUnseen, cur.momentUnseen)) out.momentUnseen = next.momentUnseen;
   if (next.diag !== undefined && !diagEqual(next.diag, cur.diag)) out.diag = next.diag;
   if (!eq(cur.settings, next.settings)) {
     const settings = { ...s.settings };
@@ -517,6 +525,7 @@ export function syncedChanged(a: AppState, b: AppState): boolean {
     a.recallQueue !== b.recallQueue ||
     a.signals !== b.signals ||
     a.momentRejected !== b.momentRejected ||
+    a.momentUnseen !== b.momentUnseen ||
     a.momentLiked !== b.momentLiked ||
     a.momentAsked !== b.momentAsked ||
     a.mutedChannels !== b.mutedChannels ||

@@ -123,7 +123,18 @@ export const isHeavy = (m: Pick<Moment, 'start' | 'end' | 'area' | 'audio' | 'fo
 export interface Conn {
   type?: string;
   effectiveType?: string;
+  /** Geschätzte Bandbreite in Mbit/s (Chrome, Android). iOS Safari kennt navigator.connection nicht. */
+  downlink?: number;
 }
+
+/** Unter dieser Bandbreite (Mbit/s) gilt das Netz sofort als schlecht (Brief 09, Schritt 6) */
+export const POOR_DOWNLINK = 1.5;
+/** Netz schon vor dem ersten langsamen Start als schlecht erkennen: effectiveType 2g, 3g, slow-2g oder downlink unter POOR_DOWNLINK */
+export const connPoor = (c: Conn | undefined): boolean => {
+  if (!c) return false;
+  if (c.effectiveType === 'slow-2g' || c.effectiveType === '2g' || c.effectiveType === '3g') return true;
+  return typeof c.downlink === 'number' && c.downlink > 0 && c.downlink < POOR_DOWNLINK;
+};
 
 /** Mobilfunk: type "cellular". Ohne type (Chrome Android) zählt ein langsamer effectiveType (slow-2g, 2g, 3g). */
 export const isCellular = (c: Conn | undefined): boolean => {

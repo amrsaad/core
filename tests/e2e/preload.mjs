@@ -139,8 +139,16 @@ try {
   await page.mouse.up();
   c.realSwipeMoves = await waitFor(page, (i) => window.__core.idx() === i + 1, idxBefore, 5000);
   await waitFor(page, () => window.__core.state() === 1, null, 5000);
+  // Geprüft wird der Start aus dem Vorrat. Ob der nächste Moment im Vorrat liegt, hängt von der Mischung ab (Regeln gehen vor, im schlechten Netz zählt der Vorrat
+  // nur dreifach, Entscheidung 42 und 45) und je nach Seed liegt ein Moment außerhalb. Der Test wischt deshalb erst, wenn der Nachfolger im Vorrat liegt, und zählt die Wartefälle.
+  num.waitedForVault = 0;
   for (let i = 0; i < 9; i++) {
     await sleep(900);
+    const nextHeld = () => window.__core.preload().ids.includes(window.__core.queue()[window.__core.idx() + 1]);
+    if (!(await page.evaluate(nextHeld))) {
+      num.waitedForVault++;
+      await waitFor(page, () => window.__core.preload().ids.includes(window.__core.queue()[window.__core.idx() + 1]), null, 20000);
+    }
     await page.evaluate(() => window.__core.next());
     await waitFor(page, () => window.__core.state() === 1, null, 5000);
   }
@@ -185,14 +193,21 @@ try {
   c.offlineIcon = await waitFor(page, () => !!document.querySelector('[data-testid=offline]'));
   await page.screenshot({ path: `${out}/chromium-5-offline-icon.png` });
   const nOff = (await latency(page)).length;
+  // Wie beim Neustart ohne Netz (Entscheidung 42): ein Wisch auf einen Moment außerhalb des Vorrats kann offline nicht spielen und zählt nicht.
+  // Jeder Wisch auf einen Moment im Vorrat muss gepuffert unter 100 ms starten, mindestens drei der vier Wische landen im Vorrat.
+  const trailOff = [];
   for (let i = 0; i < 4; i++) {
     await sleep(800);
+    const heldNext = await page.evaluate(() => window.__core.preload().ids.includes(window.__core.queue()[window.__core.idx() + 1]));
     await page.evaluate(() => window.__core.next());
-    await waitFor(page, () => window.__core.state() === 1, null, 5000);
+    const ok = await waitFor(page, () => window.__core.state() === 1, null, heldNext ? 5000 : 1500);
+    trailOff.push({ heldNext, ok });
   }
+  num.offlineTrail = trailOff;
   const latOff = (await latency(page)).slice(nOff);
   num.offlineStartMs = latOff.map((x) => x.ms);
-  c.offlineSwipesFromCache = latOff.length === 4 && latOff.every((x) => x.buffered && x.ms < 100);
+  const heldLandings = trailOff.filter((x) => x.heldNext);
+  c.offlineSwipesFromCache = heldLandings.length >= 3 && heldLandings.every((x) => x.ok) && latOff.length === heldLandings.length && latOff.every((x) => x.buffered && x.ms < 100);
   c.offlineNoRequests = net.log.length === reqBefore;
   c.poorWhenOffline = (await pre(page)).poor === true;
   await ctx.setOffline(false);
@@ -285,12 +300,13 @@ try {
   c.normalMixKeepsYoutube = SEEDS.every((sd) => normalBy[sd].length === 12) && num.normalYoutubeOf120 > 0;
   // Seit Issue 24 gibt es keine Dreierblöcke mehr: nie zweimal derselbe Bereich hintereinander, nie dieselbe Folge innerhalb 10 (harte Regeln, gelten in jedem Seed)
   // Zeigt der Feed offline einen YouTube-Moment, scheitert er und pruneBad nimmt ihn aus dem Rest. Die Lücke vorn (die Slots idx+1 und idx+2) kann dann zwei gleiche Bereiche
-  // nebeneinander setzen. Für die Bereichsregel zählt deshalb im schlechten Netz erst Stelle 4 (Befund in Issue 30). Die Folgenregel gilt überall.
+  // nebeneinander setzen. Entscheidung 45 (Brief 09): pruneBad füllt die Lücke mit dem nächsten Moment, dessen Bereich von Vorgänger und Nachfolger abweicht.
+  // Die Bereichsregel gilt deshalb im schlechten Netz wieder ab Stelle 2, nicht erst ab 4. Die Folgenregel gilt überall.
   const blocksOk = (q, areaFrom = 1) => q.every((m, i) => i === 0 || ((i < areaFrom || m.area !== q[i - 1].area) && !q.slice(Math.max(0, i - 10), i).some((x) => x.videoId === m.videoId)));
   const clumps = (by) => SEEDS.flatMap((sd) => by[sd].flatMap((m, i, q) => (i === 0 ? [] : i >= 1 && m.area === q[i - 1].area ? [`seed${sd} i${i} area ${m.area}`] : q.slice(Math.max(0, i - 10), i).some((x) => x.videoId === m.videoId) ? [`seed${sd} i${i} episode`] : [])));
   num.poorClumps = clumps(poorBy);
   num.normalClumps = clumps(normalBy);
-  c.poorNoClump = SEEDS.every((sd) => blocksOk(poorBy[sd], 4));
+  c.poorNoClump = SEEDS.every((sd) => blocksOk(poorBy[sd], 1));
   c.poorBeatFirst = poorQ[0]?.area === 'beat';
   c.normalNoClump = SEEDS.every((sd) => blocksOk(normalBy[sd]));
 

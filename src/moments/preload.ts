@@ -14,6 +14,8 @@ export const PRELOAD_CAP_BYTES = 60 * 1024 * 1024;
 export const SLOW_MS = 1000;
 /** So viele langsame Starts (oder Abrufe) in Folge machen das Netz schlecht */
 export const SLOW_RUN = 3;
+/** Ein Start (Wisch bis erstes Bild) über dieser Zeit setzt das Netz sofort auf schlecht (ms) */
+export const FIRST_FRAME_POOR_MS = 4000;
 
 export type StreamKind = 'text' | 'mp3' | 'stream' | 'youtube' | 'none';
 
@@ -163,6 +165,8 @@ export function isPoorNet(list: NetSample[], online: boolean): boolean {
   const probes = list.filter((x) => x.k === 'probe');
   // Ein frischer schneller Abruf nach den langsamen Starts beendet den Zustand
   const lastProbeFast = probes.length > 0 && probes[probes.length - 1].ms <= SLOW_MS;
+  // Ein einziger Start über FIRST_FRAME_POOR_MS genügt (Brief 09, Schritt 6): nicht erst drei langsame Starts abwarten
+  if (starts.length > 0 && starts[starts.length - 1].ms > FIRST_FRAME_POOR_MS && !lastProbeFast) return true;
   if (lastSlow(list, 'start') && !lastProbeFast) return true;
   return lastSlow(list, 'probe') && !(starts.length > 0 && starts[starts.length - 1].ms <= SLOW_MS);
 }

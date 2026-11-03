@@ -2,6 +2,7 @@
 // nexttrack = nächster Moment. previoustrack = Save (Titel 2 s "Saved · <Hook>" und kurzer Ton), ein zweiter Druck binnen 1,5 s = More like this.
 // seekbackward und seekforward werden nicht registriert: der Sperrbildschirm zeigt dann Weiter und Zurück statt Sprünge um 10 Sekunden.
 import type { Area } from '../types';
+import { PULL_WITHIN } from './startHead';
 import { speakerLine } from './speaker';
 import type { Moment } from './types';
 
@@ -42,4 +43,26 @@ export function lockMeta(m: Pick<Moment, 'hook' | 'channel' | 'videoTitle' | 'ar
     album: m.videoTitle,
     artwork: ARTWORK_SIZES.map((n) => ({ src: `${origin}${tabImage(m.area, n, base)}`, sizes: `${n}x${n}`, type: 'image/png' })),
   };
+}
+
+/**
+ * Weiter vom Sperrbildschirm oder der Medientaste im Audio-Reiter (Entscheidung 45, Brief 09 Schritt 5): ein Netzstart ist ein Fehler, solange ein
+ * Vorrats-Moment erreichbar ist. Liegt der nächste Moment nicht im Vorrat, kommt der erste Vorrats-Moment dahinter an Stelle idx+1.
+ * Sichtbar: innerhalb der nächsten PULL_WITHIN. Verdeckt: aus dem ganzen Rest, denn iOS lädt eine Netzquelle bei verdecktem Bildschirm erst weiter,
+ * wenn die App wieder sichtbar ist (Brief 09, Ergänzung 14:25).
+ * how: held (der nächste liegt im Vorrat), pulled (ein Vorrats-Moment wurde vorgezogen), net (keiner im Vorrat), none (keine Warteschlange).
+ */
+export function lockNextPlan<T extends { id: string }>(queue: readonly T[], idx: number, held: (m: T) => boolean, hidden: boolean): { queue: T[]; how: 'held' | 'pulled' | 'net' | 'none'; id?: string } {
+  const next = queue[idx + 1];
+  if (!next) return { queue: [...queue], how: 'none' };
+  if (held(next)) return { queue: [...queue], how: 'held', id: next.id };
+  const end = hidden ? queue.length : Math.min(queue.length, idx + 1 + PULL_WITHIN);
+  for (let j = idx + 2; j < end; j++) {
+    if (!held(queue[j])) continue;
+    const q = [...queue];
+    const [m] = q.splice(j, 1);
+    q.splice(idx + 1, 0, m);
+    return { queue: q, how: 'pulled', id: m.id };
+  }
+  return { queue: [...queue], how: 'net', id: next.id };
 }
