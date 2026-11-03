@@ -124,6 +124,23 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.fileEncrypted = !!api.file && !api.file.text.includes('captionMode') && doc1?.v === 1;
     c.tokenNotInFile = !!api.file && !JSON.stringify(doc1).includes(TOKEN);
 
+    // Diagnose im Sync-Stand (Entscheidung 31): Verlassen der App spült die Zeilen dieser Sitzung sofort in die Datei, eine Kennung für das Gerät, kein Token und kein Schlüssel darin
+    const putsDiag = api.puts.length;
+    await A.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }); document.dispatchEvent(new Event('visibilitychange')); });
+    c.diagFlushedOnHide = await poll(() => api.puts.length === putsDiag + 1, 8000);
+    const diagDoc = await decryptFile(api.file.text);
+    const diagLines = diagDoc.state.diag ?? [];
+    r.diagLines = diagLines.length;
+    r.diagSample = diagLines.slice(-4).map((x) => `${x.d} ${x.l}`);
+    c.diagInFile = diagLines.length > 0 && diagLines.some((x) => x.l === 'app: hidden') && diagLines.every((x) => Number.isFinite(x.t) && /^[a-z0-9]{4}$/.test(x.d) && typeof x.l === 'string');
+    c.diagOneDevice = new Set(diagLines.map((x) => x.d)).size === 1;
+    c.diagNoSecrets = !JSON.stringify(diagLines).includes(TOKEN) && !JSON.stringify(diagLines).includes(k);
+    await A.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' }); document.dispatchEvent(new Event('visibilitychange')); });
+    // Der Lauf bei der Rückkehr muss fertig sein, bevor die nächste Prüfung mit der Wartezeit von 10 s beginnt (sonst nähme er deren Änderung schon mit)
+    await sleep(400);
+    await waitFor(A, () => !window.__sync.status().running);
+    await sleep(300);
+
     // 10 Sekunden nach der letzten Änderung, nicht früher
     const putsBefore = api.puts.length;
     const t0 = Date.now();
