@@ -18,7 +18,7 @@ import { lockMeta, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS 
 import { cursorFor, historyBefore, parseSaved, queueKey, recentFromLog, releaseTail, remixTail, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMoment, sessionSkip, SIGNAL, type MomentCursor } from './mix';
 import { bumpCell, bumpColdNetStart, bumpPair, hourKey } from './signals';
-import { bumpStart, dropOverStarted, isQuickSkip, quickSkip, resumeSaved, setTabCursor } from './tabs';
+import { bumpStart, dropOverStarted, isQuickSkip, quickSkip, resumeSaved, setTabCursor, START_MAX } from './tabs';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
 import { clampRate, DEFAULT_RATE, nextRate, rateOf, type Rate } from '../lib/state';
 import { addSample } from './latency';
@@ -327,7 +327,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         const heads = pre
           .startHeads()
           .map((h) => pool.find((m) => m.id === h.id))
-          .filter((m): m is Moment => !!m && !s.momentSeen[m.id] && !s.mutedChannels[m.channel]);
+          .filter((m): m is Moment => !!m && !s.momentSeen[m.id] && !s.mutedChannels[m.channel] && (s.startShown?.[m.id] ?? 0) < START_MAX);
         const r = startOrder(queue.current, held, heads);
         queue.current = r.queue;
         diag.current.push(`deck: start order ${r.how} first=${queue.current[0]?.id ?? 'none'} heads=${pre.startHeads().length}`);
