@@ -13,7 +13,7 @@ import type { Signals } from '../moments/signals';
 import type { QueueEntry } from '../moments/recallqueue';
 import type { WeekPlan } from '../moments/review';
 import type { NoteEntry } from '../moments/note';
-import type { SkipRun } from '../moments/learn';
+import type { TapLog } from '../moments/learn';
 import type { DigestLatest, DigestTaps } from '../moments/digest';
 
 export interface SavedItem {
@@ -84,8 +84,10 @@ export interface AppState {
   // Experten-Momente (v4)
   momentSeen: Record<string, number>;
   momentWeights: Weights;
-  /** Wie oft in Folge derselbe Kanal sofort weggewischt wurde (learn.ts). Nur an diesem Gerät, wandert nicht. */
-  skipRun?: SkipRun;
+  /** Zähler für "n-mal in k Tagen" (Weak, Not for me je Unterthema, Skips je Folge), siehe learn.ts. Nur an diesem Gerät, wandert nicht. */
+  tapLog?: TapLog;
+  /** Version der Lernregeln, nach der die Gewichte zuletzt umgestellt wurden (learn.ts LEARN_VERSION). Fehlt sie, steht die einmalige Anhebung noch aus. */
+  learnVersion?: number;
   savedMoments: Record<string, SavedMoment>;
   /** letzte Wiedergaben für Signale und Wochenrückblick */
   momentLog: MomentLogEntry[];

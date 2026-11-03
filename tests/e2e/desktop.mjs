@@ -261,9 +261,9 @@ try {
   const nm = await pg.evaluate(() => window.__core.moment());
   await press(pg, '2', 200);
   // Bestätigungszeile am Blatt, dann schließt es von selbst
-  c.noteConfirmLine = await pg.evaluate((t) => document.querySelector('[data-testid=note-confirm]')?.textContent === `Less ${t.charAt(0).toUpperCase()}${t.slice(1)}`, nm.topic);
+  c.noteConfirmLine = await pg.evaluate(() => document.querySelector('[data-testid=note-confirm]')?.textContent === 'Less from this episode for 30 days');
   const w1 = await pg.evaluate((t) => window.__core.weights().topic[t] ?? 1, nm.topic);
-  c.notForMeKeyTopic02 = Math.abs(w1 - 0.2) < 0.001;
+  c.notForMeKeyTopic09 = Math.abs(w1 - 0.9) < 0.001;
   await pg.screenshot({ path: `${out}/04b-feedback-bestaetigung.png` });
   await pg.waitForFunction(() => !document.querySelector('[data-testid=note-sheet]'), null, { timeout: 4000 }).catch(() => {});
   const nl = await pg.evaluate(() => window.__core.notes());

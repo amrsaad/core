@@ -53,6 +53,11 @@ export function bumpStart(s: AppState, id: string): AppState {
   return { ...s, startShown: { ...s.startShown, [id]: (s.startShown?.[id] ?? 0) + 1 } };
 }
 
+/** Moment ist weg: gilt als gesehen (früherer Zeitpunkt bleibt) und steht in momentRejected. Keine Gewichte, keine Abrufkarte (Known, Not for me, Ablehnung). */
+export function markRejected(s: AppState, id: string, now: number): AppState {
+  return { ...s, momentSeen: s.momentSeen[id] ? s.momentSeen : { ...s.momentSeen, [id]: now }, momentRejected: { ...s.momentRejected, [id]: now } };
+}
+
 export interface QuickSkipResult {
   state: AppState;
   /** true, wenn der Moment mit diesem Wisch abgelehnt wurde */
@@ -68,13 +73,5 @@ export function quickSkip(s: AppState, m: Pick<Moment, 'id' | 'channel' | 'topic
   const n = (s.momentSkips?.[m.id] ?? 0) + 1;
   const out: AppState = { ...s, momentSkips: { ...s.momentSkips, [m.id]: n } };
   if (n < REJECT_AFTER) return { state: out, rejected: false };
-  return {
-    state: {
-      ...out,
-      momentSeen: s.momentSeen[m.id] ? s.momentSeen : { ...s.momentSeen, [m.id]: now },
-      momentRejected: { ...s.momentRejected, [m.id]: now },
-      momentWeights: rejectRule(s.momentWeights, m, now),
-    },
-    rejected: true,
-  };
+  return { state: { ...markRejected(out, m.id, now), momentWeights: rejectRule(s.momentWeights, m, now) }, rejected: true };
 }

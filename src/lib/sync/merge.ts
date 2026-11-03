@@ -171,8 +171,13 @@ export const untilTsKey = (key: string): string => {
 const combineUntil = (x: Until, y: Until): Until => (x.at !== y.at ? (x.at > y.at ? x : y) : x.back >= y.back ? x : y);
 
 function mergeWeights(a: Weights, b: Weights, tsA: Record<string, number>, tsB: Record<string, number>): Weights {
-  const fam = (f: 'area' | 'channel' | 'topic') => lww(a[f], b[f], tsA, tsB, (k) => tsKey.weight(f, k), moreLearned);
+  const fam = (f: 'area' | 'channel' | 'topic' | 'episode' | 'subtopic') => lww(a[f], b[f], tsA, tsB, (k) => tsKey.weight(f, k), moreLearned);
   const out: Weights = { area: fam('area'), channel: fam('channel'), topic: fam('topic') };
+  // Folge und Unterthema (Entscheidung 38): nur wenn vorhanden, damit Dokumente ohne sie unverändert bleiben
+  for (const f of ['episode', 'subtopic'] as const) {
+    const m = fam(f);
+    if (Object.keys(m).length) out[f] = m;
+  }
   const until = lww(a.until, b.until, tsA, tsB, untilTsKey, combineUntil);
   if (Object.keys(until).length) out.until = until;
   return out;
@@ -451,7 +456,7 @@ export function stampChanges(prev: AppState, next: AppState, now: number): AppSt
   if (prev === next) return next;
   const ts: Record<string, number> = { ...(next.syncTs ?? prev.syncTs ?? {}) };
   let changed = false;
-  for (const f of ['area', 'channel', 'topic'] as const) changed = diffKeys(prev.momentWeights?.[f], next.momentWeights?.[f], (k) => tsKey.weight(f, k), ts, now) || changed;
+  for (const f of ['area', 'channel', 'topic', 'episode', 'subtopic'] as const) changed = diffKeys(prev.momentWeights?.[f], next.momentWeights?.[f], (k) => tsKey.weight(f, k), ts, now) || changed;
   changed = diffKeys(prev.momentWeights?.until, next.momentWeights?.until, untilTsKey, ts, now) || changed;
   changed = diffKeys(prev.savedMoments, next.savedMoments, tsKey.saved, ts, now) || changed;
   changed = diffKeys(prev.momentLiked, next.momentLiked, tsKey.liked, ts, now) || changed;

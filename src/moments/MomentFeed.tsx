@@ -18,7 +18,7 @@ import { lockMeta, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS 
 import { cursorFor, historyBefore, parseSaved, queueKey, recentFromLog, releaseTail, remixTail, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMoment, sessionSkip, SIGNAL, type MomentCursor } from './mix';
 import { bumpCell, bumpColdNetStart, bumpPair, hourKey } from './signals';
-import { bumpStart, dropOverStarted, isQuickSkip, quickSkip, resumeSaved, setTabCursor, START_MAX } from './tabs';
+import { bumpStart, dropOverStarted, isQuickSkip, markRejected, quickSkip, resumeSaved, setTabCursor, START_MAX } from './tabs';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
 import { clampRate, DEFAULT_RATE, nextRate, rateOf, type Rate } from '../lib/state';
 import { addSample } from './latency';
@@ -35,7 +35,7 @@ import { NoteSheet, type NoteCtl } from './NoteSheet';
 import { createWheel, deskKey, TAB_KEYS, wheelPx, type DeskAction } from './desktop';
 import { DeskPanel } from './DeskShell';
 import { speakerLine } from './speaker';
-import { chipEffect, CONFIRM_SHEET_MS, firstOpenOfDay, inputConfirm, makeEntry, makeInputEntry, markSent, nextIssue, promptLine, unsent, type Chip, type InputChip } from './note';
+import { chipEffect, CONFIRM_SHEET_MS, MUTE_UNDO_MS, firstOpenOfDay, inputConfirm, makeEntry, makeInputEntry, markSent, nextIssue, promptLine, unsent, type Chip, type InputChip } from './note';
 import { HOOK_LINE_PT, hookStep } from './hook';
 import { makeRng } from './rng';
 import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
@@ -234,6 +234,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   noteRef.current = note;
   /** Bestätigungszeile am Blatt nach einem Chip, solange sie steht */
   const [confirmText, setConfirm] = useState<string | null>(null);
+  /** Sprecher, dessen Mute rückgängig gemacht werden kann, solange die Bestätigungszeile steht */
+  const [undoChannel, setUndo] = useState<string | null>(null);
   const confirmRef = useRef(false);
   const confirmTimer = useRef(0);
   const confirmDone = useRef<() => void>(() => {});
@@ -597,8 +599,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       const prev = idxRef.current;
       diag.current.push(`go ${prev}->${next}`);
       const prevM = queue.current[prev];
-      // Weitergewischt: Wertung nach geschautem Anteil (learn.ts). Unter 3 s ist ein Skip, zwei Skips desselben Kanals in Folge
-      // sperren den Kanal 14 Tage. Jedes andere Weiterwischen unterbricht die Folge. Im Textmodus gibt es keine Wiedergabezeit,
+      // Weitergewischt: Wertung nach geschautem Anteil (learn.ts). Unter 3 s ist ein Skip (Kanal und Thema mal 0,97), zwei Skips derselben
+      // Folge in 7 Tagen setzen die Folge 7 Tage auf 0,5 (Entscheidung 38). Im Textmodus gibt es keine Wiedergabezeit,
       // darum keine Zeitwertung. Nach einem Chip ersetzt dessen Wirkung die Wertung (silentLeave).
       const nowMs = clockNow().getTime();
       let dampened = false;
@@ -614,12 +616,11 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           // Zwei Skips beim selben Kanal oder Thema dämpfen beide für den Rest der Sitzung (Issue 24), siehe Ende dieser Funktion
           dampened = !!cursor.current && sessionSkip(cursor.current, prevM);
           update((s) => {
-            const r = skipRule(s.momentWeights, s.skipRun, prevM, nowMs);
-            return bumpCell({ ...s, momentWeights: r.weights, skipRun: r.run }, today, hourKey(clockNow()), prevM, 'skips');
+            const r = skipRule({ weights: s.momentWeights, taps: s.tapLog ?? {} }, prevM, nowMs);
+            return bumpCell({ ...s, momentWeights: r.weights, tapLog: r.taps }, today, hourKey(clockNow()), prevM, 'skips');
           });
         }
-        else if (lv || stateRef.current.skipRun)
-          update((s) => ({ ...s, momentWeights: lv ? signal(s.momentWeights, prevM, lv.f, nowMs) : s.momentWeights, skipRun: undefined }));
+        else if (lv) update((s) => ({ ...s, momentWeights: signal(s.momentWeights, prevM, lv.f, nowMs) }));
       }
       // Gezeigtes Paar zählen (Digest mixClump), jedes Paar der Sitzung einmal
       const shownNext = queue.current[next];
@@ -634,7 +635,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       if (shownNext) update((s) => setTabCursor(s, form, shownNext.id, today));
       // Zurückgewischt, um etwas nochmal zu sehen: Plus für den Zielmoment
       const backM = queue.current[next];
-      if (next < prev && backM) update((s) => ({ ...s, momentWeights: signal(s.momentWeights, backM, SIGNAL.back, nowMs), skipRun: undefined }));
+      if (next < prev && backM) update((s) => ({ ...s, momentWeights: signal(s.momentWeights, backM, SIGNAL.back, nowMs) }));
       setCaption('');
       shownCue.current = -2;
       clock.current.reset();
@@ -652,7 +653,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         if (cardDue(sessionSeen.current)) {
           const s0 = stateRef.current;
           const queued = new Set((s0.recallQueue ?? []).map((x) => x.id));
-          recallNow = pickRecall(s0.recall ?? {}, recent.current, clockNow().getTime(), (id) => !queued.has(id) && !!findMoment(id)?.recall);
+          recallNow = pickRecall(s0.recall ?? {}, recent.current, clockNow().getTime(), (id) => !queued.has(id) && !s0.momentRejected?.[id] && !!findMoment(id)?.recall);
         }
       }
       if (prevM && endedAt.current !== prev) log(prevM, {});
@@ -1453,16 +1454,19 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     navigator.vibrate?.(15);
     const fx = chipEffect(chip);
     const at = clockNow().getTime();
-    update((s) => ({
-      ...s,
-      feedbackNotes: [...(s.feedbackNotes ?? []), entry],
-      momentWeights: fx ? applyEffect(s.momentWeights, fx, m, at) : s.momentWeights,
-      skipRun: undefined,
-    }));
+    // Entscheidung 38: jede Rückmeldung wirkt auf die kleinste Einheit, die sie erklärt (learn.ts). Known und Not for me werfen den Moment weg.
+    update((s) => {
+      const r = fx ? applyEffect({ weights: s.momentWeights, taps: s.tapLog ?? {} }, fx, m, at) : null;
+      const next: AppState = { ...s, feedbackNotes: [...(s.feedbackNotes ?? []), entry], ...(r ? { momentWeights: r.weights, tapLog: r.taps } : {}) };
+      return fx === 'known' || fx === 'notForMe' ? markRejected(next, m.id, at) : next;
+    });
     if (fx && FEEDBACK_OF[fx]) log(m, { feedback: FEEDBACK_OF[fx]! });
+    // Zahl der Momente, die mit dem Sprecher wegfallen (noch nicht gesehen, nicht abgelehnt), für die Bestätigungszeile
+    const mutedCount = fx === 'mute' ? pool.filter((x) => x.channel === m.channel && !stateRef.current.momentSeen[x.id]).length : undefined;
     if (fx === 'mute') muteChannel(m);
-    if (fx === 'notForMe') dropTopic(m);
-    setConfirm(confirmLine(fx, m));
+    if (fx === 'notForMe') dropEpisode(m);
+    setConfirm(confirmLine(fx, m, mutedCount));
+    setUndo(fx === 'mute' ? m.channel : null);
     confirmRef.current = true;
     const done = () => {
       window.clearTimeout(confirmTimer.current);
@@ -1477,7 +1481,24 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       }
     };
     confirmDone.current = done;
-    confirmTimer.current = window.setTimeout(done, CONFIRM_SHEET_MS);
+    confirmTimer.current = window.setTimeout(done, fx === 'mute' ? MUTE_UNDO_MS : CONFIRM_SHEET_MS);
+  };
+
+  /** Mute speaker rückgängig (Entscheidung 38 e): der Sprecher ist wieder zugelassen, der Feed bleibt auf dem Moment */
+  const undoMute = () => {
+    const ch = undoChannel;
+    if (!ch || !confirmRef.current) return;
+    window.clearTimeout(confirmTimer.current);
+    update((s) => {
+      const x = { ...s.mutedChannels };
+      delete x[ch];
+      return { ...s, mutedChannels: x };
+    });
+    stateRef.current = { ...stateRef.current, mutedChannels: Object.fromEntries(Object.entries(stateRef.current.mutedChannels).filter(([k]) => k !== ch)) };
+    confirmRef.current = false;
+    setConfirm(null);
+    setUndo(null);
+    setNote(null);
   };
 
   /**
@@ -1529,10 +1550,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     for (const sl of slots.current) if (sl.index > idxRef.current) sl.index = -1;
   };
 
-  /** Not for me: Momente desselben Themas fliegen sofort aus der tiefen Warteschlange, sonst hätte die Wertung viele Wischer lang keine Wirkung */
-  const dropTopic = (m: Moment) => {
+  /** Not for me: Momente derselben Folge fliegen sofort aus der tiefen Warteschlange, sonst hätte die Wertung viele Wischer lang keine Wirkung. Das Thema bleibt (Entscheidung 38). */
+  const dropEpisode = (m: Moment) => {
     const keep = queue.current.slice(0, idxRef.current + 1);
-    queue.current = [...keep, ...queue.current.slice(idxRef.current + 1).filter((x) => x.topic !== m.topic)];
+    queue.current = [...keep, ...queue.current.slice(idxRef.current + 1).filter((x) => x.videoId !== m.videoId)];
     for (const sl of slots.current) if (sl.index > idxRef.current) sl.index = -1;
   };
 
@@ -2055,6 +2076,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       slotInfo: () => slots.current.slice(0, SLOTS).map((x) => ({ index: x.index, mid: x.mid, st: x.st, muted: x.player?.isMuted?.() ?? null, t: x.player?.getCurrentTime?.() ?? 0 })),
       latency: () => stateRef.current.playLatency ?? [],
       seen: (id: string) => !!stateRef.current.momentSeen[id],
+      rejected: (id: string) => !!stateRef.current.momentRejected?.[id],
+      muted: (ch: string) => !!stateRef.current.mutedChannels[ch],
       liked: (id: string) => !!stateRef.current.momentLiked?.[id],
       asked: (id: string) => stateRef.current.momentAsked?.[id] ?? 0,
       saved: (id: string) => !!stateRef.current.savedMoments[id],
@@ -2066,7 +2089,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       closeCaption: () => setCapOpen(false),
       notes: () => stateRef.current.feedbackNotes ?? [],
       weights: () => stateRef.current.momentWeights,
-      skipRun: () => stateRef.current.skipRun ?? null,
+      taps: () => stateRef.current.tapLog ?? {},
       openNote: () => openNote(),
       recallQueue: () => stateRef.current.recallQueue ?? [],
       recall: () => ({ open: recallRef.current, state: stateRef.current.recall ?? {}, sessionSeen: sessionSeen.current }),
@@ -2359,7 +2382,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </button>
       )}
 
-      {note && <NoteSheet key={note.id} m={note} speaker={speakerLine(note.channel)} onChip={(c, t) => saveNote(note, c, t)} onInput={(c, v) => saveInput(note, c, v)} onDone={(t) => saveNote(note, null, t)} onAsk={() => ask(note)} onCancel={cancelNote} confirm={confirmText} keys={!!desk} ctl={noteCtl} />}
+      {note && <NoteSheet key={note.id} m={note} speaker={speakerLine(note.channel)} onChip={(c, t) => saveNote(note, c, t)} onInput={(c, v) => saveInput(note, c, v)} onDone={(t) => saveNote(note, null, t)} onAsk={() => ask(note)} onCancel={cancelNote} confirm={confirmText} onUndo={undoChannel ? undoMute : null} keys={!!desk} ctl={noteCtl} />}
     </div>
   );
 }

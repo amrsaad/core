@@ -48,6 +48,8 @@ export const chipEffect = (c: Chip): Effect | null => (c === 'Already known' ? '
 
 /** Wie lange die Bestätigungszeile am Blatt steht, bevor es schließt und der Feed zum nächsten Moment geht (ms) */
 export const CONFIRM_SHEET_MS = 900;
+/** Nach Mute speaker bleibt die Zeile mit dem Undo-Chip so lange stehen (Entscheidung 38 e) */
+export const MUTE_UNDO_MS = 5000;
 
 export interface NoteContext {
   id: string;

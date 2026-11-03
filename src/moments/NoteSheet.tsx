@@ -17,7 +17,7 @@ export interface NoteCtl {
  * Source und Topic (Entscheidung 20): zwei weitere Chips. Ein Tipp öffnet ein einzeiliges Textfeld (Link oder Name bzw. Thema), Add (oder Enter) speichert
  * die Notiz mit dem Präfix "source:" bzw. "topic:", die Bestätigungszeile steht wie bei den anderen Chips. Back kehrt zu den Chips zurück.
  */
-export function NoteSheet({ m, speaker, onChip, onInput, onDone, onAsk, onCancel, confirm, keys, ctl }: { m: Moment; speaker: string; onChip: (chip: Chip, text: string) => void; /** Source oder Topic: Wert aus dem Textfeld */ onInput: (chip: InputChip, value: string) => void; onDone: (text: string) => void; /** Ask: öffnet Claude mit vorausgefülltem Prompt, schließt das Blatt */ onAsk: () => void; onCancel: () => void; /** Bestätigungszeile nach einem Chip (z.B. "Less Barbell Medicine"), solange sie steht sind die Chips gesperrt */ confirm?: string | null; keys?: boolean; ctl?: MutableRefObject<NoteCtl | null> }) {
+export function NoteSheet({ m, speaker, onChip, onInput, onDone, onAsk, onCancel, confirm, onUndo, keys, ctl }: { m: Moment; speaker: string; onChip: (chip: Chip, text: string) => void; /** Source oder Topic: Wert aus dem Textfeld */ onInput: (chip: InputChip, value: string) => void; onDone: (text: string) => void; /** Ask: öffnet Claude mit vorausgefülltem Prompt, schließt das Blatt */ onAsk: () => void; onCancel: () => void; /** Bestätigungszeile nach einem Chip (z.B. "Less Barbell Medicine"), solange sie steht sind die Chips gesperrt */ confirm?: string | null; /** Rückgängig zur Bestätigungszeile (Mute speaker, 5 s) */ onUndo?: (() => void) | null; keys?: boolean; ctl?: MutableRefObject<NoteCtl | null> }) {
   const [text, setText] = useState('');
   /** Source oder Topic: Textfeld statt Chips */
   const [mode, setMode] = useState<InputChip | null>(null);
@@ -48,6 +48,11 @@ export function NoteSheet({ m, speaker, onChip, onInput, onDone, onAsk, onCancel
           <span>{speaker}</span>
         </div>
         <div className="note-confirm" data-testid="note-confirm" role="status" aria-live="polite">{confirm ?? ''}</div>
+        {confirm && onUndo && (
+          <button type="button" className="note-chip" data-testid="note-undo" onClick={onUndo}>
+            Undo
+          </button>
+        )}
         {mode ? (
           <div className="note-input" data-testid="note-input-panel">
             <div className="note-input-label" data-testid="note-input-label">{INPUT_LABEL[mode]}</div>

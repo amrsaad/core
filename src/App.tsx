@@ -5,6 +5,7 @@ import { useAppState } from './lib/useAppState';
 import { useSync } from './lib/sync/useSync';
 import { decryptJson, storeKeyFrom, unlockKey } from './lib/vault';
 import { buildAliasIndex, migrateDoc, migrateState, NO_ALIASES } from './moments/aliases';
+import { LEARN_VERSION, migrateWeights } from './moments/learn';
 import { validateMoments } from './moments/contract';
 import { MomentFeed } from './moments/MomentFeed';
 import { DeskBar, DeskHelp, DeskSheet } from './moments/DeskShell';
@@ -50,6 +51,13 @@ export default function App() {
     // Einmal pro Pool, ohne neue Zeitstempel (adopt). Danach ist der Stand migriert und die Funktion tut nichts mehr.
     if (stateReady) access.adopt((s) => migrateState(s, aliases));
   }, [stateReady, aliases, access]);
+
+  useEffect(() => {
+    // Einmalig auf die Regeln von Entscheidung 38 (Issue 28): niedrige Kanal- und Themagewichte aus Not for me und Skips anheben.
+    // Über update, damit die geänderten Gewichte neue Zeitstempel bekommen und die alten Werte vom anderen Gerät nicht zurückkehren.
+    if (stateReady && (state?.learnVersion ?? 0) < LEARN_VERSION) update((s) => ({ ...s, momentWeights: migrateWeights(s.momentWeights), learnVersion: LEARN_VERSION }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stateReady, state?.learnVersion]);
 
   useEffect(() => {
     (async () => {

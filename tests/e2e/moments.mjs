@@ -542,7 +542,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.noteGoesToNext = await waitFor(page, (i) => window.__core.idx() === i + 1, idxBefore);
     const n1 = await notes();
     c.noteSavedLocally = n1.length === 1 && n1[0].id === nm.id && n1[0].chips.join() === 'Weak' && n1[0].hook === nm.hook && n1[0].tab === 'Video' && /^[0-9a-f]{7}$|^dev$/.test(n1[0].commit) && n1[0].sent === undefined;
-    c.noteWeakWeakensChannel = (wWeak.channel[nm.channel] ?? 1) <= 0.7 + 0.001 && (wWeak.topic[nm.topic] ?? 1) === (wWeak0.topic[nm.topic] ?? 1);
+    c.noteWeakWeakensChannel = Math.abs((wWeak.channel[nm.channel] ?? 1) - 0.9 * (wWeak0.channel[nm.channel] ?? 1)) < 0.001 && (wWeak.topic[nm.topic] ?? 1) === (wWeak0.topic[nm.topic] ?? 1);
     c.noteWeakNoToastNoHeart = !(await page.evaluate(() => !!document.querySelector('.flash'))) && (await page.evaluate((id) => window.__core.liked(id), nm.id)) === likedBefore;
     c.noteNothingOpened = (await page.evaluate(() => window.__opened)).length === 0 && gh.length === 0;
     // Nur Text, dann Done: speichert den Text ohne Chip, schließt, nächster Moment
@@ -604,7 +604,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await page.evaluate(() => { window.__opened = []; });
     }
 
-    // Alle Chips: Bestätigungszeile am Blatt (kein Toast), dann weiter, als Notiz gespeichert. Gewichte nach den Regeln (Deckel, nicht Faktoren).
+    // Alle Chips: Bestätigungszeile am Blatt (kein Toast), dann weiter, als Notiz gespeichert. Gewichte nach Entscheidung 38 (kleinste Einheit: Moment, Folge, Kanal je Tipp).
     const shot = async (label, n) => { await page.screenshot({ path: `${out}/${name}-${n}-chip-${label.replace(/ /g, '-')}.png` }); };
     const wNow = () => page.evaluate(() => JSON.parse(JSON.stringify(window.__core.weights())));
     const flow = async (label, line) => {
@@ -628,32 +628,41 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await page.waitForTimeout(1000);
       return { m, w0, ok: opened && shown && noToast && advanced && saved, w, until: w.until ?? {} };
     };
-    // Known ("Already known"): nur das Thema auf höchstens 0,7. Der Kanal kommt nicht dazu.
-    let f = await flow('Already known', (m) => `Less ${m.topic.charAt(0).toUpperCase()}${m.topic.slice(1)}`);
+    // Known ("Already known"): Moment weg (abgelehnt, gesehen), keine Gewichte
+    let f = await flow('Already known', 'Marked known');
     c.knownViaChip = f.ok;
-    c.knownTopicCap = Math.abs((f.w.topic[f.m.topic] ?? 1) - Math.min(0.7, f.w0.topic[f.m.topic] ?? 1)) < 0.001;
-    c.knownChannelKept = Math.abs((f.w.channel[f.m.channel] ?? 1) - (f.w0.channel[f.m.channel] ?? 1)) < 0.001;
-    // Wrong: nur der Kanal auf höchstens 0,5
-    f = await flow('Wrong', (m) => `Less ${m.channel}`);
+    c.knownNoWeights = JSON.stringify({ ...f.w, until: undefined }) === JSON.stringify({ ...f.w0, until: undefined });
+    c.knownMomentGone = await page.evaluate((id) => window.__core.rejected(id) && window.__core.seen(id), f.m.id);
+    // Wrong: nur die Notiz, keine Gewichte
+    f = await flow('Wrong', 'Noted');
     c.wrongViaChip = f.ok;
-    c.wrongChannelCap = Math.abs((f.w.channel[f.m.channel] ?? 1) - Math.min(0.5, f.w0.channel[f.m.channel] ?? 1)) < 0.001;
-    c.wrongTopicKept = Math.abs((f.w.topic[f.m.topic] ?? 1) - (f.w0.topic[f.m.topic] ?? 1)) < 0.001;
-    // Not for me: Thema 0,2 für 30 Tage (Ablauf als Zeitstempel), Kanal auf höchstens 0,5, Bereich bleibt
-    f = await flow('Not for me', (m) => `Less ${m.topic.charAt(0).toUpperCase()}${m.topic.slice(1)}`);
+    c.wrongNoWeights = JSON.stringify({ ...f.w, until: undefined }) === JSON.stringify({ ...f.w0, until: undefined });
+    // Weak: Kanal mal 0,9 je Tipp, Thema bleibt
+    f = await flow('Weak', (m) => `Less ${m.channel}`);
+    c.weakViaChip = f.ok;
+    c.weakChannel09 = Math.abs((f.w.channel[f.m.channel] ?? 1) - 0.9 * (f.w0.channel[f.m.channel] ?? 1)) < 0.001 || (f.w.channel[f.m.channel] ?? 1) <= 0.5 + 0.001;
+    c.weakTopicKept = Math.abs((f.w.topic[f.m.topic] ?? 1) - (f.w0.topic[f.m.topic] ?? 1)) < 0.001;
+    // Not for me: dieser Moment weg, die Folge 0,3 für 30 Tage (Ablauf als Zeitstempel), Thema höchstens 0,9, Kanal und Bereich bleiben
+    f = await flow('Not for me', 'Less from this episode for 30 days');
     c.notForMeViaChip = f.ok;
-    c.notForMeTopic02 = Math.abs((f.w.topic[f.m.topic] ?? 1) - 0.2) < 0.001;
-    c.notForMeChannel05 = (f.w.channel[f.m.channel] ?? 1) <= 0.5 + 0.001;
+    c.notForMeMomentGone = await page.evaluate((id) => window.__core.rejected(id) && window.__core.seen(id), f.m.id);
+    c.notForMeEpisode03 = Math.abs((f.w.episode?.[f.m.videoId] ?? 1) - 0.3) < 0.001;
+    c.notForMeTopic09 = (f.w.topic[f.m.topic] ?? 1) <= 0.9 + 0.001 && (f.w.topic[f.m.topic] ?? 1) >= Math.min(0.9, f.w0.topic[f.m.topic] ?? 1) - 0.001;
+    c.notForMeChannelKept = Math.abs((f.w.channel[f.m.channel] ?? 1) - (f.w0.channel[f.m.channel] ?? 1)) < 0.001;
     c.notForMeAreaKept = (f.w.area[f.m.area] ?? 1) >= (f.w0.area[f.m.area] ?? 1) - 0.001;
-    const uT = f.until[`t:${f.m.topic}`];
-    c.notForMeExpiry30Days = !!uT && Math.abs((uT.at - Date.parse('2026-10-23T12:00:00')) / 86400000 - 30) < 1.5 && uT.back <= 1;
+    const uE = f.until[`e:${f.m.videoId}`];
+    c.notForMeExpiry30Days = !!uE && Math.abs((uE.at - Date.parse('2026-10-23T12:00:00')) / 86400000 - 30) < 1.5 && uE.back <= 1;
     // Mute speaker: Zeile "<Sprecher> muted", Kanal verschwindet aus der Warteschlange, kein Toast
     c.muteViaChip = await openSheet();
     const idxM = await page.evaluate(() => window.__core.idx());
     const mutedMoment = await page.evaluate(() => window.__core.moment());
     await page.click('[data-testid="note-chip-Mute speaker"]');
-    c.muteLine = await waitFor(page, (t) => document.querySelector('[data-testid=note-confirm]')?.textContent === t, `${mutedMoment.channel} muted`);
+    c.muteLine = await waitFor(page, (t) => /^.+ muted, \d+ moments?$/.test(document.querySelector('[data-testid=note-confirm]')?.textContent ?? '') && document.querySelector('[data-testid=note-confirm]').textContent.startsWith(t), mutedMoment.channel);
+    c.muteUndoChip = !!(await page.$('[data-testid=note-undo]'));
+    c.mutedChannelNow = await page.evaluate((ch) => window.__core.muted(ch), mutedMoment.channel);
     c.muteNoToast = await page.evaluate(() => !document.querySelector('.flash'));
-    c.muteAdvanced = await waitFor(page, (i) => !document.querySelector('[data-testid=note-sheet]') && window.__core.idx() > i, idxM);
+    // Die Zeile mit dem Undo-Chip steht 5 s, dann schließt das Blatt und der Feed geht weiter
+    c.muteAdvanced = await waitFor(page, (i) => !document.querySelector('[data-testid=note-sheet]') && window.__core.idx() > i, idxM, 12000);
     c.muteSaved = (await notes()).at(-1).chips.join() === 'Mute speaker' && (await notes()).at(-1).id === mutedMoment.id;
     c.noteStillNoNetwork = gh.length === 0 && (await page.evaluate(() => window.__opened)).length === 0;
     r.notesCount = (await notes()).length;
@@ -952,7 +961,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await pCard.close();
     // Leerer Filter: eine Zeile statt leerem Feed, Schalter bleibt bedienbar
     // Eigener Kontext: im geteilten wären je nach Verlauf der Abschnitte davor schon fast alle Momente gesehen
-    // Zweiter Skip desselben Kanals in Folge: Kanal 0,2 für 14 Tage, danach zurück auf 0,6 (eigener Pool mit einem Kanal)
+    // Skip: Kanal und Thema mal 0,97 (Entscheidung 38). Alle Momente des Pools haben eigene Folgen, darum trifft der zweite Skip nur wieder mal 0,97.
     const fs = await freshPage(browser, url, k, poolSolo, '?now=2026-10-23');
     const ps = fs.pg;
     c.soloFeed = await waitFor(ps, () => !!window.__core?.moment());
@@ -962,14 +971,13 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const i0 = await ps.evaluate(() => window.__core.idx());
       await ps.evaluate(() => { window.__core.markStart(); window.__core.next(); });
       await waitFor(ps, (i) => window.__core.idx() > i, i0);
-      return ps.evaluate(() => ({ w: JSON.parse(JSON.stringify(window.__core.weights())), run: window.__core.skipRun() }));
+      return ps.evaluate(() => ({ w: JSON.parse(JSON.stringify(window.__core.weights())), taps: JSON.parse(JSON.stringify(window.__core.taps())) }));
     };
     const s1 = await skipNow();
-    c.soloFirstSkip = Math.abs((s1.w.channel['Kanal solo'] ?? 1) - 0.6) < 0.001 && Math.abs((s1.w.topic.augen ?? 1) - 0.6) < 0.001 && s1.run?.channel === 'Kanal solo' && s1.run?.n === 1 && !s1.w.until && Object.keys(s1.w.area).length === 0;
+    c.soloFirstSkip = Math.abs((s1.w.channel['Kanal solo'] ?? 1) - 0.97) < 0.001 && Math.abs((s1.w.topic.augen ?? 1) - 0.97) < 0.001 && !s1.w.until && Object.keys(s1.w.area).length === 0;
     const s2 = await skipNow();
-    const u2 = s2.w.until?.['c:Kanal solo'];
-    c.soloSecondSkip02 = Math.abs((s2.w.channel['Kanal solo'] ?? 1) - 0.2) < 0.001 && s2.run?.n === 2 && Math.abs((s2.w.topic.augen ?? 1) - 0.6) < 0.001;
-    c.soloSecondSkip14Days = !!u2 && Math.abs((u2.at - Date.parse('2026-10-23T12:00:00')) / 86400000 - 14) < 1.5 && Math.abs(u2.back - 0.6) < 0.001;
+    c.soloSecondSkipMild = Math.abs((s2.w.channel['Kanal solo'] ?? 1) - 0.97 * 0.97) < 0.001 && !s2.w.until && !s2.w.episode;
+    c.soloSkipCounted = Object.keys(s2.taps).filter((x) => x.startsWith('k:')).length >= 1;
     await ps.screenshot({ path: `${out}/${name}-29-zweiter-skip.png` });
     await ps.waitForTimeout(800);
     await ps.close();

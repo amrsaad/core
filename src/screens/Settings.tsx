@@ -249,7 +249,7 @@ function LearnedCard({ state, update, row, btn }: { state: AppState; update: (fn
               className={btn + ' flex-1 font-semibold'}
               data-testid="reset-confirm"
               onClick={() => {
-                update((st) => ({ ...st, momentWeights: emptyWeights(), skipRun: undefined }));
+                update((st) => ({ ...st, momentWeights: emptyWeights(), tapLog: undefined }));
                 setAsk(false);
                 setDone(true);
               }}

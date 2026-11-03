@@ -134,7 +134,7 @@ export function isNewEpisode(m: Pick<Moment, 'publishedAt' | 'createdAt'>, now: 
   return Number.isFinite(t) && now >= t && now - t < NEW_HOURS * 3_600_000;
 }
 
-const known = (w: Weights, m: Moment) => m.channel in w.channel || m.topic in w.topic;
+const known = (w: Weights, m: Moment) => m.channel in w.channel || m.topic in w.topic || !!(w.episode && episodeOf(m) in w.episode) || !!m.subtopic?.some((t) => w.subtopic && t in w.subtopic);
 
 /** Gewicht eines Unterthemen-Tags: der kleinste unter den Tags des Moments */
 const subtopicWeight = (w: Weights, m: Moment): number => {
