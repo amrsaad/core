@@ -4,22 +4,24 @@ import { createPortal } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
-import { audioDeck, createPlayer, deckClipOf, HLS, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
+import { audioDeck, createPlayer, deckClipOf, HLS, LOCAL, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
 import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, onGesture, type Gesture } from './gesture';
 import { hintVisible, SOUND_NONE } from './soundHint';
 import { errorAction, recoverDelay, resumePos } from './netrecover';
 import { isYtId } from './contract';
-import { contextForTest, levelEnabled, probeHost, setTempo, unlockAudio } from './audioGraph';
+import { beep, contextForTest, levelEnabled, probeHost, setTempo, unlockAudio } from './audioGraph';
 import { loudLine, recordLoud } from './loudness';
 import { browserPreloader } from './preloader';
-import { netRank, queueAhead, streamKind } from './preload';
+import { isPreloadable, keyOf, netRank, queueAhead, streamKind } from './preload';
+import { coldToday, countColdStart, pickHeads, startOrder } from './startHead';
+import { lockMeta, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS } from './lockScreen';
 import { cursorFor, historyBefore, parseSaved, queueKey, recentFromLog, releaseTail, remixTail, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMoment, sessionSkip, SIGNAL, type MomentCursor } from './mix';
 import { bumpCell, bumpPair, hourKey } from './signals';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
 import { clampRate, DEFAULT_RATE, nextRate, rateOf, type Rate } from '../lib/state';
 import { addSample } from './latency';
-import { captionsShown } from './captions';
+import { captionLines, captionsShown } from './captions';
 import { CueClock, cueIndexAt } from './cueClock';
 import { countGotIt, countSeen, todayLine } from './today';
 import { answer, cardDue, pickRecall, type Recent } from './recall';
@@ -248,6 +250,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const clock = useRef(new CueClock());
   const shownCue = useRef(-2);
   const [loading, setLoading] = useState(false);
+  /** Audio-Reiter: ein Netzstart wartet auf Daten (Pille "Loading, keep screen on") */
+  const [deckWait, setDeckWait] = useState(false);
+  const lastBack = useRef<number | null>(null);
+  const lockPrevRef = useRef<() => void>(() => {});
   const waitSince = useRef(0);
   rateRef.current = rateOf(state.settings);
   setTempo(clampRate(rateRef.current));
@@ -271,6 +277,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     try {
       const ids = queue.current.slice(Math.max(0, idxRef.current)).map((x) => x.id);
       localStorage.setItem(queueKey(form), JSON.stringify({ day: today, ids }));
+      // Die nächsten drei Audio-Momente bleiben über das Sitzungsende im Vorrat (Brief 02): beim nächsten Start ist Moment 1 lokal
+      if (form === 'audio') pre?.setHeads(pickHeads(queue.current, idxRef.current, isPreloadable, keyOf));
     } catch {
       /* kein Speicher */
     }
@@ -279,6 +287,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const ensureQueue = useCallback(
     (upTo: number) => {
       const s = stateRef.current;
+      const firstBuild = !cursor.current;
       if (!cursor.current) {
         // Heutige Warteschlange der letzten Sitzung übernehmen, dann passt der Vorrat noch (auch offline)
         let saved: Moment[] = [];
@@ -298,6 +307,18 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         const m = nextMoment(pool, { areaShares: s.settings.areaShares, weights: s.momentWeights, seen: s.momentSeen, mutedChannels: s.mutedChannels, now: clockNow().getTime(), rank }, cursor.current, historyBefore(queue.current, queue.current.length, seedHist.current), rng.current);
         if (!m) break;
         if (!bad.current.has(m.videoId)) queue.current.push(m);
+      }
+      // Audio-Reiter, Start (Brief 02): der erste Moment kommt aus dem Vorrat. Innerhalb der nächsten 3 der Mischung wird ein lokaler vorgezogen,
+      // sonst kommt ein gehaltener Kopf der letzten Sitzung an die erste Stelle.
+      if (firstBuild && form === 'audio' && pre && queue.current.length) {
+        const held = (m: Moment) => pre.held(m.id) || LOCAL.has(keyOf(m));
+        const heads = pre
+          .startHeads()
+          .map((h) => pool.find((m) => m.id === h.id))
+          .filter((m): m is Moment => !!m && !s.momentSeen[m.id] && !s.mutedChannels[m.channel]);
+        const r = startOrder(queue.current, held, heads);
+        queue.current = r.queue;
+        diag.current.push(`deck: start order ${r.how} first=${queue.current[0]?.id ?? 'none'} heads=${pre.startHeads().length}`);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -503,7 +524,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   /** Anzeige des Betriebssystems (Sperrbildschirm) sofort setzen, nicht erst nach dem nächsten Rendern, das im Hintergrund gedrosselt wird */
   const setMeta = (cur: Moment | undefined) => {
     if (!cur || !('mediaSession' in navigator) || typeof MediaMetadata === 'undefined') return;
-    navigator.mediaSession.metadata = new MediaMetadata({ title: cur.hook, artist: speakerLine(cur.channel), album: AREA_LABEL[cur.area], artwork: [{ src: thumbOf(cur) }] });
+    // Audio-Reiter: Hook, Kanal, Folge und das Bild des Reiters (Entscheidung 24). Sonst wie bisher.
+    navigator.mediaSession.metadata = new MediaMetadata(
+      form === 'audio' ? lockMeta(cur, import.meta.env.BASE_URL, location.origin) : { title: cur.hook, artist: speakerLine(cur.channel), album: AREA_LABEL[cur.area], artwork: [{ src: thumbOf(cur) }] },
+    );
   };
 
   /** Darf jetzt eine Abrufkarte erscheinen? Feed-Reiter offen, Seite sichtbar, kein Blatt, keine Übersicht (Pfeiler 19) */
@@ -699,7 +723,31 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (form !== 'audio') return;
     audioDeck.diag = (line) => diag.current.push(line);
     audioDeck.onAdvance = () => finishRef.current();
-    return () => audioDeck.release();
+    // Kaltstart: auf die Blob-URL aus dem Vorrat warten statt vom Netz zu starten
+    audioDeck.pending = (id, key) => pre?.pendingWarm(id, key) ?? null;
+    // Zähler coldNetStarts: jeder Start einer Quelle vom Netz, pro Tag
+    audioDeck.onStart = ({ clip, local }) => {
+      if (local) return;
+      let store: Storage | null = null;
+      try {
+        store = localStorage;
+      } catch {
+        store = null;
+      }
+      const n = countColdStart(store, dayKey(clockNow()));
+      diag.current.push(`signals: coldNetStarts ${n} today (net start ${clip.id})`);
+    };
+    // Netzstart ohne Daten: Hinweis nach 500 ms, bis canplay kommt
+    let waitTimer = 0;
+    audioDeck.onLoading = (on) => {
+      window.clearTimeout(waitTimer);
+      if (on) waitTimer = window.setTimeout(() => setDeckWait(true), 500);
+      else setDeckWait(false);
+    };
+    return () => {
+      window.clearTimeout(waitTimer);
+      audioDeck.release();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -1033,7 +1081,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         if (sl.st === STATE.PLAYING) sl.pos = c;
         setProgress(Math.min(1, Math.max(0, (c - m.start) / (m.end - m.start))));
         // Untertitel kommen aus der Uhr (rAF-Schleife unten). Die Abfrage misst nur nach, das ist für YouTube die einzige Quelle.
-        clock.current.sample(c, performance.now(), clampRate(rateRef.current), sl.st === STATE.PLAYING);
+        // Audio-Reiter: nur das Deck misst (Elementzeit und echtes playbackRate, siehe onTime). Eine zweite Quelle mit dem Tempo der App würde beim Tempowechsel gegenhalten (Issue 15).
+        if (!(form === 'audio' && audioDeck.holds(keyOf(m)))) clock.current.sample(c, performance.now(), clampRate(rateRef.current), sl.st === STATE.PLAYING);
       }
       ytRebuildRef.current();
       // Im Hintergrund wechselt im Audio-Reiter das Audio-Element selbst am Ende. Die Abfrage (gedrosselt) greift nur noch als Netz, wenn der Wechsel ausblieb.
@@ -1333,6 +1382,32 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       delete x[m.id];
       return { ...s, savedMoments: x };
     });
+  };
+
+  /**
+   * Zurück auf Sperrbildschirm und Medientasten im Audio-Reiter (Entscheidung 24): Save (nie Rücknahme), Titel 2 s "Saved · Hook", kurzer Ton.
+   * Ein zweiter Druck binnen 1,5 s ist More like this. Der Ton läuft über den Web-Audio-Kontext des Decks, ohne Kontext bleibt er aus.
+   */
+  lockPrevRef.current = () => {
+    const m = queue.current[idxRef.current];
+    if (!m) return;
+    const now = Date.now();
+    const kind = previousPress(now, lastBack.current);
+    lastBack.current = now;
+    let title = savedTitle(m.hook);
+    if (kind === 'more') {
+      like('double');
+      title = `More like this · ${m.hook}`;
+    } else if (!stateRef.current.savedMoments[m.id]) toggleSave();
+    diag.current.push(`lock: back ${kind} ${m.id} tone=${beep(kind === 'more' ? 1175 : 880)}`);
+    try {
+      if ('mediaSession' in navigator && typeof MediaMetadata !== 'undefined') navigator.mediaSession.metadata = new MediaMetadata({ ...lockMeta(m, import.meta.env.BASE_URL, location.origin), title });
+      window.setTimeout(() => {
+        if (msOnRef.current) setMeta(queue.current[idxRef.current]);
+      }, SAVED_TITLE_MS);
+    } catch {
+      /* Anzeige nicht möglich */
+    }
   };
 
   /** Log-Eintrag je Effekt (Wochenrückblick zählt schwach und falsch) */
@@ -1905,7 +1980,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     set('play', act('play', () => playRef.current(true)));
     set('pause', act('pause', () => playRef.current(false)));
     set('nexttrack', act('nexttrack', () => goTo(idxRef.current + 1)));
-    set('previoustrack', act('previoustrack', () => goTo(idxRef.current - 1)));
+    // Audio-Reiter (Entscheidung 24): Zurück speichert, ein zweiter Druck binnen 1,5 s ist More like this. Sonst springt Zurück zum vorigen Moment.
+    set('previoustrack', act('previoustrack', () => (form === 'audio' ? lockPrevRef.current() : goTo(idxRef.current - 1))));
+    // Keine Sprünge um 10 Sekunden: der Sperrbildschirm zeigt dann Weiter und Zurück
+    for (const a of LOCK_UNREGISTERED) set(a as MediaSessionAction, null);
     return () => {
       for (const a of ['play', 'pause', 'nexttrack', 'previoustrack'] as MediaSessionAction[]) set(a, null);
     };
@@ -1934,7 +2012,17 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       diagAll: () => diag.current.filter((x) => /^(replan|reorder|net poor|yt stub|first-frame)/.test(x)),
       slots: () => slots.current.slice(0, SLOTS).map((x) => ({ st: x.st, index: x.index })),
       // Audio-Reiter: Schlüssel der Ausschnitte, die das eine Audio-Element geladen hat, und ob es vorhanden ist (Tests)
-      deck: () => ({ history: [...audioDeck.history], exists: audioDeck.exists, armed: audioDeck.armedKey }),
+      deck: () => ({ history: [...audioDeck.history], exists: audioDeck.exists, armed: audioDeck.armedKey, pos: audioDeck.lastPos }),
+      /** Sperrbildschirm (Brief 02, Tests): Handler registriert, Metadaten, Positionsstatus, Zähler coldNetStarts des Tages */
+      lock: () => {
+        const ms = 'mediaSession' in navigator ? navigator.mediaSession : null;
+        const md = ms?.metadata;
+        return { title: md?.title ?? null, artist: md?.artist ?? null, album: md?.album ?? null, artwork: md ? md.artwork.map((a) => `${a.sizes} ${a.src}`) : [], state: ms?.playbackState ?? null, pos: audioDeck.lastPos, cold: coldToday(localStorage, dayKey(clockNow())) };
+      },
+      /** Zurück vom Sperrbildschirm nachstellen (Tests) */
+      lockBack: () => lockPrevRef.current(),
+      /** Vorrat-Köpfe (Tests) */
+      heads: () => pre?.startHeads() ?? [],
       /** Medien-Elemente mit gesetzter Quelle (Vorgabe höchstens 3) und der Hinweis "Ton aus" aus dem Zustand des Elements */
       media: () => mediaWithSrc(),
       /** Untertitel (Issue 15): Index der gezeigten Cue, Index laut Elementzeit, Elementzeit und Tempo */
@@ -2124,6 +2212,16 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       )}
       <div className="vprogress" style={{ transform: `scaleX(${progress})` }} />
       {loading && !forYou && <div className="vloading" aria-label="Loading" />}
+      {deckWait && form === 'audio' && !forYou && (
+        <div
+          className="pointer-events-none"
+          data-testid="loading-pill"
+          role="status"
+          style={{ position: 'absolute', left: '50%', top: 'calc(env(safe-area-inset-top, 0px) + 64px)', transform: 'translateX(-50%)', zIndex: 5, padding: '8px 14px', borderRadius: 999, background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: 13, whiteSpace: 'nowrap' }}
+        >
+          Loading, keep screen on
+        </div>
+      )}
 
       <div
         className="vgesture no-callout"
@@ -2154,7 +2252,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
       {captionsOn && caption && !forYou && (
         <div className={`vcaption pointer-events-none ${m?.audio ? 'vcaption-audio' : form === 'audio' ? 'vcaption-big' : ''} ${isArabic(caption) ? 'vcaption-rtl' : ''}`} data-testid="caption">
-          <span dir={isArabic(caption) ? 'rtl' : 'ltr'} lang={isArabic(caption) ? 'ar' : 'en'}>{caption}</span>
+          {captionLines(caption).map((line, k) => (
+            <span key={k} dir={isArabic(line) ? 'rtl' : 'ltr'} lang={isArabic(line) ? 'ar' : 'en'} style={{ display: 'block' }}>{line}</span>
+          ))}
         </div>
       )}
 

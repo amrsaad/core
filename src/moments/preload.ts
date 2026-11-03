@@ -110,15 +110,16 @@ export const totalBytes = (list: Stored[]) => list.reduce((s, e) => s + e.bytes,
  * Danach nur solche, die weiter hinten liegen als der neue (rank größer), niemals ein näherer für einen ferneren.
  * ok false: es lässt sich nichts verdrängen, der neue Ausschnitt wird dann nicht geladen.
  */
-export function planEviction(stored: Stored[], need: number, cap: number, newRank: number, rankOf: (id: string) => number | null, reserved = 0): { evict: string[]; ok: boolean } {
+export function planEviction(stored: Stored[], need: number, cap: number, newRank: number, rankOf: (id: string) => number | null, reserved = 0, pinned: ReadonlySet<string> = new Set()): { evict: string[]; ok: boolean } {
   // reserved: Bytes, die gleichzeitig ladende Abrufe schon beanspruchen
   let used = totalBytes(stored) + reserved;
   if (need > cap) return { evict: [], ok: false };
   if (used + need <= cap) return { evict: [], ok: true };
-  const outside = stored.filter((e) => rankOf(e.id) === null || (rankOf(e.id) as number) < 1).sort((a, b) => a.at - b.at);
+  // pinned: die Köpfe über das Sitzungsende (startHead.ts) werden nie verdrängt
+  const outside = stored.filter((e) => !pinned.has(e.id) && (rankOf(e.id) === null || (rankOf(e.id) as number) < 1)).sort((a, b) => a.at - b.at);
   const farther = stored.filter((e) => {
     const r = rankOf(e.id);
-    return r !== null && r >= 1 && r > newRank;
+    return !pinned.has(e.id) && r !== null && r >= 1 && r > newRank;
   });
   // Unter den ferneren zuerst das Älteste
   farther.sort((a, b) => a.at - b.at);

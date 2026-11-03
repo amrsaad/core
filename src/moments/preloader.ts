@@ -4,6 +4,7 @@
 import { LOCAL } from '../video/ytApi';
 import { Mp3Error, readHead, sliceMp3, type Mp3Head, type RangeFetch } from './mp3range';
 import { addNet, isPoorNet, keyOf, nextToLoad, planEviction, PRELOAD_CAP_BYTES, windowOfTime, type NetSample, type Ranked, type Stored } from './preload';
+import { headsKey, parseHeads, type Head } from './startHead';
 import type { Moment } from './types';
 
 export const CACHE_NAME = 'core-preload-v1';
@@ -93,9 +94,59 @@ export class Preloader {
   private headP = new Map<string, Promise<Mp3Head>>();
   private ready: Promise<void>;
   readonly log: string[] = [];
+  /** Die nächsten Audio-Momente der letzten Sitzung (startHead.ts): nie verdrängt, beim Start als Blob-URL bereit */
+  private headList: Head[] = [];
+  private pinned = new Set<string>();
+  /** IDs im Index der letzten Sitzung, sofort lesbar (der Cache selbst öffnet asynchron) */
+  private indexIds = new Set<string>();
+  private inited = false;
 
   constructor(private d: PreloaderDeps) {
+    this.readSync();
     this.ready = this.init();
+  }
+
+  /** Index und Köpfe synchron aus localStorage: der Feed weiß beim ersten Rendern, was im Vorrat liegt */
+  private readSync() {
+    try {
+      const raw = this.d.storage?.getItem(INDEX_KEY);
+      if (raw) for (const e of JSON.parse(raw) as Entry[]) if (e && typeof e.id === 'string') this.indexIds.add(e.id);
+      this.headList = parseHeads(this.d.storage?.getItem(headsKey('audio')));
+      this.pinned = new Set(this.headList.map((h) => h.id));
+    } catch {
+      /* kaputter Index: init gleicht mit dem Cache ab */
+    }
+  }
+
+  /** Köpfe der letzten Sitzung (Schlüssel und ID) */
+  startHeads(): readonly Head[] {
+    return this.headList;
+  }
+
+  /** Die nächsten Audio-Momente festhalten: sie bleiben über das Sitzungsende im Vorrat und werden beim Start sofort bereitgestellt */
+  setHeads(list: Head[]) {
+    if (list.length === this.headList.length && list.every((h, i) => h.id === this.headList[i].id)) return;
+    this.headList = list;
+    this.pinned = new Set(list.map((h) => h.id));
+    try {
+      this.d.storage?.setItem(headsKey('audio'), JSON.stringify(list));
+    } catch {
+      /* kein Speicher */
+    }
+  }
+
+  /** Liegt der Moment im Vorrat? Vor dem Ende von init gilt der Index der letzten Sitzung. */
+  held(id: string): boolean {
+    return this.inited ? this.entries.has(id) : this.indexIds.has(id) || this.entries.has(id);
+  }
+
+  /**
+   * Beim Kaltstart: der Ausschnitt liegt im Vorrat, seine Blob-URL entsteht aber erst, wenn init fertig ist. Das Versprechen löst sich dann
+   * (true = Blob-URL liegt jetzt bereit). null, wenn nichts zu warten ist (schon bereit, nicht im Vorrat oder init lange fertig).
+   */
+  pendingWarm(id: string, key: string): Promise<boolean> | null {
+    if (LOCAL.has(key) || this.inited || !this.indexIds.has(id)) return null;
+    return this.ready.then(() => LOCAL.has(key));
   }
 
   private note(s: string) {
@@ -115,10 +166,13 @@ export class Preloader {
         const id = decodeURIComponent(k.slice(k.lastIndexOf('/') + 1));
         if (!this.entries.has(id)) await this.cache.delete(k);
       }
+      // Die Köpfe sofort als Blob-URL bereitstellen, bevor der erste Moment startet
+      for (const h of this.headList) await this.warmKey(h.id, h.key);
     } catch (e) {
       this.cache = null;
       this.note(`init failed ${e instanceof Error ? e.message : String(e)}`);
     }
+    this.inited = true;
     this.emit();
     this.fill();
   }
@@ -274,7 +328,7 @@ export class Preloader {
       }
       // Grobe Größe vorab: passt es nicht ohne Näheres zu verdrängen, gar nicht erst laden
       const guess = Math.ceil((m.end - m.start + 1.3) * ((head.bitrate * 1000) / 8));
-      if (!planEviction([...this.entries.values()], guess, PRELOAD_CAP_BYTES, job.rank, this.rankOf, this.reservedBytes(m.id)).ok) {
+      if (!planEviction([...this.entries.values()], guess, PRELOAD_CAP_BYTES, job.rank, this.rankOf, this.reservedBytes(m.id), this.pinned).ok) {
         this.deferred.add(m.id);
         this.note(`defer ${m.id} (full)`);
         return;
@@ -283,7 +337,7 @@ export class Preloader {
       const slice = await sliceMp3(fr, head, m.start, m.end);
       this.hostOk.add(host);
       this.hostStrikes.delete(host);
-      const plan = planEviction([...this.entries.values()], slice.bytes.length, PRELOAD_CAP_BYTES, this.rank.get(m.id) ?? job.rank, this.rankOf, this.reservedBytes(m.id));
+      const plan = planEviction([...this.entries.values()], slice.bytes.length, PRELOAD_CAP_BYTES, this.rank.get(m.id) ?? job.rank, this.rankOf, this.reservedBytes(m.id), this.pinned);
       if (!plan.ok) {
         this.deferred.add(m.id);
         this.note(`defer ${m.id} (full)`);
@@ -344,30 +398,32 @@ export class Preloader {
     this.warmed.delete(id);
   }
 
+  /** Blob-URL für einen Eintrag anlegen (nur wenn vorgeladen) und dem Player bekannt machen */
+  private async warmKey(id: string, key: string) {
+    const e = this.entries.get(id);
+    if (!e || this.warmed.has(id) || !this.cache) return;
+    try {
+      const res = await this.cache.match(this.keyFor(id));
+      if (!res) {
+        this.entries.delete(id);
+        this.persist();
+        return;
+      }
+      const blob = await res.blob();
+      if (this.warmed.has(id) || !this.entries.has(id)) return;
+      const url = this.d.createObjectURL(blob);
+      LOCAL.set(key, { url, offset: e.offset });
+      this.warmed.set(id, { key, url });
+    } catch (err) {
+      this.note(`warm ${id} failed ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
   /** Blob-URLs für die Momente anlegen (nur wenn vorgeladen) und dem Player bekannt machen */
   async warm(ms: Moment[]) {
     await this.ready;
     if (!this.cache) return;
-    for (const m of ms) {
-      const e = this.entries.get(m.id);
-      if (!e || this.warmed.has(m.id)) continue;
-      try {
-        const res = await this.cache.match(this.keyFor(m.id));
-        if (!res) {
-          this.entries.delete(m.id);
-          this.persist();
-          continue;
-        }
-        const blob = await res.blob();
-        if (this.warmed.has(m.id) || !this.entries.has(m.id)) continue;
-        const url = this.d.createObjectURL(blob);
-        const key = keyOf(m);
-        LOCAL.set(key, { url, offset: e.offset });
-        this.warmed.set(m.id, { key, url });
-      } catch (err) {
-        this.note(`warm ${m.id} failed ${err instanceof Error ? err.message : String(err)}`);
-      }
-    }
+    for (const m of ms) await this.warmKey(m.id, keyOf(m));
   }
 
   /** Blob-URLs weit hinter und vor dem Fenster freigeben. keep: IDs, die der Feed noch braucht */

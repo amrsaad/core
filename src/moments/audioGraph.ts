@@ -165,6 +165,30 @@ export function unlockAudio(): Promise<void> {
   return resumed;
 }
 
+/**
+ * Kurzer Ton über den Web-Audio-Kontext des Decks (Bestätigung für Save vom Sperrbildschirm, Entscheidung 24). Das eine Audio-Element des Decks
+ * spielt den Moment weiter, der Ton mischt sich dazu. Läuft der Kontext nicht, bleibt es still und die Funktion gibt false zurück.
+ */
+export function beep(freq = 880, ms = 90): boolean {
+  if (!ctx || !audioRunning()) return false;
+  try {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    const t = ctx.currentTime;
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.12, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + ms / 1000);
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start(t);
+    o.stop(t + ms / 1000 + 0.02);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Wird bei jedem unlockAudio gerufen, solange registriert (Player bereiten dort ihre geregelten Elemente vor) */
 export function onUnlock(f: () => void): () => void {
   unlockListeners.add(f);

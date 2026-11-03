@@ -28,6 +28,9 @@ const RELEVEL_MIN_LEFT = 4;
 /** So lange nach einer Unterbrechung des Kontexts warten, bevor auf die unveränderte Spur gewechselt wird (iOS setzt ihn oft von selbst fort) */
 const CONTEXT_GRACE_MS = 1500;
 
+/** Wie lange der erste Start auf die Blob-URL aus dem Vorrat wartet, bevor er vom Netz kommt (ms, Kaltstart, Brief 02) */
+const HOLD_MS = 1200;
+
 /** Null Sekunden Stille: schaltet das Element durch eine Geste frei, bevor der erste echte Moment kommt */
 const SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
 
@@ -168,6 +171,18 @@ export class AudioDeck {
   readonly history: string[] = [];
   /** Beim automatischen Weiter im Hintergrund: der Wechsel ist schon geschehen, jetzt die Buchführung */
   onAdvance: ((from: DeckClip, to: DeckClip) => void) | null = null;
+  /** Vorrat (Kaltstart): liegt der Ausschnitt im Vorrat und fehlt nur die Blob-URL, ein Versprechen darauf (true = bereit). Sonst null. */
+  pending: ((id: string, key: string) => Promise<boolean> | null) | null = null;
+  /** Jeder Start einer Quelle: aus dem Vorrat oder vom Netz (Zähler coldNetStarts) */
+  onStart: ((info: { clip: DeckClip; local: boolean }) => void) | null = null;
+  /** Ein Netzstart wartet auf Daten (canplay steht aus): true, sobald er beginnt, false, wenn Daten da sind, ein Fehler kam oder die Quelle wechselte */
+  onLoading: ((on: boolean) => void) | null = null;
+  /** Letzter Stand, den setPositionState bekam (Tests, Diagnose) */
+  lastPos: { duration: number; position: number; playbackRate: number } | null = null;
+  /** Ausschnitt, der auf die Blob-URL aus dem Vorrat wartet */
+  private holding: DeckClip | null = null;
+  private holdToken = 0;
+  private loadingOn = false;
   diag: (line: string) => void = () => {};
 
   constructor(private deps: DeckDeps) {}
@@ -203,6 +218,29 @@ export class AudioDeck {
     this.diag(`bg: deck ${line}`);
   }
 
+  private loading(on: boolean) {
+    if (this.loadingOn === on) return;
+    this.loadingOn = on;
+    this.onLoading?.(on);
+  }
+
+  /** Media Session: Länge und Stelle des Moments (nicht der Folge), damit der Sperrbildschirm den Fortschritt des Moments zeigt */
+  private position(el: DeckEl) {
+    const c = this.clip;
+    if (!c || this.done) return;
+    const raw = c.end !== undefined ? c.end - c.start : (el.duration || 0) + this.offset - c.start;
+    const duration = Number.isFinite(raw) && raw > 0 ? raw : 0;
+    if (!duration) return;
+    const position = Math.min(duration, Math.max(0, el.currentTime + this.offset - c.start));
+    const playbackRate = el.playbackRate > 0 ? el.playbackRate : 1;
+    this.lastPos = { duration, position, playbackRate };
+    try {
+      if (typeof navigator !== 'undefined' && 'mediaSession' in navigator && navigator.mediaSession.setPositionState) navigator.mediaSession.setPositionState(this.lastPos);
+    } catch {
+      /* Wert vom System abgelehnt */
+    }
+  }
+
   /** Element anhalten und merken, wer es war: kommt das pause-Ereignis ohne diesen Eintrag, hat das System pausiert */
   private halt(el: DeckEl, by: string) {
     if (!el.paused) this.pauseBy.set(el, by);
@@ -220,6 +258,7 @@ export class AudioDeck {
       }
       this.live = true;
       this.played = true;
+      this.loading(false);
       this.snd = reduceSound(this.snd, 'playing', el);
       this.sink?.state(PLAYING);
       this.sink?.sound?.();
@@ -288,6 +327,7 @@ export class AudioDeck {
     });
     // Zweiter Anstoß, wenn Daten da sind und das erste play() nichts bewirkt hat (iOS verwirft play() vor den Metadaten manchmal still)
     el.addEventListener('canplay', () => {
+      if (mine()) this.loading(false);
       if (mine() && this.clip && this.want && el.paused && !this.done && !this.nudged && this.refusedKey !== this.clip.key) {
         this.nudged = true;
         this.kick('canplay');
@@ -296,6 +336,7 @@ export class AudioDeck {
     el.addEventListener('error', () => {
       const c = this.clip;
       if (!mine() || !c || this.done) return;
+      this.loading(false);
       if (this.isLocal) {
         // Ausschnitt aus dem Vorrat nicht abspielbar: einmal vom Netz laden statt zu überspringen
         this.deps.dropLocal(c.key);
@@ -326,7 +367,20 @@ export class AudioDeck {
   }
 
   /** Quelle setzen und, wenn gewollt, sofort play(). Läuft synchron, auch im Hintergrund. */
-  private start(clip: DeckClip, play: boolean, forcePlain = false, from = clip.start, forceWhy?: string) {
+  private start(clip: DeckClip, play: boolean, forcePlain = false, from = clip.start, forceWhy?: string, held = false) {
+    if (!held) {
+      // Kaltstart: der Ausschnitt liegt im Vorrat, die Blob-URL entsteht gleich. Kurz warten statt vom Netz zu starten (Brief 02). Nur wenn nichts läuft.
+      if (this.holding?.key === clip.key) {
+        this.want = play;
+        return;
+      }
+      const wait = !this.deps.local(clip.key) && (!this.clip || this.done) ? this.pending?.(clip.id, clip.key) : null;
+      if (wait) {
+        this.hold(clip, play, forcePlain, from, forceWhy, wait);
+        return;
+      }
+    }
+    this.holding = null;
     const loc = this.deps.local(clip.key);
     // Spurwahl (Lautheit): das Element der Spur, bei Misserfolg der Kette das unveränderte
     const pick = this.deps.lane?.(clip, !!loc, forcePlain) ?? { lane: 'plain' as const, why: 'no value' };
@@ -373,15 +427,41 @@ export class AudioDeck {
     this.diag(`deck: src ${loc ? 'local' : 'net'} ${clip.id}`);
     el.src = loc?.url ?? withStart(clip.url, from);
     el.load();
+    // Netzstart ohne Daten (readyState < 3 nach load() immer): die App zeigt "Loading" bis canplay, nie ein stiller Ausfall
+    this.loading(!loc && el.readyState < 3);
+    try {
+      this.onStart?.({ clip, local: !!loc });
+    } catch {
+      /* Zähler darf den Start nie stören */
+    }
     // load() setzt das Tempo auf den Standard zurück: Standard und aktuelles Tempo gemeinsam setzen
     this.applyRate(el);
     this.seek(false);
     if (play) this.kick('start');
   }
 
+  private hold(clip: DeckClip, play: boolean, forcePlain: boolean, from: number, forceWhy: string | undefined, wait: Promise<boolean>) {
+    const token = ++this.holdToken;
+    this.holding = clip;
+    this.clip = clip;
+    this.done = false;
+    this.want = play;
+    this.live = false;
+    this.played = false;
+    this.diag(`deck: hold ${clip.id} for storage`);
+    const t0 = Date.now();
+    const timeout = new Promise<boolean>((r) => setTimeout(() => r(false), HOLD_MS));
+    void Promise.race([wait, timeout]).then((ok) => {
+      if (token !== this.holdToken || this.holding !== clip) return;
+      this.diag(`deck: hold ${clip.id} ${ok ? 'released, storage ready' : 'timeout, from net'} after ${Date.now() - t0} ms`);
+      this.start(clip, this.want, forcePlain, from, forceWhy, true);
+    });
+  }
+
   /** Messung für die Untertitel: Quellzeit des Elements (currentTime plus Versatz), Tempo, und ob es gerade Ton liefert */
   private tick(el: DeckEl) {
     this.sink?.time?.(el.currentTime + this.offset, el.playbackRate || 1, !el.paused && this.live);
+    this.position(el);
   }
 
   private stateText(el: DeckEl) {
@@ -531,6 +611,12 @@ export class AudioDeck {
 
   /** Aufräumen, wenn der Audio-Reiter verlassen wird: Ton aus, keine Rückrufe */
   release() {
+    this.holdToken++;
+    this.holding = null;
+    this.loading(false);
+    this.onStart = null;
+    this.onLoading = null;
+    this.pending = null;
     this.armed = null;
     this.onAdvance = null;
     this.diag = () => {};
@@ -614,7 +700,10 @@ export class AudioDeck {
     this.rate = rate;
     for (const e of this.all()) this.applyRate(e);
     // Tempo ungleich 1x nie über Web Audio (Issue 13): ein laufender Ausschnitt auf der geregelten Spur wechselt an der Stelle auf die unveränderte
+    const before = this.el;
     if (rate !== 1) this.bail('tempo');
+    // Cue-Uhr und Sperrbildschirm sofort mit dem neuen Tempo versorgen, nicht erst beim nächsten timeupdate (Issue 15). Bei Spurwechsel hält start() die Zeit.
+    if (this.el && this.el === before && this.clip && !this.done) this.tick(this.el);
   }
 
   /** Nur schreiben, was abweicht: unnötige Schreibzugriffe auf playbackRate lassen WebKit mit aktiver Media Session abstürzen (im Testrunner beobachtet) */
