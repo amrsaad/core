@@ -1271,7 +1271,11 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         // Vorrat gelesen: war das Netz schon beim Start schlecht (offline), kommen Vorgeladene und Text zuerst
         await pre.whenReady();
         poorRef.current = pre.poor();
-        if (poorRef.current && idxRef.current === 0) replanRef.current(0);
+        if (poorRef.current && idxRef.current === 0) {
+          // Entscheidung 42: Die Startreihenfolge aus dem Vorrat gilt vor dem Neuplanen. Ein erster Moment, der schon lokal liegt, bleibt stehen, solange nichts gespielt wurde.
+          const first = queue.current[0];
+          replanRef.current(first && (pre.held(first.id) || LOCAL.has(keyOf(first))) ? 1 : 0);
+        }
         syncPre(idxRef.current);
         // Die nächsten Momente als Blob-URL bereit, bevor die Player ihre Quelle bekommen (höchstens 300 ms warten)
         await Promise.race([pre.warm(pre.warmSet(queue.current, idxRef.current, rateRef.current)), new Promise<void>((r) => window.setTimeout(r, 300))]);
@@ -1320,9 +1324,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       poorRef.current = poor;
       diag.current.push(`net poor=${poor}`);
       // Beim Wechsel ins schlechte Netz den Rest umsortieren, höchstens alle 20 s. Der Rückweg ändert nichts (kein Hin und Her).
+      // Entscheidung 42: Der laufende Moment und die zwei nächsten bleiben stehen, neu gemischt wird erst ab idx+3 (Issue 9 und 31).
       if (poor && Date.now() - lastReplan.current > 20_000) {
         lastReplan.current = Date.now();
-        reorderRef.current(idxRef.current + 1);
+        reorderRef.current(idxRef.current + 3);
       }
     };
     const onNet = () => {

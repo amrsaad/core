@@ -72,6 +72,8 @@ const snap = (page) =>
       caption: document.querySelector('[data-testid=caption] span')?.textContent ?? '', hook: document.querySelector('[data-testid=hook]')?.textContent ?? '',
       st: c.state(), sound: c.sound(), mid: s?.mid ?? null, muted: s?.muted ?? null, t: s?.t ?? c.time(),
       neighbors: info.filter((x) => x.index !== c.idx()).map((x) => `${x.index}:${x.mid}`).sort().join(','),
+      // Entscheidung 42: der laufende Moment und die zwei nächsten der Warteschlange bleiben nach einem Abbruch gleich, der Rest dahinter darf wechseln
+      next2: c.queue().slice(c.idx() + 1, c.idx() + 3).join(','),
     };
   });
 const syncStatus = (page) => page.evaluate(() => window.__sync?.status() ?? null);
@@ -142,7 +144,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         c[`${key}_sameMoment`] = after.id === before.id && after.idx === before.idx;
         c[`${key}_sameCover`] = after.cover === before.cover && after.coverOk;
         c[`${key}_sameHook`] = after.hook === before.hook;
-        c[`${key}_sameSource`] = after.mid === before.mid && after.neighbors === before.neighbors;
+        c[`${key}_sameSource`] = after.mid === before.mid && after.next2.split(',').length === 2 && after.next2 === before.next2;
         c[`${key}_playingAgain`] = after.st === 1;
         c[`${key}_positionKept`] = after.t >= before.t && after.t < before.t + sec + 30;
         c[`${key}_soundKept`] = after.sound === true && after.muted === false && before.muted === false;

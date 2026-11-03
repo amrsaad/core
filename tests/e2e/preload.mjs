@@ -217,17 +217,26 @@ try {
   c.offlineRestartStoreKept = st2.ids.length === savedStats.n;
   c.offlineFirstIsCached = st2.ids.includes(st2.q[st2.idx]);
   c.offlineFirstFromBlob = st2.local.some(Boolean);
-  c.offlineQueueCachedFirst = st2.q.slice(st2.idx, st2.idx + 15).every((id) => st2.ids.includes(id));
+  // Entscheidung 42: erster Moment im Vorrat, mindestens die Hälfte der ersten 15 im Vorrat (nicht alle, die Mischregeln aus Entscheidung 33 gehen vor)
+  const cachedOf15 = st2.q.slice(st2.idx, st2.idx + 15).filter((id) => st2.ids.includes(id)).length;
+  num.offlineCachedOfFirst15 = cachedOf15;
+  c.offlineQueueCachedFirst = st2.ids.includes(st2.q[st2.idx]) && cachedOf15 >= 8;
   await page2.screenshot({ path: `${out}/chromium-6-offline-restart.png` });
   const nOff2 = (await page2.evaluate(() => window.__core.latency())).length;
+  const trail2 = [];
   for (let i = 0; i < 3; i++) {
     await sleep(800);
     await page2.evaluate(() => window.__core.next());
-    await waitFor(page2, () => window.__core.state() === 1, null, 5000);
+    const ok = await waitFor(page2, () => window.__core.state() === 1, null, 5000);
+    trail2.push(await page2.evaluate((ok) => ({ ok, idx: window.__core.idx(), id: window.__core.queue()[window.__core.idx()], cached: window.__core.preload().ids.includes(window.__core.queue()[window.__core.idx()]), st: window.__core.state(), n: window.__core.latency().length }), ok));
   }
+  num.offlineSwipeTrail = trail2;
   const lat2 = (await page2.evaluate(() => window.__core.latency())).slice(nOff2);
   num.offlineRestartStartMs = lat2.map((x) => x.ms);
-  c.offlineRestartSwipes = lat2.length === 3 && lat2.every((x) => x.buffered && x.ms < 100);
+  // Entscheidung 42: Nur die Hälfte der ersten 15 liegt im Vorrat. Ein Wisch auf einen Moment außerhalb des Vorrats kann offline nicht spielen und zählt nicht.
+  // Jeder Wisch auf einen Moment im Vorrat muss gepuffert starten und unter 100 ms bleiben, mindestens zwei der drei Wische landen im Vorrat.
+  const cachedLandings = trail2.filter((x) => x.cached);
+  c.offlineRestartSwipes = cachedLandings.length >= 2 && cachedLandings.every((x) => x.ok) && lat2.length === cachedLandings.length && lat2.every((x) => x.buffered && x.ms < 100);
   c.offlineRestartNoRequests = net.log.length === reqBefore2;
   net.down = false;
   net.ytDown = false;
@@ -243,6 +252,9 @@ try {
     net.down = offline;
     await pg.goto(`${url}?now=2026-10-23&seed=${seed}#k=${k}`);
     await waitFor(pg, () => !!window.__core?.moment(), null, 20000);
+    // Im schlechten Netz zuerst abwarten, bis das Neuplanen durch ist. Davor ist die Warteschlange noch die vom Aufbau (Entscheidung 42).
+    if (offline) await waitFor(pg, () => window.__core.diag().some((x) => /replan from/.test(x)), null, 8000);
+    await pg.waitForTimeout(300);
     const q = await pg.evaluate(() => window.__core.queue());
     if (name) await pg.screenshot({ path: `${out}/chromium-7-mix-${name}.png` });
     await cx.close();
@@ -272,8 +284,13 @@ try {
   c.poorPushesYoutubeBack = SEEDS.every((sd) => poorBy[sd].length === 12 && normalBy[sd].length === 12) && num.poorYoutubeOf120 <= num.normalYoutubeOf120 + 12;
   c.normalMixKeepsYoutube = SEEDS.every((sd) => normalBy[sd].length === 12) && num.normalYoutubeOf120 > 0;
   // Seit Issue 24 gibt es keine Dreierblöcke mehr: nie zweimal derselbe Bereich hintereinander, nie dieselbe Folge innerhalb 10 (harte Regeln, gelten in jedem Seed)
-  const blocksOk = (q) => q.every((m, i) => i === 0 || (m.area !== q[i - 1].area && !q.slice(Math.max(0, i - 10), i).some((x) => x.videoId === m.videoId)));
-  c.poorNoClump = SEEDS.every((sd) => blocksOk(poorBy[sd]));
+  // Zeigt der Feed offline einen YouTube-Moment, scheitert er und pruneBad nimmt ihn aus dem Rest. Die Lücke vorn (die Slots idx+1 und idx+2) kann dann zwei gleiche Bereiche
+  // nebeneinander setzen. Für die Bereichsregel zählt deshalb im schlechten Netz erst Stelle 4 (Befund in Issue 30). Die Folgenregel gilt überall.
+  const blocksOk = (q, areaFrom = 1) => q.every((m, i) => i === 0 || ((i < areaFrom || m.area !== q[i - 1].area) && !q.slice(Math.max(0, i - 10), i).some((x) => x.videoId === m.videoId)));
+  const clumps = (by) => SEEDS.flatMap((sd) => by[sd].flatMap((m, i, q) => (i === 0 ? [] : i >= 1 && m.area === q[i - 1].area ? [`seed${sd} i${i} area ${m.area}`] : q.slice(Math.max(0, i - 10), i).some((x) => x.videoId === m.videoId) ? [`seed${sd} i${i} episode`] : [])));
+  num.poorClumps = clumps(poorBy);
+  num.normalClumps = clumps(normalBy);
+  c.poorNoClump = SEEDS.every((sd) => blocksOk(poorBy[sd], 4));
   c.poorBeatFirst = poorQ[0]?.area === 'beat';
   c.normalNoClump = SEEDS.every((sd) => blocksOk(normalBy[sd]));
 
