@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-03T05:42:59.496Z",
+  "at": "2026-11-03T07:51:48.259Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -42,58 +42,60 @@
         "offlineQueueCachedFirst": false,
         "offlineRestartSwipes": true,
         "offlineRestartNoRequests": true,
-        "poorPushesYoutubeBack": false,
+        "poorPushesYoutubeBack": true,
         "normalMixKeepsYoutube": true,
-        "poorNoClump": true,
+        "poorNoClump": false,
         "poorBeatFirst": true,
         "normalNoClump": true,
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1645,
-        "preloadedMoments": 30,
-        "preloadedBytes": 6289240,
-        "bytesPerMoment": 209641,
+        "coldStartMs": 1629,
+        "preloadedMoments": 31,
+        "preloadedBytes": 6498847,
+        "bytesPerMoment": 209640,
         "swipes": 10,
         "cachedStartMs": [
-          18,
           12,
-          12,
-          20,
-          16,
+          13,
+          17,
+          21,
+          14,
+          19,
           19,
           20,
-          20,
           15,
-          20
+          19
         ],
-        "cachedStartMax": 20,
+        "cachedStartMax": 21,
         "cachedStartMedian": 19,
         "firstFrames": [
+          "first-frame 12ms buffered local",
+          "first-frame 12ms buffered local",
           "first-frame 13ms buffered local",
-          "first-frame 18ms buffered local",
-          "first-frame 12ms buffered local",
-          "first-frame 12ms buffered local",
-          "first-frame 20ms buffered local",
-          "first-frame 16ms buffered local",
+          "first-frame 17ms buffered local",
+          "first-frame 21ms buffered local",
+          "first-frame 14ms buffered local",
+          "first-frame 19ms buffered local",
           "first-frame 19ms buffered local",
           "first-frame 20ms buffered local",
-          "first-frame 20ms buffered local",
           "first-frame 15ms buffered local",
-          "first-frame 20ms buffered local"
+          "first-frame 19ms buffered local"
         ],
         "settingsText": "Preloaded: 36 moments, 7.2 MB",
         "offlineStartMs": [
-          17,
+          15,
           12,
           14,
-          10
-        ],
-        "offlineRestartStartMs": [
-          15,
-          11,
           9
         ],
+        "offlineRestartStartMs": [
+          13,
+          10,
+          9
+        ],
+        "poorYoutubeOf120": 65,
+        "normalYoutubeOf120": 68,
         "poorFirst12Youtube": 10,
         "normalFirst12Youtube": 7
       },
