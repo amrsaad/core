@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-03T07:51:48.259Z",
+  "at": "2026-11-03T09:09:17.224Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -34,73 +34,106 @@
         "offlineRestartFeed": true,
         "noErrorPage": true,
         "offlineRestartIcon": true,
-        "offlineRestartPlays": false,
+        "offlineRestartPlays": true,
         "offlineRestartPoor": true,
         "offlineRestartStoreKept": true,
-        "offlineFirstIsCached": false,
-        "offlineFirstFromBlob": false,
-        "offlineQueueCachedFirst": false,
+        "offlineFirstIsCached": true,
+        "offlineFirstFromBlob": true,
+        "offlineQueueCachedFirst": true,
         "offlineRestartSwipes": true,
         "offlineRestartNoRequests": true,
         "poorPushesYoutubeBack": true,
         "normalMixKeepsYoutube": true,
-        "poorNoClump": false,
+        "poorNoClump": true,
         "poorBeatFirst": true,
         "normalNoClump": true,
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1629,
-        "preloadedMoments": 31,
-        "preloadedBytes": 6498847,
-        "bytesPerMoment": 209640,
+        "coldStartMs": 1605,
+        "preloadedMoments": 30,
+        "preloadedBytes": 6289240,
+        "bytesPerMoment": 209641,
         "swipes": 10,
         "cachedStartMs": [
-          12,
+          11,
+          10,
+          9,
           13,
-          17,
-          21,
-          14,
-          19,
-          19,
-          20,
-          15,
-          19
-        ],
-        "cachedStartMax": 21,
-        "cachedStartMedian": 19,
-        "firstFrames": [
-          "first-frame 12ms buffered local",
-          "first-frame 12ms buffered local",
-          "first-frame 13ms buffered local",
-          "first-frame 17ms buffered local",
-          "first-frame 21ms buffered local",
-          "first-frame 14ms buffered local",
-          "first-frame 19ms buffered local",
-          "first-frame 19ms buffered local",
-          "first-frame 20ms buffered local",
-          "first-frame 15ms buffered local",
-          "first-frame 19ms buffered local"
-        ],
-        "settingsText": "Preloaded: 36 moments, 7.2 MB",
-        "offlineStartMs": [
-          15,
+          13,
+          9,
           12,
-          14,
-          9
+          26,
+          10,
+          11
+        ],
+        "cachedStartMax": 26,
+        "cachedStartMedian": 11,
+        "firstFrames": [
+          "first-frame 9ms buffered local",
+          "first-frame 11ms buffered local",
+          "first-frame 10ms buffered local",
+          "first-frame 9ms buffered local",
+          "first-frame 13ms buffered local",
+          "first-frame 13ms buffered local",
+          "first-frame 9ms buffered local",
+          "first-frame 12ms buffered local",
+          "first-frame 26ms buffered local",
+          "first-frame 10ms buffered local",
+          "first-frame 11ms buffered local"
+        ],
+        "settingsText": "Preloaded: 35 moments, 7.0 MB",
+        "offlineStartMs": [
+          10,
+          8,
+          9,
+          10
+        ],
+        "offlineCachedOfFirst15": 11,
+        "offlineSwipeTrail": [
+          {
+            "ok": true,
+            "idx": 1,
+            "id": "pod-0007:10",
+            "cached": true,
+            "st": 1,
+            "n": 15
+          },
+          {
+            "ok": false,
+            "idx": 2,
+            "id": "pod-0005:70",
+            "cached": false,
+            "st": 2,
+            "n": 15
+          },
+          {
+            "ok": true,
+            "idx": 3,
+            "id": "pod-0019:70",
+            "cached": true,
+            "st": 1,
+            "n": 16
+          }
         ],
         "offlineRestartStartMs": [
-          13,
-          10,
-          9
+          9,
+          6
         ],
-        "poorYoutubeOf120": 65,
+        "poorYoutubeOf120": 62,
         "normalYoutubeOf120": 68,
-        "poorFirst12Youtube": 10,
-        "normalFirst12Youtube": 7
+        "poorFirst12Youtube": 9,
+        "normalFirst12Youtube": 7,
+        "poorClumps": [
+          "seed1 i2 area brain",
+          "seed2 i2 area brain",
+          "seed4 i2 area brain",
+          "seed10 i2 area brain"
+        ],
+        "normalClumps": []
       },
-      "ok": false
+      "ok": true
     }
   ],
-  "ok": false
+  "ok": true
 }

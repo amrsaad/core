@@ -1,5 +1,5 @@
 {
- "at": "2026-11-03T07:45:03.254Z",
+ "at": "2026-11-03T09:02:42.754Z",
  "runs": [
   {
    "browser": "webkit",
@@ -47,14 +47,14 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "diagLines": 12,
+   "diagLines": 10,
    "diagSample": [
-    "so7i slot0 sy2:1 state 2",
-    "so7i slot1 sy7:1 state 0",
-    "so7i video: warm ended early slot1 sy7:1",
-    "so7i app: hidden"
+    "qxyl slot2 sy7:1 state 1",
+    "qxyl slot2 sy7:1 state 2",
+    "qxyl slot0 sy5:1 state 2",
+    "qxyl app: hidden"
    ],
-   "writeDelayMs": 10026,
+   "writeDelayMs": 10017,
    "hosts": [
     "127.0.0.1:4176",
     "fonts.googleapis.com",
@@ -112,12 +112,12 @@
    },
    "diagLines": 10,
    "diagSample": [
-    "xcrt slot2 sy4:1 state 1",
-    "xcrt slot2 sy4:1 state 2",
-    "xcrt slot0 sy0:1 state 2",
-    "xcrt app: hidden"
+    "fdcx slot2 sy2:1 state 1",
+    "fdcx slot2 sy2:1 state 2",
+    "fdcx slot0 sy1:1 state 2",
+    "fdcx app: hidden"
    ],
-   "writeDelayMs": 10019,
+   "writeDelayMs": 10012,
    "hosts": [
     "127.0.0.1:4176",
     "fonts.googleapis.com",
