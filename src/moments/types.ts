@@ -55,6 +55,12 @@ export interface Moment {
   excerpt?: string;
   /** Frühere IDs dieses Moments (Neueinordnung im Audio, Issue 7). Gespeicherte Stände mit alter ID werden auf die aktuelle umgestellt, siehe aliases.ts. */
   aliases?: string[];
+  /** Unterthemen, 2 bis 3 Tags aus einer festen Liste je Thema, z.B. "ki/regulatorik" (Entscheidung 38, die Pipeline füllt es, Brief 04). Fehlt das Feld, wirkt keine Unterthema-Regel. */
+  subtopic?: string[];
+  /** Sprache des Sprechers (Entscheidung 23). Fehlt das Feld, schätzt focus.ts langOf sie aus Untertiteln und Text. */
+  lang?: 'ar' | 'de' | 'en';
+  /** Veröffentlichung der Folge (ISO). Fehlt das Feld, zählt createdAt für "neue Folge jünger als 48 h" in mix.ts. */
+  publishedAt?: string;
 }
 
 export interface MomentPool {

@@ -13,8 +13,8 @@ import { contextForTest, levelEnabled, probeHost, setTempo, unlockAudio } from '
 import { loudLine, recordLoud } from './loudness';
 import { browserPreloader } from './preloader';
 import { netRank, queueAhead, streamKind } from './preload';
-import { cursorFor, parseSaved, queueKey, releaseTail, reorderByRank, restoreQueue } from './queue';
-import { leaveOf, newMomentCursor, nextMomentBlock, SIGNAL, type MomentCursor } from './mix';
+import { cursorFor, historyBefore, parseSaved, queueKey, recentFromLog, releaseTail, remixTail, restoreQueue } from './queue';
+import { leaveOf, newMomentCursor, nextMoment, SIGNAL, type MomentCursor } from './mix';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
 import { clampRate, DEFAULT_RATE, nextRate, rateOf, type Rate } from '../lib/state';
 import { addSample } from './latency';
@@ -120,6 +120,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   const queue = useRef<Moment[]>([]);
   const cursor = useRef<MomentCursor | null>(null);
+  /** Die zuletzt gespielten Momente aus der letzten Sitzung: Anfang des Verlaufs für die Mischung (nie dieselbe Folge innerhalb 10) */
+  const seedHist = useRef<Moment[]>([]);
   /** Offline-Vorrat (Cache API), null wo es keine Cache API gibt */
   const pre = useMemo(() => browserPreloader(), []);
   /** Netz schlecht (offline oder die letzten Starts langsam): die Mischung zieht Vorgeladenes und Text vor, YouTube nach hinten */
@@ -282,15 +284,17 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         } catch {
           /* kein Speicher */
         }
-        cursor.current = saved.length ? cursorFor(saved, false) : newMomentCursor(s.momentDay !== today);
+        cursor.current = saved.length ? cursorFor(saved, false, clockNow().getTime()) : newMomentCursor(s.momentDay !== today);
+        seedHist.current = recentFromLog(s.momentLog, pool);
         queue.current.push(...saved);
         poorRef.current = pre?.poor() ?? false;
       }
       const rank = poorRef.current && pre ? netRank(pre.has) : undefined;
-      while (queue.current.length < upTo) {
-        const b = nextMomentBlock(pool, { areaShares: s.settings.areaShares, weights: s.momentWeights, seen: s.momentSeen, mutedChannels: s.mutedChannels, now: clockNow().getTime(), rank }, cursor.current, rng.current);
-        if (!b || !b.length) break;
-        queue.current.push(...b.filter((m) => !bad.current.has(m.videoId)));
+      // Moment für Moment (Entscheidung 33): jeder Moment wird gegen die letzten 10 gewählt. Gescheiterte Momente verbrauchen eine Wahl, kommen aber nicht in die Schlange.
+      for (let guard = 0; queue.current.length < upTo && guard < upTo + pool.length; guard++) {
+        const m = nextMoment(pool, { areaShares: s.settings.areaShares, weights: s.momentWeights, seen: s.momentSeen, mutedChannels: s.mutedChannels, now: clockNow().getTime(), rank }, cursor.current, historyBefore(queue.current, queue.current.length, seedHist.current), rng.current);
+        if (!m) break;
+        if (!bad.current.has(m.videoId)) queue.current.push(m);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -687,7 +691,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const replanTail = (from: number) => {
     const tail = queue.current.slice(from);
     if (!tail.length || !cursor.current) return;
-    releaseTail(cursor.current, tail);
+    releaseTail(cursor.current, tail, clockNow().getTime());
     queue.current = queue.current.slice(0, from);
     for (const sl of slots.current) if (sl.index >= from) sl.index = -1;
     ensureQueue(from + tail.length);
@@ -697,12 +701,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     armDeck();
     rerender();
   };
-  /** Mitten in der Sitzung: nur umsortieren (siehe reorderByRank), die schon vorgeladenen Momente bleiben in der Warteschlange */
+  /** Mitten in der Sitzung: nur neu mischen (siehe remixTail), die schon vorgeladenen Momente bleiben in der Warteschlange */
   const reorderTail = (from: number) => {
     if (!pre) return;
     const tail = queue.current.slice(from);
     if (tail.length < 2) return;
-    queue.current = [...queue.current.slice(0, from), ...reorderByRank(tail, netRank(pre.has))];
+    const s0 = stateRef.current;
+    queue.current = [...queue.current.slice(0, from), ...remixTail(tail, historyBefore(queue.current, from, seedHist.current), { areaShares: s0.settings.areaShares, weights: s0.momentWeights, seen: s0.momentSeen, mutedChannels: s0.mutedChannels, now: clockNow().getTime(), rank: netRank(pre.has) }, rng.current)];
     for (const sl of slots.current) if (sl.index >= from) sl.index = -1;
     if (!single) for (const j of [idxRef.current + 1, idxRef.current + 2]) if (j >= from && j < queue.current.length && slotFor(j).index !== j) assign(slotFor(j), j, false);
     diag.current.push(`reorder from ${from}`);

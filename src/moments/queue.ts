@@ -1,8 +1,8 @@
 // Warteschlange über Neustarts und bei Netzwechsel. Reine Funktionen, die Ablage (localStorage) macht der Feed.
+// Seit Issue 24 ohne Blöcke: der Cursor zählt Momente, der Verlauf der letzten 10 steht in der Warteschlange selbst.
 // Die Warteschlange ist 30 Momente tief, damit der Vorrat etwas hat, das er vorladen kann. Damit sie einen Neustart
 // überlebt (der Vorrat der letzten Sitzung bleibt nützlich, auch offline), wird sie pro Form und Tag abgelegt.
-import type { Area } from '../types';
-import { AREAS, BLOCK, newMomentCursor, TOP_RATE, type MomentCursor } from './mix';
+import { episodeOf, HISTORY, isNewEpisode, newMomentCursor, nextMoment, TOP_RATE, type MomentCursor, type MomentPrefs } from './mix';
 import type { Form } from './form';
 import type { Moment } from './types';
 
@@ -41,11 +41,14 @@ export function restoreQueue(saved: SavedQueue | null, day: string, pool: Moment
   return out;
 }
 
-/** Cursor, der zur übernommenen Warteschlange passt: schon verplante Momente, Blockzahl je Bereich, Abstand zum letzten Top-Moment */
-export function cursorFor(moments: Moment[], firstOfDay: boolean): MomentCursor {
+/** Cursor, der zur übernommenen Warteschlange passt: schon verplante Momente, Momente je Bereich, Abstand zum letzten Top-Moment, neue Folgen */
+export function cursorFor(moments: Moment[], firstOfDay: boolean, now: number = Date.now()): MomentCursor {
   const c = newMomentCursor(firstOfDay);
-  for (const m of moments) c.used.add(m.id);
-  for (const a of AREAS) c.counts[a] = Math.round(moments.filter((m) => m.area === a).length / BLOCK);
+  for (const m of moments) {
+    c.used.add(m.id);
+    c.counts[m.area]++;
+    if (isNewEpisode(m, now)) c.newCount[episodeOf(m)] = (c.newCount[episodeOf(m)] ?? 0) + 1;
+  }
   let since = 0;
   let found = false;
   for (let i = moments.length - 1; i >= 0; i--) {
@@ -60,28 +63,51 @@ export function cursorFor(moments: Moment[], firstOfDay: boolean): MomentCursor 
 }
 
 /**
- * Der Rest der Warteschlange wird neu geplant: seine Momente und Blöcke zählen im Cursor wieder als frei, danach füllt
- * nextMomentBlock mit den dann gültigen Regeln neu auf.
+ * Der Rest der Warteschlange wird neu geplant: seine Momente zählen im Cursor wieder als frei, danach füllt
+ * nextMoment mit den dann gültigen Regeln neu auf. Die Skips der Sitzung (dampen) bleiben.
  */
-export function releaseTail(c: MomentCursor, tail: Moment[]): void {
-  for (const m of tail) c.used.delete(m.id);
-  for (const a of AREAS) c.counts[a] = Math.max(0, c.counts[a] - Math.round(tail.filter((m) => m.area === a).length / BLOCK));
+export function releaseTail(c: MomentCursor, tail: Moment[], now: number = Date.now()): void {
+  for (const m of tail) {
+    c.used.delete(m.id);
+    c.counts[m.area] = Math.max(0, c.counts[m.area] - 1);
+    if (isNewEpisode(m, now)) c.newCount[episodeOf(m)] = Math.max(0, (c.newCount[episodeOf(m)] ?? 0) - 1);
+  }
   c.sinceTop = Math.min(c.sinceTop, TOP_RATE ** -1);
 }
 
+/** Verlauf für die nächste Wahl: die letzten 10 Momente vor der Stelle `from` der Warteschlange, davor der Verlauf aus der letzten Sitzung */
+export function historyBefore(queue: readonly Moment[], from: number, seed: readonly Moment[] = []): Moment[] {
+  return [...seed, ...queue.slice(0, Math.max(0, from))].slice(-HISTORY);
+}
+
+/** Verlauf aus dem Protokoll der letzten Sitzungen: die zuletzt gespielten Momente, die im Pool stehen (ältester zuerst). Beim Start einer Sitzung der Anfang des Verlaufs. */
+export function recentFromLog(log: readonly { id: string }[], pool: readonly Moment[], n: number = HISTORY): Moment[] {
+  const byId = new Map(pool.map((m) => [m.id, m]));
+  const out: Moment[] = [];
+  const used = new Set<string>();
+  for (let i = log.length - 1; i >= 0 && out.length < n; i--) {
+    const m = byId.get(log[i].id);
+    if (m && !used.has(m.id)) {
+      used.add(m.id);
+      out.unshift(m);
+    }
+  }
+  return out;
+}
+
 /**
- * Netz wurde schlecht: Vorgeladenes und Text rücken im Rest der Warteschlange nach vorn, YouTube nach hinten.
- * Die Folge der Bereiche bleibt exakt wie sie ist (also Blöcke à 3, Bereichsanteile, Beat zuerst), getauscht wird nur
- * innerhalb eines Bereichs, stabil nach Rang. Es kommt kein Moment dazu und keiner weg, darum fällt kein Vorrat ins Leere.
+ * Netz wurde schlecht oder gut: der Rest der Warteschlange wird neu gemischt, nur aus seinen eigenen Momenten (es kommt keiner dazu und
+ * keiner weg, darum fällt kein Vorrat ins Leere). Der Rang ist ein Gewicht, die harten Regeln der Mischung gelten weiter.
+ * Was die Regeln nicht mehr unterbringen, hängt hinten an, in der alten Reihenfolge.
  */
-export function reorderByRank(tail: Moment[], rank: (m: Moment) => number): Moment[] {
-  const lists = new Map<Area, Moment[]>();
-  for (const m of tail) (lists.get(m.area) ?? lists.set(m.area, []).get(m.area)!).push(m);
-  for (const l of lists.values()) l.sort((a, b) => rank(a) - rank(b));
-  const at = new Map<Area, number>();
-  return tail.map((m) => {
-    const i = at.get(m.area) ?? 0;
-    at.set(m.area, i + 1);
-    return lists.get(m.area)![i];
-  });
+export function remixTail(tail: Moment[], history: readonly Moment[], p: MomentPrefs, rng: () => number = Math.random): Moment[] {
+  const c = newMomentCursor(false);
+  const out: Moment[] = [];
+  while (out.length < tail.length) {
+    const m = nextMoment(tail, { ...p, seen: {}, mutedChannels: {} }, c, [...history, ...out], rng);
+    if (!m) break;
+    out.push(m);
+  }
+  for (const m of tail) if (!c.used.has(m.id)) out.push(m);
+  return out;
 }

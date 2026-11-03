@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { addNet, isPoorNet, mbText, netRank, nextToLoad, planEviction, PRELOAD_CAP_BYTES, PRELOAD_COUNT, preloadedLine, streamKind, windowOf, windowOfTime, PRELOAD_COUNT_MAX, queueAhead, type NetSample, type Stored } from '../src/moments/preload';
-import { newMomentCursor, nextMomentBlock, type MomentPrefs } from '../src/moments/mix';
+import { newMomentCursor, nextMoment, type MomentPrefs } from '../src/moments/mix';
 import type { Moment } from '../src/moments/types';
 const makeRng = (seed: number) => () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 
@@ -140,42 +140,52 @@ describe('Netz-bewusst: Mix-Regeln bleiben, nur die Kandidaten werden enger', ()
     ...Array.from({ length: 12 }, (_, i) => yt('2' + (i % 10), { id: 'ye' + i, area: 'beat', videoId: 'zbcdefghi' + String(i).padStart(2, '0') })),
   ];
   const prefs = (rank?: (m: Moment) => number): MomentPrefs => ({ areaShares: { brain: 1 / 3, body: 1 / 3, beat: 1 / 3 }, weights: { area: {}, channel: {}, topic: {} }, seen: {}, mutedChannels: {}, rank });
-  const run = (rank?: (m: Moment) => number, blocks = 8) => {
+  const run = (rank?: (m: Moment) => number, n = 24, seed = 7) => {
     const c = newMomentCursor(true);
-    const rng = makeRng(7);
-    const out: Moment[][] = [];
-    for (let i = 0; i < blocks; i++) out.push(nextMomentBlock(pool, prefs(rank), c, rng)!);
+    const rng = makeRng(seed);
+    const out: Moment[] = [];
+    for (let i = 0; i < n; i++) {
+      const m = nextMoment(pool, prefs(rank), c, out.slice(-10), rng);
+      if (m) out.push(m);
+    }
     return out;
   };
 
   it('ohne Rang oder mit gleichem Rang für alle unverändert (gleiches Ergebnis wie zuvor)', () => {
-    const ids = (x: Moment[][]) => x.flat().map((m) => m.id);
+    const ids = (x: Moment[]) => x.map((m) => m.id);
     expect(ids(run(() => 0))).toEqual(ids(run(undefined)));
     expect(ids(run(undefined))).toEqual(ids(run(undefined)));
   });
-  it('Blöcke à 3 aus demselben Bereich, Beat zuerst am Tag, auch mit Rang', () => {
-    const blocks = run(netRank(() => false));
-    for (const b of blocks) {
-      expect(b).toHaveLength(3);
-      expect(new Set(b.map((m) => m.area)).size).toBe(1);
+  it('Beat zuerst am Tag, nie zweimal derselbe Bereich hintereinander, auch mit Rang', () => {
+    const seq = run(netRank(() => false));
+    expect(seq).toHaveLength(24);
+    expect(seq[0].area).toBe('beat');
+    for (let i = 1; i < seq.length; i++) expect(seq[i].area).not.toBe(seq[i - 1].area);
+  });
+  it('der Rang ist ein Gewicht, kein Filter: YouTube kommt weiter vor, nur seltener', () => {
+    let rank = 0, plain = 0;
+    const yts = (x: Moment[]) => x.filter((m) => streamKind(m) === 'youtube').length;
+    for (let seed = 1; seed <= 20; seed++) {
+      rank += yts(run(netRank((id) => id.startsWith('b') || id.startsWith('e')), 12, seed));
+      plain += yts(run(undefined, 12, seed));
     }
-    expect(blocks[0][0].area).toBe('beat');
+    expect(plain).toBeGreaterThan(0);
+    expect(rank).toBeLessThan(plain);
   });
-  it('YouTube kommt nach hinten, solange Streams da sind', () => {
-    const blocks = run(netRank(() => false), 6).flat();
-    expect(blocks.filter((m) => streamKind(m) === 'youtube')).toHaveLength(0);
+  it('Vorgeladene werden dreimal so gewichtet und kommen deutlich öfter', () => {
+    const have = new Set(['b0', 'b1', 'b2', 'b3', 'b4', 'b5', 'e0', 'e1', 'e2', 'e3', 'e4', 'e5']);
+    let ranked = 0, plain = 0;
+    for (let seed = 1; seed <= 30; seed++) {
+      ranked += run(netRank((id) => have.has(id)), 12, seed).filter((m) => have.has(m.id)).length;
+      plain += run(undefined, 12, seed).filter((m) => have.has(m.id)).length;
+    }
+    expect(ranked).toBeGreaterThan(plain * 1.4);
   });
-  it('Vorgeladene gehen vor sonstigen Streams', () => {
-    const have = new Set(['b0', 'b1', 'b2', 'e0', 'e1', 'e2']);
-    const blocks = run(netRank((id) => have.has(id)), 2).flat();
-    expect(blocks.every((m) => have.has(m.id))).toBe(true);
-  });
-  it('sind Streams aufgebraucht, folgt YouTube (nichts bleibt hängen)', () => {
-    const streamsOnly = pool.filter((m) => streamKind(m) === 'youtube' || m.area === 'brain' && m.id === 'b0');
+  it('sind nur noch YouTube-Momente da, folgen sie (nichts bleibt hängen)', () => {
+    const youtubeOnly = pool.filter((m) => streamKind(m) === 'youtube');
     const c = newMomentCursor(false);
-    const b = nextMomentBlock(streamsOnly, prefs(netRank(() => false)), c, makeRng(1));
-    expect(b).not.toBeNull();
-    expect(b!.length).toBeGreaterThan(0);
+    const m = nextMoment(youtubeOnly, prefs(netRank(() => false)), c, [], makeRng(1));
+    expect(m).not.toBeNull();
   });
 });
 

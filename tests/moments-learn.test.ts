@@ -166,8 +166,10 @@ describe('More, Save, Ende wie bisher, zusätzlich auf Thema', () => {
       expect(name).toBeTruthy();
     }
   });
-  it('Faktoren bleiben wie bisher', () => {
-    expect([SIGNAL.more, SIGNAL.save, SIGNAL.ended, SIGNAL.back, SIGNAL.early, SIGNAL.mostly]).toEqual([1.3, 1.1, 1.1, 1.1, 0.95, 1.05]);
+  it('Faktoren: Speichern, Zurückwischen und Abruf wiegen mehr als Zuschauzeit (Issue 24)', () => {
+    expect([SIGNAL.more, SIGNAL.save, SIGNAL.ended, SIGNAL.back, SIGNAL.early, SIGNAL.mostly]).toEqual([1.3, 1.2, 1.1, 1.25, 0.95, 1.05]);
+    expect(SIGNAL.recall).toBe(1.2);
+    expect(Math.min(SIGNAL.save, SIGNAL.back, SIGNAL.recall)).toBeGreaterThan(SIGNAL.ended);
   });
   it('zwischen 0,2 und 3', () => {
     let r = w();

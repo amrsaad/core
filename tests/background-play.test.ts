@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { atEnd, backgroundLine, countsSeenAtStart, EndLedger, isBackground, nextIn, onLeave, previousIn, successorOf } from '../src/moments/background';
 import { formOf } from '../src/moments/form';
-import { newMomentCursor, nextMomentBlock, type MomentPrefs } from '../src/moments/mix';
+import { newMomentCursor, nextMoment, type MomentPrefs } from '../src/moments/mix';
 import { AUDIO_ONLY, HLS, registerHls } from '../src/video/ytApi';
 import type { Moment } from '../src/moments/types';
 
@@ -105,7 +105,10 @@ describe('Auto-Weiter ist der Wisch', () => {
     const rng = () => 0.5;
     const c = newMomentCursor(false);
     const queue: Moment[] = [];
-    for (let i = 0; i < 4; i++) queue.push(...(nextMomentBlock(pool, prefs, c, rng) ?? []));
+    for (let i = 0; i < 12; i++) {
+      const m = nextMoment(pool, prefs, c, queue.slice(-10), rng);
+      if (m) queue.push(m);
+    }
     expect(queue.length).toBe(12);
     // Warteschlange durchgehen wie der Feed: Auto-Weiter und Wisch lesen beide idx + 1
     for (let i = 0; i < queue.length - 1; i++) expect(nextIn(queue, queue[i].id)?.id).toBe(queue[i + 1].id);
