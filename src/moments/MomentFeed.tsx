@@ -17,7 +17,7 @@ import { coldToday, countColdStart, pickHeads, startOrder } from './startHead';
 import { lockMeta, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS } from './lockScreen';
 import { cursorFor, historyBefore, parseSaved, queueKey, recentFromLog, releaseTail, remixTail, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMoment, sessionSkip, SIGNAL, type MomentCursor } from './mix';
-import { bumpCell, bumpPair, hourKey } from './signals';
+import { bumpCell, bumpColdNetStart, bumpPair, hourKey } from './signals';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
 import { clampRate, DEFAULT_RATE, nextRate, rateOf, type Rate } from '../lib/state';
 import { addSample } from './latency';
@@ -734,7 +734,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       } catch {
         store = null;
       }
-      const n = countColdStart(store, dayKey(clockNow()));
+      const day = dayKey(clockNow());
+      const n = countColdStart(store, day);
+      // Im Sync-Stand pro Tag (signals.days[Tag].coldNetStarts, Brief 03), der lokale Zähler bleibt für die Diagnose und die Tests
+      update((st) => bumpColdNetStart(st, day));
       diag.current.push(`signals: coldNetStarts ${n} today (net start ${clip.id})`);
     };
     // Netzstart ohne Daten: Hinweis nach 500 ms, bis canplay kommt
@@ -2017,7 +2020,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       lock: () => {
         const ms = 'mediaSession' in navigator ? navigator.mediaSession : null;
         const md = ms?.metadata;
-        return { title: md?.title ?? null, artist: md?.artist ?? null, album: md?.album ?? null, artwork: md ? md.artwork.map((a) => `${a.sizes} ${a.src}`) : [], state: ms?.playbackState ?? null, pos: audioDeck.lastPos, cold: coldToday(localStorage, dayKey(clockNow())) };
+        return { title: md?.title ?? null, artist: md?.artist ?? null, album: md?.album ?? null, artwork: md ? md.artwork.map((a) => `${a.sizes} ${a.src}`) : [], state: ms?.playbackState ?? null, pos: audioDeck.lastPos, cold: coldToday(localStorage, dayKey(clockNow())), cloud: stateRef.current.signals?.days?.[dayKey(clockNow())]?.coldNetStarts ?? 0 };
       },
       /** Zurück vom Sperrbildschirm nachstellen (Tests) */
       lockBack: () => lockPrevRef.current(),

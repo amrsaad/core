@@ -347,6 +347,7 @@ window.onYouTubeIframeAPIReady&&window.onYouTubeIframeAPIReady();`;
     c.coldFirstSrcLocal = /^deck: src local /.test(srcLines[0] ?? '');
     c.coldNoNetStart = !srcLines.some((x) => /^deck: src net /.test(x));
     c.coldCounterZero = (await s2.pg.evaluate(() => window.__core.lock().cold)) === 0;
+    c.coldSignalsZero = (await s2.pg.evaluate(() => window.__core.lock().cloud)) === 0;
     c.coldNoSystemPause = !d2.some((x) => /pause event by=system/.test(x));
     c.coldNoPill = (await s2.pg.locator('[data-testid=loading-pill]').count()) === 0;
 
@@ -397,6 +398,8 @@ window.onYouTubeIframeAPIReady&&window.onYouTubeIframeAPIReady();`;
     c.pillText = (await s3.pg.locator('[data-testid=loading-pill]').first().textContent().catch(() => '')) === 'Loading, keep screen on';
     c.pillGoneWhenPlaying = await waitFor(s3.pg, () => window.__core.state() === 1 && !document.querySelector('[data-testid=loading-pill]'), null, 30000);
     c.pillCounted = (await s3.pg.evaluate(() => window.__core.lock().cold)) >= 1;
+    // Der Zähler steht auch im Sync-Stand (signals.days[Tag].coldNetStarts)
+    c.pillCountedInSignals = await waitFor(s3.pg, () => window.__core.lock().cloud >= 1, undefined, 3000);
     r.notes.coldNetLines = (await s3.pg.evaluate(() => window.__core.diag())).filter((x) => /^signals:/.test(x)).slice(0, 3);
     if (process.env.DEBUG_COLD) r.notes.s3diag = (await s3.pg.evaluate(() => window.__core.diag())).slice(0, 80);
     await cx2.close();
