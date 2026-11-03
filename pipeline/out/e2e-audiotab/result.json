@@ -1,5 +1,5 @@
 {
- "at": "2026-11-03T09:31:05.009Z",
+ "at": "2026-11-03T14:58:03.685Z",
  "runs": [
   {
    "browser": "webkit",
@@ -104,7 +104,7 @@
     "tempoWaiting": 0,
     "tempoPaused": 10,
     "cue": {
-     "worst": 1,
+     "worst": 0,
      "n": 623,
      "shownLate": 0,
      "shownNow": 0,
@@ -130,51 +130,51 @@
        73
       ],
       [
-       "8.49",
-       85,
-       85
+       "8.50",
+       86,
+       86
       ],
       [
-       "9.78",
+       "9.79",
        98,
        98
       ],
       [
-       "11.07",
+       "11.08",
        111,
        111
       ],
       [
-       "12.35",
+       "12.36",
        124,
        124
       ],
       [
-       "13.64",
+       "13.65",
        137,
        137
       ],
       [
-       "14.92",
+       "14.94",
        150,
        150
       ],
       [
-       "16.21",
+       "16.22",
        163,
        163
       ],
       [
-       "17.49",
-       175,
-       175
+       "17.51",
+       176,
+       176
       ]
      ],
      "rate": 2
     },
     "cueTempo": {
-     "worst": 0,
-     "n": 557,
+     "worst": 1,
+     "n": 544,
      "rates": [
       1,
       1.5,
@@ -186,7 +186,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805015
+       "dueAt": 1792756805070
       }
      ],
      "idx": 6,
@@ -345,62 +345,62 @@
      "shownNow": 0,
      "gaps": [
       [
-       "3.37",
+       "3.39",
        34,
        34
       ],
       [
-       "4.71",
+       "4.72",
        48,
        48
       ],
       [
-       "6.04",
+       "6.05",
        61,
        61
       ],
       [
-       "7.37",
+       "7.39",
        74,
        74
       ],
       [
-       "8.71",
+       "8.72",
        88,
        88
       ],
       [
-       "10.04",
+       "10.05",
        101,
        101
       ],
       [
-       "11.37",
+       "11.39",
        114,
        114
       ],
       [
-       "12.71",
+       "12.72",
        128,
        128
       ],
       [
-       "14.04",
+       "14.05",
        141,
        141
       ],
       [
-       "15.37",
+       "15.39",
        154,
        154
       ],
       [
-       "16.71",
+       "16.72",
        168,
        168
       ],
       [
-       "18.04",
+       "18.05",
        181,
        181
       ]
@@ -421,7 +421,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804902
+       "dueAt": 1792756804914
       }
      ],
      "idx": 6,
@@ -502,6 +502,10 @@
     "lockTitleBack": true,
     "lockBackLines": true,
     "lockNextAdvances": true,
+    "lockHiddenAdvances": true,
+    "lockHiddenUnder1s": true,
+    "lockHiddenTakesStock": true,
+    "lockHiddenNoNetStart": true,
     "coldS2NoPageErrors": true,
     "pillAppears": true,
     "pillText": true,
@@ -513,11 +517,14 @@
     "heads": [
      "pod-0001:22",
      "pod-0014:10",
-     "pod-0002:34"
+     "pod-0002:34",
+     "pod-0022:22",
+     "pod-0008:22",
+     "pod-0019:70"
     ],
-    "firstSoundMs": 154,
+    "firstSoundMs": 200,
     "diag": [
-     "deck: start order head first=pod-0001:22 heads=3",
+     "deck: start order head first=pod-0001:22 heads=6 usable=6 stock=6",
      "deck: src local pod-0001"
     ],
     "handlers": [
@@ -537,12 +544,18 @@
      "state": "playing",
      "pos": {
       "duration": 25,
-      "position": 0.0003977959183671942,
+      "position": 0.0006867959183658456,
       "playbackRate": 1
      },
      "cold": 0,
      "cloud": 0
     },
+    "stockBehind": 5,
+    "lockNextMs": 110,
+    "lockNextLines": [
+     "lock next: net pod-0006:82",
+     "lock next: held pod-0014:10"
+    ],
     "coldNetLines": [
      "signals: coldNetStarts 1 today (net start pod-0035)"
     ]

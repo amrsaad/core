@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-03T09:09:17.224Z",
+  "at": "2026-11-03T14:36:02.792Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -27,7 +27,7 @@
         "settingsLine": true,
         "settingsMatchesStore": true,
         "offlineIcon": true,
-        "offlineSwipesFromCache": true,
+        "offlineSwipesFromCache": false,
         "offlineNoRequests": true,
         "poorWhenOffline": true,
         "offlineIconGoes": true,
@@ -50,90 +50,103 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1605,
+        "coldStartMs": 1612,
         "preloadedMoments": 30,
-        "preloadedBytes": 6289240,
+        "preloadedBytes": 6289238,
         "bytesPerMoment": 209641,
+        "waitedForVault": 1,
         "swipes": 10,
         "cachedStartMs": [
-          11,
-          10,
-          9,
           13,
-          13,
-          9,
-          12,
-          26,
           10,
-          11
+          14,
+          15,
+          9,
+          17,
+          15,
+          14,
+          14,
+          20
         ],
-        "cachedStartMax": 26,
-        "cachedStartMedian": 11,
+        "cachedStartMax": 20,
+        "cachedStartMedian": 14,
         "firstFrames": [
-          "first-frame 9ms buffered local",
-          "first-frame 11ms buffered local",
-          "first-frame 10ms buffered local",
-          "first-frame 9ms buffered local",
+          "first-frame 14ms buffered local",
           "first-frame 13ms buffered local",
-          "first-frame 13ms buffered local",
-          "first-frame 9ms buffered local",
-          "first-frame 12ms buffered local",
-          "first-frame 26ms buffered local",
           "first-frame 10ms buffered local",
-          "first-frame 11ms buffered local"
+          "first-frame 14ms buffered local",
+          "first-frame 15ms buffered local",
+          "first-frame 9ms buffered local",
+          "first-frame 17ms buffered local",
+          "first-frame 15ms buffered local",
+          "first-frame 14ms buffered local",
+          "first-frame 14ms buffered local",
+          "first-frame 20ms buffered local"
         ],
-        "settingsText": "Preloaded: 35 moments, 7.0 MB",
+        "settingsText": "Preloaded: 36 moments, 7.2 MB",
+        "offlineTrail": [
+          {
+            "heldNext": false,
+            "ok": false
+          },
+          {
+            "heldNext": true,
+            "ok": true
+          },
+          {
+            "heldNext": true,
+            "ok": true
+          },
+          {
+            "heldNext": false,
+            "ok": false
+          }
+        ],
         "offlineStartMs": [
-          10,
-          8,
-          9,
+          15,
           10
         ],
-        "offlineCachedOfFirst15": 11,
+        "offlineCachedOfFirst15": 15,
         "offlineSwipeTrail": [
           {
             "ok": true,
             "idx": 1,
-            "id": "pod-0007:10",
+            "id": "pod-0008:22",
+            "cached": true,
+            "st": 1,
+            "n": 14
+          },
+          {
+            "ok": true,
+            "idx": 2,
+            "id": "pod-0002:34",
             "cached": true,
             "st": 1,
             "n": 15
           },
           {
-            "ok": false,
-            "idx": 2,
-            "id": "pod-0005:70",
-            "cached": false,
-            "st": 2,
-            "n": 15
-          },
-          {
             "ok": true,
             "idx": 3,
-            "id": "pod-0019:70",
+            "id": "pod-0025:58",
             "cached": true,
             "st": 1,
             "n": 16
           }
         ],
         "offlineRestartStartMs": [
-          9,
-          6
+          10,
+          8,
+          10
         ],
-        "poorYoutubeOf120": 62,
+        "poorYoutubeOf120": 58,
         "normalYoutubeOf120": 68,
         "poorFirst12Youtube": 9,
         "normalFirst12Youtube": 7,
-        "poorClumps": [
-          "seed1 i2 area brain",
-          "seed2 i2 area brain",
-          "seed4 i2 area brain",
-          "seed10 i2 area brain"
-        ],
+        "poorClumps": [],
         "normalClumps": []
       },
-      "ok": true
+      "ok": false
     }
   ],
-  "ok": true
+  "ok": false
 }
