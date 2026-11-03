@@ -1,0 +1,75 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-03",
+ "records": [
+  {
+   "sourceId": "wiki:de:Izumo no Okuni",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Izumo_no_Okuni",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/03",
+    "status": 200
+   },
+   "title": "Izumo no Okuni",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Izumo no Okuni, häufig nur Okuni genannt, war eine japanische Künstlerin. Über ihr Leben sagen die noch erhaltenen Dokumente kaum Näheres. Sie wuchs wahrscheinlich in Izumo auf und soll am dortigen Schrein als Miko durch Tänze aufgefallen sein. Später lebte sie in Kyōto, wo sie eigenwillige Tanztheater-Stücke aufführte, die das Publikum als Kabuki bezeichnete. Okuni gilt daher als Erfinderin dieser Theaterform, wobei sie sich von mehreren bereits existierenden Gattungen inspirieren ließ. Sie und später auch ihre Ensembles wurden in Japan schnell beliebt und reisten bis ungefähr 1610 durchs Land. Danach verlieren sich ihre Spuren."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-03T05:31:28.922Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Izumo_no_Okuni": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Fernsehwerbung",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Fernsehwerbung",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/03",
+    "status": 200
+   },
+   "title": "Fernsehwerbung",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Fernsehwerbung ist jede Art der Ausstrahlung von Werbespots im Fernsehen."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-03T05:31:28.922Z"
+  },
+  {
+   "sourceId": "wiki:de:Annie Oakley",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Annie_Oakley",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/03",
+    "status": 200
+   },
+   "title": "Annie Oakley",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Annie Oakley war eine US-amerikanische Scharfschützin. International berühmt wurde sie durch ihre Auftritte in der Wildwest-Show von Buffalo Bill. Bis heute gilt sie als die weltweit erfolgreichste Frau in dieser Profession. In den USA gilt sie als nationale Ikone und Prototyp des All-American-Girl und erster weiblicher Superstar der Popkultur. Ihr Ausspruch Aim at a high mark, and you will hit it wurde zum geflügelten Wort."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-03T05:31:28.922Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Annie_Oakley": 200
+   }
+  }
+ ]
+}
