@@ -1,0 +1,75 @@
+name: probe
+
+# Tägliche Probe gegen die Live-App (Entscheidung 31, Brief 07). Ein künstlicher Nutzer öffnet https://amrsaad.github.io/core/,
+# sieht einen Moment spielen, wechselt die Reiter und liest Konsolenfehler. Kein YouTube, keine fremden Medien-Hosts (scripts/probe.mjs).
+# Ergebnis als JSON-Artefakt und eine Zeile in pipeline/out/probe/probe-log.md (core, mit GITHUB_TOKEN, löst keinen neuen Lauf aus).
+# Mit dem optionalen Secret CORE_CONTENT_TOKEN geht dieselbe Zeile zusätzlich nach core-content/docs/probe-log.md.
+# Läuft auf dem Default-Branch des Repos (Name egal). Ein roter Lauf heißt: die Probe hat etwas gefunden oder lief nicht.
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CONTENT_TOKEN: ${{ secrets.CORE_CONTENT_TOKEN }}
+    # Offizielles Image wie im E2E: Browser und Systempakete sind vorinstalliert
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - run: npm ci
+      - name: Probe gegen die Live-App
+        id: probe
+        continue-on-error: true
+        run: node scripts/probe.mjs https://amrsaad.github.io/core/ probe-out
+      - name: Befund als Artefakt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: probe
+          path: probe-out
+          if-no-files-found: ignore
+          retention-days: 30
+      - name: Zeile ins Probe-Log (core)
+        if: always()
+        run: |
+          log=pipeline/out/probe/probe-log.md
+          mkdir -p pipeline/out/probe
+          if [ ! -s "$log" ]; then
+            printf '%s\n' '# Probe gegen die Live-App (Entscheidung 31)' '' 'Eine Zeile pro Lauf (täglich 04:00 UTC, .github/workflows/probe.yml). Erstes Bild in ms, gemessen vom Navigationsstart bis zum ersten spielenden Moment. Reiterwechsel ok heißt Audio, Text und Video zeigen den passenden Moment.' '' '| Datum | Start (UTC) | Erstes Bild (ms) | Reiterwechsel | Fehler | Ergebnis | Quelle |' '|---|---|---|---|---|---|---|' > "$log"
+          fi
+          if [ -s probe-out/probe-line.md ]; then
+            cat probe-out/probe-line.md > probe-line.txt
+          else
+            echo "| $(date -u +%F) | $(date -u +%T) | - | FEHLER | - | FEHLER Probe lief nicht (siehe Lauf) | actions |" > probe-line.txt
+          fi
+          cat probe-line.txt >> "$log"
+          [ -s probe-out/probe.json ] && cp probe-out/probe.json pipeline/out/probe/latest.json || true
+          git config user.name "core-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$log" pipeline/out/probe/latest.json 2>/dev/null || git add "$log"
+          git diff --cached --quiet && exit 0
+          git commit -m "probe: $(date -u +%F)"
+          for i in 1 2 3 4; do git pull --rebase -q origin "${{ github.ref_name }}" && git push origin "HEAD:${{ github.ref_name }}" && break; sleep $((i * 5)); done
+      - name: Zeile nach core-content (nur mit Token)
+        if: always() && env.CONTENT_TOKEN != ''
+        run: node scripts/probe-mirror.mjs probe-line.txt
+      - name: Lauf rot, wenn die Probe etwas gefunden hat
+        if: steps.probe.outcome == 'failure'
+        run: |
+          echo "::error::Probe gegen die Live-App fehlgeschlagen, siehe probe-log.md und das Artefakt probe"
+          exit 1
