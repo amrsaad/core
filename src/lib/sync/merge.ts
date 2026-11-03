@@ -13,6 +13,7 @@
  * - Zähler je Tag (Tageszahl, Zeit im Feed): der größere Wert.
  * - Abgelehnte Momente (Entscheidung 36): vereinigt, frühester Zeitpunkt.
  * - Signale (moments/signals.ts): Zähler je Feld und Tag der größere Wert, missed vereinigt je Moment-ID mit dem jüngsten Eintrag, höchstens 20.
+ * - Diagnose (lib/diag.ts, Entscheidung 31): Zeilen vereinigt nach Zeit, die letzten 500 bleiben. Das Feld löst allein keinen Sync aus (nicht in syncedChanged).
  */
 import type { AppState, SavedMoment, Settings } from '../state';
 import type { Weights } from '../../moments/mix';
@@ -26,6 +27,7 @@ import { parseUntilKey, type Until } from '../../moments/learn';
 import type { DigestTap } from '../../moments/digest';
 import type { QueueEntry } from '../../moments/recallqueue';
 import { mergeSignals, signalsEmpty, type Signals } from '../../moments/signals';
+import { diagEqual, mergeDiag, type DiagEntry } from '../diag';
 
 export const SYNC_VERSION = 1;
 /** wie LOG_MAX in MomentFeed.tsx */
@@ -51,6 +53,8 @@ export interface SyncState {
   signals?: Signals;
   /** Abgelehnte Momente (Entscheidung 36): ID auf Zeitpunkt, frühester gewinnt. Fehlt bei Geräten ohne Ablehnung. */
   momentRejected?: Record<string, number>;
+  /** Diagnose-Zeilen aller Geräte (Entscheidung 31), Ringpuffer mit 500 Zeilen, nach Zeit zusammengeführt. Fehlt bei Geräten ohne Zeilen. */
+  diag?: DiagEntry[];
   momentLiked: Record<string, number>;
   momentAsked: Record<string, number>;
   mutedChannels: Record<string, string>;
@@ -339,7 +343,22 @@ export function mergeDocs(a: SyncDoc, b: SyncDoc): SyncDoc {
   const sg = mergeSignals(x.signals, y.signals);
   if (!signalsEmpty(sg)) out.state.signals = sg;
   if (x.momentRejected || y.momentRejected) out.state.momentRejected = maxMapMin(x.momentRejected ?? {}, y.momentRejected ?? {});
+  const dg = mergeDiag(x.diag, y.diag);
+  if (dg) out.state.diag = dg;
   return out;
+}
+
+/** Dokument ohne Diagnose-Zeilen in stabiler Form. Damit entscheidet der Sync, ob sich außer dem Protokoll etwas unterscheidet. */
+export function canonNoDiag(d: SyncDoc): string {
+  const { diag: _diag, ...state } = d.state;
+  return canon({ ...d, state });
+}
+
+/** Dokument mit zusätzlichen Diagnose-Zeilen (die der Sitzung, noch nicht im Zustand). Ohne Zeilen unverändert. */
+export function withDiag(d: SyncDoc, lines: readonly DiagEntry[]): SyncDoc {
+  if (!lines.length) return d;
+  const dg = mergeDiag(d.state.diag, lines);
+  return dg ? { ...d, state: { ...d.state, diag: dg } } : d;
 }
 
 /** Warteschlange der Abrufkarten: der jüngere Stand gewinnt, bei Gleichstand die größere kanonische Form (gleiches Ergebnis in jeder Reihenfolge) */
@@ -388,6 +407,7 @@ export function toDoc(s: AppState): SyncDoc {
   if (s.recallQueue !== undefined) doc.state.recallQueue = s.recallQueue;
   if (!signalsEmpty(s.signals)) doc.state.signals = s.signals;
   if (s.momentRejected && Object.keys(s.momentRejected).length) doc.state.momentRejected = s.momentRejected;
+  if (s.diag?.length) doc.state.diag = s.diag;
   // Vereinigung mit dem leeren Dokument bringt Reihenfolge und Kürzungen in die gemeinsame Form
   return mergeDocs(doc, emptyDoc());
 }
@@ -420,6 +440,7 @@ export function applyDoc(s: AppState, d: SyncDoc): AppState {
   if (next.recallQueue !== undefined && !eq(next.recallQueue, s.recallQueue)) out.recallQueue = next.recallQueue;
   if (next.signals !== undefined && !eq(next.signals, cur.signals)) out.signals = next.signals;
   if (next.momentRejected !== undefined && !eq(next.momentRejected, cur.momentRejected)) out.momentRejected = next.momentRejected;
+  if (next.diag !== undefined && !diagEqual(next.diag, cur.diag)) out.diag = next.diag;
   if (!eq(cur.settings, next.settings)) {
     const settings = { ...s.settings };
     for (const k of SYNC_SETTINGS) {

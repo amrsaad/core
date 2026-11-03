@@ -15,6 +15,7 @@ import type { WeekPlan } from '../moments/review';
 import type { NoteEntry } from '../moments/note';
 import type { TapLog } from '../moments/learn';
 import type { DigestLatest, DigestTaps } from '../moments/digest';
+import type { DiagEntry } from './diag';
 
 export interface SavedItem {
   card: Card;
@@ -132,6 +133,8 @@ export interface AppState {
   digestLatest?: DigestLatest;
   /** Pfeiler 19: fällige Abrufkarten, die nicht gezeigt werden durften (Hintergrund, Settings, Blatt). Höchstens 3, per Sync. */
   recallQueue?: QueueEntry[];
+  /** Entscheidung 31 (Wache): Diagnose-Zeilen aller Geräte, Ringpuffer mit 500 Zeilen (Zeit, Gerät, Text), Merge nach Zeit, siehe lib/diag.ts. Löst keinen Sync aus, geht beim nächsten Schreiben mit. */
+  diag?: DiagEntry[];
   /** Geräte-Sync: Zeitpunkt der letzten Änderung je Schlüssel (Gewichte, Gemerktes, Herzen, Stumme, Pläne, Einstellungen), siehe lib/sync/merge.ts */
   syncTs?: Record<string, number>;
 }

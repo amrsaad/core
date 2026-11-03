@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { loadState, requestPersistence, saveState } from './db';
 import type { AppState } from './state';
 import { stampChanges } from './sync/merge';
+import { foldDiag } from './diag';
 
 /** Zugriff für den Geräte-Sync: jüngster Zustand und Änderung ohne neue Zeitstempel (Übernahme von GitHub) */
 export interface SyncAccess {
@@ -23,7 +24,17 @@ export function useAppState(): [AppState | null, (fn: (s: AppState) => AppState,
       setState(s);
     });
     requestPersistence();
-    const flush = () => latest.current && saveState(latest.current);
+    // Beim Verlassen: die Diagnose-Zeilen dieser Sitzung in den Zustand falten (Entscheidung 31), damit sie einen Neustart überleben. Löst keinen Sync aus.
+    const flush = () => {
+      const cur = latest.current;
+      if (!cur) return;
+      const next = foldDiag(cur);
+      if (next !== cur) {
+        latest.current = next;
+        setState(next);
+      }
+      saveState(next);
+    };
     document.addEventListener('visibilitychange', flush);
     // Neuladen und Schließen: nicht jeder Browser meldet dabei visibilitychange
     window.addEventListener('pagehide', flush);

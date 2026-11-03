@@ -8,13 +8,16 @@
  * Die Steuerung kennt weder React noch den Browser: Zeit, Netz, Schlüssel und Zustand kommen als Abhängigkeiten.
  */
 import type { AppState } from '../state';
-import { applyDoc, canon, mergeDocs, SYNC_VERSION, toDoc, type SyncDoc } from './merge';
+import { applyDoc, canon, canonNoDiag, mergeDocs, SYNC_VERSION, toDoc, withDiag, type SyncDoc } from './merge';
 import { CryptoFail, decryptDoc, decryptLatest, encryptDoc } from './crypto';
 import { DIGEST_PATH, readRemote, SyncError, writeRemote } from './github';
 import type { DigestLatest } from '../../moments/digest';
+import type { DiagEntry } from '../diag';
 
 export const WRITE_DELAY_MS = 10_000;
 export const MAX_ATTEMPTS = 4;
+/** Unterscheidet sich nur das Diagnose-Protokoll, schreibt der Sync höchstens alle 5 Minuten, sofort beim Verlassen der App und bei Sync now (Entscheidung 31) */
+export const DIAG_FLUSH_MS = 5 * 60_000;
 /** Wartezeit nach einem Fehler, der sich von selbst erledigen kann: 15 s, 1 min, 5 min, dann alle 5 min (Issue 9) */
 export const RETRY_DELAYS = [15_000, 60_000, 5 * 60_000] as const;
 export const retryDelay = (fails: number) => RETRY_DELAYS[Math.min(Math.max(1, fails), RETRY_DELAYS.length) - 1];
@@ -38,6 +41,8 @@ export interface SyncDeps {
   resolve?: (d: SyncDoc) => SyncDoc;
   /** Core Digest: neue Wochenkarte von GitHub (state/digest-latest.enc). Ohne diese Funktion wird sie nicht geladen. */
   adoptDigest?(latest: DigestLatest): void;
+  /** Entscheidung 31: Diagnose-Zeilen dieser Sitzung (lib/diag.ts). Sie gehen in jedes Schreiben mit, auch wenn der Zustand sie noch nicht enthält. */
+  diag?(): readonly DiagEntry[];
   fetchImpl?: typeof fetch;
   now?: () => number;
   loadMeta?: () => Promise<{ lastSync?: number } | undefined>;
@@ -78,6 +83,12 @@ export function createSync(deps: SyncDeps): Sync {
   let paused = false;
   /** Version der zuletzt gelesenen Wochenkarte, damit dieselbe Datei nicht noch einmal entschlüsselt wird */
   let digestSha: string | null = null;
+  /** Diagnose: Zeitpunkt des letzten Schreibens mit Protokoll, jüngste Zeile, die schon auf GitHub liegt, und ob beim nächsten Lauf gespült werden soll */
+  let lastDiagWrite = -Infinity;
+  let lastDiagT = 0;
+  let flushDiag = false;
+  const newestT = (l: readonly DiagEntry[]) => l.reduce((m, e) => Math.max(m, e.t), 0);
+  const diagUnsynced = () => (deps.diag?.() ?? []).some((e) => e.t > lastDiagT);
 
   const set = (p: Partial<SyncStatus>) => {
     st = { ...st, ...p };
@@ -104,9 +115,11 @@ export function createSync(deps: SyncDeps): Sync {
     if (!key) throw new SyncError('setup', 'Sync needs the unlock key on this device. Open your unlock link here once more.');
     for (let i = 0; i < MAX_ATTEMPTS; i++) {
       const remote = await readRemote(token, deps.fetchImpl);
+      const lines = deps.diag?.() ?? [];
       let remoteDoc: SyncDoc | null = null;
       /** Stand auf GitHub, wie er liegt (kann alte IDs haben): nur dann entfällt das Schreiben, wenn der zusammengeführte Stand genau so schon dort liegt */
       let rawKey = '';
+      let rawNoDiag = '';
       const fix = (d: SyncDoc) => (deps.resolve ? deps.resolve(d) : d);
       if (remote) {
         try {
@@ -117,24 +130,34 @@ export function createSync(deps: SyncDeps): Sync {
         }
         if (remoteDoc.v > SYNC_VERSION) throw new SyncError('format', 'The sync file is from a newer version of Core. Update the app.');
         rawKey = canon(remoteDoc);
+        rawNoDiag = canonNoDiag(remoteDoc);
         remoteDoc = fix(remoteDoc);
       }
       const cur = deps.getState();
       if (!cur) return;
-      const local = fix(toDoc(cur));
+      const local = withDiag(fix(toDoc(cur)), lines);
       const merged = remoteDoc ? mergeDocs(local, remoteDoc) : local;
       const mergedKey = canon(merged);
       // Lokal fehlt etwas von GitHub: übernehmen. Die Funktion rechnet gegen den neuesten Zustand, nicht gegen den von eben.
       if (remoteDoc && mergedKey !== canon(local)) {
         const r = remoteDoc;
         deps.adopt((s) => {
-          const m = mergeDocs(fix(toDoc(s)), r);
+          const m = mergeDocs(withDiag(fix(toDoc(s)), lines), r);
           return canon(m) === canon(toDoc(s)) ? s : applyDoc(s, m);
         });
       }
-      if (remoteDoc && mergedKey === rawKey) return;
+      if (remoteDoc && mergedKey === rawKey) {
+        lastDiagT = Math.max(lastDiagT, newestT(lines));
+        flushDiag = false;
+        return;
+      }
+      // Unterscheidet sich nur das Protokoll, ist Schreiben nicht dringend (jeder Start und jede Rückkehr würde sonst einen Commit machen)
+      if (remoteDoc && canonNoDiag(merged) === rawNoDiag && !flushDiag && now() - lastDiagWrite < DIAG_FLUSH_MS) return;
       try {
         await writeRemote(token, await encryptDoc(key, merged), remote?.sha ?? null, `core state ${new Date(now()).toISOString()}`, deps.fetchImpl);
+        lastDiagWrite = now();
+        lastDiagT = Math.max(lastDiagT, newestT(lines));
+        flushDiag = false;
         return;
       } catch (e) {
         if (e instanceof SyncError && e.kind === 'conflict' && i < MAX_ATTEMPTS - 1) continue;
@@ -212,11 +235,15 @@ export function createSync(deps: SyncDeps): Sync {
       clearTimeout(timer);
       timer = setTimeout(() => void run(), WRITE_DELAY_MS);
     },
-    syncNow: () => run(true),
+    syncNow() {
+      flushDiag = true;
+      return run(true);
+    },
     visible(v) {
       if (stopped) return;
       // Beim Verlassen sofort schreiben, was noch wartet. Beim Zurückkommen laden, was das andere Gerät geschrieben hat.
-      if (!v && !pending && !timer) return;
+      if (!v && !pending && !timer && !diagUnsynced()) return;
+      if (!v) flushDiag = true;
       void run();
     },
     offline() {

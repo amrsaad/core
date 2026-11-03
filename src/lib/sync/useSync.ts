@@ -6,6 +6,7 @@ import { clearToken, loadToken, saveToken, syncKey } from '../vault';
 import { createSync, type Sync, type SyncStatus } from './controller';
 import { canon, syncedChanged, type SyncDoc } from './merge';
 import type { DigestLatest } from '../../moments/digest';
+import { diagLog } from '../diag';
 
 export interface SyncUi {
   status: SyncStatus;
@@ -34,6 +35,7 @@ export function useSync(state: AppState | null, access: SyncAccess, enabled: boo
       resolve: (d) => (resolveRef.current ? resolveRef.current(d) : d),
       getKey: syncKey,
       getToken: loadToken,
+      diag: () => diagLog.entries(),
       adoptDigest: (l: DigestLatest) => access.adopt((st) => (st.digestLatest && canon(st.digestLatest) === canon(l) ? st : { ...st, digestLatest: l })),
       loadMeta: loadSyncMeta,
       saveMeta: saveSyncMeta,
