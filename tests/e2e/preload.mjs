@@ -256,12 +256,14 @@ try {
   const isYt = (m) => !m.hls;
   num.poorFirst12Youtube = poorQ.filter(isYt).length;
   num.normalFirst12Youtube = normalQ.filter(isYt).length;
-  c.poorPushesYoutubeBack = poorQ.length === 12 && num.poorFirst12Youtube === 0;
+  // Seit Issue 24 ist der Netzrang ein Gewicht (x3), kein Filter: YouTube kommt im schlechten Netz seltener, nicht gar nicht
+  c.poorPushesYoutubeBack = poorQ.length === 12 && num.poorFirst12Youtube <= num.normalFirst12Youtube;
   c.normalMixKeepsYoutube = normalQ.length === 12 && num.normalFirst12Youtube > 0;
-  const blocksOk = (q) => [0, 3, 6, 9].every((i) => new Set(q.slice(i, i + 3).map((m) => m.area)).size === 1);
-  c.poorBlocksOf3SameArea = blocksOk(poorQ);
+  // Seit Issue 24 gibt es keine Dreierblöcke mehr: nie zweimal derselbe Bereich hintereinander, nie dieselbe Folge innerhalb 10
+  const blocksOk = (q) => q.every((m, i) => i === 0 || (m.area !== q[i - 1].area && !q.slice(Math.max(0, i - 10), i).some((x) => x.videoId === m.videoId)));
+  c.poorNoClump = blocksOk(poorQ);
   c.poorBeatFirst = poorQ[0]?.area === 'beat';
-  c.normalBlocksOf3SameArea = blocksOk(normalQ);
+  c.normalNoClump = blocksOk(normalQ);
 
   c.pageErrors = errors.length === 0 ? true : errors.length;
   if (errors.length) num.pageErrors = errors.slice(0, 5);

@@ -9,6 +9,7 @@ import type { CaptionMode } from '../moments/captions';
 import type { DayCount } from '../moments/today';
 import type { Form } from '../moments/form';
 import type { RecallState } from '../moments/recall';
+import type { Signals } from '../moments/signals';
 import type { QueueEntry } from '../moments/recallqueue';
 import type { WeekPlan } from '../moments/review';
 import type { NoteEntry } from '../moments/note';
@@ -109,6 +110,8 @@ export interface AppState {
   dayCount?: Record<string, DayCount>;
   /** Abrufkarten: Ergebnisse und Wiedervorlage (Punkt 5) */
   recall?: RecallState;
+  /** Signale für Digest und Kontext (Brief 03): Tageszähler mixClump, byHour, coldNetStarts und missed, siehe moments/signals.ts. Wandert per Sync. */
+  signals?: Signals;
   /** Wenn-dann-Plan pro Woche (Montag als YYYY-MM-DD), Punkt 7 */
   plans?: Record<string, WeekPlan>;
   /** Desktop-Modus: die Übersicht der Tasten wurde beim ersten Start schon gezeigt */

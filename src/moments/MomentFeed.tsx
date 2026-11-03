@@ -14,7 +14,8 @@ import { loudLine, recordLoud } from './loudness';
 import { browserPreloader } from './preloader';
 import { netRank, queueAhead, streamKind } from './preload';
 import { cursorFor, historyBefore, parseSaved, queueKey, recentFromLog, releaseTail, remixTail, restoreQueue } from './queue';
-import { leaveOf, newMomentCursor, nextMoment, SIGNAL, type MomentCursor } from './mix';
+import { leaveOf, newMomentCursor, nextMoment, sessionSkip, SIGNAL, type MomentCursor } from './mix';
+import { bumpCell, bumpPair, hourKey } from './signals';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
 import { clampRate, DEFAULT_RATE, nextRate, rateOf, type Rate } from '../lib/state';
 import { addSample } from './latency';
@@ -142,6 +143,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   /** Abrufkarte offen: Player bleibt angehalten */
   const recallRef = useRef(false);
   const sessionSeen = useRef(0);
+  /** Paare aufeinanderfolgender Momente dieser Sitzung, die schon gezählt sind (mixClump) */
+  const pairsSeen = useRef(new Set<string>());
   const counted = useRef(new Set<string>());
   const recent = useRef<Recent[]>([]);
   const forYouTimer = useRef(0);
@@ -412,7 +415,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   const markSeen = (m: Moment | undefined) => {
     if (!m) return;
-    update((s) => (s.momentSeen[m.id] ? { ...s, momentDay: today } : { ...s, momentDay: today, momentSeen: { ...s.momentSeen, [m.id]: Date.now() }, dayCount: countSeen(s.dayCount, today) }));
+    update((s) => (s.momentSeen[m.id] ? { ...s, momentDay: today } : bumpCell({ ...s, momentDay: today, momentSeen: { ...s.momentSeen, [m.id]: Date.now() }, dayCount: countSeen(s.dayCount, today) }, today, hourKey(clockNow()), m, 'seen')));
   };
 
   // Erkennt, ob der Browser die Wiedergabe mit Ton verweigert hat. Puffern (langsames Netz, Podcast-Stream) ist keine
@@ -437,7 +440,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const answerRecall = (got: boolean) => {
     const r = recall;
     recallAnswered.current = true;
-    if (r) update((s) => ({ ...s, recall: answer(s.recall ?? {}, r.m.id, got, clockNow().getTime(), !!r.m.recallBoost), dayCount: got ? countGotIt(s.dayCount, today) : s.dayCount }));
+    // Richtig beantwortet ist ein starkes Plus für Kanal und Thema (Issue 24). Falsch ändert die Gewichte nicht.
+    if (r) update((s) => ({ ...s, recall: answer(s.recall ?? {}, r.m.id, got, clockNow().getTime(), !!r.m.recallBoost), dayCount: got ? countGotIt(s.dayCount, today) : s.dayCount, momentWeights: got ? signal(s.momentWeights, r.m, SIGNAL.recall, clockNow().getTime()) : s.momentWeights }));
   };
   const closeRecall = () => {
     recallRef.current = false;
@@ -561,18 +565,31 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       // sperren den Kanal 14 Tage. Jedes andere Weiterwischen unterbricht die Folge. Im Textmodus gibt es keine Wiedergabezeit,
       // darum keine Zeitwertung. Nach einem Chip ersetzt dessen Wirkung die Wertung (silentLeave).
       const nowMs = clockNow().getTime();
+      let dampened = false;
       const silent = silentLeave.current; // gilt für genau diesen Wechsel (er kommt mit der Feder erst am Ende der Animation)
       silentLeave.current = false;
       if (next > prev && prevM) {
         const timed = endedAt.current !== prev && !textRef.current && !silent;
         const lv = timed ? leaveOf((Date.now() - since.current) / 1000, prevM.end - prevM.start) : null;
-        if (lv?.kind === 'skip')
+        if (lv?.kind === 'skip') {
+          // Zwei Skips beim selben Kanal oder Thema dämpfen beide für den Rest der Sitzung (Issue 24), siehe Ende dieser Funktion
+          dampened = !!cursor.current && sessionSkip(cursor.current, prevM);
           update((s) => {
             const r = skipRule(s.momentWeights, s.skipRun, prevM, nowMs);
-            return { ...s, momentWeights: r.weights, skipRun: r.run };
+            return bumpCell({ ...s, momentWeights: r.weights, skipRun: r.run }, today, hourKey(clockNow()), prevM, 'skips');
           });
+        }
         else if (lv || stateRef.current.skipRun)
           update((s) => ({ ...s, momentWeights: lv ? signal(s.momentWeights, prevM, lv.f, nowMs) : s.momentWeights, skipRun: undefined }));
+      }
+      // Gezeigtes Paar zählen (Digest mixClump), jedes Paar der Sitzung einmal
+      const shownNext = queue.current[next];
+      if (next === prev + 1 && prevM && shownNext) {
+        const pk = `${prevM.id}>${shownNext.id}`;
+        if (!pairsSeen.current.has(pk)) {
+          pairsSeen.current.add(pk);
+          update((s) => bumpPair(s, today, prevM, shownNext));
+        }
       }
       // Zurückgewischt, um etwas nochmal zu sehen: Plus für den Zielmoment
       const backM = queue.current[next];
@@ -627,6 +644,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       if (next > prev && prevM) stepRecall(recallNow);
       armDeck();
       syncHint();
+      // Gedämpfter Kanal oder gedämpftes Thema: der Rest hinter den zwei vorgeladenen Momenten wird neu gewählt
+      if (dampened) replanRef.current(next + 3);
       const nSrc = mediaWithSrc();
       if (nSrc > 3) diag.current.push(`media: ${nSrc} elements with src (limit 3)`);
       setIdx(next);
@@ -645,7 +664,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     current().player?.pauseVideo();
     if (!m) return;
     log(m, { ended: true });
-    update((s) => ({ ...s, momentWeights: signal(s.momentWeights, m, SIGNAL.ended, clockNow().getTime()) }));
+    update((s) => bumpCell({ ...s, momentWeights: signal(s.momentWeights, m, SIGNAL.ended, clockNow().getTime()) }, today, hourKey(clockNow()), m, 'done'));
     const bg = isBackground(document.visibilityState);
     // Gesehen zählt beim Ende, höchstens einmal je Moment (auch nach der Rückkehr)
     if (ledger.current.first(m.id)) {
@@ -686,7 +705,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   /**
    * Rest der Warteschlange ab from neu planen (Netz wurde schlecht): Die freigegebenen Momente stehen wieder zur Wahl,
-   * nextMomentBlock füllt mit Rang auf (vorgeladen und Text zuerst, YouTube zuletzt). Blöcke, Anteile und Lernen bleiben wie sonst.
+   * nextMoment füllt mit Rang als Gewicht auf (vorgeladen und Text mal 3). Verlauf, Regeln, Anteile und Lernen bleiben wie sonst.
    */
   const replanTail = (from: number) => {
     const tail = queue.current.slice(from);
@@ -1306,7 +1325,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!m) return;
     navigator.vibrate?.(10);
     if (!stateRef.current.savedMoments[m.id]) {
-      update((s) => ({ ...s, savedMoments: { ...s.savedMoments, [m.id]: { moment: m, savedAt: new Date().toISOString() } }, momentWeights: signal(s.momentWeights, m, SIGNAL.save, clockNow().getTime()) }));
+      update((s) => bumpCell({ ...s, savedMoments: { ...s.savedMoments, [m.id]: { moment: m, savedAt: new Date().toISOString() } }, momentWeights: signal(s.momentWeights, m, SIGNAL.save, clockNow().getTime()) }, today, hourKey(clockNow()), m, 'saves'));
       return;
     }
     update((s) => {

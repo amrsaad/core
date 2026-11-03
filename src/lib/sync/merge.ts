@@ -11,6 +11,7 @@
  * - Taps auf der Wochenkarte (Core Digest): je Schlüssel nach dem jüngsten Zeitstempel, bei Gleichstand der spätere Tap, dann die größere Wahl.
  * - Abruftermine: Ergebnisse vereinigt, der Termin kommt vom Eintrag mit dem jüngsten Ergebnis (bei Gleichstand der spätere Termin).
  * - Zähler je Tag (Tageszahl, Zeit im Feed): der größere Wert.
+ * - Signale (moments/signals.ts): Zähler je Feld und Tag der größere Wert, missed vereinigt je Moment-ID mit dem jüngsten Eintrag, höchstens 20.
  */
 import type { AppState, SavedMoment, Settings } from '../state';
 import type { Weights } from '../../moments/mix';
@@ -23,6 +24,7 @@ import type { WeekPlan } from '../../moments/review';
 import { parseUntilKey, type Until } from '../../moments/learn';
 import type { DigestTap } from '../../moments/digest';
 import type { QueueEntry } from '../../moments/recallqueue';
+import { mergeSignals, signalsEmpty, type Signals } from '../../moments/signals';
 
 export const SYNC_VERSION = 1;
 /** wie LOG_MAX in MomentFeed.tsx */
@@ -44,6 +46,8 @@ export interface SyncState {
   momentDay?: string;
   /** Pfeiler 19: Warteschlange der Abrufkarten. Als Ganzes, der jüngste Stand gewinnt (Zeitstempel tsKey.recallQueue). Fehlt bei Geräten ohne Warteschlange. */
   recallQueue?: QueueEntry[];
+  /** Signale (Brief 03). Fehlt bei Geräten ohne Signale. Zähler mit Maximum je Tag, missed als Vereinigung, siehe moments/signals.ts. */
+  signals?: Signals;
   momentLiked: Record<string, number>;
   momentAsked: Record<string, number>;
   mutedChannels: Record<string, string>;
@@ -324,6 +328,8 @@ export function mergeDocs(a: SyncDoc, b: SyncDoc): SyncDoc {
   if (md !== undefined) out.state.momentDay = md;
   const rq = mergeQueue(x.recallQueue, y.recallQueue, num(a.ts[tsKey.recallQueue]), num(b.ts[tsKey.recallQueue]));
   if (rq !== undefined) out.state.recallQueue = rq;
+  const sg = mergeSignals(x.signals, y.signals);
+  if (!signalsEmpty(sg)) out.state.signals = sg;
   return out;
 }
 
@@ -371,6 +377,7 @@ export function toDoc(s: AppState): SyncDoc {
   if (s.notesPromptDay !== undefined) doc.state.notesPromptDay = s.notesPromptDay;
   if (s.momentDay !== undefined) doc.state.momentDay = s.momentDay;
   if (s.recallQueue !== undefined) doc.state.recallQueue = s.recallQueue;
+  if (!signalsEmpty(s.signals)) doc.state.signals = s.signals;
   // Vereinigung mit dem leeren Dokument bringt Reihenfolge und Kürzungen in die gemeinsame Form
   return mergeDocs(doc, emptyDoc());
 }
@@ -401,6 +408,7 @@ export function applyDoc(s: AppState, d: SyncDoc): AppState {
   if (next.notesPromptDay !== undefined && next.notesPromptDay !== s.notesPromptDay) out.notesPromptDay = next.notesPromptDay;
   if (next.momentDay !== undefined && next.momentDay !== s.momentDay) out.momentDay = next.momentDay;
   if (next.recallQueue !== undefined && !eq(next.recallQueue, s.recallQueue)) out.recallQueue = next.recallQueue;
+  if (next.signals !== undefined && !eq(next.signals, cur.signals)) out.signals = next.signals;
   if (!eq(cur.settings, next.settings)) {
     const settings = { ...s.settings };
     for (const k of SYNC_SETTINGS) {
@@ -475,6 +483,7 @@ export function syncedChanged(a: AppState, b: AppState): boolean {
     a.notesPromptDay !== b.notesPromptDay ||
     a.momentDay !== b.momentDay ||
     a.recallQueue !== b.recallQueue ||
+    a.signals !== b.signals ||
     a.momentLiked !== b.momentLiked ||
     a.momentAsked !== b.momentAsked ||
     a.mutedChannels !== b.mutedChannels ||
