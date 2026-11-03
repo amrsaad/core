@@ -1,5 +1,5 @@
 {
- "at": "2026-11-03T14:58:03.685Z",
+ "at": "2026-11-03T15:45:12.019Z",
  "runs": [
   {
    "browser": "webkit",
@@ -105,57 +105,57 @@
     "tempoPaused": 10,
     "cue": {
      "worst": 0,
-     "n": 623,
+     "n": 622,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.35",
+       "3.34",
        34,
        34
       ],
       [
-       "4.64",
+       "4.63",
        47,
        47
       ],
       [
-       "5.92",
+       "5.91",
        60,
        60
       ],
       [
-       "7.21",
+       "7.20",
        73,
        73
       ],
       [
-       "8.50",
-       86,
-       86
+       "8.49",
+       85,
+       85
       ],
       [
-       "9.79",
+       "9.78",
        98,
        98
       ],
       [
-       "11.08",
+       "11.06",
        111,
        111
       ],
       [
-       "12.36",
+       "12.35",
        124,
        124
       ],
       [
-       "13.65",
+       "13.64",
        137,
        137
       ],
       [
-       "14.94",
+       "14.93",
        150,
        150
       ],
@@ -165,7 +165,7 @@
        163
       ],
       [
-       "17.51",
+       "17.50",
        176,
        176
       ]
@@ -174,7 +174,7 @@
     },
     "cueTempo": {
      "worst": 1,
-     "n": 544,
+     "n": 547,
      "rates": [
       1,
       1.5,
@@ -186,7 +186,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805070
+       "dueAt": 1792756805079
       }
      ],
      "idx": 6,
@@ -195,15 +195,15 @@
       "bg: arm atrecall2 (net)",
       "bg: deck pause event by=app: pause (user, media key or lock screen) hidden=false done=false rs=0 muted=false t=0.1",
       "bg: mediasession playing to paused (player state paused) hidden=false",
-      "bg: mediasession paused to playing (player state playing) hidden=false",
+      "bg: mediasession paused to playing (handlers playing) hidden=false",
       "bg: arm atrecall8 (net)",
       "bg: deck pause event by=app: pause (user, media key or lock screen) hidden=false done=false rs=0 muted=false t=0.4",
       "bg: mediasession playing to paused (player state paused) hidden=false",
-      "bg: mediasession paused to playing (player state playing) hidden=false",
+      "bg: mediasession paused to playing (handlers playing) hidden=false",
       "bg: arm atrecall4 (net)",
       "bg: deck pause event by=app: pause (user, media key or lock screen) hidden=false done=false rs=0 muted=false t=0.4",
       "bg: mediasession playing to paused (player state paused) hidden=false",
-      "bg: mediasession paused to playing (player state playing) hidden=false",
+      "bg: mediasession paused to playing (handlers playing) hidden=false",
       "bg: arm atrecall10 (net)",
       "bg: deck page hidden: paused=false ended=false t=0.4 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
       "bg: left atrecall4:0",
@@ -216,7 +216,7 @@
       "recall: queued atrecall4:0 (bg)",
       "bg: arm atrecall1 (net)",
       "bg: next atrecall10:0",
-      "bg: deck page hidden +5 s: paused=false ended=false t=1.4 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+      "bg: deck page hidden +5 s: paused=false ended=false t=1.3 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
       "bg: deck advance to atrecall10: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
       "bg: deck clip end via timeupdate hidden=true armed=atrecall1 onAdvance=true advance=yes rs=0 muted=false t=4.0",
       "bg: deck advance atrecall10 to atrecall1: src and play() in this handler, same element true, next from storage false, readyState 0",
@@ -345,7 +345,7 @@
      "shownNow": 0,
      "gaps": [
       [
-       "3.39",
+       "3.38",
        34,
        34
       ],
@@ -360,7 +360,7 @@
        61
       ],
       [
-       "7.39",
+       "7.38",
        74,
        74
       ],
@@ -375,7 +375,7 @@
        101
       ],
       [
-       "11.39",
+       "11.38",
        114,
        114
       ],
@@ -390,7 +390,7 @@
        141
       ],
       [
-       "15.39",
+       "15.38",
        154,
        154
       ],
@@ -421,7 +421,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804914
+       "dueAt": 1792756804948
       }
      ],
      "idx": 6,
@@ -430,15 +430,15 @@
       "bg: arm atrecall2 (net)",
       "bg: deck pause event by=app: pause (user, media key or lock screen) hidden=false done=false rs=0 muted=false t=0.1",
       "bg: mediasession playing to paused (player state paused) hidden=false",
-      "bg: mediasession paused to playing (player state playing) hidden=false",
+      "bg: mediasession paused to playing (handlers playing) hidden=false",
       "bg: arm atrecall8 (net)",
       "bg: deck pause event by=app: pause (user, media key or lock screen) hidden=false done=false rs=0 muted=false t=0.4",
       "bg: mediasession playing to paused (player state paused) hidden=false",
-      "bg: mediasession paused to playing (player state playing) hidden=false",
+      "bg: mediasession paused to playing (handlers playing) hidden=false",
       "bg: arm atrecall4 (net)",
       "bg: deck pause event by=app: pause (user, media key or lock screen) hidden=false done=false rs=0 muted=false t=0.4",
       "bg: mediasession playing to paused (player state paused) hidden=false",
-      "bg: mediasession paused to playing (player state playing) hidden=false",
+      "bg: mediasession paused to playing (handlers playing) hidden=false",
       "bg: arm atrecall10 (net)",
       "bg: deck page hidden: paused=false ended=false t=0.4 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
       "bg: left atrecall4:0",
@@ -522,7 +522,7 @@
      "pod-0008:22",
      "pod-0019:70"
     ],
-    "firstSoundMs": 200,
+    "firstSoundMs": 218,
     "diag": [
      "deck: start order head first=pod-0001:22 heads=6 usable=6 stock=6",
      "deck: src local pod-0001"
@@ -544,14 +544,14 @@
      "state": "playing",
      "pos": {
       "duration": 25,
-      "position": 0.0006867959183658456,
+      "position": 0.0011177959183683583,
       "playbackRate": 1
      },
      "cold": 0,
      "cloud": 0
     },
     "stockBehind": 5,
-    "lockNextMs": 110,
+    "lockNextMs": 113,
     "lockNextLines": [
      "lock next: net pod-0006:82",
      "lock next: held pod-0014:10"

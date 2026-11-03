@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-03T14:36:02.792Z",
+  "at": "2026-11-03T15:23:09.778Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -27,7 +27,7 @@
         "settingsLine": true,
         "settingsMatchesStore": true,
         "offlineIcon": true,
-        "offlineSwipesFromCache": false,
+        "offlineSwipesFromCache": true,
         "offlineNoRequests": true,
         "poorWhenOffline": true,
         "offlineIconGoes": true,
@@ -50,38 +50,38 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1612,
+        "coldStartMs": 1629,
         "preloadedMoments": 30,
         "preloadedBytes": 6289238,
         "bytesPerMoment": 209641,
         "waitedForVault": 1,
         "swipes": 10,
         "cachedStartMs": [
-          13,
-          10,
-          14,
-          15,
-          9,
           17,
           15,
-          14,
-          14,
-          20
+          17,
+          18,
+          12,
+          22,
+          18,
+          17,
+          17,
+          17
         ],
-        "cachedStartMax": 20,
-        "cachedStartMedian": 14,
+        "cachedStartMax": 22,
+        "cachedStartMedian": 17,
         "firstFrames": [
-          "first-frame 14ms buffered local",
           "first-frame 13ms buffered local",
-          "first-frame 10ms buffered local",
-          "first-frame 14ms buffered local",
-          "first-frame 15ms buffered local",
-          "first-frame 9ms buffered local",
           "first-frame 17ms buffered local",
           "first-frame 15ms buffered local",
-          "first-frame 14ms buffered local",
-          "first-frame 14ms buffered local",
-          "first-frame 20ms buffered local"
+          "first-frame 17ms buffered local",
+          "first-frame 18ms buffered local",
+          "first-frame 12ms buffered local",
+          "first-frame 22ms buffered local",
+          "first-frame 18ms buffered local",
+          "first-frame 17ms buffered local",
+          "first-frame 17ms buffered local",
+          "first-frame 17ms buffered local"
         ],
         "settingsText": "Preloaded: 36 moments, 7.2 MB",
         "offlineTrail": [
@@ -103,8 +103,8 @@
           }
         ],
         "offlineStartMs": [
-          15,
-          10
+          12,
+          12
         ],
         "offlineCachedOfFirst15": 15,
         "offlineSwipeTrail": [
@@ -134,9 +134,9 @@
           }
         ],
         "offlineRestartStartMs": [
+          12,
           10,
-          8,
-          10
+          11
         ],
         "poorYoutubeOf120": 58,
         "normalYoutubeOf120": 68,
@@ -145,8 +145,8 @@
         "poorClumps": [],
         "normalClumps": []
       },
-      "ok": false
+      "ok": true
     }
   ],
-  "ok": false
+  "ok": true
 }

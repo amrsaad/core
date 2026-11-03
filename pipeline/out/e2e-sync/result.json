@@ -1,5 +1,5 @@
 {
- "at": "2026-11-03T14:29:23.284Z",
+ "at": "2026-11-03T15:16:26.201Z",
  "runs": [
   {
    "browser": "webkit",
@@ -49,12 +49,12 @@
    },
    "diagLines": 10,
    "diagSample": [
-    "2k6d slot2 sy7:1 state 1",
-    "2k6d slot2 sy7:1 state 2",
-    "2k6d slot0 sy4:1 state 2",
-    "2k6d app: hidden"
+    "pqts slot2 sy0:1 state 1",
+    "pqts slot2 sy0:1 state 2",
+    "pqts slot0 sy2:1 state 2",
+    "pqts app: hidden"
    ],
-   "writeDelayMs": 10025,
+   "writeDelayMs": 10027,
    "hosts": [
     "127.0.0.1:4176",
     "fonts.googleapis.com",
@@ -112,10 +112,10 @@
    },
    "diagLines": 10,
    "diagSample": [
-    "e030 slot2 sy6:1 state 1",
-    "e030 slot2 sy6:1 state 2",
-    "e030 slot0 sy3:1 state 2",
-    "e030 app: hidden"
+    "8db3 slot2 sy7:1 state 1",
+    "8db3 slot2 sy7:1 state 2",
+    "8db3 slot0 sy2:1 state 2",
+    "8db3 app: hidden"
    ],
    "writeDelayMs": 10016,
    "hosts": [

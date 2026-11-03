@@ -1,5 +1,5 @@
 {
- "at": "2026-11-03T14:34:21.458Z",
+ "at": "2026-11-03T15:21:27.023Z",
  "runs": [
   {
    "browser": "webkit",
@@ -21,6 +21,8 @@
     "bgRowOneAudioElement": true,
     "bgRowSrcChanges": true,
     "bgRowEndedNext": true,
+    "bgRowLockHandlers": true,
+    "bgRowHandlersReset": true,
     "bgRowNoRejected": true,
     "bgRowStillPlayingBack": true,
     "bgRejectLogged": true,
@@ -133,6 +135,8 @@
     "bgRowOneAudioElement": true,
     "bgRowSrcChanges": true,
     "bgRowEndedNext": true,
+    "bgRowLockHandlers": true,
+    "bgRowHandlersReset": true,
     "bgRowNoRejected": true,
     "bgRowStillPlayingBack": true,
     "bgRejectLogged": true,
