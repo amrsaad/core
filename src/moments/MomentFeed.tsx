@@ -17,7 +17,7 @@ import { coldToday, countColdStart, pickHeads, startOrder } from './startHead';
 import { lockMeta, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS } from './lockScreen';
 import { cursorFor, historyBefore, parseSaved, queueKey, recentFromLog, releaseTail, remixTail, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMoment, sessionSkip, SIGNAL, type MomentCursor } from './mix';
-import { bumpCell, bumpColdNetStart, bumpPair, hourKey } from './signals';
+import { addMissed, bumpCell, bumpColdNetStart, bumpPair, hourKey } from './signals';
 import { clearFocus, focusActive, focusFilter, inFocus, readFocus, subscribeFocus, type Focus } from './focus';
 import { bumpStart, dropOverStarted, isQuickSkip, markRejected, quickSkip, resumeSaved, setTabCursor, START_MAX } from './tabs';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
@@ -499,7 +499,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     const r = recall;
     recallAnswered.current = true;
     // Richtig beantwortet ist ein starkes Plus für Kanal und Thema (Issue 24). Falsch ändert die Gewichte nicht.
-    if (r) update((s) => ({ ...s, recall: answer(s.recall ?? {}, r.m.id, got, clockNow().getTime(), !!r.m.recallBoost), dayCount: got ? countGotIt(s.dayCount, today) : s.dayCount, momentWeights: got ? signal(s.momentWeights, r.m, SIGNAL.recall, clockNow().getTime()) : s.momentWeights }));
+    if (r) {
+      const at = clockNow().getTime();
+      const q = r.m.recall;
+      update((s) => {
+        const next: AppState = { ...s, recall: answer(s.recall ?? {}, r.m.id, got, at, !!r.m.recallBoost), dayCount: got ? countGotIt(s.dayCount, today) : s.dayCount, momentWeights: got ? signal(s.momentWeights, r.m, SIGNAL.recall, at) : s.momentWeights };
+        // Falsch beantwortet: für die Leseliste "Missed" im Sonntags-Digest vormerken (Entscheidung 35, höchstens 20)
+        return !got && q ? addMissed(next, { id: r.m.id, question: q.question, correct: q.options[q.correct], why: q.why, ...(fullVideoUrl(r.m) ? { source: fullVideoUrl(r.m) } : {}), ...(r.m.videoTitle ? { videoTitle: r.m.videoTitle } : {}), at }) : next;
+      });
+    }
   };
   const closeRecall = () => {
     recallRef.current = false;
