@@ -1,0 +1,110 @@
+name: silence
+# Misst Sprechpausen je Moment-Fenster. Auftrag in jobs/silence.json:
+# [{"id":"<hash>","audio":"<url>","windows":[[start,end],...]}]
+# Whisper-Wortzeiten im Arabischen sind lückenlos und zeigen keine Pausen, deshalb kommen sie aus dem Audio:
+# 10-ms-Pegel, Referenz 95. Perzentil, Stille = REL dB darunter (24, 30, 36), Mindestlänge 0,2 s. Fenster mit 8 s Rand.
+# Ergebnis je Quelle als Artefakt "sil-<id>" mit <id>.json: {"id":..,"results":[{"start":..,"end":..,"ref":..,"sil":{"24":[[a,b]],"30":[],"36":[]}}]}
+on:
+  push:
+    branches: [claude/compute]
+    paths: ['jobs/silence.json']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: m
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          jobs = json.load(open('jobs/silence.json'))
+          print('matrix=' + json.dumps({'include': [{'id': j['id'], 'audio': j['audio'], 'windows': json.dumps(j['windows'])} for j in jobs]}))
+          PY
+
+  run:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - name: Werkzeuge
+        run: |
+          command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null)
+          python3 -c "import numpy" 2>/dev/null || pip install -q numpy
+      - name: Pausen messen
+        env:
+          AUDIO: ${{ matrix.audio }}
+          WINDOWS: ${{ matrix.windows }}
+        run: |
+          mkdir -p work
+          cat > sil.py <<'PYEOF'
+          #!/usr/bin/env python3
+          import json, os, subprocess, sys, time
+          import numpy as np
+
+          audio, out, job_id = os.environ['AUDIO'], sys.argv[1], sys.argv[2]
+          windows = json.loads(os.environ['WINDOWS'])
+
+
+          def load(a, b):
+              cmd = ['ffmpeg', '-hide_banner', '-loglevel', 'error', '-nostdin', '-ss', str(a), '-i', audio, '-t', str(round(b - a, 3)),
+                     '-vn', '-ac', '1', '-ar', '16000', '-f', 's16le', '-']
+              for attempt in range(3):
+                  try:
+                      r = subprocess.run(cmd, capture_output=True, timeout=600)
+                      if r.returncode == 0 and r.stdout:
+                          return np.frombuffer(r.stdout, dtype=np.int16).astype(np.float32) / 32768.0
+                  except subprocess.TimeoutExpired:
+                      pass
+                  time.sleep(2 * (attempt + 1))
+              return None
+
+
+          res, ok = [], 0
+          for s, e in windows:
+              a, b = max(0.0, s - 8), e + 8
+              x = load(a, b)
+              n = 0 if x is None else len(x) // 160
+              if n < 100:
+                  res.append({'start': s, 'end': e, 'err': 'no audio'})
+                  continue
+              db = 20 * np.log10(np.sqrt((x[:n * 160].reshape(n, 160) ** 2).mean(axis=1)) + 1e-7)
+              ref = float(np.percentile(db, 95))
+              sil = {'24': [], '30': [], '36': []}
+              for rel in (24, 30, 36):
+                  low = db < ref - rel
+                  i = 0
+                  while i < n:
+                      if low[i]:
+                          j = i
+                          while j < n and low[j]:
+                              j += 1
+                          if j - i >= 20:
+                              sil[str(rel)].append([round(a + i * 0.01, 2), round(a + j * 0.01, 2)])
+                          i = j
+                      else:
+                          i += 1
+              ok += 1
+              res.append({'start': s, 'end': e, 'ref': round(ref, 1), 'sil': sil})
+              print(s, e, round(ref, 1), {k: len(v) for k, v in sil.items()})
+          json.dump({'id': job_id, 'results': res}, open(out, 'w'))
+          json.dump({'id': job_id, 'windows': len(windows), 'measured': ok}, open(os.path.join(os.path.dirname(out), 'stats.json'), 'w'))
+          print(f'{ok} von {len(windows)} Fenstern gemessen')
+          PYEOF
+          python3 sil.py work/${{ matrix.id }}.json ${{ matrix.id }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sil-${{ matrix.id }}
+          path: work/*.json
+          retention-days: 3

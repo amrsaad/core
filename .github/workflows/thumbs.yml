@@ -1,0 +1,88 @@
+name: thumbs
+# Standbilder für Momente mit eigener Videodatei (Issue 27). Auftrag in jobs/thumbs.json:
+# [{"id":"<hash>","video":"<url>","at":[["<bildhash>",sekunde],...]}]
+# Je Eintrag ein Bild bei der Sekunde: ffmpeg -ss vor -i, ein Frame, 640 px breit, JPEG Qualität 80 (Pillow).
+# Ergebnis je Quelle als Artefakt "thumb-<id>" mit <bildhash>.jpg und <id>.json: {"id":..,"results":[{"h":..,"at":..,"ok":true,"sha1":..,"bytes":..,"err":".."}]}
+on:
+  push:
+    branches: [claude/compute]
+    paths: ['jobs/thumbs.json']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: m
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          jobs = json.load(open('jobs/thumbs.json'))
+          print('matrix=' + json.dumps({'include': [{'id': j['id'], 'video': j['video'], 'at': json.dumps(j['at'])} for j in jobs]}))
+          PY
+
+  run:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - name: Werkzeuge
+        run: |
+          command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null)
+          python3 -c "import PIL" 2>/dev/null || pip install -q pillow
+      - name: Bilder ziehen
+        env:
+          VIDEO: ${{ matrix.video }}
+          AT: ${{ matrix.at }}
+        run: |
+          mkdir -p work
+          cat > thumb.py <<'PYEOF'
+          #!/usr/bin/env python3
+          import hashlib, io, json, os, subprocess, sys, time
+          from PIL import Image
+
+          video, job_id, out_dir = os.environ['VIDEO'], sys.argv[1], sys.argv[2]
+          res = []
+          for h, t in json.loads(os.environ['AT']):
+              cmd = ['ffmpeg', '-hide_banner', '-loglevel', 'error', '-nostdin', '-ss', str(t), '-i', video, '-frames:v', '1',
+                     '-vf', 'scale=640:-2', '-f', 'image2pipe', '-vcodec', 'png', '-']
+              err, data = '', None
+              for attempt in range(3):
+                  try:
+                      r = subprocess.run(cmd, capture_output=True, timeout=300)
+                      if r.returncode == 0 and r.stdout:
+                          data = r.stdout
+                          break
+                      err = (r.stderr.decode('utf-8', 'replace').strip().splitlines() or ['no frame'])[-1][:160]
+                  except subprocess.TimeoutExpired:
+                      err = 'timeout'
+                  time.sleep(2 * (attempt + 1))
+              if data is None:
+                  res.append({'h': h, 'at': t, 'ok': False, 'err': err})
+                  print(h, t, 'FEHLER', err)
+                  continue
+              buf = io.BytesIO()
+              Image.open(io.BytesIO(data)).convert('RGB').save(buf, 'JPEG', quality=80)
+              open(os.path.join(out_dir, h + '.jpg'), 'wb').write(buf.getvalue())
+              res.append({'h': h, 'at': t, 'ok': True, 'sha1': hashlib.sha1(buf.getvalue()).hexdigest(), 'bytes': len(buf.getvalue())})
+              print(h, t, 'ok', len(buf.getvalue()))
+          json.dump({'id': job_id, 'results': res}, open(os.path.join(out_dir, job_id + '.json'), 'w'))
+          print(sum(r['ok'] for r in res), 'von', len(res), 'Bildern')
+          PYEOF
+          python3 thumb.py ${{ matrix.id }} work
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: thumb-${{ matrix.id }}
+          path: work/*
+          retention-days: 3
