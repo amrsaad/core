@@ -234,36 +234,48 @@ try {
   await page2.close();
 
   // ---- 7. Netz-bewusste Mischung (Video-Form: Streams vor YouTube im schlechten Netz, Regeln bleiben) ----
-  const mixCase = async (offline, name) => {
+  const mixCase = async (offline, name, seed = 3) => {
     const cx = await browser.newContext({ ...devices['iPhone 15'], serviceWorkers: 'block' });
     await routes(cx);
     const pg = await cx.newPage();
     if (offline) await pg.addInitScript(() => { Object.defineProperty(navigator, 'onLine', { get: () => false }); });
     net.ytDown = offline;
     net.down = offline;
-    await pg.goto(`${url}?now=2026-10-23&seed=3#k=${k}`);
+    await pg.goto(`${url}?now=2026-10-23&seed=${seed}#k=${k}`);
     await waitFor(pg, () => !!window.__core?.moment(), null, 20000);
     const q = await pg.evaluate(() => window.__core.queue());
-    await pg.screenshot({ path: `${out}/chromium-7-mix-${name}.png` });
+    if (name) await pg.screenshot({ path: `${out}/chromium-7-mix-${name}.png` });
     await cx.close();
     net.ytDown = false;
     net.down = false;
     const byId = new Map(videoPool.map((m) => [m.id, m]));
     return q.slice(0, 12).map((id) => byId.get(id));
   };
-  const poorQ = await mixCase(true, 'poor');
-  const normalQ = await mixCase(false, 'normal');
+  // Seit Entscheidung 33 (Issue 24) ist der Netzrang ein weiches Gewicht und die Mischung wählt je Moment mit harten Regeln. Zehn Seeds mit je 12 Momenten
+  // (120 je Netzlage), weil 12 Momente allein vom Zufall kippen. Im Testpool ist im Video-Reiter nichts vorgeladen, das Gewicht (nur Rang 0) greift hier nicht.
+  const SEEDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  const poorBy = {};
+  const normalBy = {};
+  for (const sd of SEEDS) {
+    poorBy[sd] = await mixCase(true, sd === 3 ? 'poor' : null, sd);
+    normalBy[sd] = await mixCase(false, sd === 3 ? 'normal' : null, sd);
+  }
+  const poorQ = poorBy[3];
+  const normalQ = normalBy[3];
   const isYt = (m) => !m.hls;
+  const ytCount = (by) => SEEDS.reduce((n, sd) => n + by[sd].filter(isYt).length, 0);
+  num.poorYoutubeOf120 = ytCount(poorBy);
+  num.normalYoutubeOf120 = ytCount(normalBy);
   num.poorFirst12Youtube = poorQ.filter(isYt).length;
   num.normalFirst12Youtube = normalQ.filter(isYt).length;
-  // Seit Issue 24 ist der Netzrang ein Gewicht (x3), kein Filter: YouTube kommt im schlechten Netz seltener, nicht gar nicht
-  c.poorPushesYoutubeBack = poorQ.length === 12 && num.poorFirst12Youtube <= num.normalFirst12Youtube;
-  c.normalMixKeepsYoutube = normalQ.length === 12 && num.normalFirst12Youtube > 0;
-  // Seit Issue 24 gibt es keine Dreierblöcke mehr: nie zweimal derselbe Bereich hintereinander, nie dieselbe Folge innerhalb 10
+  // Erwartung: im schlechten Netz nicht mehr YouTube als im normalen. Spielraum 12 Momente (10 Prozentpunkte), das ist gut eine Standardabweichung des Zufalls bei 120 Ziehungen je Seite.
+  c.poorPushesYoutubeBack = SEEDS.every((sd) => poorBy[sd].length === 12 && normalBy[sd].length === 12) && num.poorYoutubeOf120 <= num.normalYoutubeOf120 + 12;
+  c.normalMixKeepsYoutube = SEEDS.every((sd) => normalBy[sd].length === 12) && num.normalYoutubeOf120 > 0;
+  // Seit Issue 24 gibt es keine Dreierblöcke mehr: nie zweimal derselbe Bereich hintereinander, nie dieselbe Folge innerhalb 10 (harte Regeln, gelten in jedem Seed)
   const blocksOk = (q) => q.every((m, i) => i === 0 || (m.area !== q[i - 1].area && !q.slice(Math.max(0, i - 10), i).some((x) => x.videoId === m.videoId)));
-  c.poorNoClump = blocksOk(poorQ);
+  c.poorNoClump = SEEDS.every((sd) => blocksOk(poorBy[sd]));
   c.poorBeatFirst = poorQ[0]?.area === 'beat';
-  c.normalNoClump = blocksOk(normalQ);
+  c.normalNoClump = SEEDS.every((sd) => blocksOk(normalBy[sd]));
 
   c.pageErrors = errors.length === 0 ? true : errors.length;
   if (errors.length) num.pageErrors = errors.slice(0, 5);

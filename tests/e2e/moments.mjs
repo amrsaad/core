@@ -930,7 +930,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.cardArrows = Object.entries(k1.lists).every(([id, l]) => l.every((x) => (id.endsWith('up') ? x.w > 1 && x.text.includes('↑') : x.w < 1 && x.text.includes('↓') && /\d\.\d\d ↓/.test(x.text))));
     c.cardSortedDown = Object.entries(k1.lists).every(([id, l]) => l.every((x, i) => i === 0 || (id.endsWith('up') ? l[i - 1].w >= x.w : l[i - 1].w <= x.w)));
     c.cardHasLessRows = k1.lists['channel-down'].length > 0 && k1.lists['topic-down'].length > 0;
-    c.cardTopicBlocked = k1.lists['topic-down'].some((x) => x.w < 0.5 && /until Nov 2\d/.test(x.text));
+    // Entscheidung 38: Feedback sperrt kein Thema mehr. Die Karte zeigt kein Thema unter 0,5, auch nicht als Rest alter Gewichte (Migration hebt sie auf 0,8).
+    c.cardTopicNeverBlocked = [...k1.lists['topic-up'], ...k1.lists['topic-down']].every((x) => x.w >= 0.5);
+    // Gesperrt werden nur Folge (e:) und Unterthema (s:), mit Frist. Die Karte zeigt sie nicht, sie stehen in den Gewichten.
+    const wCard = await p5.evaluate(() => JSON.parse(JSON.stringify(window.__core.weights())));
+    const nowCard = Date.parse('2026-11-01T12:00:00');
+    c.cardEpisodeBlocked = [['episode', 'e'], ['subtopic', 's']].some(([fam, pre]) => Object.entries(wCard[fam] ?? {}).some(([key, v]) => v < 0.5 && (wCard.until?.[`${pre}:${key}`]?.at ?? 0) > nowCard));
     await p5.screenshot({ path: `${out}/${name}-25-learned-card.png` });
     // Reset learning fragt nach. Abbrechen ändert nichts.
     await p5.click('[data-testid=reset-learning]');
