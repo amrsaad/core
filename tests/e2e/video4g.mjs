@@ -7,7 +7,7 @@
 // Die Zahlen belegen also die Logik der App (Warmlauf, Abdeckung, Vorladen), nicht das Verhalten des echten YouTube. Echte Werte liefert
 // Einstellungen > Copy diagnostics auf dem Gerät (Zeilen "video:" und "first-frame").
 // Aufruf: node tests/e2e/video4g.mjs <url> <ausgabeordner>   (vorher npm run build, dann vite preview)
-// Umgebung: SWIPES=20  DWELLS=4500,2000 (Verweilzeit je Moment in ms)  E2E_INFO=1 (nur messen, kein Fehlercode, z.B. gegen einen älteren Stand)
+// Umgebung: SWIPES=20  DWELLS=4500,1800 (Verweilzeit je Moment in ms)  E2E_INFO=1 (nur messen, kein Fehlercode, z.B. gegen einen älteren Stand)
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices } from 'playwright';
@@ -15,7 +15,7 @@ import { chromium, devices } from 'playwright';
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-video4g'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
 const SWIPES = Number(process.env.SWIPES ?? 20);
-const DWELLS = (process.env.DWELLS ?? '4500,2000').split(',').map(Number);
+const DWELLS = (process.env.DWELLS ?? '4500,1800').split(',').map(Number);
 const INFO = !!process.env.E2E_INFO;
 
 // Latenzmodell und Einblendung, eingefügt vor dem Aufruf von onYouTubeIframeAPIReady
@@ -151,16 +151,19 @@ const runScenario = async (browser, sc) => {
     setTimeout(() => { clearInterval(iv); resolve(res); }, 6000);
   }), idx0);
 
+  // Verweilzeit gilt vom Wisch zum nächsten Wisch (die Proben nach dem Wisch laufen innerhalb dieser Zeit)
+  let lastSwipe = 0;
   for (let n = 0; n < SWIPES; n++) {
-    await page.waitForTimeout(sc.dwell);
+    await page.waitForTimeout(lastSwipe ? Math.max(0, sc.dwell - (Date.now() - lastSwipe)) : sc.dwell);
     const idx0 = await page.evaluate(() => window.__core.idx());
     const logLen = await page.evaluate(() => window.__ytlog.length);
     const p = watch(idx0);
     await swipe();
+    lastSwipe = Date.now();
     // Einblendung in den ersten 3 s: Proben nach 60, 400, 900, 1500, 2200 und 2900 ms
     const probes = [];
     const t0 = Date.now();
-    for (const at of [60, 400, 900, 1500, 2200, 2900]) {
+    for (const at of [60, 400, 900, 1500, 2200, 2900].filter((x) => x < sc.dwell - 250)) {
       const wait = at - (Date.now() - t0);
       if (wait > 0) await page.waitForTimeout(wait);
       probes.push(await page.evaluate(EXPOSED));
