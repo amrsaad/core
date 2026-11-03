@@ -5,7 +5,7 @@ import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { audioDeck, createPlayer, deckClipOf, HLS, LOCAL, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
-import { canWarm, onNonCurrentPlaying, roleOf, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx, type WarmState } from '../video/warmup';
+import { canWarm, coverMs, onNonCurrentPlaying, roleOf, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx, type WarmState } from '../video/warmup';
 import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, onGesture, type Gesture } from './gesture';
 import { hintVisible, SOUND_NONE } from './soundHint';
 import { errorAction, recoverDelay, resumePos } from './netrecover';
@@ -610,7 +610,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         resetWarm(slot);
         // Der nächste Moment läuft nach dem Laden stumm warm, der übernächste hält am ersten Bild. Ein aktueller Moment ohne Warmlauf bekommt die Abdeckfläche.
         if (!play && canWarm(roleOf(j, idxRef.current), warmCtxOf(j))) slot.warm = 'running';
-        slot.coverMs = play && streamKind(m) === 'youtube' ? WARM_MS : 0;
+        slot.coverMs = play && streamKind(m) === 'youtube' ? coverMs('idle', 0) : 0;
         // Nach dem Neuaufbau der Player (YouTube-API kam zurück) läuft der Moment an derselben Stelle weiter, nicht von vorn
         const at = resume.current?.mid === m.id ? resume.current.pos : undefined;
         if (at !== undefined) resume.current = null;

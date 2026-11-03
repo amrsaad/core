@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canWarm, coverMs, MIN_WARM_LEN_S, onNonCurrentPlaying, roleOf, rolesAt, slotOf, slowNet, startQuality, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx } from '../src/video/warmup';
+import { canWarm, COVER_MARGIN_MS, coverMs, MIN_WARM_LEN_S, onNonCurrentPlaying, roleOf, rolesAt, slotOf, slowNet, startQuality, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx } from '../src/video/warmup';
 
 const ctx = (o: Partial<WarmCtx> = {}): WarmCtx => ({ youtube: true, lenS: 60, text: false, forYou: false, recall: false, visible: true, single: false, ...o });
 const view = (o: Partial<SlotView> = {}): SlotView => ({ index: -1, warm: 'idle', visited: false, warmPlayedMs: 0, ...o });
@@ -68,11 +68,11 @@ describe('Abdeckfläche nach PLAYING (Kaltstart und zu früher Wisch)', () => {
     expect(coverMs('done', 0)).toBe(0);
   });
   it('Warmlauf läuft: nur der Rest der drei Sekunden', () => {
-    expect(coverMs('running', 1200)).toBe(WARM_MS - 1200);
+    expect(coverMs('running', 1200)).toBe(WARM_MS - 1200 + COVER_MARGIN_MS);
     expect(coverMs('running', 9000)).toBe(0);
   });
   it('kein Warmlauf: volle drei Sekunden', () => {
-    expect(coverMs('idle', 0)).toBe(WARM_MS);
+    expect(coverMs('idle', 0)).toBe(WARM_MS + COVER_MARGIN_MS);
   });
 });
 
@@ -90,13 +90,13 @@ describe('Wisch: Zielslot, Abdeckung, Nachrücken', () => {
   it('Wisch bevor der Warmlauf fertig war: Rest der Abdeckung', () => {
     const v = base();
     v[1] = view({ index: 1, warm: 'running', warmPlayedMs: 1000 });
-    expect(swipePlan(1, v, () => ctx()).coverMs).toBe(WARM_MS - 1000);
+    expect(swipePlan(1, v, () => ctx()).coverMs).toBe(WARM_MS - 1000 + COVER_MARGIN_MS);
   });
 
   it('Wisch auf einen Slot ohne den Moment (zweiter schneller Wisch): kalt, volle Abdeckung', () => {
     const v = base();
     v[2] = view({ index: -1 });
-    expect(swipePlan(2, v, () => ctx()).coverMs).toBe(WARM_MS);
+    expect(swipePlan(2, v, () => ctx()).coverMs).toBe(WARM_MS + COVER_MARGIN_MS);
   });
 
   it('eigener Stream als Ziel braucht keine Abdeckung', () => {
@@ -120,7 +120,7 @@ describe('Wisch: Zielslot, Abdeckung, Nachrücken', () => {
     const v: SlotView[] = [view({ index: 3, warm: 'done' }), view({ index: 4, warm: 'idle' }), view({ index: 2, visited: true })];
     const p = swipePlan(1, v, () => ctx());
     expect(p.target).toBe(1);
-    expect(p.coverMs).toBe(WARM_MS);
+    expect(p.coverMs).toBe(WARM_MS + COVER_MARGIN_MS);
     // Nachfolger von 1 ist 2: er war aktuell, kein neuer Warmlauf
     expect(p.promote).toBeNull();
   });

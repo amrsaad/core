@@ -10,6 +10,8 @@
 
 /** So lange läuft der nächste Moment stumm im unsichtbaren Player, bis die YouTube-Einblendung (Titel, Kanalbild, Teilen, Logo) weg ist */
 export const WARM_MS = 3000;
+/** Reserve für die Abdeckfläche: YouTube blendet "etwa 3 s" nach PLAYING aus, ein Sprung oder Puffern verschiebt das um Millisekunden */
+export const COVER_MARGIN_MS = 300;
 /** Kürzere Momente werden nicht warmgelaufen (der Warmlauf würde fast den ganzen Moment verbrauchen) */
 export const MIN_WARM_LEN_S = 8;
 /** Bei schwachem Netz startet der Player mit kleiner Qualität und schaltet nach so langem stabilem Spiel auf Auto */
@@ -63,12 +65,15 @@ export function onNonCurrentPlaying(warm: WarmState, role: Role, can: boolean): 
 
 /**
  * Wie lange nach PLAYING die eigene Fläche über Titelbereich und Logo liegt (Millisekunden).
- * Warm fertig: 0, Warmlauf noch aktiv: Rest der WARM_MS, sonst voller Wert.
+ * Warm fertig: 0, Warmlauf noch aktiv: Rest der WARM_MS, sonst voller Wert, jeweils plus COVER_MARGIN_MS.
  */
 export function coverMs(warm: WarmState, warmPlayedMs: number): number {
   if (warm === 'done') return 0;
-  if (warm === 'running') return Math.max(0, Math.round(WARM_MS - warmPlayedMs));
-  return WARM_MS;
+  if (warm === 'running') {
+    const rest = Math.round(WARM_MS - warmPlayedMs);
+    return rest > 0 ? rest + COVER_MARGIN_MS : 0;
+  }
+  return WARM_MS + COVER_MARGIN_MS;
 }
 
 export interface SlotView {
@@ -98,7 +103,7 @@ export function swipePlan(next: number, views: SlotView[], ctx: (j: number) => W
   const t = slotOf(next);
   const tv = views[t];
   const tc = ctx(next);
-  const cover = tc.youtube && !tc.text ? (tv && tv.index === next ? coverMs(tv.warm, tv.warmPlayedMs) : WARM_MS) : 0;
+  const cover = tc.youtube && !tc.text ? (tv && tv.index === next ? coverMs(tv.warm, tv.warmPlayedMs) : coverMs('idle', 0)) : 0;
   const j = next + 1;
   const pv = views[slotOf(j)];
   const promote = pv && pv.index === j && pv.warm === 'idle' && !pv.visited && canWarm('next', ctx(j)) ? slotOf(j) : null;
