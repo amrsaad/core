@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-02T11:22:01.785Z",
+  "at": "2026-11-03T03:35:18.111Z",
   "runs": [
     {
       "variant": "webkit",
@@ -28,9 +28,9 @@
       },
       "shown": [
         "endp0000000:100",
-        "endp0000003:100",
         "endp0000001:100",
-        "endp0000002:100"
+        "endp0000002:100",
+        "endp0000003:100"
       ],
       "end": {
         "line": "You've seen every video moment.",
@@ -86,9 +86,9 @@
       },
       "shown": [
         "endp0000000:100",
-        "endp0000003:100",
         "endp0000001:100",
-        "endp0000002:100"
+        "endp0000002:100",
+        "endp0000003:100"
       ],
       "end": {
         "line": "You've seen every video moment.",

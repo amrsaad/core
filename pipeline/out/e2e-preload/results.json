@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-02T11:21:07.662Z",
+  "at": "2026-11-03T03:34:12.454Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -34,71 +34,70 @@
         "offlineRestartFeed": true,
         "noErrorPage": true,
         "offlineRestartIcon": true,
-        "offlineRestartPlays": true,
+        "offlineRestartPlays": false,
         "offlineRestartPoor": true,
         "offlineRestartStoreKept": true,
-        "offlineFirstIsCached": true,
-        "offlineFirstFromBlob": true,
-        "offlineQueueCachedFirst": true,
-        "offlineRestartSwipes": true,
+        "offlineFirstIsCached": false,
+        "offlineFirstFromBlob": false,
+        "offlineQueueCachedFirst": false,
+        "offlineRestartSwipes": false,
         "offlineRestartNoRequests": true,
-        "poorPushesYoutubeBack": true,
+        "poorPushesYoutubeBack": false,
         "normalMixKeepsYoutube": true,
-        "poorBlocksOf3SameArea": true,
+        "poorBlocksOf3SameArea": false,
         "poorBeatFirst": true,
-        "normalBlocksOf3SameArea": true,
+        "normalBlocksOf3SameArea": false,
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1621,
-        "preloadedMoments": 30,
-        "preloadedBytes": 6289236,
-        "bytesPerMoment": 209641,
+        "coldStartMs": 1647,
+        "preloadedMoments": 31,
+        "preloadedBytes": 6498847,
+        "bytesPerMoment": 209640,
         "swipes": 10,
         "cachedStartMs": [
+          11,
           10,
           10,
-          8,
-          8,
+          9,
+          9,
           10,
           9,
           9,
           9,
-          8,
           9
         ],
-        "cachedStartMax": 10,
+        "cachedStartMax": 11,
         "cachedStartMedian": 9,
         "firstFrames": [
           "first-frame 11ms buffered local",
+          "first-frame 11ms buffered local",
           "first-frame 10ms buffered local",
           "first-frame 10ms buffered local",
-          "first-frame 8ms buffered local",
-          "first-frame 8ms buffered local",
+          "first-frame 9ms buffered local",
+          "first-frame 9ms buffered local",
           "first-frame 10ms buffered local",
           "first-frame 9ms buffered local",
           "first-frame 9ms buffered local",
           "first-frame 9ms buffered local",
-          "first-frame 8ms buffered local",
           "first-frame 9ms buffered local"
         ],
         "settingsText": "Preloaded: 37 moments, 7.4 MB",
         "offlineStartMs": [
+          8,
           10,
-          9,
-          9,
+          10,
           9
         ],
         "offlineRestartStartMs": [
-          11,
-          8,
-          9
+          12,
+          10
         ],
-        "poorFirst12Youtube": 0,
-        "normalFirst12Youtube": 6
+        "poorFirst12Youtube": 9,
+        "normalFirst12Youtube": 7
       },
-      "ok": true
+      "ok": false
     }
   ],
-  "ok": true
+  "ok": false
 }

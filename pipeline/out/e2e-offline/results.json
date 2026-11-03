@@ -1,5 +1,5 @@
 {
- "at": "2026-11-02T11:24:50.945Z",
+ "at": "2026-11-03T03:38:07.577Z",
  "runs": [
   {
    "browser": "webkit",
@@ -14,7 +14,7 @@
     "off5_sameMoment": true,
     "off5_sameCover": true,
     "off5_sameHook": true,
-    "off5_sameSource": true,
+    "off5_sameSource": false,
     "off5_playingAgain": true,
     "off5_positionKept": true,
     "off5_soundKept": true,
@@ -38,7 +38,7 @@
     "off60_sameMoment": true,
     "off60_sameCover": true,
     "off60_sameHook": true,
-    "off60_sameSource": true,
+    "off60_sameSource": false,
     "off60_playingAgain": true,
     "off60_positionKept": true,
     "off60_soundKept": true,
@@ -65,8 +65,8 @@
       "sound": true,
       "mid": "of000000000:100",
       "muted": false,
-      "t": 100,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "t": 100.1,
+      "neighbors": "1:of000000001:100,2:of000000007:100"
      },
      "during": {
       "id": "of000000000:100",
@@ -79,8 +79,8 @@
       "sound": true,
       "mid": "of000000000:100",
       "muted": false,
-      "t": 100,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "t": 100.1,
+      "neighbors": "1:of000000003:100,2:of000000005:100"
      },
      "after": {
       "id": "of000000000:100",
@@ -93,18 +93,18 @@
       "sound": true,
       "mid": "of000000000:100",
       "muted": false,
-      "t": 105.89999999999966,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "t": 105.99999999999966,
+      "neighbors": "1:of000000003:100,2:of000000005:100"
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1793618692084,
+      "lastSync": 1793677096725,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1793618697286,
+      "lastSync": 1793677101940,
       "error": null,
       "running": false
      }
@@ -121,8 +121,8 @@
       "sound": true,
       "mid": "of000000000:100",
       "muted": false,
-      "t": 105.89999999999966,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "t": 105.99999999999966,
+      "neighbors": "1:of000000003:100,2:of000000005:100"
      },
      "during": {
       "id": "of000000000:100",
@@ -135,8 +135,8 @@
       "sound": true,
       "mid": "of000000000:100",
       "muted": false,
-      "t": 105.99999999999966,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "t": 106.09999999999965,
+      "neighbors": "1:of000000003:100,2:of000000005:100"
      },
      "after": {
       "id": "of000000000:100",
@@ -149,18 +149,18 @@
       "sound": true,
       "mid": "of000000000:100",
       "muted": false,
-      "t": 111.79999999999933,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "t": 111.99999999999932,
+      "neighbors": "1:of000000003:100,2:of000000005:100"
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1793618697286,
+      "lastSync": 1793677101940,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1793618723362,
+      "lastSync": 1793677128037,
       "error": null,
       "running": false
      }
@@ -177,8 +177,8 @@
       "sound": true,
       "mid": "of000000000:100",
       "muted": false,
-      "t": 111.79999999999933,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "t": 111.99999999999932,
+      "neighbors": "1:of000000003:100,2:of000000005:100"
      },
      "during": {
       "id": "of000000000:100",
@@ -191,8 +191,8 @@
       "sound": true,
       "mid": "of000000000:100",
       "muted": false,
-      "t": 111.89999999999932,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "t": 112.09999999999931,
+      "neighbors": "1:of000000003:100,2:of000000013:100"
      },
      "after": {
       "id": "of000000000:100",
@@ -205,18 +205,18 @@
       "sound": true,
       "mid": "of000000000:100",
       "muted": false,
-      "t": 117.699999999999,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "t": 117.99999999999898,
+      "neighbors": "1:of000000003:100,2:of000000013:100"
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1793618723362,
+      "lastSync": 1793677128037,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1793618789453,
+      "lastSync": 1793677194133,
       "error": null,
       "running": false
      }
@@ -237,7 +237,7 @@
     "off5_sameMoment": true,
     "off5_sameCover": true,
     "off5_sameHook": true,
-    "off5_sameSource": true,
+    "off5_sameSource": false,
     "off5_playingAgain": true,
     "off5_positionKept": true,
     "off5_soundKept": true,
@@ -261,7 +261,7 @@
     "off60_sameMoment": true,
     "off60_sameCover": true,
     "off60_sameHook": true,
-    "off60_sameSource": true,
+    "off60_sameSource": false,
     "off60_playingAgain": true,
     "off60_positionKept": true,
     "off60_soundKept": true,
@@ -288,8 +288,8 @@
       "sound": true,
       "mid": "of000000100:100",
       "muted": false,
-      "t": 100,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "t": 100.1,
+      "neighbors": "1:of000000101:100,2:of000000107:100"
      },
      "during": {
       "id": "of000000100:100",
@@ -302,8 +302,8 @@
       "sound": true,
       "mid": "of000000100:100",
       "muted": false,
-      "t": 100,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "t": 100.1,
+      "neighbors": "1:of000000103:100,2:of000000105:100"
      },
      "after": {
       "id": "of000000100:100",
@@ -316,18 +316,18 @@
       "sound": true,
       "mid": "of000000100:100",
       "muted": false,
-      "t": 105.89999999999966,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "t": 105.99999999999966,
+      "neighbors": "1:of000000103:100,2:of000000105:100"
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1793618804930,
+      "lastSync": 1793677209623,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1793618810124,
+      "lastSync": 1793677214814,
       "error": null,
       "running": false
      }
@@ -344,8 +344,8 @@
       "sound": true,
       "mid": "of000000100:100",
       "muted": false,
-      "t": 105.99999999999966,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "t": 106.09999999999965,
+      "neighbors": "1:of000000103:100,2:of000000105:100"
      },
      "during": {
       "id": "of000000100:100",
@@ -358,8 +358,8 @@
       "sound": true,
       "mid": "of000000100:100",
       "muted": false,
-      "t": 105.99999999999966,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "t": 106.09999999999965,
+      "neighbors": "1:of000000103:100,2:of000000105:100"
      },
      "after": {
       "id": "of000000100:100",
@@ -372,18 +372,18 @@
       "sound": true,
       "mid": "of000000100:100",
       "muted": false,
-      "t": 111.89999999999932,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "t": 111.99999999999932,
+      "neighbors": "1:of000000103:100,2:of000000105:100"
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1793618810124,
+      "lastSync": 1793677214814,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1793618836223,
+      "lastSync": 1793677240907,
       "error": null,
       "running": false
      }
@@ -400,8 +400,8 @@
       "sound": true,
       "mid": "of000000100:100",
       "muted": false,
-      "t": 111.89999999999932,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "t": 112.09999999999931,
+      "neighbors": "1:of000000103:100,2:of000000105:100"
      },
      "during": {
       "id": "of000000100:100",
@@ -414,8 +414,8 @@
       "sound": true,
       "mid": "of000000100:100",
       "muted": false,
-      "t": 111.99999999999932,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "t": 112.09999999999931,
+      "neighbors": "1:of000000103:100,2:of000000113:100"
      },
      "after": {
       "id": "of000000100:100",
@@ -428,18 +428,18 @@
       "sound": true,
       "mid": "of000000100:100",
       "muted": false,
-      "t": 117.89999999999898,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "t": 117.99999999999898,
+      "neighbors": "1:of000000103:100,2:of000000113:100"
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1793618836223,
+      "lastSync": 1793677240907,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1793618902294,
+      "lastSync": 1793677307010,
       "error": null,
       "running": false
      }
@@ -460,7 +460,7 @@
     "off5_sameMoment": true,
     "off5_sameCover": true,
     "off5_sameHook": true,
-    "off5_sameSource": true,
+    "off5_sameSource": false,
     "off5_playingAgain": true,
     "off5_positionKept": true,
     "off5_soundKept": true,
@@ -484,7 +484,7 @@
     "off60_sameMoment": true,
     "off60_sameCover": true,
     "off60_sameHook": true,
-    "off60_sameSource": true,
+    "off60_sameSource": false,
     "off60_playingAgain": true,
     "off60_positionKept": true,
     "off60_soundKept": true,
@@ -512,7 +512,7 @@
       "mid": "of000000000:100",
       "muted": false,
       "t": 100,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "neighbors": "1:of000000001:100,2:of000000007:100"
      },
      "during": {
       "id": "of000000000:100",
@@ -526,7 +526,7 @@
       "mid": "of000000000:100",
       "muted": false,
       "t": 100,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "neighbors": "1:of000000003:100,2:of000000005:100"
      },
      "after": {
       "id": "of000000000:100",
@@ -540,17 +540,17 @@
       "mid": "of000000000:100",
       "muted": false,
       "t": 105.89999999999966,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "neighbors": "1:of000000003:100,2:of000000005:100"
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1793618909446,
+      "lastSync": 1793677314118,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1793618914560,
+      "lastSync": 1793677319219,
       "error": null,
       "running": false
      }
@@ -568,7 +568,7 @@
       "mid": "of000000000:100",
       "muted": false,
       "t": 105.99999999999966,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "neighbors": "1:of000000003:100,2:of000000005:100"
      },
      "during": {
       "id": "of000000000:100",
@@ -582,7 +582,7 @@
       "mid": "of000000000:100",
       "muted": false,
       "t": 105.99999999999966,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "neighbors": "1:of000000003:100,2:of000000005:100"
      },
      "after": {
       "id": "of000000000:100",
@@ -596,17 +596,17 @@
       "mid": "of000000000:100",
       "muted": false,
       "t": 111.79999999999933,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "neighbors": "1:of000000003:100,2:of000000005:100"
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1793618914560,
+      "lastSync": 1793677319219,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1793618940643,
+      "lastSync": 1793677345295,
       "error": null,
       "running": false
      }
@@ -624,7 +624,7 @@
       "mid": "of000000000:100",
       "muted": false,
       "t": 111.89999999999932,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "neighbors": "1:of000000003:100,2:of000000005:100"
      },
      "during": {
       "id": "of000000000:100",
@@ -638,7 +638,7 @@
       "mid": "of000000000:100",
       "muted": false,
       "t": 111.89999999999932,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "neighbors": "1:of000000003:100,2:of000000013:100"
      },
      "after": {
       "id": "of000000000:100",
@@ -652,17 +652,17 @@
       "mid": "of000000000:100",
       "muted": false,
       "t": 117.699999999999,
-      "neighbors": "1:of000000001:100,2:of000000008:100"
+      "neighbors": "1:of000000003:100,2:of000000013:100"
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1793618940643,
+      "lastSync": 1793677345295,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1793619006723,
+      "lastSync": 1793677411362,
       "error": null,
       "running": false
      }
@@ -683,7 +683,7 @@
     "off5_sameMoment": true,
     "off5_sameCover": true,
     "off5_sameHook": true,
-    "off5_sameSource": true,
+    "off5_sameSource": false,
     "off5_playingAgain": true,
     "off5_positionKept": true,
     "off5_soundKept": true,
@@ -707,7 +707,7 @@
     "off60_sameMoment": true,
     "off60_sameCover": true,
     "off60_sameHook": true,
-    "off60_sameSource": true,
+    "off60_sameSource": false,
     "off60_playingAgain": true,
     "off60_positionKept": true,
     "off60_soundKept": true,
@@ -735,7 +735,7 @@
       "mid": "of000000100:100",
       "muted": false,
       "t": 100,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "neighbors": "1:of000000101:100,2:of000000107:100"
      },
      "during": {
       "id": "of000000100:100",
@@ -749,7 +749,7 @@
       "mid": "of000000100:100",
       "muted": false,
       "t": 100,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "neighbors": "1:of000000103:100,2:of000000105:100"
      },
      "after": {
       "id": "of000000100:100",
@@ -763,17 +763,17 @@
       "mid": "of000000100:100",
       "muted": false,
       "t": 105.99999999999966,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "neighbors": "1:of000000103:100,2:of000000105:100"
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1793619013924,
+      "lastSync": 1793677418515,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1793619019021,
+      "lastSync": 1793677423614,
       "error": null,
       "running": false
      }
@@ -791,7 +791,7 @@
       "mid": "of000000100:100",
       "muted": false,
       "t": 105.99999999999966,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "neighbors": "1:of000000103:100,2:of000000105:100"
      },
      "during": {
       "id": "of000000100:100",
@@ -805,7 +805,7 @@
       "mid": "of000000100:100",
       "muted": false,
       "t": 105.99999999999966,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "neighbors": "1:of000000103:100,2:of000000105:100"
      },
      "after": {
       "id": "of000000100:100",
@@ -819,17 +819,17 @@
       "mid": "of000000100:100",
       "muted": false,
       "t": 111.99999999999932,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "neighbors": "1:of000000103:100,2:of000000105:100"
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1793619019021,
+      "lastSync": 1793677423614,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1793619045102,
+      "lastSync": 1793677449693,
       "error": null,
       "running": false
      }
@@ -847,7 +847,7 @@
       "mid": "of000000100:100",
       "muted": false,
       "t": 111.99999999999932,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "neighbors": "1:of000000103:100,2:of000000105:100"
      },
      "during": {
       "id": "of000000100:100",
@@ -861,7 +861,7 @@
       "mid": "of000000100:100",
       "muted": false,
       "t": 111.99999999999932,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "neighbors": "1:of000000103:100,2:of000000113:100"
      },
      "after": {
       "id": "of000000100:100",
@@ -874,18 +874,18 @@
       "sound": true,
       "mid": "of000000100:100",
       "muted": false,
-      "t": 117.99999999999898,
-      "neighbors": "1:of000000101:100,2:of000000108:100"
+      "t": 117.89999999999898,
+      "neighbors": "1:of000000103:100,2:of000000113:100"
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1793619045102,
+      "lastSync": 1793677449693,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1793619111168,
+      "lastSync": 1793677515761,
       "error": null,
       "running": false
      }

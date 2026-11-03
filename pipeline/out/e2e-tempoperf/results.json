@@ -1,5 +1,5 @@
 {
- "at": "2026-11-02T11:32:34.460Z",
+ "at": "2026-11-03T03:45:58.920Z",
  "config": {
   "MOMENTS": 10,
   "CONTENT_S": 6,
@@ -34,8 +34,8 @@
    "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 47,
-   "switchWorstMs": 53,
+   "switchMedianMs": 38,
+   "switchWorstMs": 51,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -107,8 +107,8 @@
    "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 40,
-   "switchWorstMs": 60,
+   "switchMedianMs": 37,
+   "switchWorstMs": 54,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -142,8 +142,8 @@
    "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 40,
-   "switchWorstMs": 57,
+   "switchMedianMs": 37,
+   "switchWorstMs": 48,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -177,8 +177,8 @@
    "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 43,
-   "switchWorstMs": 48,
+   "switchMedianMs": 39,
+   "switchWorstMs": 46,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -212,7 +212,7 @@
    "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 38,
+   "switchMedianMs": 39,
    "switchWorstMs": 64,
    "switchFailed": 0,
    "swipeFrames": {
@@ -247,8 +247,8 @@
    "srcMax": 4,
    "srcMaxReal": 3,
    "framesLostPct": 0,
-   "switchMedianMs": 38,
-   "switchWorstMs": 60,
+   "switchMedianMs": 36,
+   "switchWorstMs": 58,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -282,8 +282,8 @@
    "srcMax": 1,
    "srcMaxReal": 1,
    "framesLostPct": 0,
-   "switchMedianMs": 78,
-   "switchWorstMs": 83,
+   "switchMedianMs": 77,
+   "switchWorstMs": 82,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -355,8 +355,8 @@
    "srcMax": 1,
    "srcMaxReal": 1,
    "framesLostPct": 0,
-   "switchMedianMs": 76,
-   "switchWorstMs": 90,
+   "switchMedianMs": 74,
+   "switchWorstMs": 88,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -390,8 +390,8 @@
    "srcMax": 1,
    "srcMaxReal": 1,
    "framesLostPct": 0,
-   "switchMedianMs": 76,
-   "switchWorstMs": 91,
+   "switchMedianMs": 74,
+   "switchWorstMs": 87,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -426,7 +426,7 @@
    "srcMaxReal": 1,
    "framesLostPct": 0,
    "switchMedianMs": 79,
-   "switchWorstMs": 82,
+   "switchWorstMs": 84,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -461,7 +461,7 @@
    "srcMaxReal": 1,
    "framesLostPct": 0,
    "switchMedianMs": 75,
-   "switchWorstMs": 85,
+   "switchWorstMs": 87,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
@@ -495,8 +495,8 @@
    "srcMax": 1,
    "srcMaxReal": 1,
    "framesLostPct": 0,
-   "switchMedianMs": 78,
-   "switchWorstMs": 86,
+   "switchMedianMs": 73,
+   "switchWorstMs": 88,
    "switchFailed": 0,
    "swipeFrames": {
     "frames": 0,
