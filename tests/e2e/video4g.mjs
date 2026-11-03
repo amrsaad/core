@@ -31,16 +31,18 @@ const PATCH = `
     const ev = opts.events;
     let isCold = false, since = 0, acc = 0, state = -1;
     const on = () => state !== 1 || acc + (performance.now() - since) < 3000;
+    const emit = (data) => {
+      if (data === 1) since = performance.now(); else if (state === 1) acc += performance.now() - since;
+      state = data;
+      ev.onStateChange({ data });
+    };
     const wrapped = { ...opts, events: { ...ev, onStateChange: (e) => {
-      const deliver = () => {
-        if (e.data === 1) since = performance.now(); else if (state === 1) acc += performance.now() - since;
-        state = e.data;
-        ev.onStateChange(e);
-      };
-      if (e.data === 1) { const d = isCold ? cold() : warm(); isCold = false; setTimeout(deliver, d); } else deliver();
+      if (e.data === 1) { const d = isCold ? cold() : warm(); isCold = false; setTimeout(() => emit(1), d); } else emit(e.data);
     } } };
     Orig.call(this, el, wrapped);
-    const load = this.loadVideoById, cue = this.cueVideoById;
+    const load = this.loadVideoById, cue = this.cueVideoById, seek = this.seekTo;
+    // Wie bei YouTube: ein Sprung im laufenden Player puffert kurz (80 bis 160 ms), dann kommt PLAYING wieder
+    this.seekTo = (sec, ahead) => { const was = state === 1; seek(sec, ahead); if (was) { emit(3); setTimeout(() => emit(1), 80 + rnd() * 80); } };
     this.loadVideoById = (a) => { isCold = true; acc = 0; state = -1; load(a); };
     this.cueVideoById = (a) => { acc = 0; state = -1; cue(a); };
     // Einblendung als echte Elemente im Player-Rahmen, damit der Test prüfen kann, ob etwas Eigenes darüberliegt
@@ -80,6 +82,9 @@ const EXPOSED = () => {
   const cur = document.querySelector('.vslot[aria-hidden=false]');
   if (!cur) return { n: 0, checked: 0 };
   let n = 0, checked = 0;
+  // Die Trefferregeln gelten nur während der Messung, sonst würden sie die Wischgeste abschalten
+  document.documentElement.setAttribute('data-probe', '1');
+  try {
   for (const el of cur.querySelectorAll('.ytfake-overlay')) {
     if (el.style.display !== 'block') continue;
     const r = el.getBoundingClientRect();
@@ -88,6 +93,7 @@ const EXPOSED = () => {
     const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
     if (!hit || el === hit || el.contains(hit) || (hit.closest('.vframe') && !hit.closest('.vcover'))) n++;
   }
+  } finally { document.documentElement.removeAttribute('data-probe'); }
   return { n, checked };
 };
 
@@ -103,8 +109,8 @@ const runScenario = async (browser, sc) => {
   await page.addInitScript(() => {
     window.__ytSlow = true;
     Object.defineProperty(navigator, 'connection', { value: { effectiveType: '4g', downlink: 9, rtt: 85 }, configurable: true });
-    // Die eigene Abdeckfläche ist im Betrieb ohne Zeigerereignisse. Für die Trefferprüfung des Tests muss sie treffbar sein.
-    document.addEventListener('DOMContentLoaded', () => { const s = document.createElement('style'); s.textContent = '.vcover{pointer-events:auto !important}'; document.head.append(s); });
+    // Nur für die Trefferprüfung: Abdeckfläche und Vorschaubild treffbar, die Gestenebene darüber nicht, der Player-Rahmen wieder treffbar.
+    document.addEventListener('DOMContentLoaded', () => { const s = document.createElement('style'); s.textContent = 'html[data-probe] .vcover, html[data-probe] .vposter{pointer-events:auto !important} html[data-probe] .vgesture, html[data-probe] .vui, html[data-probe] .vui *{pointer-events:none !important} html[data-probe] .vframe, html[data-probe] .vframe *{pointer-events:auto !important}'; document.head.append(s); });
   });
   await page.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBody }));
   const cdp = await ctx.newCDPSession(page);
