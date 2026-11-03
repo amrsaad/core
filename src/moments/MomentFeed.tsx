@@ -18,6 +18,7 @@ import { lockMeta, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS 
 import { cursorFor, historyBefore, parseSaved, queueKey, recentFromLog, releaseTail, remixTail, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMoment, sessionSkip, SIGNAL, type MomentCursor } from './mix';
 import { bumpCell, bumpColdNetStart, bumpPair, hourKey } from './signals';
+import { bumpStart, dropOverStarted, isQuickSkip, quickSkip, resumeSaved, setTabCursor } from './tabs';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
 import { clampRate, DEFAULT_RATE, nextRate, rateOf, type Rate } from '../lib/state';
 import { addSample } from './latency';
@@ -267,6 +268,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   }, [rateOf(state.settings)]);
 
   const today = dayKey(clockNow());
+  // Startmoment des Reiters zählen (Entscheidung 36), nach dem ersten Aufbau der Warteschlange, einmal je Einblendung des Reiters
+  const startCounted = useRef(false);
+  useEffect(() => {
+    const head = queue.current[idxRef.current];
+    if (startCounted.current || !head) return;
+    startCounted.current = true;
+    update((s) => bumpStart(setTabCursor(s, form, head.id, today), head.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  });
   const show = (t: string) => {
     setFlash(t);
     window.setTimeout(() => setFlash(null), 900);
@@ -292,7 +302,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         // Heutige Warteschlange der letzten Sitzung übernehmen, dann passt der Vorrat noch (auch offline)
         let saved: Moment[] = [];
         try {
-          saved = restoreQueue(parseSaved(localStorage.getItem(queueKey(form))), today, pool, { seen: s.momentSeen, mutedChannels: s.mutedChannels }, queueAhead(rateRef.current));
+          // Entscheidung 36: der Reiter macht dort weiter, wo er verlassen wurde. Abgelehnte Momente stehen in momentSeen. Kein Moment ist öfter als zweimal Startmoment.
+          saved = restoreQueue(resumeSaved(parseSaved(localStorage.getItem(queueKey(form))), s.tabCursor?.[form], today), today, pool, { seen: s.momentSeen, mutedChannels: s.mutedChannels }, queueAhead(rateRef.current));
+          saved = dropOverStarted(saved, s.startShown);
         } catch {
           /* kein Speicher */
         }
@@ -594,7 +606,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       silentLeave.current = false;
       if (next > prev && prevM) {
         const timed = endedAt.current !== prev && !textRef.current && !silent;
-        const lv = timed ? leaveOf((Date.now() - since.current) / 1000, prevM.end - prevM.start) : null;
+        const watchedSec = (Date.now() - since.current) / 1000;
+        const lv = timed ? leaveOf(watchedSec, prevM.end - prevM.start) : null;
+        // Zweimal vor 5 s weggewischt: abgelehnt, gilt als gesehen, kommt nie wieder (Entscheidung 36)
+        if (timed && isQuickSkip(watchedSec)) update((s) => quickSkip(s, prevM, nowMs).state);
         if (lv?.kind === 'skip') {
           // Zwei Skips beim selben Kanal oder Thema dämpfen beide für den Rest der Sitzung (Issue 24), siehe Ende dieser Funktion
           dampened = !!cursor.current && sessionSkip(cursor.current, prevM);
@@ -615,6 +630,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           update((s) => bumpPair(s, today, prevM, shownNext));
         }
       }
+      // Position des Reiters merken (Entscheidung 36)
+      if (shownNext) update((s) => setTabCursor(s, form, shownNext.id, today));
       // Zurückgewischt, um etwas nochmal zu sehen: Plus für den Zielmoment
       const backM = queue.current[next];
       if (next < prev && backM) update((s) => ({ ...s, momentWeights: signal(s.momentWeights, backM, SIGNAL.back, nowMs), skipRun: undefined }));

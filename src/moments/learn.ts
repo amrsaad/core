@@ -11,6 +11,7 @@
  * - Wrong: Kanal auf höchstens 0,5.
  * - Known ("Already known"): Thema auf höchstens 0,7.
  * - Weak (Chip Weak, früher Boring): Kanal auf höchstens 0,7.
+ * - Abgelehnt (derselbe Moment zweimal vor 5 s weggewischt, Entscheidung 36): Kanal und Thema mal 0,85, nie dauerhaft (ein Moment ist kein Kanal).
  * - More, Save, Ende, Zurückwischen, früh oder fast ganz weggewischt: Faktor wie bisher (mix.ts SIGNAL) auf Kanal und Thema,
  *   dazu abgeschwächt auf den Bereich.
  *
@@ -136,6 +137,9 @@ export function notForMe(w0: Weights, m: M, now: number): Weights {
   return cap(w, 'channel', m.channel, RULE.notForMeChannel);
 }
 
+/** Faktor für Kanal und Thema eines abgelehnten Moments */
+export const REJECT = 0.85;
+export const reject = (w: Weights, m: M & { area: string }, now: number): Weights => signal(w, m, REJECT, now, { area: false });
 export const wrong = (w: Weights, m: M, now: number): Weights => cap(settle(w, now), 'channel', m.channel, RULE.wrongChannel);
 export const known = (w: Weights, m: M, now: number): Weights => cap(settle(w, now), 'topic', m.topic, RULE.knownTopic);
 export const weak = (w: Weights, m: M, now: number): Weights => cap(settle(w, now), 'channel', m.channel, RULE.weakChannel);

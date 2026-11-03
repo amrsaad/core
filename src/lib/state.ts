@@ -112,6 +112,14 @@ export interface AppState {
   recall?: RecallState;
   /** Signale für Digest und Kontext (Brief 03): Tageszähler mixClump, byHour, coldNetStarts und missed, siehe moments/signals.ts. Wandert per Sync. */
   signals?: Signals;
+  /** Entscheidung 36: Position je Reiter (ID des Moments, bei dem der Reiter verlassen wurde). Nur an diesem Gerät. */
+  tabCursor?: Partial<Record<'video' | 'audio' | 'text', { id: string; day: string }>>;
+  /** Wie oft ein Moment Startmoment eines Reiters war (höchstens 2). Nur an diesem Gerät. */
+  startShown?: Record<string, number>;
+  /** Schnelle Skips (vor 5 s weggewischt) je Moment. Zwei davon heißen abgelehnt. Nur an diesem Gerät. */
+  momentSkips?: Record<string, number>;
+  /** Abgelehnte Momente (Entscheidung 36): ID auf Zeitpunkt. Sie stehen auch in momentSeen. Per Sync, frühester Zeitpunkt. */
+  momentRejected?: Record<string, number>;
   /** Wenn-dann-Plan pro Woche (Montag als YYYY-MM-DD), Punkt 7 */
   plans?: Record<string, WeekPlan>;
   /** Desktop-Modus: die Übersicht der Tasten wurde beim ersten Start schon gezeigt */
