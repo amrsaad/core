@@ -94,8 +94,28 @@ jobs:
                           i = j
                       else:
                           i += 1
+              # Unabhängige Kontrollmessung für die Synchronprobe: 5-ms-Pegel, Sprache = mehr als 40 dB unter dem Referenzpegel nicht erreicht,
+              # Einsatz = Übergang von mindestens 150 ms Nichtsprache zu mindestens 40 ms Sprache. Andere Rahmenlänge und Schwelle als die Pausen oben.
+              m5 = len(x) // 80
+              d5 = 20 * np.log10(np.sqrt((x[:m5 * 80].reshape(m5, 80) ** 2).mean(axis=1)) + 1e-7)
+              sp = d5 > ref - 40
+              onsets = []
+              quiet = 0
+              k = 0
+              while k < m5:
+                  if sp[k]:
+                      j = k
+                      while j < m5 and sp[j]:
+                          j += 1
+                      if quiet >= 30 and j - k >= 8:
+                          onsets.append(round(a + k * 0.005, 3))
+                      quiet = 0
+                      k = j
+                  else:
+                      quiet += 1
+                      k += 1
               ok += 1
-              res.append({'start': s, 'end': e, 'ref': round(ref, 1), 'sil': sil})
+              res.append({'start': s, 'end': e, 'ref': round(ref, 1), 'sil': sil, 'onsets': onsets})
               print(s, e, round(ref, 1), {k: len(v) for k, v in sil.items()})
           json.dump({'id': job_id, 'results': res}, open(out, 'w'))
           json.dump({'id': job_id, 'windows': len(windows), 'measured': ok}, open(os.path.join(os.path.dirname(out), 'stats.json'), 'w'))
