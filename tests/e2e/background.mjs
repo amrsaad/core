@@ -136,6 +136,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bgRowOneAudioElement = row.count === 1;
     c.bgRowSrcChanges = row.srcs >= 5 && new Set(row.history).size >= 6;
     c.bgRowEndedNext = row.diag.filter((x) => x.startsWith('bg: ended ')).length >= 5 && row.diag.filter((x) => x.startsWith('bg: next ')).length >= 5;
+    // Issue 35: nach mehreren Trackwechseln sind Weiter und Zurück noch registriert, keine Sprung-Aktionen, Handler wurden nach playing neu gesetzt
+    const lh = await pr.evaluate(() => ({ h: window.__core.lockHandlers(), d: window.__core.diag().filter((x) => x.startsWith('lock: handlers set')), prevNull: window.__ms ? Object.keys(window.__ms).sort() : null }));
+    c.bgRowLockHandlers = ['nexttrack', 'previoustrack', 'play', 'pause'].every((a) => lh.h.includes(a)) && !lh.h.some((a) => /^seek/.test(a));
+    c.bgRowHandlersReset = lh.d.some((x) => x === 'lock: handlers set (mount)') && lh.d.some((x) => x === 'lock: handlers set (playing)');
     c.bgRowNoRejected = !row.diag.some((x) => x.startsWith('bg: play rejected'));
     await setVisibility(pr, 'visible');
     await pr.waitForTimeout(200);

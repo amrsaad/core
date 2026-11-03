@@ -1055,6 +1055,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     // Kaltstart: auf die Blob-URL aus dem Vorrat warten statt vom Netz zu starten
     audioDeck.pending = (id, key) => pre?.pendingWarm(id, key) ?? null;
     // Zähler coldNetStarts: jeder Start einer Quelle vom Netz, pro Tag
+    audioDeck.onMedia = (e) => lockHandlersRef.current(e);
     audioDeck.onStart = ({ clip, local }) => {
       if (local) return;
       let store: Storage | null = null;
@@ -2370,13 +2371,23 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [msOn, !!desk, curId]);
 
-  // Medientasten und Sperrbildschirm: Pause, Weiter und Zurück (Weiter vom Sperrbildschirm zählt wie ein Wisch)
-  useEffect(() => {
-    if (!msOn || !('mediaSession' in navigator)) return;
+  // Medientasten und Sperrbildschirm: Pause, Weiter und Zurück (Weiter vom Sperrbildschirm zählt wie ein Wisch).
+  // Issue 35: Die Handler werden einmal gesetzt und bleiben, solange msOn gilt. Ein Aufräumen auf null bei jeder neuen Identität von goTo ließ iOS auf die
+  // 10-Sekunden-Sprünge zurückfallen. goTo und form kommen über Refs. Nach jedem playing und loadedmetadata des Deck-Elements wird alles neu gesetzt,
+  // weil iOS Now Playing beim Quellwechsel zurücksetzt.
+  const goToRef = useRef(goTo);
+  goToRef.current = goTo;
+  const formRef = useRef(form);
+  formRef.current = form;
+  const lockSet = useRef(new Set<string>());
+  const setLockHandlers = (reason: string) => {
+    if (!msOnRef.current || !('mediaSession' in navigator)) return;
     const ms = navigator.mediaSession;
     const set = (a: MediaSessionAction, f: MediaSessionActionHandler | null) => {
       try {
         ms.setActionHandler(a, f);
+        if (f) lockSet.current.add(a);
+        else lockSet.current.delete(a);
       } catch {
         /* Aktion nicht unterstützt */
       }
@@ -2390,13 +2401,32 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     set('pause', act('pause', () => playRef.current(false)));
     set('nexttrack', act('nexttrack', () => lockNextRef.current()));
     // Audio-Reiter (Entscheidung 24): Zurück speichert, ein zweiter Druck binnen 1,5 s ist More like this. Sonst springt Zurück zum vorigen Moment.
-    set('previoustrack', act('previoustrack', () => (form === 'audio' ? lockPrevRef.current() : goTo(idxRef.current - 1))));
+    set('previoustrack', act('previoustrack', () => (formRef.current === 'audio' ? lockPrevRef.current() : goToRef.current(idxRef.current - 1))));
     // Keine Sprünge um 10 Sekunden: der Sperrbildschirm zeigt dann Weiter und Zurück
     for (const a of LOCK_UNREGISTERED) set(a as MediaSessionAction, null);
+    if (reason !== 'mount') {
+      setMeta(queue.current[idxRef.current]);
+      setPlaybackState(userPaused.current ? 'paused' : 'playing', `handlers ${reason}`);
+    }
+    diag.current.push(`lock: handlers set (${reason})`);
+  };
+  const lockHandlersRef = useRef(setLockHandlers);
+  lockHandlersRef.current = setLockHandlers;
+  useEffect(() => {
+    if (!msOn || !('mediaSession' in navigator)) return;
+    lockHandlersRef.current('mount');
     return () => {
-      for (const a of ['play', 'pause', 'nexttrack', 'previoustrack'] as MediaSessionAction[]) set(a, null);
+      // Nur beim Verlassen von Audio und Desktop (msOn wird false), nie dazwischen
+      for (const a of ['play', 'pause', 'nexttrack', 'previoustrack'] as MediaSessionAction[]) {
+        try {
+          navigator.mediaSession.setActionHandler(a, null);
+        } catch {
+          /* Aktion nicht unterstützt */
+        }
+        lockSet.current.delete(a);
+      }
     };
-  }, [msOn, goTo]);
+  }, [msOn]);
   useEffect(() => {
     if (msOn && 'mediaSession' in navigator) setPlaybackState(paused ? 'paused' : 'playing', `feed paused=${paused}`);
   }, [msOn, paused]);
@@ -2436,6 +2466,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       },
       /** Zurück vom Sperrbildschirm nachstellen (Tests) */
       lockBack: () => lockPrevRef.current(),
+      /** Registrierte Sperrbildschirm-Aktionen (Issue 35, Tests) */
+      lockHandlers: () => [...lockSet.current].sort(),
       /** Vorrat-Köpfe (Tests) */
       heads: () => pre?.startHeads() ?? [],
       /** Medien-Elemente mit gesetzter Quelle (Vorgabe höchstens 3) und der Hinweis "Ton aus" aus dem Zustand des Elements */

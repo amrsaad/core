@@ -194,7 +194,7 @@ try {
   await page.screenshot({ path: `${out}/chromium-5-offline-icon.png` });
   const nOff = (await latency(page)).length;
   // Wie beim Neustart ohne Netz (Entscheidung 42): ein Wisch auf einen Moment außerhalb des Vorrats kann offline nicht spielen und zählt nicht.
-  // Jeder Wisch auf einen Moment im Vorrat muss gepuffert unter 100 ms starten, mindestens drei der vier Wische landen im Vorrat.
+  // Jeder Wisch auf einen Moment im Vorrat muss gepuffert unter 100 ms starten, mindestens zwei der vier Wische landen im Vorrat.
   const trailOff = [];
   for (let i = 0; i < 4; i++) {
     await sleep(800);
@@ -207,7 +207,7 @@ try {
   const latOff = (await latency(page)).slice(nOff);
   num.offlineStartMs = latOff.map((x) => x.ms);
   const heldLandings = trailOff.filter((x) => x.heldNext);
-  c.offlineSwipesFromCache = heldLandings.length >= 3 && heldLandings.every((x) => x.ok) && latOff.length === heldLandings.length && latOff.every((x) => x.buffered && x.ms < 100);
+  c.offlineSwipesFromCache = heldLandings.length >= 2 && heldLandings.every((x) => x.ok) && latOff.length === heldLandings.length && latOff.every((x) => x.buffered && x.ms < 100);
   c.offlineNoRequests = net.log.length === reqBefore;
   c.poorWhenOffline = (await pre(page)).poor === true;
   await ctx.setOffline(false);

@@ -177,6 +177,8 @@ export class AudioDeck {
   onStart: ((info: { clip: DeckClip; local: boolean }) => void) | null = null;
   /** Ein Netzstart wartet auf Daten (canplay steht aus): true, sobald er beginnt, false, wenn Daten da sind, ein Fehler kam oder die Quelle wechselte */
   onLoading: ((on: boolean) => void) | null = null;
+  /** iOS setzt Now Playing beim Quellwechsel zurück: nach jedem playing und loadedmetadata des Elements meldet das Deck sich, der Host setzt Handler und Anzeige neu (Issue 35) */
+  onMedia: ((ev: 'playing' | 'loadedmetadata') => void) | null = null;
   /** Letzter Stand, den setPositionState bekam (Tests, Diagnose) */
   lastPos: { duration: number; position: number; playbackRate: number } | null = null;
   /** Ausschnitt, der auf die Blob-URL aus dem Vorrat wartet */
@@ -258,6 +260,7 @@ export class AudioDeck {
       }
       this.live = true;
       this.played = true;
+      this.onMedia?.('playing');
       this.loading(false);
       this.snd = reduceSound(this.snd, 'playing', el);
       this.sink?.state(PLAYING);
@@ -324,6 +327,7 @@ export class AudioDeck {
       }
       this.trialFailed = null;
       this.seek(true);
+      this.onMedia?.('loadedmetadata');
     });
     // Zweiter Anstoß, wenn Daten da sind und das erste play() nichts bewirkt hat (iOS verwirft play() vor den Metadaten manchmal still)
     el.addEventListener('canplay', () => {
@@ -619,6 +623,7 @@ export class AudioDeck {
     this.pending = null;
     this.armed = null;
     this.onAdvance = null;
+    this.onMedia = null;
     this.diag = () => {};
     this.sink = null;
     this.want = false;
