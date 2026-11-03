@@ -1,0 +1,35 @@
+{
+  "startedAt": "2026-11-03T11:46:56.339Z",
+  "url": "https://amrsaad.github.io/core/",
+  "browser": "chromium",
+  "ok": false,
+  "firstImageMs": 1076,
+  "tabsOk": true,
+  "tabs": {
+    "audio": {
+      "ok": true,
+      "ms": 116
+    },
+    "text": {
+      "ok": true,
+      "ms": 45
+    },
+    "video": {
+      "ok": true,
+      "ms": 82
+    }
+  },
+  "errors": [
+    "pageerror Cannot read properties of null (reading 'mute')",
+    "pageerror Cannot read properties of null (reading 'mute')",
+    "pageerror Cannot read properties of null (reading 'mute')"
+  ],
+  "failedRequests": [],
+  "pageStatus": 200,
+  "pageLastModified": "Tue, 03 Nov 2026 09:40:38 GMT",
+  "poolStatus": 200,
+  "note": "",
+  "problems": [
+    "errors 3: pageerror Cannot read properties of null (reading 'mute')"
+  ]
+}
