@@ -1,5 +1,5 @@
 {
- "at": "2026-11-03T03:56:20.147Z",
+ "at": "2026-11-03T04:33:53.069Z",
  "runs": [
   {
    "browser": "webkit",
@@ -32,6 +32,11 @@
     "cueNeverLate": true,
     "cueAt2x": true,
     "captionOnScreen": true,
+    "cueTempoChanged": true,
+    "cueTempoDone": true,
+    "cueTempoSamples": true,
+    "cueTempoSawBothRates": true,
+    "cueTempoWithin300ms": true,
     "recallThreeSwiped": true,
     "recallNoCardYet": true,
     "recallBgThree": true,
@@ -100,79 +105,88 @@
     "tempoPaused": 10,
     "cue": {
      "worst": 0,
-     "n": 622,
+     "n": 623,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.41",
-       35,
-       35
+       "3.39",
+       34,
+       34
       ],
       [
-       "4.70",
+       "4.68",
        47,
        47
       ],
       [
-       "5.98",
+       "5.97",
        60,
        60
       ],
       [
-       "7.27",
+       "7.26",
        73,
        73
       ],
       [
-       "8.55",
+       "8.54",
        86,
        86
       ],
       [
-       "9.84",
+       "9.83",
        99,
        99
       ],
       [
-       "11.13",
+       "11.11",
        112,
        112
       ],
       [
-       "12.42",
+       "12.40",
        125,
        125
       ],
       [
-       "13.71",
-       138,
-       138
+       "13.69",
+       137,
+       137
       ],
       [
-       "14.99",
+       "14.97",
        150,
        150
       ],
       [
-       "16.28",
+       "16.26",
        163,
        163
       ],
       [
-       "17.57",
+       "17.55",
        176,
        176
       ]
      ],
      "rate": 2
     },
+    "cueTempo": {
+     "worst": 1,
+     "n": 554,
+     "rates": [
+      1,
+      1.5,
+      2
+     ]
+    },
     "recall": {
      "q": [
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805091
+       "dueAt": 1792756805044
       }
      ],
      "idx": 6,
@@ -202,21 +216,21 @@
       "recall: queued atrecall4:0 (bg)",
       "bg: arm atrecall1 (net)",
       "bg: next atrecall10:0",
-      "bg: deck page hidden +5 s: paused=false ended=false t=1.4 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+      "bg: deck page hidden +5 s: paused=false ended=false t=1.3 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
       "bg: deck advance to atrecall10: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
       "bg: deck clip end via timeupdate hidden=true armed=atrecall1 onAdvance=true advance=yes rs=0 muted=false t=4.0",
       "bg: deck advance atrecall10 to atrecall1: src and play() in this handler, same element true, next from storage false, readyState 0",
       "bg: ended atrecall10:0",
       "bg: started atrecall1:0",
-      "bg: arm atrecall9 (net)",
+      "bg: arm atrecall12 (net)",
       "bg: next atrecall1:0",
       "bg: deck advance to atrecall1: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
-      "bg: deck clip end via timeupdate hidden=true armed=atrecall9 onAdvance=true advance=yes rs=0 muted=false t=4.0",
-      "bg: deck advance atrecall1 to atrecall9: src and play() in this handler, same element true, next from storage false, readyState 0",
+      "bg: deck clip end via timeupdate hidden=true armed=atrecall12 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+      "bg: deck advance atrecall1 to atrecall12: src and play() in this handler, same element true, next from storage false, readyState 0",
       "bg: ended atrecall1:0",
-      "bg: started atrecall9:0",
-      "bg: arm atrecall14 (net)",
-      "bg: next atrecall9:0"
+      "bg: started atrecall12:0",
+      "bg: arm atrecall15 (net)",
+      "bg: next atrecall12:0"
      ]
     }
    },
@@ -253,6 +267,11 @@
     "cueNeverLate": true,
     "cueAt2x": true,
     "captionOnScreen": true,
+    "cueTempoChanged": true,
+    "cueTempoDone": true,
+    "cueTempoSamples": true,
+    "cueTempoSawBothRates": true,
+    "cueTempoWithin300ms": true,
     "recallThreeSwiped": true,
     "recallNoCardYet": true,
     "recallBgThree": true,
@@ -326,7 +345,7 @@
      "shownNow": 0,
      "gaps": [
       [
-       "3.38",
+       "3.39",
        34,
        34
       ],
@@ -341,7 +360,7 @@
        61
       ],
       [
-       "7.38",
+       "7.39",
        74,
        74
       ],
@@ -356,7 +375,7 @@
        101
       ],
       [
-       "11.38",
+       "11.39",
        114,
        114
       ],
@@ -371,7 +390,7 @@
        141
       ],
       [
-       "15.38",
+       "15.39",
        154,
        154
       ],
@@ -388,12 +407,21 @@
      ],
      "rate": 2
     },
+    "cueTempo": {
+     "worst": 0,
+     "n": 541,
+     "rates": [
+      1,
+      1.5,
+      2
+     ]
+    },
     "recall": {
      "q": [
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804942
+       "dueAt": 1792756804919
       }
      ],
      "idx": 6,
@@ -429,17 +457,95 @@
       "bg: deck advance atrecall10 to atrecall1: src and play() in this handler, same element true, next from storage false, readyState 0",
       "bg: ended atrecall10:0",
       "bg: started atrecall1:0",
-      "bg: arm atrecall9 (net)",
+      "bg: arm atrecall12 (net)",
       "bg: next atrecall1:0",
       "bg: deck advance to atrecall1: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
-      "bg: deck clip end via timeupdate hidden=true armed=atrecall9 onAdvance=true advance=yes rs=0 muted=false t=4.0",
-      "bg: deck advance atrecall1 to atrecall9: src and play() in this handler, same element true, next from storage false, readyState 0",
+      "bg: deck clip end via timeupdate hidden=true armed=atrecall12 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+      "bg: deck advance atrecall1 to atrecall12: src and play() in this handler, same element true, next from storage false, readyState 0",
       "bg: ended atrecall1:0",
-      "bg: started atrecall9:0",
-      "bg: arm atrecall14 (net)",
-      "bg: next atrecall9:0"
+      "bg: started atrecall12:0",
+      "bg: arm atrecall15 (net)",
+      "bg: next atrecall12:0"
      ]
     }
+   },
+   "ok": true
+  },
+  {
+   "browser": "chromium-cold",
+   "checks": {
+    "coldS1Plays": true,
+    "coldS1Filled": true,
+    "coldS1Heads": true,
+    "coldHeadsInVault": true,
+    "coldS2Plays": true,
+    "coldFirstSoundBeforeNet": true,
+    "coldFirstSrcLocal": true,
+    "coldNoNetStart": true,
+    "coldCounterZero": true,
+    "coldSignalsZero": true,
+    "coldNoSystemPause": true,
+    "coldNoPill": true,
+    "lockHandlers": true,
+    "lockNoSeekHandlers": true,
+    "lockPositionIsMomentLength": true,
+    "lockPositionInside": true,
+    "lockMetadata": true,
+    "lockAlbumIsEpisode": true,
+    "lockArtwork": true,
+    "lockArtworkFilesExist": true,
+    "lockBackSaves": true,
+    "lockSavedTitle": true,
+    "lockNotLiked": true,
+    "lockSecondBackLikes": true,
+    "lockStillSaved": true,
+    "lockTitleBack": true,
+    "lockBackLines": true,
+    "lockNextAdvances": true,
+    "coldS2NoPageErrors": true,
+    "pillAppears": true,
+    "pillText": true,
+    "pillGoneWhenPlaying": true,
+    "pillCounted": true,
+    "pillCountedInSignals": true
+   },
+   "notes": {
+    "heads": [
+     "pod-0001:22",
+     "pod-0014:10",
+     "pod-0002:34"
+    ],
+    "firstSoundMs": 172,
+    "diag": [
+     "deck: start order head first=pod-0001:22 heads=3",
+     "deck: src local pod-0001"
+    ],
+    "handlers": [
+     "nexttrack",
+     "pause",
+     "play",
+     "previoustrack"
+    ],
+    "lock": {
+     "title": "Cold audio moment 1",
+     "artist": "Show 1",
+     "album": "Episode 1",
+     "artwork": [
+      "512x512 http://127.0.0.1:4187/core/tab-brain-512.png",
+      "1024x1024 http://127.0.0.1:4187/core/tab-brain-1024.png"
+     ],
+     "state": "playing",
+     "pos": {
+      "duration": 25,
+      "position": 0.00048079591836724944,
+      "playbackRate": 1
+     },
+     "cold": 0,
+     "cloud": 0
+    },
+    "coldNetLines": [
+     "signals: coldNetStarts 1 today (net start pod-0035)"
+    ]
    },
    "ok": true
   }
