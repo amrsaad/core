@@ -17,6 +17,7 @@ import { coldToday, countColdStart, pickHeads, startOrder } from './startHead';
 import { lockMeta, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS } from './lockScreen';
 import { cursorFor, historyBefore, parseSaved, queueKey, recentFromLog, releaseTail, remixTail, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMoment, sessionSkip, SIGNAL, type MomentCursor } from './mix';
+import { attentionStep, makeCtx, newAttention, readConn, type Attention } from './context';
 import { addMissed, bumpCell, bumpColdNetStart, bumpPair, hourKey } from './signals';
 import { clearFocus, focusActive, focusFilter, inFocus, readFocus, subscribeFocus, type Focus } from './focus';
 import { bumpStart, dropOverStarted, isQuickSkip, markRejected, quickSkip, resumeSaved, setTabCursor, START_MAX } from './tabs';
@@ -26,7 +27,7 @@ import { addSample } from './latency';
 import { captionLines, captionsShown } from './captions';
 import { CueClock, cueIndexAt } from './cueClock';
 import { countGotIt, countSeen, todayLine } from './today';
-import { answer, cardDue, pickRecall, type Recent } from './recall';
+import { answer, cardDue, pickRecall, recallQuiet, type Recent } from './recall';
 import { RecallCard, type RecallCtl } from './RecallCard';
 import { canShowRecall, onReturn, onSwipe, requeueOpen, type QueueEntry } from './recallqueue';
 import { CaptionSheet } from './CaptionSheet';
@@ -164,6 +165,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   /** Abrufkarte offen: Player bleibt angehalten */
   const recallRef = useRef(false);
   const sessionSeen = useRef(0);
+  const sessionT0 = useRef(Date.now());
+  const attention = useRef<Attention>(newAttention());
   /** Paare aufeinanderfolgender Momente dieser Sitzung, die schon gezählt sind (mixClump) */
   const pairsSeen = useRef(new Set<string>());
   const counted = useRef(new Set<string>());
@@ -314,6 +317,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     }
   };
 
+  /** Kontextgewicht (Issue 26): Tageszeit aus den eigenen Signalen, Aufmerksamkeit der Sitzung, Netzart. Zeitfenster einmal je Aufruf gerechnet. */
+  const ctxOf = (s: AppState) => makeCtx({ signals: s.signals, today, hour: clockNow().getHours(), attention: attention.current, position: () => queue.current.length, conn: readConn() });
+
   const ensureQueue = useCallback(
     (upTo: number) => {
       const s = stateRef.current;
@@ -334,9 +340,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         poorRef.current = pre?.poor() ?? false;
       }
       const rank = poorRef.current && pre ? netRank(pre.has) : undefined;
+      const ctx = ctxOf(s);
       // Moment für Moment (Entscheidung 33): jeder Moment wird gegen die letzten 10 gewählt. Gescheiterte Momente verbrauchen eine Wahl, kommen aber nicht in die Schlange.
       for (let guard = 0; queue.current.length < upTo && guard < upTo + pool.length; guard++) {
-        const m = nextMoment(pool, { areaShares: s.settings.areaShares, weights: s.momentWeights, seen: s.momentSeen, mutedChannels: s.mutedChannels, now: clockNow().getTime(), rank }, cursor.current, historyBefore(queue.current, queue.current.length, seedHist.current), rng.current);
+        const m = nextMoment(pool, { areaShares: s.settings.areaShares, weights: s.momentWeights, seen: s.momentSeen, mutedChannels: s.mutedChannels, now: clockNow().getTime(), rank, ctx }, cursor.current, historyBefore(queue.current, queue.current.length, seedHist.current), rng.current);
         if (!m) break;
         if (!bad.current.has(m.videoId)) queue.current.push(m);
       }
@@ -637,6 +644,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       // darum keine Zeitwertung. Nach einem Chip ersetzt dessen Wirkung die Wertung (silentLeave).
       const nowMs = clockNow().getTime();
       let dampened = false;
+      let attentionStarted = false;
       const silent = silentLeave.current; // gilt für genau diesen Wechsel (er kommt mit der Feder erst am Ende der Animation)
       silentLeave.current = false;
       if (next > prev && prevM) {
@@ -645,6 +653,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         const lv = timed ? leaveOf(watchedSec, prevM.end - prevM.start) : null;
         // Zweimal vor 5 s weggewischt: abgelehnt, gilt als gesehen, kommt nie wieder (Entscheidung 36)
         if (timed && isQuickSkip(watchedSec)) update((s) => quickSkip(s, prevM, nowMs).state);
+        // Drei Skips unter 3 s in Folge: die nächsten 10 Momente ohne lange Momente und ohne Brain-Text (Issue 26), Rest der Schlange neu gewählt
+        if (timed) {
+          const st = attentionStep(attention.current, lv?.kind === 'skip', prev);
+          attention.current = st.att;
+          if (st.started) attentionStarted = true;
+        }
         if (lv?.kind === 'skip') {
           // Zwei Skips beim selben Kanal oder Thema dämpfen beide für den Rest der Sitzung (Issue 24), siehe Ende dieser Funktion
           dampened = !!cursor.current && sessionSkip(cursor.current, prevM);
@@ -683,7 +697,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         const watched = endedAt.current === prev ? 1 : textRef.current ? (textSeen.current === prev ? 1 : 0) : Math.max(0, Math.min(1, pos / len));
         recent.current = [...recent.current, { id: prevM.id, watched }].slice(-8);
         sessionSeen.current += 1;
-        if (cardDue(sessionSeen.current)) {
+        if (cardDue(sessionSeen.current) && !recallQuiet(rateRef.current, Date.now() - sessionT0.current)) {
           const s0 = stateRef.current;
           const queued = new Set((s0.recallQueue ?? []).map((x) => x.id));
           recallNow = pickRecall(s0.recall ?? {}, recent.current, clockNow().getTime(), (id) => !queued.has(id) && !s0.momentRejected?.[id] && !!findMoment(id)?.recall);
@@ -720,7 +734,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       armDeck();
       syncHint();
       // Gedämpfter Kanal oder gedämpftes Thema: der Rest hinter den zwei vorgeladenen Momenten wird neu gewählt
-      if (dampened) replanRef.current(next + 3);
+      if (dampened || attentionStarted) replanRef.current(next + 3);
       const nSrc = mediaWithSrc();
       if (nSrc > 3) diag.current.push(`media: ${nSrc} elements with src (limit 3)`);
       setIdx(next);
@@ -828,7 +842,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     const tail = queue.current.slice(from);
     if (tail.length < 2) return;
     const s0 = stateRef.current;
-    queue.current = [...queue.current.slice(0, from), ...remixTail(tail, historyBefore(queue.current, from, seedHist.current), { areaShares: s0.settings.areaShares, weights: s0.momentWeights, seen: s0.momentSeen, mutedChannels: s0.mutedChannels, now: clockNow().getTime(), rank: netRank(pre.has) }, rng.current)];
+    queue.current = [...queue.current.slice(0, from), ...remixTail(tail, historyBefore(queue.current, from, seedHist.current), { areaShares: s0.settings.areaShares, weights: s0.momentWeights, seen: s0.momentSeen, mutedChannels: s0.mutedChannels, now: clockNow().getTime(), rank: netRank(pre.has), ctx: ctxOf(s0) }, rng.current)];
     for (const sl of slots.current) if (sl.index >= from) sl.index = -1;
     if (!single) for (const j of [idxRef.current + 1, idxRef.current + 2]) if (j >= from && j < queue.current.length && slotFor(j).index !== j) assign(slotFor(j), j, false);
     diag.current.push(`reorder from ${from}`);

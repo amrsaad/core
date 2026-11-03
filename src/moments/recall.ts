@@ -38,6 +38,11 @@ export interface Recent {
 }
 
 /** Nach jedem 4. gesehenen Moment kommt eine Karte */
+/** Tempo 2x (Issue 26, Entscheidung 34): in den ersten 5 Minuten der Sitzung keine Abrufkarte */
+export const FAST_RATE = 2;
+export const FAST_QUIET_MS = 5 * 60_000;
+export const recallQuiet = (rate: number, sessionMs: number): boolean => rate >= FAST_RATE && sessionMs < FAST_QUIET_MS;
+
 export const cardDue = (seenInSession: number) => seenInSession > 0 && seenInSession % RECALL_EVERY === 0;
 
 /**
