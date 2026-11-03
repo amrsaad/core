@@ -31,9 +31,11 @@ const PATCH = `
     const ev = opts.events;
     let isCold = false, since = 0, acc = 0, state = -1;
     const on = () => state !== 1 || acc + (performance.now() - since) < 3000;
+    let refresh = () => {};
     const emit = (data) => {
       if (data === 1) since = performance.now(); else if (state === 1) acc += performance.now() - since;
       state = data;
+      refresh();
       ev.onStateChange({ data });
     };
     const wrapped = { ...opts, events: { ...ev, onStateChange: (e) => {
@@ -49,11 +51,9 @@ const PATCH = `
     const mk = (pos, h) => { const d = document.createElement('div'); d.className = 'ytfake-overlay'; d.style.cssText = 'position:absolute;left:0;right:0;' + pos + ';height:' + h + 'px;background:#c00;color:#fff;font:14px sans-serif;display:none;z-index:1'; d.textContent = 'YOUTUBE'; return d; };
     const top = mk('top:0', 60), bot = mk('bottom:0', 48);
     host.append(top, bot);
-    const iv = setInterval(() => {
-      if (!top.isConnected) { clearInterval(iv); return; }
-      const d = on() ? 'block' : 'none';
-      top.style.display = d; bot.style.display = d;
-    }, 20);
+    // Sofort beim Zustandswechsel, dazu alle 20 ms für den Ablauf der 3 s
+    refresh = () => { const d = on() ? 'block' : 'none'; top.style.display = d; bot.style.display = d; };
+    const iv = setInterval(() => { if (!top.isConnected) clearInterval(iv); else refresh(); }, 20);
   };
   window.YT.Player.prototype = Orig.prototype;
 })();
@@ -82,6 +82,7 @@ const EXPOSED = () => {
   const cur = document.querySelector('.vslot[aria-hidden=false]');
   if (!cur) return { n: 0, checked: 0 };
   let n = 0, checked = 0;
+  const by = [];
   // Die Trefferregeln gelten nur während der Messung, sonst würden sie die Wischgeste abschalten
   document.documentElement.setAttribute('data-probe', '1');
   try {
@@ -91,10 +92,14 @@ const EXPOSED = () => {
     if (r.width < 5 || r.bottom < 0 || r.top > innerHeight) continue;
     checked++;
     const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-    if (!hit || el === hit || el.contains(hit) || (hit.closest('.vframe') && !hit.closest('.vcover'))) n++;
+    if (!hit || el === hit || el.contains(hit) || (hit.closest('.vframe') && !hit.closest('.vcover'))) {
+      n++;
+      const sl = hit?.closest('.vslot');
+      by.push({ hit: hit ? (hit.className || hit.tagName) : null, sameSlot: sl === cur, live: cur.hasAttribute('data-live'), top: Math.round(r.top), left: Math.round(r.left) });
+    }
   }
   } finally { document.documentElement.removeAttribute('data-probe'); }
-  return { n, checked };
+  return { n, checked, by };
 };
 
 const runScenario = async (browser, sc) => {
@@ -182,7 +187,7 @@ const runScenario = async (browser, sc) => {
     const reloaded = newLogs.some((x) => x.startsWith('load ' + vid + ' '));
     if (reloaded) r.reloads++;
     r.ms.push(res.ms ?? 99999);
-    r.exposed.push({ n, idx0, idx1, probes: probes.map((x) => x.n), checked: probes.reduce((s, x) => s + x.checked, 0), reloaded, ms: res.ms });
+    r.exposed.push({ n, idx0, idx1, by: probes.flatMap((x) => x.by ?? []).slice(0, 2), probes: probes.map((x) => x.n), checked: probes.reduce((s, x) => s + x.checked, 0), reloaded, ms: res.ms });
   }
   if (hasVideoHook) r.appMs = await page.evaluate(() => window.__core.video().frames);
   r.video = hasVideoHook ? await page.evaluate(() => window.__core.video()) : null;
@@ -240,6 +245,7 @@ for (const dwell of DWELLS) {
 const results = { at: new Date().toISOString(), url, model: 'Nachbau der IFrame-API mit Latenzmodell, kein echtes YouTube', swipes: SWIPES, runs: [] };
 const browser = await chromium.launch(process.env.E2E_CHROME ? { executablePath: process.env.E2E_CHROME } : {});
 for (const sc of scenarios) {
+  if (process.env.ONLY && !sc.name.includes(process.env.ONLY)) continue;
   try {
     const r = await runScenario(browser, sc);
     results.runs.push(r);
