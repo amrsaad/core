@@ -7,9 +7,11 @@ import { clampGain, laneFor, youtubeVolume, type LoudInfo } from '../moments/lou
 import { AudioDeck, type DeckClip, type DeckSink } from './audioDeck';
 import { isSilent, reduceSound, SOUND_NONE, type SoundObs } from '../moments/soundHint';
 import { installGestures, onGesture } from '../moments/gesture';
+import { netType } from '../lib/diag';
+import { QUALITY_UP_MS, startQuality } from './warmup';
 
 /** gainDb: Anpassung der Lautheit des Moments in dB (Entscheidung 16), fehlt sie, bleibt der Moment unverändert */
-export type YTLoad = string | { videoId: string; startSeconds?: number; endSeconds?: number; gainDb?: number };
+export type YTLoad = string | { videoId: string; startSeconds?: number; endSeconds?: number; gainDb?: number; suggestedQuality?: string };
 
 export interface YTPlayer {
   loadVideoById(arg: YTLoad): void;
@@ -41,6 +43,8 @@ export interface YTPlayer {
   relevel?(): void;
   /** YouTube-Player: an eine Stelle springen */
   seekTo?(seconds: number, allowSeekAhead?: boolean): void;
+  /** Nur YouTube: Qualität vorschlagen ('small', 'default' = Auto). YouTube darf den Vorschlag ignorieren (Issue 22). */
+  setPlaybackQuality?(quality: string): void;
   /**
    * Nach einem Netzfehler an derselben Stelle weiter (Issue 9): Stream neu laden und bei pos ansetzen, YouTube springen und spielen.
    * Moment, Ton und Tempo bleiben, der Slot wird nicht neu gebaut. play false: nur bereitstellen (Vorlade-Slot).
@@ -201,7 +205,9 @@ function ytPlayer(YT: YTNamespace, el: HTMLElement, videoId: string | undefined,
     ...(videoId ? { videoId } : {}),
     width: '100%',
     height: '100%',
-    playerVars: { ...PLAYER_VARS, origin: location.origin, playlist: undefined },
+    // vq: bei schwachem Netz (3g, slow-2g) mit kleiner Qualität starten (Issue 22). Der Wert gilt nur für den ersten Moment des Players,
+    // jeder weitere bekommt suggestedQuality beim Laden (route).
+    playerVars: { ...PLAYER_VARS, origin: location.origin, playlist: undefined, ...(startQuality(netType()) ? { vq: 'small' } : {}) },
     events: {
       onReady: () => events.onReady?.(),
       onStateChange: (e: { data: number }) => events.onState?.(e.data),
@@ -308,6 +314,9 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     if (mode === 'hls') events.onState?.(st);
   };
   const diag = (line: string) => events.onDiag?.(line);
+  // Schwaches Netz (Issue 22): der Moment wurde mit kleiner Qualität geladen, nach QUALITY_UP_MS stabilem Spiel zurück auf Auto
+  let lowQuality = false;
+  let qualityTimer = 0;
   // Gewünschtes Tempo für den YouTube-Pfad und Nachprüfung in Stufen (300, 1000, 2500 ms), weil setPlaybackRate vor dem ersten Bild verworfen wird
   let wantRate: number | null = null;
   let rateTimers: ReturnType<typeof setTimeout>[] = [];
@@ -424,6 +433,21 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       if (mode === 'yt') events.onState?.(st);
       // YouTube setzt das Tempo bei jedem neuen Video und auf iOS oft beim ersten Start auf 1x zurück (Max 31.10.): nach PLAYING nachprüfen
       if (mode === 'yt' && st === STATE.PLAYING) verifyYtRate();
+      if (mode === 'yt') {
+        // Jeder Zustandswechsel unterbricht das "stabile Spiel": die fünf Sekunden zählen neu, sobald es wieder läuft
+        window.clearTimeout(qualityTimer);
+        if (st === STATE.PLAYING && lowQuality) {
+          qualityTimer = window.setTimeout(() => {
+            lowQuality = false;
+            try {
+              yt.setPlaybackQuality?.('default');
+              diag(`video: quality auto after ${QUALITY_UP_MS / 1000} s stable`);
+            } catch {
+              /* Player nicht bereit */
+            }
+          }, QUALITY_UP_MS);
+        }
+      }
     },
     onRate: (r) => {
       if (mode !== 'yt') return;
@@ -640,7 +664,13 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       show('yt');
       applyYtVolume(gain);
       // gainDb gehört nicht an die YouTube-API
-      const yarg = typeof arg === 'string' ? arg : { videoId: arg.videoId, startSeconds: arg.startSeconds, endSeconds: arg.endSeconds };
+      const yarg0 = typeof arg === 'string' ? arg : { videoId: arg.videoId, startSeconds: arg.startSeconds, endSeconds: arg.endSeconds };
+      // Schwaches Netz (3g, 2g, slow-2g): mit kleiner Qualität starten, nach 5 s stabilem Spiel auf Auto (onState). YouTube darf den Vorschlag ignorieren.
+      const q = startQuality(netType());
+      window.clearTimeout(qualityTimer);
+      lowQuality = !!q;
+      const yarg = q ? { ...(typeof yarg0 === 'string' ? { videoId: yarg0 } : yarg0), suggestedQuality: q } : yarg0;
+      if (q) diag(`video: start quality ${q} (net ${netType()})`);
       if (play) yt.loadVideoById(yarg);
       else yt.cueVideoById(yarg);
     }
@@ -690,6 +720,10 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       if (mode !== 'hls') yt.pauseVideo();
       else if (deckMode) audioDeck.pause(sink);
       else media.pause();
+    },
+    // Nur YouTube (Warmlauf, Issue 22): zurück auf den Start des Ausschnitts. Eigene Streams laufen nicht warm und brauchen es nicht.
+    seekTo: (seconds, allowSeekAhead) => {
+      if (mode !== 'hls') yt.seekTo?.(seconds, allowSeekAhead ?? true);
     },
     mute: () => {
       for (const e of all) if (!e.muted) e.muted = true;
@@ -782,6 +816,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     },
     destroy: () => {
       rateTimers.forEach(clearTimeout);
+      window.clearTimeout(qualityTimer);
       offUnlock();
       offState();
       leaveDeck();

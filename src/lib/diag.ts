@@ -108,3 +108,12 @@ if (typeof window !== 'undefined') {
   window.addEventListener('offline', () => diagLog.push('net: offline'));
   document.addEventListener('visibilitychange', () => diagLog.push(`app: ${document.visibilityState}`));
 }
+
+/** Netzart für die Video-Zeilen (Issue 22): navigator.connection.effectiveType, sonst "n/a" (Safari kennt es nicht) */
+export const netType = (): string => {
+  try {
+    return (navigator as unknown as { connection?: { effectiveType?: string } }).connection?.effectiveType ?? 'n/a';
+  } catch {
+    return 'n/a';
+  }
+};

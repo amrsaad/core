@@ -1,10 +1,11 @@
-import { diagLog } from '../lib/diag';
+import { diagLog, netType } from '../lib/diag';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { audioDeck, createPlayer, deckClipOf, HLS, LOCAL, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
+import { canWarm, onNonCurrentPlaying, roleOf, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx, type WarmState } from '../video/warmup';
 import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, onGesture, type Gesture } from './gesture';
 import { hintVisible, SOUND_NONE } from './soundHint';
 import { errorAction, recoverDelay, resumePos } from './netrecover';
@@ -81,8 +82,29 @@ interface Slot {
   tries: number;
   /** Letzte gute Position im laufenden Moment (Quellzeit) */
   pos: number;
+  /** Warmlauf (Issue 22, Entscheidung 29): idle, running (läuft stumm als nächster Moment) oder done (angehalten am Start, YouTube-Einblendung ist weg) */
+  warm: WarmState;
+  warmTimer: number;
+  /** Zeitpunkt (performance.now) des ersten PLAYING im Warmlauf */
+  warmAt: number;
+  /** Der Slot war mit diesem Moment schon der aktuelle: kein neuer Warmlauf */
+  visited: boolean;
+  /** Eigene Fläche über Titelbereich und Logo (Entscheidung 29, Rückfall): Dauer nach PLAYING, Ende und Zeitgeber */
+  coverMs: number;
+  coverEnd: number;
+  coverTimer: number;
+  cover: HTMLDivElement | null;
+  /** Puffer-Stopps nach dem ersten Bild des laufenden Moments */
+  stalls: number;
+  /** Zeitpunkt des ersten PLAYING als aktueller Moment (0: noch nicht gelaufen) */
+  playedAt: number;
 }
-const newSlot = (): Slot => ({ host: null, el: null, player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0 });
+const newSlot = (): Slot => ({ host: null, el: null, player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, cover: null, stalls: 0, playedAt: 0 });
+/** Zeit, die der Start der Vorlade-Player nach dem Kaltstart höchstens hinter dem aktuellen Moment wartet (Issue 22) */
+const GATE_MS = 3500;
+/** Zwei Zeilen Abdeckfläche über dem YouTube-Titelbereich (60 px) und dem Logo-Bereich (48 px) des 16:9-Bildes */
+const COVER_TOP = 60;
+const COVER_BOTTOM = 48;
 
 const END_GUARD = 0.3;
 const FOR_YOU_MS = 6000;
@@ -198,6 +220,14 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const everPlayed = useRef(false);
   /** Offene Messung Wisch bis erstes Bild */
   const swipe = useRef<{ j: number; t0: number; buffered: boolean } | null>(null);
+  /** Messung für die Zeile "video: ..." (Issue 22): Wisch bis Bereitschaft des Players und bis zum ersten PLAYING */
+  const vstat = useRef<{ j: number; t0: number; readyAt: number | null; mode: string; done: boolean; start?: boolean } | null>(null);
+  /** Zeiten Wisch bis erstes Bild der YouTube-Momente dieser Sitzung (Median und p90 im Protokoll) */
+  const ytFrames = useRef<number[]>([]);
+  /** Nach dem Kaltstart laden die Vorlade-Player erst, wenn der aktuelle Moment spielt (sonst teilen drei Player die Leitung) */
+  const gateOpen = useRef(false);
+  const gateTimer = useRef(0);
+  const gateWait = useRef(new Set<Slot>());
 
   /** Wischübergang: Bühne mit den Seiten und Ebene mit den Overlays bewegen sich gemeinsam, nur transform, direkt geschrieben (ohne React) */
   const stageEl = useRef<HTMLDivElement>(null);
@@ -424,6 +454,130 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const current = () => slotFor(idxRef.current);
   const applySound = (p: YTPlayer) => (soundOn.current ? p.unMute() : p.mute());
 
+  // ---- Video-Reiter: Warmlauf, Abdeckfläche, Vorlade-Gate (Issue 22, Entscheidung 29). Nur Referenzen, damit auch ältere Closures stimmen. ----
+  /** Kontext für die Warmlauf-Regeln (warmup.ts) */
+  const warmCtxOf = (j: number): WarmCtx => {
+    const m = queue.current[j];
+    return {
+      youtube: !!m && m.form !== 'text' && !m.audio && !ytStub.current && streamKind(m) === 'youtube',
+      lenS: m ? m.end - m.start : 0,
+      text: textRef.current || m?.form === 'text',
+      forYou: forYouRef.current,
+      recall: recallRef.current,
+      visible: typeof document === 'undefined' || document.visibilityState === 'visible',
+      single: stateRef.current.settings.playerMode === 'single',
+    };
+  };
+  const setCover = (slot: Slot, on: boolean) => {
+    if (slot.cover) slot.cover.style.visibility = on ? 'visible' : 'hidden';
+  };
+  /** Die Fläche liegt nur, solange der Moment spielt, aktuell ist und die Frist läuft. Pause und Standbild brauchen sie nicht (das Vorschaubild deckt alles). */
+  const syncCover = (slot: Slot) => setCover(slot, slot.index === idxRef.current && slot.st === STATE.PLAYING && slot.coverEnd > performance.now());
+  /** Erstes PLAYING des aktuellen Moments: Frist der Abdeckfläche beginnt (Kaltstart, zu früher Wisch). Nach einem fertigen Warmlauf ist coverMs 0. */
+  const startCover = (slot: Slot) => {
+    if (slot.coverMs <= 0) return;
+    if (!slot.coverEnd) {
+      slot.coverEnd = performance.now() + slot.coverMs;
+      window.clearTimeout(slot.coverTimer);
+      slot.coverTimer = window.setTimeout(() => syncCover(slot), slot.coverMs + 20);
+      diag.current.push(`video: cover on ${slot.mid} ${slot.coverMs} ms`);
+    }
+    syncCover(slot);
+  };
+  /** Neuer Moment im Slot: Warmlauf, Abdeckfläche und Zähler zurück auf Anfang */
+  const resetWarm = (slot: Slot) => {
+    window.clearTimeout(slot.warmTimer);
+    window.clearTimeout(slot.coverTimer);
+    Object.assign(slot, { warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, stalls: 0, playedAt: 0, coverMs: 0, coverEnd: 0, coverTimer: 0 });
+    setCover(slot, false);
+  };
+  /**
+   * Der nächste Moment läuft stumm bis die YouTube-Einblendung weg ist (WARM_MS nach PLAYING), dann angehalten und zurück auf den Start.
+   * Beim Wisch wird er nur noch hörbar und weitergespielt. Hat der Wisch den Slot vorher erreicht, kommt hier nichts mehr an.
+   */
+  const startWarmTimer = (slot: Slot) => {
+    if (slot.warmTimer) return;
+    slot.warmAt = performance.now();
+    const mid = slot.mid;
+    const n = slots.current.indexOf(slot);
+    const arm = (ms: number, tries: number) => {
+      slot.warmTimer = window.setTimeout(() => {
+        slot.warmTimer = 0;
+        const m = queue.current[slot.index];
+        if (!m || slot.mid !== mid || slot.warm !== 'running' || roleOf(slot.index, idxRef.current) !== 'next') return;
+        const played = (slot.player?.getCurrentTime?.() ?? m.start) - m.start;
+        // Kaum gelaufen (Puffern): zweimal noch etwas warten, dann so abschließen
+        if (played < 1.5 && tries < 2) {
+          arm(1500, tries + 1);
+          return;
+        }
+        slot.warm = 'done';
+        try {
+          slot.player?.pauseVideo();
+          slot.player?.seekTo?.(m.start, true);
+        } catch {
+          /* Player nicht bereit */
+        }
+        diag.current.push(`video: warm done slot${n} ${mid} played ${played.toFixed(1)}s net ${netType()}`);
+      }, ms);
+    };
+    arm(WARM_MS, 0);
+  };
+  /** Nach dem Wisch ist der übernächste Moment der nächste: sein Warmlauf beginnt jetzt. Wartet er noch am ersten Bild, läuft er an, sonst kommt er von selbst. */
+  const promoteWarm = (slot: Slot, n: number) => {
+    slot.warm = 'running';
+    slot.warmAt = 0;
+    diag.current.push(`video: warm start slot${n} ${slot.mid} st=${slot.st}`);
+    if (slot.player && slot.ready && slot.st === STATE.PAUSED) {
+      try {
+        slot.player.mute();
+        slot.player.playVideo();
+      } catch {
+        /* Player nicht bereit */
+      }
+    }
+  };
+  /**
+   * Erstes Bild des aktuellen Moments nach dem Wisch (oder nach dem Kaltstart): Zeile first-frame (unverändert), Messung für die Einstellungen,
+   * dazu die Zeile "video: swipe→ready .., →playing .., net .." (Issue 22) und alle fünf Messungen Median und p90 der letzten 20.
+   */
+  const frameDone = (slot: Slot) => {
+    const sw = swipe.current;
+    if (sw && slot.index === sw.j && sw.j === idxRef.current) {
+      swipe.current = null;
+      const ms = Math.round(performance.now() - sw.t0);
+      diag.current.push(`first-frame ${ms}ms ${sw.buffered ? 'buffered' : 'cold'}${slot.player?.isLocal?.() ? ' local' : ''}`);
+      pre?.recordStart(ms, sw.buffered);
+      update((x) => ({ ...x, playLatency: addSample(x.playLatency, { ms, buffered: sw.buffered, at: Date.now() }) }));
+    }
+    const vs = vstat.current;
+    const m = queue.current[slot.index];
+    if (!vs || vs.done || slot.index !== vs.j || vs.j !== idxRef.current || !m || streamKind(m) !== 'youtube') return;
+    vs.done = true;
+    const playing = Math.round(performance.now() - vs.t0);
+    diag.current.push(`video: ${vs.start ? 'start' : 'swipe'}→ready ${vs.readyAt ?? playing}ms, →playing ${playing}ms, net ${netType()}, ${vs.mode}`);
+    if (vs.start) return; // der Kaltstart zählt nicht in Median und p90 der Wische
+    ytFrames.current.push(playing);
+    const n = ytFrames.current.length;
+    if (n % 5 === 0) {
+      const st = videoStats(ytFrames.current.slice(-20));
+      diag.current.push(`video: median ${st.median}ms, p90 ${st.p90}ms over last ${st.n} swipes`);
+    }
+  };
+  /** Kaltstart: die Vorlade-Player laden erst, wenn der aktuelle Moment spielt (oder GATE_MS vergangen sind) */
+  const openGate = (why: string) => {
+    if (gateOpen.current) return;
+    gateOpen.current = true;
+    window.clearTimeout(gateTimer.current);
+    const waiting = [...gateWait.current];
+    gateWait.current.clear();
+    diag.current.push(`video: preload gate open (${why}), ${waiting.length} waiting`);
+    for (const sl of waiting) if (sl.index >= 0 && sl.player && sl.ready) assign(sl, sl.index, false);
+  };
+
+  const openGateRef = useRef(openGate);
+  openGateRef.current = openGate;
+
   const assign = useCallback((slot: Slot, j: number, play: boolean) => {
     const m = queue.current[j];
     slot.index = j;
@@ -435,6 +589,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       if (play) window.setTimeout(() => skipRef.current(), 0);
       return;
     }
+    // Kaltstart (Issue 22): der aktuelle YouTube-Moment bekommt die Leitung zuerst, die Vorlade-Player warten bis er spielt
+    if (!play && !gateOpen.current) {
+      const cm = queue.current[idxRef.current];
+      if (cm && cm.form !== 'text' && streamKind(cm) === 'youtube' && streamKind(m) === 'youtube') {
+        gateWait.current.add(slot);
+        return;
+      }
+      gateOpen.current = true;
+    }
     try {
       // Vorladen ohne Ton, der aktuelle Moment bekommt den gewählten Ton
       if (play) applySound(slot.player);
@@ -444,6 +607,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         slot.st = STATE.UNSTARTED;
         slot.broken = false;
         slot.tries = 0;
+        resetWarm(slot);
+        // Der nächste Moment läuft nach dem Laden stumm warm, der übernächste hält am ersten Bild. Ein aktueller Moment ohne Warmlauf bekommt die Abdeckfläche.
+        if (!play && canWarm(roleOf(j, idxRef.current), warmCtxOf(j))) slot.warm = 'running';
+        slot.coverMs = play && streamKind(m) === 'youtube' ? WARM_MS : 0;
         // Nach dem Neuaufbau der Player (YouTube-API kam zurück) läuft der Moment an derselben Stelle weiter, nicht von vorn
         const at = resume.current?.mid === m.id ? resume.current.pos : undefined;
         if (at !== undefined) resume.current = null;
@@ -453,8 +620,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         // YouTube lädt bei cue nur das Vorschaubild. Darum stumm laden, der Player hält beim ersten Bild an (siehe onState).
         else if (!HLS.has(m.videoId)) slot.player.loadVideoById(arg);
         else slot.player.cueVideoById(arg);
-      } else if (play) slot.player.playVideo();
-      else slot.player.pauseVideo();
+      } else if (play) {
+        // Wisch während des Warmlaufs: der Moment lief schon stumm weiter und beginnt wieder am Anfang des Ausschnitts
+        if (slot.warm === 'running') slot.player.seekTo?.(m.start, true);
+        slot.player.playVideo();
+      } else slot.player.pauseVideo();
+      if (play) slot.visited = true;
     } catch (e) {
       // Ein einzelner Moment ließ sich nicht laden: merken und zum nächsten, nie die Fehlerseite
       diag.current.push(`assign ${m.id} failed ${e instanceof Error ? e.message : String(e)}`);
@@ -716,13 +887,40 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       const nm = queue.current[next];
       // Gepuffert heißt: der Vorlade-Player hält genau diesen Moment schon angehalten am Start
       // Ein Stream-Moment (Podcast, Vorrat) hält angehalten im Zustand CUED und gilt als geladen, sobald das erste Bild Daten hat
-      const ready = !single && !!nm && target.ready && target.mid === nm.id && (target.st === STATE.PAUSED || (target.st === STATE.CUED && !!target.player?.isBuffered?.()));
-      swipe.current = { j: next, t0: performance.now(), buffered: ready };
+      const holds = !single && !!nm && target.mid === nm.id;
+      const ready = !single && !!nm && target.ready && holds && (target.warm === 'done' || target.st === STATE.PAUSED || (target.st === STATE.CUED && !!target.player?.isBuffered?.()));
+      const t0 = performance.now();
+      swipe.current = { j: next, t0, buffered: ready };
+      // Warmlauf, Abdeckfläche und Nachrücken (warmup.ts), bevor assign den Slot anfasst
+      const plan = single
+        ? null
+        : swipePlan(next, slots.current.slice(0, SLOTS).map((x): SlotView => ({ index: x.index, warm: x.warm, visited: x.visited, warmPlayedMs: x.warm === 'running' && x.warmAt ? t0 - x.warmAt : 0 })), warmCtxOf);
+      vstat.current = { j: next, t0, readyAt: ready ? 0 : null, mode: holds ? (target.warm === 'done' ? 'warm' : target.warm === 'running' ? 'warming' : ready ? 'paused' : 'cold') : 'cold', done: false };
       const play = !textRef.current;
       if (single) assign(slots.current[0], next, play);
       else {
         assign(slotFor(next), next, play);
         for (const j of [next + 1, next + 2]) if (slotFor(j).index !== j) assign(slotFor(j), j, false);
+      }
+      if (plan) {
+        const tgt = slots.current[plan.target];
+        if (tgt.index === next) {
+          // Der Slot ist jetzt der aktuelle: kein Warmlauf mehr, die Abdeckfläche (Rest oder voll) beginnt mit PLAYING
+          window.clearTimeout(tgt.warmTimer);
+          tgt.warmTimer = 0;
+          window.clearTimeout(tgt.coverTimer);
+          tgt.coverMs = plan.coverMs;
+          tgt.coverEnd = 0;
+          setCover(tgt, false);
+          tgt.warm = 'done';
+          // Lief der Warmlauf noch, spielt der Slot schon: es kommt kein neues PLAYING, also hier starten und das erste Bild melden
+          if (tgt.st === STATE.PLAYING && play) {
+            tgt.playedAt ||= t0;
+            startCover(tgt);
+            frameDone(tgt);
+          }
+        }
+        if (plan.promote !== null) promoteWarm(slots.current[plan.promote], plan.promote);
       }
       // Im Hintergrund zählt erst das Ende (finish), bei der Rückkehr der laufende Moment
       if (!textRef.current && countsSeenAtStart(isBackground(document.visibilityState))) markSeen(queue.current[next]);
@@ -915,6 +1113,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!queue.current.length) return;
     const begin = (YT: Awaited<ReturnType<typeof loadYT>>) => {
         if (cancelled) return;
+        // Issue 22: Vorlade-Player warten, bis der aktuelle Moment spielt (höchstens GATE_MS), Messung Start bis erstes Bild
+        gateOpen.current = false;
+        gateWait.current.clear();
+        window.clearTimeout(gateTimer.current);
+        gateTimer.current = window.setTimeout(() => openGateRef.current('timeout'), GATE_MS);
+        vstat.current = { j: idxRef.current, t0: performance.now(), readyAt: null, mode: 'cold start', done: false, start: true };
         const failedCurrent: number[] = [];
         for (let s = 0; s < SLOTS; s++) {
           const slot = slots.current[s];
@@ -938,6 +1142,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
               },
               onReady: () => {
                 slot.ready = true;
+                const vsr = vstat.current;
+                if (vsr && slot.index === vsr.j && vsr.readyAt === null) vsr.readyAt = Math.round(performance.now() - vsr.t0);
                 slot.player!.mute();
                 assign(slot, slot.index, slot.index === idxRef.current && !textRef.current);
                 if (slot.index === idxRef.current && !textRef.current && countsSeenAtStart(isBackground(document.visibilityState))) markSeen(queue.current[slot.index]);
@@ -948,10 +1154,40 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                 slot.st = st;
                 // Vorschaubild bleibt bis zum ersten Bild: ohne Umweg über React, damit kein Frame der YouTube-Oberfläche durchrutscht
                 slot.el?.toggleAttribute('data-live', st === STATE.PLAYING);
+                // Issue 22: Bereitschaft des Zielmoments (erster Zustand nach dem Wisch), Gate der Vorlade-Player, Abdeckfläche, Puffer-Stopps
+                const vs0 = vstat.current;
+                if (vs0 && slot.index === vs0.j && vs0.readyAt === null && st !== STATE.UNSTARTED) vs0.readyAt = Math.round(performance.now() - vs0.t0);
+                if (slot.index === idxRef.current) {
+                  if (st === STATE.PLAYING) {
+                    slot.playedAt ||= performance.now();
+                    openGate('first playing');
+                    startCover(slot);
+                  } else {
+                    syncCover(slot);
+                    if (st === STATE.BUFFERING && slot.playedAt) {
+                      slot.stalls++;
+                      diag.current.push(`video: stall #${slot.stalls} ${slot.mid} after ${Math.round((performance.now() - slot.playedAt) / 100) / 10}s, net ${netType()}`);
+                    }
+                  }
+                }
                 if (st === STATE.PLAYING) {
                   everPlayed.current = true;
                   slot.broken = false;
                   slot.tries = 0;
+                }
+                // Der Warmlauf kam vor dem Ablauf der Zeit ans Ende des Ausschnitts: zurück auf den Start und fertig (Sicherheitsnetz, kurze Momente laufen nicht warm)
+                if (st === STATE.ENDED && slot.index !== idxRef.current && slot.warm === 'running') {
+                  window.clearTimeout(slot.warmTimer);
+                  slot.warmTimer = 0;
+                  slot.warm = 'done';
+                  const mw = queue.current[slot.index];
+                  try {
+                    if (mw) slot.player?.seekTo?.(mw.start, true);
+                    slot.player?.pauseVideo();
+                  } catch {
+                    /* Player nicht bereit */
+                  }
+                  diag.current.push(`video: warm ended early slot${s} ${slot.mid}`);
                 }
                 if (st === STATE.PLAYING && slot.index === idxRef.current) noteLoud(slot, s);
                 if (st === STATE.PLAYING && slot.index === idxRef.current && isBackground(document.visibilityState) && !bgStarted.current.has(slot.mid)) {
@@ -962,19 +1198,17 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                   if (st === STATE.PLAYING) setPlaybackState('playing', 'player state playing');
                   else if (st === STATE.PAUSED || st === STATE.ENDED) setPlaybackState('paused', st === STATE.ENDED ? 'player state ended' : 'player state paused');
                 }
-                const sw = swipe.current;
-                if (st === STATE.PLAYING && sw && slot.index === sw.j && sw.j === idxRef.current) {
-                  swipe.current = null;
-                  const ms = Math.round(performance.now() - sw.t0);
-                  diag.current.push(`first-frame ${ms}ms ${sw.buffered ? 'buffered' : 'cold'}${slot.player?.isLocal?.() ? ' local' : ''}`);
-                  pre?.recordStart(ms, sw.buffered);
-                  update((x) => ({ ...x, playLatency: addSample(x.playLatency, { ms, buffered: sw.buffered, at: Date.now() }) }));
-                }
+                if (st === STATE.PLAYING) frameDone(slot);
                 // Gespeichertes Tempo (Pfeiler 17) bei jedem Start, auch nach Neuaufbau oder Wiederaufnahme eines Players
                 if (st === STATE.PLAYING && slot.index === idxRef.current) slot.player?.setPlaybackRate(clampRate(rateRef.current));
                 if (slot.index === idxRef.current) syncHintRef.current();
                 if (st === STATE.ENDED && slot.index === idxRef.current) finish();
-                if (st === STATE.PLAYING && (slot.index !== idxRef.current || forYouRef.current || textRef.current || recallRef.current)) slot.player?.pauseVideo();
+                if (st === STATE.PLAYING && (slot.index !== idxRef.current || forYouRef.current || textRef.current || recallRef.current)) {
+                  // Der nächste Moment läuft stumm weiter (Warmlauf, bis die YouTube-Einblendung weg ist), jeder andere hält am ersten Bild
+                  const role = roleOf(slot.index, idxRef.current);
+                  if (slot.index !== idxRef.current && onNonCurrentPlaying(slot.warm, role, canWarm(role, warmCtxOf(slot.index))) === 'hold') startWarmTimer(slot);
+                  else slot.player?.pauseVideo();
+                }
                 if (moving()) pendingRender.current = true;
                 else rerender();
               },
@@ -1008,6 +1242,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
               const f = pl[k].bind(pl) as (a?: never) => void;
               pl[k] = ((arg?: never) => {
                 slot.el?.removeAttribute('data-live');
+                setCover(slot, false);
                 f(arg);
               }) as never;
             }
@@ -1062,10 +1297,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     })();
     return () => {
       cancelled = true;
+      window.clearTimeout(gateTimer.current);
+      gateWait.current.clear();
       for (const s of slots.current) {
+        window.clearTimeout(s.warmTimer);
+        window.clearTimeout(s.coverTimer);
         s.player?.destroy();
         s.el?.removeAttribute('data-live');
-        Object.assign(s, { player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0 });
+        Object.assign(s, { player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, stalls: 0, playedAt: 0 });
+        if (s.cover) s.cover.style.visibility = 'hidden';
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -2097,7 +2337,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       /** Nur Tests: der Web-Audio-Kontext, um ihn anzuhalten (iOS-Unterbrechung nachstellen) */
       ctx: () => contextForTest(),
       gain: () => slots.current.slice(0, SLOTS).map((x) => ({ index: x.index, loud: x.player?.loud?.() ?? null })),
-      diagAll: () => diag.current.filter((x) => /^(replan|reorder|net poor|yt stub|first-frame)/.test(x)),
+      diagAll: () => diag.current.filter((x) => /^(replan|reorder|net poor|yt stub|first-frame|video:)/.test(x)),
+      /** Nur Tests (Issue 22): Zeiten Wisch bis erstes Bild je YouTube-Moment, Warmlauf und Abdeckfläche je Slot, Gate der Vorlade-Player */
+      video: () => ({
+        frames: [...ytFrames.current],
+        gate: gateOpen.current,
+        slots: slots.current.slice(0, SLOTS).map((x) => ({ index: x.index, mid: x.mid, warm: x.warm, st: x.st, cover: x.cover?.style.visibility ?? null })),
+      }),
       slots: () => slots.current.slice(0, SLOTS).map((x) => ({ st: x.st, index: x.index })),
       // Audio-Reiter: Schlüssel der Ausschnitte, die das eine Audio-Element geladen hat, und ob es vorhanden ist (Tests)
       deck: () => ({ history: [...audioDeck.history], exists: audioDeck.exists, armed: audioDeck.armedKey, pos: audioDeck.lastPos }),
@@ -2223,6 +2469,24 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
               <div ref={(el) => (slot.host = el)} />
             </div>
             {posterOf(mm)}
+            <div
+              ref={(el) => (slot.cover = el)}
+              className="vcover"
+              data-testid="vcover"
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                zIndex: 2,
+                pointerEvents: 'none',
+                visibility: 'hidden',
+                ...(desk
+                  ? { left: 0, top: '50%', width: '100%', aspectRatio: '16 / 9', transform: 'translateY(-50%)' }
+                  : { left: '50%', width: '100vw', height: 'calc(100vw * 9 / 16)', top: 'calc(50% - 0.19 * max(100dvh, 100vw * 16 / 9))', transform: 'translateX(-50%)' }),
+              }}
+            >
+              <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: COVER_TOP, background: 'var(--tab-bg, #000)' }} />
+              <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: COVER_BOTTOM, background: 'var(--tab-bg, #000)' }} />
+            </div>
             {isCur && paused && !forYou && (
               <svg className="vplay" width="72" height="72" viewBox="0 0 24 24" fill="#fff" aria-label="Pausiert">
                 <path d="M8 5v14l11-7z" />
