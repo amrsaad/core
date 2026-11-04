@@ -134,6 +134,8 @@ export const audioDeck: AudioDeck = new AudioDeck({
   running: audioRunning,
   broken: breakLevel,
   playbackState: (st, why) => setMediaState(st, why),
+  // Zweites Element hält den nächsten Moment fertig, Weiter tauscht nur (Entscheidung 47)
+  standby: true,
 });
 
 /** Media Session des Betriebssystems setzen. Im Hintergrund steht jede Änderung im Protokoll (Hintergrund-Diagnose, Frage 2). */

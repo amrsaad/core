@@ -444,69 +444,361 @@ describe('Lautheit: zwei feste Elemente', () => {
   });
 });
 
-describe('Weiter vom Sperrbildschirm (Brief 10, Issue 36)', () => {
-  it('startNow setzt Quelle und play() synchron im Aufruf, am selben Element, mit der Blob-URL aus dem Vorrat', () => {
-    const b = clip('b', 10, 20);
-    const t = setup({ local: { [b.key]: { url: 'blob:b', offset: 10 } } });
-    const a = clip('a', 0, 60);
-    t.deck.load(a, t.sink, { play: true, muted: false });
-    t.el.calls.length = 0;
-    const r = t.deck.startNow(b);
-    // Beides ist beim Rücksprung aus startNow schon geschehen, vor jedem Rendern der App
-    expect(t.el.calls.filter((c) => c.startsWith('src:'))).toEqual(['src:blob:b']);
-    expect(t.el.calls.indexOf('src:blob:b')).toBeLessThan(t.el.calls.lastIndexOf('play'));
-    expect(r.local).toBe(true);
-    expect(t.made()).toBe(1);
+// Brief 11, Entscheidung 47: das zweite Element (Standby) hält den nächsten Ausschnitt fertig, Weiter tauscht nur die Rollen.
+// Jedes Element ist ein eigener Nachbau, die Ereignisse des Browsers kommen nur durch emit.
+type SbEl = FakeEl & { level: boolean };
+function setupStandby(opts: { hidden?: boolean; local?: Record<string, { url: string; offset: number }>; running?: boolean; level?: boolean } = {}) {
+  const els: SbEl[] = [];
+  const local = { ...(opts.local ?? {}) };
+  let hidden = opts.hidden ?? false;
+  let running = opts.running ?? true;
+  const dropped: string[] = [];
+  const hosts: string[] = [];
+  const media: string[] = [];
+  const chained: number[] = [];
+  const deck = new AudioDeck({
+    standby: true,
+    local: (k) => local[k],
+    dropLocal: (k) => {
+      dropped.push(k);
+      delete local[k];
+    },
+    make: (lv) => {
+      const e = Object.assign(new FakeEl(), { level: lv });
+      // src protokollieren: die Reihenfolge von Quelle und play() ist prüfbar
+      let src = '';
+      Object.defineProperty(e, 'src', {
+        get: () => src,
+        set: (v: string) => {
+          src = v;
+          e.calls.push(`src:${v}`);
+        },
+      });
+      els.push(e);
+      return e;
+    },
+    hidden: () => hidden,
+    running: () => running,
+    lane: (c, _l, force) => (opts.level && c.gain && !force ? { lane: 'level', why: 'cors trial' } : { lane: 'plain', why: force ? 'fallback' : 'no value' }),
+    chain: (_el, db) => {
+      chained.push(db);
+      return { linear: () => 10 ** (db / 20) };
+    },
+    host: (u, s) => hosts.push(`${s} ${u}`),
+    playbackState: (s, why) => media.push(`${s} ${why}`),
+  });
+  const states: number[] = [];
+  const sink: DeckSink = { state: (st) => states.push(st), error: () => states.push(-1) };
+  const lines: string[] = [];
+  deck.diag = (l) => lines.push(l);
+  return { deck, els, sink, states, lines, dropped, hosts, media, chained, setHidden: (h: boolean) => (hidden = h), setRunning: (r: boolean) => (running = r), local };
+}
+/** Der Standby bekommt Metadaten und genug Daten */
+const fill = (el: FakeEl, rs = 4) => {
+  el.emit('loadedmetadata');
+  el.readyState = rs;
+  el.emit('canplaythrough');
+};
+const sbA = clip('a', 0, 60);
+const sbB = clip('b', 10, 20);
+
+describe('Standby: zweites Audio-Element (Brief 11, Entscheidung 47)', () => {
+  it('prepare tut nichts, solange der Standby nicht eingeschaltet ist', () => {
+    const t = setup();
+    expect(t.deck.prepare(sbB)).toBe(false);
+    expect(t.made()).toBe(0);
+    expect(t.deck.standbyReady()).toBe(false);
+  });
+
+  it('prepare lädt auf ein zweites Element: Vorrat lokal bevorzugt, sonst Netz mit Start, Zeilen "deck: prepare" und "deck: standby ready"', () => {
+    const t = setupStandby({ local: { [sbB.key]: { url: 'blob:b', offset: 8 } } });
+    t.deck.load(sbA, t.sink, { play: true, muted: false });
+    expect(t.deck.prepare(sbB)).toBe(true);
+    expect(t.els).toHaveLength(2);
+    const [act, sb] = t.els;
+    expect(sb.src).toBe('blob:b');
+    expect(sb.calls).toContain('load');
+    expect(t.lines).toContain('deck: prepare b src=local');
+    // Das aktive Element bleibt unberührt
+    expect(act.src).toBe('https://pod.test/a.mp3');
+    expect(t.deck.standbyReady()).toBe(false);
+    fill(sb);
+    expect(t.deck.standbyReady(sbB.key)).toBe(true);
+    expect(t.deck.standbyReady('x|0|1')).toBe(false);
+    expect(t.lines.some((l) => /^deck: standby ready b after \d+ ms$/.test(l))).toBe(true);
+    // Ohne Vorrat: Netz, der Start steckt im Medienfragment
+    t.deck.dropStandby('test');
+    const c = clip('c', 30, 40);
+    t.deck.prepare(c);
+    expect(t.els[1].src).toBe('https://pod.test/c.mp3#t=30');
+    expect(t.lines).toContain('deck: prepare c src=net');
+  });
+
+  it('bereit erst mit Metadaten, gesetzter Position und genug Daten, die Position wird nach den Metadaten nachgezogen', () => {
+    const t = setupStandby({ local: { [sbB.key]: { url: 'blob:b', offset: 8 } } });
+    t.deck.load(sbA, t.sink, { play: true, muted: false });
+    t.deck.prepare(sbB);
+    const sb = t.els[1];
+    // Vor den Metadaten: nichts
+    sb.readyState = 1;
+    sb.emit('canplaythrough');
+    expect(t.deck.standbyReady()).toBe(false);
+    // iOS hat die frühe Position verworfen
+    sb.currentTime = 0;
+    sb.emit('loadedmetadata');
+    // Start 10 minus Versatz 8
+    expect(sb.currentTime).toBe(2);
+    // Nach dem Springen zählt erst ein neues canplaythrough oder genug Daten
+    expect(t.deck.standbyReady()).toBe(false);
+    sb.readyState = 4;
+    sb.emit('canplaythrough');
+    expect(t.deck.standbyReady()).toBe(true);
+  });
+
+  it('aus dem Vorrat genügt readyState 3, übers Netz braucht es canplaythrough oder readyState 4', () => {
+    const t = setupStandby({ local: { [sbB.key]: { url: 'blob:b', offset: 10 } } });
+    t.deck.load(sbA, t.sink, { play: true, muted: false });
+    t.deck.prepare(sbB);
+    t.els[1].emit('loadedmetadata');
+    t.els[1].readyState = 3;
+    t.els[1].emit('canplay');
+    expect(t.deck.standbyReady()).toBe(true);
+    const c = clip('c', 0, 10);
+    t.deck.prepare(c);
+    const net = t.els[1];
+    net.emit('loadedmetadata');
+    net.readyState = 3;
+    net.emit('canplay');
+    expect(t.deck.standbyReady()).toBe(false);
+    net.readyState = 4;
+    net.emit('seeked');
+    expect(t.deck.standbyReady()).toBe(true);
+  });
+
+  it('swap ohne bereiten Standby tut nichts und sagt es', () => {
+    const t = setupStandby();
+    t.deck.load(sbA, t.sink, { play: true, muted: false });
+    t.deck.prepare(sbB);
+    const [act, sb] = t.els;
+    act.calls.length = 0;
+    sb.calls.length = 0;
+    expect(t.deck.swap()).toBe(false);
+    expect(t.lines).toContain('deck: swap b ready=false');
+    expect(act.calls).toEqual([]);
+    expect(sb.calls).toEqual([]);
+    expect(act.paused).toBe(false);
+    expect(t.deck.clip?.id).toBe('a');
+  });
+
+  it('swap tauscht die Rollen: play() sofort auf dem Standby, danach hält das alte an, nichts wird geladen, keine Quelle gewechselt', () => {
+    const t = setupStandby();
+    t.deck.load(sbA, t.sink, { play: true, muted: false });
+    t.deck.prepare(sbB);
+    const [act, sb] = t.els;
+    fill(sb);
+    act.calls.length = 0;
+    sb.calls.length = 0;
+    expect(t.deck.swap()).toBe(true);
+    expect(sb.calls).toEqual(['play']);
+    expect(sb.paused).toBe(false);
+    expect(act.paused).toBe(true);
+    // Weder load() noch eine neue Quelle an einem der beiden
+    expect([...act.calls, ...sb.calls].filter((c) => c === 'load' || c.startsWith('src:'))).toEqual([]);
+    expect(t.deck.clip?.id).toBe('b');
+    expect(t.deck.history.at(-1)).toBe(sbB.key);
+    expect(t.deck.standbyReady()).toBe(false);
+    expect(t.lines).toContain('deck: swap b ready=true');
+    expect(t.lines.some((l) => /^deck play#\d+ swap /.test(l))).toBe(true);
+    expect(t.media).toContain('playing swap');
+    // Der alte Player ist abgegeben: seine Ereignisse und Befehle stören das neue Element nicht
+    t.deck.pause(t.sink);
+    expect(sb.paused).toBe(false);
+    act.tick(60);
     expect(t.deck.clip?.id).toBe('b');
   });
 
-  it('der neue Player übernimmt über load() ohne neue Quelle, der alte Player stört nicht mehr', () => {
-    const b = clip('b', 10, 20);
-    const t = setup({ local: { [b.key]: { url: 'blob:b', offset: 10 } } });
-    const a = clip('a', 0, 60);
-    t.deck.load(a, t.sink, { play: true, muted: false });
-    t.deck.startNow(b);
-    t.el.calls.length = 0;
-    // Der alte Player (React räumt ihn nach dem Rendern ab) darf das neue Element nicht anhalten
-    t.deck.pause(t.sink);
-    t.deck.drop(t.sink);
-    expect(t.el.paused).toBe(false);
-    const next: DeckSink = { state: () => {}, error: () => {} };
-    t.deck.load(b, next, { play: true, muted: false });
-    expect(t.el.calls.filter((c) => c === 'load' || c.startsWith('src:'))).toEqual([]);
-    expect(t.deck.owns(next)).toBe(true);
-  });
-
-  it('played ist true, sobald play() erfüllt ist, und false bei Ablehnung', async () => {
-    const t = setup();
-    t.deck.load(clip('a'), t.sink, { play: true, muted: false });
-    expect(await t.deck.startNow(clip('b', 5, 15)).played).toBe(true);
-    t.el.playResult = () => Promise.reject(new DOMException('blocked', 'NotAllowedError'));
-    expect(await t.deck.startNow(clip('c', 5, 15)).played).toBe(false);
-  });
-
-  it('revertNow geht zurück zum vorigen Ausschnitt an der Stelle, an der er stand', () => {
-    const t = setup();
-    const a = clip('a', 0, 60);
-    const b = clip('b', 10, 20);
-    t.deck.load(a, t.sink, { play: true, muted: false });
-    t.el.tick(12);
-    t.deck.startNow(b);
-    t.el.calls.length = 0;
-    expect(t.deck.revertNow(b.key)).toBe(true);
-    expect(t.deck.clip?.id).toBe('a');
-    expect(t.el.calls.filter((c) => c.startsWith('src:'))).toEqual(['src:https://pod.test/a.mp3#t=12']);
-    expect(t.el.calls).toContain('play');
-    // Nur einmal
-    expect(t.deck.revertNow(b.key)).toBe(false);
-  });
-
-  it('revertNow tut nichts, wenn das Deck inzwischen einen anderen Ausschnitt hält (zweiter Druck)', () => {
-    const t = setup();
-    t.deck.load(clip('a', 0, 60), t.sink, { play: true, muted: false });
-    t.deck.startNow(clip('b', 10, 20));
-    t.deck.startNow(clip('c', 10, 20));
-    expect(t.deck.revertNow(clip('b', 10, 20).key)).toBe(false);
+  it('nach dem Tausch gelten die Ereignisse des neuen Elements: Ende im Hintergrund führt zum Nachfolger', () => {
+    const t = setupStandby({ hidden: true, local: { 'b|0|10': { url: 'blob:b', offset: 0 } } });
+    t.deck.load(sbA, t.sink, { play: true, muted: false });
+    t.deck.prepare(clip('b', 0, 10));
+    fill(t.els[1]);
+    t.deck.swap();
+    const c = clip('c', 0, 10);
+    t.deck.arm(c);
+    let advanced = 0;
+    t.deck.onAdvance = () => advanced++;
+    t.els[1].tick(10);
+    expect(advanced).toBe(1);
     expect(t.deck.clip?.id).toBe('c');
+  });
+
+  it('fünf Mal tauschen: das freie Element nimmt jeweils den nächsten Standby, es bleiben zwei Elemente', () => {
+    const t = setupStandby({ hidden: true });
+    const ids = ['b', 'c', 'd', 'e', 'f'];
+    const clips = ids.map((i) => clip(i, 0, 10));
+    for (const c of clips) t.local[c.key] = { url: `blob:${c.id}`, offset: 0 };
+    t.deck.load(clip('a', 0, 10), t.sink, { play: true, muted: false });
+    for (const c of clips) {
+      expect(t.deck.prepare(c)).toBe(true);
+      fill(t.els[t.els.length > 1 ? (t.deck as unknown as { standby: { el: SbEl } }).standby.el === t.els[0] ? 0 : 1 : 1]);
+      expect(t.deck.standbyReady(c.key)).toBe(true);
+      expect(t.deck.swap()).toBe(true);
+      expect(t.deck.clip?.id).toBe(c.id);
+    }
+    expect(t.els).toHaveLength(2);
+    expect(t.lines.filter((l) => /^deck: swap \S+ ready=true$/.test(l))).toHaveLength(5);
+    expect(t.lines.some((l) => /ready=false/.test(l))).toBe(false);
+  });
+
+  it('der Wisch auf den Standby-Moment tauscht in load() statt die Quelle zu wechseln', () => {
+    const t = setupStandby();
+    t.deck.load(sbA, t.sink, { play: true, muted: false });
+    t.deck.prepare(sbB);
+    const [act, sb] = t.els;
+    fill(sb);
+    // Der Feed pausiert den alten Player, dann lädt der neue
+    t.deck.pause(t.sink);
+    act.calls.length = 0;
+    sb.calls.length = 0;
+    const states: number[] = [];
+    const next: DeckSink = { state: (x) => states.push(x), error: () => {} };
+    t.deck.load(sbB, next, { play: true, muted: false });
+    // Das Element meldet "playing" schon synchron im play(): der neue Player bekommt PLAYING trotzdem (der Sink steht vor dem Tausch)
+    expect(states).toContain(1);
+    expect([...act.calls, ...sb.calls].filter((c) => c === 'load' || c.startsWith('src:'))).toEqual([]);
+    expect(sb.calls).toEqual(['play']);
+    expect(t.deck.owns(next)).toBe(true);
+    expect(t.deck.holds(sbB.key)).toBe(true);
+    expect(sb.muted).toBe(false);
+  });
+
+  it('der Wisch auf einen anderen Moment startet normal, der Standby bleibt', () => {
+    const t = setupStandby();
+    t.deck.load(sbA, t.sink, { play: true, muted: false });
+    t.deck.prepare(sbB);
+    fill(t.els[1]);
+    const far = clip('z', 0, 10);
+    t.deck.load(far, t.sink, { play: true, muted: false });
+    expect(t.deck.clip?.id).toBe('z');
+    expect(t.deck.standbyReady(sbB.key)).toBe(true);
+  });
+
+  it('verdeckt wird nur aus dem Vorrat vorbereitet, nie vom Netz', () => {
+    const t = setupStandby({ hidden: true, local: { [sbB.key]: { url: 'blob:b', offset: 10 } } });
+    t.deck.load(sbA, t.sink, { play: true, muted: false });
+    const c = clip('c', 0, 10);
+    expect(t.deck.prepare(c)).toBe(false);
+    expect(t.lines).toContain('deck: prepare c skipped (hidden, not in storage)');
+    expect(t.els).toHaveLength(1);
+    expect(t.deck.prepare(sbB)).toBe(true);
+    expect(t.els).toHaveLength(2);
+  });
+
+  it('ein Ereignis des Standby stört den laufenden Ausschnitt nicht', () => {
+    const t = setupStandby();
+    t.deck.load(sbA, t.sink, { play: true, muted: false });
+    t.deck.prepare(sbB);
+    const sb = t.els[1];
+    t.states.length = 0;
+    sb.emit('ended');
+    sb.emit('pause');
+    sb.emit('playing');
+    sb.tick(5);
+    expect(t.states).toEqual([]);
+    expect(t.deck.clip?.id).toBe('a');
+  });
+
+  it('Standby aus dem Vorrat nicht abspielbar: Vorrat vergessen, sichtbar einmal vom Netz, verdeckt nichts', () => {
+    const t = setupStandby({ local: { [sbB.key]: { url: 'blob:b', offset: 10 } } });
+    t.deck.load(sbA, t.sink, { play: true, muted: false });
+    t.deck.prepare(sbB);
+    t.els[1].emit('error');
+    expect(t.dropped).toEqual([sbB.key]);
+    expect(t.lines).toContain('deck: prepare b src=net');
+    const h = setupStandby({ hidden: true, local: { [sbB.key]: { url: 'blob:b', offset: 10 } } });
+    h.deck.load(sbA, h.sink, { play: true, muted: false });
+    h.deck.prepare(sbB);
+    h.els[1].emit('error');
+    expect(h.dropped).toEqual([sbB.key]);
+    expect(h.deck.standbyKey).toBeNull();
+    expect(h.lines).toContain('deck: prepare b skipped (hidden, not in storage)');
+  });
+
+  it('startet der Feed den Standby-Ausschnitt direkt, ist der Standby überholt und das Element frei', () => {
+    const t = setupStandby();
+    t.deck.load(sbA, t.sink, { play: true, muted: false });
+    t.deck.prepare(sbB);
+    fill(t.els[1]);
+    t.deck.load(sbB, t.sink, { play: false, muted: false });
+    expect(t.deck.standbyKey).toBeNull();
+    expect(t.deck.clip?.id).toBe('b');
+  });
+
+  it('onPlayed kommt nach jedem erfüllten play(), auch nach swap', async () => {
+    const t = setupStandby();
+    let n = 0;
+    t.deck.onPlayed = () => n++;
+    t.deck.load(sbA, t.sink, { play: true, muted: false });
+    await Promise.resolve();
+    expect(n).toBe(1);
+    t.deck.prepare(sbB);
+    fill(t.els[1]);
+    t.deck.swap();
+    await Promise.resolve();
+    expect(n).toBe(2);
+    expect(t.lines.some((l) => /^deck play#\d+ ok$/.test(l))).toBe(true);
+  });
+
+  it('Lautheit: die Kette hängt am Element des Standby, nach swap gilt ihr Wert', () => {
+    const t = setupStandby({ level: true });
+    const a = { ...clip('a', 0, 60), gain: 0 };
+    const b = { ...clip('b', 0, 20), gain: 6 };
+    t.deck.load(a, t.sink, { play: true, muted: false });
+    t.deck.prepare(b);
+    expect(t.chained).toEqual([6]);
+    expect(t.els.find((e) => e.level)?.src).toContain('b.mp3');
+    fill(t.els.find((e) => e.level) as SbEl);
+    expect(t.deck.swap()).toBe(true);
+    t.deck.load(b, t.sink, { play: true, muted: false });
+    expect(t.deck.loud(t.sink)).toEqual({ db: 6, how: 'web audio', linear: 10 ** (6 / 20) });
+  });
+
+  it('Lautheit: läuft der Kontext beim Tausch nicht, geht dieser Druck verloren und der Standby wird unverändert neu vorbereitet', () => {
+    const t = setupStandby({ level: true, local: { 'b|0|20': { url: 'blob:b', offset: 0 } } });
+    const a = { ...clip('a', 0, 60), gain: 0 };
+    const b = { ...clip('b', 0, 20), gain: 6 };
+    t.deck.load(a, t.sink, { play: true, muted: false });
+    t.deck.prepare(b);
+    fill(t.els.find((e) => e.level) as SbEl);
+    t.setRunning(false);
+    expect(t.deck.swap()).toBe(false);
+    expect(t.lines).toContain('deck: swap b ready=false (context not running)');
+    expect(t.deck.clip?.id).toBe('a');
+    expect(t.deck.standbyKey).toBe(b.key);
+    expect(t.els.find((e) => !e.level && e.src === 'blob:b')).toBeTruthy();
+  });
+
+  it('eine Geste schaltet das zweite Element mit Stille frei, einmal, und lässt aktive und Standby-Elemente in Ruhe', () => {
+    const t = setupStandby();
+    t.deck.load(sbA, t.sink, { play: true, muted: false });
+    t.deck.unlock();
+    expect(t.els).toHaveLength(2);
+    const sp = t.els[1];
+    expect(sp.src.startsWith('data:audio/wav')).toBe(true);
+    expect(sp.calls.filter((c) => c === 'play')).toHaveLength(1);
+    t.deck.unlock();
+    expect(sp.calls.filter((c) => c === 'play')).toHaveLength(1);
+    expect(t.els[0].src).toBe('https://pod.test/a.mp3');
+    expect(t.els[0].paused).toBe(false);
+  });
+
+  it('release räumt den Standby auf', () => {
+    const t = setupStandby();
+    t.deck.load(sbA, t.sink, { play: true, muted: false });
+    t.deck.prepare(sbB);
+    fill(t.els[1]);
+    t.deck.release();
+    expect(t.deck.standbyReady()).toBe(false);
+    expect(t.els.every((e) => e.paused)).toBe(true);
   });
 });

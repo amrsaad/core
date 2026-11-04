@@ -109,8 +109,6 @@ const COVER_BOTTOM = 48;
 
 const END_GUARD = 0.3;
 const FOR_YOU_MS = 6000;
-/** Weiter vom Sperrbildschirm (Brief 10): so lange darf der sofort gestartete Moment brauchen, bis er spielt, danach zurück zum laufenden */
-const LOCK_START_MS = 3000;
 const POLL_MS = 150;
 const TAP_MS = 260;
 const LONG_MS = 500;
@@ -726,13 +724,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   };
 
   /**
-   * Audio-Reiter, Entscheidung 45: Der Nachfolger kommt aus dem Vorrat, nie vom Netz, solange einer erreichbar ist. Sichtbar innerhalb der nächsten drei,
+   * Audio-Reiter, Entscheidung 45: Ein Moment, der erreichbar ist und die Bedingung erfüllt, rückt an die Stelle idx+1. Sichtbar innerhalb der nächsten drei,
    * verdeckt aus dem ganzen Rest. Gibt den Ausgang zurück (held, pulled, net, none) und setzt bei pulled die Warteschlange um.
    */
-  const pullStock = (hidden: boolean, strict = false) => {
+  const pullBy = (held: (m: Moment) => boolean, hidden: boolean) => {
     if (form !== 'audio' || !pre) return { how: 'none' as const };
-    // strict (Brief 10): nur Momente mit fertiger Blob-URL. Nur sie starten verdeckt synchron, ein Moment ohne Blob-URL ginge über Netz oder Service Worker.
-    const r = lockNextPlan(queue.current, idxRef.current, (m) => LOCAL.has(keyOf(m)) || (!strict && pre.held(m.id)), hidden);
+    const r = lockNextPlan(queue.current, idxRef.current, held, hidden);
     if (r.how === 'pulled') {
       queue.current = r.queue;
       for (const sl of slots.current) if (sl.index >= idxRef.current + 1) sl.index = -1;
@@ -741,7 +738,37 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     }
     return r;
   };
-  /** Weiter vom Sperrbildschirm oder der Medientaste (Brief 09, Schritt 5). Verdeckt ohne Vorrat startet nichts vom Netz: der laufende Moment spielt zu Ende. */
+  /** Nachfolger aus dem Vorrat (Blob oder Cache), nie vom Netz, solange einer erreichbar ist (Entscheidung 45) */
+  const pullStock = (hidden: boolean) => (pre ? pullBy((m) => LOCAL.has(keyOf(m)) || pre.held(m.id), hidden) : { how: 'none' as const });
+
+  /**
+   * Standby vorbereiten (Entscheidung 47, Brief 11): der Nachfolger kommt in das zweite Audio-Element, bevorzugt aus dem Vorrat. Sichtbar auch über Netz,
+   * verdeckt nur aus dem Vorrat (dann rückt ein Vorrats-Moment mit fertiger Blob-URL an idx+1). Aufruf nach jedem "deck play ok" und nach jedem Wechsel.
+   */
+  const prepareNext = () => {
+    if (form !== 'audio' || !pre) return;
+    const hidden = isBackground(document.visibilityState);
+    pruneBad();
+    if (!queue.current[idxRef.current + 1]) ensureQueue(idxRef.current + 2);
+    // Ein bereiter Standby für den Nachfolger bleibt, sonst rückt ein Vorrats-Moment mit Blob-URL nach vorn
+    const first = queue.current[idxRef.current + 1];
+    if (hidden && !(first && audioDeck.standbyReady(keyOf(first)))) pullBy((m) => LOCAL.has(keyOf(m)), true);
+    const nm = successorOf(queue.current, idxRef.current, bad.current);
+    const clip = nm && formOf(nm) === 'audio' ? deckClipOf(nm) : null;
+    if (!nm || !clip) {
+      audioDeck.dropStandby('no successor');
+      return;
+    }
+    if (audioDeck.prepare(clip)) void pre.warm([nm]);
+  };
+  const prepareNextRef = useRef(prepareNext);
+  prepareNextRef.current = prepareNext;
+
+  /**
+   * Weiter vom Sperrbildschirm oder der Medientaste (Brief 11, Entscheidung 47): ist der Standby für den Nachfolger bereit, tauschen die Elemente, es wird nichts
+   * geladen und keine Quelle gewechselt. Verdeckt ohne bereiten Standby geschieht nichts (der laufende Moment spielt zu Ende, nichts wird gezählt, nie ein
+   * Netzstart verdeckt). Sichtbar gilt der normale Weg (Vorrat zuerst, sonst Netz mit der Laden-Pille).
+   */
   const lockNext = () => {
     const hidden = isBackground(document.visibilityState);
     if (form !== 'audio' || !pre) {
@@ -750,66 +777,29 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     }
     pruneBad();
     ensureQueue(idxRef.current + 1 + queueAhead(rateRef.current));
-    const r = pullStock(hidden, hidden);
-    if (r.how === 'pulled') diag.current.push(`lock next: pulled ${r.id}`);
-    else if (r.how === 'net') {
-      if (hidden) {
-        diag.current.push(`lock next: stay ${r.id} (no stock, net start refused while hidden)`);
-        // Ein Moment im Vorrat ohne Blob-URL: jetzt bereitstellen, der nächste Druck startet ihn
-        const h = queue.current.slice(idxRef.current + 1).find((x) => pre.held(x.id));
-        if (h) void pre.warm([h]);
+    // Der Moment mit bereitem Standby rückt an idx+1, falls die Warteschlange sich seit dem Vorbereiten verschoben hat
+    const r = pullBy((m) => audioDeck.standbyReady(keyOf(m)), hidden);
+    if (r.how === 'held' || r.how === 'pulled') {
+      if (r.how === 'pulled') diag.current.push(`lock next: pulled ${r.id}`);
+      if (audioDeck.swap()) {
+        goTo(idxRef.current + 1);
         return;
       }
-      diag.current.push(`lock next: net ${r.id}`);
-    } else if (r.how === 'held') diag.current.push(`lock next: held ${r.id}`);
-    // Brief 10 (Issue 36): Quelle und play() des Ziels jetzt, im Call-Stack des Handlers. Erst danach die Buchführung (goTo), die nicht neu lädt.
-    const target = queue.current[idxRef.current + 1];
-    const clip = target && formOf(target) === 'audio' ? deckClipOf(target) : null;
-    if (target && clip) startNow(target, clip, hidden);
+    }
+    if (hidden) {
+      diag.current.push('lock next: stay (standby not ready)');
+      // Für den nächsten Druck: Standby neu bestimmen (verdeckt nur aus dem Vorrat)
+      prepareNextRef.current();
+      return;
+    }
+    const s = pullStock(false);
+    if (s.how === 'pulled') diag.current.push(`lock next: pulled ${s.id}`);
+    else if (s.how === 'net') diag.current.push(`lock next: net ${s.id}`);
+    else if (s.how === 'held') diag.current.push(`lock next: held ${s.id}`);
     goTo(idxRef.current + 1);
   };
   const lockNextRef = useRef(lockNext);
   lockNextRef.current = lockNext;
-
-  /** Zähler der Starts vom Sperrbildschirm: ein zweiter Druck macht den Wächter des ersten gegenstandslos */
-  const lockStart = useRef(0);
-  /**
-   * Das Ziel starten, bevor React rendert (iOS erlaubt das im Hintergrund nur synchron im Handler). Kommt es verdeckt nicht binnen 3 s an, zurück zum
-   * laufenden Moment: Diagnose "reverted", das Ziel bleibt ungesehen (goTo zurück). Nie stumm weiterlaufen. Sichtbar gilt kein Rückfall:
-   * ein Netzstart darf dort länger dauern (Laden-Pille), und kehrt die App während der Wartezeit zurück, übernimmt der normale Ablauf.
-   */
-  const startNow = (target: Moment, clip: NonNullable<ReturnType<typeof deckClipOf>>, hidden: boolean) => {
-    const t0 = performance.now();
-    const token = ++lockStart.current;
-    const to = idxRef.current + 1;
-    let r: ReturnType<typeof audioDeck.startNow>;
-    try {
-      r = audioDeck.startNow(clip);
-    } catch (e) {
-      diag.current.push(`lock next: startNow failed ${target.id} ${e instanceof Error ? e.message : String(e)}`);
-      return;
-    }
-    diag.current.push(`lock next: startNow ${target.id} src=${r.local ? 'blob' : pre?.held(target.id) ? 'cache' : 'net'}`);
-    let settled = false;
-    const revert = () => {
-      if (settled || token !== lockStart.current) return;
-      settled = true;
-      // Der Mensch ist schon weiter (zweiter Druck, Wisch) oder die App ist wieder sichtbar: dort gilt der normale Ablauf
-      if (!isBackground(document.visibilityState) || idxRef.current !== to || !audioDeck.revertNow(clip.key)) return;
-      diag.current.push(`lock next: reverted ${target.id}`);
-      goToRef.current(to - 1);
-    };
-    if (hidden) window.setTimeout(revert, LOCK_START_MS);
-    void r.played.then((ok) => {
-      if (settled || token !== lockStart.current) return;
-      if (!ok) {
-        if (hidden) revert();
-        return;
-      }
-      settled = true;
-      diag.current.push(`lock next: playing after ${Math.round(performance.now() - t0)} ms`);
-    });
-  };
 
   /** Gescheiterte Momente aus dem Rest der Warteschlange nehmen (Wisch und Auto-Weiter lesen danach dieselbe Stelle) */
   const pruneBad = () => {
@@ -1102,6 +1092,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (form !== 'audio') return;
     audioDeck.diag = (line) => diag.current.push(line);
     audioDeck.onAdvance = () => finishRef.current();
+    // Nach jedem erfüllten play() den Nachfolger im zweiten Element vorbereiten (Entscheidung 47)
+    audioDeck.onPlayed = () => prepareNextRef.current();
     // Kaltstart: auf die Blob-URL aus dem Vorrat warten statt vom Netz zu starten
     audioDeck.pending = (id, key) => pre?.pendingWarm(id, key) ?? null;
     // Zähler coldNetStarts: jeder Start einer Quelle vom Netz, pro Tag
@@ -2507,7 +2499,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       }),
       slots: () => slots.current.slice(0, SLOTS).map((x) => ({ st: x.st, index: x.index })),
       // Audio-Reiter: Schlüssel der Ausschnitte, die das eine Audio-Element geladen hat, und ob es vorhanden ist (Tests)
-      deck: () => ({ history: [...audioDeck.history], exists: audioDeck.exists, armed: audioDeck.armedKey, pos: audioDeck.lastPos }),
+      deck: () => ({ history: [...audioDeck.history], exists: audioDeck.exists, armed: audioDeck.armedKey, standby: audioDeck.standbyKey, standbyReady: audioDeck.standbyReady(), pos: audioDeck.lastPos }),
       /** Sperrbildschirm (Brief 02, Tests): Handler registriert, Metadaten, Positionsstatus, Zähler coldNetStarts des Tages */
       lock: () => {
         const ms = 'mediaSession' in navigator ? navigator.mediaSession : null;

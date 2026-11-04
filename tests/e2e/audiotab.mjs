@@ -104,7 +104,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.fiveInARow = await waitFor(p2, () => window.__core.diag().filter((x) => x.startsWith('bg: next ')).length >= 5 && window.__core.state() === 1, undefined, 60000);
     const row = await p2.evaluate(() => ({ same: window.__node === document.querySelector('audio'), count: document.querySelectorAll('audio').length, media: window.__core.media(), diag: window.__core.diag() }));
     r.notes.bgLines = row.diag.filter((x) => x.startsWith('bg: ')).slice(0, 60);
-    c.rowSameNode = row.same && row.count === 1;
+    // Brief 11: höchstens zwei Elemente (aktiv und Standby), das aktive bleibt beim automatischen Weiter dasselbe
+    c.rowSameNode = row.same && row.count <= 2;
     c.rowEndedNext = row.diag.filter((x) => x.startsWith('bg: ended ')).length >= 5 && row.diag.filter((x) => x.startsWith('bg: next ')).length >= 5;
     c.rowNoRejected = !row.diag.some((x) => x.startsWith('bg: play rejected'));
     // Der Wechsel setzt Quelle und play() im Ende-Handler: je Wechsel eine Zeile "advance" und keine Pause dazwischen
@@ -213,18 +214,18 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const f5 = await freshPage(browser, poolRecall);
       const p5 = f5.pg;
       await startAudio(p5);
-      await p5.evaluate(() => { window.__node = document.querySelector('audio'); });
       for (let i = 0; i < 3; i++) { await p5.evaluate(() => window.__core.next()); await sleep(350); }
       c.recallThreeSwiped = (await p5.evaluate(() => window.__core.recall().sessionSeen)) === 3;
       c.recallNoCardYet = (await p5.locator('[data-testid=recall-card]').count()) === 0;
       await waitFor(p5, () => window.__core.state() === 1, undefined, 4000);
       await setVisibility(p5, 'hidden');
       c.recallBgThree = await waitFor(p5, () => window.__core.diag().filter((x) => x.startsWith('bg: next ')).length >= 3 && window.__core.state() === 1, undefined, 40000);
-      const st = await p5.evaluate(() => ({ q: window.__core.recallQueue(), open: window.__core.recall().open, card: !!document.querySelector('[data-testid=recall-card]'), state: window.__core.state(), idx: window.__core.idx(), same: window.__node === document.querySelector('audio'), paused: document.querySelector('audio')?.paused, diag: window.__core.diag() }));
+      const st = await p5.evaluate(() => ({ q: window.__core.recallQueue(), open: window.__core.recall().open, card: !!document.querySelector('[data-testid=recall-card]'), state: window.__core.state(), idx: window.__core.idx(), playing: [...document.querySelectorAll('audio')].filter((a) => !a.paused).length, diag: window.__core.diag() }));
       r.notes.recall = { q: st.q, idx: st.idx, lines: st.diag.filter((x) => x.startsWith('recall:') || x.startsWith('bg: ')).slice(-40) };
       c.recallQueuedOne = st.q.length === 1;
       c.recallNotOpenInBg = !st.open && !st.card;
-      c.recallAudioKeepsPlaying = st.state === 1 && st.paused === false && st.same;
+      // Brief 11: der Standby kann das aktive Element geworden sein, es spielt genau eines von höchstens zwei
+      c.recallAudioKeepsPlaying = st.state === 1 && st.playing === 1;
       c.recallDiagBg = st.diag.some((x) => /^recall: queued \S+ \(bg\)$/.test(x));
       c.recallNoStall = !st.diag.some((x) => x.startsWith('bg: stalled'));
       const idBg = st.q[0]?.id;
@@ -383,26 +384,25 @@ window.onYouTubeIframeAPIReady&&window.onYouTubeIframeAPIReady();`;
     const i0 = await s2.pg.evaluate(() => window.__core.idx());
     await s2.pg.evaluate(() => window.__ms.nexttrack());
     c.lockNextAdvances = await waitFor(s2.pg, (i) => window.__core.idx() === i + 1 && window.__core.state() === 1, i0, 8000);
-    // Brief 09: Weiter am Sperrbildschirm (Bildschirm verdeckt) nimmt den Vorrat. Der Moment startet aus dem Cache, nie per Netz, der Ton kommt innerhalb einer Sekunde.
-    // Verdeckt darf nur ein Vorrats-Moment starten, auch wenn er weit hinten in der Warteschlange liegt (iOS lädt dann erst nach der Rückkehr weiter).
+    // Brief 11: Weiter am Sperrbildschirm (Bildschirm verdeckt) tauscht auf das zweite Element, das den Nachfolger schon fertig hält. Nichts wird geladen,
+    // kein Netzstart, der Ton kommt innerhalb einer Sekunde. Echte mp3 und echtes Audio-Element: hier fällt canplaythrough und die Position wirklich an.
     const netBefore = (await s2.pg.evaluate(() => window.__core.diag())).filter((x) => /^deck: src net /.test(x)).length;
     const stock = await s2.pg.evaluate(() => { const q = window.__core.queue(), i = window.__core.idx(), h = window.__core.preload().ids; return q.slice(i + 1).filter((id) => h.includes(id)).length; });
     r.notes.stockBehind = stock;
+    c.lockStandbyReadyBeforeHidden = await waitFor(s2.pg, () => window.__core.deck().standbyReady, null, 10000);
     const i1 = await s2.pg.evaluate(() => window.__core.idx());
+    const len1 = await s2.pg.evaluate(() => window.__core.diag().length);
     await s2.pg.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }); document.dispatchEvent(new Event('visibilitychange')); });
     const tNext = Date.now();
     await s2.pg.evaluate(() => window.__ms.nexttrack());
     c.lockHiddenAdvances = await waitFor(s2.pg, (i) => window.__core.idx() === i + 1 && window.__core.state() === 1, i1, 3000);
     r.notes.lockNextMs = Date.now() - tNext;
     const dn = await s2.pg.evaluate(() => window.__core.diag());
-    const nextLines = dn.filter((x) => x.startsWith('lock next: '));
+    const nextLines = dn.slice(len1).filter((x) => /^lock next: |^deck: (swap|prepare|standby)|^deck play#|^deck: src /.test(x));
     r.notes.lockNextLines = nextLines;
     c.lockHiddenUnder1s = c.lockHiddenAdvances && r.notes.lockNextMs < 1100;
-    // Letzte Entscheidungszeile (Brief 10 hängt startNow und playing dahinter)
-    c.lockHiddenTakesStock = stock > 0 && /^lock next: (held|pulled) /.test(nextLines.filter((x) => /^lock next: (held|pulled|net|stay) /.test(x)).pop() ?? '');
-    // Brief 10: der Ziel-Moment startet synchron im Handler aus der Blob-URL und spielt binnen einer Sekunde
-    const playedAfter = Number(/^lock next: playing after (\d+) ms$/.exec(nextLines[nextLines.length - 1] ?? '')?.[1] ?? NaN);
-    c.lockHiddenStartNowBlob = nextLines.some((x) => /^lock next: startNow \S+ src=blob$/.test(x)) && playedAfter < 1000;
+    c.lockHiddenSwaps = nextLines.some((x) => /^deck: swap \S+ ready=true$/.test(x)) && nextLines.some((x) => /^deck play#\d+ ok$/.test(x));
+    c.lockHiddenNoNewSource = !nextLines.some((x) => /^deck: src /.test(x));
     c.lockHiddenNoNetStart = dn.filter((x) => /^deck: src net /.test(x)).length === netBefore;
     await s2.pg.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' }); document.dispatchEvent(new Event('visibilitychange')); });
     c.coldS2NoPageErrors = s2.errors.length === 0;

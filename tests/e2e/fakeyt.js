@@ -72,7 +72,7 @@ window.onYouTubeIframeAPIReady && window.onYouTubeIframeAPIReady();
     });
   }
   // Wie die Spezifikation: load() hält ein laufendes Element an (paused wird true, ohne pause-Ereignis) und löscht einen Fehler
-  P.load = function () { this.__err = null; clearInterval(timers.get(this)); this.__p = true; setTimeout(() => emit(this, 'loadedmetadata'), 20); };
+  P.load = function () { this.__err = null; clearInterval(timers.get(this)); this.__p = true; setTimeout(() => emit(this, 'loadedmetadata'), 20); setTimeout(() => { if (!window.__noCpt) emit(this, 'canplaythrough'); }, 30); };
   P.play = function () {
     if (this.__err) return Promise.reject(new DOMException('The media resource is not supported', 'NotSupportedError'));
     live.add(this);

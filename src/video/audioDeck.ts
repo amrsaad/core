@@ -34,6 +34,28 @@ const HOLD_MS = 1200;
 /** Null Sekunden Stille: schaltet das Element durch eine Geste frei, bevor der erste echte Moment kommt */
 const SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
 
+type Lane = 'plain' | 'level';
+
+/** Der Ausschnitt, den das zweite Element (Standby) fertig geladen hält (Entscheidung 47, Brief 11) */
+interface Standby {
+  clip: DeckClip;
+  el: DeckEl;
+  lane: Lane;
+  /** Warum diese Spur (Diagnose, Anzeige der Lautheit) */
+  why: string;
+  chain: { linear: () => number } | null;
+  local: boolean;
+  offset: number;
+  /** Position im Element, an der der Ausschnitt beginnt */
+  target: number;
+  /** Metadaten sind da */
+  meta: boolean;
+  /** canplaythrough kam, seit die Position zuletzt gesetzt wurde */
+  cpt: boolean;
+  ready: boolean;
+  t0: number;
+}
+
 export interface DeckClip {
   /** localKey(videoId, start, end), gleicher Schlüssel wie im Offline-Vorrat */
   key: string;
@@ -105,6 +127,8 @@ export interface DeckDeps {
   hidden?: () => boolean;
   /** Media Session des Betriebssystems setzen (Standard: navigator.mediaSession.playbackState), why für die Diagnose */
   playbackState?: (s: 'playing' | 'paused', why: string) => void;
+  /** Zweites Element (Standby, Entscheidung 47): prepare() lädt den nächsten Ausschnitt dort vor, swap() tauscht nur die Rollen. Aus: prepare() tut nichts. */
+  standby?: boolean;
 }
 
 const defaultMake = (level: boolean): DeckEl => {
@@ -128,10 +152,17 @@ const defaultHidden = () => typeof document !== 'undefined' && document.visibili
 export const withStart = (url: string, start: number): string => (start > 0 && !url.includes('#') ? `${url}#t=${start}` : url);
 
 export class AudioDeck {
-  /** Das aktive Element. Es gibt höchstens zwei, je Spur eines (unverändert, geregelt), beide bleiben im DOM und werden nie ersetzt. */
+  /** Das aktive Element. Je Spur gibt es höchstens zwei (aktiv und frei für den Standby), alle bleiben im DOM und werden nie ersetzt. */
   private el: DeckEl | null = null;
-  private els: { plain: DeckEl | null; level: DeckEl | null } = { plain: null, level: null };
-  private lane: 'plain' | 'level' = 'plain';
+  private pool: Record<Lane, DeckEl[]> = { plain: [], level: [] };
+  private laneOf = new Map<DeckEl, Lane>();
+  private lane: Lane = 'plain';
+  /** Das zweite Element mit dem nächsten Ausschnitt (Entscheidung 47) */
+  private standby: Standby | null = null;
+  /** Elemente, die eine Geste schon einmal mit Stille gestartet hat (iOS erlaubt nur ihnen später play() im Hintergrund) */
+  private unlockedEls = new WeakSet<DeckEl>();
+  /** play() des aktiven Elements wurde erfüllt (nach jedem "deck play#N ok"): der Host bereitet danach den Standby vor */
+  onPlayed: (() => void) | null = null;
   private loudInfo: { db: number; how: string } = { db: 0, how: 'unchanged: no value' };
   private loudLinear: (() => number) | null = null;
   /** Quelle, die in der geregelten Spur nicht lud. Lädt sie danach unverändert, gilt der Host als ohne CORS. */
@@ -195,18 +226,38 @@ export class AudioDeck {
     return this.el;
   }
 
-  private ensure(lane: 'plain' | 'level'): DeckEl {
-    let el = this.els[lane];
-    if (!el) {
-      el = (this.deps.make ?? defaultMake)(lane === 'level');
-      this.els[lane] = el;
+  /** Element der Spur: das aktive, wenn es zu ihr gehört, sonst ein freies (weder aktiv noch Standby), bei Bedarf neu angelegt */
+  private ensure(lane: Lane): DeckEl {
+    if (this.el && this.laneOf.get(this.el) === lane) return this.el;
+    return this.spare(lane);
+  }
+
+  private spare(lane: Lane): DeckEl {
+    return this.pool[lane].find((e) => e !== this.el && e !== this.standby?.el) ?? this.makeEl(lane);
+  }
+
+  private makeEl(lane: Lane): DeckEl {
+    const el = (this.deps.make ?? defaultMake)(lane === 'level');
+    // Ein Nachbau, der immer dasselbe Element liefert (Tests), wird nicht doppelt eingetragen und verdrahtet
+    if (!this.laneOf.has(el)) {
+      this.pool[lane].push(el);
+      this.laneOf.set(el, lane);
       this.wire(el);
     }
     return el;
   }
 
+  /** Mindestens n Elemente der Spur anlegen (für die Freischaltung per Geste) */
+  private ensureCount(lane: Lane, n: number) {
+    while (this.pool[lane].length < n) {
+      const before = this.pool[lane].length;
+      this.makeEl(lane);
+      if (this.pool[lane].length === before) break;
+    }
+  }
+
   private all(): DeckEl[] {
-    return [this.els.plain, this.els.level].filter((x): x is DeckEl => !!x);
+    return [...this.pool.plain, ...this.pool.level];
   }
 
   get exists(): boolean {
@@ -250,8 +301,9 @@ export class AudioDeck {
   }
 
   private wire(el: DeckEl) {
-    // Ereignisse des gerade nicht benutzten Elements zählen nicht
+    // Ereignisse des gerade nicht benutzten Elements zählen nicht, die des Standby gehen nur an seine Bereitschaft (eine Verdrahtung je Element, nie doppelt)
     const mine = () => el === this.el;
+    const sb = () => this.standby?.el === el;
     el.addEventListener('playing', () => {
       if (!mine()) return;
       if (this.adv && this.adv.to === this.clip?.id) {
@@ -317,6 +369,11 @@ export class AudioDeck {
       if (el.currentTime >= c.end - this.offset - END_EPS) this.clipEnd('timeupdate');
     });
     el.addEventListener('loadedmetadata', () => {
+      if (sb() && this.standby) {
+        this.standby.meta = true;
+        this.checkStandby();
+        return;
+      }
       if (!mine()) return;
       this.diag(`deck loadedmetadata ${this.stateText(el)}`);
       // Die Quelle lud in der geregelten Spur: der Host erlaubt CORS. Lud sie erst nach einem Fehler dort unverändert: er erlaubt es nicht.
@@ -330,7 +387,16 @@ export class AudioDeck {
       this.onMedia?.('loadedmetadata');
     });
     // Zweiter Anstoß, wenn Daten da sind und das erste play() nichts bewirkt hat (iOS verwirft play() vor den Metadaten manchmal still)
+    el.addEventListener('canplaythrough', () => {
+      if (!sb() || !this.standby) return;
+      this.standby.cpt = true;
+      this.checkStandby();
+    });
+    el.addEventListener('seeked', () => {
+      if (sb()) this.checkStandby();
+    });
     el.addEventListener('canplay', () => {
+      if (sb()) this.checkStandby();
       if (mine()) this.loading(false);
       if (mine() && this.clip && this.want && el.paused && !this.done && !this.nudged && this.refusedKey !== this.clip.key) {
         this.nudged = true;
@@ -338,6 +404,10 @@ export class AudioDeck {
       }
     });
     el.addEventListener('error', () => {
+      if (sb()) {
+        this.standbyError();
+        return;
+      }
       const c = this.clip;
       if (!mine() || !c || this.done) return;
       this.loading(false);
@@ -385,6 +455,8 @@ export class AudioDeck {
       }
     }
     this.holding = null;
+    // Der Standby hält genau diesen Ausschnitt, aber er wird hier direkt gestartet: der Standby ist überholt, das Element wird frei
+    if (this.standby?.clip.key === clip.key) this.dropStandby('started directly');
     const loc = this.deps.local(clip.key);
     // Spurwahl (Lautheit): das Element der Spur, bei Misserfolg der Kette das unveränderte
     const pick = this.deps.lane?.(clip, !!loc, forcePlain) ?? { lane: 'plain' as const, why: 'no value' };
@@ -472,72 +544,191 @@ export class AudioDeck {
     return `rs=${el.readyState} muted=${el.muted} t=${el.currentTime.toFixed(1)}`;
   }
 
-  /** Das Versprechen des letzten play()-Aufrufs von kick (startNow wartet darauf). undefined, wenn play() warf oder nichts zurückgab. */
-  private lastKick: Promise<void> | undefined;
-
   private kick(why: string) {
     const el = this.element;
     const n = ++this.plays;
     if (this.hidden()) this.hiddenStats.plays++;
     this.diag(`deck play#${n} ${why} ${this.stateText(el)}`);
     let p: Promise<void> | undefined;
-    this.lastKick = undefined;
     try {
       p = el.play();
     } catch (e) {
       this.rejected(e, why);
       return;
     }
-    this.lastKick = p;
     p?.then?.(
       () => {
         this.unlocked = true;
         this.diag(`deck play#${n} ok`);
+        // Nach jedem erfüllten play() bereitet der Host den nächsten Ausschnitt im Standby vor (Brief 11, Schritt 2)
+        if (el === this.el) this.onPlayed?.();
       },
       // Ein Ergebnis des früheren Elements (Spurwechsel) zählt nicht
       (e: unknown) => el === this.el && this.rejected(e, why),
     );
   }
 
-  /** Der Ausschnitt, den startNow abgelöst hat, mit der Stelle, an der er stand (für revertNow) */
-  private prior: { clip: DeckClip; at: number } | null = null;
+  // ---- Standby (Entscheidung 47, Brief 11): das zweite Element hält den nächsten Ausschnitt fertig, Weiter tauscht nur die Rollen ----
 
   /**
-   * Weiter vom Sperrbildschirm (Brief 10, Issue 36): Quelle setzen und play() sofort, im selben Call-Stack wie der Media-Session-Handler.
-   * iOS startet im Hintergrund eine neue Quelle nur dort, alles nach dem React-Rendern bleibt bis zur Rückkehr in die App ausstehend.
-   * Das Deck gibt den alten Player ab (sink null, wie beim automatischen Weiter), der neue übernimmt später über load(), das den laufenden
-   * Ausschnitt erkennt (holds) und nichts neu lädt. Die Buchführung der App (goTo) folgt danach.
-   * played: true, sobald play() erfüllt ist, false bei Ablehnung oder wenn play() nichts zurückgab.
+   * Nächsten Ausschnitt im zweiten Element vorladen: Quelle setzen (Vorrat lokal bevorzugt, sonst Netz), load(), Position auf den Start, warten auf
+   * canplaythrough (lokal genügt readyState 3, sonst 4). Meldet "deck: standby ready". Verdeckt nur aus dem Vorrat (iOS lädt eine Netzquelle dann nicht).
+   * true, wenn der Standby für diesen Ausschnitt läuft oder bereit ist.
    */
-  startNow(clip: DeckClip): { local: boolean; played: Promise<boolean> } {
-    const old = this.el;
-    this.prior = this.clip && !this.done && old ? { clip: this.clip, at: Math.max(this.clip.start, old.currentTime + this.offset) } : null;
-    this.armed = null;
-    this.sink = null;
-    const local = !!this.deps.local(clip.key);
-    // held = true: nie auf den Vorrat warten (hold), die Quelle wird jetzt gesetzt
-    this.start(clip, true, false, clip.start, undefined, true);
-    this.deps.playbackState?.('playing', 'lock next');
-    const p = this.lastKick;
-    const played = p?.then ? p.then(() => true, () => false) : Promise.resolve(false);
-    void played.then((ok) => {
-      if (ok && this.clip?.key === clip.key) this.prior = null;
-    });
-    return { local, played };
+  prepare(clip: DeckClip, forcePlain = false): boolean {
+    if (!this.deps.standby) return false;
+    const cur = this.standby;
+    if (cur?.clip.key === clip.key) return true;
+    // Der Ausschnitt läuft schon im aktiven Element
+    if (this.clip?.key === clip.key && !this.done) return false;
+    const loc = this.deps.local(clip.key);
+    if (!loc && this.hidden()) {
+      this.diag(`deck: prepare ${clip.id} skipped (hidden, not in storage)`);
+      return false;
+    }
+    if (cur) this.dropStandby('replaced');
+    // Spurwahl wie beim Start: die Lautheit hängt am Element, das später aktiv wird
+    const pick = this.deps.lane?.(clip, !!loc, forcePlain) ?? { lane: 'plain' as const, why: 'no value' };
+    let lane = pick.lane;
+    let why = forcePlain && !pick.why ? 'fallback' : pick.why;
+    let el = this.spare(lane);
+    let chain: { linear: () => number } | null = null;
+    if (lane === 'level') {
+      chain = this.deps.chain?.(el, clip.gain ?? 0) ?? null;
+      if (!chain) {
+        lane = 'plain';
+        why = 'no audio graph';
+        el = this.spare('plain');
+      }
+    }
+    const offset = loc?.offset ?? 0;
+    const target = Math.max(0, clip.start - offset);
+    const s: Standby = { clip, el, lane, why, chain, local: !!loc, offset, target, meta: false, cpt: false, ready: false, t0: Date.now() };
+    this.standby = s;
+    this.diag(`deck: prepare ${clip.id} src=${loc ? 'local' : 'net'}`);
+    el.src = loc?.url ?? withStart(clip.url, clip.start);
+    el.load();
+    // load() setzt das Tempo zurück: Standard und aktuelles Tempo gemeinsam setzen
+    this.applyRate(el);
+    try {
+      // iOS setzt die Position erst nach loadedmetadata, dort folgt der zweite Versuch
+      if (target > 0) el.currentTime = target;
+    } catch {
+      /* nach loadedmetadata */
+    }
+    setTimeout(() => {
+      if (this.standby === s && !s.ready) this.diag(`deck: standby not ready ${clip.id} after 8000 ms rs=${el.readyState} meta=${s.meta}`);
+    }, 8000);
+    this.checkStandby();
+    return true;
+  }
+
+  /** Metadaten da, Position gesetzt, genug Daten zum Durchspielen: der Standby ist bereit */
+  private checkStandby() {
+    const s = this.standby;
+    if (!s || s.ready || !s.meta) return;
+    const el = s.el;
+    try {
+      if (Math.abs(el.currentTime - s.target) > SEEK_TOL) {
+        el.currentTime = s.target;
+        // Nach dem Springen zählt erst ein canplaythrough, das danach kommt
+        s.cpt = false;
+      }
+    } catch {
+      /* iOS lehnt die Position ab, solange keine Metadaten da sind */
+    }
+    if (Math.abs(el.currentTime - s.target) > SEEK_TOL) return;
+    const rs = el.readyState;
+    if (!(s.cpt || rs >= 4 || (s.local && rs >= 3))) return;
+    s.ready = true;
+    this.diag(`deck: standby ready ${s.clip.id} after ${Date.now() - s.t0} ms`);
+  }
+
+  /** Die Quelle des Standby lud nicht: aus dem Vorrat einmal vom Netz (nur sichtbar), in der geregelten Spur einmal unverändert, sonst kein Standby */
+  private standbyError() {
+    const s = this.standby;
+    if (!s) return;
+    this.diag(`deck: standby failed ${s.clip.id} (${s.local ? 'local' : s.lane})`);
+    const { clip, local, lane } = s;
+    this.dropStandby('error');
+    if (local) {
+      this.deps.dropLocal(clip.key);
+      this.prepare(clip);
+    } else if (lane === 'level') {
+      this.deps.host?.(clip.url, 'bad');
+      this.prepare(clip, true);
+    }
+  }
+
+  /** Standby verwerfen, das Element wird frei */
+  dropStandby(why = 'dropped') {
+    const s = this.standby;
+    if (!s) return;
+    this.standby = null;
+    this.diag(`deck: standby dropped ${s.clip.id} (${why})`);
+    this.clearSrc(s.el);
+  }
+
+  /** Ist der Standby bereit (für diesen Ausschnitt, wenn key gegeben)? */
+  standbyReady(key?: string): boolean {
+    return !!this.standby?.ready && (key === undefined || this.standby.clip.key === key);
+  }
+
+  get standbyKey(): string | null {
+    return this.standby?.clip.key ?? null;
   }
 
   /**
-   * Der Start aus startNow kam nicht an (Brief 10, Schritt 4): zurück zum vorigen Ausschnitt, an der Stelle, an der er stand. Nie stumm weiterlaufen.
-   * false, wenn es keinen gab oder das Deck inzwischen einen anderen Ausschnitt hält.
+   * Weiter ohne Quellwechsel: der Standby wird aktiv, play() läuft synchron auf ihm (im Call-Stack des Handlers), danach hält das alte Element an
+   * und ist frei für den nächsten Standby. Nichts wird geladen. false, wenn kein bereiter Standby da ist, dann geschieht nichts.
    */
-  revertNow(key: string): boolean {
-    const p = this.prior;
-    this.prior = null;
-    if (!p || this.clip?.key !== key) return false;
+  swap(sink: DeckSink | null = null): boolean {
+    const s = this.standby;
+    if (!s || !s.ready) {
+      this.diag(`deck: swap ${s?.clip.id ?? 'none'} ready=false`);
+      return false;
+    }
+    // iOS hat den Web-Audio-Kontext unterbrochen: die geregelte Spur wäre stumm. Standby auf der unveränderten Spur neu, dieser Druck geht verloren.
+    if (s.lane === 'level' && this.deps.running && !this.deps.running()) {
+      this.diag(`deck: swap ${s.clip.id} ready=false (context not running)`);
+      const c = s.clip;
+      this.dropStandby('context not running');
+      this.prepare(c, true);
+      return false;
+    }
+    const old = this.el;
+    const clip = s.clip;
+    const el = s.el;
+    this.standby = null;
+    if (old) el.muted = old.muted;
+    this.el = el;
+    this.lane = s.lane;
+    this.loudLinear = s.chain ? s.chain.linear : null;
+    this.loudInfo = s.chain ? { db: clip.gain ?? 0, how: 'web audio' } : { db: 0, how: `unchanged: ${s.why}` };
+    this.holding = null;
+    this.holdToken++;
+    this.clip = clip;
+    this.done = false;
+    this.nudged = false;
+    this.live = false;
+    this.played = false;
+    this.want = true;
+    this.offset = s.offset;
+    this.isLocal = s.local;
+    this.resumeFrom = clip.start;
+    this.target = s.target;
+    this.history.push(clip.key);
+    if (this.history.length > 200) this.history.shift();
+    this.snd = { muted: isSilent(el), playing: false, refused: false };
+    // Der alte Player gibt ab (wie beim automatischen Weiter), der neue übernimmt später über load(), das den laufenden Ausschnitt erkennt (holds)
+    // Der Sink steht vor dem play(): ein Element meldet "playing" auch synchron, der neue Player soll den Zustand nie verpassen
     this.armed = null;
-    this.sink = null;
-    this.start(p.clip, true, false, p.at, undefined, true);
-    this.deps.playbackState?.('playing', 'lock next reverted');
+    this.sink = sink;
+    this.applyRate(el);
+    this.diag(`deck: swap ${clip.id} ready=true`);
+    this.kick('swap');
+    if (old && old !== el) this.halt(old, 'app: swap');
+    this.deps.playbackState?.('playing', 'swap');
     return true;
   }
 
@@ -671,7 +862,9 @@ export class AudioDeck {
     this.armed = null;
     this.onAdvance = null;
     this.onMedia = null;
+    this.onPlayed = null;
     this.diag = () => {};
+    this.standby = null;
     this.sink = null;
     this.want = false;
     this.done = true;
@@ -716,6 +909,11 @@ export class AudioDeck {
         if (el.paused) this.kick('resume');
         else if (this.live) sink.state(PLAYING);
       } else this.halt(el, 'app: load without play');
+      return;
+    }
+    // Wisch auf den Moment, den der Standby fertig hält: Rollen tauschen statt die Quelle zu wechseln (Brief 11, Schritt 4)
+    if (opts.play && this.standbyReady(clip.key) && this.swap(sink)) {
+      if (this.el) this.el.muted = opts.muted;
       return;
     }
     this.start(clip, opts.play);
@@ -782,18 +980,31 @@ export class AudioDeck {
   prime() {
     if (this.levelPrimed || !this.deps.lane) return;
     this.levelPrimed = true;
-    const el = this.ensure('level');
-    if (el === this.el) return;
+    // Mit Standby gibt es zwei Elemente der geregelten Spur: beide müssen die Geste gesehen haben, sonst startet das zweite verdeckt nicht
+    this.ensureCount('level', this.deps.standby ? 2 : 1);
+    for (const el of this.pool.level) this.silentPlay(el);
+  }
+
+  /** Element mit Stille starten, solange eine Geste läuft. Aktive und Standby-Elemente bleiben unberührt, ein schon freigeschaltetes ebenso. */
+  private silentPlay(el: DeckEl) {
+    if (el === this.el || el === this.standby?.el || this.unlockedEls.has(el)) return;
+    this.unlockedEls.add(el);
     try {
       if (!el.src) el.src = SILENT;
       const p = el.play();
       const done = () => {
-        if (el !== this.el) this.clearSrc(el);
+        if (el !== this.el && el !== this.standby?.el) this.clearSrc(el);
       };
       p?.then?.(done, done);
     } catch {
       /* kein Entsperren nötig oder möglich */
     }
+  }
+
+  /** Mit Standby gibt es ein zweites Element der unveränderten Spur: auch es per Geste freischalten (iOS erlaubt play() ohne Geste nur Elementen, die schon durch eine gespielt haben) */
+  private unlockSpares() {
+    this.ensureCount('plain', 2);
+    for (const el of this.pool.plain) this.silentPlay(el);
   }
 
   time(sink: DeckSink): number | null {
@@ -849,6 +1060,7 @@ export class AudioDeck {
   /** Aus einer Geste heraus aufrufen: schaltet das Element für späteres play() ohne Geste frei. Wirkt nur einmal je Seite. */
   unlock() {
     this.session();
+    if (this.deps.standby) this.unlockSpares();
     if (this.unlocked) return;
     const el = this.ensure('plain');
     // Läuft oder wartet schon ein echter Ausschnitt, kommt die Freischaltung von dessen play(). Ein vom Menschen angehaltener bleibt angehalten.
