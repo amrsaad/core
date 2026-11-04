@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-04T09:27:34.113Z",
+  "at": "2026-11-04T12:00:31.409Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -50,38 +50,38 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1648,
+        "coldStartMs": 1588,
         "preloadedMoments": 30,
         "preloadedBytes": 6289238,
         "bytesPerMoment": 209641,
         "waitedForVault": 1,
         "swipes": 10,
         "cachedStartMs": [
-          5,
           4,
-          8,
-          6,
           3,
-          6,
-          6,
           5,
+          3,
+          3,
           4,
-          16
+          5,
+          3,
+          4,
+          11
         ],
-        "cachedStartMax": 16,
-        "cachedStartMedian": 6,
+        "cachedStartMax": 11,
+        "cachedStartMedian": 4,
         "firstFrames": [
-          "first-frame 18ms buffered local",
-          "first-frame 5ms buffered local",
           "first-frame 4ms buffered local",
-          "first-frame 8ms buffered local",
-          "first-frame 6ms buffered local",
+          "first-frame 4ms buffered local",
           "first-frame 3ms buffered local",
-          "first-frame 6ms buffered local",
-          "first-frame 6ms buffered local",
           "first-frame 5ms buffered local",
+          "first-frame 3ms buffered local",
+          "first-frame 3ms buffered local",
           "first-frame 4ms buffered local",
-          "first-frame 16ms buffered local"
+          "first-frame 5ms buffered local",
+          "first-frame 3ms buffered local",
+          "first-frame 4ms buffered local",
+          "first-frame 11ms buffered local"
         ],
         "settingsText": "Preloaded: 36 moments, 7.2 MB",
         "offlineTrail": [
@@ -103,8 +103,8 @@
           }
         ],
         "offlineStartMs": [
-          14,
-          5
+          8,
+          4
         ],
         "offlineCachedOfFirst15": 15,
         "offlineSwipeTrail": [
@@ -134,9 +134,9 @@
           }
         ],
         "offlineRestartStartMs": [
-          5,
-          5,
-          5
+          4,
+          3,
+          4
         ],
         "poorYoutubeOf120": 58,
         "normalYoutubeOf120": 68,

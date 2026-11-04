@@ -1,5 +1,5 @@
 {
- "at": "2026-11-04T09:49:33.840Z",
+ "at": "2026-11-04T12:22:24.422Z",
  "runs": [
   {
    "browser": "webkit",
@@ -105,76 +105,76 @@
     "tempoPaused": 10,
     "cue": {
      "worst": 0,
-     "n": 621,
+     "n": 623,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.39",
+       "3.32",
        34,
        34
       ],
       [
-       "4.68",
+       "4.61",
        47,
        47
       ],
       [
-       "5.97",
-       60,
-       60
+       "5.89",
+       59,
+       59
       ],
       [
-       "7.26",
-       73,
-       73
+       "7.18",
+       72,
+       72
       ],
       [
-       "8.54",
-       86,
-       86
+       "8.46",
+       85,
+       85
       ],
       [
-       "9.83",
-       99,
-       99
+       "9.75",
+       98,
+       98
       ],
       [
-       "11.12",
-       112,
-       112
+       "11.04",
+       111,
+       111
       ],
       [
-       "12.41",
-       125,
-       125
+       "12.32",
+       124,
+       124
       ],
       [
-       "13.70",
-       138,
-       138
+       "13.61",
+       137,
+       137
       ],
       [
-       "14.99",
-       150,
-       150
+       "14.89",
+       149,
+       149
       ],
       [
-       "16.27",
-       163,
-       163
+       "16.18",
+       162,
+       162
       ],
       [
-       "17.56",
-       176,
-       176
+       "17.46",
+       175,
+       175
       ]
      ],
      "rate": 2
     },
     "cueTempo": {
-     "worst": 1,
-     "n": 549,
+     "worst": 0,
+     "n": 556,
      "rates": [
       1,
       1.5,
@@ -186,7 +186,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804845
+       "dueAt": 1792756804767
       }
      ],
      "idx": 6,
@@ -345,62 +345,62 @@
      "shownNow": 0,
      "gaps": [
       [
-       "3.38",
+       "3.37",
        34,
        34
       ],
       [
-       "4.72",
+       "4.71",
        48,
        48
       ],
       [
-       "6.05",
+       "6.04",
        61,
        61
       ],
       [
-       "7.38",
+       "7.37",
        74,
        74
       ],
       [
-       "8.72",
+       "8.71",
        88,
        88
       ],
       [
-       "10.05",
+       "10.04",
        101,
        101
       ],
       [
-       "11.38",
+       "11.37",
        114,
        114
       ],
       [
-       "12.72",
+       "12.71",
        128,
        128
       ],
       [
-       "14.05",
+       "14.04",
        141,
        141
       ],
       [
-       "15.38",
+       "15.37",
        154,
        154
       ],
       [
-       "16.72",
+       "16.71",
        168,
        168
       ],
       [
-       "18.05",
+       "18.04",
        181,
        181
       ]
@@ -421,7 +421,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804677
+       "dueAt": 1792756804654
       }
      ],
      "idx": 6,
@@ -502,10 +502,10 @@
     "lockTitleBack": true,
     "lockBackLines": true,
     "lockNextAdvances": true,
-    "lockStandbyReadyBeforeHidden": false,
-    "lockHiddenAdvances": false,
-    "lockHiddenUnder1s": false,
-    "lockHiddenSwaps": false,
+    "lockStandbyReadyBeforeHidden": true,
+    "lockHiddenAdvances": true,
+    "lockHiddenUnder1s": true,
+    "lockHiddenSwaps": true,
     "lockHiddenNoNewSource": true,
     "lockHiddenNoNetStart": true,
     "coldS2NoPageErrors": true,
@@ -524,7 +524,7 @@
      "pod-0008:22",
      "pod-0019:70"
     ],
-    "firstSoundMs": 210,
+    "firstSoundMs": 142,
     "diag": [
      "deck: start order head first=pod-0001:22 heads=6 usable=6 stock=6",
      "deck: src local pod-0001"
@@ -546,24 +546,25 @@
      "state": "playing",
      "pos": {
       "duration": 25,
-      "position": 0.00105279591836549,
+      "position": 0.0005527959183666553,
       "playbackRate": 1
      },
      "cold": 0,
      "cloud": 0
     },
     "stockBehind": 5,
-    "lockNextMs": 3003,
+    "lockNextMs": 7,
     "lockNextLines": [
-     "lock next: stay (standby not ready)",
-     "deck: prepare pod-0036 src=local",
-     "deck: standby ready pod-0036 after 5 ms"
+     "deck: swap pod-0036 ready=true",
+     "deck play#4 swap rs=4 muted=false t=0.1",
+     "deck play#4 ok",
+     "deck: prepare pod-0013 src=local"
     ],
     "coldNetLines": [
      "signals: coldNetStarts 1 today (net start pod-0035)"
     ]
    },
-   "ok": false
+   "ok": true
   }
  ]
 }

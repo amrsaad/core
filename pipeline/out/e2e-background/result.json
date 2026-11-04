@@ -1,5 +1,5 @@
 {
- "at": "2026-11-04T09:25:48.286Z",
+ "at": "2026-11-04T11:58:47.409Z",
  "runs": [
   {
    "browser": "webkit",
@@ -133,37 +133,37 @@
     "deck: prepare bgstock6 src=local"
    ],
    "bgNextFiveMs": [
-    19,
-    14,
-    19,
-    20,
-    12
+    13,
+    11,
+    15,
+    9,
+    9
    ],
    "bgNextPlays": [
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/88b09615-e49e",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:29 < @http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:6246 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/eb4fa713-d303",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < swap@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < Ka@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:29 < @http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:6265 < @ < evaluate@"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/22c88ae7-1279",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:29 < @http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:6246 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/5e4174da-c534",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < swap@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < Ka@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:29 < @http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:6265 < @ < evaluate@"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/18f8edd5-726f",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:29 < @http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:6246 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/24233b77-1545",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < swap@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < Ka@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:29 < @http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:6265 < @ < evaluate@"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/f6275eab-8116",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:29 < @http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:6246 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/135bef8e-aa82",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < swap@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < Ka@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:29 < @http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:6265 < @ < evaluate@"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/5c1e4bf1-846c",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:29 < @http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:6246 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/1fb75ffd-ef08",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < swap@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < Ka@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:29 < @http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:6265 < @ < evaluate@"
     }
    ],
    "ok": true
@@ -300,37 +300,37 @@
     "deck: prepare bgstock6 src=local"
    ],
    "bgNextFiveMs": [
-    13,
-    12,
-    10,
-    10,
-    8
+    8,
+    8,
+    8,
+    6,
+    7
    ],
    "bgNextPlays": [
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/e44fbc96-ef9b",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at x0.swap (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/cf1b9811-cae6",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at x0.swap (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at Object.Ka [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/8b2fab60-5ee1",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at x0.swap (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/e23282ec-aec0",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at x0.swap (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at Object.Ka [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/ca98f4b8-fe65",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at x0.swap (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/089744cf-ea76",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at x0.swap (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at Object.Ka [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/da95fb30-b2e2",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at x0.swap (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/7188989b-e502",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at x0.swap (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at Object.Ka [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/a027298f-57b0",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at x0.swap (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/013b9716-5dc1",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at x0.swap (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at Object.Ka [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     }
    ],
    "ok": true
