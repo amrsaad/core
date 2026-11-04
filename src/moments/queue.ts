@@ -137,3 +137,20 @@ export function pruneAndHeal(queue: readonly Moment[], idx: number, isBad: (m: M
   }
   return [...head, ...out];
 }
+
+/** So viele nächste Momente halten verdeckt den Element-Vorrat des Audio-Decks (Entscheidung 52, Brief 14) */
+export const POOL_AHEAD = 5;
+
+/**
+ * Neuplanen ab `from` (Entscheidung 42). Verdeckt liegen die nächsten fünf Momente im Element-Vorrat, sie bleiben stehen: Neuplanen beginnt frühestens
+ * bei idx+6. Sichtbar gilt `from` unverändert.
+ */
+export const replanStart = (from: number, idx: number, hidden: boolean): number => (hidden ? Math.max(from, idx + 1 + POOL_AHEAD) : from);
+
+/**
+ * Verdeckt gescheiterte Momente nur herausnehmen, nie umstellen: pruneAndHeal schiebt Nachbarn nach vorn, und das verschöbe Momente, die schon in einem
+ * Element des Vorrats geladen sind (Brief 14, Schritt 3).
+ */
+export function pruneOnly(queue: readonly Moment[], idx: number, isBad: (m: Moment) => boolean): Moment[] {
+  return [...queue.slice(0, idx + 1), ...queue.slice(idx + 1).filter((m) => !isBad(m))];
+}

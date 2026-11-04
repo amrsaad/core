@@ -5,6 +5,7 @@ import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL, topicLabel } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { audioDeck, createPlayer, deckClipOf, HLS, LOCAL, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
+import type { DeckClip } from '../video/audioDeck';
 import { canWarm, coverMs, onNonCurrentPlaying, roleOf, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx, type WarmState } from '../video/warmup';
 import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, onGesture, type Gesture } from './gesture';
 import { hintVisible, SOUND_NONE } from './soundHint';
@@ -16,7 +17,7 @@ import { browserPreloader } from './preloader';
 import { isPreloadable, keyOf, netRank, queueAhead, streamKind } from './preload';
 import { coldToday, countColdStart, pickHeads, startOrder } from './startHead';
 import { depthPlan, lockMeta, lockNextPlan, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS } from './lockScreen';
-import { cursorFor, historyBefore, parseSaved, pruneAndHeal, queueKey, recentFromLog, releaseTail, remixTail, restoreQueue } from './queue';
+import { cursorFor, historyBefore, parseSaved, POOL_AHEAD, pruneAndHeal, pruneOnly, queueKey, recentFromLog, releaseTail, remixTail, replanStart, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMoment, sessionSkip, SIGNAL, type MomentCursor } from './mix';
 import { attentionStep, makeCtx, newAttention, readConn, type Attention } from './context';
 import { addMissed, bumpCell, bumpColdNetStart, bumpPair, hourKey } from './signals';
@@ -45,7 +46,7 @@ import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
 import { addFrames, atRest, commitVelocity, dragY, frameSample, release, SPRING_BACK, SPRING_COMMIT, stepSpring, Velocity, type Spring, type SpringState } from './swipe';
 import { saveGate } from '../lib/useAppState';
 import { blockedCount, emptyFormLine, END_SUB, endButtonLabel, endLine, filterPool, formOf, FORM_LABEL, momentText, otherForms, textEndReached, unseenCount, waitingLine, type Form } from './form';
-import { atEnd, EndLedger, isBackground, onLeave, successorOf } from './background';
+import { atEnd, EndLedger, isBackground, onLeave } from './background';
 import { PlayTracker } from './played';
 import { setMood } from '../design/mood';
 import { Status } from '../components/Status';
@@ -776,77 +777,76 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const pullStock = (hidden: boolean) => (pre ? pullBy((m) => LOCAL.has(keyOf(m)) || pre.held(m.id), hidden) : { how: 'none' as const });
 
   /**
-   * Standby vorbereiten (Entscheidung 47, Brief 11): der Nachfolger kommt in das zweite Audio-Element, bevorzugt aus dem Vorrat. Sichtbar auch über Netz,
-   * verdeckt nur aus dem Vorrat (dann rückt ein Vorrats-Moment mit fertiger Blob-URL an idx+1). Aufruf nach jedem "deck play ok" und nach jedem Wechsel.
+   * Element-Vorrat füllen (Entscheidung 52, Brief 14): solange die App sichtbar ist, halten fünf Audio-Elemente die nächsten fünf Momente fertig geladen, lokal
+   * bevorzugt, sonst Netz. Aufruf nach jedem Wisch, nach jedem "deck play ok", beim Wechsel in den Audio-Reiter und bei der Rückkehr in die App. Verdeckt
+   * tut er nichts (iOS lädt dann nichts nach, die Warteschlange bleibt stehen).
    */
-  const prepareNext = () => {
-    if (form !== 'audio' || !pre) return;
-    const hidden = isBackground(document.visibilityState);
+  const warmTried = useRef(new Set<string>());
+  const fillPool = () => {
+    if (form !== 'audio' || !pre || !activeRef.current) return;
+    if (isBackground(document.visibilityState)) return;
     pruneBad();
-    if (!queue.current[idxRef.current + 1]) ensureQueue(idxRef.current + 2);
-    // Ein bereiter Standby für den Nachfolger bleibt. Sonst rückt verdeckt der nächste Vorrats-Moment aus dem ganzen Rest nach vorn (Blob-URL oder nur im Vorrat,
-    // die Blob-URL entsteht gleich aus dem Vorrat und braucht kein Netz). Brief 11, Schritt 9: ein Netz-Moment an idx+1 darf den Standby nie leer lassen.
+    ensureQueue(idxRef.current + 1 + POOL_AHEAD + 3);
+    // Schwaches Netz und der Nachfolger liegt nicht im Vorrat: ein Vorrats-Moment aus den nächsten drei rückt nach idx+1, damit das erste Element lokal wird
     const first = queue.current[idxRef.current + 1];
-    if (hidden && !(first && audioDeck.standbyReady(keyOf(first)))) {
-      const before = queue.current.map((m) => m.id);
-      const r = pullBy((m) => LOCAL.has(keyOf(m)) || pre.held(m.id), true);
-      if (r.how === 'pulled' && r.id) pullNote.current = { id: r.id, text: `pulled from ${before.indexOf(r.id) - idxRef.current}` };
+    if (first && !pre.held(first.id) && pre.poor()) pullBy((m) => pre.held(m.id), false);
+    // Mindestens 3 der nächsten 6 liegen im Vorrat, sonst rücken Vorrats-Momente von weiter hinten in die ersten Plätze (idx+1 bleibt)
+    const d = depthPlan(queue.current, idxRef.current, (m) => pre.held(m.id));
+    if (d.moved > 0) {
+      applyQueue(d.queue);
+      diag.current.push(`stock: depth ${d.have} of 6 (pulled ${d.moved})`);
     }
-    // Sichtbar: mindestens 3 der nächsten 6 liegen im Vorrat, sonst rücken Vorrats-Momente von weiter hinten in die ersten Plätze (idx+1 bleibt)
-    if (!hidden) {
-      ensureQueue(idxRef.current + 8);
-      // Schwaches Netz und der Nachfolger liegt nicht im Vorrat: ein Vorrats-Moment aus den nächsten drei rückt nach idx+1, damit der Standby lokal wird (kein Netz-Standby)
-      if (first && !pre.held(first.id) && pre.poor()) pullBy((m) => pre.held(m.id), false);
-      const d = depthPlan(queue.current, idxRef.current, (m) => pre.held(m.id));
-      if (d.moved > 0) {
-        applyQueue(d.queue);
-        diag.current.push(`stock: depth ${d.have} of 6 (pulled ${d.moved})`);
-      }
+    const next: Moment[] = [];
+    for (let j = idxRef.current + 1; j < queue.current.length && next.length < POOL_AHEAD; j++) {
+      const m = queue.current[j];
+      if (!bad.current.has(m.videoId) && formOf(m) === 'audio' && deckClipOf(m)) next.push(m);
     }
-    const nm = successorOf(queue.current, idxRef.current, bad.current);
-    const clip = nm && formOf(nm) === 'audio' ? deckClipOf(nm) : null;
-    if (!nm || !clip) {
-      audioDeck.dropStandby('no successor');
+    // Ein Vorrats-Moment ohne Blob-URL bekommt sie zuerst (keine zweite Netzverbindung neben dem Vorrat, Entscheidung 45), dann lädt sein Element lokal.
+    // Einmal je Moment: kommt die Blob-URL nicht, lädt er danach vom Netz.
+    const wait = next.filter((m) => !LOCAL.has(keyOf(m)) && pre.held(m.id) && !warmTried.current.has(m.id));
+    if (wait.length) {
+      for (const m of wait) warmTried.current.add(m.id);
+      void pre.warm(wait).then(() => fillPoolRef.current());
+    }
+    const netOk = !pre.poor();
+    const clips: DeckClip[] = [];
+    for (const m of next) {
+      if (!LOCAL.has(keyOf(m)) && (wait.includes(m) || !netOk)) continue;
+      const c = deckClipOf(m);
+      if (c) clips.push(c);
+    }
+    audioDeck.fill(clips);
+  };
+  const fillPoolRef = useRef(fillPool);
+  fillPoolRef.current = fillPool;
+
+  /** Der Moment, auf den das Deck getauscht hat (Schlüssel), rückt an idx+1, falls er dort noch nicht steht: danach liest goTo dieselbe Stelle */
+  const placeNext = (key: string) => {
+    const at = idxRef.current + 1;
+    const j = queue.current.findIndex((x, i) => i >= at && keyOf(x) === key);
+    if (j === at) return;
+    const q = [...queue.current];
+    const m = j >= 0 ? q.splice(j, 1)[0] : pool.find((x) => keyOf(x) === key);
+    if (!m) {
+      diag.current.push(`bg: swap target not in queue ${key}`);
       return;
     }
-    // Nicht lokal: liegt der Moment im Vorrat oder ist das Netz schwach, wartet der Standby bis zu 8 s auf die Blob-URL (keine zweite Netzverbindung neben dem Vorrat,
-    // Entscheidung 45). Kommt sie nicht, geht es bei normalem Netz über das Netz weiter, bei schwachem Netz bleibt es beim normalen Weg ohne Standby.
-    const nk = keyOf(nm);
-    if (!LOCAL.has(nk) && audioDeck.standbyKey !== nk) {
-      if ((pre.held(nm.id) || pre.poor()) && stockWait.current !== nk) {
-        stockWait.current = nk;
-        audioDeck.dropStandby('waiting for stock');
-        let tries = 0;
-        const tick = () => {
-          void pre.warm([nm]).then(() => {
-            const cur = successorOf(queue.current, idxRef.current, bad.current);
-            // Wechselt der Nachfolger (die Tiefenpflege schiebt Momente um), darf dieser Moment später wieder warten
-            if (!cur || keyOf(cur) !== nk) { if (stockWait.current === nk) stockWait.current = null; return; }
-            if (LOCAL.has(nk)) { stockWait.current = null; prepareNextRef.current(); }
-            else if (++tries >= 12) prepareNextRef.current();
-            else setTimeout(tick, 700);
-          });
-        };
-        tick();
-        return;
-      }
-      if (pre.poor()) {
-        audioDeck.dropStandby('poor net, no blob');
-        return;
-      }
-    }
-    const pn = pullNote.current;
-    if (audioDeck.prepare(clip, false, pn && pn.id === nm.id ? pn.text : '')) void pre.warm([nm]);
+    q.splice(at, 0, m);
+    applyQueue(q);
   };
-  const pullNote = useRef<{ id: string; text: string } | null>(null);
-  const stockWait = useRef<string | null>(null);
-  const prepareNextRef = useRef(prepareNext);
-  prepareNextRef.current = prepareNext;
+
+  const placeNextRef = useRef(placeNext);
+  placeNextRef.current = placeNext;
+
+  /** Das Deck hat im Hintergrund selbst getauscht (Ende eines Moments): der Schlüssel des Moments, der jetzt spielt. Fehlt er, stand kein Element bereit. */
+  const advancedTo = useRef<string | null>(null);
+  /** Der Moment endete verdeckt ohne bereites Element: bei der Rückkehr geht es mit dem nächsten weiter */
+  const resumeNext = useRef(false);
 
   /**
-   * Weiter vom Sperrbildschirm oder der Medientaste (Brief 11, Entscheidung 47): ist der Standby für den Nachfolger bereit, tauschen die Elemente, es wird nichts
-   * geladen und keine Quelle gewechselt. Verdeckt ohne bereiten Standby geschieht nichts (der laufende Moment spielt zu Ende, nichts wird gezählt, nie ein
-   * Netzstart verdeckt). Sichtbar gilt der normale Weg (Vorrat zuerst, sonst Netz mit der Laden-Pille).
+   * Weiter vom Sperrbildschirm oder der Medientaste (Brief 14, Entscheidung 52): das Deck tauscht auf das erste bereite Element des Vorrats, es wird nichts geladen
+   * und keine Quelle gewechselt. Ist keins bereit, geschieht verdeckt nichts: der laufende Moment spielt zu Ende, nichts wird gezählt, nie ein Netzstart
+   * verdeckt. Sichtbar ohne bereites Element gilt der normale Weg (Vorrat zuerst, sonst Netz mit der Laden-Pille).
    */
   const lockNext = () => {
     const hidden = isBackground(document.visibilityState);
@@ -855,22 +855,17 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       return;
     }
     pruneBad();
-    ensureQueue(idxRef.current + 1 + queueAhead(rateRef.current));
-    // Der Moment mit bereitem Standby rückt an idx+1, falls die Warteschlange sich seit dem Vorbereiten verschoben hat
-    const r = pullBy((m) => audioDeck.standbyReady(keyOf(m)), hidden);
-    if (r.how === 'held' || r.how === 'pulled') {
-      if (r.how === 'pulled') diag.current.push(`lock next: pulled ${r.id}`);
-      if (audioDeck.swap()) {
-        goTo(idxRef.current + 1);
-        return;
-      }
-    }
-    if (hidden) {
-      diag.current.push('lock next: stay (standby not ready)');
-      // Für den nächsten Druck: Standby neu bestimmen (verdeckt nur aus dem Vorrat)
-      prepareNextRef.current();
+    const c = audioDeck.swapNext();
+    if (c) {
+      placeNext(c.key);
+      goTo(idxRef.current + 1);
       return;
     }
+    if (hidden) {
+      diag.current.push('lock next: stay (pool empty)');
+      return;
+    }
+    ensureQueue(idxRef.current + 1 + queueAhead(rateRef.current));
     const s = pullStock(false);
     if (s.how === 'pulled') diag.current.push(`lock next: pulled ${s.id}`);
     else if (s.how === 'net') diag.current.push(`lock next: net ${s.id}`);
@@ -880,39 +875,19 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const lockNextRef = useRef(lockNext);
   lockNextRef.current = lockNext;
 
-  /** Gescheiterte Momente aus dem Rest der Warteschlange nehmen (Wisch und Auto-Weiter lesen danach dieselbe Stelle) */
+  /**
+   * Gescheiterte Momente aus dem Rest der Warteschlange nehmen (Wisch und Auto-Weiter lesen danach dieselbe Stelle). Verdeckt im Audio-Reiter nur entfernen, nie
+   * umstellen: die nächsten fünf Momente stecken schon in Elementen des Vorrats (Brief 14, Schritt 3).
+   */
   const pruneBad = () => {
     const from = idxRef.current + 1;
     // Entscheidung 45: fehlt ein Nachbar an idx+1 oder idx+2, füllt der nächste Moment mit anderem Bereich die Lücke (pruneAndHeal)
-    const next = pruneAndHeal(queue.current, idxRef.current, (x) => bad.current.has(x.videoId));
+    const prune = form === 'audio' && isBackground(document.visibilityState) ? pruneOnly : pruneAndHeal;
+    const next = prune(queue.current, idxRef.current, (x) => bad.current.has(x.videoId));
     if (next.length !== queue.current.length) {
       queue.current = next;
       for (const sl of slots.current) if (sl.index >= from) sl.index = -1;
     }
-  };
-
-  /**
-   * Audio-Reiter (Issue 11): den Nachfolger schon vor dem Ende bestimmen und dem Audio-Element geben. Im Ende-Handler passieren dann nur
-   * noch src und play. Der Nachfolger ist derselbe wie beim Wisch (Stelle idx + 1 der Warteschlange der Mischung).
-   */
-  const armDeck = () => {
-    if (form !== 'audio') return;
-    pruneBad();
-    const j = idxRef.current + 1;
-    if (!queue.current[j]) ensureQueue(j + 1);
-    // Verdeckt darf nur ein Vorrats-Moment starten (iOS lädt eine Netzquelle erst weiter, wenn die App wieder sichtbar ist): der Nachfolger kommt aus dem Vorrat
-    if (isBackground(document.visibilityState)) pullStock(true);
-    const nm = successorOf(queue.current, idxRef.current, bad.current);
-    audioDeck.arm(nm && formOf(nm) === 'audio' ? deckClipOf(nm) : null);
-    // Der Nachfolger kommt wenn möglich als Blob aus dem Vorrat: sein Start im Hintergrund dauert dann Millisekunden statt Sekunden (Issue 14)
-    if (nm && pre) void pre.warm([nm]);
-  };
-  /** Der Nachfolger muss bestimmt sein, bevor der aktuelle Moment endet: stimmt der gesetzte nicht mit dem berechneten überein, neu setzen (Warteschlange, Fehler, Umsortieren) */
-  const armCheck = () => {
-    if (form !== 'audio') return;
-    const nm = successorOf(queue.current, idxRef.current, bad.current);
-    const want = nm && formOf(nm) === 'audio' ? deckClipOf(nm) : null;
-    if ((want?.key ?? null) !== audioDeck.armedKey) armDeck();
   };
 
   /** Media Session: Zustand setzen und jeden Wechsel mit Grund ins Protokoll (Issue 13: pausiert die App die Session im Hintergrund?) */
@@ -1114,12 +1089,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       if (!textRef.current) soundGuard(next);
       // Pfeiler 19: nie eine Karte, solange der Feed nicht im Vordergrund und sichtbar ist. Dann Warteschlange, je eine Karte pro Wisch.
       if (next > prev && prevM) stepRecall(recallNow);
-      armDeck();
+      fillPoolRef.current();
       syncHint();
       // Gedämpfter Kanal oder gedämpftes Thema: der Rest hinter den zwei vorgeladenen Momenten wird neu gewählt
       if (dampened || attentionStarted) replanRef.current(next + 3);
       const nSrc = mediaWithSrc();
-      if (nSrc > 3) diag.current.push(`media: ${nSrc} elements with src (limit 3)`);
+      if (nSrc > POOL_AHEAD + 1) diag.current.push(`media: ${nSrc} elements with src (limit ${POOL_AHEAD + 1})`);
       setIdx(next);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1149,8 +1124,19 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       return;
     }
     if (bg) {
-      // Auto-Weiter im Hintergrund: derselbe Weg wie der Wisch, ohne Für-dich-Karte. Im Audio-Reiter hat das Audio-Element den Wechsel schon vollzogen.
+      // Auto-Weiter im Hintergrund: derselbe Weg wie der Wisch, ohne Für-dich-Karte. Im Audio-Reiter hat das Deck den Tausch schon vollzogen (Brief 14, Schritt 4).
       const j = idxRef.current + 1;
+      if (form === 'audio') {
+        const to = advancedTo.current;
+        advancedTo.current = null;
+        if (!to) {
+          // Kein bereites Element: verdeckt wird nichts geladen. Die Rückkehr startet den nächsten Moment.
+          diag.current.push(`bg: stalled at ${m.id} (pool empty)`);
+          resumeNext.current = true;
+          return;
+        }
+        placeNextRef.current(to);
+      }
       goTo(j);
       const nm = queue.current[idxRef.current];
       diag.current.push(idxRef.current === j && nm ? `bg: next ${nm.id}` : `bg: stalled at ${m.id} (no next)`);
@@ -1170,9 +1156,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   useEffect(() => {
     if (form !== 'audio') return;
     audioDeck.diag = (line) => diag.current.push(line);
-    audioDeck.onAdvance = () => finishRef.current();
-    // Nach jedem erfüllten play() den Nachfolger im zweiten Element vorbereiten (Entscheidung 47)
-    audioDeck.onPlayed = () => prepareNextRef.current();
+    audioDeck.onAdvance = (_from, to) => {
+      advancedTo.current = to.key;
+      finishRef.current();
+    };
+    // Nach jedem erfüllten play() den Vorrat auffüllen (Brief 14, Schritt 2). Verdeckt tut das nichts.
+    audioDeck.onPlayed = () => fillPoolRef.current();
+    audioDeck.onNeedFill = () => fillPoolRef.current();
     // Kaltstart: auf die Blob-URL aus dem Vorrat warten statt vom Netz zu starten
     audioDeck.pending = (id, key) => pre?.pendingWarm(id, key) ?? null;
     // Zähler coldNetStarts: jeder Start einer Quelle vom Netz, pro Tag
@@ -1205,11 +1195,19 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Wechsel in den Audio-Reiter: der Element-Vorrat füllt sich sofort (Brief 14, Schritt 2)
+  useEffect(() => {
+    if (active && form === 'audio') fillPoolRef.current();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
+
   /**
    * Rest der Warteschlange ab from neu planen (Netz wurde schlecht): Die freigegebenen Momente stehen wieder zur Wahl,
    * nextMoment füllt mit Rang als Gewicht auf (vorgeladen und Text mal 3). Verlauf, Regeln, Anteile und Lernen bleiben wie sonst.
    */
-  const replanTail = (from: number) => {
+  const replanTail = (fromAsked: number) => {
+    // Verdeckt stecken die nächsten fünf Momente im Element-Vorrat des Decks: Neuplanen beginnt frühestens hinter ihnen (Entscheidung 42, Brief 14 Schritt 3)
+    const from = form === 'audio' ? replanStart(fromAsked, idxRef.current, isBackground(document.visibilityState)) : fromAsked;
     const tail = queue.current.slice(from);
     if (!tail.length || !cursor.current) return;
     releaseTail(cursor.current, tail, clockNow().getTime());
@@ -1219,12 +1217,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!single) for (const j of [idxRef.current + 1, idxRef.current + 2]) if (j >= from && j < queue.current.length && slotFor(j).index !== j) assign(slotFor(j), j, false);
     diag.current.push(`replan from ${from} poor=${poorRef.current}`);
     syncPre(idxRef.current);
-    armDeck();
+    fillPoolRef.current();
     rerender();
   };
   /** Mitten in der Sitzung: nur neu mischen (siehe remixTail), die schon vorgeladenen Momente bleiben in der Warteschlange */
-  const reorderTail = (from: number) => {
+  const reorderTail = (fromAsked: number) => {
     if (!pre) return;
+    const from = form === 'audio' ? replanStart(fromAsked, idxRef.current, isBackground(document.visibilityState)) : fromAsked;
     const tail = queue.current.slice(from);
     if (tail.length < 2) return;
     const s0 = stateRef.current;
@@ -1233,7 +1232,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!single) for (const j of [idxRef.current + 1, idxRef.current + 2]) if (j >= from && j < queue.current.length && slotFor(j).index !== j) assign(slotFor(j), j, false);
     diag.current.push(`reorder from ${from}`);
     syncPre(idxRef.current);
-    armDeck();
+    fillPoolRef.current();
     rerender();
   };
   const replanRef = useRef(replanTail);
@@ -1420,7 +1419,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                   return;
                 }
                 if (m2) bad.current.add(m2.videoId);
-                armDeck();
+                fillPoolRef.current();
                 // Einzelne Fehler überspringen nur. Die Fehlerseite gibt es erst, wenn nie ein Video lief und acht Momente scheiterten.
                 if (!everPlayed.current && bad.current.size >= 8) setError(`YouTube spielt gerade keine Videos ab (Fehler ${code})`);
                 else if (slot.index === idxRef.current) goTo(idxRef.current + 1);
@@ -1454,7 +1453,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           }
         }
         if (failedCurrent.length) goTo(idxRef.current + 1);
-        armDeck();
+        fillPoolRef.current();
     };
     void (async () => {
       if (pre) {
@@ -1554,7 +1553,6 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     let flushed = 0;
     const t = window.setInterval(() => {
       if (moving()) return;
-      armCheck();
       const sl = current();
       const p = sl.player;
       const m = queue.current[idxRef.current];
@@ -2444,8 +2442,6 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     const playable = !textRef.current && !forYouRef.current && !recallRef.current;
     if (isBackground(vis)) {
       diag.current.push(`bg: left ${m.id}`);
-      // Der Nachfolger kommt ab jetzt aus dem Vorrat (Entscheidung 45), solange der Bildschirm verdeckt ist
-      if (form === 'audio') armDeck();
       if (playable && onLeave(formOf(m), !HLS.has(m.videoId)) === 'pause' && !userPaused.current) {
         current().player?.pauseVideo();
         leftPaused.current = true;
@@ -2453,6 +2449,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       return;
     }
     diag.current.push(`bg: back ${m.id}`);
+    // Sichtbar: der Element-Vorrat füllt sich wieder (Brief 14, Schritt 2)
+    fillPoolRef.current();
     // Der laufende Moment ist jetzt zu sehen: gesehen (einmal), dann Karte oder Ton wieder aufnehmen
     if (!textRef.current && played.current.enough(m.id)) markSeen(m);
     if (!recallRef.current && (stateRef.current.recallQueue?.length ?? 0) > 0) {
@@ -2464,6 +2462,14 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     }
     const wasLeft = leftPaused.current;
     leftPaused.current = false;
+    // Der Moment endete verdeckt ohne bereites Element: jetzt mit dem nächsten weiter, sichtbar und mit der normalen Ladeanzeige
+    if (resumeNext.current) {
+      resumeNext.current = false;
+      if (playable && !userPaused.current) {
+        navRef.current(idxRef.current + 1);
+        return;
+      }
+    }
     if (!playable || userPaused.current || endedAt.current === idxRef.current) return;
     // Angehalten beim Verlassen, vom Betriebssystem pausiert oder im Hintergrund nicht gestartet: weiter am Stand
     if (wasLeft || current().st !== STATE.PLAYING) current().player?.playVideo();
@@ -2600,7 +2606,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       }),
       slots: () => slots.current.slice(0, SLOTS).map((x) => ({ st: x.st, index: x.index })),
       // Audio-Reiter: Schlüssel der Ausschnitte, die das eine Audio-Element geladen hat, und ob es vorhanden ist (Tests)
-      deck: () => ({ history: [...audioDeck.history], exists: audioDeck.exists, armed: audioDeck.armedKey, standby: audioDeck.standbyKey, standbyReady: audioDeck.standbyReady(), pos: audioDeck.lastPos }),
+      deck: () => ({ history: [...audioDeck.history], exists: audioDeck.exists, pool: audioDeck.poolInfo(), ready: audioDeck.readyCount(), pos: audioDeck.lastPos }),
       /** Sperrbildschirm (Brief 02, Tests): Handler registriert, Metadaten, Positionsstatus, Zähler coldNetStarts des Tages */
       lock: () => {
         const ms = 'mediaSession' in navigator ? navigator.mediaSession : null;
@@ -2643,13 +2649,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       recallQueue: () => stateRef.current.recallQueue ?? [],
       recall: () => ({ open: recallRef.current, state: stateRef.current.recall ?? {}, sessionSeen: sessionSeen.current }),
       queue: () => queue.current.map((x) => x.id),
-      /** Nur Tests (Brief 11, Schritt 9): die genannten Momente an idx+1, idx+2 ... legen und den Standby neu bestimmen, wie nach einem Tausch */
+      /** Nur Tests (Brief 14): die genannten Momente an idx+1, idx+2 ... legen und den Vorrat neu füllen */
       arrange: (ids: string[]) => {
         const at = idxRef.current;
         const have = ids.filter((id) => queue.current.slice(at + 1).some((x) => x.id === id));
         const rest = queue.current.slice(at + 1).filter((x) => !have.includes(x.id));
         applyQueue([...queue.current.slice(0, at + 1), ...have.map((id) => queue.current.find((x) => x.id === id)!), ...rest]);
-        prepareNextRef.current();
+        fillPoolRef.current();
         return have.length;
       },
       preload: () => ({ ids: pre?.ids() ?? [], stats: pre?.stats() ?? { n: 0, bytes: 0 }, poor: poorRef.current, log: pre?.log.slice(-200) ?? [], net: pre?.netSamples() ?? [], local: slots.current.slice(0, SLOTS).map((x) => !!x.player?.isLocal?.()) }),

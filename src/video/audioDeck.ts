@@ -34,10 +34,13 @@ const HOLD_MS = 1200;
 /** Null Sekunden Stille: schaltet das Element durch eine Geste frei, bevor der erste echte Moment kommt */
 const SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
 
+/** Größe des Element-Vorrats (Entscheidung 52, Brief 14): so viele nächste Momente liegen fertig geladen in eigenen Elementen, plus das aktive */
+export const POOL = 5;
+
 type Lane = 'plain' | 'level';
 
-/** Der Ausschnitt, den das zweite Element (Standby) fertig geladen hält (Entscheidung 47, Brief 11) */
-interface Standby {
+/** Ein Element des Vorrats: hält den Anfang eines Ausschnitts fertig geladen (Entscheidung 47 und 52, Brief 11 und 14) */
+interface PoolEntry {
   clip: DeckClip;
   el: DeckEl;
   lane: Lane;
@@ -53,7 +56,16 @@ interface Standby {
   /** canplaythrough kam, seit die Position zuletzt gesetzt wurde */
   cpt: boolean;
   ready: boolean;
+  /** readyState, als der Eintrag bereit wurde. Fällt er danach auf 0, hat iOS das Element verworfen (Schritt 5). 0 heißt: nie Daten gesehen (kein Maßstab). */
+  rsAtReady: number;
   t0: number;
+}
+
+/** Stand eines Eintrags für Host und Diagnose */
+export interface PoolInfo {
+  key: string;
+  id: string;
+  ready: boolean;
 }
 
 export interface DeckClip {
@@ -127,7 +139,7 @@ export interface DeckDeps {
   hidden?: () => boolean;
   /** Media Session des Betriebssystems setzen (Standard: navigator.mediaSession.playbackState), why für die Diagnose */
   playbackState?: (s: 'playing' | 'paused', why: string) => void;
-  /** Zweites Element (Standby, Entscheidung 47): prepare() lädt den nächsten Ausschnitt dort vor, swap() tauscht nur die Rollen. Aus: prepare() tut nichts. */
+  /** Element-Vorrat (Entscheidung 47 und 52): fill() lädt die nächsten POOL Ausschnitte in eigene Elemente vor, swapNext() tauscht nur die Rollen. Aus: fill() tut nichts. */
   standby?: boolean;
 }
 
@@ -152,17 +164,21 @@ const defaultHidden = () => typeof document !== 'undefined' && document.visibili
 export const withStart = (url: string, start: number): string => (start > 0 && !url.includes('#') ? `${url}#t=${start}` : url);
 
 export class AudioDeck {
-  /** Das aktive Element. Je Spur gibt es höchstens zwei (aktiv und frei für den Standby), alle bleiben im DOM und werden nie ersetzt. */
+  /** Das aktive Element. Je Spur gibt es höchstens POOL + 1 (aktiv und die des Vorrats), alle bleiben im DOM und werden nie ersetzt. */
   private el: DeckEl | null = null;
   private pool: Record<Lane, DeckEl[]> = { plain: [], level: [] };
   private laneOf = new Map<DeckEl, Lane>();
   private lane: Lane = 'plain';
-  /** Das zweite Element mit dem nächsten Ausschnitt (Entscheidung 47) */
-  private standby: Standby | null = null;
+  /** Der Vorrat in Reihenfolge der Warteschlange (Brief 14): je Eintrag ein Element mit dem Anfang eines der nächsten Momente */
+  private entries: PoolEntry[] = [];
+  /** Der Vorrat wurde verbraucht oder verworfen: sobald er wieder voll ist, meldet das Deck "pool refill" */
+  private depleted = false;
   /** Elemente, die eine Geste schon einmal mit Stille gestartet hat (iOS erlaubt nur ihnen später play() im Hintergrund) */
   private unlockedEls = new WeakSet<DeckEl>();
-  /** play() des aktiven Elements wurde erfüllt (nach jedem "deck play#N ok"): der Host bereitet danach den Standby vor */
+  /** play() des aktiven Elements wurde erfüllt (nach jedem "deck play#N ok"): der Host füllt danach den Vorrat auf */
   onPlayed: (() => void) | null = null;
+  /** Ein Eintrag fiel sichtbar aus (Fehler), der Host soll den Vorrat neu füllen */
+  onNeedFill: (() => void) | null = null;
   private loudInfo: { db: number; how: string } = { db: 0, how: 'unchanged: no value' };
   private loudLinear: (() => number) | null = null;
   /** Quelle, die in der geregelten Spur nicht lud. Lädt sie danach unverändert, gilt der Host als ohne CORS. */
@@ -172,7 +188,6 @@ export class AudioDeck {
   private resumeFrom = 0;
   /** Der Ausschnitt, der gerade im Element steckt */
   clip: DeckClip | null = null;
-  private armed: DeckClip | null = null;
   private sink: DeckSink | null = null;
   private offset = 0;
   private isLocal = false;
@@ -200,7 +215,7 @@ export class AudioDeck {
   private snd: SoundObs = SOUND_NONE;
   /** Schlüssel aller Ausschnitte, die geladen wurden (Tests, Diagnose) */
   readonly history: string[] = [];
-  /** Beim automatischen Weiter im Hintergrund: der Wechsel ist schon geschehen, jetzt die Buchführung */
+  /** Beim automatischen Weiter im Hintergrund: der Tausch auf das nächste bereite Element ist schon geschehen, jetzt die Buchführung */
   onAdvance: ((from: DeckClip, to: DeckClip) => void) | null = null;
   /** Vorrat (Kaltstart): liegt der Ausschnitt im Vorrat und fehlt nur die Blob-URL, ein Versprechen darauf (true = bereit). Sonst null. */
   pending: ((id: string, key: string) => Promise<boolean> | null) | null = null;
@@ -226,14 +241,14 @@ export class AudioDeck {
     return this.el;
   }
 
-  /** Element der Spur: das aktive, wenn es zu ihr gehört, sonst ein freies (weder aktiv noch Standby), bei Bedarf neu angelegt */
+  /** Element der Spur: das aktive, wenn es zu ihr gehört, sonst ein freies (weder aktiv noch im Vorrat), bei Bedarf neu angelegt */
   private ensure(lane: Lane): DeckEl {
     if (this.el && this.laneOf.get(this.el) === lane) return this.el;
     return this.spare(lane);
   }
 
   private spare(lane: Lane): DeckEl {
-    return this.pool[lane].find((e) => e !== this.el && e !== this.standby?.el) ?? this.makeEl(lane);
+    return this.pool[lane].find((e) => e !== this.el && !this.entryOf(e)) ?? this.makeEl(lane);
   }
 
   private makeEl(lane: Lane): DeckEl {
@@ -301,9 +316,9 @@ export class AudioDeck {
   }
 
   private wire(el: DeckEl) {
-    // Ereignisse des gerade nicht benutzten Elements zählen nicht, die des Standby gehen nur an seine Bereitschaft (eine Verdrahtung je Element, nie doppelt)
+    // Ereignisse des gerade nicht benutzten Elements zählen nicht, die eines Vorrats-Elements gehen nur an seine Bereitschaft (eine Verdrahtung je Element, nie doppelt)
     const mine = () => el === this.el;
-    const sb = () => this.standby?.el === el;
+    const entry = () => this.entryOf(el);
     el.addEventListener('playing', () => {
       if (!mine()) return;
       if (this.adv && this.adv.to === this.clip?.id) {
@@ -369,9 +384,10 @@ export class AudioDeck {
       if (el.currentTime >= c.end - this.offset - END_EPS) this.clipEnd('timeupdate');
     });
     el.addEventListener('loadedmetadata', () => {
-      if (sb() && this.standby) {
-        this.standby.meta = true;
-        this.checkStandby();
+      const e = entry();
+      if (e) {
+        e.meta = true;
+        this.checkEntry(e);
         return;
       }
       if (!mine()) return;
@@ -388,15 +404,18 @@ export class AudioDeck {
     });
     // Zweiter Anstoß, wenn Daten da sind und das erste play() nichts bewirkt hat (iOS verwirft play() vor den Metadaten manchmal still)
     el.addEventListener('canplaythrough', () => {
-      if (!sb() || !this.standby) return;
-      this.standby.cpt = true;
-      this.checkStandby();
+      const e = entry();
+      if (!e) return;
+      e.cpt = true;
+      this.checkEntry(e);
     });
     el.addEventListener('seeked', () => {
-      if (sb()) this.checkStandby();
+      const e = entry();
+      if (e) this.checkEntry(e);
     });
     el.addEventListener('canplay', () => {
-      if (sb()) this.checkStandby();
+      const e = entry();
+      if (e) this.checkEntry(e);
       if (mine()) this.loading(false);
       if (mine() && this.clip && this.want && el.paused && !this.done && !this.nudged && this.refusedKey !== this.clip.key) {
         this.nudged = true;
@@ -404,8 +423,9 @@ export class AudioDeck {
       }
     });
     el.addEventListener('error', () => {
-      if (sb()) {
-        this.standbyError();
+      const e = entry();
+      if (e) {
+        this.entryError(e);
         return;
       }
       const c = this.clip;
@@ -455,8 +475,9 @@ export class AudioDeck {
       }
     }
     this.holding = null;
-    // Der Standby hält genau diesen Ausschnitt, aber er wird hier direkt gestartet: der Standby ist überholt, das Element wird frei
-    if (this.standby?.clip.key === clip.key) this.dropStandby('started directly');
+    // Der Vorrat hält genau diesen Ausschnitt, aber er wird hier direkt gestartet: der Eintrag ist überholt, das Element wird frei
+    const inPool = this.entries.find((x) => x.clip.key === clip.key);
+    if (inPool) this.dropEntry(inPool, 'started directly');
     const loc = this.deps.local(clip.key);
     // Spurwahl (Lautheit): das Element der Spur, bei Misserfolg der Kette das unveränderte
     const pick = this.deps.lane?.(clip, !!loc, forcePlain) ?? { lane: 'plain' as const, why: 'no value' };
@@ -560,7 +581,7 @@ export class AudioDeck {
       () => {
         this.unlocked = true;
         this.diag(`deck play#${n} ok`);
-        // Nach jedem erfüllten play() bereitet der Host den nächsten Ausschnitt im Standby vor (Brief 11, Schritt 2)
+        // Nach jedem erfüllten play() füllt der Host den Vorrat auf (Brief 14, Schritt 2)
         if (el === this.el) this.onPlayed?.();
       },
       // Ein Ergebnis des früheren Elements (Spurwechsel) zählt nicht
@@ -568,25 +589,79 @@ export class AudioDeck {
     );
   }
 
-  // ---- Standby (Entscheidung 47, Brief 11): das zweite Element hält den nächsten Ausschnitt fertig, Weiter tauscht nur die Rollen ----
+  // ---- Vorrat (Entscheidung 52, Brief 14): fünf Elemente halten die nächsten fünf Momente fertig geladen, gesperrt tauscht Weiter nur noch die Rollen ----
+
+  private entryOf(el: DeckEl): PoolEntry | undefined {
+    return this.entries.find((e) => e.el === el);
+  }
+
+  /** Eintrag ist abspielbar: bereit und nicht von iOS verworfen (readyState fiel auf 0, nachdem das Element schon Daten hatte) */
+  private usable(e: PoolEntry): boolean {
+    return e.ready && !(e.rsAtReady > 0 && e.el.readyState === 0);
+  }
+
+  /** Wie viele Elemente des Vorrats sind bereit (Diagnose, Statuszeile) */
+  readyCount(): number {
+    return this.entries.filter((e) => this.usable(e)).length;
+  }
+
+  /** Der Vorrat in Reihenfolge der Warteschlange, bereit oder noch ladend (Diagnose, Tests) */
+  poolInfo(): PoolInfo[] {
+    return this.entries.map((e) => ({ key: e.clip.key, id: e.clip.id, ready: this.usable(e) }));
+  }
+
+  /** Hält der Vorrat diesen Ausschnitt bereit? Ohne key: ist überhaupt ein Element bereit? */
+  poolReady(key?: string): boolean {
+    return key === undefined ? this.readyCount() > 0 : this.entries.some((e) => e.clip.key === key && this.usable(e));
+  }
 
   /**
-   * Nächsten Ausschnitt im zweiten Element vorladen: Quelle setzen (Vorrat lokal bevorzugt, sonst Netz), load(), Position auf den Start, warten auf
-   * canplaythrough (lokal genügt readyState 3, sonst 4). Meldet "deck: standby ready". Verdeckt nur aus dem Vorrat (iOS lädt eine Netzquelle dann nicht).
-   * true, wenn der Standby für diesen Ausschnitt läuft oder bereit ist.
+   * Vorrat auffüllen (Schritt 1): die nächsten POOL Ausschnitte der Warteschlange, in Reihenfolge, laden jeweils in ein freies Element (Quelle setzen, load(),
+   * Position auf den Start, bereit bei canplaythrough oder readyState 4, lokal genügt 3). Lokale Quellen starten zuerst, dann das Netz. Nur wenn die App
+   * sichtbar ist: verdeckt lädt iOS nichts nach, und ein load() verdeckt hängt das Element für immer. Bereits geladene Einträge bleiben. Was aus dem Fenster
+   * gefallen ist oder von iOS verworfen wurde, wird ersetzt. Gibt die Zahl der Einträge zurück (bereit oder ladend).
    */
-  prepare(clip: DeckClip, forcePlain = false, note = ''): boolean {
-    if (!this.deps.standby) return false;
-    const cur = this.standby;
-    if (cur?.clip.key === clip.key) return true;
-    // Der Ausschnitt läuft schon im aktiven Element
-    if (this.clip?.key === clip.key && !this.done) return false;
-    const loc = this.deps.local(clip.key);
-    if (!loc && this.hidden()) {
-      this.diag(`deck: prepare ${clip.id} skipped (hidden, not in storage)`);
-      return false;
+  fill(clips: readonly DeckClip[], locOf: (key: string) => LocalClip | undefined = this.deps.local): number {
+    if (!this.deps.standby || this.hidden()) return this.entries.length;
+    // Ohne eine Geste hat kein Element je gespielt: ein Vorrat, der verdeckt nie starten darf, wäre wertlos
+    if (!this.unlocked) return this.entries.length;
+    const want: DeckClip[] = [];
+    for (const c of clips) {
+      if (want.length >= POOL) break;
+      if (this.clip?.key === c.key && !this.done) continue;
+      if (!want.some((w) => w.key === c.key)) want.push(c);
     }
-    if (cur) this.dropStandby('replaced');
+    const keys = new Set(want.map((c) => c.key));
+    let changed = false;
+    for (const e of [...this.entries]) {
+      if (e.rsAtReady > 0 && e.ready && e.el.readyState === 0) {
+        this.evict(e);
+        changed = true;
+      } else if (!keys.has(e.clip.key)) {
+        this.dropEntry(e, 'left window');
+        changed = true;
+      }
+    }
+    // Lokale Quellen zuerst: sie sind in Millisekunden bereit, das Netz braucht Sekunden
+    const missing = want.filter((c) => !this.entries.some((e) => e.clip.key === c.key));
+    const loc = new Map(missing.map((c) => [c.key, locOf(c.key)] as const));
+    const order = [...missing.filter((c) => loc.get(c.key)), ...missing.filter((c) => !loc.get(c.key))];
+    for (const c of order) {
+      this.startEntry(c, loc.get(c.key));
+      changed = true;
+    }
+    // Reihenfolge der Warteschlange herstellen (neue Einträge kamen hinten dazu)
+    const rank = new Map(want.map((c, i) => [c.key, i] as const));
+    this.entries.sort((a, b) => (rank.get(a.clip.key) ?? 0) - (rank.get(b.clip.key) ?? 0));
+    if (changed) {
+      const local = this.entries.filter((e) => e.local).length;
+      this.diag(`deck: pool fill ${this.entries.length}/${POOL} (local ${local}, net ${this.entries.length - local})`);
+    }
+    return this.entries.length;
+  }
+
+  /** Einen Ausschnitt in ein freies Element laden (aus dem Vorrat lokal bevorzugt, sonst Netz). Nur sichtbar aufgerufen. */
+  private startEntry(clip: DeckClip, loc: LocalClip | undefined, forcePlain = false): PoolEntry {
     // Spurwahl wie beim Start: die Lautheit hängt am Element, das später aktiv wird
     const pick = this.deps.lane?.(clip, !!loc, forcePlain) ?? { lane: 'plain' as const, why: 'no value' };
     let lane = pick.lane;
@@ -603,9 +678,9 @@ export class AudioDeck {
     }
     const offset = loc?.offset ?? 0;
     const target = Math.max(0, clip.start - offset);
-    const s: Standby = { clip, el, lane, why, chain, local: !!loc, offset, target, meta: false, cpt: false, ready: false, t0: Date.now() };
-    this.standby = s;
-    this.diag(`deck: prepare ${clip.id} src=${loc ? 'local' : 'net'}${note ? ` (${note})` : ''}`);
+    const s: PoolEntry = { clip, el, lane, why, chain, local: !!loc, offset, target, meta: false, cpt: false, ready: false, rsAtReady: 0, t0: Date.now() };
+    this.entries.push(s);
+    this.diag(`deck: pool load ${clip.id} src=${loc ? 'local' : 'net'}`);
     el.src = loc?.url ?? withStart(clip.url, clip.start);
     el.load();
     // load() setzt das Tempo zurück: Standard und aktuelles Tempo gemeinsam setzen
@@ -617,16 +692,15 @@ export class AudioDeck {
       /* nach loadedmetadata */
     }
     setTimeout(() => {
-      if (this.standby === s && !s.ready) this.diag(`deck: standby not ready ${clip.id} after 8000 ms rs=${el.readyState} meta=${s.meta}`);
+      if (this.entries.includes(s) && !s.ready) this.diag(`deck: pool not ready ${clip.id} after 8000 ms rs=${el.readyState} meta=${s.meta}`);
     }, 8000);
-    this.checkStandby();
-    return true;
+    this.checkEntry(s);
+    return s;
   }
 
-  /** Metadaten da, Position gesetzt, genug Daten zum Durchspielen: der Standby ist bereit */
-  private checkStandby() {
-    const s = this.standby;
-    if (!s || s.ready || !s.meta) return;
+  /** Metadaten da, Position gesetzt, genug Daten zum Durchspielen: der Eintrag ist bereit */
+  private checkEntry(s: PoolEntry) {
+    if (s.ready || !s.meta || !this.entries.includes(s)) return;
     const el = s.el;
     try {
       if (Math.abs(el.currentTime - s.target) > SEEK_TOL) {
@@ -641,65 +715,86 @@ export class AudioDeck {
     const rs = el.readyState;
     if (!(s.cpt || rs >= 4 || (s.local && rs >= 3))) return;
     s.ready = true;
-    this.diag(`deck: standby ready ${s.clip.id} after ${Date.now() - s.t0} ms`);
-  }
-
-  /** Die Quelle des Standby lud nicht: aus dem Vorrat einmal vom Netz (nur sichtbar), in der geregelten Spur einmal unverändert, sonst kein Standby */
-  private standbyError() {
-    const s = this.standby;
-    if (!s) return;
-    this.diag(`deck: standby failed ${s.clip.id} (${s.local ? 'local' : s.lane})`);
-    const { clip, local, lane } = s;
-    this.dropStandby('error');
-    if (local) {
-      this.deps.dropLocal(clip.key);
-      this.prepare(clip);
-    } else if (lane === 'level') {
-      this.deps.host?.(clip.url, 'bad');
-      this.prepare(clip, true);
+    s.rsAtReady = rs;
+    this.diag(`deck: pool ready ${s.clip.id} after ${Date.now() - s.t0} ms`);
+    // Nach einem Tausch oder Verwerfen ist der Vorrat wieder voll
+    if (this.depleted && this.entries.every((x) => this.usable(x))) {
+      this.depleted = false;
+      this.diag(`deck: pool refill ${this.entries.length}/${POOL}`);
     }
   }
 
-  /** Standby verwerfen, das Element wird frei */
-  dropStandby(why = 'dropped') {
-    const s = this.standby;
-    if (!s) return;
-    this.standby = null;
-    this.diag(`deck: standby dropped ${s.clip.id} (${why})`);
-    this.clearSrc(s.el);
+  /** Die Quelle eines Eintrags lud nicht: aus dem Vorrat einmal vom Netz, in der geregelten Spur einmal unverändert. Sichtbar füllt der Host neu. */
+  private entryError(e: PoolEntry) {
+    this.diag(`deck: pool failed ${e.clip.id} (${e.local ? 'local' : e.lane})`);
+    const { clip, local, lane } = e;
+    this.dropEntry(e, 'error');
+    this.depleted = true;
+    if (local) this.deps.dropLocal(clip.key);
+    else if (lane === 'level') this.deps.host?.(clip.url, 'bad');
+    if (!this.hidden()) this.onNeedFill?.();
   }
 
-  /** Ist der Standby bereit (für diesen Ausschnitt, wenn key gegeben)? */
-  standbyReady(key?: string): boolean {
-    return !!this.standby?.ready && (key === undefined || this.standby.clip.key === key);
+  /** iOS hat das Element verworfen (readyState fiel auf 0): der Eintrag fällt aus dem Vorrat, der nächste sichtbare fill lädt ihn neu */
+  private evict(e: PoolEntry) {
+    this.diag(`deck: pool evicted ${e.clip.id}`);
+    this.depleted = true;
+    this.dropEntry(e, 'evicted');
   }
 
-  get standbyKey(): string | null {
-    return this.standby?.clip.key ?? null;
+  /** Eintrag aus dem Vorrat nehmen. Das Element bleibt, wie es ist (pausiert, Quelle bleibt bis zur nächsten Befüllung). Sichtbar wird die Quelle freigegeben, verdeckt nie (kein load()). */
+  private dropEntry(e: PoolEntry, why: string) {
+    this.entries = this.entries.filter((x) => x !== e);
+    this.diag(`deck: pool dropped ${e.clip.id} (${why})`);
+    if (!this.hidden()) this.clearSrc(e.el);
   }
 
   /**
-   * Weiter ohne Quellwechsel: der Standby wird aktiv, play() läuft synchron auf ihm (im Call-Stack des Handlers), danach hält das alte Element an
-   * und ist frei für den nächsten Standby. Nichts wird geladen. false, wenn kein bereiter Standby da ist, dann geschieht nichts.
+   * Weiter ohne Quellwechsel (Schritt 1): das erste bereite Element in Reihenfolge der Warteschlange wird aktiv, play() läuft synchron auf ihm (im Call-Stack
+   * des Handlers), danach hält das alte Element an und geht frei in den Vorrat zurück. Nichts wird geladen. Gibt den Ausschnitt zurück, der jetzt spielt.
+   * null, wenn kein Element bereit ist: dann geschieht nichts.
    */
-  swap(sink: DeckSink | null = null): boolean {
-    const s = this.standby;
-    if (!s || !s.ready) {
-      this.diag(`deck: swap ${s?.clip.id ?? 'none'} ready=false`);
+  swapNext(sink: DeckSink | null = null): DeckClip | null {
+    for (const e of [...this.entries]) {
+      if (!e.ready) continue;
+      if (!this.usable(e)) {
+        // Verworfen, seit es bereit wurde: nicht abspielbar
+        this.evict(e);
+        continue;
+      }
+      // iOS hat den Web-Audio-Kontext unterbrochen: die geregelte Spur wäre stumm. Dieser Eintrag taugt nicht, der nächste vielleicht.
+      if (e.lane === 'level' && this.deps.running && !this.deps.running()) {
+        this.diag(`deck: swap ${e.clip.id} ready=false (context not running)`);
+        this.depleted = true;
+        this.dropEntry(e, 'context not running');
+        continue;
+      }
+      return this.swapEntry(e, sink);
+    }
+    this.diag('deck: swap none ready=false pool=0');
+    return null;
+  }
+
+  /** Tausch auf den Eintrag mit diesem Schlüssel (Wisch auf einen Moment, den der Vorrat fertig hält). false, wenn er nicht bereit ist. */
+  private swapKey(key: string, sink: DeckSink | null): boolean {
+    const e = this.entries.find((x) => x.clip.key === key);
+    if (!e || !this.usable(e)) return false;
+    if (e.lane === 'level' && this.deps.running && !this.deps.running()) {
+      this.diag(`deck: swap ${e.clip.id} ready=false (context not running)`);
+      this.depleted = true;
+      this.dropEntry(e, 'context not running');
       return false;
     }
-    // iOS hat den Web-Audio-Kontext unterbrochen: die geregelte Spur wäre stumm. Standby auf der unveränderten Spur neu, dieser Druck geht verloren.
-    if (s.lane === 'level' && this.deps.running && !this.deps.running()) {
-      this.diag(`deck: swap ${s.clip.id} ready=false (context not running)`);
-      const c = s.clip;
-      this.dropStandby('context not running');
-      this.prepare(c, true);
-      return false;
-    }
+    this.swapEntry(e, sink);
+    return true;
+  }
+
+  private swapEntry(s: PoolEntry, sink: DeckSink | null): DeckClip {
     const old = this.el;
     const clip = s.clip;
     const el = s.el;
-    this.standby = null;
+    this.entries = this.entries.filter((x) => x !== s);
+    this.depleted = true;
     if (old) el.muted = old.muted;
     this.el = el;
     this.lane = s.lane;
@@ -722,14 +817,14 @@ export class AudioDeck {
     this.snd = { muted: isSilent(el), playing: false, refused: false };
     // Der alte Player gibt ab (wie beim automatischen Weiter), der neue übernimmt später über load(), das den laufenden Ausschnitt erkennt (holds)
     // Der Sink steht vor dem play(): ein Element meldet "playing" auch synchron, der neue Player soll den Zustand nie verpassen
-    this.armed = null;
     this.sink = sink;
     this.applyRate(el);
-    this.diag(`deck: swap ${clip.id} ready=true`);
+    this.diag(`deck: swap ${clip.id} ready=true pool=${this.readyCount()}`);
     this.kick('swap');
+    // Das alte Element geht frei in den Vorrat zurück: pausiert, Quelle bleibt bis zur nächsten Befüllung (kein load() verdeckt)
     if (old && old !== el) this.halt(old, 'app: swap');
     this.deps.playbackState?.('playing', 'swap');
-    return true;
+    return clip;
   }
 
   private rejected(e: unknown, why: string) {
@@ -800,55 +895,44 @@ export class AudioDeck {
     }, CONTEXT_GRACE_MS);
   }
 
-  /** Ende des Ausschnitts (timeupdate oder ended), höchstens einmal je Ausschnitt */
+  /**
+   * Ende des Ausschnitts (timeupdate oder ended), höchstens einmal je Ausschnitt. Verdeckt tauscht das Deck auf das nächste bereite Element des Vorrats
+   * (Schritt 4), im selben Handler, nie mit einem Quellwechsel am Element. Ist keins bereit, hält das Element an und meldet das Ende.
+   */
   private clipEnd(why: string) {
     const el = this.el;
     const c = this.clip;
     if (!el || !c || this.done) return;
     this.done = true;
-    const next = this.armed;
     const hid = this.hidden();
     if (hid) this.hiddenStats.ends++;
-    const go = !!(next && this.onAdvance && hid);
-    this.note(`clip end via ${why} hidden=${hid} armed=${next?.id ?? 'none'} onAdvance=${!!this.onAdvance} advance=${go ? 'yes' : 'no'} ${this.stateText(el)}`);
-    if (next && this.onAdvance && hid) {
-      // Hintergrund: Quelle wechseln und play() im selben Handler. Erst danach die Buchführung der App.
+    const ready = this.readyCount();
+    const go = !!(this.onAdvance && hid && ready > 0);
+    this.note(`clip end via ${why} hidden=${hid} pool=${ready} onAdvance=${!!this.onAdvance} advance=${go ? 'yes' : 'no'} ${this.stateText(el)}`);
+    if (go && this.onAdvance) {
+      // Hintergrund: Tausch und play() im selben Handler. Erst danach die Buchführung der App.
       const from = c;
-      this.armed = null;
-      this.sink = null;
-      this.diag(`deck switch ${from.id} to ${next.id} (${why})`);
-      this.start(next, true);
-      // Die Quelle des Nachfolgers wird erst hier gesetzt (nicht schon vor dem Ende), play() folgt im selben Aufruf auf demselben Element
-      this.note(`advance ${from.id} to ${next.id}: src and play() in this handler, same element ${this.el === el}, next from storage ${this.isLocal}, readyState ${this.el?.readyState ?? '?'}`);
-      this.adv = { to: next.id, t0: Date.now() };
-      setTimeout(() => {
-        if (this.adv?.to !== next.id) return;
-        this.adv = null;
-        if (this.el) this.note(`advance to ${next.id}: NOT playing after 3 s, ${this.stateText(this.el)} error ${this.el.error?.code ?? 'none'}`);
-      }, 3000);
-      // Die Media Session steht sofort auf playing, nicht erst nach dem ersten Ton der neuen Quelle
-      this.deps.playbackState?.('playing', 'switch');
-      try {
-        this.onAdvance(from, next);
-      } catch (e) {
-        this.diag(`deck onAdvance failed ${e instanceof Error ? e.message : String(e)}`);
+      const to = this.swapNext(null);
+      if (to) {
+        this.note(`advance ${from.id} to ${to.id}: swap and play() in this handler, new element ${this.el !== el}, next from storage ${this.isLocal}, readyState ${this.el?.readyState ?? '?'}`);
+        this.adv = { to: to.id, t0: Date.now() };
+        setTimeout(() => {
+          if (this.adv?.to !== to.id) return;
+          this.adv = null;
+          if (this.el) this.note(`advance to ${to.id}: NOT playing after 3 s, ${this.stateText(this.el)} error ${this.el.error?.code ?? 'none'}`);
+        }, 3000);
+        try {
+          this.onAdvance(from, to);
+        } catch (e) {
+          this.diag(`deck onAdvance failed ${e instanceof Error ? e.message : String(e)}`);
+        }
+        return;
       }
-      return;
     }
-    // Vordergrund oder kein Nachfolger: anhalten und das Ende melden, die App entscheidet (Für-dich-Karte, Wisch)
-    if (hid) this.diag(`bg: end without switch ${c.id} (armed ${next?.id ?? 'none'}, onAdvance ${this.onAdvance ? 'yes' : 'no'}), element stops`);
-    this.halt(el, 'app: clip end in foreground');
+    // Vordergrund oder kein bereites Element: anhalten und das Ende melden, die App entscheidet (Für-dich-Karte, Wisch)
+    if (hid) this.diag(`bg: end without switch ${c.id} (pool ${ready}, onAdvance ${this.onAdvance ? 'yes' : 'no'}), element stops`);
+    this.halt(el, 'app: clip end');
     this.sink?.state(ENDED);
-  }
-
-  /** Nachfolger vorbereiten. null, wenn es keinen gibt. */
-  arm(clip: DeckClip | null) {
-    if ((clip?.key ?? null) !== (this.armed?.key ?? null)) this.diag(`bg: arm ${clip ? `${clip.id} (${this.deps.local(clip.key) ? 'local' : 'net'})` : 'none'}`);
-    this.armed = clip;
-  }
-
-  get armedKey(): string | null {
-    return this.armed?.key ?? null;
   }
 
   /** Aufräumen, wenn der Audio-Reiter verlassen wird: Ton aus, keine Rückrufe */
@@ -859,12 +943,13 @@ export class AudioDeck {
     this.onStart = null;
     this.onLoading = null;
     this.pending = null;
-    this.armed = null;
     this.onAdvance = null;
     this.onMedia = null;
     this.onPlayed = null;
+    this.onNeedFill = null;
     this.diag = () => {};
-    this.standby = null;
+    this.entries = [];
+    this.depleted = false;
     this.sink = null;
     this.want = false;
     this.done = true;
@@ -911,8 +996,8 @@ export class AudioDeck {
       } else this.halt(el, 'app: load without play');
       return;
     }
-    // Wisch auf den Moment, den der Standby fertig hält: Rollen tauschen statt die Quelle zu wechseln (Brief 11, Schritt 4)
-    if (opts.play && this.standbyReady(clip.key) && this.swap(sink)) {
+    // Wisch auf einen Moment, den der Vorrat fertig hält: Rollen tauschen statt die Quelle zu wechseln (Brief 11, Schritt 4)
+    if (opts.play && this.swapKey(clip.key, sink)) {
       if (this.el) this.el.muted = opts.muted;
       return;
     }
@@ -980,20 +1065,20 @@ export class AudioDeck {
   prime() {
     if (this.levelPrimed || !this.deps.lane) return;
     this.levelPrimed = true;
-    // Mit Standby gibt es zwei Elemente der geregelten Spur: beide müssen die Geste gesehen haben, sonst startet das zweite verdeckt nicht
-    this.ensureCount('level', this.deps.standby ? 2 : 1);
+    // Mit Vorrat gibt es POOL + 1 Elemente der geregelten Spur: alle müssen die Geste gesehen haben, sonst startet ein Tausch verdeckt nicht
+    this.ensureCount('level', this.deps.standby ? POOL + 1 : 1);
     for (const el of this.pool.level) this.silentPlay(el);
   }
 
-  /** Element mit Stille starten, solange eine Geste läuft. Aktive und Standby-Elemente bleiben unberührt, ein schon freigeschaltetes ebenso. */
+  /** Element mit Stille starten, solange eine Geste läuft. Aktive und Vorrats-Elemente bleiben unberührt, ein schon freigeschaltetes ebenso. */
   private silentPlay(el: DeckEl) {
-    if (el === this.el || el === this.standby?.el || this.unlockedEls.has(el)) return;
+    if (el === this.el || this.entryOf(el) || this.unlockedEls.has(el)) return;
     this.unlockedEls.add(el);
     try {
       if (!el.src) el.src = SILENT;
       const p = el.play();
       const done = () => {
-        if (el !== this.el && el !== this.standby?.el) this.clearSrc(el);
+        if (el !== this.el && !this.entryOf(el)) this.clearSrc(el);
       };
       p?.then?.(done, done);
     } catch {
@@ -1001,9 +1086,9 @@ export class AudioDeck {
     }
   }
 
-  /** Mit Standby gibt es ein zweites Element der unveränderten Spur: auch es per Geste freischalten (iOS erlaubt play() ohne Geste nur Elementen, die schon durch eine gespielt haben) */
+  /** Mit Vorrat gibt es POOL + 1 Elemente der unveränderten Spur: alle per Geste freischalten (iOS erlaubt play() ohne Geste nur Elementen, die schon durch eine gespielt haben) */
   private unlockSpares() {
-    this.ensureCount('plain', 2);
+    this.ensureCount('plain', POOL + 1);
     for (const el of this.pool.plain) this.silentPlay(el);
   }
 

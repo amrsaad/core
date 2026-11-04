@@ -152,27 +152,29 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await fs.cx.close();
     await fa.cx.close();
 
-    // Fünf Momente in Folge im Hintergrund (Entscheidung 13): dasselbe Audio-Element, die Quelle wechselt, nie ein zweites Element, kein Stopp
+    // Fünf Momente in Folge im Hintergrund (Entscheidung 13, Brief 14): der Vorrat hält fünf Elemente fertig, das Ende tauscht nur die Rollen, nie eine neue Quelle, kein Stopp
     const fr = await freshPage(browser, url, k, poolBgAudio, '?now=2026-10-23&seed=3');
     const pr = fr.pg;
     await pr.waitForSelector('[data-testid=form-switch]');
     await pr.click('[data-testid=form-switch] >> text=Audio');
     await waitFor(pr, () => window.__core.state() === 1 && window.__core.moment()?.audio === true);
-    await pr.evaluate(() => { window.__node = document.querySelector('audio'); window.__srcs = new Set(); setInterval(() => window.__srcs.add(window.__node.src), 20); });
+    c.bgRowPoolFilled = await waitFor(pr, () => window.__core.deck().ready >= 5, undefined, 8000);
+    const rowLen0 = await pr.evaluate(() => { window.__node = document.querySelector('audio'); return window.__core.diag().length; });
     await setVisibility(pr, 'hidden');
     c.bgFiveInARow = await waitFor(pr, () => window.__core.diag().filter((x) => x.startsWith('bg: next ')).length >= 5 && window.__core.state() === 1, undefined, 45000);
-    const row = await pr.evaluate(() => ({
+    const row = await pr.evaluate((n0) => ({
       same: window.__node === document.querySelector('audio'),
       count: document.querySelectorAll('audio').length,
-      srcs: window.__srcs.size,
       history: window.__core.deck().history,
       diag: window.__core.diag().filter((x) => x.startsWith('bg: ')),
-    }));
+      after: window.__core.diag().slice(n0),
+    }), rowLen0);
     r.bgRowLog = row.diag;
     c.bgRowSameNode = row.same;
-    // Brief 11: höchstens zwei Elemente, das aktive und der Standby
-    c.bgRowAtMostTwoAudioElements = row.count <= 2;
-    c.bgRowSrcChanges = row.srcs >= 5 && new Set(row.history).size >= 6;
+    // Brief 14: höchstens fünf Elemente im Vorrat plus das aktive
+    c.bgRowAtMostPoolElements = row.count <= 6;
+    c.bgRowSwapsNotSources = row.after.filter((x) => /^deck: swap \S+ ready=true pool=\d$/.test(x)).length >= 5 && new Set(row.history).size >= 6;
+    c.bgRowNoLoadWhileHidden = !row.after.some((x) => /^deck: (src|pool load) /.test(x));
     c.bgRowEndedNext = row.diag.filter((x) => x.startsWith('bg: ended ')).length >= 5 && row.diag.filter((x) => x.startsWith('bg: next ')).length >= 5;
     // Issue 35: nach mehreren Trackwechseln sind Weiter und Zurück noch registriert, keine Sprung-Aktionen, Handler wurden nach playing neu gesetzt
     const lh = await pr.evaluate(() => ({ h: window.__core.lockHandlers(), d: window.__core.diag().filter((x) => x.startsWith('lock: handlers set')), prevNull: window.__ms ? Object.keys(window.__ms).sort() : null }));
@@ -203,7 +205,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bgRejectResumesOnReturn = await waitFor(pe, (idx) => window.__core.state() === 1 && window.__core.idx() === idx, atReject, 4000);
     await fe.cx.close();
 
-    // Brief 11: Weiter am Sperrbildschirm ohne bereiten Standby (hier kommt kein canplaythrough) tut nichts: kein Netzstart, kein Wechsel, nichts gezählt.
+    // Brief 14: Weiter am Sperrbildschirm ohne bereites Element im Vorrat (hier kommt kein canplaythrough) tut nichts: kein Netzstart, kein Wechsel, nichts gezählt.
     // Der laufende Moment spielt weiter, die Diagnose sagt es.
     const fn = await freshPage(browser, url, k, poolBgAudio, '?now=2026-10-23&seed=3', [MS_SPY, () => { window.__noCpt = true; }]);
     const pn = fn.pg;
@@ -216,7 +218,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const nxNet0 = await pn.evaluate(() => window.__core.diag().filter((x) => /^deck: src net /.test(x)).length);
     await setVisibility(pn, 'hidden');
     await pn.evaluate(() => window.__ms.nexttrack());
-    c.bgLockNextStayLine = await waitFor(pn, () => window.__core.diag().some((x) => x === 'lock next: stay (standby not ready)'), undefined, 3000);
+    c.bgLockNextStayLine = await waitFor(pn, () => window.__core.diag().some((x) => x === 'lock next: stay (pool empty)'), undefined, 3000);
     await pn.waitForTimeout(500);
     const nx = await pn.evaluate(() => ({ idx: window.__core.idx(), st: window.__core.state(), net: window.__core.diag().filter((x) => /^deck: src net /.test(x)).length, seenNext: window.__core.seen(window.__core.queue()[window.__core.idx() + 1]) }));
     c.bgLockNextNoNetStart = nx.net === nxNet0;
@@ -224,38 +226,38 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bgLockNextCountsNothing = !nx.seenNext;
     await fn.cx.close();
 
-    // Brief 11 (Entscheidung 47, Issue 36), 'five nexttrack hidden all play within 1 s': das zweite Element hält den nächsten Moment fertig, Weiter am
-    // Sperrbildschirm tauscht nur. Fünf Mal Weiter hintereinander, jedes Mal Ton binnen 1 s, ohne Rückkehr in die App und ohne neue Quelle.
-    // IOS_GATE sperrt jedes play() außerhalb des Handlers, das tauschende play() läuft im Handler.
+    // Brief 14 (Entscheidung 52, Issue 36), 'five nexttrack hidden, all play within 1 s, no prepare while hidden': der Vorrat hält die nächsten fünf Momente fertig
+    // geladen, gemischt aus dem Speicher (Blob) und dem Netz. Weiter am Sperrbildschirm tauscht nur die Rollen: fünf Mal hintereinander, jedes Mal Ton binnen 1 s,
+    // ohne Rückkehr in die App, ohne neue Quelle, ohne Laden. IOS_GATE sperrt jedes play() außerhalb des Handlers, das tauschende play() läuft im Handler.
     const fk = await freshPage(browser, url, k, poolBgStock, '?now=2026-10-23&seed=3', [MS_SPY, IOS_GATE], routeMp3);
     const pk = fk.pg;
     await pk.waitForSelector('[data-testid=form-switch]');
     await pk.click('[data-testid=form-switch] >> text=Audio');
     await waitFor(pk, () => window.__core.state() === 1 && window.__core.moment()?.audio === true);
     c.bgNextStockFills = await waitFor(pk, () => window.__core.preload().stats.n >= 8, undefined, 30000);
-    // Sichtbar bereitet das Deck den Nachfolger nach dem ersten play ok vor
-    c.bgNextStandbyReady = await waitFor(pk, () => window.__core.deck().standbyReady, undefined, 8000);
-    const kIdx = await pk.evaluate(() => window.__core.idx());
-    const press = () => pk.evaluate(() => { window.__sync = true; try { window.__ms.nexttrack(); } finally { window.__sync = false; } });
-    await setVisibility(pk, 'hidden');
-    // Brief 11, Schritt 9 (Test Max 04.11. 12:55): idx+1 ist ein Netz-Moment, der Vorrat liegt dahinter. Vorher blieb verdeckt jedes Next ohne Wirkung
-    // ('prepare ... skipped (hidden, not in storage)', dann 'stay'). Jetzt zieht der Host den nächsten Vorrats-Moment nach vorn, macht ihn zur Blob-URL und bereitet ihn vor.
+    // Warteschlange: idx+1 bis idx+5 gemischt Speicher und Netz (Speicher, Netz, Speicher, Netz, Speicher)
     const arr = await pk.evaluate(() => {
       const held = new Set(window.__core.preload().ids);
       const cur = window.__core.moment().id;
       const q = window.__core.queue();
-      const nets = q.filter((id) => id.startsWith('bgnet') && id !== cur).slice(0, 3);
-      // Der sichtbar vorbereitete Standby bleibt außen vor: es geht um den Standby, den der Host erst verdeckt aus dem Vorrat bestimmen muss
-      const sb = window.__core.deck().standby ?? '';
-      const stock = q.filter((id) => held.has(id) && id !== cur && !sb.startsWith(`${id.split(':')[0]}|`)).slice(0, 6);
-      return { n: window.__core.arrange([...nets, ...stock]), nets, stock };
+      const nets = q.filter((id) => id.startsWith('bgnet') && id !== cur).slice(0, 2);
+      const stock = q.filter((id) => held.has(id) && id !== cur).slice(0, 3);
+      const order = [stock[0], nets[0], stock[1], nets[1], stock[2]];
+      return { n: window.__core.arrange([...order, ...stock.slice(3), ...q.filter((id) => !order.includes(id) && id !== cur)]), order, nets, stock };
     });
     r.bgNextArranged = arr;
-    c.bgNextArranged = arr.nets.length === 3 && arr.stock.length >= 6 && arr.n === arr.nets.length + arr.stock.length;
-    const five = { adv: true, ok: true, swap: true, noSrc: true, noVisible: true, noStay: true, ms: [] };
+    c.bgNextArranged = arr.nets.length === 2 && arr.stock.length === 3 && arr.order.every(Boolean);
+    // Sichtbar füllt das Deck den Vorrat (nach dem ersten play ok und nach der Umstellung): fünf Elemente bereit, in Reihenfolge der Warteschlange
+    c.bgNextPoolReady = await waitFor(pk, () => window.__core.deck().ready >= 5, undefined, 8000);
+    const kIdx = await pk.evaluate(() => window.__core.idx());
+    const poolState = await pk.evaluate(() => ({ pool: window.__core.deck().pool.map((x) => x.id), q: window.__core.queue().slice(window.__core.idx() + 1, window.__core.idx() + 6), local: window.__core.preload().ids }));
+    r.bgNextPool = poolState;
+    c.bgNextPoolFollowsQueue = poolState.pool.length === 5 && poolState.pool.every((id, i) => id === poolState.q[i].split(':')[0]);
+    c.bgNextPoolMixed = poolState.q.some((id) => id.startsWith('bgnet')) && poolState.q.some((id) => poolState.local.includes(id));
+    const press = () => pk.evaluate(() => { window.__sync = true; try { window.__ms.nexttrack(); } finally { window.__sync = false; } });
+    await setVisibility(pk, 'hidden');
+    const five = { adv: true, ok: true, swap: true, noSrc: true, noLoad: true, noVisible: true, noStay: true, order: true, ms: [] };
     for (let i = 1; i <= 5; i++) {
-      // Der Standby der nächsten Runde wird verdeckt aus dem Vorrat vorbereitet. Ein Mensch drückt nicht schneller, darum wird auf ihn gewartet.
-      await waitFor(pk, () => window.__core.deck().standbyReady, undefined, 4000);
       const len0 = await pk.evaluate(() => window.__core.diag().length);
       const t0 = Date.now();
       await press();
@@ -265,32 +267,41 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const lines = (await pk.evaluate(() => window.__core.diag())).slice(len0);
       five.adv &&= adv;
       five.ok &&= ok;
-      five.swap &&= lines.some((x) => /^deck: swap \S+ ready=true$/.test(x));
+      five.swap &&= lines.some((x) => x === `deck: swap ${arr.order[i - 1].split(':')[0]} ready=true pool=${5 - i}`);
       five.noSrc &&= !lines.some((x) => /^deck: src /.test(x));
+      five.noLoad &&= !lines.some((x) => /^deck: pool (load|fill) /.test(x));
       five.noVisible &&= !lines.some((x) => /app: visible|page visible/.test(x));
       five.noStay &&= !lines.some((x) => /^lock next: stay/.test(x));
-      if (i === 1) r.bgNextFirstLines = lines.filter((x) => /^lock next: |^deck: (swap|prepare|standby)|^deck play#/.test(x));
+      five.order &&= (await pk.evaluate(() => window.__core.moment().id)) === arr.order[i - 1];
+      if (i === 1) r.bgNextFirstLines = lines.filter((x) => /^lock next: |^deck: (swap|pool)|^deck play#/.test(x));
     }
     r.bgNextFiveMs = five.ms;
     c.bgNextFiveAdvance = five.adv;
-    c.bgNextFivePlayOk = five.ok && five.ms.every((m) => m < 1500);
+    c.bgNextFivePlayOk = five.ok && five.ms.every((m) => m < 1000);
     c.bgNextFiveSwapLines = five.swap;
+    c.bgNextFiveFollowsQueue = five.order;
     c.bgNextFiveNoNewSource = five.noSrc;
+    c.bgNextFiveNoLoad = five.noLoad;
     c.bgNextFiveNoVisible = five.noVisible;
     c.bgNextFiveNoStay = five.noStay;
     const all = await pk.evaluate(() => window.__core.diag());
-    // Der Standby kam jedes Mal aus dem Vorrat, vorgezogen vor die Netz-Momente, nie übersprungen
-    r.bgNextPullLines = all.filter((x) => /^deck: prepare /.test(x));
-    c.bgNextPulledFromStock = all.filter((x) => /^deck: prepare \S+ src=local \(pulled from \d+\)$/.test(x)).length >= 1;
-    c.bgNextNoSkippedPrepare = !all.some((x) => /^deck: prepare \S+ skipped/.test(x));
-    c.bgNextNoNetMomentPlayed = !(await pk.evaluate(() => window.__core.moment().id)).startsWith('bgnet');
+    // Verdeckt wurde nichts vorbereitet und nichts übersprungen
+    c.bgNextNoPrepareHidden = !all.some((x) => /^deck: prepare /.test(x));
     c.bgNextNoGatedPlay = (await pk.evaluate(() => window.__gated)) === 0;
     c.bgNextColdUnder2 = (await pk.evaluate(() => window.__core.lock().cold)) < 2;
     r.bgNextPlays = await pk.evaluate(() => window.__plays);
+    // Der Vorrat ist leer: das sechste Weiter tut nichts, sagt es und der Moment spielt weiter (kein Netzstart verdeckt)
+    const len6 = await pk.evaluate(() => window.__core.diag().length);
+    await press();
+    c.bgNextSixthStays = await waitFor(pk, (n) => window.__core.diag().slice(n).some((x) => x === 'lock next: stay (pool empty)'), len6, 2000);
+    c.bgNextSixthKeeps = (await pk.evaluate(() => window.__core.idx())) === kIdx + 5;
     // Die Sperre ist wirksam: ein play() außerhalb des Handlers bleibt verdeckt ausstehend (so scheiterte jeder Wechsel einer Quelle im Hintergrund)
     c.bgNextGateActive = (await pk.evaluate(() => { document.querySelector('audio').play(); return window.__gated; })) === 1;
-    // Höchstens zwei Elemente mit Quelle (aktiv und Standby)
-    c.bgNextAtMostTwoSrc = (await pk.evaluate(() => window.__core.media())) <= 2;
+    // Zurück in die App: der Vorrat füllt sich wieder
+    await setVisibility(pk, 'visible');
+    c.bgNextRefill = await waitFor(pk, () => window.__core.diag().some((x) => x === 'deck: pool refill 5/5'), undefined, 8000);
+    // Aktives Element plus fünf im Vorrat
+    c.bgNextAtMostPoolSrc = (await pk.evaluate(() => window.__core.media())) <= 6;
     await fk.cx.close();
 
     // Video-Reiter mit eigenem Stream: läuft im Hintergrund bis zum Ende, dann Stopp ohne Auto-Weiter

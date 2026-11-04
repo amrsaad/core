@@ -88,9 +88,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.deckElementUnmuted = await p1.evaluate(() => { const a = document.querySelector('audio'); return !!a && a.muted === false; });
     // Deck nimmt die Quelle: je Start eine Zeile "deck: src local|net"
     c.deckSrcLine = await p1.evaluate(() => window.__core.diag().some((x) => /^deck: src (local|net) /.test(x)));
-    // Ein Nachfolger ist vor dem Ende bestimmt (arm)
-    c.nextIsArmed = await p1.evaluate(() => !!window.__core.deck().armed);
-    c.atMostThreeMedia = (await p1.evaluate(() => window.__core.media())) <= 3;
+    // Brief 14: der Vorrat hält die nächsten Momente schon fertig (sichtbar gefüllt), höchstens fünf Elemente plus das aktive mit Quelle
+    c.poolHoldsNext = await waitFor(p1, () => window.__core.deck().ready >= 1, undefined, 8000);
+    c.atMostPoolMedia = (await p1.evaluate(() => window.__core.media())) <= 6;
     await f1.cx.close();
     }
 
@@ -100,18 +100,20 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const p2 = f2.pg;
     await startAudio(p2);
     await p2.evaluate(() => { window.__node = document.querySelector('audio'); });
+    // Der Vorrat ist vor dem Sperren gefüllt: verdeckt wird nichts mehr geladen
+    c.rowPoolReady = await waitFor(p2, () => window.__core.deck().ready >= 5, undefined, 8000);
     await setVisibility(p2, 'hidden');
     c.fiveInARow = await waitFor(p2, () => window.__core.diag().filter((x) => x.startsWith('bg: next ')).length >= 5 && window.__core.state() === 1, undefined, 60000);
     const row = await p2.evaluate(() => ({ same: window.__node === document.querySelector('audio'), count: document.querySelectorAll('audio').length, media: window.__core.media(), diag: window.__core.diag() }));
     r.notes.bgLines = row.diag.filter((x) => x.startsWith('bg: ')).slice(0, 60);
-    // Brief 11: höchstens zwei Elemente (aktiv und Standby), das aktive bleibt beim automatischen Weiter dasselbe
-    c.rowSameNode = row.same && row.count <= 2;
+    // Brief 14: höchstens sechs Elemente (aktiv und fünf im Vorrat), das erste Element bleibt im Dokument
+    c.rowSameNode = row.same && row.count <= 6;
     c.rowEndedNext = row.diag.filter((x) => x.startsWith('bg: ended ')).length >= 5 && row.diag.filter((x) => x.startsWith('bg: next ')).length >= 5;
     c.rowNoRejected = !row.diag.some((x) => x.startsWith('bg: play rejected'));
-    // Der Wechsel setzt Quelle und play() im Ende-Handler: je Wechsel eine Zeile "advance" und keine Pause dazwischen
-    c.rowAdvanceLines = row.diag.filter((x) => /^bg: deck advance \S+ to \S+: src and play\(\) in this handler, same element true/.test(x)).length >= 5;
+    // Der Wechsel tauscht das Element und setzt play() im Ende-Handler: je Wechsel eine Zeile "advance" und keine Pause dazwischen
+    c.rowAdvanceLines = row.diag.filter((x) => /^bg: deck advance \S+ to \S+: swap and play\(\) in this handler/.test(x)).length >= 5;
     c.rowNoPausedState = !row.diag.some((x) => /slot\d+ \S+ state 2$/.test(x));
-    c.rowMediaLimit = row.media <= 3 && !row.diag.some((x) => x.startsWith('media: '));
+    c.rowMediaLimit = row.media <= 6 && !row.diag.some((x) => x.startsWith('media: '));
     await setVisibility(p2, 'visible');
     await p2.waitForTimeout(300);
     c.rowStillPlayingBack = (await p2.evaluate(() => window.__core.state())) === 1;
@@ -134,7 +136,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     r.notes.tempoPaused = log3.filter((x) => /state 2$/.test(x)).length;
     c.tempoNoWaiting = r.notes.tempoWaiting === 0;
     c.tempoNoSymbol = (await p3.evaluate(() => window.__core.hint())) === false;
-    c.tempoMediaLimit = (await p3.evaluate(() => window.__core.media())) <= 3;
+    c.tempoMediaLimit = (await p3.evaluate(() => window.__core.media())) <= 6;
     c.tempoNoPageErrors = f3.errors.length === 0;
     await f3.cx.close();
     }
@@ -224,7 +226,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       r.notes.recall = { q: st.q, idx: st.idx, lines: st.diag.filter((x) => x.startsWith('recall:') || x.startsWith('bg: ')).slice(-40) };
       c.recallQueuedOne = st.q.length === 1;
       c.recallNotOpenInBg = !st.open && !st.card;
-      // Brief 11: der Standby kann das aktive Element geworden sein, es spielt genau eines von höchstens zwei
+      // Brief 14: das aktive Element spielt, die Elemente des Vorrats sind pausiert: genau eines spielt
       c.recallAudioKeepsPlaying = st.state === 1 && st.playing === 1;
       c.recallDiagBg = st.diag.some((x) => /^recall: queued \S+ \(bg\)$/.test(x));
       c.recallNoStall = !st.diag.some((x) => x.startsWith('bg: stalled'));
@@ -389,7 +391,7 @@ window.onYouTubeIframeAPIReady&&window.onYouTubeIframeAPIReady();`;
     const netBefore = (await s2.pg.evaluate(() => window.__core.diag())).filter((x) => /^deck: src net /.test(x)).length;
     const stock = await s2.pg.evaluate(() => { const q = window.__core.queue(), i = window.__core.idx(), h = window.__core.preload().ids; return q.slice(i + 1).filter((id) => h.includes(id)).length; });
     r.notes.stockBehind = stock;
-    c.lockStandbyReadyBeforeHidden = await waitFor(s2.pg, () => window.__core.deck().standbyReady, null, 10000);
+    c.lockPoolReadyBeforeHidden = await waitFor(s2.pg, () => window.__core.deck().ready >= 1, null, 10000);
     const i1 = await s2.pg.evaluate(() => window.__core.idx());
     const len1 = await s2.pg.evaluate(() => window.__core.diag().length);
     await s2.pg.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }); document.dispatchEvent(new Event('visibilitychange')); });
@@ -398,10 +400,10 @@ window.onYouTubeIframeAPIReady&&window.onYouTubeIframeAPIReady();`;
     c.lockHiddenAdvances = await waitFor(s2.pg, (i) => window.__core.idx() === i + 1 && window.__core.state() === 1, i1, 3000);
     r.notes.lockNextMs = Date.now() - tNext;
     const dn = await s2.pg.evaluate(() => window.__core.diag());
-    const nextLines = dn.slice(len1).filter((x) => /^lock next: |^deck: (swap|prepare|standby)|^deck play#|^deck: src /.test(x));
+    const nextLines = dn.slice(len1).filter((x) => /^lock next: |^deck: (swap|pool)|^deck play#|^deck: src /.test(x));
     r.notes.lockNextLines = nextLines;
     c.lockHiddenUnder1s = c.lockHiddenAdvances && r.notes.lockNextMs < 1100;
-    c.lockHiddenSwaps = nextLines.some((x) => /^deck: swap \S+ ready=true$/.test(x)) && nextLines.some((x) => /^deck play#\d+ ok$/.test(x));
+    c.lockHiddenSwaps = nextLines.some((x) => /^deck: swap \S+ ready=true pool=\d$/.test(x)) && nextLines.some((x) => /^deck play#\d+ ok$/.test(x));
     c.lockHiddenNoNewSource = !nextLines.some((x) => /^deck: src /.test(x));
     c.lockHiddenNoNetStart = dn.filter((x) => /^deck: src net /.test(x)).length === netBefore;
     await s2.pg.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' }); document.dispatchEvent(new Event('visibilitychange')); });

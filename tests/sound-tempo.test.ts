@@ -90,6 +90,28 @@ function setup(opts: { local?: Record<string, { url: string; offset: number }>; 
   return { deck, plain, level, made, sink, states, times, lines, sounds: () => soundCalls };
 }
 
+/** Vorrat aus mehreren freien Elementen (Brief 14): ein Nachbau je Aufruf von make, sichtbar umschaltbar */
+function setupPool() {
+  const els: FakeEl[] = [];
+  let hidden = false;
+  const deck = new AudioDeck({
+    standby: true,
+    local: () => undefined,
+    dropLocal: () => {},
+    make: () => {
+      const e = new FakeEl();
+      els.push(e);
+      return e;
+    },
+    hidden: () => hidden,
+  });
+  const states: number[] = [];
+  const sink: DeckSink = { state: (s) => states.push(s), error: () => states.push(-1) };
+  const lines: string[] = [];
+  deck.diag = (l) => lines.push(l);
+  return { deck, els, sink, states, lines, setHidden: (h: boolean) => (hidden = h) };
+}
+
 describe('Hinweis Ton aus: Regel', () => {
   const o = (muted: boolean, playing: boolean, refused: boolean): SoundObs => ({ muted, playing, refused });
   it('sichtbar genau dann, wenn das spielende Element stumm ist oder play() abgelehnt wurde', () => {
@@ -163,19 +185,26 @@ describe('Diagnosezeilen des Audio-Reiters', () => {
     expect(t.lines.filter((l) => l.startsWith('deck: src '))).toEqual(['deck: src net a', 'deck: src local b']);
     expect(t.plain.src).toBe('blob:x');
   });
-  it('Ende im Hintergrund: Diagnose clip end, advance, arm; Wechsel am selben Element, Quelle vor play', () => {
-    const t = setup();
+  it('Ende im Hintergrund: Diagnose clip end, swap und advance; Tausch ohne Quellwechsel, play im selben Handler', async () => {
+    const t = setupPool();
     t.deck.load(clip('a', 0, 4), t.sink, { play: true, muted: false });
-    t.deck.arm(clip('b', 10, 20));
+    await Promise.resolve();
+    await Promise.resolve();
+    t.deck.fill([clip('b', 10, 20)]);
+    const b = t.els[1];
+    b.emit('loadedmetadata');
+    b.readyState = 4;
+    b.emit('canplaythrough');
+    t.setHidden(true);
     t.deck.onAdvance = () => {};
-    t.plain.calls.length = 0;
-    t.plain.tick(4);
-    expect(t.lines.some((l) => l.startsWith('bg: arm b'))).toBe(true);
-    expect(t.lines.some((l) => l.startsWith('bg: deck clip end via timeupdate') && l.includes('armed=b') && l.includes('advance=yes'))).toBe(true);
-    expect(t.lines.some((l) => l.startsWith('bg: deck advance a to b') && l.includes('same element true'))).toBe(true);
-    expect(t.plain.calls.indexOf('src:https://pod.test/b.mp3#t=10')).toBeLessThan(t.plain.calls.indexOf('play'));
-    t.plain.readyState = 3;
-    t.plain.emit('playing');
+    b.calls.length = 0;
+    t.els[0].tick(4);
+    expect(t.lines.some((l) => l.startsWith('bg: deck clip end via timeupdate') && l.includes('pool=1') && l.includes('advance=yes'))).toBe(true);
+    expect(t.lines).toContain('deck: swap b ready=true pool=0');
+    expect(t.lines.some((l) => l.startsWith('bg: deck advance a to b') && l.includes('swap and play() in this handler'))).toBe(true);
+    expect(b.calls).toEqual(['play']);
+    b.readyState = 3;
+    b.emit('playing');
     expect(t.lines.some((l) => l.startsWith('bg: deck advance to b: playing after'))).toBe(true);
   });
   it('pause vor ended am natürlichen Ende ist kein Anhalten', () => {
@@ -187,12 +216,18 @@ describe('Diagnosezeilen des Audio-Reiters', () => {
     t.plain.emit('pause');
     expect(t.states).not.toContain(2);
   });
-  it('die Zeilen der Hintergrund-Zählung heißen nicht wie neue Diagnosezeilen', () => {
-    const t = setup();
+  it('die Zeilen der Hintergrund-Zählung heißen nicht wie neue Diagnosezeilen', async () => {
+    const t = setupPool();
     t.deck.load(clip('a', 0, 4), t.sink, { play: true, muted: false });
-    t.deck.arm(clip('b'));
+    await Promise.resolve();
+    await Promise.resolve();
+    t.deck.fill([clip('b')]);
+    t.els[1].emit('loadedmetadata');
+    t.els[1].readyState = 4;
+    t.els[1].emit('canplaythrough');
+    t.setHidden(true);
     t.deck.onAdvance = () => {};
-    t.plain.tick(4);
+    t.els[0].tick(4);
     // bg: started, bg: ended, bg: next und bg: play rejected zählt die App, das Deck schreibt keine davon
     expect(t.lines.filter((l) => /^bg: (started|ended|next) /.test(l))).toEqual([]);
   });

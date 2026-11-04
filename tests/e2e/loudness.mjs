@@ -156,7 +156,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     r.deckEls = await page.evaluate(() => [...document.querySelectorAll('audio[data-core=audio-deck]')].map((a) => ({ lane: a.dataset.lane, paused: a.paused, src: !!(a.currentSrc || a.src), cross: a.crossOrigin })));
     c.levelElementPlays = r.deckEls.some((e) => e.lane === wantLane && !e.paused && (wantLane === 'plain' || e.cross === 'anonymous'));
     c.tempoOneByDefault = (await page.evaluate(() => window.__core.rate())) === 1;
-    c.atMostThreeMedia = (await page.evaluate(() => window.__core.media())) <= 3;
+    // Direkt nach der Geste tragen die freigeschalteten Elemente noch kurz die Stille-Quelle: zählt erst, wenn sie sie wieder abgegeben haben
+    c.atMostPoolMedia = await waitFor(page, () => window.__core.media() <= 6, undefined, 5000);
     c.deckSrcLine = await page.evaluate(() => window.__core.diag().some((x) => /^deck: src (local|net) /.test(x)));
     await page.mouse.click(vp.width / 2, vp.height / 2); // erste Berührung: Ton an, AudioContext entsteht
     c.contextRunning = await waitFor(page, () => window.__core.sound() === true);

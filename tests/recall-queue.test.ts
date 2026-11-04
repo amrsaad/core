@@ -109,27 +109,52 @@ describe('Abrufkarten-Warteschlange (Pfeiler 19)', () => {
 });
 
 describe('Abrufkarte im Auto-Weiter des Audio-Reiters (Issue 11)', () => {
-  it('Karte fällig, Seite hidden, Ende des Ausschnitts: recallQueue plus 1, das Deck spielt den nächsten Moment, keine Karte', () => {
-    // Nachbau des Elements wie in audio-deck.test.ts
-    const listeners = new Map<string, (() => void)[]>();
-    const calls: string[] = [];
-    let src = '';
-    const el = {
-      get src() { return src; },
-      set src(v: string) { src = v; calls.push(`src:${v}`); },
-      currentTime: 0, paused: true, ended: false, readyState: 0, duration: 600, muted: false, playbackRate: 1, defaultPlaybackRate: 1,
-      removeAttribute() { src = ''; },
-      addEventListener(t: string, f: () => void) { listeners.set(t, [...(listeners.get(t) ?? []), f]); },
-      emit(t: string) { for (const f of listeners.get(t) ?? []) f(); },
-      play() { calls.push('play'); this.paused = false; this.emit('playing'); return Promise.resolve(); },
-      pause() { if (!this.paused) { this.paused = true; this.emit('pause'); } },
-      load() { calls.push('load'); this.currentTime = 0; },
+  it('Karte fällig, Seite hidden, Ende des Ausschnitts: recallQueue plus 1, das Deck spielt den nächsten Moment, keine Karte', async () => {
+    // Nachbau der Elemente wie in audio-deck.test.ts: ein Element je Aufruf von make, der Vorrat lädt in freie Elemente
+    type El = Omit<DeckEl, 'paused' | 'readyState'> & { paused: boolean; readyState: number; emit(t: string): void; calls: string[] };
+    const els: El[] = [];
+    const mkEl = (): El => {
+      const listeners = new Map<string, (() => void)[]>();
+      const calls: string[] = [];
+      let src = '';
+      const o = {
+        get src() { return src; },
+        set src(v: string) { src = v; calls.push(`src:${v}`); },
+        currentTime: 0, paused: true, ended: false, readyState: 0, duration: 600, muted: false, playbackRate: 1, defaultPlaybackRate: 1,
+        calls,
+        removeAttribute() { src = ''; },
+        addEventListener(t: string, f: () => void) { listeners.set(t, [...(listeners.get(t) ?? []), f]); },
+        emit(t: string) { for (const f of listeners.get(t) ?? []) f(); },
+        play() { calls.push('play'); this.paused = false; this.emit('playing'); return Promise.resolve(); },
+        pause() { if (!this.paused) { this.paused = true; this.emit('pause'); } },
+        load() { calls.push('load'); this.currentTime = 0; },
+      };
+      return o as unknown as El;
     };
-    const deck = new AudioDeck({ local: () => undefined, dropLocal: () => {}, make: () => el as unknown as DeckEl, hidden: () => true });
+    let hidden = false;
+    const deck = new AudioDeck({
+      standby: true,
+      local: () => undefined,
+      dropLocal: () => {},
+      make: () => {
+        const el = mkEl();
+        els.push(el);
+        return el;
+      },
+      hidden: () => hidden,
+    });
     const clip = (id: string): DeckClip => ({ key: `${id}|0|4`, id, url: `https://pod.test/${id}.mp3`, start: 0, end: 4 });
     const sink = { state: () => {}, error: () => {} };
     deck.load(clip('a'), sink, { play: true, muted: false });
-    deck.arm(clip('b'));
+    await Promise.resolve();
+    await Promise.resolve();
+    // Sichtbar: der Vorrat lädt den nächsten Moment, dann verdeckt
+    deck.fill([clip('b')]);
+    const next = els.find((x) => x.src === 'https://pod.test/b.mp3') as El;
+    next.emit('loadedmetadata');
+    next.readyState = 4;
+    next.emit('canplaythrough');
+    hidden = true;
     // Die App entscheidet im onAdvance wie beim Wisch: Karte im Hintergrund nie zeigen, nur einreihen
     let queue: QueueEntry[] = [];
     let shown: QueueEntry | null = null;
@@ -138,14 +163,16 @@ describe('Abrufkarte im Auto-Weiter des Audio-Reiters (Issue 11)', () => {
       queue = step.queue;
       shown = step.show;
     };
-    el.currentTime = 4;
-    el.emit('timeupdate');
+    const first = els[0];
+    first.currentTime = 4;
+    first.emit('timeupdate');
     expect(queue.map((x) => x.id)).toEqual(['a']);
     expect(shown).toBeNull();
     expect(deck.clip?.id).toBe('b');
-    expect(el.paused).toBe(false);
-    expect(calls.filter((c) => c.startsWith('src:'))).toEqual(['src:https://pod.test/a.mp3', 'src:https://pod.test/b.mp3']);
-    expect(calls.lastIndexOf('play')).toBeGreaterThan(calls.indexOf('src:https://pod.test/b.mp3'));
+    expect(next.paused).toBe(false);
+    // Der Nachfolger spielte aus dem Vorrat: keine neue Quelle am Element des Endes, kein load im Hintergrund
+    expect(first.calls.filter((c) => c.startsWith('src:'))).toEqual(['src:https://pod.test/a.mp3']);
+    expect(next.calls).toEqual(['src:https://pod.test/b.mp3', 'load', 'play']);
   });
 
   it('offene Karte beim Wechsel in den Hintergrund: zurück in die Warteschlange, vor allem anderen nicht verloren', () => {

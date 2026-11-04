@@ -4,7 +4,7 @@ import { PLAYED_MIN_MS, PlayTracker } from '../src/moments/played';
 import { emptyState, repair45, type AppState } from '../src/lib/state';
 import { applyDoc, canon, emptyDoc, mergeDocs, syncedChanged, toDoc, type SyncDoc, type SyncState } from '../src/lib/sync/merge';
 import { blockedCount, unseenCount, waitingLine, endLine } from '../src/moments/form';
-import { pruneAndHeal } from '../src/moments/queue';
+import { POOL_AHEAD, pruneAndHeal, pruneOnly, replanStart } from '../src/moments/queue';
 import { startOrder, HEADS } from '../src/moments/startHead';
 import { lockNextPlan } from '../src/moments/lockScreen';
 import { connPoor, POOR_DOWNLINK } from '../src/moments/context';
@@ -149,6 +149,33 @@ describe('Schritt 3: Leer-Seite wartet aufs Netz', () => {
     expect(waitingLine('video', 1)).toBe("Waiting for network. 1 video ready when it's back.");
     expect(waitingLine('audio', 6)).toBe("Waiting for network. 6 audio moments ready when it's back.");
     expect(endLine('video')).toBe("You've seen every video moment.");
+  });
+});
+
+describe('Brief 14, Schritt 3: Warteschlange stabil, solange die App verdeckt ist', () => {
+  const ids = (q: Moment[]) => q.map((m) => m.id);
+  it('Neuplanen verdeckt beginnt frühestens bei idx+6, sichtbar unverändert', () => {
+    expect(POOL_AHEAD).toBe(5);
+    // idx 3: die Momente 4 bis 8 liegen im Vorrat
+    expect(replanStart(4, 3, true)).toBe(9);
+    expect(replanStart(6, 3, true)).toBe(9);
+    // Wer ohnehin weiter hinten beginnt, bleibt dort
+    expect(replanStart(12, 3, true)).toBe(12);
+    expect(replanStart(4, 3, false)).toBe(4);
+  });
+  it('pruneOnly nimmt Gescheiterte heraus, stellt aber nie um (anders als pruneAndHeal)', () => {
+    // Brain(cur) Beat(bad) Brain Beat Body: pruneAndHeal zöge Beat vor, pruneOnly lässt die Reihenfolge der Übrigen
+    const q = [area('c', 'brain'), area('b1', 'beat', { videoId: 'bad' }), area('r1', 'brain'), area('r2', 'beat'), area('r3', 'body')];
+    expect(ids(pruneOnly(q, 0, (m) => m.videoId === 'bad'))).toEqual(['c', 'r1', 'r2', 'r3']);
+    expect(ids(pruneAndHeal(q, 0, (m) => m.videoId === 'bad'))).not.toEqual(ids(pruneOnly(q, 0, (m) => m.videoId === 'bad')));
+  });
+  it('pruneOnly lässt den Kopf bis idx unberührt, auch wenn dort ein gescheiterter steht', () => {
+    const q = [area('x', 'brain', { videoId: 'bad' }), area('c', 'beat'), area('b', 'body', { videoId: 'bad' }), area('d', 'brain')];
+    expect(ids(pruneOnly(q, 1, (m) => m.videoId === 'bad'))).toEqual(['x', 'c', 'd']);
+  });
+  it('pruneOnly ohne Gescheiterte: gleiche Folge', () => {
+    const q = [area('c', 'brain'), area('a', 'beat'), area('b', 'brain')];
+    expect(ids(pruneOnly(q, 0, () => false))).toEqual(['c', 'a', 'b']);
   });
 });
 
