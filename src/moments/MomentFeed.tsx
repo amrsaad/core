@@ -15,7 +15,7 @@ import { loudLine, recordLoud } from './loudness';
 import { browserPreloader } from './preloader';
 import { isPreloadable, keyOf, netRank, queueAhead, streamKind } from './preload';
 import { coldToday, countColdStart, pickHeads, startOrder } from './startHead';
-import { lockMeta, lockNextPlan, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS } from './lockScreen';
+import { depthPlan, lockMeta, lockNextPlan, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS } from './lockScreen';
 import { cursorFor, historyBefore, parseSaved, pruneAndHeal, queueKey, recentFromLog, releaseTail, remixTail, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMoment, sessionSkip, SIGNAL, type MomentCursor } from './mix';
 import { attentionStep, makeCtx, newAttention, readConn, type Attention } from './context';
@@ -423,6 +423,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!pre) return;
     pre.setQueue(queue.current, at, rateRef.current);
     const w = pre.warmSet(queue.current, at, rateRef.current);
+    // Audio-Reiter (Brief 11, Schritt 9): die ersten zwei Vorrats-Momente der nächsten 6 halten ihre Blob-URL, damit nach einem Tausch sofort ein lokaler Kandidat da ist
+    if (form === 'audio') for (const m of queue.current.slice(at + 1, at + 7).filter((x) => pre.held(x.id)).slice(0, 2)) if (!w.includes(m)) w.push(m);
     void pre.warm(w);
     pre.trimWarm(new Set(w.map((x) => x.id)));
     saveQueue();
@@ -730,13 +732,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const pullBy = (held: (m: Moment) => boolean, hidden: boolean) => {
     if (form !== 'audio' || !pre) return { how: 'none' as const };
     const r = lockNextPlan(queue.current, idxRef.current, held, hidden);
-    if (r.how === 'pulled') {
-      queue.current = r.queue;
-      for (const sl of slots.current) if (sl.index >= idxRef.current + 1) sl.index = -1;
-      if (!single) for (const k of [idxRef.current + 1, idxRef.current + 2]) if (k < queue.current.length && slotFor(k).index !== k) assign(slotFor(k), k, false);
-      syncPre(idxRef.current);
-    }
+    if (r.how === 'pulled') applyQueue(r.queue);
     return r;
+  };
+  /** Neue Reihenfolge ab idx+1 übernehmen: Slots hinter dem laufenden Moment neu belegen, Vorrat und Blob-URLs auf das neue Fenster */
+  const applyQueue = (q: Moment[]) => {
+    queue.current = q;
+    for (const sl of slots.current) if (sl.index >= idxRef.current + 1) sl.index = -1;
+    if (!single) for (const k of [idxRef.current + 1, idxRef.current + 2]) if (k < queue.current.length && slotFor(k).index !== k) assign(slotFor(k), k, false);
+    syncPre(idxRef.current);
   };
   /** Nachfolger aus dem Vorrat (Blob oder Cache), nie vom Netz, solange einer erreichbar ist (Entscheidung 45) */
   const pullStock = (hidden: boolean) => (pre ? pullBy((m) => LOCAL.has(keyOf(m)) || pre.held(m.id), hidden) : { how: 'none' as const });
@@ -750,9 +754,25 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     const hidden = isBackground(document.visibilityState);
     pruneBad();
     if (!queue.current[idxRef.current + 1]) ensureQueue(idxRef.current + 2);
-    // Ein bereiter Standby für den Nachfolger bleibt, sonst rückt ein Vorrats-Moment mit Blob-URL nach vorn
+    // Ein bereiter Standby für den Nachfolger bleibt. Sonst rückt verdeckt der nächste Vorrats-Moment aus dem ganzen Rest nach vorn (Blob-URL oder nur im Vorrat,
+    // die Blob-URL entsteht gleich aus dem Vorrat und braucht kein Netz). Brief 11, Schritt 9: ein Netz-Moment an idx+1 darf den Standby nie leer lassen.
     const first = queue.current[idxRef.current + 1];
-    if (hidden && !(first && audioDeck.standbyReady(keyOf(first)))) pullBy((m) => LOCAL.has(keyOf(m)), true);
+    if (hidden && !(first && audioDeck.standbyReady(keyOf(first)))) {
+      const before = queue.current.map((m) => m.id);
+      const r = pullBy((m) => LOCAL.has(keyOf(m)) || pre.held(m.id), true);
+      if (r.how === 'pulled' && r.id) pullNote.current = { id: r.id, text: `pulled from ${before.indexOf(r.id) - idxRef.current}` };
+    }
+    // Sichtbar: mindestens 3 der nächsten 6 liegen im Vorrat, sonst rücken Vorrats-Momente von weiter hinten in die ersten Plätze (idx+1 bleibt)
+    if (!hidden) {
+      ensureQueue(idxRef.current + 8);
+      // Schwaches Netz und der Nachfolger liegt nicht im Vorrat: ein Vorrats-Moment aus den nächsten drei rückt nach idx+1, damit der Standby lokal wird (kein Netz-Standby)
+      if (first && !pre.held(first.id) && pre.poor()) pullBy((m) => pre.held(m.id), false);
+      const d = depthPlan(queue.current, idxRef.current, (m) => pre.held(m.id));
+      if (d.moved > 0) {
+        applyQueue(d.queue);
+        diag.current.push(`stock: depth ${d.have} of 6 (pulled ${d.moved})`);
+      }
+    }
     const nm = successorOf(queue.current, idxRef.current, bad.current);
     const clip = nm && formOf(nm) === 'audio' ? deckClipOf(nm) : null;
     if (!nm || !clip) {
@@ -770,8 +790,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         const tick = () => {
           void pre.warm([nm]).then(() => {
             const cur = successorOf(queue.current, idxRef.current, bad.current);
-            if (!cur || keyOf(cur) !== nk) return;
-            if (LOCAL.has(nk) || ++tries >= 12) prepareNextRef.current();
+            // Wechselt der Nachfolger (die Tiefenpflege schiebt Momente um), darf dieser Moment später wieder warten
+            if (!cur || keyOf(cur) !== nk) { if (stockWait.current === nk) stockWait.current = null; return; }
+            if (LOCAL.has(nk)) { stockWait.current = null; prepareNextRef.current(); }
+            else if (++tries >= 12) prepareNextRef.current();
             else setTimeout(tick, 700);
           });
         };
@@ -783,8 +805,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         return;
       }
     }
-    if (audioDeck.prepare(clip)) void pre.warm([nm]);
+    const pn = pullNote.current;
+    if (audioDeck.prepare(clip, false, pn && pn.id === nm.id ? pn.text : '')) void pre.warm([nm]);
   };
+  const pullNote = useRef<{ id: string; text: string } | null>(null);
   const stockWait = useRef<string | null>(null);
   const prepareNextRef = useRef(prepareNext);
   prepareNextRef.current = prepareNext;
@@ -2567,6 +2591,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       recallQueue: () => stateRef.current.recallQueue ?? [],
       recall: () => ({ open: recallRef.current, state: stateRef.current.recall ?? {}, sessionSeen: sessionSeen.current }),
       queue: () => queue.current.map((x) => x.id),
+      /** Nur Tests (Brief 11, Schritt 9): die genannten Momente an idx+1, idx+2 ... legen und den Standby neu bestimmen, wie nach einem Tausch */
+      arrange: (ids: string[]) => {
+        const at = idxRef.current;
+        const have = ids.filter((id) => queue.current.slice(at + 1).some((x) => x.id === id));
+        const rest = queue.current.slice(at + 1).filter((x) => !have.includes(x.id));
+        applyQueue([...queue.current.slice(0, at + 1), ...have.map((id) => queue.current.find((x) => x.id === id)!), ...rest]);
+        prepareNextRef.current();
+        return have.length;
+      },
       preload: () => ({ ids: pre?.ids() ?? [], stats: pre?.stats() ?? { n: 0, bytes: 0 }, poor: poorRef.current, log: pre?.log.slice(-200) ?? [], net: pre?.netSamples() ?? [], local: slots.current.slice(0, SLOTS).map((x) => !!x.player?.isLocal?.()) }),
     };
   });

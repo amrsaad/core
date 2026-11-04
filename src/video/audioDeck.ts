@@ -575,7 +575,7 @@ export class AudioDeck {
    * canplaythrough (lokal genügt readyState 3, sonst 4). Meldet "deck: standby ready". Verdeckt nur aus dem Vorrat (iOS lädt eine Netzquelle dann nicht).
    * true, wenn der Standby für diesen Ausschnitt läuft oder bereit ist.
    */
-  prepare(clip: DeckClip, forcePlain = false): boolean {
+  prepare(clip: DeckClip, forcePlain = false, note = ''): boolean {
     if (!this.deps.standby) return false;
     const cur = this.standby;
     if (cur?.clip.key === clip.key) return true;
@@ -605,7 +605,7 @@ export class AudioDeck {
     const target = Math.max(0, clip.start - offset);
     const s: Standby = { clip, el, lane, why, chain, local: !!loc, offset, target, meta: false, cpt: false, ready: false, t0: Date.now() };
     this.standby = s;
-    this.diag(`deck: prepare ${clip.id} src=${loc ? 'local' : 'net'}`);
+    this.diag(`deck: prepare ${clip.id} src=${loc ? 'local' : 'net'}${note ? ` (${note})` : ''}`);
     el.src = loc?.url ?? withStart(clip.url, clip.start);
     el.load();
     // load() setzt das Tempo zurück: Standard und aktuelles Tempo gemeinsam setzen

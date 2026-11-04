@@ -66,3 +66,30 @@ export function lockNextPlan<T extends { id: string }>(queue: readonly T[], idx:
   }
   return { queue: [...queue], how: 'net', id: next.id };
 }
+
+/**
+ * Vorrat-Tiefe (Brief 11, Schritt 9): von den nächsten `within` Momenten (idx+1 bis idx+within) liegen mindestens `want` im Vorrat. Fehlen welche,
+ * tauschen Vorrats-Momente von weiter hinten mit den ersten Plätzen ohne Vorrat ab idx+2 (idx+1 bleibt, dort entscheidet die Wahl des Nachfolgers).
+ * moved: wie viele vorgezogen wurden, have: wie viele von `within` danach im Vorrat liegen.
+ */
+export function depthPlan<T extends { id: string }>(queue: readonly T[], idx: number, held: (m: T) => boolean, want = 3, within = 6): { queue: T[]; moved: number; have: number } {
+  const q = [...queue];
+  const last = Math.min(q.length, idx + 1 + within);
+  let have = 0;
+  for (let j = idx + 1; j < last; j++) if (held(q[j])) have++;
+  let moved = 0;
+  let from = last;
+  let slot = idx + 2;
+  while (have < want) {
+    while (slot < last && held(q[slot])) slot++;
+    while (from < q.length && !held(q[from])) from++;
+    if (slot >= last || from >= q.length) break;
+    // Tausch statt Einfügen: so verlässt nie ein Vorrats-Moment das Fenster hinten, der verdrängte Moment ohne Vorrat nimmt den frei gewordenen Platz
+    [q[slot], q[from]] = [q[from], q[slot]];
+    have++;
+    moved++;
+    slot++;
+    from++;
+  }
+  return { queue: q, moved, have };
+}

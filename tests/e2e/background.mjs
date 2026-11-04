@@ -76,7 +76,9 @@ const bgYt = Array.from({ length: 6 }, (_, i) => bgMk(`bgyt${String(i).padStart(
 mkdirSync('dist/moments', { recursive: true });
 // Brief 10: Momente mit echter mp3 (Ausschnitt 10 bis 14 s), damit der Vorrat sich füllt und Blob-URLs entstehen
 const bgStock = Array.from({ length: 12 }, (_, i) => bgMk(`bgstock${i}`, 'audio', { audio: true, start: 10, end: 14, hls: `https://stream.test/bgstock${i}.mp3` }));
-const poolBgStock = await encPool(bgStock);
+// Brief 11, Schritt 9: Netz-Momente (m3u8, werden nicht vorgeladen) neben dem Vorrat. Sie liegen im Test vor dem Vorrat in der Warteschlange.
+const bgNet = Array.from({ length: 4 }, (_, i) => bgMk(`bgnet${i}`, 'audio', { audio: true, start: 10, end: 14, hls: `https://stream.test/bgnet${i}.m3u8` }));
+const poolBgStock = await encPool([...bgStock, ...bgNet]);
 const MP3 = new Uint8Array(readFileSync(new URL('../fixtures/media/tone-cbr.mp3', import.meta.url)));
 const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'range', 'access-control-allow-methods': 'GET,OPTIONS' };
 const routeMp3 = (cx) => cx.route('https://stream.test/**', (route) => {
@@ -230,16 +232,30 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await pk.waitForSelector('[data-testid=form-switch]');
     await pk.click('[data-testid=form-switch] >> text=Audio');
     await waitFor(pk, () => window.__core.state() === 1 && window.__core.moment()?.audio === true);
-    c.bgNextStockFills = await waitFor(pk, () => window.__core.preload().stats.n >= 4, undefined, 20000);
+    c.bgNextStockFills = await waitFor(pk, () => window.__core.preload().stats.n >= 8, undefined, 30000);
     // Sichtbar bereitet das Deck den Nachfolger nach dem ersten play ok vor
     c.bgNextStandbyReady = await waitFor(pk, () => window.__core.deck().standbyReady, undefined, 8000);
     const kIdx = await pk.evaluate(() => window.__core.idx());
     const press = () => pk.evaluate(() => { window.__sync = true; try { window.__ms.nexttrack(); } finally { window.__sync = false; } });
     await setVisibility(pk, 'hidden');
+    // Brief 11, Schritt 9 (Test Max 04.11. 12:55): idx+1 ist ein Netz-Moment, der Vorrat liegt dahinter. Vorher blieb verdeckt jedes Next ohne Wirkung
+    // ('prepare ... skipped (hidden, not in storage)', dann 'stay'). Jetzt zieht der Host den nächsten Vorrats-Moment nach vorn, macht ihn zur Blob-URL und bereitet ihn vor.
+    const arr = await pk.evaluate(() => {
+      const held = new Set(window.__core.preload().ids);
+      const cur = window.__core.moment().id;
+      const q = window.__core.queue();
+      const nets = q.filter((id) => id.startsWith('bgnet') && id !== cur).slice(0, 3);
+      // Der sichtbar vorbereitete Standby bleibt außen vor: es geht um den Standby, den der Host erst verdeckt aus dem Vorrat bestimmen muss
+      const sb = window.__core.deck().standby ?? '';
+      const stock = q.filter((id) => held.has(id) && id !== cur && !sb.startsWith(`${id.split(':')[0]}|`)).slice(0, 6);
+      return { n: window.__core.arrange([...nets, ...stock]), nets, stock };
+    });
+    r.bgNextArranged = arr;
+    c.bgNextArranged = arr.nets.length === 3 && arr.stock.length >= 6 && arr.n === arr.nets.length + arr.stock.length;
     const five = { adv: true, ok: true, swap: true, noSrc: true, noVisible: true, noStay: true, ms: [] };
     for (let i = 1; i <= 5; i++) {
       // Der Standby der nächsten Runde wird verdeckt aus dem Vorrat vorbereitet. Ein Mensch drückt nicht schneller, darum wird auf ihn gewartet.
-      if (i > 1) await waitFor(pk, () => window.__core.deck().standbyReady, undefined, 4000);
+      await waitFor(pk, () => window.__core.deck().standbyReady, undefined, 4000);
       const len0 = await pk.evaluate(() => window.__core.diag().length);
       const t0 = Date.now();
       await press();
@@ -262,6 +278,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bgNextFiveNoNewSource = five.noSrc;
     c.bgNextFiveNoVisible = five.noVisible;
     c.bgNextFiveNoStay = five.noStay;
+    const all = await pk.evaluate(() => window.__core.diag());
+    // Der Standby kam jedes Mal aus dem Vorrat, vorgezogen vor die Netz-Momente, nie übersprungen
+    r.bgNextPullLines = all.filter((x) => /^deck: prepare /.test(x));
+    c.bgNextPulledFromStock = all.filter((x) => /^deck: prepare \S+ src=local \(pulled from \d+\)$/.test(x)).length >= 1;
+    c.bgNextNoSkippedPrepare = !all.some((x) => /^deck: prepare \S+ skipped/.test(x));
+    c.bgNextNoNetMomentPlayed = !(await pk.evaluate(() => window.__core.moment().id)).startsWith('bgnet');
     c.bgNextNoGatedPlay = (await pk.evaluate(() => window.__gated)) === 0;
     c.bgNextColdUnder2 = (await pk.evaluate(() => window.__core.lock().cold)) < 2;
     r.bgNextPlays = await pk.evaluate(() => window.__plays);

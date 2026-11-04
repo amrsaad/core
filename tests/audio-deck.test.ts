@@ -534,6 +534,17 @@ describe('Standby: zweites Audio-Element (Brief 11, Entscheidung 47)', () => {
     expect(t.lines).toContain('deck: prepare c src=net');
   });
 
+  it('prepare hängt die Herkunft an die Zeile, wenn der Host den Moment vorgezogen hat (Brief 11, Schritt 9)', () => {
+    const t = setupStandby({ local: { [sbB.key]: { url: 'blob:b', offset: 8 } } });
+    t.deck.load(sbA, t.sink, { play: true, muted: false });
+    expect(t.deck.prepare(sbB, false, 'pulled from 4')).toBe(true);
+    expect(t.lines).toContain('deck: prepare b src=local (pulled from 4)');
+    // Ein zweiter Aufruf für denselben Ausschnitt schreibt nichts mehr
+    const n = t.lines.length;
+    expect(t.deck.prepare(sbB, false, 'pulled from 4')).toBe(true);
+    expect(t.lines.length).toBe(n);
+  });
+
   it('bereit erst mit Metadaten, gesetzter Position und genug Daten, die Position wird nach den Metadaten nachgezogen', () => {
     const t = setupStandby({ local: { [sbB.key]: { url: 'blob:b', offset: 8 } } });
     t.deck.load(sbA, t.sink, { play: true, muted: false });
