@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-04T18:43:36.013Z",
+  "at": "2026-11-04T19:45:55.155Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -50,7 +50,7 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1665,
+        "coldStartMs": 1669,
         "preloadedMoments": 30,
         "preloadedBytes": 6289238,
         "bytesPerMoment": 209641,
@@ -58,29 +58,29 @@
         "swipes": 10,
         "cachedStartMs": [
           6,
-          6,
-          11,
+          5,
+          14,
+          7,
+          5,
           8,
-          6,
-          9,
           9,
           7,
-          8,
+          12,
           6
         ],
-        "cachedStartMax": 11,
-        "cachedStartMedian": 8,
+        "cachedStartMax": 14,
+        "cachedStartMedian": 7,
         "firstFrames": [
-          "first-frame 31ms buffered local",
+          "first-frame 39ms buffered local",
           "first-frame 6ms buffered local",
-          "first-frame 6ms buffered local",
-          "first-frame 11ms buffered local",
+          "first-frame 5ms buffered local",
+          "first-frame 14ms buffered local",
+          "first-frame 7ms buffered local",
+          "first-frame 5ms buffered local",
           "first-frame 8ms buffered local",
-          "first-frame 6ms buffered local",
-          "first-frame 9ms buffered local",
           "first-frame 9ms buffered local",
           "first-frame 7ms buffered local",
-          "first-frame 8ms buffered local",
+          "first-frame 12ms buffered local",
           "first-frame 6ms buffered local"
         ],
         "settingsText": "Preloaded: 35 moments, 7.0 MB",
@@ -103,9 +103,9 @@
           }
         ],
         "offlineStartMs": [
+          7,
+          7,
           6,
-          7,
-          7,
           5
         ],
         "offlineCachedOfFirst15": 13,

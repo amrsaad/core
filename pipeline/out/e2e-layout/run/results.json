@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-04T19:15:38.139Z",
+  "at": "2026-11-04T20:17:58.317Z",
   "block": "run",
   "checks": {
     "feed beat 390 dark kein Seitwärtsscrollen": true,
@@ -85,7 +85,7 @@
     "fokus-aktiv body 390 dark Kontrast AA": true,
     "fokus-aktiv body 390 dark Berührfläche 44 px": true,
     "more body 390 dark kein Seitwärtsscrollen": true,
-    "more body 390 dark nichts außerhalb": false,
+    "more body 390 dark nichts außerhalb": true,
     "more body 390 dark Kontrast AA": true,
     "more body 390 dark Berührfläche 44 px": true,
     "abruf body 390 dark kein Seitwärtsscrollen": true,
@@ -412,7 +412,7 @@
     "share 1920 light nichts außerhalb": true,
     "share 1920 light Kontrast AA": true,
     "share 1920 light Berührfläche 44 px": true,
-    "clip 390 dark kein Seitwärtsscrollen": false,
+    "clip 390 dark kein Seitwärtsscrollen": true,
     "clip 390 dark nichts außerhalb": true,
     "clip 390 dark Kontrast AA": true,
     "clip 390 dark Berührfläche 44 px": true,
@@ -428,7 +428,7 @@
     "clip 1920 dark nichts außerhalb": true,
     "clip 1920 dark Kontrast AA": true,
     "clip 1920 dark Berührfläche 44 px": true,
-    "clip 390 light kein Seitwärtsscrollen": false,
+    "clip 390 light kein Seitwärtsscrollen": true,
     "clip 390 light nichts außerhalb": true,
     "clip 390 light Kontrast AA": true,
     "clip 390 light Berührfläche 44 px": true,
@@ -444,7 +444,7 @@
     "clip 1920 light nichts außerhalb": true,
     "clip 1920 light Kontrast AA": true,
     "clip 1920 light Berührfläche 44 px": true,
-    "clip-text 390 dark kein Seitwärtsscrollen": false,
+    "clip-text 390 dark kein Seitwärtsscrollen": true,
     "clip-text 390 dark nichts außerhalb": true,
     "clip-text 390 dark Kontrast AA": true,
     "clip-text 390 dark Berührfläche 44 px": true,
@@ -460,7 +460,7 @@
     "clip-text 1920 dark nichts außerhalb": true,
     "clip-text 1920 dark Kontrast AA": true,
     "clip-text 1920 dark Berührfläche 44 px": true,
-    "clip-text 390 light kein Seitwärtsscrollen": false,
+    "clip-text 390 light kein Seitwärtsscrollen": true,
     "clip-text 390 light nichts außerhalb": true,
     "clip-text 390 light Kontrast AA": true,
     "clip-text 390 light Berührfläche 44 px": true,
@@ -509,11 +509,5 @@
     "clip-rtl 1920 light Kontrast AA": true,
     "clip-rtl 1920 light Berührfläche 44 px": true
   },
-  "failures": [
-    "more body 390 dark nichts außerhalb: SPAN. | SPAN. | SPAN. | SPAN.",
-    "clip 390 dark kein Seitwärtsscrollen: scrollWidth größer als Fenster",
-    "clip 390 light kein Seitwärtsscrollen: scrollWidth größer als Fenster",
-    "clip-text 390 dark kein Seitwärtsscrollen: scrollWidth größer als Fenster",
-    "clip-text 390 light kein Seitwärtsscrollen: scrollWidth größer als Fenster"
-  ]
+  "failures": []
 }
