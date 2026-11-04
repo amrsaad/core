@@ -1,5 +1,5 @@
 {
- "at": "2026-11-04T11:58:47.409Z",
+ "at": "2026-11-04T13:47:07.968Z",
  "runs": [
   {
    "browser": "webkit",
@@ -36,12 +36,16 @@
     "bgLockNextCountsNothing": true,
     "bgNextStockFills": true,
     "bgNextStandbyReady": true,
+    "bgNextArranged": true,
     "bgNextFiveAdvance": true,
     "bgNextFivePlayOk": true,
     "bgNextFiveSwapLines": true,
     "bgNextFiveNoNewSource": true,
     "bgNextFiveNoVisible": true,
     "bgNextFiveNoStay": true,
+    "bgNextPulledFromStock": true,
+    "bgNextNoSkippedPrepare": true,
+    "bgNextNoNetMomentPlayed": true,
     "bgNextNoGatedPlay": true,
     "bgNextColdUnder2": true,
     "bgNextGateActive": true,
@@ -126,44 +130,69 @@
     "bg: arm bgaudio7 (net)",
     "bg: next bgaudio3:0"
    ],
+   "bgNextArranged": {
+    "n": 9,
+    "nets": [
+     "bgnet2:0",
+     "bgnet0:0",
+     "bgnet1:0"
+    ],
+    "stock": [
+     "bgstock8:0",
+     "bgstock4:0",
+     "bgstock10:0",
+     "bgstock1:0",
+     "bgstock9:0",
+     "bgstock11:0"
+    ]
+   },
    "bgNextFirstLines": [
-    "deck: swap bgstock1 ready=true",
+    "deck: swap bgstock8 ready=true",
     "deck play#2 swap rs=0 muted=false t=0.1",
     "deck play#2 ok",
-    "deck: prepare bgstock6 src=local"
+    "deck: prepare bgstock4 src=local"
    ],
    "bgNextFiveMs": [
-    13,
-    11,
-    15,
-    9,
-    9
+    21,
+    23,
+    22,
+    22,
+    20
+   ],
+   "bgNextPullLines": [
+    "deck: prepare bgstock2 src=local",
+    "deck: prepare bgstock8 src=local (pulled from 4)",
+    "deck: prepare bgstock4 src=local",
+    "deck: prepare bgstock10 src=local",
+    "deck: prepare bgstock1 src=local",
+    "deck: prepare bgstock11 src=local",
+    "deck: prepare bgstock9 src=local"
    ],
    "bgNextPlays": [
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/eb4fa713-d303",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < swap@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < Ka@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:29 < @http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:6265 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/97a65752-4d80",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < swap@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < Ho@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:30 < @http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:6329 < @ < evaluate@"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/5e4174da-c534",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < swap@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < Ka@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:29 < @http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:6265 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/ac21f460-8209",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < swap@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < Ho@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:30 < @http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:6329 < @ < evaluate@"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/24233b77-1545",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < swap@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < Ka@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:29 < @http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:6265 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/8f9dc353-e7a2",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < swap@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < Ho@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:30 < @http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:6329 < @ < evaluate@"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/135bef8e-aa82",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < swap@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < Ka@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:29 < @http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:6265 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/58dbb788-e66f",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < swap@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < Ho@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:30 < @http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:6329 < @ < evaluate@"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/1fb75ffd-ef08",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < swap@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:40: < Ka@http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:29 < @http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:6265 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/0adc9ec5-28c0",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < swap@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < Ho@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:30 < @http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:6329 < @ < evaluate@"
     }
    ],
    "ok": true
@@ -203,12 +232,16 @@
     "bgLockNextCountsNothing": true,
     "bgNextStockFills": true,
     "bgNextStandbyReady": true,
+    "bgNextArranged": true,
     "bgNextFiveAdvance": true,
     "bgNextFivePlayOk": true,
     "bgNextFiveSwapLines": true,
     "bgNextFiveNoNewSource": true,
     "bgNextFiveNoVisible": true,
     "bgNextFiveNoStay": true,
+    "bgNextPulledFromStock": true,
+    "bgNextNoSkippedPrepare": true,
+    "bgNextNoNetMomentPlayed": true,
     "bgNextNoGatedPlay": true,
     "bgNextColdUnder2": true,
     "bgNextGateActive": true,
@@ -293,44 +326,69 @@
     "bg: arm bgaudio7 (net)",
     "bg: next bgaudio3:0"
    ],
+   "bgNextArranged": {
+    "n": 9,
+    "nets": [
+     "bgnet2:0",
+     "bgnet0:0",
+     "bgnet1:0"
+    ],
+    "stock": [
+     "bgstock8:0",
+     "bgstock4:0",
+     "bgstock10:0",
+     "bgstock1:0",
+     "bgstock9:0",
+     "bgstock11:0"
+    ]
+   },
    "bgNextFirstLines": [
-    "deck: swap bgstock1 ready=true",
+    "deck: swap bgstock8 ready=true",
     "deck play#2 swap rs=0 muted=false t=0.1",
     "deck play#2 ok",
-    "deck: prepare bgstock6 src=local"
+    "deck: prepare bgstock4 src=local"
    ],
    "bgNextFiveMs": [
-    8,
-    8,
-    8,
-    6,
-    7
+    13,
+    13,
+    10,
+    9,
+    9
+   ],
+   "bgNextPullLines": [
+    "deck: prepare bgstock2 src=local",
+    "deck: prepare bgstock8 src=local (pulled from 4)",
+    "deck: prepare bgstock4 src=local",
+    "deck: prepare bgstock10 src=local",
+    "deck: prepare bgstock1 src=local",
+    "deck: prepare bgstock11 src=local",
+    "deck: prepare bgstock9 src=local"
    ],
    "bgNextPlays": [
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/cf1b9811-cae6",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at x0.swap (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at Object.Ka [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/00223d5e-dcab",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-npslDAWm < at x0.swap (http://127.0.0.1:4178/core/assets/index-npslDAWm < at Object.Ho [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/e23282ec-aec0",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at x0.swap (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at Object.Ka [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/af3ba3d3-403f",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-npslDAWm < at x0.swap (http://127.0.0.1:4178/core/assets/index-npslDAWm < at Object.Ho [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/089744cf-ea76",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at x0.swap (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at Object.Ka [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/5d89a953-f3bf",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-npslDAWm < at x0.swap (http://127.0.0.1:4178/core/assets/index-npslDAWm < at Object.Ho [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/7188989b-e502",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at x0.swap (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at Object.Ka [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/da1d12f5-2c45",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-npslDAWm < at x0.swap (http://127.0.0.1:4178/core/assets/index-npslDAWm < at Object.Ho [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/013b9716-5dc1",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at x0.swap (http://127.0.0.1:4178/core/assets/index-OlyR_PKF < at Object.Ka [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-OlyR_PKF.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/17e611c7-778d",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-npslDAWm < at x0.swap (http://127.0.0.1:4178/core/assets/index-npslDAWm < at Object.Ho [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     }
    ],
    "ok": true
