@@ -1,5 +1,5 @@
 {
- "at": "2026-11-04T13:47:07.968Z",
+ "at": "2026-11-04T15:01:29.795Z",
  "runs": [
   {
    "browser": "webkit",
@@ -153,11 +153,11 @@
     "deck: prepare bgstock4 src=local"
    ],
    "bgNextFiveMs": [
+    27,
+    21,
     21,
     23,
-    22,
-    22,
-    20
+    12
    ],
    "bgNextPullLines": [
     "deck: prepare bgstock2 src=local",
@@ -171,28 +171,28 @@
    "bgNextPlays": [
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/97a65752-4d80",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < swap@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < Ho@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:30 < @http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:6329 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/7c09b801-4d3e",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < el@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:30 < @http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:6350 < @ < evaluate@"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/ac21f460-8209",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < swap@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < Ho@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:30 < @http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:6329 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/721b5735-6ac5",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < el@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:30 < @http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:6350 < @ < evaluate@"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/8f9dc353-e7a2",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < swap@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < Ho@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:30 < @http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:6329 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/9e5c8c4b-388b",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < el@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:30 < @http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:6350 < @ < evaluate@"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/58dbb788-e66f",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < swap@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < Ho@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:30 < @http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:6329 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/933df595-aa4c",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < el@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:30 < @http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:6350 < @ < evaluate@"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/0adc9ec5-28c0",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < swap@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:40: < Ho@http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:30 < @http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:6329 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/034ffa06-c599",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < el@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:30 < @http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:6350 < @ < evaluate@"
     }
    ],
    "ok": true
@@ -349,11 +349,11 @@
     "deck: prepare bgstock4 src=local"
    ],
    "bgNextFiveMs": [
-    13,
-    13,
-    10,
+    14,
+    16,
+    12,
     9,
-    9
+    10
    ],
    "bgNextPullLines": [
     "deck: prepare bgstock2 src=local",
@@ -367,28 +367,28 @@
    "bgNextPlays": [
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/00223d5e-dcab",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-npslDAWm < at x0.swap (http://127.0.0.1:4178/core/assets/index-npslDAWm < at Object.Ho [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/b3e16430-0920",
+     "stack": "at P.play (<anonymous>:9:134) < at S0.kick (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at S0.swap (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at Object.el [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/af3ba3d3-403f",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-npslDAWm < at x0.swap (http://127.0.0.1:4178/core/assets/index-npslDAWm < at Object.Ho [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/dbad0cb1-30ac",
+     "stack": "at P.play (<anonymous>:9:134) < at S0.kick (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at S0.swap (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at Object.el [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/5d89a953-f3bf",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-npslDAWm < at x0.swap (http://127.0.0.1:4178/core/assets/index-npslDAWm < at Object.Ho [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/1b6e44a1-b007",
+     "stack": "at P.play (<anonymous>:9:134) < at S0.kick (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at S0.swap (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at Object.el [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/da1d12f5-2c45",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-npslDAWm < at x0.swap (http://127.0.0.1:4178/core/assets/index-npslDAWm < at Object.Ho [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/d2d087b7-8eef",
+     "stack": "at P.play (<anonymous>:9:134) < at S0.kick (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at S0.swap (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at Object.el [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/17e611c7-778d",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-npslDAWm < at x0.swap (http://127.0.0.1:4178/core/assets/index-npslDAWm < at Object.Ho [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-npslDAWm.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/b49df959-1f64",
+     "stack": "at P.play (<anonymous>:9:134) < at S0.kick (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at S0.swap (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at Object.el [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     }
    ],
    "ok": true

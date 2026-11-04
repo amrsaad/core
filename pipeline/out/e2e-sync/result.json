@@ -1,5 +1,5 @@
 {
- "at": "2026-11-04T13:42:00.449Z",
+ "at": "2026-11-04T14:56:21.869Z",
  "runs": [
   {
    "browser": "webkit",
@@ -49,15 +49,14 @@
    },
    "diagLines": 12,
    "diagSample": [
-    "ia43 slot0 sy5:1 state 2",
-    "ia43 slot1 sy6:1 state 0",
-    "ia43 video: warm ended early slot1 sy6:1",
-    "ia43 app: hidden"
+    "ngow slot0 sy7:1 state 2",
+    "ngow slot1 sy4:1 state 0",
+    "ngow video: warm ended early slot1 sy4:1",
+    "ngow app: hidden"
    ],
-   "writeDelayMs": 10038,
+   "writeDelayMs": 10028,
    "hosts": [
     "127.0.0.1:4176",
-    "fonts.googleapis.com",
     "www.youtube.com",
     "api.github.com"
    ],
@@ -112,15 +111,14 @@
    },
    "diagLines": 10,
    "diagSample": [
-    "fqgq slot2 sy4:1 state 1",
-    "fqgq slot2 sy4:1 state 2",
-    "fqgq slot0 sy3:1 state 2",
-    "fqgq app: hidden"
+    "b4kl slot2 sy3:1 state 1",
+    "b4kl slot2 sy3:1 state 2",
+    "b4kl slot0 sy1:1 state 2",
+    "b4kl app: hidden"
    ],
-   "writeDelayMs": 10019,
+   "writeDelayMs": 10017,
    "hosts": [
     "127.0.0.1:4176",
-    "fonts.googleapis.com",
     "www.youtube.com",
     "api.github.com"
    ],

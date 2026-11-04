@@ -1,5 +1,5 @@
 {
- "at": "2026-11-04T14:10:51.942Z",
+ "at": "2026-11-04T15:25:08.135Z",
  "runs": [
   {
    "browser": "webkit",
@@ -70,7 +70,7 @@
      "bg: started atshort1:0",
      "bg: arm atshort7 (net)",
      "bg: next atshort1:0",
-     "bg: deck page hidden +5 s: paused=false ended=false t=1.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+     "bg: deck page hidden +5 s: paused=false ended=false t=1.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
      "bg: deck advance to atshort1: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
      "bg: deck clip end via timeupdate hidden=true armed=atshort7 onAdvance=true advance=yes rs=0 muted=false t=4.0",
      "bg: deck advance atshort1 to atshort7: src and play() in this handler, same element true, next from storage false, readyState 0",
@@ -104,68 +104,68 @@
     "tempoWaiting": 0,
     "tempoPaused": 10,
     "cue": {
-     "worst": 0,
+     "worst": 1,
      "n": 622,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.39",
+       "3.38",
        34,
        34
       ],
       [
-       "4.68",
+       "4.67",
        47,
        47
       ],
       [
-       "5.97",
+       "5.96",
        60,
        60
       ],
       [
-       "7.26",
+       "7.25",
        73,
        73
       ],
       [
-       "8.54",
+       "8.53",
        86,
        86
       ],
       [
-       "9.83",
+       "9.82",
        99,
        99
       ],
       [
-       "11.12",
+       "11.11",
        112,
        112
       ],
       [
-       "12.41",
-       125,
-       125
+       "12.40",
+       124,
+       124
       ],
       [
-       "13.70",
+       "13.68",
        137,
        137
       ],
       [
-       "14.99",
+       "14.97",
        150,
        150
       ],
       [
-       "16.27",
+       "16.26",
        163,
        163
       ],
       [
-       "17.56",
+       "17.55",
        176,
        176
       ]
@@ -174,7 +174,7 @@
     },
     "cueTempo": {
      "worst": 0,
-     "n": 534,
+     "n": 537,
      "rates": [
       1,
       1.5,
@@ -186,7 +186,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804855
+       "dueAt": 1792756804886
       }
      ],
      "idx": 6,
@@ -408,8 +408,8 @@
      "rate": 2
     },
     "cueTempo": {
-     "worst": 0,
-     "n": 541,
+     "worst": 1,
+     "n": 542,
      "rates": [
       1,
       1.5,
@@ -421,7 +421,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804691
+       "dueAt": 1792756804695
       }
      ],
      "idx": 6,
@@ -524,7 +524,7 @@
      "pod-0008:22",
      "pod-0019:70"
     ],
-    "firstSoundMs": 218,
+    "firstSoundMs": 222,
     "diag": [
      "deck: start order head first=pod-0001:22 heads=6 usable=6 stock=6",
      "deck: src local pod-0001"
@@ -546,14 +546,14 @@
      "state": "playing",
      "pos": {
       "duration": 25,
-      "position": 0.0008817959183673452,
+      "position": 0.00547579591836822,
       "playbackRate": 1
      },
      "cold": 0,
      "cloud": 0
     },
     "stockBehind": 4,
-    "lockNextMs": 19,
+    "lockNextMs": 20,
     "lockNextLines": [
      "lock next: pulled pod-0006:82",
      "deck: swap pod-0006 ready=true",
