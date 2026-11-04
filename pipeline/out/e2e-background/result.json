@@ -1,5 +1,5 @@
 {
- "at": "2026-11-04T08:12:37.833Z",
+ "at": "2026-11-04T09:25:48.286Z",
  "runs": [
   {
    "browser": "webkit",
@@ -110,8 +110,8 @@
     "bg: started bgaudio2:0",
     "bg: arm bgaudio6 (net)",
     "bg: next bgaudio2:0",
-    "bg: deck page hidden +15 s: paused=false ended=false t=2.9 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: deck advance to bgaudio2: NOT playing after 3 s, rs=0 muted=false t=2.9 error none",
+    "bg: deck page hidden +15 s: paused=false ended=false t=2.9 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: deck clip end via timeupdate hidden=true armed=bgaudio6 onAdvance=true advance=yes rs=0 muted=false t=4.0",
     "bg: deck advance bgaudio2 to bgaudio6: src and play() in this handler, same element true, next from storage false, readyState 0",
     "bg: ended bgaudio2:0",
@@ -133,37 +133,37 @@
     "deck: prepare bgstock6 src=local"
    ],
    "bgNextFiveMs": [
+    19,
     14,
-    15,
-    18,
-    17,
-    19
+    19,
+    20,
+    12
    ],
    "bgNextPlays": [
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/64354ba0-6883",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < swap@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:29 < @http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:6226 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/88b09615-e49e",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:29 < @http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:6246 < @ < evaluate@"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/539e70d7-76ba",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < swap@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:29 < @http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:6226 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/22c88ae7-1279",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:29 < @http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:6246 < @ < evaluate@"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/05f4822c-23d1",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < swap@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:29 < @http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:6226 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/18f8edd5-726f",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:29 < @http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:6246 < @ < evaluate@"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/ae351f12-1b36",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < swap@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:29 < @http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:6226 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/f6275eab-8116",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:29 < @http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:6246 < @ < evaluate@"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/daf1354f-ac71",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < swap@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:29 < @http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:6226 < @ < evaluate@"
+     "src": "blob:http://127.0.0.1:4178/5c1e4bf1-846c",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:29 < @http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:6246 < @ < evaluate@"
     }
    ],
    "ok": true
@@ -300,37 +300,37 @@
     "deck: prepare bgstock6 src=local"
    ],
    "bgNextFiveMs": [
-    15,
-    11,
+    13,
+    12,
     10,
     10,
-    9
+    8
    ],
    "bgNextPlays": [
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/a6b6a4e5-0a5a",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at x0.swap (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/e44fbc96-ef9b",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at x0.swap (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/54426b00-496e",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at x0.swap (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/8b2fab60-5ee1",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at x0.swap (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/836c7565-e32a",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at x0.swap (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/ca98f4b8-fe65",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at x0.swap (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/26d6110b-14a3",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at x0.swap (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/da95fb30-b2e2",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at x0.swap (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/a4179cc4-3b99",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at x0.swap (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "blob:http://127.0.0.1:4178/a027298f-57b0",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at x0.swap (http://127.0.0.1:4178/core/assets/index-DeAeOGqB < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DeAeOGqB.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     }
    ],
    "ok": true

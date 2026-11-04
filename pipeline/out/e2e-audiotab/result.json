@@ -1,5 +1,5 @@
 {
- "at": "2026-11-04T08:36:20.727Z",
+ "at": "2026-11-04T09:49:33.840Z",
  "runs": [
   {
    "browser": "webkit",
@@ -105,67 +105,67 @@
     "tempoPaused": 10,
     "cue": {
      "worst": 0,
-     "n": 622,
+     "n": 621,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.35",
+       "3.39",
        34,
        34
       ],
       [
-       "4.64",
+       "4.68",
        47,
        47
       ],
       [
-       "5.93",
+       "5.97",
        60,
        60
       ],
       [
-       "7.22",
+       "7.26",
        73,
        73
       ],
       [
-       "8.51",
+       "8.54",
        86,
        86
       ],
       [
-       "9.79",
-       98,
-       98
+       "9.83",
+       99,
+       99
       ],
       [
-       "11.08",
-       111,
-       111
+       "11.12",
+       112,
+       112
       ],
       [
-       "12.37",
-       124,
-       124
+       "12.41",
+       125,
+       125
       ],
       [
-       "13.66",
-       137,
-       137
+       "13.70",
+       138,
+       138
       ],
       [
-       "14.95",
+       "14.99",
        150,
        150
       ],
       [
-       "16.23",
+       "16.27",
        163,
        163
       ],
       [
-       "17.52",
+       "17.56",
        176,
        176
       ]
@@ -174,7 +174,7 @@
     },
     "cueTempo": {
      "worst": 1,
-     "n": 555,
+     "n": 549,
      "rates": [
       1,
       1.5,
@@ -186,7 +186,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804830
+       "dueAt": 1792756804845
       }
      ],
      "idx": 6,
@@ -350,7 +350,7 @@
        34
       ],
       [
-       "4.71",
+       "4.72",
        48,
        48
       ],
@@ -365,7 +365,7 @@
        74
       ],
       [
-       "8.71",
+       "8.72",
        88,
        88
       ],
@@ -380,7 +380,7 @@
        114
       ],
       [
-       "12.71",
+       "12.72",
        128,
        128
       ],
@@ -395,7 +395,7 @@
        154
       ],
       [
-       "16.71",
+       "16.72",
        168,
        168
       ],
@@ -421,7 +421,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804699
+       "dueAt": 1792756804677
       }
      ],
      "idx": 6,
@@ -502,10 +502,10 @@
     "lockTitleBack": true,
     "lockBackLines": true,
     "lockNextAdvances": true,
-    "lockStandbyReadyBeforeHidden": true,
-    "lockHiddenAdvances": true,
-    "lockHiddenUnder1s": true,
-    "lockHiddenSwaps": true,
+    "lockStandbyReadyBeforeHidden": false,
+    "lockHiddenAdvances": false,
+    "lockHiddenUnder1s": false,
+    "lockHiddenSwaps": false,
     "lockHiddenNoNewSource": true,
     "lockHiddenNoNetStart": true,
     "coldS2NoPageErrors": true,
@@ -524,7 +524,7 @@
      "pod-0008:22",
      "pod-0019:70"
     ],
-    "firstSoundMs": 203,
+    "firstSoundMs": 210,
     "diag": [
      "deck: start order head first=pod-0001:22 heads=6 usable=6 stock=6",
      "deck: src local pod-0001"
@@ -546,25 +546,24 @@
      "state": "playing",
      "pos": {
       "duration": 25,
-      "position": 0.0008437959183673627,
+      "position": 0.00105279591836549,
       "playbackRate": 1
      },
      "cold": 0,
      "cloud": 0
     },
     "stockBehind": 5,
-    "lockNextMs": 15,
+    "lockNextMs": 3003,
     "lockNextLines": [
-     "deck: swap pod-0036 ready=true",
-     "deck play#4 swap rs=4 muted=false t=22.0",
-     "deck play#4 ok",
-     "deck: prepare pod-0013 src=local"
+     "lock next: stay (standby not ready)",
+     "deck: prepare pod-0036 src=local",
+     "deck: standby ready pod-0036 after 5 ms"
     ],
     "coldNetLines": [
      "signals: coldNetStarts 1 today (net start pod-0035)"
     ]
    },
-   "ok": true
+   "ok": false
   }
  ]
 }

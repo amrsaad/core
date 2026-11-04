@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-04T08:14:23.240Z",
+  "at": "2026-11-04T09:27:34.113Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -23,7 +23,7 @@
         "allUnder100": true,
         "startedFromBlob": true,
         "playbackTimeIsSourceTime": true,
-        "noMediaStreamRequests": false,
+        "noMediaStreamRequests": true,
         "settingsLine": true,
         "settingsMatchesStore": true,
         "offlineIcon": true,
@@ -50,7 +50,7 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1633,
+        "coldStartMs": 1648,
         "preloadedMoments": 30,
         "preloadedBytes": 6289238,
         "bytesPerMoment": 209641,
@@ -60,28 +60,28 @@
           5,
           4,
           8,
+          6,
+          3,
+          6,
+          6,
           5,
           4,
-          6,
-          6,
-          5,
-          5,
-          25
+          16
         ],
-        "cachedStartMax": 25,
-        "cachedStartMedian": 5,
+        "cachedStartMax": 16,
+        "cachedStartMedian": 6,
         "firstFrames": [
-          "first-frame 6ms buffered",
+          "first-frame 18ms buffered local",
           "first-frame 5ms buffered local",
           "first-frame 4ms buffered local",
           "first-frame 8ms buffered local",
+          "first-frame 6ms buffered local",
+          "first-frame 3ms buffered local",
+          "first-frame 6ms buffered local",
+          "first-frame 6ms buffered local",
           "first-frame 5ms buffered local",
           "first-frame 4ms buffered local",
-          "first-frame 6ms buffered local",
-          "first-frame 6ms buffered local",
-          "first-frame 5ms buffered local",
-          "first-frame 5ms buffered local",
-          "first-frame 25ms buffered local"
+          "first-frame 16ms buffered local"
         ],
         "settingsText": "Preloaded: 36 moments, 7.2 MB",
         "offlineTrail": [
@@ -103,7 +103,7 @@
           }
         ],
         "offlineStartMs": [
-          13,
+          14,
           5
         ],
         "offlineCachedOfFirst15": 15,
@@ -134,8 +134,8 @@
           }
         ],
         "offlineRestartStartMs": [
-          6,
-          4,
+          5,
+          5,
           5
         ],
         "poorYoutubeOf120": 58,
@@ -145,8 +145,8 @@
         "poorClumps": [],
         "normalClumps": []
       },
-      "ok": false
+      "ok": true
     }
   ],
-  "ok": false
+  "ok": true
 }
