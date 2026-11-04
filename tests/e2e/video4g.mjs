@@ -232,7 +232,7 @@ const runScenario = async (browser, sc) => {
     const vis = (e) => !!e && getComputedStyle(e).visibility !== 'hidden' && e.getBoundingClientRect().width > 0;
     const ex = new Function('return (' + EX + ')')()();
     const pr = poster?.getBoundingClientRect();
-    return { poster: vis(poster), live: !!cur?.hasAttribute('data-live'), hook: [...document.querySelectorAll('[data-testid=hook], h1, h2, h3, [class*=hook]')].some((e) => vis(e) && e.textContent.includes(hookText)), play: !!cur?.querySelector('.vplay'), exposed: ex.n, checked: ex.checked, band: pr ? [Math.round(pr.width), Math.round(pr.height)] : null, vw: innerWidth };
+    return { poster: vis(poster), live: !!cur?.hasAttribute('data-live'), hook: [...document.querySelectorAll('[data-testid=hook], h1, h2, h3, [class*=hook]')].some((e) => vis(e) && e.textContent.includes(hookText)), play: !!cur?.querySelector('.vplay'), exposed: ex.n, checked: ex.checked, band: pr ? [Math.round(pr.width), Math.round(pr.height)] : null, left: pr ? Math.round(pr.left) : null, vw: innerWidth };
   }, EXPOSED.toString());
   r.pause = pz;
   c.pauseOwnStill = pz.poster && !pz.live;
@@ -240,7 +240,9 @@ const runScenario = async (browser, sc) => {
   c.pausePlayIcon = pz.play;
   c.pauseNoYoutubeView = pz.exposed === 0;
   c.pauseOverlayMeasured = pz.checked > 0;
-  c.band16by9 = !!pz.band && Math.abs(pz.band[0] / pz.band[1] - 16 / 9) < 0.03 && (sc.desk ? pz.band[0] <= 1280 : pz.band[0] === pz.vw);
+  // Geometrie seit Brief 06: Handy und Tablet zeigen die Karte mit 16 px Rand links und rechts (--margin), höchstens 640 px breit und mittig, Verhältnis 16:9
+  // (iPhone 15 mit 393 px: 361 x 203 bei x = 16). Desktop: Video höchstens 1280 px breit.
+  c.band16by9 = !!pz.band && Math.abs(pz.band[0] / pz.band[1] - 16 / 9) < 0.03 && (sc.desk ? pz.band[0] <= 1280 : Math.abs(pz.band[0] - Math.min(pz.vw - 32, 640)) <= 1 && Math.abs(pz.left - (pz.vw - pz.band[0]) / 2) <= 1 && (pz.vw > 672 || Math.abs(pz.left - 16) <= 1));
   await page.screenshot({ path: `${out}/${sc.name}-pause.png` });
   c.pageErrors = errors.length === 0;
   r.errors = errors.slice(0, 3);

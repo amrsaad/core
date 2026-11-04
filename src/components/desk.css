@@ -48,6 +48,9 @@
 .desk .vframe { left: 0; top: 0; width: 100%; height: 100%; transform: none; }
 .desk .vframe > div { left: 50%; top: calc(50% - var(--cap-h) / 2); width: var(--vid-w); height: auto; aspect-ratio: 16 / 9; transform: translate(-50%, -50%); border-radius: var(--r-card); overflow: hidden; }
 .desk .vposter { left: 50%; top: calc(50% - var(--cap-h) / 2); width: var(--vid-w); height: auto; aspect-ratio: 16 / 9; transform: translate(-50%, -50%); border-radius: var(--r-card); overflow: hidden; }
+/* Die Abdeckung der YouTube-Einblendung (60 px oben, 48 px unten) liegt genau auf dem Bild. Vorher stand sie mit Inline-Maßen in der Mitte des Slots,
+   seit Brief 06 sitzt das Bild aber um --cap-h / 2 höher, und der obere Streifen der Einblendung blieb frei (video4g noOverlayFirst3s). */
+.desk .vcover { left: 50%; top: calc(50% - var(--cap-h) / 2); width: var(--vid-w); height: auto; aspect-ratio: 16 / 9; transform: translate(-50%, -50%); }
 .desk .vcaption { left: calc(50% - var(--vid-w) / 2 + var(--s-4)); right: auto; width: calc(var(--vid-w) - var(--s-8)); top: calc(50% - var(--cap-h) / 2 + var(--vid-w) * 9 / 32 + var(--s-4)); }
 .desk .vaudio-art { top: calc(50% - 220px); width: 240px; }
 .desk .vcaption.vcaption-audio { top: calc(50% + var(--s-12)); }

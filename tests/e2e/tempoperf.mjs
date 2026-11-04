@@ -247,7 +247,7 @@ for (const [name, type] of [['chromium', chromium], ['webkit', webkit]].filter((
   }
 }
 
-// Zielwerte (CHECK=1): kein Stall mitten im Lauf, Tempo-Wechsel ohne Netzanfrage und ohne Neuladen, höchstens 3 Elemente mit Quelle
+// Zielwerte (CHECK=1): kein Stall mitten im Lauf, Tempo-Wechsel ohne Netzanfrage und ohne Neuladen, höchstens 3 Elemente mit Quelle (Audio: 6, Brief 14)
 let bad = 0;
 if (CHECK) {
   for (const r of results.runs) {
@@ -255,8 +255,11 @@ if (CHECK) {
     if (r.error || !r.ok) fails.push('run');
     if ((r.stallsMid ?? 0) > 0) fails.push(`stalls ${r.stallsMid}`);
     if ((r.startsWrongRate ?? 0) > 0) fails.push(`starts at wrong rate ${r.startsWrongRate}`);
-    // Das stille Entsperr-Element der geregelten Spur (prime) zählt nicht mit, es hält nur kurz eine Quelle (srcMax zeigt es trotzdem)
-    if ((r.srcMaxReal ?? 0) > 3) fails.push(`elements with src ${r.srcMaxReal}`);
+    // Das stille Entsperr-Element der geregelten Spur (prime) zählt nicht mit, es hält nur kurz eine Quelle (srcMax zeigt es trotzdem).
+    // Video: höchstens 3 Elemente mit Quelle. Audio (Brief 14, Entscheidung 52): der Vorrat hält POOL = 5 nächste Momente fertig geladen, dazu das aktive Element,
+    // also höchstens 6 (gleiche Grenze wie audiotab.mjs: atMostPoolMedia, rowMediaLimit, tempoMediaLimit).
+    const maxSrc = r.form === 'audio' ? 6 : 3;
+    if ((r.srcMaxReal ?? 0) > maxSrc) fails.push(`elements with src ${r.srcMaxReal} (max ${maxSrc})`);
     // Lautheit an: beim Wechsel von 1x weg verlässt der laufende Moment die Web-Audio-Spur, ein Neuladen ist dort erlaubt (Max 30.10.2026). Sonst null.
     for (const c of r.tempoChange ?? []) {
       const reloadOk = r.lane === 'on' && c.from === 1;

@@ -2759,7 +2759,6 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                 zIndex: 2,
                 pointerEvents: 'none',
                 visibility: 'hidden',
-                ...(desk ? { left: 0, top: '50%', width: '100%', height: 'auto', aspectRatio: '16 / 9', transform: 'translateY(-50%)' } : {}),
               }}
             >
               <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: COVER_TOP, background: 'var(--tab-bg, #000)' }} />

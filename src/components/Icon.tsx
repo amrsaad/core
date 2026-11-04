@@ -10,6 +10,8 @@ export function Icon({ name, size = 'var(--icon)', label, className }: { name: I
       className={className ? `icon ${className}` : 'icon'}
       width={size}
       height={size}
+      // Chromium wertet var() im SVG-Attribut width/height nicht aus (WebKit schon), das Symbol füllte dort die ganze Fläche. Der Inline-Style gilt in beiden.
+      style={{ width: size, height: size }}
       viewBox="0 0 256 256"
       fill="currentColor"
       role={label ? 'img' : undefined}
