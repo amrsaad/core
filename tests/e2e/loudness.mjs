@@ -149,8 +149,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       return { id: m.id, loud: g?.loud ?? null };
     });
     c.tabTapStartsLevelled = laneOk(byId.get(first.id), first.loud);
+    // Die Spur hängt vom ersten Moment ab (zufällig): geregelt ('web audio') spielt das Element der geregelten Spur, sonst das der einfachen.
+    // Geprüft wird die Spur, die laut Diag gilt (CI 41772174744: Check war rot, wenn der erste Moment ungeregelt war, auch auf f0a3629 in 4 von 8 Läufen).
+    const wantLane = first.loud?.how === 'web audio' ? 'level' : 'plain';
+    await waitFor(page, (lane) => [...document.querySelectorAll('audio[data-core=audio-deck]')].some((a) => a.dataset.lane === lane && !a.paused), wantLane, 5000);
     r.deckEls = await page.evaluate(() => [...document.querySelectorAll('audio[data-core=audio-deck]')].map((a) => ({ lane: a.dataset.lane, paused: a.paused, src: !!(a.currentSrc || a.src), cross: a.crossOrigin })));
-    c.levelElementPlays = r.deckEls.some((e) => e.lane === 'level' && e.cross === 'anonymous' && !e.paused);
+    c.levelElementPlays = r.deckEls.some((e) => e.lane === wantLane && !e.paused && (wantLane === 'plain' || e.cross === 'anonymous'));
     c.tempoOneByDefault = (await page.evaluate(() => window.__core.rate())) === 1;
     c.atMostThreeMedia = (await page.evaluate(() => window.__core.media())) <= 3;
     c.deckSrcLine = await page.evaluate(() => window.__core.diag().some((x) => /^deck: src (local|net) /.test(x)));
