@@ -5,3 +5,4 @@ Eine Zeile pro Lauf (täglich 04:00 UTC, .github/workflows/probe.yml). Erstes Bi
 | Datum | Start (UTC) | Erstes Bild (ms) | Reiterwechsel | Fehler | Ergebnis | Quelle |
 |---|---|---|---|---|---|---|
 | 2026-11-03 | 11:46:56 | 1076 | ok | 3 | FEHLER errors 3: pageerror Cannot read properties of null (reading 'mute') | actions |
+| 2026-11-04 | 11:48:57 | 253 | ok | 0 | ok | actions |
