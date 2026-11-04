@@ -1,7 +1,7 @@
 import type { Area, CardType } from '../types';
 
 export const AREA_LABEL: Record<Area, string> = { beat: 'Beat', body: 'Body', brain: 'Brain' };
-export const AREA_COLOR: Record<Area, string> = { beat: '#C9A227', body: '#2FB37A', brain: '#4A8CFF' };
+export const AREA_COLOR: Record<Area, string> = { beat: 'var(--c-beat)', body: 'var(--c-body)', brain: 'var(--c-brain)' };
 export const TYPE_LABEL: Record<CardType, string> = { fact: 'Wissen', fresh: 'Neu', verse: 'Vers', apply: 'Praxis', recall: 'Abruf' };
 export const TOPIC_LABEL: Record<string, string> = {
   glaukom: 'Glaukom', retina: 'Retina', katarakt: 'Katarakt', refraktiv: 'Refraktiv', cornea: 'Cornea', allgemein: 'Augen allgemein',

@@ -2,25 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg: #0e0f12;
-  --surface: #17191e;
-  --fg: #f2f2f2;
-  --muted: #9aa0a6;
-  --line: #262931;
-  color-scheme: dark;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #f6f6f4;
-    --surface: #ffffff;
-    --fg: #15171b;
-    --muted: #5f6368;
-    --line: #e2e2de;
-    color-scheme: light;
-  }
-}
+/* Farben, Maße, Zeiten: src/design/tokens.css (Brief 06). Hier keine :root-Werte mehr. */
 
 html,
 body,
@@ -29,7 +11,7 @@ body,
   margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
 }
@@ -73,8 +55,8 @@ body {
 .t-body { font-size: 18px; line-height: 27px; font-weight: 400; }
 .t-excerpt { font-family: ui-serif, Georgia, serif; font-style: italic; font-size: 15px; line-height: 22px; }
 .t-meta { font-size: 12px; line-height: 16px; text-transform: uppercase; letter-spacing: 0.08em; }
-.t-arabic { font-family: 'Amiri Quran', 'Noto Naskh Arabic', serif; font-size: 28px; line-height: 1.9; }
-.t-arabic-sm { font-family: 'Noto Naskh Arabic', 'Amiri Quran', serif; font-style: normal; font-size: 17px; line-height: 1.8; }
+.t-arabic { font-family: var(--font-verse); font-size: var(--t-verse); line-height: var(--lh-verse); }
+.t-arabic-sm { font-family: var(--font-ar); font-style: normal; font-size: 17px; line-height: 1.8; }
 
 .flash { animation: flash 900ms ease-out forwards; }
 @keyframes flash {
@@ -164,7 +146,7 @@ body {
 }
 .vtext-hook { margin: 4px 0 16px; font-size: 24px; line-height: 31px; font-weight: 700; }
 .vtext-body { margin: 0; white-space: pre-line; font-size: 18px; line-height: 28px; color: #e6e6e6; }
-.vtext-rtl { text-align: right; font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', sans-serif; font-size: 21px; line-height: 36px; }
+.vtext-rtl { text-align: right; font-family: var(--font-ar); font-size: 21px; line-height: 36px; }
 .vtext-source { display: block; margin: 20px 0 0; min-height: 44px; font-size: 13px; line-height: 20px; color: #9aa0aa; text-decoration: none; overflow-wrap: anywhere; }
 a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 .vtext-end { margin-top: 32px; padding-top: 16px; border-top: 1px solid #262931; font-size: 13px; color: #8a8a8a; }
@@ -232,7 +214,7 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
   -webkit-box-decoration-break: clone; box-decoration-break: clone;
 }
 .vcaption-rtl { justify-content: flex-end; }
-.vcaption-rtl span { direction: rtl; unicode-bidi: plaintext; text-align: right; font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', 'Segoe UI', sans-serif; font-size: 21px; line-height: 32px; }
+.vcaption-rtl span { direction: rtl; unicode-bidi: plaintext; text-align: right; font-family: var(--font-ar); font-size: 21px; line-height: 32px; }
 .vcaption-audio.vcaption-rtl { justify-content: center; }
 .vcaption-audio.vcaption-rtl span { text-align: center; font-size: 26px; line-height: 38px; }
 .vaudio { position: absolute; inset: 0; z-index: 1; background: #000; }
@@ -262,11 +244,11 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 .vcap-grip { width: 36px; height: 4px; border-radius: 2px; background: #444; margin: 0 auto 12px; }
 .vcap-hook { margin: 0 0 12px; font-size: 20px; line-height: 27px; font-weight: 700; }
 .vcap-text { margin: 0 0 16px; white-space: pre-line; font-size: 17px; line-height: 26px; color: #e0e0e0; }
-.vcap-text[dir='rtl'] { font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', sans-serif; font-size: 20px; line-height: 34px; }
+.vcap-text[dir='rtl'] { font-family: var(--font-ar); font-size: 20px; line-height: 34px; }
 .vcap-context { margin: 0 0 16px; }
 .vcap-ctx-label { display: block; margin-bottom: 2px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #8a8f98; }
 .vcap-ctx-text { margin: 0; font-size: 14px; line-height: 20px; color: #a3a3a3; }
-.vcap-ctx-text[dir='rtl'] { font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', sans-serif; font-size: 16px; line-height: 26px; }
+.vcap-ctx-text[dir='rtl'] { font-family: var(--font-ar); font-size: 16px; line-height: 26px; }
 .vcap-meta { margin: 0; border-top: 1px solid #262931; padding-top: 12px; display: grid; gap: 6px; font-size: 14px; line-height: 20px; }
 .vcap-meta > div { display: flex; gap: 12px; }
 .vcap-meta dt { width: 64px; flex: none; color: #8a8a8a; }
@@ -405,7 +387,7 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 .dp-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: calc(100% + 16px); min-height: 32px; margin: 0 -8px; padding: 0 8px; border-radius: 8px; text-align: left; font-size: 12px; line-height: 16px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; color: #8a8f98; }
 .dp-head-static { cursor: default; }
 .dp-text { margin: 0 0 12px; white-space: pre-line; font-size: 16px; line-height: 25px; color: #e0e0e0; }
-.dp-text[dir='rtl'] { font-family: -apple-system, 'Geeza Pro', 'Noto Naskh Arabic', sans-serif; font-size: 19px; line-height: 32px; }
+.dp-text[dir='rtl'] { font-family: var(--font-ar); font-size: 19px; line-height: 32px; }
 .dp-source { margin: 0; font-size: 14px; line-height: 21px; color: #b3b3b3; overflow-wrap: anywhere; }
 a.dp-source { text-decoration: underline; text-underline-offset: 3px; }
 .dp-open { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid #2a2d35; color: #d8d8d8; font-size: 13px; line-height: 18px; font-weight: 600; }

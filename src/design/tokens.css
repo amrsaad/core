@@ -1,0 +1,307 @@
+/*
+ * Tokens (Entscheidung 22, Brief 06). Die einzige Stelle mit Farb-, Maß-, Zeit- und Schriftwerten.
+ * Komponenten und Screens nehmen nur var(--...), kein Literal (tests/design-tokens.test.ts prüft das).
+ * Werte aus den abgenommenen Boards (Canvas "Core Design Rollover", Stand 03.11., Issue 25 in core-content).
+ *
+ * Stimmung (Entscheidung 22a und 41): data-mood am html-Element, gesetzt von App.tsx nach dem Bereich des aktuellen Moments.
+ *   beat   Sand und Gold auf Schwarz, immer dunkel
+ *   body   Schiefer und Grün, immer dunkel
+ *   brain  Papier und Tinte bei Hell, dunkel mit Lila bei Dunkel, folgt dem Gerät (keine eigene Uhr)
+ *   ohne   neutral (Saved, Settings, Unlock), dunkel zuerst, Hell abgeleitet
+ *
+ * Umbrüche (Brief 06): Handy unter 768, Tablet 768 bis 1180, Desktop ab 1181 px.
+ * Media-Queries können keine Variablen lesen. Die Zahlen stehen hier und in src/design/breakpoints.ts, der Test hält beide gleich.
+ *   @media (min-width: 768px)    Tablet
+ *   @media (min-width: 1181px)   Desktop
+ *
+ * Farben sind mit @property registriert, damit die Überblendung beim Stimmungswechsel (400 ms) auch alle Kinder erreicht.
+ */
+
+@property --bg { syntax: '<color>'; inherits: true; initial-value: #0a0e12; }
+@property --surface { syntax: '<color>'; inherits: true; initial-value: #141a20; }
+@property --surface-2 { syntax: '<color>'; inherits: true; initial-value: #1f272e; }
+@property --text { syntax: '<color>'; inherits: true; initial-value: #ffffff; }
+@property --body { syntax: '<color>'; inherits: true; initial-value: #c8d0d6; }
+@property --muted { syntax: '<color>'; inherits: true; initial-value: #8a9aa8; }
+@property --soft { syntax: '<color>'; inherits: true; initial-value: #6f7f8c; }
+@property --accent { syntax: '<color>'; inherits: true; initial-value: #4ade80; }
+@property --on-accent { syntax: '<color>'; inherits: true; initial-value: #04210f; }
+@property --kicker { syntax: '<color>'; inherits: true; initial-value: #4ade80; }
+@property --hairline { syntax: '<color>'; inherits: true; initial-value: rgba(255, 255, 255, 0.08); }
+@property --tab-off { syntax: '<color>'; inherits: true; initial-value: #3a4651; }
+
+:root {
+  /* ---------- Neutral (Body-Palette): Saved, Settings, Unlock. Dunkel zuerst. ---------- */
+  --bg: #0a0e12;
+  --surface: #141a20;
+  --surface-2: #1f272e;
+  --text: #ffffff;
+  --body: #c8d0d6;
+  --muted: #8a9aa8;
+  --soft: #6f7f8c;
+  --accent: #4ade80;
+  --on-accent: #04210f;
+  --kicker: #4ade80;
+  --hairline: rgba(255, 255, 255, 0.08);
+  --tab-off: #3a4651;
+  color-scheme: dark;
+
+  /* Bereichsfarben, überall gleich (Punkt am Kanal, Zähler, Wochenkarte) */
+  --c-beat: #d4a94c;
+  --c-body: #4ade80;
+  --c-brain: #a594ff;
+  /* Dieselben Farben für dunkle Flächen, auch wenn die Stimmung hell ist (Medienfläche, Bild, Panel) */
+  --c-beat-dk: #d4a94c;
+  --c-body-dk: #4ade80;
+  --c-brain-dk: #a594ff;
+
+  /* Zustände */
+  --ok: #4ade80;
+  --ok-bg: #12351f;
+  --danger: #e5484d;
+  --danger-bg: #3d1417;
+  --warn: #f0a04b;
+  --link-err: #e07b7b;
+
+  /* Medienfläche, immer dunkel, auch bei hellem Brain (Video und Cover liegen auf Schwarz) */
+  --media: #000000;
+  --media-2: #1a1d24;
+  --on-media: #ffffff;
+  --on-media-muted: rgba(255, 255, 255, 0.72);
+  --media-shade: rgba(0, 0, 0, 0.6);
+  --media-shade-strong: rgba(0, 0, 0, 0.75);
+  --media-caption: rgba(0, 0, 0, 0.72);
+  --scrim: rgba(0, 0, 0, 0.55);
+  --scrim-soft: rgba(0, 0, 0, 0.35);
+  --glass: rgba(20, 26, 32, 0.78);
+  --heart: #ffffff;
+
+  /* Alte Namen, die Tailwind und ältere Regeln noch lesen */
+  --fg: var(--text);
+  --line: var(--hairline);
+
+  /* ---------- Schrift (Systemschrift, Entscheidung 22 Ergänzung 03.11.) ---------- */
+  --font-ui: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --font-ar: 'Noto Sans Arabic', 'Geeza Pro', var(--font-ui);
+  --font-verse: 'Amiri', 'Noto Naskh Arabic', 'Geeza Pro', serif;
+  --font-brain: 'Source Serif 4', ui-serif, Georgia, 'Times New Roman', serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --tracking: 0;
+  --tracking-title: -0.01em;
+  --tracking-caps: 0.08em;
+
+  /* Skala: Größe und Zeilenhöhe. Gewicht je Zeile. */
+  --t-title: 34px;      --t-title-lh: 41px;      --w-title: 700;
+  --t-hook: 22px;       --t-hook-lh: 28px;       --w-hook: 600;
+  --t-row: 17px;        --t-row-lh: 22px;        --w-row: 500;
+  --t-tab: 16px;        --t-tab-lh: 22px;        --w-tab: 600;
+  --t-body: 15px;       --t-body-lh: 22px;       --w-body: 400;
+  --t-meta: 13px;       --t-meta-lh: 18px;       --w-meta: 500;
+  --t-status: 12px;     --t-status-lh: 16px;
+  --t-nav: 11px;        --t-nav-lh: 14px;
+  --t-reading: 17px;    --t-reading-lh: 27px;
+  --t-brain-hook: 34px; --t-brain-hook-lh: 40px; --w-brain-hook: 600;
+  --t-verse: 28px;      --lh-verse: 1.65;
+  --t-ar: 15px;         --t-ar-lh: 24px;
+  --t-caption: 17px;    --t-caption-lh: 23px;
+
+  /* ---------- Raster 4 px ---------- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+  --margin: 16px;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+
+  /* Maße */
+  --hit: 44px;              /* kleinste Berührfläche (Layout-Gate 43) */
+  --rail-btn: 48px;         /* Kreis der Leiste rechts */
+  --rail-icon: 26px;
+  --icon: 22px;
+  --icon-sm: 18px;
+  --bar-h: 56px;            /* Navigation unten */
+  --head-h: 52px;           /* Kopfzeile mit Reitern */
+  --progress-h: 2px;
+  --desk-main-max: 880px;   /* Videofläche Desktop, Board Stand 03.11. */
+  --desk-side: 392px;
+  --desk-read: 640px;
+  --art-max: 342px;
+
+  /* Rundung */
+  --r-sm: 8px;
+  --r-btn: 12px;
+  --r-card: 14px;
+  --r-group: 16px;
+  --r-art: 22px;
+  --r-sheet: 24px;
+  --r-pill: 999px;
+
+  /* Schatten nur auf Medienkarten */
+  --shadow-media: 0 10px 28px rgba(0, 0, 0, 0.45);
+  --inset-hair: inset 0 0 0 1px var(--hairline);
+
+  /* Bewegung: eine Kurve, 200 bis 350 ms, Spring nur für Karten */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --spring: cubic-bezier(0.3, 1.25, 0.5, 1);
+  --dur-cut: 150ms;
+  --dur-ui: 200ms;
+  --dur-swipe: 220ms;
+  --dur-sheet: 280ms;
+  --dur-slow: 350ms;
+  --dur-mood: 400ms;
+  --stagger: 30ms;
+
+  /* Ebenen */
+  --z-media: 1;
+  --z-ui: 20;
+  --z-bar: 60;
+  --z-sheet: 80;
+  --z-toast: 90;
+}
+
+/* Neutral, Hell abgeleitet */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f2f4f6;
+    --surface: #ffffff;
+    --surface-2: #e8ecef;
+    --text: #15171a;
+    --body: #2f363c;
+    --muted: #55626d;
+    --soft: #5d6973;
+    --accent: #0f7a3d;
+    --on-accent: #ffffff;
+    --kicker: #0f7a3d;
+    --hairline: rgba(21, 23, 26, 0.12);
+    --tab-off: #b9c2ca;
+    --c-body: #0f7a3d;
+    --c-brain: #6a58d6;
+    --c-beat: #8a6a14;
+    --ok-bg: #d6f2e0;
+    --danger-bg: #fbe0e1;
+    --glass: rgba(255, 255, 255, 0.82);
+    color-scheme: light;
+  }
+}
+
+/* ---------- Stimmungen ---------- */
+[data-mood='beat'] {
+  --bg: #0d0b08;
+  --surface: #15110a;
+  --surface-2: #211b10;
+  --text: #f3ead8;
+  --body: #d6ccb8;
+  --muted: #8f8778;
+  --soft: #807a6d;
+  --accent: #d4a94c;
+  --on-accent: #1a1405;
+  --kicker: #d4a94c;
+  --hairline: rgba(243, 234, 216, 0.1);
+  --tab-off: #3d372b;
+  --c-beat: #d4a94c;
+  --glass: rgba(21, 17, 10, 0.78);
+  color-scheme: dark;
+}
+
+[data-mood='body'] {
+  --bg: #0a0e12;
+  --surface: #141a20;
+  --surface-2: #1f272e;
+  --text: #ffffff;
+  --body: #c8d0d6;
+  --muted: #8a9aa8;
+  --soft: #6f7f8c;
+  --accent: #4ade80;
+  --on-accent: #04210f;
+  --kicker: #4ade80;
+  --hairline: rgba(255, 255, 255, 0.08);
+  --tab-off: #3a4651;
+  --c-body: #4ade80;
+  --glass: rgba(20, 26, 32, 0.78);
+  color-scheme: dark;
+}
+
+/* Brain folgt dem Gerät (Entscheidung 41). Dunkel zuerst, Hell bei prefers-color-scheme: light. */
+[data-mood='brain'] {
+  --bg: #0b0d11;
+  --surface: #14171d;
+  --surface-2: #1d2129;
+  --text: #f4f5f8;
+  --body: #d9dbe3;
+  --muted: #8a8fa0;
+  --soft: #7c8192;
+  --accent: #a594ff;
+  --on-accent: #0b0d11;
+  --kicker: #a594ff;
+  --hairline: rgba(255, 255, 255, 0.08);
+  --tab-off: #363a48;
+  --c-brain: #a594ff;
+  --glass: rgba(20, 23, 29, 0.78);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  [data-mood='brain'] {
+    --bg: #f4f1ea;
+    --surface: #ebe7dd;
+    --surface-2: #e0dbcf;
+    --text: #15171a;
+    --body: #2a2c30;
+    --muted: #66635b;
+    --soft: #6b685f;
+    --accent: #15171a;
+    --on-accent: #f4f1ea;
+    --kicker: #8a5f0c;
+    --hairline: rgba(21, 23, 26, 0.12);
+    --tab-off: #c4beb0;
+    --c-brain: #15171a;
+    --glass: rgba(244, 241, 234, 0.85);
+    color-scheme: light;
+  }
+}
+
+/* Überblendung 400 ms beim Stimmungswechsel. Reduced motion schneidet. */
+:root {
+  transition:
+    --bg var(--dur-mood) var(--ease),
+    --surface var(--dur-mood) var(--ease),
+    --surface-2 var(--dur-mood) var(--ease),
+    --text var(--dur-mood) var(--ease),
+    --body var(--dur-mood) var(--ease),
+    --muted var(--dur-mood) var(--ease),
+    --soft var(--dur-mood) var(--ease),
+    --accent var(--dur-mood) var(--ease),
+    --on-accent var(--dur-mood) var(--ease),
+    --kicker var(--dur-mood) var(--ease),
+    --hairline var(--dur-mood) var(--ease),
+    --tab-off var(--dur-mood) var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    transition: none;
+    --dur-cut: 0ms;
+    --dur-ui: 0ms;
+    --dur-swipe: 0ms;
+    --dur-sheet: 0ms;
+    --dur-slow: 0ms;
+    --dur-mood: 0ms;
+    --stagger: 0ms;
+  }
+}
+
+/* Flächen mit Bild oder Video sind immer dunkel: Bereichsfarben dort in der dunklen Fassung */
+.vfeed, .dpanel {
+  --c-beat: var(--c-beat-dk);
+  --c-body: var(--c-body-dk);
+  --c-brain: var(--c-brain-dk);
+}

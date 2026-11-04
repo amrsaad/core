@@ -47,6 +47,7 @@ import { saveGate } from '../lib/useAppState';
 import { blockedCount, emptyFormLine, END_SUB, endButtonLabel, endLine, filterPool, formOf, FORM_LABEL, FORMS, momentText, otherForms, textEndReached, unseenCount, waitingLine, type Form } from './form';
 import { atEnd, EndLedger, isBackground, onLeave, successorOf } from './background';
 import { PlayTracker } from './played';
+import { setMood } from '../design/mood';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
 /** Desktop-Modus ab 900 px: Panel rechts, Übersicht, Seitenblatt. Fehlt das Feld, gilt das mobile Verhalten unverändert. */
@@ -249,6 +250,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const moving = () => mot.current.busy || dragging.current;
 
   const [idx, setIdx] = useState(0);
+  // Stimmung folgt dem Bereich des aktuellen Moments, außerhalb des Feeds gilt die neutrale Palette (Brief 06)
+  const moodArea = queue.current[idx]?.area;
+  useEffect(() => {
+    setMood(active && moodArea ? moodArea : null);
+    return () => setMood(null);
+  }, [active, moodArea]);
   const [, setTick] = useState(0);
   const rerender = () => setTick((t) => t + 1);
   const [progress, setProgress] = useState(0);
@@ -2673,7 +2680,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const captionsOn = !!m && form !== 'text' && captionsShown(form === 'audio' ? 'on' : state.settings.captionMode, m);
 
   return (
-    <div className="vfeed" ref={dragEl} style={{ ['--area' as string]: m ? AREA_COLOR[m.area] : '#fff' }}>
+    <div className="vfeed" ref={dragEl} style={{ ['--area' as string]: m ? AREA_COLOR[m.area] : 'var(--on-media)' }}>
       <div className="vstage" ref={stageEl}>
       {slots.current.slice(0, SLOTS).map((slot, s) => {
         const j = slot.index;
