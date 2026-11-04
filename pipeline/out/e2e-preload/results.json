@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-04T17:04:03.598Z",
+  "at": "2026-11-04T18:43:36.013Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -50,7 +50,7 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1672,
+        "coldStartMs": 1665,
         "preloadedMoments": 30,
         "preloadedBytes": 6289238,
         "bytesPerMoment": 209641,
@@ -58,27 +58,27 @@
         "swipes": 10,
         "cachedStartMs": [
           6,
+          6,
           11,
-          13,
           8,
           6,
-          12,
-          8,
+          9,
+          9,
           7,
           8,
           6
         ],
-        "cachedStartMax": 13,
+        "cachedStartMax": 11,
         "cachedStartMedian": 8,
         "firstFrames": [
-          "first-frame 37ms buffered local",
+          "first-frame 31ms buffered local",
+          "first-frame 6ms buffered local",
           "first-frame 6ms buffered local",
           "first-frame 11ms buffered local",
-          "first-frame 13ms buffered local",
           "first-frame 8ms buffered local",
           "first-frame 6ms buffered local",
-          "first-frame 12ms buffered local",
-          "first-frame 8ms buffered local",
+          "first-frame 9ms buffered local",
+          "first-frame 9ms buffered local",
           "first-frame 7ms buffered local",
           "first-frame 8ms buffered local",
           "first-frame 6ms buffered local"
@@ -103,9 +103,9 @@
           }
         ],
         "offlineStartMs": [
-          7,
-          8,
           6,
+          7,
+          7,
           5
         ],
         "offlineCachedOfFirst15": 13,
@@ -136,9 +136,9 @@
           }
         ],
         "offlineRestartStartMs": [
-          9,
+          8,
           7,
-          8
+          9
         ],
         "poorYoutubeOf120": 58,
         "normalYoutubeOf120": 68,

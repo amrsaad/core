@@ -1,5 +1,5 @@
 {
- "at": "2026-11-04T17:27:19.259Z",
+ "at": "2026-11-04T19:05:37.026Z",
  "runs": [
   {
    "browser": "webkit",
@@ -99,68 +99,68 @@
     "tempoWaiting": 0,
     "tempoPaused": 10,
     "cue": {
-     "worst": 1,
+     "worst": 0,
      "n": 621,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.42",
-       35,
-       35
+       "3.37",
+       34,
+       34
       ],
       [
-       "4.70",
-       48,
-       48
+       "4.66",
+       47,
+       47
       ],
       [
-       "5.99",
+       "5.95",
        60,
        60
       ],
       [
-       "7.28",
+       "7.23",
        73,
        73
       ],
       [
-       "8.57",
+       "8.52",
        86,
        86
       ],
       [
-       "9.86",
+       "9.81",
        99,
        99
       ],
       [
-       "11.14",
-       112,
-       112
+       "11.10",
+       111,
+       111
       ],
       [
-       "12.43",
-       125,
-       125
+       "12.39",
+       124,
+       124
       ],
       [
-       "13.72",
-       138,
-       138
+       "13.68",
+       137,
+       137
       ],
       [
-       "15.00",
-       151,
-       151
+       "14.96",
+       150,
+       150
       ],
       [
-       "16.29",
+       "16.25",
        163,
        163
       ],
       [
-       "17.58",
+       "17.54",
        176,
        176
       ]
@@ -168,8 +168,8 @@
      "rate": 2
     },
     "cueTempo": {
-     "worst": 0,
-     "n": 533,
+     "worst": 1,
+     "n": 535,
      "rates": [
       1,
       1.5,
@@ -181,7 +181,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805100
+       "dueAt": 1792756805108
       }
      ],
      "idx": 6,
@@ -404,7 +404,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804949
+       "dueAt": 1792756804954
       }
      ],
      "idx": 6,
@@ -500,7 +500,7 @@
      "pod-0008:22",
      "pod-0019:70"
     ],
-    "firstSoundMs": 249,
+    "firstSoundMs": 251,
     "diag": [
      "deck: start order head first=pod-0001:22 heads=6 usable=6 stock=6",
      "deck: src local pod-0001"
@@ -522,14 +522,14 @@
      "state": "playing",
      "pos": {
       "duration": 25,
-      "position": 0.0008007959183657931,
+      "position": 0.0008557959183654873,
       "playbackRate": 1
      },
      "cold": 0,
      "cloud": 0
     },
     "stockBehind": 4,
-    "lockNextMs": 13,
+    "lockNextMs": 15,
     "lockNextLines": [
      "deck: swap pod-0014 ready=true pool=1",
      "deck play#3 swap rs=4 muted=false t=0.1",
