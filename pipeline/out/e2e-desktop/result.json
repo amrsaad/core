@@ -1,8 +1,8 @@
 {
-  "at": "2026-11-04T14:55:36.072Z",
+  "at": "2026-11-04T16:56:22.898Z",
   "checks": {
-    "below900Mobile": true,
-    "at900Desktop": true,
+    "below1181Mobile": true,
+    "at1181Desktop": true,
     "resizeKeepsMoment": true,
     "soundIconDesk": true,
     "helpShownFirst": true,
@@ -12,9 +12,9 @@
     "helpBlocksKeys": true,
     "escClosesHelp": true,
     "helpOnlyOnce": true,
-    "columnIs480": true,
-    "columnCentered": true,
+    "mainFillsLeftOfPanel": true,
     "videoIs16by9": true,
+    "videoCentered": true,
     "panelFixedRight": true,
     "barOnTop": true,
     "noHorizontalScroll": true,
@@ -64,7 +64,7 @@
     "keyAInSheet": true,
     "tab2Audio": true,
     "tab3Text": true,
-    "textWidth65ch": true,
+    "textColumn640": true,
     "barFitsWindowText": true,
     "barTabsClickableText": true,
     "textSourceInPanel": true,
@@ -112,16 +112,16 @@
   "notes": {
     "geo": {
       "main": {
-        "x": 480,
+        "x": 0,
         "y": 56,
-        "w": 480,
+        "w": 1040,
         "h": 844
       },
       "panel": {
         "x": 1065,
         "y": 80,
         "w": 351,
-        "h": 260
+        "h": 294
       },
       "aside": {
         "x": 1040,
@@ -136,17 +136,17 @@
         "h": 56
       },
       "video": {
-        "x": 480,
-        "y": 343,
-        "w": 480,
-        "h": 270
+        "x": 0,
+        "y": 125.5,
+        "w": 1040,
+        "h": 585
       },
       "scrollW": 1440
     },
     "text": {
-      "w": 701.53125,
-      "ch65": 701.546875,
-      "col": 821.53125
+      "w": 640,
+      "ch65": 640,
+      "col": 1040
     },
     "ring": [
       {

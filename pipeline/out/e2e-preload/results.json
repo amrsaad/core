@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-04T15:03:16.007Z",
+  "at": "2026-11-04T17:04:03.598Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -50,38 +50,38 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1641,
+        "coldStartMs": 1672,
         "preloadedMoments": 30,
         "preloadedBytes": 6289238,
         "bytesPerMoment": 209641,
         "waitedForVault": 0,
         "swipes": 10,
         "cachedStartMs": [
-          4,
-          4,
-          4,
+          6,
+          11,
+          13,
+          8,
+          6,
+          12,
+          8,
           7,
-          4,
-          6,
-          7,
-          6,
-          6,
-          5
+          8,
+          6
         ],
-        "cachedStartMax": 7,
-        "cachedStartMedian": 6,
+        "cachedStartMax": 13,
+        "cachedStartMedian": 8,
         "firstFrames": [
+          "first-frame 37ms buffered local",
           "first-frame 6ms buffered local",
-          "first-frame 4ms buffered local",
-          "first-frame 4ms buffered local",
-          "first-frame 4ms buffered local",
+          "first-frame 11ms buffered local",
+          "first-frame 13ms buffered local",
+          "first-frame 8ms buffered local",
+          "first-frame 6ms buffered local",
+          "first-frame 12ms buffered local",
+          "first-frame 8ms buffered local",
           "first-frame 7ms buffered local",
-          "first-frame 4ms buffered local",
-          "first-frame 6ms buffered local",
-          "first-frame 7ms buffered local",
-          "first-frame 6ms buffered local",
-          "first-frame 6ms buffered local",
-          "first-frame 5ms buffered local"
+          "first-frame 8ms buffered local",
+          "first-frame 6ms buffered local"
         ],
         "settingsText": "Preloaded: 35 moments, 7.0 MB",
         "offlineTrail": [
@@ -103,17 +103,17 @@
           }
         ],
         "offlineStartMs": [
+          7,
+          8,
           6,
-          4,
-          5,
-          6
+          5
         ],
         "offlineCachedOfFirst15": 13,
         "offlineSwipeTrail": [
           {
             "ok": true,
             "idx": 1,
-            "id": "pod-0002:34",
+            "id": "pod-0003:46",
             "cached": true,
             "st": 1,
             "n": 15
@@ -129,16 +129,16 @@
           {
             "ok": true,
             "idx": 3,
-            "id": "pod-0003:46",
+            "id": "pod-0013:82",
             "cached": true,
             "st": 1,
             "n": 17
           }
         ],
         "offlineRestartStartMs": [
+          9,
           7,
-          5,
-          6
+          8
         ],
         "poorYoutubeOf120": 58,
         "normalYoutubeOf120": 68,

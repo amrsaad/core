@@ -1,5 +1,5 @@
 {
- "at": "2026-11-04T15:01:29.795Z",
+ "at": "2026-11-04T17:02:17.673Z",
  "runs": [
   {
    "browser": "webkit",
@@ -16,10 +16,12 @@
     "bgLogStartedEndedNext": true,
     "bgEndedOnce": true,
     "bgAutoNextEqualsSwipe": true,
+    "bgRowPoolFilled": true,
     "bgFiveInARow": true,
     "bgRowSameNode": true,
-    "bgRowAtMostTwoAudioElements": true,
-    "bgRowSrcChanges": true,
+    "bgRowAtMostPoolElements": true,
+    "bgRowSwapsNotSources": true,
+    "bgRowNoLoadWhileHidden": true,
     "bgRowEndedNext": true,
     "bgRowLockHandlers": true,
     "bgRowHandlersReset": true,
@@ -35,21 +37,26 @@
     "bgLockNextKeepsMoment": true,
     "bgLockNextCountsNothing": true,
     "bgNextStockFills": true,
-    "bgNextStandbyReady": true,
     "bgNextArranged": true,
+    "bgNextPoolReady": true,
+    "bgNextPoolFollowsQueue": true,
+    "bgNextPoolMixed": true,
     "bgNextFiveAdvance": true,
     "bgNextFivePlayOk": true,
     "bgNextFiveSwapLines": true,
+    "bgNextFiveFollowsQueue": true,
     "bgNextFiveNoNewSource": true,
+    "bgNextFiveNoLoad": true,
     "bgNextFiveNoVisible": true,
     "bgNextFiveNoStay": true,
-    "bgNextPulledFromStock": true,
-    "bgNextNoSkippedPrepare": true,
-    "bgNextNoNetMomentPlayed": true,
+    "bgNextNoPrepareHidden": true,
     "bgNextNoGatedPlay": true,
     "bgNextColdUnder2": true,
+    "bgNextSixthStays": true,
+    "bgNextSixthKeeps": true,
     "bgNextGateActive": true,
-    "bgNextAtMostTwoSrc": true,
+    "bgNextRefill": true,
+    "bgNextAtMostPoolSrc": true,
     "bgVideoPlays": true,
     "bgVideoKeepsPlaying": true,
     "bgVideoStops": true,
@@ -63,136 +70,149 @@
    },
    "bgAudioLog": [
     "bg: mediasession none to playing (feed paused=false) hidden=false",
-    "bg: arm bgaudio1 (net)",
-    "bg: deck page hidden: paused=false ended=false t=1.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck page hidden: paused=false ended=false t=1.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: left bgaudio0:0",
-    "bg: deck page hidden +1 s: paused=false ended=false t=2.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
-    "bg: deck clip end via timeupdate hidden=true armed=bgaudio1 onAdvance=true advance=yes rs=0 muted=false t=4.0",
-    "bg: deck advance bgaudio0 to bgaudio1: src and play() in this handler, same element true, next from storage false, readyState 0",
-    "bg: ms playbackState playing (switch)",
+    "bg: deck page hidden +1 s: paused=false ended=false t=2.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck clip end via timeupdate hidden=true pool=5 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+    "bg: ms playbackState playing (swap)",
+    "bg: deck advance bgaudio0 to bgaudio1: swap and play() in this handler, new element true, next from storage false, readyState 0",
     "bg: ended bgaudio0:0",
     "bg: started bgaudio1:0",
-    "bg: arm bgaudio5 (net)",
     "bg: next bgaudio1:0",
-    "bg: deck page hidden +5 s: paused=false ended=false t=2.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck page hidden +5 s: paused=true ended=false t=4.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: deck advance to bgaudio1: NOT playing after 3 s, rs=0 muted=false t=2.9 error none",
-    "bg: deck clip end via timeupdate hidden=true armed=bgaudio5 onAdvance=true advance=yes rs=0 muted=false t=4.0",
-    "bg: deck advance bgaudio1 to bgaudio5: src and play() in this handler, same element true, next from storage false, readyState 0",
+    "bg: deck clip end via timeupdate hidden=true pool=4 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+    "bg: deck advance bgaudio1 to bgaudio5: swap and play() in this handler, new element true, next from storage false, readyState 0",
     "bg: ended bgaudio1:0",
     "bg: started bgaudio5:0",
-    "bg: arm bgaudio2 (net)",
     "bg: next bgaudio5:0",
     "bg: deck page visible: paused=false ended=false t=0.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
-    "bg: deck while hidden 7 s: timeupdate 69, ended 0, clip ends 2, play calls 2",
+    "bg: deck while hidden 7 s: timeupdate 70, ended 0, clip ends 2, play calls 2",
     "bg: back bgaudio5:0"
    ],
    "bgRowLog": [
     "bg: mediasession none to playing (feed paused=false) hidden=false",
-    "bg: arm bgaudio1 (net)",
     "bg: deck page hidden: paused=false ended=false t=0.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: left bgaudio0:0",
     "bg: deck page hidden +1 s: paused=false ended=false t=1.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
-    "bg: deck clip end via timeupdate hidden=true armed=bgaudio1 onAdvance=true advance=yes rs=0 muted=false t=4.0",
-    "bg: deck advance bgaudio0 to bgaudio1: src and play() in this handler, same element true, next from storage false, readyState 0",
-    "bg: ms playbackState playing (switch)",
+    "bg: deck clip end via timeupdate hidden=true pool=5 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+    "bg: ms playbackState playing (swap)",
+    "bg: deck advance bgaudio0 to bgaudio1: swap and play() in this handler, new element true, next from storage false, readyState 0",
     "bg: ended bgaudio0:0",
     "bg: started bgaudio1:0",
-    "bg: arm bgaudio5 (net)",
     "bg: next bgaudio1:0",
-    "bg: deck page hidden +5 s: paused=false ended=false t=1.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck page hidden +5 s: paused=true ended=false t=4.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: deck advance to bgaudio1: NOT playing after 3 s, rs=0 muted=false t=2.9 error none",
-    "bg: deck clip end via timeupdate hidden=true armed=bgaudio5 onAdvance=true advance=yes rs=0 muted=false t=4.0",
-    "bg: deck advance bgaudio1 to bgaudio5: src and play() in this handler, same element true, next from storage false, readyState 0",
+    "bg: deck clip end via timeupdate hidden=true pool=4 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+    "bg: deck advance bgaudio1 to bgaudio5: swap and play() in this handler, new element true, next from storage false, readyState 0",
     "bg: ended bgaudio1:0",
     "bg: started bgaudio5:0",
-    "bg: arm bgaudio2 (net)",
     "bg: next bgaudio5:0",
     "bg: deck advance to bgaudio5: NOT playing after 3 s, rs=0 muted=false t=2.9 error none",
-    "bg: deck clip end via timeupdate hidden=true armed=bgaudio2 onAdvance=true advance=yes rs=0 muted=false t=4.0",
-    "bg: deck advance bgaudio5 to bgaudio2: src and play() in this handler, same element true, next from storage false, readyState 0",
+    "bg: deck clip end via timeupdate hidden=true pool=3 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+    "bg: deck advance bgaudio5 to bgaudio2: swap and play() in this handler, new element true, next from storage false, readyState 0",
     "bg: ended bgaudio5:0",
     "bg: started bgaudio2:0",
-    "bg: arm bgaudio6 (net)",
     "bg: next bgaudio2:0",
+    "bg: deck page hidden +15 s: paused=true ended=false t=4.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: deck advance to bgaudio2: NOT playing after 3 s, rs=0 muted=false t=2.9 error none",
-    "bg: deck page hidden +15 s: paused=false ended=false t=2.9 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
-    "bg: deck clip end via timeupdate hidden=true armed=bgaudio6 onAdvance=true advance=yes rs=0 muted=false t=4.0",
-    "bg: deck advance bgaudio2 to bgaudio6: src and play() in this handler, same element true, next from storage false, readyState 0",
+    "bg: deck clip end via timeupdate hidden=true pool=2 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+    "bg: deck advance bgaudio2 to bgaudio6: swap and play() in this handler, new element true, next from storage false, readyState 0",
     "bg: ended bgaudio2:0",
     "bg: started bgaudio6:0",
-    "bg: arm bgaudio3 (net)",
     "bg: next bgaudio6:0",
     "bg: deck advance to bgaudio6: NOT playing after 3 s, rs=0 muted=false t=2.9 error none",
-    "bg: deck clip end via timeupdate hidden=true armed=bgaudio3 onAdvance=true advance=yes rs=0 muted=false t=4.0",
-    "bg: deck advance bgaudio6 to bgaudio3: src and play() in this handler, same element true, next from storage false, readyState 0",
+    "bg: deck clip end via timeupdate hidden=true pool=1 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+    "bg: deck advance bgaudio6 to bgaudio3: swap and play() in this handler, new element true, next from storage false, readyState 0",
     "bg: ended bgaudio6:0",
     "bg: started bgaudio3:0",
-    "bg: arm bgaudio7 (net)",
     "bg: next bgaudio3:0"
    ],
    "bgNextArranged": {
-    "n": 9,
+    "n": 15,
+    "order": [
+     "bgstock2:0",
+     "bgnet2:0",
+     "bgstock8:0",
+     "bgnet0:0",
+     "bgstock4:0"
+    ],
     "nets": [
      "bgnet2:0",
-     "bgnet0:0",
-     "bgnet1:0"
+     "bgnet0:0"
     ],
     "stock": [
+     "bgstock2:0",
+     "bgstock8:0",
+     "bgstock4:0"
+    ]
+   },
+   "bgNextPool": {
+    "pool": [
+     "bgstock2",
+     "bgnet2",
+     "bgstock8",
+     "bgnet0",
+     "bgstock4"
+    ],
+    "q": [
+     "bgstock2:0",
+     "bgnet2:0",
+     "bgstock8:0",
+     "bgnet0:0",
+     "bgstock4:0"
+    ],
+    "local": [
+     "bgstock2:0",
      "bgstock8:0",
      "bgstock4:0",
      "bgstock10:0",
      "bgstock1:0",
      "bgstock9:0",
-     "bgstock11:0"
+     "bgstock11:0",
+     "bgstock3:0",
+     "bgstock6:0",
+     "bgstock7:0",
+     "bgstock5:0"
     ]
    },
    "bgNextFirstLines": [
-    "deck: swap bgstock8 ready=true",
-    "deck play#2 swap rs=0 muted=false t=0.1",
-    "deck play#2 ok",
-    "deck: prepare bgstock4 src=local"
+    "deck: swap bgstock2 ready=true pool=4",
+    "deck play#2 swap rs=0 muted=false t=10.0",
+    "deck play#2 ok"
    ],
    "bgNextFiveMs": [
-    27,
-    21,
-    21,
-    23,
+    41,
+    25,
+    15,
+    19,
     12
-   ],
-   "bgNextPullLines": [
-    "deck: prepare bgstock2 src=local",
-    "deck: prepare bgstock8 src=local (pulled from 4)",
-    "deck: prepare bgstock4 src=local",
-    "deck: prepare bgstock10 src=local",
-    "deck: prepare bgstock1 src=local",
-    "deck: prepare bgstock11 src=local",
-    "deck: prepare bgstock9 src=local"
    ],
    "bgNextPlays": [
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/7c09b801-4d3e",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < el@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:30 < @http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:6350 < @ < evaluate@"
+     "src": "https://stream.test/bgstock2.mp3#t=10",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DvETWAta.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-DvETWAta.j < swapNext@http://127.0.0.1:4178/core/assets/index-DvETWAta.js < al@http://127.0.0.1:4178/core/assets/index-DvETWAta.js:47:35 < @http://127.0.0.1:4178/core/assets/index-DvETWAta.js:47:6849 < @"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/721b5735-6ac5",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < el@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:30 < @http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:6350 < @ < evaluate@"
+     "src": "https://stream.test/bgnet2.m3u8#t=10",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DvETWAta.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-DvETWAta.j < swapNext@http://127.0.0.1:4178/core/assets/index-DvETWAta.js < al@http://127.0.0.1:4178/core/assets/index-DvETWAta.js:47:35 < @http://127.0.0.1:4178/core/assets/index-DvETWAta.js:47:6849 < @"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/9e5c8c4b-388b",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < el@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:30 < @http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:6350 < @ < evaluate@"
+     "src": "https://stream.test/bgstock8.mp3#t=10",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DvETWAta.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-DvETWAta.j < swapNext@http://127.0.0.1:4178/core/assets/index-DvETWAta.js < al@http://127.0.0.1:4178/core/assets/index-DvETWAta.js:47:35 < @http://127.0.0.1:4178/core/assets/index-DvETWAta.js:47:6849 < @"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/933df595-aa4c",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < el@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:30 < @http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:6350 < @ < evaluate@"
+     "src": "https://stream.test/bgnet0.m3u8#t=10",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DvETWAta.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-DvETWAta.j < swapNext@http://127.0.0.1:4178/core/assets/index-DvETWAta.js < al@http://127.0.0.1:4178/core/assets/index-DvETWAta.js:47:35 < @http://127.0.0.1:4178/core/assets/index-DvETWAta.js:47:6849 < @"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/034ffa06-c599",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < swap@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:40: < el@http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:30 < @http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:6350 < @ < evaluate@"
+     "src": "https://stream.test/bgstock4.mp3#t=10",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-DvETWAta.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-DvETWAta.j < swapNext@http://127.0.0.1:4178/core/assets/index-DvETWAta.js < al@http://127.0.0.1:4178/core/assets/index-DvETWAta.js:47:35 < @http://127.0.0.1:4178/core/assets/index-DvETWAta.js:47:6849 < @"
     }
    ],
    "ok": true
@@ -212,10 +232,12 @@
     "bgLogStartedEndedNext": true,
     "bgEndedOnce": true,
     "bgAutoNextEqualsSwipe": true,
+    "bgRowPoolFilled": true,
     "bgFiveInARow": true,
     "bgRowSameNode": true,
-    "bgRowAtMostTwoAudioElements": true,
-    "bgRowSrcChanges": true,
+    "bgRowAtMostPoolElements": true,
+    "bgRowSwapsNotSources": true,
+    "bgRowNoLoadWhileHidden": true,
     "bgRowEndedNext": true,
     "bgRowLockHandlers": true,
     "bgRowHandlersReset": true,
@@ -231,21 +253,26 @@
     "bgLockNextKeepsMoment": true,
     "bgLockNextCountsNothing": true,
     "bgNextStockFills": true,
-    "bgNextStandbyReady": true,
     "bgNextArranged": true,
+    "bgNextPoolReady": true,
+    "bgNextPoolFollowsQueue": true,
+    "bgNextPoolMixed": true,
     "bgNextFiveAdvance": true,
     "bgNextFivePlayOk": true,
     "bgNextFiveSwapLines": true,
+    "bgNextFiveFollowsQueue": true,
     "bgNextFiveNoNewSource": true,
+    "bgNextFiveNoLoad": true,
     "bgNextFiveNoVisible": true,
     "bgNextFiveNoStay": true,
-    "bgNextPulledFromStock": true,
-    "bgNextNoSkippedPrepare": true,
-    "bgNextNoNetMomentPlayed": true,
+    "bgNextNoPrepareHidden": true,
     "bgNextNoGatedPlay": true,
     "bgNextColdUnder2": true,
+    "bgNextSixthStays": true,
+    "bgNextSixthKeeps": true,
     "bgNextGateActive": true,
-    "bgNextAtMostTwoSrc": true,
+    "bgNextRefill": true,
+    "bgNextAtMostPoolSrc": true,
     "bgVideoPlays": true,
     "bgVideoKeepsPlaying": true,
     "bgVideoStops": true,
@@ -259,24 +286,21 @@
    },
    "bgAudioLog": [
     "bg: mediasession none to playing (feed paused=false) hidden=false",
-    "bg: arm bgaudio1 (net)",
     "bg: deck page hidden: paused=false ended=false t=1.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: left bgaudio0:0",
     "bg: deck page hidden +1 s: paused=false ended=false t=2.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
-    "bg: deck clip end via timeupdate hidden=true armed=bgaudio1 onAdvance=true advance=yes rs=0 muted=false t=4.0",
-    "bg: deck advance bgaudio0 to bgaudio1: src and play() in this handler, same element true, next from storage false, readyState 0",
-    "bg: ms playbackState playing (switch)",
+    "bg: deck clip end via timeupdate hidden=true pool=5 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+    "bg: ms playbackState playing (swap)",
+    "bg: deck advance bgaudio0 to bgaudio1: swap and play() in this handler, new element true, next from storage false, readyState 0",
     "bg: ended bgaudio0:0",
     "bg: started bgaudio1:0",
-    "bg: arm bgaudio5 (net)",
     "bg: next bgaudio1:0",
-    "bg: deck page hidden +5 s: paused=false ended=false t=2.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck page hidden +5 s: paused=true ended=false t=4.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: deck advance to bgaudio1: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
-    "bg: deck clip end via timeupdate hidden=true armed=bgaudio5 onAdvance=true advance=yes rs=0 muted=false t=4.0",
-    "bg: deck advance bgaudio1 to bgaudio5: src and play() in this handler, same element true, next from storage false, readyState 0",
+    "bg: deck clip end via timeupdate hidden=true pool=4 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+    "bg: deck advance bgaudio1 to bgaudio5: swap and play() in this handler, new element true, next from storage false, readyState 0",
     "bg: ended bgaudio1:0",
     "bg: started bgaudio5:0",
-    "bg: arm bgaudio2 (net)",
     "bg: next bgaudio5:0",
     "bg: deck page visible: paused=false ended=false t=0.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: deck while hidden 7 s: timeupdate 70, ended 0, clip ends 2, play calls 2",
@@ -284,111 +308,127 @@
    ],
    "bgRowLog": [
     "bg: mediasession none to playing (feed paused=false) hidden=false",
-    "bg: arm bgaudio1 (net)",
     "bg: deck page hidden: paused=false ended=false t=0.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: left bgaudio0:0",
     "bg: deck page hidden +1 s: paused=false ended=false t=1.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
-    "bg: deck clip end via timeupdate hidden=true armed=bgaudio1 onAdvance=true advance=yes rs=0 muted=false t=4.0",
-    "bg: deck advance bgaudio0 to bgaudio1: src and play() in this handler, same element true, next from storage false, readyState 0",
-    "bg: ms playbackState playing (switch)",
+    "bg: deck clip end via timeupdate hidden=true pool=5 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+    "bg: ms playbackState playing (swap)",
+    "bg: deck advance bgaudio0 to bgaudio1: swap and play() in this handler, new element true, next from storage false, readyState 0",
     "bg: ended bgaudio0:0",
     "bg: started bgaudio1:0",
-    "bg: arm bgaudio5 (net)",
     "bg: next bgaudio1:0",
-    "bg: deck page hidden +5 s: paused=false ended=false t=1.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck page hidden +5 s: paused=true ended=false t=4.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: deck advance to bgaudio1: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
-    "bg: deck clip end via timeupdate hidden=true armed=bgaudio5 onAdvance=true advance=yes rs=0 muted=false t=4.0",
-    "bg: deck advance bgaudio1 to bgaudio5: src and play() in this handler, same element true, next from storage false, readyState 0",
+    "bg: deck clip end via timeupdate hidden=true pool=4 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+    "bg: deck advance bgaudio1 to bgaudio5: swap and play() in this handler, new element true, next from storage false, readyState 0",
     "bg: ended bgaudio1:0",
     "bg: started bgaudio5:0",
-    "bg: arm bgaudio2 (net)",
     "bg: next bgaudio5:0",
     "bg: deck advance to bgaudio5: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
-    "bg: deck clip end via timeupdate hidden=true armed=bgaudio2 onAdvance=true advance=yes rs=0 muted=false t=4.0",
-    "bg: deck advance bgaudio5 to bgaudio2: src and play() in this handler, same element true, next from storage false, readyState 0",
+    "bg: deck clip end via timeupdate hidden=true pool=3 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+    "bg: deck advance bgaudio5 to bgaudio2: swap and play() in this handler, new element true, next from storage false, readyState 0",
     "bg: ended bgaudio5:0",
     "bg: started bgaudio2:0",
-    "bg: arm bgaudio6 (net)",
     "bg: next bgaudio2:0",
     "bg: deck advance to bgaudio2: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
-    "bg: deck page hidden +15 s: paused=false ended=false t=3.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
-    "bg: deck clip end via timeupdate hidden=true armed=bgaudio6 onAdvance=true advance=yes rs=0 muted=false t=4.0",
-    "bg: deck advance bgaudio2 to bgaudio6: src and play() in this handler, same element true, next from storage false, readyState 0",
+    "bg: deck page hidden +15 s: paused=true ended=false t=4.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck clip end via timeupdate hidden=true pool=2 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+    "bg: deck advance bgaudio2 to bgaudio6: swap and play() in this handler, new element true, next from storage false, readyState 0",
     "bg: ended bgaudio2:0",
     "bg: started bgaudio6:0",
-    "bg: arm bgaudio3 (net)",
     "bg: next bgaudio6:0",
     "bg: deck advance to bgaudio6: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
-    "bg: deck clip end via timeupdate hidden=true armed=bgaudio3 onAdvance=true advance=yes rs=0 muted=false t=4.0",
-    "bg: deck advance bgaudio6 to bgaudio3: src and play() in this handler, same element true, next from storage false, readyState 0",
+    "bg: deck clip end via timeupdate hidden=true pool=1 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+    "bg: deck advance bgaudio6 to bgaudio3: swap and play() in this handler, new element true, next from storage false, readyState 0",
     "bg: ended bgaudio6:0",
     "bg: started bgaudio3:0",
-    "bg: arm bgaudio7 (net)",
     "bg: next bgaudio3:0"
    ],
    "bgNextArranged": {
-    "n": 9,
+    "n": 15,
+    "order": [
+     "bgstock2:0",
+     "bgnet2:0",
+     "bgstock8:0",
+     "bgnet0:0",
+     "bgstock4:0"
+    ],
     "nets": [
      "bgnet2:0",
-     "bgnet0:0",
-     "bgnet1:0"
+     "bgnet0:0"
     ],
     "stock": [
+     "bgstock2:0",
+     "bgstock8:0",
+     "bgstock4:0"
+    ]
+   },
+   "bgNextPool": {
+    "pool": [
+     "bgstock2",
+     "bgnet2",
+     "bgstock8",
+     "bgnet0",
+     "bgstock4"
+    ],
+    "q": [
+     "bgstock2:0",
+     "bgnet2:0",
+     "bgstock8:0",
+     "bgnet0:0",
+     "bgstock4:0"
+    ],
+    "local": [
+     "bgstock2:0",
      "bgstock8:0",
      "bgstock4:0",
      "bgstock10:0",
      "bgstock1:0",
      "bgstock9:0",
-     "bgstock11:0"
+     "bgstock11:0",
+     "bgstock3:0",
+     "bgstock6:0",
+     "bgstock7:0",
+     "bgstock5:0"
     ]
    },
    "bgNextFirstLines": [
-    "deck: swap bgstock8 ready=true",
-    "deck play#2 swap rs=0 muted=false t=0.1",
-    "deck play#2 ok",
-    "deck: prepare bgstock4 src=local"
+    "deck: swap bgstock2 ready=true pool=4",
+    "deck play#2 swap rs=0 muted=false t=10.0",
+    "deck play#2 ok"
    ],
    "bgNextFiveMs": [
-    14,
-    16,
+    17,
+    13,
+    13,
     12,
-    9,
-    10
-   ],
-   "bgNextPullLines": [
-    "deck: prepare bgstock2 src=local",
-    "deck: prepare bgstock8 src=local (pulled from 4)",
-    "deck: prepare bgstock4 src=local",
-    "deck: prepare bgstock10 src=local",
-    "deck: prepare bgstock1 src=local",
-    "deck: prepare bgstock11 src=local",
-    "deck: prepare bgstock9 src=local"
+    12
    ],
    "bgNextPlays": [
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/b3e16430-0920",
-     "stack": "at P.play (<anonymous>:9:134) < at S0.kick (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at S0.swap (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at Object.el [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "https://stream.test/bgstock2.mp3#t=10",
+     "stack": "at P.play (<anonymous>:9:134) < at _y.kick (http://127.0.0.1:4178/core/assets/index-DvETWAta < at _y.swapEntry (http://127.0.0.1:4178/core/assets/index-DvE < at _y.swapNext (http://127.0.0.1:4178/core/assets/index-DvET < at Object.al [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DvETWAta.js:47:68"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/dbad0cb1-30ac",
-     "stack": "at P.play (<anonymous>:9:134) < at S0.kick (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at S0.swap (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at Object.el [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "https://stream.test/bgnet2.m3u8#t=10",
+     "stack": "at P.play (<anonymous>:9:134) < at _y.kick (http://127.0.0.1:4178/core/assets/index-DvETWAta < at _y.swapEntry (http://127.0.0.1:4178/core/assets/index-DvE < at _y.swapNext (http://127.0.0.1:4178/core/assets/index-DvET < at Object.al [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DvETWAta.js:47:68"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/1b6e44a1-b007",
-     "stack": "at P.play (<anonymous>:9:134) < at S0.kick (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at S0.swap (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at Object.el [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "https://stream.test/bgstock8.mp3#t=10",
+     "stack": "at P.play (<anonymous>:9:134) < at _y.kick (http://127.0.0.1:4178/core/assets/index-DvETWAta < at _y.swapEntry (http://127.0.0.1:4178/core/assets/index-DvE < at _y.swapNext (http://127.0.0.1:4178/core/assets/index-DvET < at Object.al [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DvETWAta.js:47:68"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/d2d087b7-8eef",
-     "stack": "at P.play (<anonymous>:9:134) < at S0.kick (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at S0.swap (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at Object.el [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "https://stream.test/bgnet0.m3u8#t=10",
+     "stack": "at P.play (<anonymous>:9:134) < at _y.kick (http://127.0.0.1:4178/core/assets/index-DvETWAta < at _y.swapEntry (http://127.0.0.1:4178/core/assets/index-DvE < at _y.swapNext (http://127.0.0.1:4178/core/assets/index-DvET < at Object.al [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DvETWAta.js:47:68"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/b49df959-1f64",
-     "stack": "at P.play (<anonymous>:9:134) < at S0.kick (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at S0.swap (http://127.0.0.1:4178/core/assets/index-DUsgWT9G < at Object.el [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DUsgWT9G.js:47:63 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+     "src": "https://stream.test/bgstock4.mp3#t=10",
+     "stack": "at P.play (<anonymous>:9:134) < at _y.kick (http://127.0.0.1:4178/core/assets/index-DvETWAta < at _y.swapEntry (http://127.0.0.1:4178/core/assets/index-DvE < at _y.swapNext (http://127.0.0.1:4178/core/assets/index-DvET < at Object.al [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-DvETWAta.js:47:68"
     }
    ],
    "ok": true
