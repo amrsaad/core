@@ -38,25 +38,25 @@ export function UnlockDevice({ tokenKey }: { tokenKey?: boolean }) {
     }
   };
 
-  const btn = 'rounded-xl border border-[var(--line)] px-4 py-3 text-[16px] text-left';
+  const btn = 'grp-btn';
   return (
-    <section className="flex flex-col gap-3 rounded-xl bg-surface p-4" data-testid="unlock-device">
-      <span className="text-[17px]">Unlock another device</span>
-      {link === null && <p className="t-meta m-0 text-muted">This device only has the old key format. Open your unlock link here once more, then you can share it.</p>}
+    <section className="grp" data-testid="unlock-device">
+      <span className="grp-title">Unlock another device</span>
+      {link === null && <p className="grp-note">This device only has the old key format. Open your unlock link here once more, then you can share it.</p>}
       {link && (
         <>
           <button className={btn} onClick={() => setQr(!qr)}>{qr ? 'Hide QR code' : 'Show QR code'}</button>
-          {svg && <div className="mx-auto w-full max-w-[260px] rounded-lg bg-white p-2" data-testid="unlock-qr" dangerouslySetInnerHTML={{ __html: svg }} />}
+          {svg && <div className="qr-box" data-testid="unlock-qr" dangerouslySetInnerHTML={{ __html: svg }} />}
           <button className={btn} onClick={share}>Share unlock link</button>
-          <p className="t-meta m-0 text-muted">Anyone with this link can open your moments. Only send it to your own devices.{qrLink?.includes('&t=') ? ' The QR code also carries your sync token. Only show it to your own devices.' : ''}</p>
+          <p className="grp-note">Anyone with this link can open your moments. Only send it to your own devices.{qrLink?.includes('&t=') ? ' The QR code also carries your sync token. Only show it to your own devices.' : ''}</p>
         </>
       )}
       {backups && (
-        <p className="t-meta m-0 text-muted" data-testid="key-backups">
+        <p className="grp-note" data-testid="key-backups">
           Key saved in IndexedDB {backups.idb ? 'yes' : 'no'} · in offline cache {backups.cache ? 'yes' : 'no'}
         </p>
       )}
-      {msg && <p className="t-meta m-0 text-muted">{msg}</p>}
+      {msg && <p className="grp-note">{msg}</p>}
     </section>
   );
 }

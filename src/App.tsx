@@ -3,7 +3,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { dayKey, now as clockNow } from './lib/clock';
 import { useAppState } from './lib/useAppState';
 import { useSync } from './lib/sync/useSync';
-import { decryptJson, storeKeyFrom, unlockKey } from './lib/vault';
+import { decryptJson, unlockKey } from './lib/vault';
+import { Locked, Unlock } from './screens/Unlock';
 import { buildAliasIndex, migrateDoc, migrateState, NO_ALIASES } from './moments/aliases';
 import { LEARN_VERSION, migrateWeights } from './moments/learn';
 import { validateMoments } from './moments/contract';
@@ -37,7 +38,7 @@ export default function App() {
   const [tab, setTab] = useState<Tab>('feed');
   const [paused, setPaused] = useState(false);
   const [review, setReview] = useState<boolean | null>(null);
-  // Desktop-Modus ab 900 px: Leiste oben, Panel rechts, Settings und Saved als Seitenblatt
+  // Desktop-Modus ab 1181 px: Leiste oben, Panel rechts, Settings und Saved als Seitenblatt
   const desk = useDesktop();
   const [panel, setPanel] = useState<HTMLElement | null>(null);
   const [help, setHelp] = useState(false);
@@ -96,7 +97,7 @@ export default function App() {
     if (!desk) setHelp(false);
   }, [desk]);
 
-  if (!state || vault.status === 'loading' || review === null) return <div className="h-[100dvh] bg-black" />;
+  if (!state || vault.status === 'loading' || review === null) return <div className="h-[100dvh]" style={{ background: 'var(--stage)' }} />;
   if (vault.status === 'locked') return <Unlock />;
   if (vault.status === 'error') return <Locked text={`Could not load the pool (${vault.message}). The first start needs internet.`} />;
 
@@ -115,6 +116,7 @@ export default function App() {
           update={update}
           active={tab === 'feed'}
           onPausedChange={onPausedChange}
+          syncError={sync.status.error}
           desk={desk ? { panel, help, sheet: tab !== 'feed', onHelp: () => setHelp((h) => !h), onCloseSheet: () => setTab('feed') } : undefined}
         />
       </div>
@@ -129,7 +131,7 @@ export default function App() {
       {desk && help && <DeskHelp onClose={() => setHelp(false)} />}
       {!desk && (
         <nav
-          className={`absolute inset-x-0 bottom-0 z-[60] flex justify-around border-t transition-transform duration-200 ${showBar ? '' : 'translate-y-full'} ${dark ? 'border-[#222] bg-black' : 'border-[var(--line)] bg-[var(--bg)]'}`}
+          className={`absolute inset-x-0 bottom-0 z-[60] flex justify-around border-t transition-transform duration-200 ${showBar ? '' : 'translate-y-full'} ${dark ? 'border-[var(--hairline)] bg-[var(--stage)]' : 'border-[var(--line)] bg-[var(--bg)]'}`}
           style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
         >
           {(Object.keys(ICONS) as Tab[]).map((t) => (
@@ -137,7 +139,7 @@ export default function App() {
               key={t}
               aria-label={NAMES[t]}
               onClick={() => setTab(t)}
-              className={`flex flex-1 justify-center py-3 ${tab === t ? (dark ? 'text-white' : 'text-[var(--fg)]') : dark ? 'text-[#B3B3B3]' : 'text-muted'}`}
+              className={`flex flex-1 justify-center py-3 ${tab === t ? (dark ? 'text-[var(--on-media)]' : 'text-[var(--fg)]') : dark ? 'text-[var(--muted)]' : 'text-muted'}`}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 {ICONS[t]}
@@ -148,45 +150,4 @@ export default function App() {
       )}
     </div>
   );
-}
-
-/** Home-Bildschirm-Apps auf iOS haben eigenen Speicher. Daher Freischalten per eingefügtem Link direkt in der App. */
-function Unlock() {
-  const [text, setText] = useState('');
-  const [msg, setMsg] = useState('');
-  const tryText = async (t: string) => {
-    if (await storeKeyFrom(t)) location.reload();
-    else setMsg('That is not a valid unlock link. Please paste the whole link.');
-  };
-  const paste = async () => {
-    try {
-      await tryText(await navigator.clipboard.readText());
-    } catch {
-      setMsg('Pasting is blocked. Paste the link into the field below.');
-    }
-  };
-  return (
-    <div className="pad flex h-[100dvh] flex-col justify-center gap-4 bg-black text-[17px] leading-[25px] text-[#B3B3B3]">
-      <p>Core is not unlocked on this device yet. Copy your unlock link, then paste it here.</p>
-      <button onClick={paste} className="rounded-xl bg-white py-3 font-semibold text-black">Paste link</button>
-      <input
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        onPaste={(e) => {
-          const t = e.clipboardData.getData('text');
-          if (t) void tryText(t);
-        }}
-        placeholder="or paste it here"
-        autoCapitalize="off"
-        autoCorrect="off"
-        className="rounded-xl border border-[#333] bg-[#111] px-3 py-3 text-white"
-      />
-      {text && <button onClick={() => tryText(text)} className="rounded-xl border border-[#555] py-3 text-white">Unlock</button>}
-      {msg && <p className="text-[15px] text-[#E07B7B]">{msg}</p>}
-    </div>
-  );
-}
-
-function Locked({ text }: { text: string }) {
-  return <div className="pad flex h-[100dvh] items-center bg-black text-[17px] leading-[25px] text-[#B3B3B3]">{text}</div>;
 }

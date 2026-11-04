@@ -18,6 +18,7 @@
  */
 
 @property --bg { syntax: '<color>'; inherits: true; initial-value: #0a0e12; }
+@property --stage { syntax: '<color>'; inherits: true; initial-value: #0a0e12; }
 @property --surface { syntax: '<color>'; inherits: true; initial-value: #141a20; }
 @property --surface-2 { syntax: '<color>'; inherits: true; initial-value: #1f272e; }
 @property --text { syntax: '<color>'; inherits: true; initial-value: #ffffff; }
@@ -33,6 +34,7 @@
 :root {
   /* ---------- Neutral (Body-Palette): Saved, Settings, Unlock. Dunkel zuerst. ---------- */
   --bg: #0a0e12;
+  --stage: #0a0e12;
   --surface: #141a20;
   --surface-2: #1f272e;
   --text: #ffffff;
@@ -62,6 +64,7 @@
   --danger-bg: #3d1417;
   --warn: #f0a04b;
   --link-err: #e07b7b;
+  --qr-bg: #ffffff;           /* QR-Code braucht hellen Grund in jeder Stimmung */
 
   /* Medienfläche, immer dunkel, auch bei hellem Brain (Video und Cover liegen auf Schwarz) */
   --media: #000000;
@@ -115,6 +118,7 @@
   --s-8: 32px;
   --s-10: 40px;
   --s-12: 48px;
+  --s-14: 56px;
   --s-16: 64px;
   --margin: 16px;
   --safe-t: env(safe-area-inset-top, 0px);
@@ -172,6 +176,7 @@
 @media (prefers-color-scheme: light) {
   :root {
     --bg: #f2f4f6;
+  --stage: #0a0e12;
     --surface: #ffffff;
     --surface-2: #e8ecef;
     --text: #15171a;
@@ -196,6 +201,7 @@
 /* ---------- Stimmungen ---------- */
 [data-mood='beat'] {
   --bg: #0d0b08;
+  --stage: #0d0b08;
   --surface: #15110a;
   --surface-2: #211b10;
   --text: #f3ead8;
@@ -214,6 +220,7 @@
 
 [data-mood='body'] {
   --bg: #0a0e12;
+  --stage: #0a0e12;
   --surface: #141a20;
   --surface-2: #1f272e;
   --text: #ffffff;
@@ -233,6 +240,7 @@
 /* Brain folgt dem Gerät (Entscheidung 41). Dunkel zuerst, Hell bei prefers-color-scheme: light. */
 [data-mood='brain'] {
   --bg: #0b0d11;
+  --stage: #0b0d11;
   --surface: #14171d;
   --surface-2: #1d2129;
   --text: #f4f5f8;
@@ -252,6 +260,7 @@
 @media (prefers-color-scheme: light) {
   [data-mood='brain'] {
     --bg: #f4f1ea;
+  --stage: #0b0d11;
     --surface: #ebe7dd;
     --surface-2: #e0dbcf;
     --text: #15171a;
@@ -273,6 +282,7 @@
 :root {
   transition:
     --bg var(--dur-mood) var(--ease),
+    --stage var(--dur-mood) var(--ease),
     --surface var(--dur-mood) var(--ease),
     --surface-2 var(--dur-mood) var(--ease),
     --text var(--dur-mood) var(--ease),
@@ -304,4 +314,23 @@
   --c-beat: var(--c-beat-dk);
   --c-body: var(--c-body-dk);
   --c-brain: var(--c-brain-dk);
+}
+
+/*
+ * Der Feed (Video, Audio) liegt auf dunkler Bühne (--stage), auch wenn das Gerät hell ist.
+ * Neutral und Brain wechseln dort bei hellem Gerät auf ihre dunkle Palette. Beat und Body sind schon dunkel.
+ * Text (data-surface="page") liegt auf dem Papier und behält die helle Palette.
+ */
+@media (prefers-color-scheme: light) {
+  :root:not([data-mood]) :is(.vfeed:not([data-surface='page']), .dbar, .dpanel) {
+    --text: #ffffff; --body: #c8d0d6; --muted: #8a9aa8; --soft: #5d6973; --surface: #141a20; --surface-2: #1f272e;
+    --accent: #4ade80; --on-accent: #04210f; --kicker: #4ade80; --hairline: rgba(255, 255, 255, 0.08); --tab-off: #3a4651; --glass: rgba(20, 26, 32, 0.78);
+    color-scheme: dark;
+  }
+  [data-mood='brain'] :is(.vfeed:not([data-surface='page']), .dbar, .dpanel) {
+    --text: #f4f5f8; --body: #d9dbe3; --muted: #8a8fa0; --soft: #7c8192; --surface: #14171d; --surface-2: #1d2129;
+    --accent: #a594ff; --on-accent: #0b0d11; --kicker: #a594ff; --hairline: rgba(255, 255, 255, 0.08); --tab-off: #363a48; --glass: rgba(20, 23, 29, 0.78);
+    --c-brain: var(--c-brain-dk);
+    color-scheme: dark;
+  }
 }

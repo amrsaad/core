@@ -186,7 +186,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
 
     // Ohne Schlüssel gesperrt
     await page.goto(url + '?now=2026-10-23');
-    c.lockedWithoutKey = await waitFor(page, () => document.body.innerText.includes('not unlocked'));
+    c.lockedWithoutKey = await waitFor(page, () => document.body.innerText.includes('This device is locked'));
 
     // Freischalten über #k=, Fragment wird entfernt
     await page.goto('about:blank');
@@ -199,7 +199,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.firstPlaying = await waitFor(page, () => window.__core.state() === 1);
     // Kurzer Hook: Normalgröße, nicht gekürzt, keine drei Punkte
     const h0 = await page.evaluate(() => { const e = document.querySelector('[data-testid=hook]'); return { step: e.dataset.step, clipped: e.scrollHeight > e.clientHeight + 1, ellipsis: getComputedStyle(e).textOverflow === 'ellipsis', clamp: getComputedStyle(e).webkitLineClamp, size: parseFloat(getComputedStyle(e).fontSize), text: e.textContent }; });
-    c.hookShortNormal = h0.step === '0' && !h0.clipped && h0.size === 17 && (h0.clamp === 'none' || h0.clamp === '' || h0.clamp === undefined);
+    c.hookShortNormal = h0.step === '0' && !h0.clipped && h0.size === 22 && (h0.clamp === 'none' || h0.clamp === '' || h0.clamp === undefined);
     const capState = () => page.evaluate(() => {
       const m = window.__core.moment();
       const el = document.querySelector('[data-testid=caption] span');
@@ -208,20 +208,19 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const capLog = [];
     await page.screenshot({ path: `${out}/${name}-1-start.png` });
 
-    // Ton aus: nur ein kleines durchgestrichenes Lautsprecher-Symbol unten rechts im Videoband, keine Pille und kein Text
+    // Ton aus: Status-Zeile unter den Reitern (Entscheidung 22E, Brief 06): 12 px mit Icon, grau, kein Symbol im Videoband, keine Pille mitten im Bild
     const vp = page.viewportSize();
-    // Messen erst, wenn keine Transition mehr läuft (der Feed gleitet beim Start noch ein)
     await waitFor(page, () => document.getAnimations().filter((a) => a instanceof CSSTransition).length === 0);
     const icon = await page.evaluate(() => {
       const el = document.querySelector('[data-testid=sound-off]');
-      const band = document.querySelector('.vframe > div');
-      if (!el || !band) return null;
-      const a = el.getBoundingClientRect(), b = band.getBoundingClientRect();
-      return { w: a.width, h: a.height, text: el.textContent.trim(), right: innerWidth - a.right, fromBandBottom: b.bottom - a.bottom, inBand: a.top >= b.top && a.bottom <= b.bottom + 12, centered: Math.abs(a.left + a.width / 2 - innerWidth / 2) < 40, pillText: document.body.innerText.includes('Tap for sound'), slashed: !!el.querySelector('path[d^="m16 9"]') };
+      const tabs = document.querySelector('[data-testid=form-switch]');
+      if (!el || !tabs) return null;
+      const a = el.getBoundingClientRect(), t = tabs.getBoundingClientRect();
+      return { h: a.height, text: el.textContent.trim(), under: a.top >= t.bottom - 1, left: a.left, font: parseFloat(getComputedStyle(el).fontSize), icon: !!el.querySelector('svg'), pillText: document.body.innerText.includes('Tap for sound') };
     });
     r.soundIcon = icon;
-    c.soundIconShownWhileMuted = !!icon && icon.w <= 40 && icon.h <= 40 && icon.text === '' && icon.slashed;
-    c.soundIconBottomRightOfBand = !!icon && icon.right >= 8 && icon.right <= 24 && icon.inBand && Math.abs(icon.fromBandBottom - 12) <= 3 && !icon.centered;
+    c.soundIconShownWhileMuted = !!icon && /^Sound off/.test(icon.text) && icon.icon && icon.font === 12;
+    c.soundIconBottomRightOfBand = !!icon && icon.under && icon.left >= 8 && icon.left <= 24;
     c.noSoundPill = !!icon && !icon.pillText && !(await page.$('.vhint'));
     await page.screenshot({ path: `${out}/${name}-1b-ton-aus-symbol.png` });
     // Tipp irgendwo: Ton an, Symbol verschwindet
@@ -285,6 +284,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.screenshot({ path: `${out}/${name}-11-abruf-frage.png` });
     // Falsch wählen: gewählte rot, richtige grün, dritte neutral, dann Begründung und Next
     await page.click('[data-testid=recall-option][data-correct="0"]');
+    await page.waitForTimeout(350); // Farbwechsel des Rahmens läuft über --dur-cut
     const wr = await page.evaluate(() => ({
       states: [...document.querySelectorAll('[data-testid=recall-option]')].map((o) => ({ c: o.dataset.correct, s: o.dataset.state })),
       col: [...document.querySelectorAll('[data-testid=recall-option]')].map((o) => getComputedStyle(o).borderColor),
@@ -353,7 +353,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       return { bw: a.width, bh: a.height, fw: b.width, fh: b.height, dx: b.left - a.left, dy: b.top - a.top, vw: innerWidth };
     });
     c.embedNoZoom = Math.abs(r.band.fw - r.band.bw) < 1 && Math.abs(r.band.fh - r.band.bh) < 1 && Math.abs(r.band.dx) < 1 && Math.abs(r.band.dy) < 1;
-    c.embed16by9FullWidth = Math.abs(r.band.bw - r.band.vw) < 1 && Math.abs(r.band.bh - (r.band.vw * 9) / 16) < 1;
+    // Brief 06 (Board 03.11.): Karte mit 16 px Rand links und rechts, 16:9, höchstens 640 px (ersetzt die volle Breite von E3)
+    c.embed16by9FullWidth = Math.abs(r.band.bw - Math.min(r.band.vw - 32, 640)) < 1 && Math.abs(r.band.bh - (r.band.bw * 9) / 16) < 1;
 
     // Pfeiler 17: Standard 1x, nach dem langen Drücken 1.5x, nie über 2x
     const rates = await page.evaluate(() => window.__ytlog.filter((x) => x.startsWith('rate ')).map((x) => Number(x.slice(5))));
@@ -438,7 +439,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     for (let i = 0; i < 3 && (await page.evaluate(() => window.__core.state())) === 1; i++) { await page.keyboard.press(' '); await page.waitForTimeout(300); }
     const op = await page.evaluate(() => ({ id: window.__core.moment().id }));
     c.pausedForCheck = (await page.evaluate(() => window.__core.state())) !== 1;
-    const tapX = vp.width * 0.4, tapY = vp.height * 0.45;
+    const tapX = vp.width * 0.4, tapY = vp.height * 0.25;
     await page.mouse.dblclick(tapX, tapY);
     c.heartShown = await waitFor(page, () => !!document.querySelector('[data-testid=heart-burst]'));
     const hb = await page.evaluate(() => { const r = document.querySelector('[data-testid=heart-burst]')?.getBoundingClientRect(); return r ? { cx: r.left + r.width / 2, cy: r.top + r.height / 2 } : null; });
@@ -457,10 +458,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.saveFills = await page.evaluate((id) => window.__core.saved(id) && document.querySelector('[data-testid=save]').getAttribute('aria-pressed') === 'true', op.id);
     // Spalte: vier Knöpfe, Ziele mindestens 48 pt, Abstände, Beschriftung
     const col = await page.evaluate(() => [...document.querySelectorAll('.vactions button')].map((b) => { const r = b.getBoundingClientRect(); return { id: b.dataset.testid, w: r.width, h: r.height, top: r.top, bottom: r.bottom, text: b.textContent }; }));
-    c.columnOrder = col.map((x) => x.id).join() === 'like,save,source';
+    c.columnOrder = col.map((x) => x.id).join() === 'like,save,share,source';
     c.columnTargets48 = col.every((x) => x.w >= 48 && x.h >= 48);
     c.columnSpacing = col.slice(1).every((x, i) => x.top - col[i].bottom >= 16);
-    c.columnLabels = col.map((x) => x.text).join('|') === 'More|Save|Source';
+    c.columnLabels = col.map((x) => x.text).join('|') === 'More|Save|Share|Source';
     // Das "…"-Menü entfällt
     c.noOptionsButton = !(await page.$('[data-testid=options]')) && !(await page.$('[aria-label=Options]'));
     await page.screenshot({ path: `${out}/${name}-12-spalte.png` });
@@ -1122,7 +1123,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       if (await p7.$('[data-testid=recall-card]')) cardSeen = true;
     }
     r.capLogs = capLogs;
-    c.hookLongSmallerNeverCut = capLogs.every((x) => x.hk.step === '1' && !x.hk.clipped && x.hk.full && x.hk.size === 15);
+    c.hookLongSmallerNeverCut = capLogs.every((x) => x.hk.step === '1' && !x.hk.clipped && x.hk.full && x.hk.size === 17);
     c.captionOpensWithContent = capLogs.every((x) => x.open && x.hook && x.exLen > 50 && x.speaker && x.ep && x.at);
     c.captionOrder = capLogs.every((x) => x.order.filter((t) => t !== 'caption-context').join() === 'DIV,caption-hook,caption-excerpt,caption-meta');
     // Kontext (Entscheidung 18): unter dem Ausschnitt, kleiner und gedämpft, Überschrift wie die anderen Meta-Zeilen (Großbuchstaben, gesperrt), kein eigenes Blatt, fehlt das Feld, fehlt die Zeile

@@ -35,14 +35,14 @@ export function SyncCard({ sync }: { sync: SyncUi }) {
     else setMsg('That does not look like a GitHub token. It starts with github_pat_ or ghp_.');
   };
 
-  const btn = 'rounded-xl border border-[var(--line)] px-4 py-3 text-[16px] text-left';
+  const btn = 'grp-btn';
   return (
-    <section className="flex flex-col gap-3 rounded-xl bg-surface p-4" data-testid="sync-card">
-      <span className="text-[17px]">Sync between devices</span>
+    <section className="grp" data-testid="sync-card">
+      <span className="grp-title">Sync between devices</span>
       {!status.hasToken && (
         <>
-          <label className="flex flex-col gap-1">
-            <span className="t-meta text-muted">GitHub token</span>
+          <label className="grp-stack">
+            <span className="grp-note">GitHub token</span>
             <input
               type="password"
               data-testid="sync-token"
@@ -54,22 +54,22 @@ export function SyncCard({ sync }: { sync: SyncUi }) {
               autoComplete="off"
               spellCheck={false}
               aria-label="GitHub token"
-              className="rounded-xl border border-[var(--line)] bg-transparent px-3 py-3 text-[16px]"
+              className="grp-input"
             />
           </label>
           <button className={btn} onClick={save} disabled={!text.trim()} data-testid="sync-save">Save token</button>
-          <p className="t-meta m-0 text-muted">Fine-grained token for core-content only, Contents read and write. Or scan the QR code from your other device.</p>
+          <p className="grp-note">Fine-grained token for core-content only, Contents read and write. Or scan the QR code from your other device.</p>
         </>
       )}
       {status.hasToken && (
         <>
-          <span className="text-[16px]" data-testid="sync-last">Last sync: {status.running ? 'syncing…' : status.lastSync ? ago(status.lastSync, tick) : 'not yet'}</span>
+          <span className="grp-row" data-testid="sync-last">Last sync: {status.running ? 'syncing…' : status.lastSync ? ago(status.lastSync, tick) : 'not yet'}</span>
           <button className={btn} onClick={() => void sync.syncNow()} disabled={status.running} data-testid="sync-now">Sync now</button>
           <button className={btn} onClick={() => void sync.removeToken()} data-testid="sync-remove">Remove token</button>
         </>
       )}
       {(status.error || msg) && (
-        <p className="t-meta m-0" style={{ color: '#E07B7B' }} data-testid="sync-error">{status.error || msg}</p>
+        <p className="grp-err" data-testid="sync-error">{status.error || msg}</p>
       )}
     </section>
   );

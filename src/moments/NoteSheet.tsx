@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState, type MutableRefObject } from 'react';
 import { AREA_COLOR } from '../lib/labels';
+import { Icon } from '../components/Icon';
+import type { IconName } from '../components/icons';
 import { CHIPS, INPUT_BUTTON, INPUT_CHIPS, INPUT_HINT, INPUT_LABEL, INPUT_MAX, TEXT_MAX, type Chip, type InputChip } from './note';
 import type { Moment } from './types';
+
+const CHIP_ICON: Record<string, IconName> = { 'Already known': 'check', 'Not for me': 'eye-slash', Weak: 'warning', Wrong: 'question', 'Bad cut': 'timer', 'Mute speaker': 'speaker-slash', Source: 'arrow-square-out', Topic: 'stack' };
 
 /** Steuerung von außen, nur im Desktop-Modus: Chip nach Nummer wählen, ins Textfeld springen */
 export interface NoteCtl {
@@ -40,11 +44,11 @@ export function NoteSheet({ m, speaker, onChip, onInput, onDone, onAsk, onCancel
     };
   });
   return (
-    <div className="absolute inset-0 z-40 flex items-end bg-black/60" data-testid="note-sheet" onPointerDown={stop} onPointerUp={stop} onClick={(e) => e.target === e.currentTarget && onCancel()}>
-      <div className="w-full rounded-t-2xl bg-[#121212] px-4 pt-2 text-white" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + var(--nav-h, 0px) + 16px)' }}>
-        <div className="mx-auto mb-3 h-1 w-9 rounded-full bg-[#3A3D45]" aria-hidden="true" />
-        <div className="mb-3 flex items-center gap-2 text-[13px] leading-[18px] text-[#B3B3B3]">
-          <span className="h-2 w-2 rounded-full" style={{ background: AREA_COLOR[m.area] }} aria-hidden="true" />
+    <div className="sheet-backdrop" data-testid="note-sheet" onPointerDown={stop} onPointerUp={stop} onClick={(e) => e.target === e.currentTarget && onCancel()}>
+      <div className="sheet">
+        <div className="sheet-grip" aria-hidden="true" />
+        <div className="sheet-head">
+          <span className="vdot" style={{ background: AREA_COLOR[m.area] }} aria-hidden="true" />
           <span>{speaker}</span>
         </div>
         <div className="note-confirm" data-testid="note-confirm" role="status" aria-live="polite">{confirm ?? ''}</div>
@@ -86,19 +90,22 @@ export function NoteSheet({ m, speaker, onChip, onInput, onDone, onAsk, onCancel
         ) : (
           <>
           <button type="button" className="note-ask" data-testid="note-ask" disabled={!!confirm} onClick={onAsk}>
-            Ask
+            <Icon name="chat-circle" size="var(--icon)" />
+            <span>Ask</span>
             {keys && <kbd className="note-key" aria-hidden="true">A</kbd>}
           </button>
           <div className="note-chips" role="group" aria-label="Feedback">
             {CHIPS.map((c, i) => (
               <button key={c} type="button" className="note-chip" data-testid={`note-chip-${c}`} disabled={!!confirm} onClick={() => onChip(c, text)}>
-                {c}
+                <Icon name={CHIP_ICON[c] ?? 'check'} size="var(--icon)" />
+                <span>{c}</span>
                 {keys && <kbd className="note-key" aria-hidden="true">{i + 1}</kbd>}
               </button>
             ))}
             {INPUT_CHIPS.map((c) => (
               <button key={c} type="button" className="note-chip" data-testid={`note-chip-${c}`} disabled={!!confirm} onClick={() => { setValue(''); setMode(c); }}>
-                {c}
+                <Icon name={CHIP_ICON[c] ?? 'check'} size="var(--icon)" />
+                <span>{c}</span>
               </button>
             ))}
           </div>

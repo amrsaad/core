@@ -6,9 +6,9 @@ const k = (key: string, o: Partial<KeyIn> = {}): KeyIn => ({ key, code: o.code ?
 const act = (key: string, ctx: Partial<DeskCtx> = {}, o: Partial<KeyIn> = {}) => deskKey({ ...base, ...ctx }, k(key, o));
 
 describe('Desktop-Modus, Schwelle', () => {
-  it('900 px, nicht 899', () => {
-    expect(DESKTOP_MIN).toBe(900);
-    expect(DESKTOP_QUERY).toBe('(min-width: 900px)');
+  it('1181 px, nicht 1180 (Brief 06)', () => {
+    expect(DESKTOP_MIN).toBe(1181);
+    expect(DESKTOP_QUERY).toBe('(min-width: 1181px)');
   });
 });
 

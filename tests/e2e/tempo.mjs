@@ -105,7 +105,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const ch = await chip(page);
       r.notes.chip = ch;
       c.chipShows15 = ch?.text === '1.5x' && ch.onScreen;
-      c.chipTarget48 = !!ch && ch.w >= 48 && ch.h >= 48;
+      c.chipTarget44 = !!ch && ch.w >= 44 && ch.h >= 44;
       const t = await page.evaluate(() => window.__t);
       r.notes.feedbackMs = Math.round(t.seen - t.down - 500);
       c.feedbackWithin150 = t.seen > 0 && t.seen - t.down - 500 <= 150;

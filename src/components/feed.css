@@ -1,0 +1,295 @@
+/*
+ * Feed: Bildkarte, Ambient, Quellenleiste, Caption, Info, Leiste rechts (Brief 06, Block Body).
+ * Alle Maße aus tokens.css. Handy und Tablet: Karte mit Rand, Desktop (.desk) überschreibt unten.
+ * Die Zahlen für Band und Rand stehen nur hier, damit Bild, Poster, Abdeckung und Caption dieselbe Rechnung nutzen.
+ */
+.vfeed {
+  --band-w: min(calc(100vw - var(--safe-l) - var(--safe-r) - 2 * var(--margin)), 640px);
+  --band-h: calc(var(--band-w) * 9 / 16);
+  --band-top: calc(var(--safe-t) + var(--head-h) + var(--s-10));
+  --band-left: calc((100vw - var(--band-w)) / 2);
+  --rail-w: 64px;
+  --text-right: calc(var(--safe-r) + var(--rail-w) + var(--s-3));
+}
+
+.vframe { position: absolute; inset: 0; }
+.vframe > div,
+.vposter,
+.vcover {
+  position: absolute;
+  left: var(--band-left);
+  top: var(--band-top);
+  width: var(--band-w);
+  height: var(--band-h);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.vframe > div { box-shadow: var(--shadow-media); background: var(--media); }
+.vposter { z-index: 1; object-fit: cover; background: var(--media-2); }
+.vcover { border-radius: var(--r-card); }
+/* Sichtbar, solange der Slot nicht der aktuelle ist oder sein Player nicht abspielt (data-live setzt der Player-Callback) */
+.vslot[data-live][aria-hidden='false'] .vposter { visibility: hidden; }
+
+/* Ambient: das Vorschaubild weich und dunkel hinter der Karte, nur Video */
+.vambient {
+  position: absolute;
+  inset: calc(var(--s-16) * -1);
+  width: calc(100% + var(--s-16) * 2);
+  height: calc(100% + var(--s-16) * 2);
+  object-fit: cover;
+  filter: blur(48px) brightness(0.35) saturate(1.3);
+  opacity: 0.9;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Fortschritt am unteren Rand der Karte */
+.vtrack, .vprogress {
+  position: absolute;
+  z-index: var(--z-ui);
+  left: calc(var(--band-left) + var(--s-3));
+  width: calc(var(--band-w) - 2 * var(--s-3));
+  top: calc(var(--band-top) + var(--band-h) - var(--s-3));
+  height: var(--progress-h);
+  border-radius: var(--r-pill);
+}
+.vtrack { background: var(--on-media-muted); opacity: 0.35; }
+.vprogress { background: var(--area, var(--accent)); transform-origin: left center; }
+
+/* Quellenleiste unter der Karte: Folge links, Schnitt rechts */
+.vsource {
+  position: absolute;
+  z-index: var(--z-ui);
+  left: var(--band-left);
+  width: var(--band-w);
+  top: calc(var(--band-top) + var(--band-h) + var(--s-2));
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-3);
+  font-size: var(--t-nav);
+  line-height: var(--t-nav-lh);
+  font-weight: var(--w-meta);
+  color: var(--muted);
+  pointer-events: none;
+}
+.vsource span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vsource span:last-child { flex: none; }
+
+.vplay { position: absolute; left: 50%; top: calc(var(--band-top) + var(--band-h) / 2); width: var(--s-16); height: var(--s-16); transform: translate(-50%, -50%); z-index: 2; color: var(--on-media); opacity: 0.85; }
+
+/* Zähler des Tages, nur wenn keine Status-Zeile da ist */
+.vtoday {
+  position: absolute;
+  z-index: var(--z-ui);
+  right: calc(var(--safe-r) + var(--margin));
+  top: calc(var(--safe-t) + var(--head-h) + var(--s-3));
+  font-size: var(--t-meta);
+  line-height: var(--t-meta-lh);
+  font-weight: var(--w-tab);
+  color: var(--ink-2);
+}
+
+/* Caption unter der Quellenleiste: Text ohne Band, Wort für Wort aus dem Moment */
+.vcaption {
+  position: absolute;
+  z-index: 18;
+  left: calc(var(--band-left) + var(--s-1));
+  width: calc(var(--band-w) - var(--s-2));
+  top: calc(var(--band-top) + var(--band-h) + var(--s-10));
+  display: flex;
+  justify-content: flex-start;
+}
+.vcaption span {
+  max-width: 100%;
+  color: var(--body);
+  font-size: var(--t-body);
+  line-height: var(--t-body-lh);
+  font-weight: var(--w-meta);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.vcaption-rtl { justify-content: flex-end; }
+.vcaption-rtl span { direction: rtl; unicode-bidi: plaintext; text-align: right; font-family: var(--font-ar); font-size: var(--t-caption); line-height: var(--t-ar-lh); }
+.vcaption.vcaption-big span { font-size: var(--t-hook); line-height: var(--t-hook-lh); color: var(--text); }
+.vcaption.vcaption-big.vcaption-rtl span { font-size: var(--t-verse); line-height: 1.5; }
+/* Audio: Caption mittig unter dem Cover */
+.vcaption-audio { top: 52%; right: var(--s-6); left: var(--s-6); width: auto; justify-content: center; text-align: center; }
+.vcaption-audio span { font-size: var(--t-hook); line-height: var(--t-hook-lh); color: var(--text); text-shadow: 0 1px 3px var(--media-shade-strong); }
+.vcaption-audio.vcaption-rtl { justify-content: center; }
+.vcaption-audio.vcaption-rtl span { text-align: center; font-size: var(--t-verse); line-height: 1.5; }
+
+/* Info unten: Kanal, Hook */
+.vinfo {
+  position: absolute;
+  z-index: var(--z-ui);
+  left: calc(var(--safe-l) + var(--margin));
+  right: var(--text-right);
+  bottom: calc(var(--safe-b) + var(--nav-h, 0px) + var(--s-6));
+  transition: bottom var(--dur-ui) var(--ease);
+}
+.vinfo-tap { pointer-events: auto; cursor: pointer; }
+.vchannel { display: flex; align-items: center; gap: var(--s-2); font-size: var(--t-meta); line-height: var(--t-meta-lh); font-weight: var(--w-tab); margin-bottom: var(--s-2); }
+.vdot { width: var(--s-2); height: var(--s-2); border-radius: var(--r-pill); background: var(--area); flex-shrink: 0; }
+.vspeaker { color: var(--muted); font-weight: var(--w-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vtitle {
+  font-size: var(--t-hook);
+  line-height: var(--t-hook-lh);
+  font-weight: var(--w-hook);
+  letter-spacing: var(--tracking-title);
+  overflow-wrap: anywhere;
+}
+.vtitle[data-step='1'] { font-size: var(--t-row); line-height: var(--t-row-lh); }
+
+/* Leiste rechts */
+.vactions {
+  position: absolute;
+  z-index: var(--z-ui);
+  right: calc(var(--safe-r) + var(--s-2));
+  width: var(--rail-w);
+  bottom: calc(var(--safe-b) + var(--nav-h, 0px) + var(--s-6));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-4);
+  transition: bottom var(--dur-ui) var(--ease);
+}
+.vbtn { color: var(--text); gap: var(--s-1); }
+.vbtn .vbtn-ring {
+  width: var(--rail-btn);
+  height: var(--rail-btn);
+  border-radius: var(--r-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  box-shadow: var(--inset-hair);
+  transition: background var(--dur-cut) var(--ease), color var(--dur-cut) var(--ease);
+}
+.vbtn[data-on] .vbtn-ring { color: var(--accent); }
+.vbtn:disabled { opacity: 0.4; }
+.vbtn[data-on] .icon { animation: vpop var(--dur-cut) var(--ease); }
+@keyframes vpop { 0% { transform: scale(0.8); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+.vlabel { font-size: var(--t-nav); line-height: var(--t-nav-lh); color: var(--muted); font-weight: var(--w-meta); }
+
+/* Desktop: Bild, Poster und Abdeckung füllen die Spalte (Maße setzt .desk in index.css) */
+.desk .vframe > div, .desk .vposter, .desk .vcover { border-radius: 0; box-shadow: none; }
+.desk .vambient, .desk .vsource, .desk .vtrack, .desk .vprogress { display: none; }
+
+/* ---------- Audio (Beat-Board): Cover als Karte, Vers in Amiri, Zeiten, Bedienung ---------- */
+.vfeed[data-form='audio'] { --art: min(62vw, var(--art-max)); --art-top: calc(var(--safe-t) + var(--head-h) + var(--s-12)); }
+.vaudio { position: absolute; inset: 0; z-index: 1; background: var(--stage); }
+.vaudio-bg { display: none; }
+.vaudio-art {
+  position: absolute;
+  left: 50%;
+  top: var(--art-top);
+  transform: translateX(-50%);
+  width: var(--art);
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--r-art);
+  background: var(--surface);
+  box-shadow: var(--shadow-media), var(--inset-hair);
+}
+.vfeed[data-form='audio'] .vcaption-audio { top: calc(var(--art-top) + var(--art) + var(--s-6)); }
+/* Verse und arabische Erklärtexte: Amiri nur für Verse (kind vers), sonst Noto Sans Arabic */
+.vcaption-audio.vcaption-rtl span { font-family: var(--font-verse); line-height: var(--lh-verse); }
+
+.vctrl {
+  position: absolute;
+  z-index: var(--z-ui);
+  left: calc(var(--safe-l) + var(--margin));
+  right: calc(var(--safe-r) + var(--margin));
+  bottom: calc(var(--safe-b) + var(--nav-h, 0px) + var(--s-6) + var(--rail-btn) + var(--s-8) + var(--s-3));
+  pointer-events: auto;
+}
+.vtimes {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--t-nav);
+  line-height: var(--t-nav-lh);
+  font-weight: var(--w-meta);
+  color: var(--muted);
+  margin-bottom: var(--s-2);
+}
+.vtransport { display: flex; align-items: center; justify-content: center; gap: var(--s-8); }
+.vtransport button {
+  width: var(--hit);
+  height: var(--hit);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  color: var(--text);
+}
+.vtransport button.vplaybtn { width: var(--s-16); height: var(--s-16); background: var(--text); color: var(--bg); }
+.vfeed[data-form='audio'] .vtrack,
+.vfeed[data-form='audio'] .vprogress {
+  top: auto;
+  bottom: calc(var(--safe-b) + var(--nav-h, 0px) + var(--s-6) + var(--rail-btn) + var(--s-8) + var(--s-3) + var(--s-6) + var(--s-16) + var(--s-4));
+  left: calc(var(--safe-l) + var(--margin));
+  width: calc(100% - var(--safe-l) - var(--safe-r) - 2 * var(--margin));
+}
+.vfeed[data-form='audio'] .vinfo { bottom: calc(var(--safe-b) + var(--nav-h, 0px) + var(--s-6) + var(--rail-btn) + var(--s-8) + var(--s-3) + var(--s-6) + var(--s-16) + var(--s-12)); right: calc(var(--safe-r) + var(--margin)); }
+
+/* Audio und Text: Leiste als Reihe unten (Beat- und Brain-Board), Video behält die Spalte rechts */
+.vfeed[data-form='audio'] .vactions,
+.vfeed[data-form='text'] .vactions {
+  left: calc(var(--safe-l) + var(--margin));
+  right: calc(var(--safe-r) + var(--margin));
+  width: auto;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: flex-start;
+}
+
+/* ---------- Text (Brain-Board): Seite auf Papier, Serif-Hook nur im Brain, Lesetext in der Systemschrift ---------- */
+.vtext {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  background: var(--bg);
+  color: var(--text);
+  /* endet über der Leiste, damit Text nicht unter den Knöpfen läuft */
+  bottom: calc(var(--safe-b) + var(--s-6) + var(--rail-btn) + var(--s-8));
+  padding:
+    calc(var(--safe-t) + var(--head-h) + var(--s-10))
+    calc(var(--safe-r) + var(--margin))
+    var(--s-8)
+    calc(var(--safe-l) + var(--margin));
+}
+.vtext > * { max-width: var(--desk-read); margin-left: auto; margin-right: auto; }
+.vkicker {
+  font-size: var(--t-meta);
+  line-height: var(--t-meta-lh);
+  font-weight: var(--w-tab);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--kicker);
+  margin-bottom: var(--s-3);
+}
+.vtext-hook { margin: 0 0 var(--s-5); font-size: var(--t-hook); line-height: var(--t-hook-lh); font-weight: var(--w-hook); letter-spacing: var(--tracking-title); }
+.vtext[data-area='brain'] .vtext-hook {
+  font-family: var(--font-brain);
+  font-size: var(--t-brain-hook);
+  line-height: var(--t-brain-hook-lh);
+  font-weight: var(--w-brain-hook);
+}
+.vtext-body { margin: 0; white-space: pre-line; font-size: var(--t-reading); line-height: var(--t-reading-lh); color: var(--body); }
+.vtext-rtl { text-align: right; font-family: var(--font-ar); font-size: var(--t-reading); line-height: 1.9; }
+.vtext-source { display: block; margin: var(--s-5) auto 0; min-height: var(--hit); font-size: var(--t-meta); line-height: var(--t-meta-lh); color: var(--muted); text-decoration: none; overflow-wrap: anywhere; }
+a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
+.vtext-end { margin-top: var(--s-8); padding-top: var(--s-4); border-top: 1px solid var(--hairline); font-size: var(--t-meta); color: var(--soft); }
+.vtext-empty { color: var(--muted); }
+
+/* Text und Papier: Tinte der Kopfzeile folgt der Stimmung */
+.desk .vctrl { display: none; }
+
+/* Seite (Text): Hintergrund und Schrift der Stimmung statt der dunklen Bühne */
+.vfeed[data-surface='page'] { background: var(--bg); color: var(--text); }
+
+.vfeed[data-form='text'] .vtrack, .vfeed[data-form='text'] .vprogress { display: none; }
+.desk .vtext { bottom: 0; }

@@ -2,7 +2,7 @@ import { diagLog, netType } from '../lib/diag';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
-import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
+import { AREA_COLOR, AREA_LABEL, topicLabel } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { audioDeck, createPlayer, deckClipOf, HLS, LOCAL, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
 import { canWarm, coverMs, onNonCurrentPlaying, roleOf, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx, type WarmState } from '../video/warmup';
@@ -44,13 +44,21 @@ import { makeRng } from './rng';
 import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
 import { addFrames, atRest, commitVelocity, dragY, frameSample, release, SPRING_BACK, SPRING_COMMIT, stepSpring, Velocity, type Spring, type SpringState } from './swipe';
 import { saveGate } from '../lib/useAppState';
-import { blockedCount, emptyFormLine, END_SUB, endButtonLabel, endLine, filterPool, formOf, FORM_LABEL, FORMS, momentText, otherForms, textEndReached, unseenCount, waitingLine, type Form } from './form';
+import { blockedCount, emptyFormLine, END_SUB, endButtonLabel, endLine, filterPool, formOf, FORM_LABEL, momentText, otherForms, textEndReached, unseenCount, waitingLine, type Form } from './form';
 import { atEnd, EndLedger, isBackground, onLeave, successorOf } from './background';
 import { PlayTracker } from './played';
 import { setMood } from '../design/mood';
+import { Status } from '../components/Status';
+import { Head } from '../components/Head';
+import { FocusSheet } from '../components/FocusSheet';
+import { Icon } from '../components/Icon';
+import type { IconName } from '../components/icons';
+import { atTime } from './hook';
+import { focusTabText } from '../components/head';
+import { statusOf } from '../components/status';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
-/** Desktop-Modus ab 900 px: Panel rechts, Übersicht, Seitenblatt. Fehlt das Feld, gilt das mobile Verhalten unverändert. */
+/** Desktop-Modus ab 1181 px: Panel rechts, Übersicht, Seitenblatt. Fehlt das Feld, gilt das mobile Verhalten unverändert. */
 export interface DeskProps {
   panel: HTMLElement | null;
   help: boolean;
@@ -65,6 +73,8 @@ interface Props {
   update: (fn: (s: AppState) => AppState) => void;
   active: boolean;
   onPausedChange: (paused: boolean) => void;
+  /** Fehlertext des letzten Syncs, für die Status-Zeile */
+  syncError?: string | null;
   desk?: DeskProps;
 }
 
@@ -121,7 +131,7 @@ const load = (m: Moment) => ({ videoId: m.videoId, startSeconds: m.start, endSec
 /** Anzahl der Medien-Elemente mit gesetzter Quelle (Vorgabe: höchstens 3 gleichzeitig) */
 const mediaWithSrc = (): number => (typeof document === 'undefined' ? 0 : [...document.querySelectorAll('audio,video')].filter((e) => !!e.getAttribute('src')).length);
 
-export function MomentFeed({ pool: allPool, state, update, active, onPausedChange, desk }: Props) {
+export function MomentFeed({ pool: allPool, state, update, active, onPausedChange, syncError = null, desk }: Props) {
   const single = state.settings.playerMode === 'single';
   const SLOTS = single ? 1 : 3;
   const stateRef = useRef(state);
@@ -318,6 +328,19 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const [loading, setLoading] = useState(false);
   /** Audio-Reiter: ein Netzstart wartet auf Daten (Pille "Loading, keep screen on") */
   const [deckWait, setDeckWait] = useState(false);
+  const [focusSheet, setFocusSheet] = useState(false);
+  /** Status "Playing in the background": Audio lief, während die Seite verborgen war, und bleibt nach der Rückkehr 4 s sichtbar (nur Anzeige, keine Wiedergabelogik) */
+  const [bgShown, setBgShown] = useState(false);
+  useEffect(() => {
+    let t = 0;
+    const on = () => {
+      window.clearTimeout(t);
+      if (isBackground(document.visibilityState)) setBgShown(stateRef.current.settings.form === 'audio');
+      else t = window.setTimeout(() => setBgShown(false), 4000);
+    };
+    document.addEventListener('visibilitychange', on);
+    return () => { window.clearTimeout(t); document.removeEventListener('visibilitychange', on); };
+  }, []);
   const lastBack = useRef<number | null>(null);
   const lockPrevRef = useRef<() => void>(() => {});
   const waitSince = useRef(0);
@@ -2053,7 +2076,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     setNote(null);
   };
 
+  /** Der Griff begann auf der Infozeile (Hook): ein Tipp öffnet den Kontext, ein Wisch oder langes Drücken gilt wie überall */
+  const infoDown = useRef(false);
   const onDown = (e: React.PointerEvent) => {
+    infoDown.current = false;
     const r = g.current;
     // Der Seitenwechsel wird gerade übernommen (eine Zeichnung lang): kein neuer Griff
     if (mot.current.busy && !mot.current.raf) return;
@@ -2076,6 +2102,16 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       if (textRef.current || recallRef.current || forYouRef.current) return;
       cycleRate();
     }, LONG_MS);
+  };
+  const cancelGesture = () => {
+    infoDown.current = false;
+    g.current.fired = false;
+    g.current.t = 0;
+    window.clearTimeout(g.current.long);
+    if (dragging.current) {
+      dragging.current = false;
+      settle(0, 0);
+    } else stopMeter(false);
   };
   const onMove = (e: React.PointerEvent) => {
     const r = g.current;
@@ -2163,6 +2199,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       if (p) p.playVideo();
       userPaused.current = false;
       setPaused(false);
+      if (infoDown.current) {
+        infoDown.current = false;
+        setCapOpen(true);
+      }
+      return;
+    }
+    if (infoDown.current) {
+      infoDown.current = false;
+      setCapOpen(true);
       return;
     }
     const t = Date.now();
@@ -2210,7 +2255,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
-  // ---- Desktop ab 900 px (Auftrag 28.10.2026). Mobil ist alles unten ohne Wirkung, solange desk fehlt. ----
+  // ---- Desktop ab 1181 px (Auftrag 28.10.2026). Mobil ist alles unten ohne Wirkung, solange desk fehlt. ----
   const capRef = useRef(false);
   capRef.current = capOpen;
 
@@ -2643,6 +2688,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   }, [idx, form]);
 
   const focusOn = focusActive(focus, clockNow().getTime());
+  const headEl = (
+    <Head form={form} setForm={setForm} rate={rateOf(state.settings)} onRate={cycleRate} focusText={focusOn && focus ? focusTabText(focus, clockNow().getTime()) : null} onClearFocus={() => clearFocus()} onFocusSheet={() => setFocusSheet(true)} />
+  );
   // Entscheidung 45: sind alle ungesehenen Momente der Form in dieser Sitzung gesperrt, wartet die Endseite aufs Netz (Video und Audio)
   const unseenHere = unseenCount(allPool, form, state.momentSeen, state.mutedChannels);
   const blockedHere = blockedCount(allPool, form, state.momentSeen, state.mutedChannels, bad.current);
@@ -2652,7 +2700,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   if (!formPool.length)
     return (
       <div className="vfeed" ref={dragEl}>
-        <FormSwitch form={form} setForm={setForm} rate={rateOf(state.settings)} onRate={cycleRate} />
+        {headEl}
         <Empty text={emptyFormLine(form)} />
       </div>
     );
@@ -2660,7 +2708,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   if (!pool.length)
     return (
       <div className="vfeed" ref={dragEl}>
-        <FormSwitch form={form} setForm={setForm} rate={rateOf(state.settings)} onRate={cycleRate} />
+        {headEl}
         <EndPage form={form} counts={endCounts} waiting={waiting} setForm={setForm} focus onClearFocus={() => clearFocus()} />
       </div>
     );
@@ -2668,11 +2716,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   if (!queue.current.length)
     return (
       <div className="vfeed" ref={dragEl}>
-        <FormSwitch form={form} setForm={setForm} rate={rateOf(state.settings)} onRate={cycleRate} />
+        {headEl}
         <EndPage form={form} counts={endCounts} waiting={waiting} setForm={setForm} focus={focusOn} onClearFocus={() => clearFocus()} />
       </div>
     );
 
+  const statusKind = statusOf({ offline: !online, syncError, loading: loading || (deckWait && form === 'audio'), background: bgShown && form === 'audio', muted: hint && form !== 'text' });
   const m = queue.current[idx];
   const recallEl = recall ? <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} rng={rng.current!} onAnswer={answerRecall} onClose={closeRecall} keys={!!desk} ctl={recallCtl} /> : null;
   const saved = m && !!state.savedMoments[m.id];
@@ -2680,7 +2729,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const captionsOn = !!m && form !== 'text' && captionsShown(form === 'audio' ? 'on' : state.settings.captionMode, m);
 
   return (
-    <div className="vfeed" ref={dragEl} style={{ ['--area' as string]: m ? AREA_COLOR[m.area] : 'var(--on-media)' }}>
+    <div className="vfeed" ref={dragEl} data-form={form} data-surface={form === 'text' ? 'page' : 'media'} style={{ ['--area' as string]: m ? AREA_COLOR[m.area] : 'var(--on-media)' }}>
       <div className="vstage" ref={stageEl}>
       {slots.current.slice(0, SLOTS).map((slot, s) => {
         const j = slot.index;
@@ -2703,18 +2752,14 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                 zIndex: 2,
                 pointerEvents: 'none',
                 visibility: 'hidden',
-                ...(desk
-                  ? { left: 0, top: '50%', width: '100%', aspectRatio: '16 / 9', transform: 'translateY(-50%)' }
-                  : { left: '50%', width: '100vw', height: 'calc(100vw * 9 / 16)', top: 'calc(50% - 0.19 * max(100dvh, 100vw * 16 / 9))', transform: 'translateX(-50%)' }),
+                ...(desk ? { left: 0, top: '50%', width: '100%', height: 'auto', aspectRatio: '16 / 9', transform: 'translateY(-50%)' } : {}),
               }}
             >
               <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: COVER_TOP, background: 'var(--tab-bg, #000)' }} />
               <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: COVER_BOTTOM, background: 'var(--tab-bg, #000)' }} />
             </div>
             {isCur && paused && !forYou && (
-              <svg className="vplay" width="72" height="72" viewBox="0 0 24 24" fill="#fff" aria-label="Pausiert">
-                <path d="M8 5v14l11-7z" />
-              </svg>
+              <Icon name="play" size="var(--s-16)" className="vplay" label="Pausiert" />
             )}
           </div>
         );
@@ -2733,18 +2778,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       </div>
 
       <div className="vtrack" />
-      <FormSwitch form={form} setForm={setForm} rate={rateOf(state.settings)} onRate={cycleRate} />
-      {!online && (
-        <div className="voffline pointer-events-none" data-testid="offline" role="img" aria-label="Offline">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8a15 15 0 0 0-9.4-4.7M5.5 12.6a10 10 0 0 1 3.1-1.8M18.5 12.6a10 10 0 0 0-4.2-2.3M8.9 16.4a5 5 0 0 1 6.2 0M12 20h.01M3 3l18 18" />
-          </svg>
-        </div>
-      )}
+      {headEl}
       {form === 'text' && m && !forYou && (
         <div
           ref={textBox}
           className="vtext no-callout"
+          data-area={m.area}
           data-testid="text-view"
           onScroll={checkTextEnd}
           onTouchStart={(e) => {
@@ -2763,11 +2802,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         >
           {!desk && (
             <>
-              <div className="vchannel">
-                <span className="vdot" aria-hidden="true" />
-                <span style={{ color: AREA_COLOR[m.area] }}>{AREA_LABEL[m.area]}</span>
-                <span className="vspeaker">{speakerLine(m.channel)}</span>
-              </div>
+              <div className="vkicker">{AREA_LABEL[m.area]} · {topicLabel(m.topic)}</div>
               <h2 className="vtext-hook">{m.hook}</h2>
             </>
           )}
@@ -2777,7 +2812,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
             return t ? (
               <p className={`vtext-body ${ar ? 'vtext-rtl' : ''}`} dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'}>{t}</p>
             ) : (
-              <p className="vtext-body text-[#B3B3B3]">No text for this moment yet.</p>
+              <p className="vtext-body vtext-empty">No text for this moment yet.</p>
             );
           })()}
           {!desk && (() => {
@@ -2793,51 +2828,30 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           <div className="vtext-end" aria-hidden="true">{desk ? 'Next moment: J, Down, or two fingers up' : 'Swipe up for the next moment'}</div>
         </div>
       )}
-      {!forYou && (
+      {!forYou && !statusKind && !(prompt && unsent(state.feedbackNotes).length > 0) && (
         <div className="vtoday pointer-events-none" data-testid="today">
           {todayLine(state.dayCount?.[today], true)}
         </div>
       )}
       <div className="vprogress" style={{ transform: `scaleX(${progress})` }} />
-      {loading && !forYou && <div className="vloading" aria-label="Loading" />}
-      {deckWait && form === 'audio' && !forYou && (
-        <div
-          className="pointer-events-none"
-          data-testid="loading-pill"
-          role="status"
-          style={{ position: 'absolute', left: '50%', top: 'calc(env(safe-area-inset-top, 0px) + 64px)', transform: 'translateX(-50%)', zIndex: 5, padding: '8px 14px', borderRadius: 999, background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: 13, whiteSpace: 'nowrap' }}
-        >
-          Loading, keep screen on
-        </div>
-      )}
+      {!forYou && <Status kind={statusKind} audio={form === 'audio'} />}
 
       <div
         className="vgesture no-callout"
         onPointerDown={onDown}
         onPointerMove={onMove}
         onPointerUp={onUp}
-        onPointerCancel={() => {
-          g.current.fired = false;
-          g.current.t = 0;
-          window.clearTimeout(g.current.long);
-          if (dragging.current) {
-            dragging.current = false;
-            settle(0, 0);
-          } else stopMeter(false);
-        }}
+        onPointerCancel={cancelGesture}
         onContextMenu={(e) => e.preventDefault()}
       />
 
       <div className="vui" ref={uiEl}>
-      {hint && !forYou && form !== 'text' && (
-        <div className="vsound pointer-events-none" data-testid="sound-off" role="img" aria-label="Sound off">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M11 5 6 9H3v6h3l5 4z" fill="#fff" />
-            <path d="m16 9 5 6M21 9l-5 6" />
-          </svg>
+      {m && !forYou && form === 'video' && !desk && (
+        <div className="vsource pointer-events-none" data-testid="source-line">
+          <span>{m.videoTitle}</span>
+          <span>This cut {atTime(m.start)} to {atTime(m.end)}</span>
         </div>
       )}
-
       {captionsOn && caption && !forYou && (
         <div className={`vcaption pointer-events-none ${m?.audio ? 'vcaption-audio' : form === 'audio' ? 'vcaption-big' : ''} ${isArabic(caption) ? 'vcaption-rtl' : ''}`} data-testid="caption">
           {captionLines(caption).map((line, k) => (
@@ -2846,13 +2860,29 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </div>
       )}
 
+      {m && !forYou && form === 'audio' && !desk && (
+        <div className="vctrl" data-testid="audio-controls" onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
+          <div className="vtimes">
+            <span>{atTime(Math.round(progress * Math.max(0, m.end - m.start)))}</span>
+            {rateOf(state.settings) > 1 && <span>{rateOf(state.settings)}x</span>}
+            <span>{atTime(Math.max(0, m.end - m.start))}</span>
+          </div>
+          <div className="vtransport">
+            <button type="button" aria-label="Previous moment" data-testid="ctl-prev" onClick={() => goTo(idxRef.current - 1)}><Icon name="skip-back" size="var(--icon)" /></button>
+            <button type="button" className="vplaybtn" aria-label={paused ? 'Play' : 'Pause'} data-testid="ctl-play" onClick={() => togglePlay()}><Icon name={paused ? 'play' : 'pause'} size="var(--s-8)" /></button>
+            <button type="button" aria-label="Next moment" data-testid="ctl-next" onClick={() => goTo(idxRef.current + 1)}><Icon name="skip-forward" size="var(--icon)" /></button>
+          </div>
+        </div>
+      )}
+
       {m && !forYou && form !== 'text' && !desk && (
         <div className="vinfo pointer-events-none">
           <div
             className="vinfo-tap"
             data-testid="info-tap"
-            onPointerDown={(e) => e.stopPropagation()}
-            onPointerUp={(e) => { e.stopPropagation(); setCapOpen(true); }}
+            onPointerDown={(e) => { onDown(e); infoDown.current = true; }}
+            onPointerMove={onMove}
+            onPointerCancel={cancelGesture}
           >
             <div className="vchannel" data-testid="speaker-line">
               <span className="vdot" aria-hidden="true" />
@@ -2866,15 +2896,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
       {!forYou && (
         <div className="vactions">
-          <ActionButton testid="like" label="More" on={liked} onClick={(e) => { const t0 = e.timeStamp; like('button'); recordTap(t0); }}>
-            <path d={HEART} />
-          </ActionButton>
-          <ActionButton testid="save" label="Save" on={saved} onClick={(e) => { const t0 = e.timeStamp; toggleSave(); recordTap(t0); }}>
-            <path d="M7 4h10v16l-5-4-5 4z" />
-          </ActionButton>
-          {m && fullVideoUrl(m) && <ActionButton testid="source" label="Source" on={pulse === 'source'} fill={false} onClick={openFull}>
-            <path d="M7 17 17 7M9 7h8v8" />
-          </ActionButton>}
+          <ActionButton testid="like" label="More" icon="heart" on={liked} onClick={(e) => { const t0 = e.timeStamp; like('button'); recordTap(t0); }} />
+          <ActionButton testid="save" label="Save" icon="bookmark-simple" on={saved} onClick={(e) => { const t0 = e.timeStamp; toggleSave(); recordTap(t0); }} />
+          <ActionButton testid="share" label="Share" icon="export" disabled onClick={() => {}} />
+          {m && fullVideoUrl(m) && <ActionButton testid="source" label="Source" icon="arrow-square-out" on={pulse === 'source'} fill={false} onClick={openFull} />}
         </div>
       )}
 
@@ -2916,8 +2941,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
 
       {flash && (
-        <div className="flash pointer-events-none absolute inset-x-0 bottom-40 z-30 flex justify-center">
-          <span className="rounded-full bg-black/80 px-4 py-2 text-[15px] text-white">{flash}</span>
+        <div className="toast flash" role="status" data-testid="toast">
+          <span>{flash}</span>
         </div>
       )}
 
@@ -2927,6 +2952,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         </button>
       )}
 
+      {focusSheet && <FocusSheet current={focus} now={clockNow().getTime()} onClose={() => setFocusSheet(false)} />}
       {note && <NoteSheet key={note.id} m={note} speaker={speakerLine(note.channel)} onChip={(c, t) => saveNote(note, c, t)} onInput={(c, v) => saveInput(note, c, v)} onDone={(t) => saveNote(note, null, t)} onAsk={() => ask(note)} onCancel={cancelNote} confirm={confirmText} onUndo={undoChannel ? undoMute : null} keys={!!desk} ctl={noteCtl} />}
     </div>
   );
@@ -2934,48 +2960,38 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
 const HEART = 'M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z';
 
-/** Ziel 48 pt, Bestätigung am Knopf (Füllung ohne Verzögerung, Pop 150 ms) */
-function ActionButton({ label, aria, testid, onClick, on, fill = true, children }: { label: string; aria?: string; testid: string; onClick: (e: React.MouseEvent) => void; on?: boolean; fill?: boolean; children: React.ReactNode }) {
+/** Knopf der Leiste: Kreis 48 px, Phosphor Regular, Zustand an in Akzentfarbe, Bestätigung am Knopf in 150 ms */
+function ActionButton({ label, aria, testid, onClick, on, fill = true, icon, disabled }: { disabled?: boolean; label: string; aria?: string; testid: string; onClick: (e: React.MouseEvent) => void; on?: boolean; fill?: boolean; icon: IconName }) {
   return (
     <button
       aria-label={aria ?? label}
       aria-pressed={on === undefined || !fill ? undefined : on}
       data-testid={testid}
       data-on={on ? '1' : undefined}
+      disabled={disabled}
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
       onClick={onClick}
-      className="vbtn no-callout flex min-h-[48px] min-w-[48px] flex-col items-center justify-center gap-0.5 text-white"
+      className="vbtn no-callout flex min-h-[var(--hit)] min-w-[var(--hit)] flex-col items-center justify-center"
     >
-      <svg width="28" height="28" viewBox="0 0 24 24" fill={on && fill ? '#fff' : 'none'} stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,.6))' }}>
-        {children}
-      </svg>
+      <span className="vbtn-ring">
+        <Icon name={icon} size="var(--rail-icon)" />
+      </span>
       {label && <span className="vlabel">{label}</span>}
     </button>
-  );
-}
-
-function FormSwitch({ form, setForm, rate, onRate }: { form: Form; setForm: (f: Form) => void; rate: Rate; onRate: () => void }) {
-  return (
-    <div className="vform" role="radiogroup" aria-label="Form" data-testid="form-switch" onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
-        {FORMS.map((f) => (
-          <button key={f} role="radio" aria-checked={form === f} className={form === f ? 'on' : ''} onClick={() => setForm(f)}>
-            {FORM_LABEL[f]}
-          </button>
-        ))}
-        {rate > 1 && form !== 'text' && (
-          <button type="button" className="vrate" data-testid="rate" aria-label={`Speed ${rate}x, tap to change`} onClick={onRate}>
-            {rate}x
-          </button>
-        )}
-    </div>
   );
 }
 
 /** Vorschaubild eines Moments: Video über dem IFrame, Audio mit Cover. Text hat keins. */
 function posterOf(mm: Moment | undefined) {
   if (!mm || mm.form === 'text') return null;
-  if (!mm.audio) return <Cover className="vposter" src={thumbOf(mm)} />;
+  if (!mm.audio)
+    return (
+      <>
+        <Cover className="vambient" src={thumbOf(mm)} />
+        <Cover className="vposter" src={thumbOf(mm)} />
+      </>
+    );
   return (
     <div className="vaudio">
       <Cover className="vaudio-bg" src={thumbOf(mm)} />

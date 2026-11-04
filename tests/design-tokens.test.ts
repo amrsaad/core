@@ -145,15 +145,15 @@ function files(dir: string): string[] {
 }
 // Stand bei Start von Brief 06 (04.11.2026). Nur senken.
 const CAP: Record<string, number> = {
-  'src/App.tsx': 8,
-  'src/index.css': 129,
-  'src/moments/MomentFeed.tsx': 14,
+  'src/App.tsx': 0,
+  'src/index.css': 41,
+  'src/moments/MomentFeed.tsx': 4,
   'src/moments/MomentModal.tsx': 1,
-  'src/moments/NoteSheet.tsx': 3,
+  'src/moments/NoteSheet.tsx': 0,
   'src/video/VideoFeed.tsx': 11,
   'src/video/ytApi.ts': 1,
   'src/video/VideoModal.tsx': 1,
-  'src/screens/SyncCard.tsx': 1,
+  'src/screens/SyncCard.tsx': 0,
   'src/screens/SavedTabs.tsx': 1,
 };
 describe('lint: Farbliterale', () => {

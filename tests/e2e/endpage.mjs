@@ -100,7 +100,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     c.audioMarkedSeen = await waitFor(page, (id) => window.__core.seen(id), firstAudio, 3000);
     await page.waitForTimeout(1300); // Zustand wird verzögert gespeichert (der Moment läuft im Zeitraffer erst danach zu Ende)
     await page.screenshot({ path: `${out}/${name}-3b-audio.png` });
-    await page.click('.vform button:has-text("Video")', { timeout: 4000 });
+    await page.click('.head-tabs button:has-text("Video")', { timeout: 4000 });
     c.backToVideoEnd = await waitFor(page, () => !!document.querySelector('[data-testid=end-page]') && !document.querySelector('[data-testid=end-page]').innerText.includes('Video'));
     const b2 = await page.evaluate(() => [...document.querySelectorAll('[data-testid^=end-]')].filter((x) => x.tagName === 'BUTTON').map((x) => x.textContent));
     r.afterAudio = b2;

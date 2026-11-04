@@ -28,7 +28,11 @@ const mk = (i, area, extra = {}) => ({
   recall: { question: `What follows from moment ${i}?`, options: [`Wrong A ${i}`, `Right ${i}`, `Wrong B ${i}`], correct: 1, why: `Because ${i} says so.` }, ...extra,
 });
 async function pool(area) {
-  const moments = Array.from({ length: 14 }, (_, i) => mk(i, area));
+  const moments = [
+    ...Array.from({ length: 14 }, (_, i) => mk(i, area)),
+    ...Array.from({ length: 6 }, (_, i) => mk(40 + i, area, { form: 'audio', audio: true, hls: `https://stream.test/${40 + i}.m3u8`, cues: [[0, area === 'beat' ? 'لَا تَقْصُصْ رُؤْيَاكَ عَلَىٰ إِخْوَتِكَ فَيَكِيدُوا لَكَ كَيْدًا' : 'Audio caption one, a marketing message'], [2, 'two']] })),
+    ...Array.from({ length: 6 }, (_, i) => mk(60 + i, area, { form: 'text', videoId: `texto${String(60 + i).padStart(5, '0')}`, author: `Author ${i}`, ref: `Ref ${i}`, sourceUrl: `https://example.org/s/${i}`, license: 'CC BY 4.0', hook: i === 1 ? 'A very long hook that keeps going over several lines to test wrapping in the page, with many words and a clause or two' : `Check lens status before the next injection ${i}` })),
+  ];
   const raw = crypto.getRandomValues(new Uint8Array(32));
   const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt']);
   const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -64,7 +68,7 @@ const probe = () => {
     if (el.matches('button, a[href], [role="button"], input, [role="radio"]') && (r.width < 44 - 0.5 || r.height < 44 - 0.5) && r.top < H && r.bottom > 0 && r.left < W) res.small.push(`${el.tagName}.${String(el.className).slice(0, 30)}[${el.getAttribute('aria-label') ?? el.textContent?.trim().slice(0, 12)}] ${Math.round(r.width)}x${Math.round(r.height)}`);
     // Textknoten direkt unter dem Element
     const own = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
-    if (own && r.top < H && r.bottom > 0 && !el.closest('.vslot')) {
+    if (own && r.top < H && r.bottom > 0 && !el.closest('.vslot') && !el.closest('.head[data-focus="on"] button:not(.on)')) {
       const fg = parse(cs.color); if (!fg) continue;
       const bg = backdrop(el); const f = blend(fg, bg);
       const a = lum(f), b = lum(bg); const cr = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
@@ -88,6 +92,8 @@ async function open(area, vp, scheme, p) {
   await pg.goto(`${url}?now=2026-10-23&seed=3#k=${p.k}`);
   try { await pg.waitForFunction(() => !!window.__core?.moment(), null, { timeout: 8000 }); } catch { fail(`load ${area} ${vp.name}`, 'Feed lädt nicht'); }
   await pg.waitForTimeout(700);
+  // Erststart-Übersicht der Tasten (Desktop) zu, sie deckt sonst den Feed
+  if (await pg.locator('[data-testid=desk-help]').count()) { await pg.keyboard.press('Escape'); await pg.waitForTimeout(300); }
   return { cx, pg, errors };
 }
 
@@ -112,20 +118,124 @@ for (const area of MOODS) {
       const r = await check(pg, `feed ${tag}`, { skipSmall: !strict });
       if (r.mood !== area) fail(`stimmung ${tag}`, `data-mood ist ${r.mood}`); else ok(`stimmung ${tag}`);
       await pg.screenshot({ path: `${dir}/feed-${area}-${vp.name}${scheme === 'light' ? '-hell' : ''}.png` });
+      if (area === 'body') {
+        // Zustände der Leiste und der Status-Zeile (Entscheidung 50 und 22E): Stumm kommt vom Start, Offline per Netz aus
+        const st = await pg.evaluate(() => { const e = document.querySelector('[data-status]'); return e ? { kind: e.getAttribute('data-status'), text: e.textContent.trim() } : null; });
+        if (vp.width < 1181 && st?.kind !== 'muted') fail(`status stumm ${tag}`, JSON.stringify(st)); else ok(`status stumm ${tag}`);
+        await check(pg, `status stumm ${tag}`, { skipSmall: true });
+        if (vp.width < 1181) await pg.screenshot({ path: `${dir}/status-stumm-${vp.name}.png` });
+        await cx.setOffline(true);
+        await pg.evaluate(() => window.dispatchEvent(new Event('offline')));
+        await pg.waitForTimeout(500);
+        const off = await pg.evaluate(() => { const e = document.querySelector('[data-status]'); const t = document.querySelector('[data-testid=form-switch]'); const r = e?.getBoundingClientRect(); return { kind: e?.getAttribute('data-status') ?? null, under: r && t ? r.top >= t.getBoundingClientRect().bottom - 1 || document.querySelector('.desk') !== null : false, count: document.querySelectorAll('[data-status]').length }; });
+        if (off.kind !== 'offline' || off.count !== 1) fail(`status offline ${tag}`, JSON.stringify(off)); else ok(`status offline ${tag}`);
+        await check(pg, `status offline ${tag}`, { skipSmall: true });
+        await pg.screenshot({ path: `${dir}/status-offline-${vp.name}.png` });
+        await cx.setOffline(false);
+        await pg.evaluate(() => window.dispatchEvent(new Event('online')));
+        await pg.waitForTimeout(300);
+      }
+      if (area === 'body') {
+        // Zustände (Entscheidung 43): Kontext, Fokus-Blatt, Fokus aktiv, More, Toast, Abruf
+        const isDesk = vp.width >= 1181;
+        const snap = async (name) => { await check(pg, `${name} ${tag}`, { skipSmall: !strict }); await pg.screenshot({ path: `${dir}/state-${name.replace(/\s+/g, '-')}-${vp.name}.png` }); };
+        if (!isDesk) {
+          try { await pg.locator('[data-testid=info-tap]').first().click({ timeout: 2500, force: true }); await pg.waitForSelector('[data-testid=caption-sheet]', { timeout: 2500 }); await pg.waitForTimeout(500); await snap('kontext'); await pg.locator('[data-testid=caption-backdrop]').first().click({ force: true, position: { x: 5, y: 5 } }); await pg.waitForTimeout(300); } catch (e) { fail(`kontext ${tag}`, String(e).slice(0, 80)); }
+          try {
+            const tab = pg.locator('[data-testid=form-switch] button:has-text("Video")').first(); const bb = await tab.boundingBox();
+            await pg.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2); await pg.mouse.down(); await pg.waitForTimeout(700); await pg.mouse.up();
+            await pg.waitForSelector('[data-testid=focus-sheet]', { timeout: 2500 }); await pg.waitForTimeout(500); await snap('fokus-blatt');
+            await pg.locator('[data-testid=focus-sheet] .chip:has-text("English")').first().click(); await pg.locator('[data-testid=focus-start]').click(); await pg.waitForTimeout(700);
+            const f = await pg.evaluate(() => !!document.querySelector('[data-testid=focus-in-tab]'));
+            if (!f) fail(`fokus aktiv ${tag}`, 'kein Zusatz am Reiter'); else ok(`fokus aktiv ${tag}`);
+            await snap('fokus-aktiv');
+            await pg.evaluate(() => localStorage.removeItem('core-focus')); await pg.reload(); await pg.waitForFunction(() => !!window.__core?.moment(), null, { timeout: 8000 }); await pg.waitForTimeout(500);
+          } catch (e) { fail(`fokus ${tag}`, String(e).slice(0, 80)); }
+          try { await pg.evaluate(() => window.__core.openNote()); await pg.waitForSelector('[data-testid=note-sheet]', { timeout: 2500 }); await pg.waitForTimeout(500); await snap('more'); await pg.locator('[data-testid=note-chip-Wrong]').click(); await pg.waitForTimeout(300); if (await pg.locator('[data-testid=toast]').count()) await snap('toast'); await pg.waitForTimeout(1500); } catch (e) { fail(`more ${tag}`, String(e).slice(0, 80)); }
+        }
+        try {
+          // Abruf: nach dem ersten Tipp läuft die Nachbildung schnell, nach vier gesehenen Momenten kommt die Karte
+          await pg.reload(); await pg.waitForFunction(() => !!window.__core?.moment(), null, { timeout: 8000 }); await pg.waitForTimeout(500);
+          if (isDesk && (await pg.locator('[data-testid=desk-help]').count())) await pg.keyboard.press('Escape');
+          // drei Momente zu über 80 % geschaut, der vierte Wisch bringt die Karte (wie recallqueue.mjs)
+          for (let i = 0; i < 4; i++) {
+            await pg.evaluate(() => { for (const d of document.querySelectorAll('div')) if (d.__player) d.__player.seekTo(Math.max(0, (window.__core.moment()?.end ?? 60) - 1)); });
+            await pg.waitForTimeout(200);
+            await pg.evaluate(() => window.__core.next());
+            await pg.waitForTimeout(500);
+          }
+          const got = await pg.waitForSelector('[data-testid=recall-card]', { timeout: 6000 }).then(() => true, () => false);
+          if (got) { await pg.waitForTimeout(600); await snap('abruf'); } else fail(`abruf ${tag}`, 'keine Karte nach vier Wischen');
+        } catch (e) { fail(`abruf ${tag}`, String(e).slice(0, 80)); }
+      }
+      for (const [form, label] of [['audio', 'Audio'], ['text', 'Text']]) {
+        const tab = vp.width >= 1181 ? pg.locator(`[data-testid="desk-tab-${form}"]`) : pg.locator(`[data-testid=form-switch] button:has-text("${label}")`);
+        try { await tab.first().click({ timeout: 2500 }); await pg.waitForTimeout(900); } catch { fail(`${form} öffnen ${tag}`, 'Reiter nicht erreichbar'); continue; }
+        await check(pg, `${form} ${tag}`, { skipSmall: !strict });
+        await pg.screenshot({ path: `${dir}/${form}-${area}-${vp.name}${scheme === 'light' ? '-hell' : ''}.png` });
+      }
+      try { const tab = vp.width >= 1181 ? pg.locator('[data-testid="desk-tab-video"]') : pg.locator('[data-testid=form-switch] button:has-text("Video")'); await tab.first().click({ timeout: 1500 }); await pg.waitForTimeout(500); } catch {}
       if (area === 'body' || (area === 'brain' && scheme === 'light')) {
         // neutrale Screens: Saved und Settings
         for (const [id, name, desk] of [['saved', 'Saved', 'desk-saved'], ['settings', 'Settings', 'desk-settings']]) {
           const btn = vp.width >= 1181 ? pg.locator(`[data-testid="${desk}"]`) : pg.locator(`nav [aria-label="${name}"]`);
           if (vp.width < 1181 && id === 'saved') { await pg.mouse.click(vp.width / 2, vp.height / 2); await pg.waitForTimeout(400); }
+          if (id === 'saved' && vp.width < 1181) {
+            // ein gespeicherter Moment, damit Raster und Liste etwas zeigen
+            try {
+              for (let i = 0; i < 3; i++) {
+                await pg.locator('[data-testid=save]').first().click({ timeout: 2000, force: true }); await pg.waitForTimeout(300);
+                await pg.evaluate(() => window.__core.next()); await pg.waitForTimeout(700);
+              }
+            } catch {}
+          }
           try { await btn.first().click({ timeout: 2500, force: true }); await pg.waitForTimeout(600); } catch { fail(`${id} öffnen ${tag}`, 'Schaltfläche nicht erreichbar'); continue; }
           if (scheme === 'dark' || area === 'body') {
             await check(pg, `${id} ${tag}`, { skipSmall: !strict });
             await pg.screenshot({ path: `${dir}/${id}-${vp.name}${scheme === 'light' ? '-hell' : ''}.png` });
+            if (id === 'saved' && (await pg.locator('[data-testid=saved-view-list]').count())) {
+              await pg.locator('[data-testid=saved-view-list]').click({ force: true }); await pg.waitForTimeout(300);
+              await check(pg, `saved-liste ${tag}`, { skipSmall: !strict });
+              await pg.screenshot({ path: `${dir}/saved-liste-${vp.name}${scheme === 'light' ? '-hell' : ''}.png` });
+              await pg.locator('[data-testid=saved-view-grid]').click({ force: true }); await pg.waitForTimeout(200);
+            }
           }
           try { await btn.first().click({ timeout: 1500, force: true }); } catch {}
         }
       }
       if (errors.length) fail(`js-fehler ${tag}`, errors[0]); else ok(`js-fehler ${tag}`);
+      await cx.close();
+    }
+  }
+}
+// Unlock-Seite: ohne Schlüssel im Fragment
+for (const scheme of SCHEMES) {
+  for (const vp of VIEWPORTS) {
+    const cx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, serviceWorkers: 'block', deviceScaleFactor: 1, colorScheme: scheme });
+    const pg = await cx.newPage();
+    try {
+      await pg.goto(`${url}?now=2026-10-23`);
+      await pg.waitForSelector('[data-testid=unlock-screen]', { timeout: 8000 });
+      await pg.waitForTimeout(400);
+      await check(pg, `unlock ${vp.name} ${scheme}`, { skipSmall: !strict });
+      await pg.screenshot({ path: `${dir}/unlock-${vp.name}${scheme === 'light' ? '-hell' : ''}.png` });
+    } catch (e) { fail(`unlock ${vp.name} ${scheme}`, String(e).slice(0, 80)); }
+    await cx.close();
+  }
+}
+// Share-Blatt und Clip-Seite (Vorschau ?design=, Verdrahtung kommt mit Brief 05)
+for (const which of ['share', 'clip', 'clip-text', 'clip-rtl']) {
+  for (const scheme of SCHEMES) {
+    for (const vp of VIEWPORTS) {
+      const cx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, serviceWorkers: 'block', deviceScaleFactor: 1, colorScheme: scheme });
+      const pg = await cx.newPage();
+      try {
+        await pg.goto(`${url}?design=${which}`);
+        await pg.waitForSelector(which === 'share' ? '[data-testid=share-sheet]' : '[data-testid=clip-view]', { timeout: 8000 });
+        await pg.waitForTimeout(700);
+        await check(pg, `${which} ${vp.name} ${scheme}`, { skipSmall: !strict });
+        await pg.screenshot({ path: `${dir}/${which}-${vp.name}${scheme === 'light' ? '-hell' : ''}.png` });
+      } catch (e) { fail(`${which} ${vp.name} ${scheme}`, String(e).slice(0, 80)); }
       await cx.close();
     }
   }

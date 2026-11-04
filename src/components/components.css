@@ -1,0 +1,116 @@
+/* Komponenten (Brief 06). Nur Werte aus src/design/tokens.css. */
+
+.icon { flex: none; display: block; }
+
+/* Status: eine Zeile unter den Reitern, 12 px mit Icon, Grau. Grün nur Hintergrund, Orange nur Sync-Fehler (Entscheidung 22E). */
+.status {
+  position: absolute;
+  z-index: var(--z-ui);
+  top: calc(var(--safe-t) + var(--head-h) + var(--s-3));
+  left: calc(var(--safe-l) + var(--margin));
+  right: calc(var(--safe-r) + var(--margin));
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--t-status);
+  line-height: var(--t-status-lh);
+  font-weight: var(--w-meta);
+  color: var(--ink-2);
+}
+.status > span { min-width: 0; overflow-wrap: anywhere; }
+.status[data-status='background'] { color: var(--ok); }
+.status[data-status='sync'] { color: var(--warn); }
+.status[data-status='loading'] .icon { animation: status-spin 0.9s linear infinite; }
+@keyframes status-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .status[data-status='loading'] .icon { animation: none; }
+}
+
+/* Desktop: Die Reiter stehen in der Kopfleiste, die Zeile liegt oben links in der Videospalte */
+.desk .status { top: var(--s-3); }
+
+/* Tinte der Kopfzeile und der Zeilen auf der Fläche: auf Medien hell, auf Seiten (Text) in der Stimmung */
+.vfeed { --ink: var(--on-media); --ink-2: var(--on-media-muted); }
+.vfeed[data-surface='page'] { --ink: var(--text); --ink-2: var(--muted); }
+
+/* Kopfzeile: Reiter als Text mit Linie in Bereichsfarbe, Tempo-Pille rechts */
+.head {
+  position: absolute;
+  z-index: calc(var(--z-ui) + 5);
+  top: var(--safe-t);
+  left: 0;
+  right: 0;
+  height: var(--head-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.head-tabs { display: flex; gap: var(--s-2); pointer-events: auto; }
+.head-tabs button {
+  position: relative;
+  min-width: var(--hit);
+  min-height: var(--hit);
+  padding: 0 var(--s-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--t-tab);
+  line-height: var(--t-tab-lh);
+  font-weight: var(--w-tab);
+  color: var(--ink-2);
+  transition: color var(--dur-ui) var(--ease);
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+.head-tabs button.on { color: var(--ink); }
+.head-tabs button.on::after {
+  content: '';
+  position: absolute;
+  left: var(--s-3);
+  right: var(--s-3);
+  bottom: var(--s-1);
+  height: 2px;
+  border-radius: var(--r-pill);
+  background: var(--area, var(--accent));
+}
+.head-focus {
+  display: block;
+  /* Berührfläche 44 px hoch (Layout-Gate), im Layout unverändert 19 px: die Polster werden von den Rändern aufgehoben */
+  padding: 3px 0 27px;
+  margin: -2px 0 -23px;
+  font-size: var(--t-nav);
+  line-height: var(--t-nav-lh);
+  font-weight: var(--w-tab);
+  color: var(--area, var(--accent));
+  white-space: nowrap;
+}
+/* Fokus aktiv: die anderen Reiter werden fast unsichtbar */
+.head[data-focus='on'] .head-tabs button:not(.on) { color: var(--tab-off); }
+.head-rate {
+  position: absolute;
+  right: calc(var(--safe-r) + var(--margin));
+  top: 50%;
+  transform: translateY(-50%);
+  min-width: var(--hit);
+  min-height: var(--hit);
+  padding: 0 var(--s-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--t-meta);
+  font-weight: var(--w-tab);
+  color: var(--ink);
+  pointer-events: none;
+  isolation: isolate;
+}
+.head-rate::before {
+  content: '';
+  position: absolute;
+  inset: var(--s-2) 0;
+  border-radius: var(--r-pill);
+  background: var(--glass);
+  z-index: -1;
+}
+.desk .head { display: none; }

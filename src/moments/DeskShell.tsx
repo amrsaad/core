@@ -8,7 +8,7 @@ import { sourceLine } from './source';
 import { isArabic, type Moment } from './types';
 
 /**
- * Bausteine des Desktop-Modus ab 900 px (Auftrag Max 28.10.2026): Leiste oben mit Reitern und Tageszahl, Seitenblatt für
+ * Bausteine des Desktop-Modus ab 1181 px (Auftrag Max 28.10.2026): Leiste oben mit Reitern und Tageszahl, Seitenblatt für
  * Settings und Saved, Übersicht der Tasten, festes Panel rechts mit Hook, Caption, Quelle und Abrufkarte.
  * Mobil wird nichts davon gezeichnet.
  */

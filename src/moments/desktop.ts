@@ -1,5 +1,5 @@
 /**
- * Desktop-Modus ab 900 px Breite (Auftrag Max 28.10.2026). Reine Regeln, ohne React und ohne DOM, damit sie sich ohne Browser prüfen lassen.
+ * Desktop-Modus ab 1181 px Breite (Auftrag Max 28.10.2026, Schwelle neu mit Brief 06). Reine Regeln, ohne React und ohne DOM, damit sie sich ohne Browser prüfen lassen.
  * Mobil bleibt unverändert. Was hier steht, gilt nur, wenn die Breite mindestens DESKTOP_MIN beträgt.
  *
  * Tasten: Pfeile oder J und K blättern, Leertaste Pause, M stumm, Shift+. schaltet das Tempo, L Herz, S Save, O Source,
@@ -7,19 +7,20 @@
  * Enter Next, ? zeigt die Übersicht.
  * Trackpad: zwei Finger senkrecht blättert (ein Wisch ist ein Schritt, der Nachlauf zählt nicht), zwei Finger nach links öffnet die Rückmeldung.
  */
+import { BP_DESKTOP } from '../design/breakpoints';
 import { SWIPE_PX } from './actions';
 import type { Form } from './form';
 
-export const DESKTOP_MIN = 900;
+export const DESKTOP_MIN = BP_DESKTOP;
 export const DESKTOP_QUERY = `(min-width: ${DESKTOP_MIN}px)`;
-/** Spalte mit Video, Audio und Abruf, Bild immer 16:9 */
-export const COLUMN_PX = 480;
-/** Lesebreite im Textreiter in Zeichen */
-export const READ_CH = 65;
+/** Höchstbreite des Videos, Bild immer 16:9 (Brief 06) */
+export const VIDEO_MAX_PX = 1280;
+/** Lesespalte im Textreiter in Pixel */
+export const READ_PX = 640;
 export const PANEL_MAX_PX = 400;
 export const BAR_PX = 56;
-/** Zielgröße der kompakten Spalte in Pixel (mobil 48 pt) */
-export const DESK_TARGET_PX = 36;
+/** Zielgröße der kompakten Spalte in Pixel (mobil 48 pt, Layout-Gate 44) */
+export const DESK_TARGET_PX = 44;
 
 export interface KeyIn {
   key: string;

@@ -1,0 +1,19 @@
+/* ---------- Share-Blatt und Clip-Seite (Brief 06, Block 13) ---------- */
+.share-hook { margin: 0 0 var(--s-3); font-size: var(--t-hook); line-height: var(--t-hook-lh); font-weight: var(--w-hook); overflow-wrap: anywhere; }
+.share-url { margin: 0 0 var(--s-3); padding: var(--s-3); border-radius: var(--r-btn); background: var(--surface-2); color: var(--muted); font-size: var(--t-meta); line-height: var(--t-meta-lh); overflow-wrap: anywhere; box-shadow: var(--inset-hair); }
+.share-close { margin-top: var(--s-2); color: var(--muted); }
+
+.clip { min-height: 100dvh; background: var(--bg); color: var(--text); padding: calc(var(--safe-t) + var(--s-6)) calc(var(--safe-r) + var(--margin)) calc(var(--safe-b) + var(--s-6)) calc(var(--safe-l) + var(--margin)); display: flex; justify-content: center; }
+.clip-col { width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: var(--s-4); }
+.clip-kicker { margin: 0; color: var(--kicker); font-size: var(--t-meta); line-height: var(--t-meta-lh); font-weight: var(--w-meta); text-transform: uppercase; letter-spacing: 0.08em; }
+.clip-hook { margin: 0; font-size: var(--t-hook); line-height: var(--t-hook-lh); font-weight: var(--w-hook); overflow-wrap: anywhere; }
+.clip-media { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: var(--r-art); background: var(--media); overflow: hidden; display: grid; place-items: center; }
+.clip-media iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.clip-play { width: var(--s-16); height: var(--s-16); border-radius: var(--r-pill); background: var(--accent); color: var(--on-accent); display: grid; place-items: center; }
+.clip-play:disabled { opacity: 0.35; }
+.clip-caption, .clip-passage { display: flex; flex-direction: column; gap: var(--s-3); }
+.clip-caption p, .clip-passage p { margin: 0; overflow-wrap: anywhere; }
+.clip-caption p { color: var(--muted); font-size: var(--t-caption); line-height: var(--t-caption-lh); }
+.clip-passage p { font-size: var(--t-reading); line-height: var(--t-reading-lh); }
+.clip[dir='rtl'] .clip-passage p, .clip[dir='rtl'] .clip-caption p { font-family: var(--font-ar); font-size: var(--t-ar); line-height: var(--t-ar-lh); }
+.clip-link { display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--hit); color: var(--text); font-size: var(--t-row); text-decoration: underline; }

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
+import { Icon } from '../components/Icon';
 import { shuffleOrder } from './recall';
 import { isArabic, thumbOf, type Moment } from './types';
 
@@ -61,7 +62,8 @@ export function RecallCard({ m, review, rng, onAnswer, onClose, keys, ctl }: { m
           const state = chosen === null ? '' : i === r.correct ? 'right' : i === chosen ? 'wrong' : 'rest';
           return (
             <button key={i} className={`recall-option ${state}`} data-testid="recall-option" data-correct={i === r.correct ? '1' : '0'} data-state={state} disabled={chosen !== null && state === 'rest' ? true : undefined} aria-pressed={chosen === i} onClick={() => pick(i)}>
-              {r.options[i]}
+              <span>{r.options[i]}</span>
+              {state === 'right' && <Icon name="check" size="var(--icon-sm)" />}
               {keys && <kbd className="recall-key" aria-hidden="true">{shown + 1}</kbd>}
             </button>
           );

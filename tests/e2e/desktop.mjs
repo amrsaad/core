@@ -80,13 +80,13 @@ let browser;
 try {
   browser = await chromium.launch(process.env.E2E_CHROME ? { executablePath: process.env.E2E_CHROME } : {});
 
-  // ---------- Schwelle: 899 mobil, 900 Desktop ----------
+  // ---------- Schwelle: 1180 Tablet, 1181 Desktop ----------
   {
-    const a = await freshPage(browser, { width: 899, height: 900 });
-    c.below900Mobile = !(await has(a.pg, 'desk-bar')) && (await E(a.pg, 'form-switch').isVisible());
+    const a = await freshPage(browser, { width: 1180, height: 900 });
+    c.below1181Mobile = !(await has(a.pg, 'desk-bar')) && (await E(a.pg, 'form-switch').isVisible());
     await a.cx.close();
-    const b = await freshPage(browser, { width: 900, height: 900 });
-    c.at900Desktop = (await has(b.pg, 'desk-bar')) && !(await E(b.pg, 'form-switch').isVisible().catch(() => false));
+    const b = await freshPage(browser, { width: 1181, height: 900 });
+    c.at1181Desktop = (await has(b.pg, 'desk-bar')) && !(await E(b.pg, 'form-switch').isVisible().catch(() => false));
     // Größe ändern ohne neu zu laden: Player bleibt im Dokument, Moment und Index bleiben
     await settle(b.pg);
     const before = await b.pg.evaluate(() => ({ id: window.__core.moment().id, n: document.querySelectorAll('iframe, [data-testid=player]').length }));
@@ -105,16 +105,16 @@ try {
   await settle(pg);
   const bodyNoHelp = () => pg.evaluate(() => !!document.querySelector('[data-testid=desk-help]'));
 
-  // Ton aus: Symbol statt Text, unten rechts im 16:9-Band der Spalte (gemessen, wenn keine Transition mehr läuft)
+  // Ton aus: Status-Zeile oben links in der Videospalte (Brief 06), 12 px mit Icon
   await waitFor(pg, () => document.getAnimations().filter((a) => a instanceof CSSTransition).length === 0);
   const dIcon = await pg.evaluate(() => {
     const el = document.querySelector('[data-testid=sound-off]');
-    const band = document.querySelector('.vframe > div');
-    if (!el || !band) return null;
-    const a = el.getBoundingClientRect(), b = band.getBoundingClientRect();
-    return { right: b.right - a.right, fromBandBottom: b.bottom - a.bottom, w: a.width, text: el.textContent.trim(), pill: /for sound/i.test(document.body.innerText) };
+    const col = document.querySelector('.vfeed');
+    if (!el || !col) return null;
+    const a = el.getBoundingClientRect(), b = col.getBoundingClientRect();
+    return { left: a.left - b.left, top: a.top - b.top, text: el.textContent.trim(), font: parseFloat(getComputedStyle(el).fontSize), pill: /for sound/i.test(document.body.innerText) };
   });
-  c.soundIconDesk = !!dIcon && dIcon.text === '' && !dIcon.pill && Math.abs(dIcon.right - 12) <= 3 && Math.abs(dIcon.fromBandBottom - 12) <= 3;
+  c.soundIconDesk = !!dIcon && /^Sound off/.test(dIcon.text) && dIcon.font === 12 && !dIcon.pill && dIcon.left >= 8 && dIcon.left <= 24 && dIcon.top >= 8 && dIcon.top <= 24;
   if (!c.soundIconDesk) console.log('soundIconDesk', JSON.stringify(dIcon));
 
   // Übersicht einmalig beim ersten Desktop-Start
@@ -145,9 +145,10 @@ try {
     return { main: r('.dmain'), panel: r('[data-testid=desk-panel]'), aside: r('[data-testid=desk-aside]'), bar: r('[data-testid=desk-bar]'), video: v && { x: v.x, y: v.y, w: v.width, h: v.height }, scrollW: document.documentElement.scrollWidth };
   });
   results.notes.geo = geo;
-  c.columnIs480 = !!geo.main && Math.abs(geo.main.w - 480) < 1;
-  c.columnCentered = !!geo.main && Math.abs(geo.main.x + geo.main.w / 2 - 720) < 1;
-  c.videoIs16by9 = !!geo.video && Math.abs(geo.video.w / geo.video.h - 16 / 9) < 0.02 && Math.abs(geo.video.w - 480) < 1;
+  // Brief 06: Hauptbereich = Fenster minus Panel (400), Video min(1280, Platz, (Höhe - Leiste - Caption) * 16 / 9), bei 1440 über 1000 px
+  c.mainFillsLeftOfPanel = !!geo.main && Math.abs(geo.main.w - (1440 - 400)) < 1 && geo.main.x === 0;
+  c.videoIs16by9 = !!geo.video && Math.abs(geo.video.w / geo.video.h - 16 / 9) < 0.02 && geo.video.w > 1000 && geo.video.w <= 1280;
+  c.videoCentered = !!geo.video && !!geo.main && Math.abs(geo.video.x + geo.video.w / 2 - (geo.main.x + geo.main.w / 2)) < 2;
   c.panelFixedRight = !!geo.aside && geo.aside.x + geo.aside.w > 1439 && geo.aside.w >= 340;
   c.barOnTop = !!geo.bar && geo.bar.y === 0 && geo.bar.h <= 60 && geo.bar.w >= 1439;
   c.noHorizontalScroll = geo.scrollW <= 1440;
@@ -157,7 +158,7 @@ try {
   c.barHasTabsAndDay = ['Video', 'Audio', 'Text'].every((x) => topbar.includes(x)) && (await E(pg, 'desk-today').innerText()).length > 0;
   c.panelHasHookAndSource = (await E(pg, 'desk-hook').innerText()) === (await pg.evaluate(() => window.__core.moment().hook)) && (await has(pg, 'desk-source')) && (await has(pg, 'desk-open-source'));
   c.noMobileOverlays = !(await has(pg, 'hook')) && !(await has(pg, 'info-tap'));
-  c.compactButtons = await pg.evaluate(() => [...document.querySelectorAll('.vactions button')].every((b) => b.getBoundingClientRect().height <= 40 && b.getBoundingClientRect().height >= 32));
+  c.compactButtons = await pg.evaluate(() => [...document.querySelectorAll('.vactions button')].every((b) => b.getBoundingClientRect().height <= 56 && b.getBoundingClientRect().height >= 32));
   await pg.screenshot({ path: `${out}/02-video.png` });
 
   // Fenstertitel zeigt den Hook
@@ -306,20 +307,19 @@ try {
   await pg.screenshot({ path: `${out}/05-audio.png` });
   await press(pg, '3', 600);
   c.tab3Text = (await E(pg, 'desk-tab-text').getAttribute('aria-checked')) === 'true' && (await pg.evaluate(() => window.__core.moment()?.form === 'text'));
-  // Text: 65 Zeichen Lesebreite, Quelle im Panel, Spalte breiter
+  // Text: Lesespalte 640 px, Quelle im Panel
   const tg = await pg.evaluate(() => {
     const body = document.querySelector('.vtext-body');
     const cs = getComputedStyle(body);
     const probe = document.createElement('span');
     probe.style.cssText = `position:absolute;visibility:hidden;font:${cs.font};white-space:pre`;
-    probe.textContent = '0'.repeat(65);
+    probe.textContent = '0';
     document.body.appendChild(probe);
-    const ch65 = probe.getBoundingClientRect().width;
     probe.remove();
-    return { w: body.getBoundingClientRect().width, ch65, col: document.querySelector('.dmain').getBoundingClientRect().width };
+    return { w: body.getBoundingClientRect().width, ch65: 640, col: document.querySelector('.dmain').getBoundingClientRect().width };
   });
   results.notes.text = tg;
-  c.textWidth65ch = tg.w <= tg.ch65 + 2 && tg.w >= tg.ch65 * 0.9;
+  c.textColumn640 = tg.w <= 642 && tg.w >= 600;
   c.barFitsWindowText = await pg.evaluate(() => [...document.querySelectorAll('[data-testid=desk-bar] button')].every((b) => { const r = b.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth; }));
   c.barTabsClickableText = await pg.evaluate(() => { const b = document.querySelector('[data-testid=desk-tab-audio]').getBoundingClientRect(); return document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2)?.closest('[data-testid=desk-tab-audio]') !== null; });
   c.textSourceInPanel = (await E(pg, 'text-source').count()) === 1 && (await E(pg, 'desk-panel').locator('[data-testid=text-source]').count()) === 1;

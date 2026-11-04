@@ -64,135 +64,141 @@ export function Settings({ state, update, replace, moments, skipped = 0, sync }:
     }
   };
 
-  const row = 'rounded-xl bg-surface p-4 flex flex-col gap-3';
-  const btn = 'rounded-xl border border-[var(--line)] px-4 py-3 text-[16px] text-left';
+  const row = 'grp';
+  const btn = 'grp-btn';
 
   return (
-    <div className="pad pad-nav flex h-[100dvh] flex-col gap-4 overflow-y-auto">
-      <h1 className="t-headline m-0">Settings</h1>
+    <div className="pad pad-nav scr">
+      <div className="scr-wrap">
+        <div className="scr-head">
+          <h1 className="scr-title">Settings</h1>
+        </div>
 
-      <section className={row}>
-        <span className="text-[17px]">Mix</span>
-        {AREAS.map((a) => (
-          <label key={a} className="flex flex-col gap-1">
-            <span className="t-meta flex justify-between">
-              <span style={{ color: AREA_COLOR[a] }}>{AREA_LABEL[a]}</span>
-              <span className="text-muted">{Math.round(s.areaShares[a] * 100)} %</span>
-            </span>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              step={5}
-              value={Math.round(s.areaShares[a] * 100)}
-              onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, areaShares: rebalance(st.settings.areaShares, a, Number(e.target.value)) } }))}
-            />
-          </label>
-        ))}
-        <p className="t-meta m-0 text-muted">Starting values. Core learns from what you watch, skip and save. Every area keeps at least 10 %.</p>
-      </section>
+        <span className="grp-label">Mix</span>
+        <section className={row}>
+          <div className="grp-stack">
+            {AREAS.map((a) => (
+              <label key={a} className="mix-row" style={{ ['--area' as string]: AREA_COLOR[a] }}>
+                <span>
+                  <span style={{ color: 'var(--text)' }}>{AREA_LABEL[a]}</span>
+                  <span className="grp-note">{Math.round(s.areaShares[a] * 100)} %</span>
+                </span>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={Math.round(s.areaShares[a] * 100)}
+                  onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, areaShares: rebalance(st.settings.areaShares, a, Number(e.target.value)) } }))}
+                />
+              </label>
+            ))}
+          </div>
+          <p className="grp-note">Starting values. Core learns from what you watch, skip and save. Every area keeps at least 10 %.</p>
+        </section>
 
-      <section className={row}>
-        <span className="text-[17px]">Moments</span>
-        <div className="grid grid-cols-3 gap-2 text-center">
-          {AREAS.map((a) => (
-            <div key={a} className="rounded-lg border border-[var(--line)] py-2">
-              <div className="text-[20px] font-semibold">{list.filter((m) => m.area === a).length}</div>
-              <div className="t-meta" style={{ color: AREA_COLOR[a] }}>{AREA_LABEL[a]}</div>
+        <span className="grp-label">Moments</span>
+        <section className={row}>
+          <div className="mom-grid">
+            {AREAS.map((a) => (
+              <div key={a}>
+                <b>{list.filter((m) => m.area === a).length}</b>
+                <span>{AREA_LABEL[a]}</span>
+              </div>
+            ))}
+          </div>
+          <p className="grp-note">
+            {list.length} moments · unseen {list.filter((m) => !state.momentSeen[m.id] && !state.mutedChannels[m.channel]).length} · last daily run {moments?.lastRun ? new Date(moments.lastRun).toLocaleDateString('en-US') : 'none yet'}
+          </p>
+        </section>
+
+        <span className="grp-label">Muted channels</span>
+        <section className={row}>
+          {Object.keys(state.mutedChannels).length === 0 && <p className="grp-note">None. Tap More on a moment, then Mute this channel.</p>}
+          {Object.entries(state.mutedChannels).map(([id, name]) => (
+            <div key={id} className="grp-row">
+              <span>{name}</span>
+              <button
+                className="grp-btn mini"
+                onClick={() => update((st) => { const m = { ...st.mutedChannels }; delete m[id]; return { ...st, mutedChannels: m }; })}
+              >
+                Show again
+              </button>
             </div>
           ))}
-        </div>
-        <p className="t-meta m-0 text-muted">
-          {list.length} moments · unseen {list.filter((m) => !state.momentSeen[m.id] && !state.mutedChannels[m.channel]).length} · last daily run {moments?.lastRun ? new Date(moments.lastRun).toLocaleDateString('en-US') : 'none yet'}
-        </p>
-      </section>
+        </section>
 
-      <section className={row}>
-        <span className="text-[17px]">Muted channels</span>
-        {Object.keys(state.mutedChannels).length === 0 && <p className="t-meta m-0 text-muted">None. Tap More on a moment, then Mute this channel.</p>}
-        {Object.entries(state.mutedChannels).map(([id, name]) => (
-          <div key={id} className="flex items-center justify-between">
-            <span className="text-[16px]">{name}</span>
-            <button
-              className="t-meta rounded-lg border border-[var(--line)] px-3 py-2"
-              onClick={() => update((st) => { const m = { ...st.mutedChannels }; delete m[id]; return { ...st, mutedChannels: m }; })}
+        <LearnedCard state={state} update={update} row={row} btn={btn} />
+
+        <span className="grp-label">Player</span>
+        <section className={row}>
+          <label className="grp-row">
+            <span>Captions</span>
+            <select
+              data-testid="captions"
+              value={s.captionMode ?? 'auto'}
+              onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, captionMode: e.target.value as CaptionMode } }))}
             >
-              Show again
-            </button>
-          </div>
-        ))}
-      </section>
+              <option value="auto">Auto</option>
+              <option value="on">Always on</option>
+              <option value="off">Always off</option>
+            </select>
+          </label>
+          <label className="grp-row">
+            <span>Playback speed</span>
+            <select
+              data-testid="speed"
+              value={rateOf(s)}
+              onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, playbackRate: Number(e.target.value) as Rate } }))}
+            >
+              {RATES.map((v) => (
+                <option key={v} value={v}>{v}x</option>
+              ))}
+            </select>
+          </label>
+          <label className="grp-row">
+            <span>Single player mode (if iOS turns the sound off when swiping)</span>
+            <input
+              type="checkbox"
+              checked={s.playerMode === 'single'}
+              onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, playerMode: e.target.checked ? 'single' : 'slots' } }))}
+            />
+          </label>
+          <Loudness />
+        </section>
+        <p className="grp-foot">Captions Auto: on for audio and Arabic moments, off for English video.</p>
 
-      <LearnedCard state={state} update={update} row={row} btn={btn} />
+        <span className="grp-label">Sync and devices</span>
+        <SyncCard sync={sync} />
+        <p className="grp-foot" data-testid="digest-line">{lastDigestLine(state.digestLatest, state.digestTaps)}</p>
+        <UnlockDevice tokenKey={sync.status.hasToken} />
 
-      <section className={row}>
-        <span className="text-[17px]">Time in Core</span>
-        <CoreTime feedTime={state.feedTime} />
-      </section>
+        <span className="grp-label">Data</span>
+        <section className={row}>
+          <button className={btn} onClick={doExport}>Export as JSON</button>
+          <button className={btn} onClick={() => file.current?.click()}>Import from JSON</button>
+          <input ref={file} type="file" accept="application/json,.json" hidden onChange={(e) => e.target.files?.[0] && doImport(e.target.files[0])} />
+          {msg && <p className="grp-note">{msg}</p>}
+        </section>
 
-      <section className={row}>
-        <span className="text-[17px]">Player</span>
-        <label className="flex items-center justify-between gap-3 text-[16px]">
-          <span>Captions</span>
-          <select
-            data-testid="captions"
-            value={s.captionMode ?? 'auto'}
-            onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, captionMode: e.target.value as CaptionMode } }))}
-          >
-            <option value="auto">Auto</option>
-            <option value="on">Always on</option>
-            <option value="off">Always off</option>
-          </select>
-        </label>
-        <p className="t-meta m-0 text-muted">Auto: on for audio and Arabic moments, off for English video.</p>
-        <label className="flex items-center justify-between gap-3 text-[16px]">
-          <span>Playback speed</span>
-          <select
-            data-testid="speed"
-            value={rateOf(s)}
-            onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, playbackRate: Number(e.target.value) as Rate } }))}
-          >
-            {RATES.map((v) => (
-              <option key={v} value={v}>{v}x</option>
-            ))}
-          </select>
-        </label>
-        <label className="flex items-center justify-between gap-3 text-[16px]">
-          <span>Single player mode (if iOS turns the sound off when swiping)</span>
-          <input
-            type="checkbox"
-            checked={s.playerMode === 'single'}
-            onChange={(e) => update((st) => ({ ...st, settings: { ...st.settings, playerMode: e.target.checked ? 'single' : 'slots' } }))}
-          />
-        </label>
-        <PreloadLine />
-        <Loudness />
-        <Latency samples={state.playLatency} />
-        <span className="t-meta" data-testid="moments-skipped">Moments skipped: {skipped}</span>
-        <TapReaction samples={state.tapMs} />
-        <SwipeFrames samples={state.swipeFrames} />
-        <Diagnostics state={state} moments={moments} skipped={skipped} sync={sync} />
-      </section>
+        <span className="grp-label">Advanced</span>
+        <section className={row} data-testid="advanced">
+          <div className="grp-metric"><span className="lead">Time in Core</span><CoreTime feedTime={state.feedTime} /></div>
+          <PreloadLine />
+          <Latency samples={state.playLatency} />
+          <TapReaction samples={state.tapMs} />
+          <SwipeFrames samples={state.swipeFrames} />
+          <span className="grp-metric" data-testid="moments-skipped">Moments skipped: {skipped}</span>
+          <Diagnostics state={state} moments={moments} skipped={skipped} sync={sync} />
+        </section>
 
-      <SyncCard sync={sync} />
-
-      <p className="t-meta m-0 px-1 text-muted" data-testid="digest-line">{lastDigestLine(state.digestLatest, state.digestTaps)}</p>
-
-      <UnlockDevice tokenKey={sync.status.hasToken} />
-
-      <section className={row}>
-        <button className={btn} onClick={doExport}>Export as JSON</button>
-        <button className={btn} onClick={() => file.current?.click()}>Import from JSON</button>
-        <input ref={file} type="file" accept="application/json,.json" hidden onChange={(e) => e.target.files?.[0] && doImport(e.target.files[0])} />
-        {msg && <p className="t-meta m-0 text-muted">{msg}</p>}
-      </section>
-
-      <section className="t-meta flex flex-col gap-1 text-muted">
-        <span>Version {__APP_VERSION__}</span>
-        <span>Pool updated {moments?.updatedAt ? new Date(moments.updatedAt).toLocaleString('en-US') : 'unknown'}</span>
-        <span>Saved {Object.keys(state.savedMoments).length} · seen {Object.keys(state.momentSeen).length} · today {Math.round((state.feedTime[dayKey(now())] ?? 0) / 60000)} min</span>
-        {isTimeShifted() && <span>Test time active: {now().toLocaleString('en-US')}</span>}
-      </section>
+        <section className="set-foot">
+          <span>Version {__APP_VERSION__}</span>
+          <span>Pool updated {moments?.updatedAt ? new Date(moments.updatedAt).toLocaleString('en-US') : 'unknown'}</span>
+          <span>Saved {Object.keys(state.savedMoments).length} · seen {Object.keys(state.momentSeen).length} · today {Math.round((state.feedTime[dayKey(now())] ?? 0) / 60000)} min</span>
+          {isTimeShifted() && <span>Test time active: {now().toLocaleString('en-US')}</span>}
+        </section>
+      </div>
     </div>
   );
 }
@@ -200,15 +206,15 @@ export function Settings({ state, update, replace, moments, skipped = 0, sync }:
 /** Gewicht und Pfeil je Zeile, mit Ende der Frist, solange ein Ablauf läuft */
 function LearnedList({ title, rows, name, id }: { title: string; rows: Row[]; name: (k: string) => string; id: string }) {
   return (
-    <div className="flex flex-col gap-1" data-testid={`learned-${id}`}>
-      <span className="t-meta text-muted">{title}</span>
-      {rows.length === 0 && <span className="t-meta text-muted">none yet</span>}
+    <div className="lrn" data-testid={`learned-${id}`}>
+      <span className="grp-note">{title}</span>
+      {rows.length === 0 && <span className="grp-note">none yet</span>}
       {rows.map((r) => (
-        <div key={r.key} className="flex items-baseline justify-between gap-3 text-[16px]" data-testid="learned-row">
-          <span className="min-w-0 truncate">{name(r.key)}</span>
-          <span className="shrink-0 tabular-nums" data-weight={r.weight.toFixed(2)}>
+        <div key={r.key} className="lrn-row" data-testid="learned-row">
+          <span>{name(r.key)}</span>
+          <span style={{ flex: 'none', fontVariantNumeric: 'tabular-nums' }} data-weight={r.weight.toFixed(2)}>
             {weightText(r.weight)}
-            {r.until !== undefined && <span className="t-meta text-muted"> until {new Date(r.until).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+            {r.until !== undefined && <span className="grp-note"> until {new Date(r.until).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
           </span>
         </div>
       ))}
@@ -224,9 +230,11 @@ function LearnedCard({ state, update, row, btn }: { state: AppState; update: (fn
   const any = l.channelUp.length + l.channelDown.length + l.topicUp.length + l.topicDown.length > 0;
   const cap1 = (k: string) => k.charAt(0).toUpperCase() + k.slice(1);
   return (
+    <>
+    <span className="grp-label">What Core learned</span>
     <section className={row} data-testid="learned-card">
-      <span className="text-[17px]">What Core learned</span>
-      {!any && <p className="t-meta m-0 text-muted" data-testid="learned-empty">{done ? 'Learning reset.' : 'Nothing learned yet. Core learns from what you watch, skip and save.'}</p>}
+      <span hidden>What Core learned</span>
+      {!any && <p className="grp-note" data-testid="learned-empty">{done ? 'Learning reset.' : 'Nothing learned yet. Core learns from what you watch, skip and save.'}</p>}
       {any && (
         <>
           <LearnedList id="channel-up" title="Speakers, more" rows={l.channelUp} name={speakerLine} />
@@ -241,12 +249,12 @@ function LearnedCard({ state, update, row, btn }: { state: AppState; update: (fn
         </button>
       )}
       {ask && (
-        <div className="flex flex-col gap-2" role="alertdialog" aria-label="Reset learning" data-testid="reset-ask">
-          <p className="m-0 text-[16px]">Reset everything Core learned? Speakers and topics go back to normal.</p>
-          <div className="flex gap-2">
-            <button className={btn + ' flex-1'} data-testid="reset-cancel" onClick={() => setAsk(false)}>Cancel</button>
+        <div className="grp-stack" role="alertdialog" aria-label="Reset learning" data-testid="reset-ask">
+          <p className="grp-row">Reset everything Core learned? Speakers and topics go back to normal.</p>
+          <div className="grp-btns">
+            <button className={btn} data-testid="reset-cancel" onClick={() => setAsk(false)}>Cancel</button>
             <button
-              className={btn + ' flex-1 font-semibold'}
+              className={btn + ' strong'}
               data-testid="reset-confirm"
               onClick={() => {
                 update((st) => ({ ...st, momentWeights: emptyWeights(), tapLog: undefined }));
@@ -260,6 +268,7 @@ function LearnedCard({ state, update, row, btn }: { state: AppState; update: (fn
         </div>
       )}
     </section>
+    </>
   );
 }
 
@@ -272,12 +281,12 @@ function CoreTime({ feedTime }: { feedTime: Record<string, number> }) {
   });
   const max = Math.max(1, ...days.map((d) => d.min));
   return (
-    <div className="flex items-end gap-2" aria-label="Minutes per day">
+    <div className="core-time" aria-label="Minutes per day">
       {days.map((d, i) => (
-        <div key={i} className="flex flex-1 flex-col items-center gap-1">
-          <span className="t-meta">{d.min}</span>
-          <div className="w-full rounded bg-[var(--text)] opacity-80" style={{ height: `${Math.max(2, (d.min / max) * 60)}px` }} />
-          <span className="t-meta text-muted">{d.label}</span>
+        <div key={i}>
+          <span>{d.min}</span>
+          <i style={{ height: `${Math.max(2, (d.min / max) * 60)}px` }} />
+          <span style={{ color: 'var(--muted)' }}>{d.label}</span>
         </div>
       ))}
     </div>
@@ -326,12 +335,12 @@ function Diagnostics({ state, moments, skipped, sync }: { state: AppState; momen
     }
   };
   return (
-    <div className="flex flex-col gap-2" data-testid="diagnostics">
-      <button className="rounded-xl border border-[var(--line)] px-4 py-3 text-[16px] text-left" onClick={copy} data-testid="copy-diagnostics">
+    <div className="grp-stack" data-testid="diagnostics">
+      <button className="grp-btn" onClick={copy} data-testid="copy-diagnostics">
         Copy diagnostics
       </button>
-      {msg && <span className="t-meta text-muted">{msg}</span>}
-      {msg.startsWith('Could not') && <textarea readOnly className="t-meta h-32 w-full rounded-xl bg-transparent p-2" value={diagnosticsText(state, moments, skipped, sync)} />}
+      {msg && <span className="grp-note">{msg}</span>}
+      {msg.startsWith('Could not') && <textarea readOnly className="grp-input" style={{ height: '8rem', padding: 'var(--s-2)' }} value={diagnosticsText(state, moments, skipped, sync)} />}
     </div>
   );
 }
@@ -345,13 +354,13 @@ function Loudness() {
   const [msg, setMsg] = useState('');
   const lines = loudLog(5);
   return (
-    <div className="t-meta flex flex-col gap-1" data-testid="loudness">
-      <label className="flex items-center justify-between gap-3 text-[16px]">
+    <div className="grp-metric" data-testid="loudness">
+      <label className="grp-row">
         <span>Even out loudness (this device)</span>
         <input type="checkbox" data-testid="level-toggle" checked={on} onChange={(e) => { setLevelOn(e.target.checked); setOn(e.target.checked); setMsg('Applies from the next moment, reload the app to fully apply'); }} />
       </label>
       {lines.length === 0 ? <span>no moments played yet</span> : lines.map((l) => <span key={l} data-testid="loud-line">{l}</span>)}
-      {msg && <span className="text-muted">{msg}</span>}
+      {msg && <span>{msg}</span>}
     </div>
   );
 }
@@ -359,7 +368,7 @@ function Loudness() {
 /** Offline-Vorrat: wie viele Momente als Ausschnitt auf dem Gerät liegen */
 function PreloadLine() {
   const p = usePreloadStats();
-  return <span className="t-meta" data-testid="preloaded">{preloadedLine(p.n, p.bytes)}</span>;
+  return <span className="grp-metric" data-testid="preloaded">{preloadedLine(p.n, p.bytes)}</span>;
 }
 
 /** Wisch bis erstes Bild, getrennt nach gepuffert und nicht gepuffert. Ziel unter 300 ms bei gepuffertem Moment. */
@@ -374,10 +383,10 @@ function Latency({ samples }: { samples?: LatencySample[] }) {
     );
   };
   return (
-    <div className="t-meta flex flex-col gap-1" data-testid="latency">
-      <span className="text-[16px]">Swipe to first frame</span>
+    <div className="grp-metric" data-testid="latency">
+      <span className="lead">Swipe to first frame</span>
       {line('Preloaded', true)}
-      <span className="text-muted">{line('Not preloaded', false)}</span>
+      {line('Not preloaded', false)}
     </div>
   );
 }
@@ -386,8 +395,8 @@ function Latency({ samples }: { samples?: LatencySample[] }) {
 function TapReaction({ samples }: { samples?: TapSample[] }) {
   const x = tapStats(samples);
   return (
-    <div className="t-meta flex flex-col gap-1" data-testid="tap-reaction">
-      <span className="text-[16px]">Tap to fill</span>
+    <div className="grp-metric" data-testid="tap-reaction">
+      <span className="lead">Tap to fill</span>
       {x.n ? (
         <span>
           Median {x.median} ms, 90 % within {x.p90} ms, {Math.round((x.underTarget ?? 0) * 100)} % under {TAP_TARGET_MS} ms ({x.n} taps)
@@ -403,8 +412,8 @@ function TapReaction({ samples }: { samples?: TapSample[] }) {
 function SwipeFrames({ samples }: { samples?: FrameSample[] }) {
   const x = frameStats(samples);
   return (
-    <div className="t-meta flex flex-col gap-1" data-testid="swipe-frames">
-      <span className="text-[16px]">Swipe frame drops</span>
+    <div className="grp-metric" data-testid="swipe-frames">
+      <span className="lead">Swipe frame drops</span>
       {x.n ? (
         <span>
           {x.lostPct} % lost over {x.n} swipes at {x.hz} Hz, worst swipe {x.worstPct} %, target under {DROP_TARGET_PCT} %
