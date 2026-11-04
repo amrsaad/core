@@ -759,19 +759,33 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       audioDeck.dropStandby('no successor');
       return;
     }
-    // Nicht lokal und das Netz ist schwach, oder der Vorrat hat ihn und die Blob-URL kommt gleich: keine zweite Netzverbindung neben dem Vorrat (Entscheidung 45).
-    // Der Standby wartet dann auf die Blob-URL, ohne Vorrat und auf schwachem Netz bleibt der normale Weg.
+    // Nicht lokal: liegt der Moment im Vorrat oder ist das Netz schwach, wartet der Standby bis zu 8 s auf die Blob-URL (keine zweite Netzverbindung neben dem Vorrat,
+    // Entscheidung 45). Kommt sie nicht, geht es bei normalem Netz über das Netz weiter, bei schwachem Netz bleibt es beim normalen Weg ohne Standby.
     const nk = keyOf(nm);
     if (!LOCAL.has(nk) && audioDeck.standbyKey !== nk) {
-      const stock = pre.held(nm.id);
-      if (stock || pre.poor()) {
-        audioDeck.dropStandby(stock ? 'waiting for stock' : 'poor net, no stock');
-        if (stock) void pre.warm([nm]).then(() => { if (LOCAL.has(nk)) prepareNextRef.current(); });
+      if ((pre.held(nm.id) || pre.poor()) && stockWait.current !== nk) {
+        stockWait.current = nk;
+        audioDeck.dropStandby('waiting for stock');
+        let tries = 0;
+        const tick = () => {
+          void pre.warm([nm]).then(() => {
+            const cur = successorOf(queue.current, idxRef.current, bad.current);
+            if (!cur || keyOf(cur) !== nk) return;
+            if (LOCAL.has(nk) || ++tries >= 12) prepareNextRef.current();
+            else setTimeout(tick, 700);
+          });
+        };
+        tick();
+        return;
+      }
+      if (pre.poor()) {
+        audioDeck.dropStandby('poor net, no blob');
         return;
       }
     }
     if (audioDeck.prepare(clip)) void pre.warm([nm]);
   };
+  const stockWait = useRef<string | null>(null);
   const prepareNextRef = useRef(prepareNext);
   prepareNextRef.current = prepareNext;
 
