@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-04T05:21:14.580Z",
+  "at": "2026-11-04T08:14:23.240Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -23,7 +23,7 @@
         "allUnder100": true,
         "startedFromBlob": true,
         "playbackTimeIsSourceTime": true,
-        "noMediaStreamRequests": true,
+        "noMediaStreamRequests": false,
         "settingsLine": true,
         "settingsMatchesStore": true,
         "offlineIcon": true,
@@ -50,38 +50,38 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1620,
+        "coldStartMs": 1633,
         "preloadedMoments": 30,
         "preloadedBytes": 6289238,
         "bytesPerMoment": 209641,
         "waitedForVault": 1,
         "swipes": 10,
         "cachedStartMs": [
-          16,
-          16,
-          18,
-          19,
-          18,
-          20,
-          19,
-          18,
-          17,
-          15
+          5,
+          4,
+          8,
+          5,
+          4,
+          6,
+          6,
+          5,
+          5,
+          25
         ],
-        "cachedStartMax": 20,
-        "cachedStartMedian": 18,
+        "cachedStartMax": 25,
+        "cachedStartMedian": 5,
         "firstFrames": [
-          "first-frame 17ms buffered local",
-          "first-frame 16ms buffered local",
-          "first-frame 16ms buffered local",
-          "first-frame 18ms buffered local",
-          "first-frame 19ms buffered local",
-          "first-frame 18ms buffered local",
-          "first-frame 20ms buffered local",
-          "first-frame 19ms buffered local",
-          "first-frame 18ms buffered local",
-          "first-frame 17ms buffered local",
-          "first-frame 15ms buffered local"
+          "first-frame 6ms buffered",
+          "first-frame 5ms buffered local",
+          "first-frame 4ms buffered local",
+          "first-frame 8ms buffered local",
+          "first-frame 5ms buffered local",
+          "first-frame 4ms buffered local",
+          "first-frame 6ms buffered local",
+          "first-frame 6ms buffered local",
+          "first-frame 5ms buffered local",
+          "first-frame 5ms buffered local",
+          "first-frame 25ms buffered local"
         ],
         "settingsText": "Preloaded: 36 moments, 7.2 MB",
         "offlineTrail": [
@@ -103,8 +103,8 @@
           }
         ],
         "offlineStartMs": [
-          16,
-          13
+          13,
+          5
         ],
         "offlineCachedOfFirst15": 15,
         "offlineSwipeTrail": [
@@ -134,9 +134,9 @@
           }
         ],
         "offlineRestartStartMs": [
-          11,
-          10,
-          12
+          6,
+          4,
+          5
         ],
         "poorYoutubeOf120": 58,
         "normalYoutubeOf120": 68,
@@ -145,8 +145,8 @@
         "poorClumps": [],
         "normalClumps": []
       },
-      "ok": true
+      "ok": false
     }
   ],
-  "ok": true
+  "ok": false
 }

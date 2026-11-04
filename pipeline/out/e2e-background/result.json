@@ -1,5 +1,5 @@
 {
- "at": "2026-11-04T05:19:21.765Z",
+ "at": "2026-11-04T08:12:37.833Z",
  "runs": [
   {
    "browser": "webkit",
@@ -18,7 +18,7 @@
     "bgAutoNextEqualsSwipe": true,
     "bgFiveInARow": true,
     "bgRowSameNode": true,
-    "bgRowOneAudioElement": true,
+    "bgRowAtMostTwoAudioElements": true,
     "bgRowSrcChanges": true,
     "bgRowEndedNext": true,
     "bgRowLockHandlers": true,
@@ -33,22 +33,19 @@
     "bgLockNextStayLine": true,
     "bgLockNextNoNetStart": true,
     "bgLockNextKeepsMoment": true,
+    "bgLockNextCountsNothing": true,
     "bgNextStockFills": true,
-    "bgNextHiddenAdvances": true,
-    "bgNextHiddenPlayOk": true,
-    "bgNextStartNowLine": true,
-    "bgNextPlayingLine": true,
-    "bgNextNoVisibleBetween": true,
-    "bgNextOneSrcLine": true,
+    "bgNextStandbyReady": true,
+    "bgNextFiveAdvance": true,
+    "bgNextFivePlayOk": true,
+    "bgNextFiveSwapLines": true,
+    "bgNextFiveNoNewSource": true,
+    "bgNextFiveNoVisible": true,
+    "bgNextFiveNoStay": true,
     "bgNextNoGatedPlay": true,
-    "bgNextTwiceAdvances": true,
-    "bgNextTwicePlays": true,
-    "bgNextTwiceNoGated": true,
+    "bgNextColdUnder2": true,
     "bgNextGateActive": true,
-    "bgRevertLine": true,
-    "bgRevertBackOnRunning": true,
-    "bgRevertTargetUnseen": true,
-    "bgRevertNotPlayedLine": true,
+    "bgNextAtMostTwoSrc": true,
     "bgVideoPlays": true,
     "bgVideoKeepsPlaying": true,
     "bgVideoStops": true,
@@ -129,26 +126,45 @@
     "bg: arm bgaudio7 (net)",
     "bg: next bgaudio3:0"
    ],
-   "bgNextHiddenMs": 21,
-   "bgNextHiddenLines": [
-    "lock next: held bgstock1:0",
-    "deck: src local bgstock1",
-    "deck play#2 start rs=0 muted=false t=0.1",
-    "lock next: startNow bgstock1:0 src=blob",
+   "bgNextFirstLines": [
+    "deck: swap bgstock1 ready=true",
+    "deck play#2 swap rs=0 muted=false t=0.1",
     "deck play#2 ok",
-    "lock next: playing after 3 ms"
+    "deck: prepare bgstock6 src=local"
+   ],
+   "bgNextFiveMs": [
+    14,
+    15,
+    18,
+    17,
+    19
    ],
    "bgNextPlays": [
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/96514b95-f73f",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-CdZEajXl.js:40: < start@http://127.0.0.1:4178/core/assets/index-CdZEajXl.js:40 < startNow@http://127.0.0.1:4178/core/assets/index-CdZEajXl.js < Du@http://127.0.0.1:4178/core/assets/index-CdZEajXl.js:47:29 < ls@http://127.0.0.1:4178/core/assets/index-CdZEajXl.js:47:29 < @http://127.0.0.1:4178/core/assets/index-CdZEajXl.js:47:6254"
+     "src": "blob:http://127.0.0.1:4178/64354ba0-6883",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < swap@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:29 < @http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:6226 < @ < evaluate@"
+    },
+    {
+     "sync": true,
+     "src": "blob:http://127.0.0.1:4178/539e70d7-76ba",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < swap@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:29 < @http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:6226 < @ < evaluate@"
+    },
+    {
+     "sync": true,
+     "src": "blob:http://127.0.0.1:4178/05f4822c-23d1",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < swap@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:29 < @http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:6226 < @ < evaluate@"
+    },
+    {
+     "sync": true,
+     "src": "blob:http://127.0.0.1:4178/ae351f12-1b36",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < swap@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:29 < @http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:6226 < @ < evaluate@"
+    },
+    {
+     "sync": true,
+     "src": "blob:http://127.0.0.1:4178/daf1354f-ac71",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < swap@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:40: < Ga@http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:29 < @http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:6226 < @ < evaluate@"
     }
-   ],
-   "bgRevertLines": [
-    "lock next: held bgstock1:0",
-    "lock next: startNow bgstock1:0 src=blob",
-    "lock next: reverted bgstock1:0"
    ],
    "ok": true
   },
@@ -169,7 +185,7 @@
     "bgAutoNextEqualsSwipe": true,
     "bgFiveInARow": true,
     "bgRowSameNode": true,
-    "bgRowOneAudioElement": true,
+    "bgRowAtMostTwoAudioElements": true,
     "bgRowSrcChanges": true,
     "bgRowEndedNext": true,
     "bgRowLockHandlers": true,
@@ -184,22 +200,19 @@
     "bgLockNextStayLine": true,
     "bgLockNextNoNetStart": true,
     "bgLockNextKeepsMoment": true,
+    "bgLockNextCountsNothing": true,
     "bgNextStockFills": true,
-    "bgNextHiddenAdvances": true,
-    "bgNextHiddenPlayOk": true,
-    "bgNextStartNowLine": true,
-    "bgNextPlayingLine": true,
-    "bgNextNoVisibleBetween": true,
-    "bgNextOneSrcLine": true,
+    "bgNextStandbyReady": true,
+    "bgNextFiveAdvance": true,
+    "bgNextFivePlayOk": true,
+    "bgNextFiveSwapLines": true,
+    "bgNextFiveNoNewSource": true,
+    "bgNextFiveNoVisible": true,
+    "bgNextFiveNoStay": true,
     "bgNextNoGatedPlay": true,
-    "bgNextTwiceAdvances": true,
-    "bgNextTwicePlays": true,
-    "bgNextTwiceNoGated": true,
+    "bgNextColdUnder2": true,
     "bgNextGateActive": true,
-    "bgRevertLine": true,
-    "bgRevertBackOnRunning": true,
-    "bgRevertTargetUnseen": true,
-    "bgRevertNotPlayedLine": true,
+    "bgNextAtMostTwoSrc": true,
     "bgVideoPlays": true,
     "bgVideoKeepsPlaying": true,
     "bgVideoStops": true,
@@ -280,26 +293,45 @@
     "bg: arm bgaudio7 (net)",
     "bg: next bgaudio3:0"
    ],
-   "bgNextHiddenMs": 13,
-   "bgNextHiddenLines": [
-    "lock next: held bgstock1:0",
-    "deck: src local bgstock1",
-    "deck play#2 start rs=0 muted=false t=0.1",
-    "lock next: startNow bgstock1:0 src=blob",
+   "bgNextFirstLines": [
+    "deck: swap bgstock1 ready=true",
+    "deck play#2 swap rs=0 muted=false t=0.1",
     "deck play#2 ok",
-    "lock next: playing after 3 ms"
+    "deck: prepare bgstock6 src=local"
+   ],
+   "bgNextFiveMs": [
+    15,
+    11,
+    10,
+    10,
+    9
    ],
    "bgNextPlays": [
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/fba20fe7-adc2",
-     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-CdZEajXl < at x0.start (http://127.0.0.1:4178/core/assets/index-CdZEajX < at x0.startNow (http://127.0.0.1:4178/core/assets/index-CdZE < at Du (http://127.0.0.1:4178/core/assets/index-CdZEajXl.js:4 < at Object.ls [as current] (http://127.0.0.1:4178/core/assets"
+     "src": "blob:http://127.0.0.1:4178/a6b6a4e5-0a5a",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at x0.swap (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+    },
+    {
+     "sync": true,
+     "src": "blob:http://127.0.0.1:4178/54426b00-496e",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at x0.swap (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+    },
+    {
+     "sync": true,
+     "src": "blob:http://127.0.0.1:4178/836c7565-e32a",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at x0.swap (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+    },
+    {
+     "sync": true,
+     "src": "blob:http://127.0.0.1:4178/26d6110b-14a3",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at x0.swap (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
+    },
+    {
+     "sync": true,
+     "src": "blob:http://127.0.0.1:4178/a4179cc4-3b99",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at x0.swap (http://127.0.0.1:4178/core/assets/index-Cu87xyC8 < at Object.Ga [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-Cu87xyC8.js:47:62 < at Object.nexttrack (http://127.0.0.1:4178/core/assets/index"
     }
-   ],
-   "bgRevertLines": [
-    "lock next: held bgstock1:0",
-    "lock next: startNow bgstock1:0 src=blob",
-    "lock next: reverted bgstock1:0"
    ],
    "ok": true
   }

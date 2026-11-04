@@ -1,5 +1,5 @@
 {
- "at": "2026-11-04T05:43:22.107Z",
+ "at": "2026-11-04T08:36:20.727Z",
  "runs": [
   {
    "browser": "webkit",
@@ -105,76 +105,76 @@
     "tempoPaused": 10,
     "cue": {
      "worst": 0,
-     "n": 612,
+     "n": 622,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.46",
-       35,
-       35
+       "3.35",
+       34,
+       34
       ],
       [
-       "4.77",
-       48,
-       48
+       "4.64",
+       47,
+       47
       ],
       [
-       "6.06",
-       61,
-       61
+       "5.93",
+       60,
+       60
       ],
       [
-       "7.37",
-       74,
-       74
+       "7.22",
+       73,
+       73
       ],
       [
-       "8.68",
-       87,
-       87
+       "8.51",
+       86,
+       86
       ],
       [
-       "9.98",
-       100,
-       100
+       "9.79",
+       98,
+       98
       ],
       [
-       "11.28",
-       113,
-       113
+       "11.08",
+       111,
+       111
       ],
       [
-       "12.58",
-       126,
-       126
+       "12.37",
+       124,
+       124
       ],
       [
-       "13.88",
-       139,
-       139
+       "13.66",
+       137,
+       137
       ],
       [
-       "15.18",
-       152,
-       152
+       "14.95",
+       150,
+       150
       ],
       [
-       "16.49",
-       165,
-       165
+       "16.23",
+       163,
+       163
       ],
       [
-       "17.80",
-       178,
-       178
+       "17.52",
+       176,
+       176
       ]
      ],
      "rate": 2
     },
     "cueTempo": {
-     "worst": 0,
-     "n": 530,
+     "worst": 1,
+     "n": 555,
      "rates": [
       1,
       1.5,
@@ -186,7 +186,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805080
+       "dueAt": 1792756804830
       }
      ],
      "idx": 6,
@@ -205,10 +205,10 @@
       "bg: mediasession playing to paused (player state paused) hidden=false",
       "bg: mediasession paused to playing (handlers playing) hidden=false",
       "bg: arm atrecall10 (net)",
-      "bg: deck page hidden: paused=false ended=false t=0.4 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+      "bg: deck page hidden: paused=false ended=false t=0.7 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
       "bg: left atrecall4:0",
-      "bg: deck page hidden +1 s: paused=false ended=false t=1.4 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
-      "bg: deck clip end via timeupdate hidden=true armed=atrecall10 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+      "bg: deck page hidden +1 s: paused=false ended=false t=1.7 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+      "bg: deck clip end via timeupdate hidden=true armed=atrecall10 onAdvance=true advance=yes rs=0 muted=false t=4.1",
       "bg: deck advance atrecall4 to atrecall10: src and play() in this handler, same element true, next from storage false, readyState 0",
       "bg: ms playbackState playing (switch)",
       "bg: ended atrecall4:0",
@@ -216,7 +216,7 @@
       "recall: queued atrecall4:0 (bg)",
       "bg: arm atrecall1 (net)",
       "bg: next atrecall10:0",
-      "bg: deck page hidden +5 s: paused=false ended=false t=1.4 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+      "bg: deck page hidden +5 s: paused=false ended=false t=1.6 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
       "bg: deck advance to atrecall10: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
       "bg: deck clip end via timeupdate hidden=true armed=atrecall1 onAdvance=true advance=yes rs=0 muted=false t=4.0",
       "bg: deck advance atrecall10 to atrecall1: src and play() in this handler, same element true, next from storage false, readyState 0",
@@ -345,12 +345,12 @@
      "shownNow": 0,
      "gaps": [
       [
-       "3.39",
+       "3.38",
        34,
        34
       ],
       [
-       "4.72",
+       "4.71",
        48,
        48
       ],
@@ -360,12 +360,12 @@
        61
       ],
       [
-       "7.39",
+       "7.38",
        74,
        74
       ],
       [
-       "8.72",
+       "8.71",
        88,
        88
       ],
@@ -375,12 +375,12 @@
        101
       ],
       [
-       "11.39",
+       "11.38",
        114,
        114
       ],
       [
-       "12.72",
+       "12.71",
        128,
        128
       ],
@@ -395,7 +395,7 @@
        154
       ],
       [
-       "16.72",
+       "16.71",
        168,
        168
       ],
@@ -421,7 +421,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804926
+       "dueAt": 1792756804699
       }
      ],
      "idx": 6,
@@ -440,10 +440,10 @@
       "bg: mediasession playing to paused (player state paused) hidden=false",
       "bg: mediasession paused to playing (handlers playing) hidden=false",
       "bg: arm atrecall10 (net)",
-      "bg: deck page hidden: paused=false ended=false t=0.4 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+      "bg: deck page hidden: paused=false ended=false t=0.7 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
       "bg: left atrecall4:0",
-      "bg: deck page hidden +1 s: paused=false ended=false t=1.4 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
-      "bg: deck clip end via timeupdate hidden=true armed=atrecall10 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+      "bg: deck page hidden +1 s: paused=false ended=false t=1.7 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+      "bg: deck clip end via timeupdate hidden=true armed=atrecall10 onAdvance=true advance=yes rs=0 muted=false t=4.1",
       "bg: deck advance atrecall4 to atrecall10: src and play() in this handler, same element true, next from storage false, readyState 0",
       "bg: ms playbackState playing (switch)",
       "bg: ended atrecall4:0",
@@ -451,7 +451,7 @@
       "recall: queued atrecall4:0 (bg)",
       "bg: arm atrecall1 (net)",
       "bg: next atrecall10:0",
-      "bg: deck page hidden +5 s: paused=false ended=false t=1.4 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+      "bg: deck page hidden +5 s: paused=false ended=false t=1.6 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
       "bg: deck advance to atrecall10: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
       "bg: deck clip end via timeupdate hidden=true armed=atrecall1 onAdvance=true advance=yes rs=0 muted=false t=4.0",
       "bg: deck advance atrecall10 to atrecall1: src and play() in this handler, same element true, next from storage false, readyState 0",
@@ -502,10 +502,11 @@
     "lockTitleBack": true,
     "lockBackLines": true,
     "lockNextAdvances": true,
+    "lockStandbyReadyBeforeHidden": true,
     "lockHiddenAdvances": true,
     "lockHiddenUnder1s": true,
-    "lockHiddenTakesStock": true,
-    "lockHiddenStartNowBlob": true,
+    "lockHiddenSwaps": true,
+    "lockHiddenNoNewSource": true,
     "lockHiddenNoNetStart": true,
     "coldS2NoPageErrors": true,
     "pillAppears": true,
@@ -523,7 +524,7 @@
      "pod-0008:22",
      "pod-0019:70"
     ],
-    "firstSoundMs": 191,
+    "firstSoundMs": 203,
     "diag": [
      "deck: start order head first=pod-0001:22 heads=6 usable=6 stock=6",
      "deck: src local pod-0001"
@@ -545,21 +546,19 @@
      "state": "playing",
      "pos": {
       "duration": 25,
-      "position": 0.0008947959183664977,
+      "position": 0.0008437959183673627,
       "playbackRate": 1
      },
      "cold": 0,
      "cloud": 0
     },
     "stockBehind": 5,
-    "lockNextMs": 113,
+    "lockNextMs": 15,
     "lockNextLines": [
-     "lock next: net pod-0006:82",
-     "lock next: startNow pod-0006:82 src=net",
-     "lock next: playing after 2536 ms",
-     "lock next: held pod-0014:10",
-     "lock next: startNow pod-0014:10 src=blob",
-     "lock next: playing after 16 ms"
+     "deck: swap pod-0036 ready=true",
+     "deck play#4 swap rs=4 muted=false t=22.0",
+     "deck play#4 ok",
+     "deck: prepare pod-0013 src=local"
     ],
     "coldNetLines": [
      "signals: coldNetStarts 1 today (net start pod-0035)"
