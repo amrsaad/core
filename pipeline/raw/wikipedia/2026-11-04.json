@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-04",
+ "records": [
+  {
+   "sourceId": "wiki:de:Tribunus voluptatum",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Tribunus_voluptatum",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/04",
+    "status": 200
+   },
+   "title": "Tribunus voluptatum",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Der tribunus voluptatum war ein spätantiker Amtsträger im Rang eines Offiziers (tribunus), der die Oberaufsicht über die Theaterschauspiele und Schauspieler hatte, vielleicht auch über andere Spiele. Bezeugt ist das Amt vom Anfang des 5. Jahrhunderts bis ins 6. Jahrhundert für die wichtigen weströmischen bzw. ostgotischen Städte Rom, Karthago und Mediolanum (Mailand). Es wird nur in zehn antiken Quellen genannt: von einem kaiserlichen Gesetz des weströmischen Kaisers Honorius 414 über zwei Inschriften von Amtsträgern bis zu Material aus der Kanzlei des Ostgotenkönigs Theoderich aus dem ersten Viertel des 6. Jahrhunderts. Aufgrund der mangelnden Quellen sind viele Eckpunkte der Entwicklung des Amtes unsicher und die Lücken nur mit wissenschaftlicher Spekulation zu füllen."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-04T11:49:22.631Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Tribunus_voluptatum": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Nordirland",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Nordirland",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/04",
+    "status": 200
+   },
+   "title": "Nordirland",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Nordirland ist ein Landesteil des Vereinigten Königreichs Großbritannien und Nordirland. Es besteht aus sechs der neun Grafschaften der historischen irischen Provinz Ulster im Nordosten der Insel Irland."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-04T11:49:22.631Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Nordirland": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:St. Justina (Bozen)",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/St._Justina_(Bozen)",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/04",
+    "status": 200
+   },
+   "title": "St. Justina (Bozen)",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "St. Justina ist ein am nordöstlichen Rand der Stadtgemeinde Bozen gelegener Weiler, der einst Teil der alten Landgemeinde Zwölfmalgreien war. Er befindet sich am unteren Abhang des Rittner Bergs am Übergang vom Eisacktal in den Bozner Talkessel. Er wird westlich vom Rivelaunbach gegen Rentsch und St. Magdalena begrenzt, östlich vom Bozner Leitach, nördlich gegen Signat von der Grenze zur Gemeinde Ritten."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-04T11:49:22.631Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/St._Justina_(Bozen)": 200
+   }
+  }
+ ]
+}
