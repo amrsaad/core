@@ -12,6 +12,10 @@ mkdirSync(out, { recursive: true });
 const FAKE = readFileSync(new URL('./fakeyt.js', import.meta.url), 'utf8');
 const SWIPES = Number(process.env.SWIPES ?? 10);
 const WARM = 2;
+// Die Grenze bleibt in der CI und lokal bei 2 Prozent. Gemessen auf dem Runner (ubuntu-latest, Playwright-Image) auf dem Stand vor Brief 06
+// (e2dba01, Lauf 41607159405): Chromium 0 Prozent, WebKit 9,4 Prozent bei 15,3 Prozent auf der leeren Seite. Für WebKit gilt darum schon der Abstand zum Boden.
+// Auf dem Stand von Brief 06 (b2fb494, Lauf 41868874291) lag WebKit bei 12 Hz im Leerlauf und 94,2 Prozent verlorenen Frames (Boden 42,5 Prozent), Chromium bei 0 Prozent.
+// Das war das Design (Ambient mit blur(48px) und Kartenschatten, siehe Ambient.tsx und feed.css), nicht der Runner. Darum wurde die Ursache behoben, die Grenze nicht gelockert.
 const GATE_PCT = 2;
 const FRAME = 1000 / 60;
 

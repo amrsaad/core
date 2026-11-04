@@ -24,21 +24,24 @@
   border-radius: var(--r-card);
   overflow: hidden;
 }
-.vframe > div { box-shadow: var(--shadow-media); background: var(--media); }
+/* Kein Schatten unter der Karte: Auf dem dunklen Hintergrund (--stage, Ambient 32 %) ist 0 10px 28px bei 45 % Schwarz nicht zu sehen, kostet WebKit ohne GPU aber
+   gut 20 Punkte verlorene Frames beim Wischen (gemessen, vier bewegte Karten mit Weichzeichner-Schatten). Blätter behalten --shadow-media. */
+.vframe > div { background: var(--media); }
 .vposter { z-index: 1; object-fit: cover; background: var(--media-2); }
 .vcover { border-radius: var(--r-card); }
 /* Sichtbar, solange der Slot nicht der aktuelle ist oder sein Player nicht abspielt (data-live setzt der Player-Callback) */
 .vslot[data-live][aria-hidden='false'] .vposter { visibility: hidden; }
 
-/* Ambient: das Vorschaubild weich und dunkel hinter der Karte, nur Video */
+/* Ambient: das Vorschaubild weich und dunkel hinter der Karte, nur Video.
+   Kein filter: blur(48px). WebKit ohne GPU rechnet ihn bei jedem Frame neu (CI-Runner: 12 Hz im Leerlauf, 94 % verlorene Frames beim Wischen).
+   Ambient.tsx zeichnet das Bild einmal auf 24 x 42 Pixel, die Fläche skaliert es weich hoch. Das Abdunkeln macht die Deckkraft über dem Hintergrund (--stage). */
 .vambient {
   position: absolute;
   inset: calc(var(--s-16) * -1);
   width: calc(100% + var(--s-16) * 2);
   height: calc(100% + var(--s-16) * 2);
   object-fit: cover;
-  filter: blur(48px) brightness(0.35) saturate(1.3);
-  opacity: 0.9;
+  opacity: 0.32;
   z-index: 0;
   pointer-events: none;
 }

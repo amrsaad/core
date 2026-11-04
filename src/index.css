@@ -76,6 +76,9 @@ body {
   position: relative;
   height: 100dvh;
   overflow: hidden;
+  /* clip statt hidden: ein hidden-Container lässt sich per Fokus, scrollIntoView oder Tippen auf ein verdecktes Element verschieben. Gemessen im E2E: .vfeed stand
+     auf scrollTop 435, der Feed hing halb zwischen zwei Momenten und nahm keine Geste mehr an. clip kann nicht gescrollt werden. */
+  overflow: clip;
   background: var(--stage);
   color: var(--on-media);
   touch-action: none;
@@ -84,6 +87,7 @@ body {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  overflow: clip;
   transform: translateY(calc(var(--off) * 100%));
 }
 /* Bühne und Overlay-Ebene bewegen sich gemeinsam beim Wischen: nur transform (und opacity), nie top, height oder Layout.

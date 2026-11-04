@@ -183,6 +183,14 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.addInitScript(() => { window.__ytSlow = true; });
     const errors = [];
     page.on('pageerror', (e) => errors.push(String(e)));
+    // Nur zum Suchen von Ursachen (E2E_DEBUG_SCROLL=1): wer scrollt den Feed? Protokoll in window.__scrollLog
+    if (process.env.E2E_DEBUG_SCROLL) await page.addInitScript(() => {
+      window.__scrollLog = [];
+      const note = (what, el) => { if (window.__scrollLog.length < 40) window.__scrollLog.push({ t: Math.round(performance.now()), what, el: el ? `${el.tagName}.${String(el.className).slice(0, 30)}[${el.getAttribute?.('data-testid') ?? ''}]` : null, feed: document.querySelector('.vfeed')?.scrollTop, stack: new Error().stack.split('\n').slice(2, 5).join(' | ').slice(0, 300) }); };
+      const si = Element.prototype.scrollIntoView; Element.prototype.scrollIntoView = function (...a) { note('scrollIntoView', this); return si.apply(this, a); };
+      const fo = HTMLElement.prototype.focus; HTMLElement.prototype.focus = function (...a) { note('focus', this); return fo.apply(this, a); };
+      document.addEventListener('scroll', (e) => { const f = document.querySelector('.vfeed'); if (f && f.scrollTop > 0) note('scroll', e.target); }, true);
+    });
 
     // Ohne Schlüssel gesperrt
     await page.goto(url + '?now=2026-10-23');
@@ -511,7 +519,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         await swipeLeft();
         ok = await waitFor(page, () => !!document.querySelector('[data-testid=note-sheet]'), undefined, 1500);
       }
-      if (!ok) r.openDbg = await page.evaluate(() => ({ moving: !!document.querySelector('.vfeed[data-moving]'), card: !!document.querySelector('[data-testid=recall-card]'), motion: window.__core.motion(), vis: document.visibilityState, idx: window.__core.idx(), tr: document.querySelector('.vstage')?.style.transform, fy: window.__core.forYou(), recall: window.__core.recall().open }));
+      if (!ok) await page.screenshot({ path: `${out}/${name}-openfail.png` }).catch(() => {});
+      if (!ok) r.openDbg = await page.evaluate(() => ({ scrollLog: window.__scrollLog ?? null, stage: (() => { const st = document.querySelector('.vstage'); const f = document.querySelector('.vfeed'); return { stageTransform: st ? getComputedStyle(st).transform : null, stageInline: st?.getAttribute('style'), stageCls: st?.className, feedCls: f?.className, feedScroll: f ? [f.scrollTop, f.scrollLeft] : null, docScroll: document.scrollingElement?.scrollTop, anims: document.getAnimations().map((a) => `${a.constructor.name}:${a.playState}:${a.transitionProperty ?? a.animationName ?? ''}`).slice(0, 8), slots: [...document.querySelectorAll('.vslot')].map((x) => `${x.getAttribute('aria-hidden')}:${x.getAttribute('style')}`) }; })(), hit: (() => { const e = document.elementFromPoint(innerWidth * 0.8, innerHeight * 0.45); return e ? `${e.tagName}.${String(e.className).slice(0, 40)}[${e.getAttribute('data-testid') ?? ''}]` : null; })(), moving: !!document.querySelector('.vfeed[data-moving]'), card: !!document.querySelector('[data-testid=recall-card]'), motion: window.__core.motion(), vis: document.visibilityState, idx: window.__core.idx(), tr: document.querySelector('.vstage')?.style.transform, fy: window.__core.forYou(), recall: window.__core.recall().open }));
       return ok;
     };
     const notes = () => page.evaluate(() => window.__core.notes());
@@ -707,7 +716,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const poster = (st) => page.evaluate(() => [...document.querySelectorAll('.vslot')].map((sl) => {
       const p = sl.querySelector('.vposter'); const host = sl.querySelector('.vframe > div'); const pr = p?.getBoundingClientRect(); const hr = host?.getBoundingClientRect();
       const vis = !!p && getComputedStyle(p).visibility !== 'hidden' && getComputedStyle(p).display !== 'none' && +getComputedStyle(p).opacity > 0;
-      return { rects: { p: pr && [pr.left, pr.top, pr.width, pr.height].map(Math.round), h: hr && [hr.left, hr.top, hr.width, hr.height].map(Math.round), iw: innerWidth }, current: sl.getAttribute('aria-hidden') === 'false', vis, live: sl.hasAttribute('data-live'), covers: !!pr && (!hr || (pr.left <= hr.left + 0.5 && pr.right >= hr.right - 0.5 && pr.top <= hr.top + 0.5 && pr.bottom >= hr.bottom - 0.5)), noZoom: !!pr && Math.abs(pr.width - innerWidth) < 1.5 && Math.abs(pr.height - (innerWidth * 9) / 16) < 1.5 };
+      return { rects: { p: pr && [pr.left, pr.top, pr.width, pr.height].map(Math.round), h: hr && [hr.left, hr.top, hr.width, hr.height].map(Math.round), iw: innerWidth }, current: sl.getAttribute('aria-hidden') === 'false', vis, live: sl.hasAttribute('data-live'), covers: !!pr && (!hr || (pr.left <= hr.left + 0.5 && pr.right >= hr.right - 0.5 && pr.top <= hr.top + 0.5 && pr.bottom >= hr.bottom - 0.5)), noZoom: !!pr && Math.abs(pr.width - Math.min(innerWidth - 32, 640)) < 1.5 && Math.abs(pr.height - (Math.min(innerWidth - 32, 640) * 9) / 16) < 1.5 };
     }));
     // ENDED am aktuellen Slot blättert weiter (finish), also wird er dort von der Schleife oben abgedeckt (endedSeen) und hier nur an den Nachbarn erzwungen
     const force = (st) => page.evaluate((s) => { for (const sl of document.querySelectorAll('.vslot')) if (s !== 0 || sl.getAttribute('aria-hidden') !== 'false') sl.querySelector('.vframe > div')?.firstChild?.__player?.__force(s); }, st);
@@ -815,12 +824,15 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.issueTitleCount = (uN?.searchParams.get('title') ?? '') === `Core feedback 2026-10-25, ${momentsN.size} moments`;
     c.promptMarksSent = await waitFor(p2, () => window.__core.notes().every((x) => typeof x.sent === 'number') && !document.querySelector('[data-testid=notes-prompt]'));
     // Nach dem Senden: neue Notiz bleibt ungesendet, und am selben Tag kommt die Zeile nicht noch einmal
-    await p2.evaluate(() => window.__core.openNote());
+    // Langsame Uhr, sonst endet der Moment zwischen den beiden Messungen und sein Signal ändert die Gewichte (das Chip-Ergebnis wäre dann nicht gemeint)
+    await p2.evaluate(() => { window.__ytSlow = true; window.__core.openNote(); });
     const wG0 = await p2.evaluate(() => JSON.stringify(window.__core.weights()));
     await p2.click('[data-testid="note-chip-Bad cut"]');
     // Bad cut lernt nichts: Zeile "Noted", Gewichte unverändert
     c.badCutNoted = await waitFor(p2, () => document.querySelector('[data-testid=note-confirm]')?.textContent === 'Noted');
-    c.badCutLearnsNothing = (await p2.evaluate(() => JSON.stringify(window.__core.weights()))) === wG0;
+    const wG1 = await p2.evaluate(() => JSON.stringify(window.__core.weights()));
+    c.badCutLearnsNothing = wG1 === wG0;
+    if (!c.badCutLearnsNothing) r.badCutWeights = { before: wG0.slice(0, 1500), after: wG1.slice(0, 1500) };
     // Zustand wird verzögert gespeichert (250 ms bis 1 s nach der Änderung, während eines Wischs später): warten, bis IndexedDB dieselben Notizen hält wie der Speicher.
     // Ein Schließen davor verliert die letzte Änderung (WebKit meldet pagehide beim Schließen nicht zuverlässig).
     for (let q = 0; q < 40; q++) {
@@ -1055,6 +1067,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     for (let n = 0; n < 5; n++) {
       const b = await p7.evaluate(() => window.__core.idx());
       // Hook lang: eine Stufe kleiner, nie gekürzt. Caption auf, Ton läuft weiter, zu.
+      // Erst messen, wenn die Infozeile den Hook des neuen Moments zeigt (auf einem langsamen Runner folgt sie dem Wechsel einen Takt später)
+      await waitFor(p7, () => document.querySelector('[data-testid=hook]')?.textContent === window.__core.moment().hook, undefined, 5000);
       const hk = await p7.evaluate(() => { const e = document.querySelector('[data-testid=hook]'); const m = window.__core.moment(); return { step: e.dataset.step, clipped: e.scrollHeight > e.clientHeight + 1, full: e.textContent === m.hook, size: parseFloat(getComputedStyle(e).fontSize), lines: Math.round(e.scrollHeight / parseFloat(getComputedStyle(e).lineHeight)), id: m.id }; });
       capLogs.push({ hk });
       if (n === 0) await p7.screenshot({ path: `${out}/${name}-17-hook-lang.png` });
@@ -1072,7 +1086,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const cxText = cx?.querySelector('.vcap-ctx-text');
         const cxLabel = cx?.querySelector('.vcap-ctx-label');
         const css = (e, p) => (e ? getComputedStyle(e)[p] : null);
-        return { ctx: cx?.textContent ?? null, mctx: m.context ?? null, ctxPx: parseFloat(css(cxText, 'fontSize')) || 0, exPx: parseFloat(css(ex, 'fontSize')) || 0, ctxColor: css(cxText, 'color'), exColor: css(ex, 'color'), ctxCaps: css(cxLabel, 'textTransform'), ctxLabel: cxLabel?.textContent ?? null, hook: q('caption-hook')?.textContent === m.hook, exLen: ex?.textContent.length, exDir: ex?.getAttribute('dir'), exAr: /[\u0600-\u06FF]/.test(ex?.textContent ?? ''), meta, speaker: meta.includes(m.channel.replace(/^(.*?)\s*\((.+)\)$/, '$1 · $2')), ep: meta.includes('Testvideo'), at: meta.includes('1:40'), order: kids, playing: window.__core.state() === 1 };
+        return { ctx: cx?.textContent ?? null, mctx: m.context ?? null, ctxPx: parseFloat(css(cxText, 'fontSize')) || 0, exPx: parseFloat(css(ex, 'fontSize')) || 0, ctxColor: css(cxText, 'color'), exColor: css(ex, 'color'), ctxLabelPx: parseFloat(css(cxLabel, 'fontSize')) || 0, ctxLabelColor: css(cxLabel, 'color'), ctxCaps: css(cxLabel, 'textTransform'), ctxLabel: cxLabel?.textContent ?? null, hook: q('caption-hook')?.textContent === m.hook, exLen: ex?.textContent.length, exDir: ex?.getAttribute('dir'), exAr: /[\u0600-\u06FF]/.test(ex?.textContent ?? ''), meta, speaker: meta.includes(m.channel.replace(/^(.*?)\s*\((.+)\)$/, '$1 · $2')), ep: meta.includes('Testvideo'), at: meta.includes('1:40'), order: kids, playing: window.__core.state() === 1 };
       });
       await p7.waitForTimeout(400);
       const stillPlaying = await p7.evaluate(() => window.__core.state() === 1);
@@ -1125,11 +1139,14 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     r.capLogs = capLogs;
     c.hookLongSmallerNeverCut = capLogs.every((x) => x.hk.step === '1' && !x.hk.clipped && x.hk.full && x.hk.size === 17);
     c.captionOpensWithContent = capLogs.every((x) => x.open && x.hook && x.exLen > 50 && x.speaker && x.ep && x.at);
-    c.captionOrder = capLogs.every((x) => x.order.filter((t) => t !== 'caption-context').join() === 'DIV,caption-hook,caption-excerpt,caption-meta');
+    // Brief 06, Block 7: unter der Meta-Zeile stehen jetzt Ask und Later (Later ist ein grauer Platzhalter, Entscheidung 49)
+    c.captionOrder = capLogs.every((x) => x.order.filter((t) => t !== 'caption-context').join() === 'DIV,caption-hook,caption-excerpt,caption-meta,caption-ask,caption-later');
     // Kontext (Entscheidung 18): unter dem Ausschnitt, kleiner und gedämpft, Überschrift wie die anderen Meta-Zeilen (Großbuchstaben, gesperrt), kein eigenes Blatt, fehlt das Feld, fehlt die Zeile
     c.captionShowsContext = capLogs.some((x) => x.mctx) && capLogs.every((x) => (x.mctx ? !!x.ctx && x.ctx.startsWith('Context') && x.ctx.includes(x.mctx) : x.ctx === null));
     c.captionContextBelowExcerpt = capLogs.filter((x) => x.mctx).every((x) => x.order.indexOf('caption-context') === x.order.indexOf('caption-excerpt') + 1 && x.order.indexOf('caption-context') < x.order.indexOf('caption-meta'));
-    c.captionContextMutedSmall = capLogs.filter((x) => x.mctx).every((x) => x.ctxPx > 0 && x.ctxPx < x.exPx && x.ctxColor !== x.exColor && x.ctxCaps === 'uppercase' && x.ctxLabel === 'Context');
+    // Brief 06 (abgenommenes Board): Kontext steht im Lesetext des Ausschnitts (gleiche Größe und Farbe wie der Ausschnitt, nie größer), abgesetzt durch die Überschrift
+    // "Context" in Großbuchstaben, kleiner als der Text und in der Signalfarbe des Bereichs (anders als der Text)
+    c.captionContextLabelled = capLogs.filter((x) => x.mctx).every((x) => x.ctxPx > 0 && x.ctxPx <= x.exPx && x.ctxLabelPx > 0 && x.ctxLabelPx < x.ctxPx && x.ctxLabelColor !== x.ctxColor && x.ctxCaps === 'uppercase' && x.ctxLabel === 'Context');
     c.captionKeepsPlaying = capLogs.every((x) => x.playing && x.stillPlaying);
     c.captionCloses = capLogs.every((x) => x.closed);
     c.captionArabicRtl = capLogs.some((x) => x.exAr) && capLogs.filter((x) => x.exAr).every((x) => x.exDir === 'rtl') && capLogs.filter((x) => !x.exAr).every((x) => x.exDir === 'ltr');

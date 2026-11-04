@@ -57,6 +57,7 @@ import type { IconName } from '../components/icons';
 import { atTime } from './hook';
 import { focusTabText } from '../components/head';
 import { statusOf } from '../components/status';
+import { Ambient } from './Ambient';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 
 /** Desktop-Modus ab 1181 px: Panel rechts, Übersicht, Seitenblatt. Fehlt das Feld, gilt das mobile Verhalten unverändert. */
@@ -2994,7 +2995,7 @@ function posterOf(mm: Moment | undefined) {
   if (!mm.audio)
     return (
       <>
-        <Cover className="vambient" src={thumbOf(mm)} />
+        <Ambient src={thumbOf(mm)} />
         <Cover className="vposter" src={thumbOf(mm)} />
       </>
     );
