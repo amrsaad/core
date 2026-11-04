@@ -280,7 +280,8 @@ describe('Gewichte sind weich, nie ein Filter', () => {
     }
     expect(ranked).toBeGreaterThan(plain * 1.5);
     expect(ranked).toBeLessThan(1500 * 0.5);
-  });
+    // Lokal ca. 2 s, auf dem CI-Runner 5,9 s (CI-Lauf 41771898967 riss das Standardlimit von 5 s): mehr Luft, an der Mischung ändert das nichts
+  }, 20000);
   it('Kontextgewicht (ctx) verschiebt die Anteile, nie eine harte Regel', () => {
     const pool = realPool(100, 20);
     const ctx = (m: Moment) => (m.area === 'beat' ? 3 : 1);
