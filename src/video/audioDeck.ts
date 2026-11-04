@@ -472,18 +472,23 @@ export class AudioDeck {
     return `rs=${el.readyState} muted=${el.muted} t=${el.currentTime.toFixed(1)}`;
   }
 
+  /** Das Versprechen des letzten play()-Aufrufs von kick (startNow wartet darauf). undefined, wenn play() warf oder nichts zurückgab. */
+  private lastKick: Promise<void> | undefined;
+
   private kick(why: string) {
     const el = this.element;
     const n = ++this.plays;
     if (this.hidden()) this.hiddenStats.plays++;
     this.diag(`deck play#${n} ${why} ${this.stateText(el)}`);
     let p: Promise<void> | undefined;
+    this.lastKick = undefined;
     try {
       p = el.play();
     } catch (e) {
       this.rejected(e, why);
       return;
     }
+    this.lastKick = p;
     p?.then?.(
       () => {
         this.unlocked = true;
@@ -492,6 +497,48 @@ export class AudioDeck {
       // Ein Ergebnis des früheren Elements (Spurwechsel) zählt nicht
       (e: unknown) => el === this.el && this.rejected(e, why),
     );
+  }
+
+  /** Der Ausschnitt, den startNow abgelöst hat, mit der Stelle, an der er stand (für revertNow) */
+  private prior: { clip: DeckClip; at: number } | null = null;
+
+  /**
+   * Weiter vom Sperrbildschirm (Brief 10, Issue 36): Quelle setzen und play() sofort, im selben Call-Stack wie der Media-Session-Handler.
+   * iOS startet im Hintergrund eine neue Quelle nur dort, alles nach dem React-Rendern bleibt bis zur Rückkehr in die App ausstehend.
+   * Das Deck gibt den alten Player ab (sink null, wie beim automatischen Weiter), der neue übernimmt später über load(), das den laufenden
+   * Ausschnitt erkennt (holds) und nichts neu lädt. Die Buchführung der App (goTo) folgt danach.
+   * played: true, sobald play() erfüllt ist, false bei Ablehnung oder wenn play() nichts zurückgab.
+   */
+  startNow(clip: DeckClip): { local: boolean; played: Promise<boolean> } {
+    const old = this.el;
+    this.prior = this.clip && !this.done && old ? { clip: this.clip, at: Math.max(this.clip.start, old.currentTime + this.offset) } : null;
+    this.armed = null;
+    this.sink = null;
+    const local = !!this.deps.local(clip.key);
+    // held = true: nie auf den Vorrat warten (hold), die Quelle wird jetzt gesetzt
+    this.start(clip, true, false, clip.start, undefined, true);
+    this.deps.playbackState?.('playing', 'lock next');
+    const p = this.lastKick;
+    const played = p?.then ? p.then(() => true, () => false) : Promise.resolve(false);
+    void played.then((ok) => {
+      if (ok && this.clip?.key === clip.key) this.prior = null;
+    });
+    return { local, played };
+  }
+
+  /**
+   * Der Start aus startNow kam nicht an (Brief 10, Schritt 4): zurück zum vorigen Ausschnitt, an der Stelle, an der er stand. Nie stumm weiterlaufen.
+   * false, wenn es keinen gab oder das Deck inzwischen einen anderen Ausschnitt hält.
+   */
+  revertNow(key: string): boolean {
+    const p = this.prior;
+    this.prior = null;
+    if (!p || this.clip?.key !== key) return false;
+    this.armed = null;
+    this.sink = null;
+    this.start(p.clip, true, false, p.at, undefined, true);
+    this.deps.playbackState?.('playing', 'lock next reverted');
+    return true;
   }
 
   private rejected(e: unknown, why: string) {

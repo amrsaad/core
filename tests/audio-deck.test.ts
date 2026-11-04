@@ -443,3 +443,70 @@ describe('Lautheit: zwei feste Elemente', () => {
     expect(t.plain.paused).toBe(false);
   });
 });
+
+describe('Weiter vom Sperrbildschirm (Brief 10, Issue 36)', () => {
+  it('startNow setzt Quelle und play() synchron im Aufruf, am selben Element, mit der Blob-URL aus dem Vorrat', () => {
+    const b = clip('b', 10, 20);
+    const t = setup({ local: { [b.key]: { url: 'blob:b', offset: 10 } } });
+    const a = clip('a', 0, 60);
+    t.deck.load(a, t.sink, { play: true, muted: false });
+    t.el.calls.length = 0;
+    const r = t.deck.startNow(b);
+    // Beides ist beim Rücksprung aus startNow schon geschehen, vor jedem Rendern der App
+    expect(t.el.calls.filter((c) => c.startsWith('src:'))).toEqual(['src:blob:b']);
+    expect(t.el.calls.indexOf('src:blob:b')).toBeLessThan(t.el.calls.lastIndexOf('play'));
+    expect(r.local).toBe(true);
+    expect(t.made()).toBe(1);
+    expect(t.deck.clip?.id).toBe('b');
+  });
+
+  it('der neue Player übernimmt über load() ohne neue Quelle, der alte Player stört nicht mehr', () => {
+    const b = clip('b', 10, 20);
+    const t = setup({ local: { [b.key]: { url: 'blob:b', offset: 10 } } });
+    const a = clip('a', 0, 60);
+    t.deck.load(a, t.sink, { play: true, muted: false });
+    t.deck.startNow(b);
+    t.el.calls.length = 0;
+    // Der alte Player (React räumt ihn nach dem Rendern ab) darf das neue Element nicht anhalten
+    t.deck.pause(t.sink);
+    t.deck.drop(t.sink);
+    expect(t.el.paused).toBe(false);
+    const next: DeckSink = { state: () => {}, error: () => {} };
+    t.deck.load(b, next, { play: true, muted: false });
+    expect(t.el.calls.filter((c) => c === 'load' || c.startsWith('src:'))).toEqual([]);
+    expect(t.deck.owns(next)).toBe(true);
+  });
+
+  it('played ist true, sobald play() erfüllt ist, und false bei Ablehnung', async () => {
+    const t = setup();
+    t.deck.load(clip('a'), t.sink, { play: true, muted: false });
+    expect(await t.deck.startNow(clip('b', 5, 15)).played).toBe(true);
+    t.el.playResult = () => Promise.reject(new DOMException('blocked', 'NotAllowedError'));
+    expect(await t.deck.startNow(clip('c', 5, 15)).played).toBe(false);
+  });
+
+  it('revertNow geht zurück zum vorigen Ausschnitt an der Stelle, an der er stand', () => {
+    const t = setup();
+    const a = clip('a', 0, 60);
+    const b = clip('b', 10, 20);
+    t.deck.load(a, t.sink, { play: true, muted: false });
+    t.el.tick(12);
+    t.deck.startNow(b);
+    t.el.calls.length = 0;
+    expect(t.deck.revertNow(b.key)).toBe(true);
+    expect(t.deck.clip?.id).toBe('a');
+    expect(t.el.calls.filter((c) => c.startsWith('src:'))).toEqual(['src:https://pod.test/a.mp3#t=12']);
+    expect(t.el.calls).toContain('play');
+    // Nur einmal
+    expect(t.deck.revertNow(b.key)).toBe(false);
+  });
+
+  it('revertNow tut nichts, wenn das Deck inzwischen einen anderen Ausschnitt hält (zweiter Druck)', () => {
+    const t = setup();
+    t.deck.load(clip('a', 0, 60), t.sink, { play: true, muted: false });
+    t.deck.startNow(clip('b', 10, 20));
+    t.deck.startNow(clip('c', 10, 20));
+    expect(t.deck.revertNow(clip('b', 10, 20).key)).toBe(false);
+    expect(t.deck.clip?.id).toBe('c');
+  });
+});

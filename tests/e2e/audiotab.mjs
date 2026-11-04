@@ -398,7 +398,11 @@ window.onYouTubeIframeAPIReady&&window.onYouTubeIframeAPIReady();`;
     const nextLines = dn.filter((x) => x.startsWith('lock next: '));
     r.notes.lockNextLines = nextLines;
     c.lockHiddenUnder1s = c.lockHiddenAdvances && r.notes.lockNextMs < 1100;
-    c.lockHiddenTakesStock = stock > 0 && /^lock next: (held|pulled) /.test(nextLines[nextLines.length - 1] ?? '');
+    // Letzte Entscheidungszeile (Brief 10 hängt startNow und playing dahinter)
+    c.lockHiddenTakesStock = stock > 0 && /^lock next: (held|pulled) /.test(nextLines.filter((x) => /^lock next: (held|pulled|net|stay) /.test(x)).pop() ?? '');
+    // Brief 10: der Ziel-Moment startet synchron im Handler aus der Blob-URL und spielt binnen einer Sekunde
+    const playedAfter = Number(/^lock next: playing after (\d+) ms$/.exec(nextLines[nextLines.length - 1] ?? '')?.[1] ?? NaN);
+    c.lockHiddenStartNowBlob = nextLines.some((x) => /^lock next: startNow \S+ src=blob$/.test(x)) && playedAfter < 1000;
     c.lockHiddenNoNetStart = dn.filter((x) => /^deck: src net /.test(x)).length === netBefore;
     await s2.pg.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' }); document.dispatchEvent(new Event('visibilitychange')); });
     c.coldS2NoPageErrors = s2.errors.length === 0;

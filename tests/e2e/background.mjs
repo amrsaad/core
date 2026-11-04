@@ -29,15 +29,36 @@ const MS_SPY = () => {
   const orig = ms.setActionHandler.bind(ms);
   ms.setActionHandler = (a, f) => { if (f) window.__ms[a] = f; else delete window.__ms[a]; return orig(a, f); };
 };
-const freshPage = async (browser, url, k, poolBody, query, extraInit) => {
+// Brief 10: iOS startet im Hintergrund eine neue Quelle nur synchron im Media-Session-Handler. Jedes play() danach (React-Render, Zeitgeber) bleibt
+// verdeckt für immer ausstehend und startet nichts. window.__sync markiert den Handler-Aufruf, window.__gated zählt die ausgesperrten play().
+// window.__stallArm = true: die Quelle des nächsten play() im Handler bleibt verdeckt dauerhaft ausstehend (das Ziel kommt nicht an, Rückfall prüfen),
+// window.__open = true: alle anderen play() sind erlaubt (der Rückfall startet verdeckt aus einem Zeitgeber, das prüft die Logik, nicht iOS).
+const IOS_GATE = () => {
+  const P = HTMLMediaElement.prototype;
+  const orig = P.play;
+  window.__sync = false;
+  window.__gated = 0;
+  window.__plays = [];
+  P.play = function () {
+    if (document.visibilityState === 'hidden') window.__plays.push({ sync: window.__sync, src: String(this.src).slice(0, 40), stack: new Error().stack.split('\n').slice(1, 7).map((l) => l.trim().slice(0, 60)).join(' < ') });
+    if (document.visibilityState === 'hidden') {
+      if (window.__stallArm && window.__sync) { window.__stallArm = false; window.__stallSrc = this.src; }
+      if (window.__stallSrc && this.src === window.__stallSrc) { window.__gated++; return new Promise(() => {}); }
+      if (!window.__sync && !window.__open) { window.__gated++; return new Promise(() => {}); }
+    }
+    return orig.call(this);
+  };
+};
+const freshPage = async (browser, url, k, poolBody, query, extraInit, onCx) => {
   const cx = await browser.newContext({ ...devices['iPhone 15'], serviceWorkers: 'block' });
   await cx.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
   await cx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
+  await onCx?.(cx);
   const pg = await cx.newPage();
   await pg.addInitScript(() => { window.__ytSlow = true; });
   // Das nachgebaute Medien-Element muss vor dem ersten Gebrauch da sein: die Freischaltung per Geste spielt schon vor dem ersten Moment, ein echtes Element würde danach ein spätes ended liefern
   await pg.addInitScript(FAKE_MEDIA);
-  if (extraInit) await pg.addInitScript(extraInit);
+  for (const f of [].concat(extraInit ?? [])) await pg.addInitScript(f);
   await pg.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBody }));
   await pg.goto(`${url}${query}#k=${k}`);
   return { cx, pg };
@@ -53,6 +74,20 @@ const bgAudio = Array.from({ length: 9 }, (_, i) => bgMk(`bgaudio${i}`, 'audio',
 const bgVideo = Array.from({ length: 6 }, (_, i) => bgMk(`bgvideo${i}`, 'video', { hls: `https://stream.test/bgvideo${i}.m3u8` }));
 const bgYt = Array.from({ length: 6 }, (_, i) => bgMk(`bgyt${String(i).padStart(7, '0')}`, 'video'));
 mkdirSync('dist/moments', { recursive: true });
+// Brief 10: Momente mit echter mp3 (Ausschnitt 10 bis 14 s), damit der Vorrat sich füllt und Blob-URLs entstehen
+const bgStock = Array.from({ length: 12 }, (_, i) => bgMk(`bgstock${i}`, 'audio', { audio: true, start: 10, end: 14, hls: `https://stream.test/bgstock${i}.mp3` }));
+const poolBgStock = await encPool(bgStock);
+const MP3 = new Uint8Array(readFileSync(new URL('../fixtures/media/tone-cbr.mp3', import.meta.url)));
+const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'range', 'access-control-allow-methods': 'GET,OPTIONS' };
+const routeMp3 = (cx) => cx.route('https://stream.test/**', (route) => {
+  const req = route.request();
+  if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: CORS });
+  const m = /bytes=(\d+)-(\d*)/.exec(req.headers().range ?? '');
+  const from = m ? Number(m[1]) : 0;
+  const to = m && m[2] ? Math.min(Number(m[2]), MP3.length - 1) : MP3.length - 1;
+  if (from >= MP3.length) return route.fulfill({ status: 416, headers: CORS });
+  return route.fulfill({ status: m ? 206 : 200, headers: { ...CORS, 'content-type': 'audio/mpeg', 'accept-ranges': 'bytes', ...(m ? { 'content-range': `bytes ${from}-${to}/${MP3.length}` } : {}) }, body: Buffer.from(MP3.subarray(from, to + 1)) });
+});
 const poolBgAudio = await encPool(bgAudio);
 const poolBgVideo = await encPool(bgVideo);
 const poolBgYt = await encPool(bgYt);
@@ -183,6 +218,63 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bgLockNextNoNetStart = nx.net === nxNet0;
     c.bgLockNextKeepsMoment = nx.idx === nxIdx && nx.st === 1;
     await fn.cx.close();
+
+    // Brief 10 (Issue 36), 'nexttrack hidden plays within 2 s': Weiter am Sperrbildschirm mit Vorrat. Der Ziel-Moment startet synchron im Handler (iOS erlaubt
+    // verdeckt nur das), 'deck play#N ok' kommt binnen 2 s, ohne Rückkehr in die App. Zweimal Weiter hintereinander, beide spielen.
+    const fk = await freshPage(browser, url, k, poolBgStock, '?now=2026-10-23&seed=3', [MS_SPY, IOS_GATE], routeMp3);
+    const pk = fk.pg;
+    await pk.waitForSelector('[data-testid=form-switch]');
+    await pk.click('[data-testid=form-switch] >> text=Audio');
+    await waitFor(pk, () => window.__core.state() === 1 && window.__core.moment()?.audio === true);
+    c.bgNextStockFills = await waitFor(pk, () => window.__core.preload().stats.n >= 4, undefined, 20000);
+    await pk.waitForTimeout(600);
+    const kIdx = await pk.evaluate(() => window.__core.idx());
+    const press = () => pk.evaluate(() => { window.__sync = true; try { window.__ms.nexttrack(); } finally { window.__sync = false; } });
+    await setVisibility(pk, 'hidden');
+    const kLen0 = await pk.evaluate(() => window.__core.diag().length);
+    const kT0 = Date.now();
+    await press();
+    c.bgNextHiddenAdvances = await waitFor(pk, (i) => window.__core.idx() === i + 1 && window.__core.state() === 1, kIdx, 3000);
+    c.bgNextHiddenPlayOk = await waitFor(pk, (n) => window.__core.diag().slice(n).some((x) => /^deck play#\d+ ok$/.test(x)), kLen0, 2000);
+    r.bgNextHiddenMs = Date.now() - kT0;
+    const kLines = (await pk.evaluate(() => window.__core.diag())).slice(kLen0);
+    r.bgNextHiddenLines = kLines.filter((x) => /^lock next: |^deck: src |^deck play#/.test(x));
+    c.bgNextStartNowLine = kLines.some((x) => /^lock next: startNow \S+ src=blob$/.test(x));
+    c.bgNextPlayingLine = await waitFor(pk, (n) => window.__core.diag().slice(n).some((x) => /^lock next: playing after \d+ ms$/.test(x)), kLen0, 2000);
+    c.bgNextNoVisibleBetween = !kLines.some((x) => /app: visible|page visible/.test(x));
+    // Eine Quelle für das Ziel, kein zweites Laden durch die Buchführung
+    c.bgNextOneSrcLine = kLines.filter((x) => /^deck: src /.test(x)).length === 1;
+    c.bgNextNoGatedPlay = (await pk.evaluate(() => window.__gated)) === 0;
+    r.bgNextPlays = await pk.evaluate(() => window.__plays);
+    // Zweiter Druck gleich danach: beide Momente spielen
+    await press();
+    c.bgNextTwiceAdvances = await waitFor(pk, (i) => window.__core.idx() === i + 2 && window.__core.state() === 1, kIdx, 3000);
+    c.bgNextTwicePlays = await waitFor(pk, (n) => window.__core.diag().slice(n).filter((x) => /^deck play#\d+ ok$/.test(x)).length >= 2, kLen0, 2000);
+    c.bgNextTwiceNoGated = (await pk.evaluate(() => window.__gated)) === 0;
+    // Die Sperre ist wirksam: ein play() außerhalb des Handlers bleibt verdeckt ausstehend (so scheiterte der Weg vor Brief 10)
+    c.bgNextGateActive = (await pk.evaluate(() => { document.querySelector('audio').play(); return window.__gated; })) === 1;
+    await fk.cx.close();
+
+    // Brief 10, Schritt 4: kommt das Ziel nicht binnen 3 s an, zurück zum laufenden Moment, das Ziel bleibt ungesehen, nie stumm weiter
+    const fb = await freshPage(browser, url, k, poolBgStock, '?now=2026-10-23&seed=3', [MS_SPY, IOS_GATE], routeMp3);
+    const pb = fb.pg;
+    await pb.waitForSelector('[data-testid=form-switch]');
+    await pb.click('[data-testid=form-switch] >> text=Audio');
+    await waitFor(pb, () => window.__core.state() === 1 && window.__core.moment()?.audio === true);
+    await waitFor(pb, () => window.__core.preload().stats.n >= 4, undefined, 20000);
+    await pb.waitForTimeout(600);
+    const bIdx = await pb.evaluate(() => window.__core.idx());
+    const bRun = await pb.evaluate(() => window.__core.moment().id);
+    await setVisibility(pb, 'hidden');
+    await pb.evaluate(() => { window.__stallArm = true; window.__open = true; window.__sync = true; try { window.__ms.nexttrack(); } finally { window.__sync = false; } });
+    c.bgRevertLine = await waitFor(pb, () => window.__core.diag().some((x) => /^lock next: reverted /.test(x)), undefined, 5000);
+    c.bgRevertBackOnRunning = await waitFor(pb, (a) => window.__core.idx() === a.i && window.__core.moment().id === a.id && window.__core.state() === 1, { i: bIdx, id: bRun }, 3000);
+    const bDiag = await pb.evaluate(() => window.__core.diag());
+    const bTarget = /^lock next: startNow (\S+) src=/.exec(bDiag.find((x) => /^lock next: startNow /.test(x)) ?? '')?.[1];
+    r.bgRevertLines = bDiag.filter((x) => /^lock next: /.test(x));
+    c.bgRevertTargetUnseen = !!bTarget && !(await pb.evaluate((id) => window.__core.seen(id), bTarget));
+    c.bgRevertNotPlayedLine = !bDiag.some((x) => /^lock next: playing after /.test(x));
+    await fb.cx.close();
 
     // Video-Reiter mit eigenem Stream: läuft im Hintergrund bis zum Ende, dann Stopp ohne Auto-Weiter
     const fv = await freshPage(browser, url, k, poolBgVideo, '?now=2026-10-23&seed=3');
