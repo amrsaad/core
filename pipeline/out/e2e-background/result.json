@@ -1,5 +1,5 @@
 {
- "at": "2026-11-03T15:21:27.023Z",
+ "at": "2026-11-04T04:26:39.438Z",
  "runs": [
   {
    "browser": "webkit",
@@ -33,6 +33,22 @@
     "bgLockNextStayLine": true,
     "bgLockNextNoNetStart": true,
     "bgLockNextKeepsMoment": true,
+    "bgNextStockFills": true,
+    "bgNextHiddenAdvances": true,
+    "bgNextHiddenPlayOk": true,
+    "bgNextStartNowLine": true,
+    "bgNextPlayingLine": true,
+    "bgNextNoVisibleBetween": true,
+    "bgNextOneSrcLine": true,
+    "bgNextNoGatedPlay": true,
+    "bgNextTwiceAdvances": true,
+    "bgNextTwicePlays": true,
+    "bgNextTwiceNoGated": true,
+    "bgNextGateActive": true,
+    "bgRevertLine": true,
+    "bgRevertBackOnRunning": true,
+    "bgRevertTargetUnseen": true,
+    "bgRevertNotPlayedLine": true,
     "bgVideoPlays": true,
     "bgVideoKeepsPlaying": true,
     "bgVideoStops": true,
@@ -113,6 +129,27 @@
     "bg: arm bgaudio7 (net)",
     "bg: next bgaudio3:0"
    ],
+   "bgNextHiddenMs": 20,
+   "bgNextHiddenLines": [
+    "lock next: held bgstock1:0",
+    "deck: src local bgstock1",
+    "deck play#2 start rs=0 muted=false t=0.1",
+    "lock next: startNow bgstock1:0 src=blob",
+    "deck play#2 ok",
+    "lock next: playing after 3 ms"
+   ],
+   "bgNextPlays": [
+    {
+     "sync": true,
+     "src": "blob:http://127.0.0.1:4178/8cc6d051-0791",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-CmqwyrVE.js:40: < start@http://127.0.0.1:4178/core/assets/index-CmqwyrVE.js:40 < startNow@http://127.0.0.1:4178/core/assets/index-CmqwyrVE.js < Du@http://127.0.0.1:4178/core/assets/index-CmqwyrVE.js:47:29 < ls@http://127.0.0.1:4178/core/assets/index-CmqwyrVE.js:47:29 < @http://127.0.0.1:4178/core/assets/index-CmqwyrVE.js:47:6254"
+    }
+   ],
+   "bgRevertLines": [
+    "lock next: held bgstock1:0",
+    "lock next: startNow bgstock1:0 src=blob",
+    "lock next: reverted bgstock1:0"
+   ],
    "ok": true
   },
   {
@@ -147,6 +184,22 @@
     "bgLockNextStayLine": true,
     "bgLockNextNoNetStart": true,
     "bgLockNextKeepsMoment": true,
+    "bgNextStockFills": true,
+    "bgNextHiddenAdvances": true,
+    "bgNextHiddenPlayOk": true,
+    "bgNextStartNowLine": true,
+    "bgNextPlayingLine": true,
+    "bgNextNoVisibleBetween": true,
+    "bgNextOneSrcLine": true,
+    "bgNextNoGatedPlay": true,
+    "bgNextTwiceAdvances": true,
+    "bgNextTwicePlays": true,
+    "bgNextTwiceNoGated": true,
+    "bgNextGateActive": true,
+    "bgRevertLine": true,
+    "bgRevertBackOnRunning": true,
+    "bgRevertTargetUnseen": true,
+    "bgRevertNotPlayedLine": true,
     "bgVideoPlays": true,
     "bgVideoKeepsPlaying": true,
     "bgVideoStops": true,
@@ -226,6 +279,27 @@
     "bg: started bgaudio3:0",
     "bg: arm bgaudio7 (net)",
     "bg: next bgaudio3:0"
+   ],
+   "bgNextHiddenMs": 10,
+   "bgNextHiddenLines": [
+    "lock next: held bgstock1:0",
+    "deck: src local bgstock1",
+    "deck play#2 start rs=0 muted=false t=0.1",
+    "lock next: startNow bgstock1:0 src=blob",
+    "deck play#2 ok",
+    "lock next: playing after 2 ms"
+   ],
+   "bgNextPlays": [
+    {
+     "sync": true,
+     "src": "blob:http://127.0.0.1:4178/059033bc-f520",
+     "stack": "at P.play (<anonymous>:9:134) < at x0.kick (http://127.0.0.1:4178/core/assets/index-CmqwyrVE < at x0.start (http://127.0.0.1:4178/core/assets/index-CmqwyrV < at x0.startNow (http://127.0.0.1:4178/core/assets/index-Cmqw < at Du (http://127.0.0.1:4178/core/assets/index-CmqwyrVE.js:4 < at Object.ls [as current] (http://127.0.0.1:4178/core/assets"
+    }
+   ],
+   "bgRevertLines": [
+    "lock next: held bgstock1:0",
+    "lock next: startNow bgstock1:0 src=blob",
+    "lock next: reverted bgstock1:0"
    ],
    "ok": true
   }
