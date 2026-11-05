@@ -2084,8 +2084,14 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   /** Der Griff begann auf der Infozeile (Hook): ein Tipp öffnet den Kontext, ein Wisch oder langes Drücken gilt wie überall */
   const infoDown = useRef(false);
+  /** Der Griff begann auf der Steuerzeile des Audio-Reiters (Brief 17 legt sie in die Mitte der Spalte): Wisch und langes Drücken gelten wie überall,
+   *  ein Tipp gehört der Taste. Ein Wisch oder langes Drücken löst die Taste nicht aus (gestureUsed, bis zum nächsten Griff). */
+  const ctrlDown = useRef(false);
+  const gestureUsed = useRef(false);
   const onDown = (e: React.PointerEvent) => {
     infoDown.current = false;
+    ctrlDown.current = false;
+    gestureUsed.current = false;
     const r = g.current;
     // Der Seitenwechsel wird gerade übernommen (eine Zeichnung lang): kein neuer Griff
     if (mot.current.busy && !mot.current.raf) return;
@@ -2103,6 +2109,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     window.clearTimeout(r.long);
     r.long = window.setTimeout(() => {
       r.fired = true;
+      gestureUsed.current = true;
       navigator.vibrate?.(10);
       // Abrufkarte, Text-Reiter und For-you-Karte bleiben unberührt (Pfeiler 17)
       if (textRef.current || recallRef.current || forYouRef.current) return;
@@ -2111,6 +2118,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   };
   const cancelGesture = () => {
     infoDown.current = false;
+    ctrlDown.current = false;
     g.current.fired = false;
     g.current.t = 0;
     window.clearTimeout(g.current.long);
@@ -2127,6 +2135,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     vel.current.push(e.timeStamp, e.clientY);
     if (Math.abs(r.dy) > 10 || Math.abs(r.dx) > 10) {
       r.moved = true;
+      gestureUsed.current = true;
       window.clearTimeout(r.long);
     }
     // Achse wird nach 4 px festgelegt. Senkrecht folgt die Seite dem Finger ab dem ersten Pixel, waagerecht verschiebt sie den Feed nicht (Rückmeldung).
@@ -2155,6 +2164,14 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       return;
     }
     if (!wasDown) return;
+    // Ein Tipp auf die Steuerzeile gehört der Taste (onClick), die Gesten-Ebene tut nichts (kein Pausentipp, kein Doppeltipp-Herz)
+    if (ctrlDown.current) {
+      ctrlDown.current = false;
+      if (!dragging.current && !r.moved) {
+        stopMeter(false);
+        return;
+      }
+    }
     // Jede erste Berührung (auch ein Wisch) gilt dem Browser als Geste: Ton sofort freischalten, damit nach einem
     // Neuladen der PWA nie ein Tipp nur für den Ton nötig ist und der Hinweis nicht zurückkommt (Max, 29.10.).
     // Die erste Geste irgendwo im Dokument hat den Ton schon freigeschaltet (gesture.ts). Dieselbe Berührung ist hier trotzdem kein Pausentipp.
@@ -2784,16 +2801,22 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   ) : null;
   const ctrlEl = m && !forYou && form === 'audio' && !desk ? (
 
-        <div className="vctrl" data-testid="audio-controls" onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
+        <div
+          className="vctrl"
+          data-testid="audio-controls"
+          onPointerDown={(e) => { onDown(e); ctrlDown.current = true; }}
+          onPointerMove={onMove}
+          onPointerCancel={cancelGesture}
+        >
           <div className="vtimes">
             <span>{atTime(Math.round(progress * Math.max(0, m.end - m.start)))}</span>
             {rateOf(state.settings) > 1 && <span>{rateOf(state.settings)}x</span>}
             <span>{atTime(Math.max(0, m.end - m.start))}</span>
           </div>
           <div className="vtransport">
-            <button type="button" aria-label="Previous moment" data-testid="ctl-prev" onClick={() => goTo(idxRef.current - 1)}><Icon name="skip-back" size="var(--icon)" /></button>
-            <button type="button" className="vplaybtn" aria-label={paused ? 'Play' : 'Pause'} data-testid="ctl-play" onClick={() => togglePlay()}><Icon name={paused ? 'play' : 'pause'} size="var(--s-8)" /></button>
-            <button type="button" aria-label="Next moment" data-testid="ctl-next" onClick={() => goTo(idxRef.current + 1)}><Icon name="skip-forward" size="var(--icon)" /></button>
+            <button type="button" aria-label="Previous moment" data-testid="ctl-prev" onClick={() => { if (!gestureUsed.current) goTo(idxRef.current - 1); }}><Icon name="skip-back" size="var(--icon)" /></button>
+            <button type="button" className="vplaybtn" aria-label={paused ? 'Play' : 'Pause'} data-testid="ctl-play" onClick={() => { if (!gestureUsed.current) togglePlay(); }}><Icon name={paused ? 'play' : 'pause'} size="var(--s-8)" /></button>
+            <button type="button" aria-label="Next moment" data-testid="ctl-next" onClick={() => { if (!gestureUsed.current) goTo(idxRef.current + 1); }}><Icon name="skip-forward" size="var(--icon)" /></button>
           </div>
         </div>
       
