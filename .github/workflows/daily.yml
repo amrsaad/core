@@ -254,9 +254,9 @@ jobs:
           npx vite preview --host 127.0.0.1 --port 4188 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4188/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           E2E_BROWSERS=chromium node tests/e2e/video4g.mjs http://127.0.0.1:4188/core/ pipeline/out/e2e-video4g
-      - name: Layout-Gate (Entscheidung 43, Brief 06; vier Breiten, drei Stimmungen, Überlauf, Kontrast AA, 44 px; ein roter Befund bricht den Deploy)
+      - name: Layout-Gate (Entscheidung 43, Brief 06 und 17; Chromium mit vier Breiten und WebKit mit iPhone-Profilen 390x844 und 430x932 mit Sicherheitsrand 59/34; Überlauf, Kontrast AA, 44 px, keine überlagerten Textblöcke, kein Seitenscroll, Leiste im Fenster, Blätter schließen; ein roter Befund bricht den Deploy)
         if: always()
-        timeout-minutes: 30
+        timeout-minutes: 45
         run: |
           npx vite preview --host 127.0.0.1 --port 4189 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4189/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"

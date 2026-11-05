@@ -40,7 +40,12 @@ const freshPage = async (browser, poolBody) => {
 };
 const setVisibility = (page, v) => page.evaluate((state) => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => state }); document.dispatchEvent(new Event('visibilitychange')); }, v);
 const longPress = async (page, ms = 700) => {
-  await page.mouse.move(190, 420);
+  // Auf das Cover drücken (Brief 17: Untertitel, Zeiten und Tasten stehen darunter im Fluss und fangen den Druck selbst ab)
+  const at = await page.evaluate(() => {
+    for (const el of document.querySelectorAll('.vaudio-art')) { const r = el.getBoundingClientRect(); if (r.width > 40 && r.left >= 0 && r.right <= innerWidth) return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
+    return null;
+  });
+  await page.mouse.move(at?.x ?? 190, at?.y ?? 420);
   await page.mouse.down();
   await sleep(ms);
   await page.mouse.up();

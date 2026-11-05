@@ -382,8 +382,21 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const tid = await page.evaluate(() => window.__core.moment().id);
     c.textNotSeenBeforeEnd = !(await page.evaluate((id) => window.__core.seen(id), tid));
     await page.screenshot({ path: `${out}/${name}-9-text.png` });
-    await page.evaluate(() => { const el = document.querySelector('[data-testid=text-view]'); el.scrollTop = el.scrollHeight; el.dispatchEvent(new Event('scroll')); });
+    // Handy (Brief 17, Issue 37): der Text ist auf einen Schirm gekürzt, "Read more" öffnet den ganzen Text im Blatt, am Ende des Blatts gilt er als gesehen.
+    // Desktop und alles, was ohne Kürzung passt: wie bisher am Ende des Texts.
+    const more = await page.$('[data-testid=text-more]');
+    if (more) {
+      c.textMoreShown = true;
+      await more.click();
+      await page.waitForSelector('[data-testid=caption-sheet]', { timeout: 3000 });
+      await page.waitForTimeout(300);
+      c.textNotSeenInSheetTop = !(await page.evaluate((id) => window.__core.seen(id), tid));
+      await page.evaluate(() => { const el = document.querySelector('[data-testid=caption-sheet]'); el.scrollTop = el.scrollHeight; el.dispatchEvent(new Event('scroll')); });
+    } else {
+      await page.evaluate(() => { const el = document.querySelector('[data-testid=text-view]'); el.scrollTop = el.scrollHeight; el.dispatchEvent(new Event('scroll')); });
+    }
     c.textSeenAtEnd = await waitFor(page, (id) => window.__core.seen(id), tid);
+    if (more) { await page.locator('[data-testid=caption-close]').click(); await page.waitForTimeout(300); }
     c.textStillPaused = await page.evaluate(() => window.__core.state() !== 1);
     await skipRecall(page, name, out);
     // Filter nach Feld form: Text zeigt nur Text-Momente, ohne Player
