@@ -1,5 +1,5 @@
 {
- "at": "2026-11-04T19:44:09.336Z",
+ "at": "2026-11-05T04:15:35.685Z",
  "runs": [
   {
    "browser": "webkit",
@@ -182,37 +182,37 @@
     "deck play#2 ok"
    ],
    "bgNextFiveMs": [
-    32,
-    17,
-    17,
-    18,
-    17
+    35,
+    14,
+    14,
+    21,
+    13
    ],
    "bgNextPlays": [
     {
      "sync": true,
      "src": "https://stream.test/bgstock2.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-CsczEl2R.j < swapNext@http://127.0.0.1:4178/core/assets/index-CsczEl2R.js < al@http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:47:36 < @http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:47:6953 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.j < swapNext@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js < al@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:47:36 < @http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:47:6953 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgnet2.m3u8#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-CsczEl2R.j < swapNext@http://127.0.0.1:4178/core/assets/index-CsczEl2R.js < al@http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:47:36 < @http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:47:6953 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.j < swapNext@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js < al@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:47:36 < @http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:47:6953 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock8.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-CsczEl2R.j < swapNext@http://127.0.0.1:4178/core/assets/index-CsczEl2R.js < al@http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:47:36 < @http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:47:6953 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.j < swapNext@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js < al@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:47:36 < @http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:47:6953 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgnet0.m3u8#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-CsczEl2R.j < swapNext@http://127.0.0.1:4178/core/assets/index-CsczEl2R.js < al@http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:47:36 < @http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:47:6953 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.j < swapNext@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js < al@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:47:36 < @http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:47:6953 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock4.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-CsczEl2R.j < swapNext@http://127.0.0.1:4178/core/assets/index-CsczEl2R.js < al@http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:47:36 < @http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:47:6953 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.j < swapNext@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js < al@http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:47:36 < @http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:47:6953 < @"
     }
    ],
    "ok": true
@@ -379,8 +379,8 @@
      "bgstock4:0"
     ],
     "local": [
-     "bgstock8:0",
      "bgstock2:0",
+     "bgstock8:0",
      "bgstock4:0",
      "bgstock10:0",
      "bgstock1:0",
@@ -398,37 +398,37 @@
     "deck play#2 ok"
    ],
    "bgNextFiveMs": [
-    16,
-    10,
-    10,
+    11,
     8,
-    12
+    12,
+    10,
+    7
    ],
    "bgNextPlays": [
     {
      "sync": true,
      "src": "https://stream.test/bgstock2.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at $y.kick (http://127.0.0.1:4178/core/assets/index-CsczEl2R < at $y.swapEntry (http://127.0.0.1:4178/core/assets/index-Csc < at $y.swapNext (http://127.0.0.1:4178/core/assets/index-Cscz < at Object.al [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:47:69"
+     "stack": "at P.play (<anonymous>:9:134) < at $y.kick (http://127.0.0.1:4178/core/assets/index-Clw9yYhy < at $y.swapEntry (http://127.0.0.1:4178/core/assets/index-Clw < at $y.swapNext (http://127.0.0.1:4178/core/assets/index-Clw9 < at Object.al [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:47:69"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgnet2.m3u8#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at $y.kick (http://127.0.0.1:4178/core/assets/index-CsczEl2R < at $y.swapEntry (http://127.0.0.1:4178/core/assets/index-Csc < at $y.swapNext (http://127.0.0.1:4178/core/assets/index-Cscz < at Object.al [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:47:69"
+     "stack": "at P.play (<anonymous>:9:134) < at $y.kick (http://127.0.0.1:4178/core/assets/index-Clw9yYhy < at $y.swapEntry (http://127.0.0.1:4178/core/assets/index-Clw < at $y.swapNext (http://127.0.0.1:4178/core/assets/index-Clw9 < at Object.al [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:47:69"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock8.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at $y.kick (http://127.0.0.1:4178/core/assets/index-CsczEl2R < at $y.swapEntry (http://127.0.0.1:4178/core/assets/index-Csc < at $y.swapNext (http://127.0.0.1:4178/core/assets/index-Cscz < at Object.al [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:47:69"
+     "stack": "at P.play (<anonymous>:9:134) < at $y.kick (http://127.0.0.1:4178/core/assets/index-Clw9yYhy < at $y.swapEntry (http://127.0.0.1:4178/core/assets/index-Clw < at $y.swapNext (http://127.0.0.1:4178/core/assets/index-Clw9 < at Object.al [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:47:69"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgnet0.m3u8#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at $y.kick (http://127.0.0.1:4178/core/assets/index-CsczEl2R < at $y.swapEntry (http://127.0.0.1:4178/core/assets/index-Csc < at $y.swapNext (http://127.0.0.1:4178/core/assets/index-Cscz < at Object.al [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:47:69"
+     "stack": "at P.play (<anonymous>:9:134) < at $y.kick (http://127.0.0.1:4178/core/assets/index-Clw9yYhy < at $y.swapEntry (http://127.0.0.1:4178/core/assets/index-Clw < at $y.swapNext (http://127.0.0.1:4178/core/assets/index-Clw9 < at Object.al [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:47:69"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock4.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at $y.kick (http://127.0.0.1:4178/core/assets/index-CsczEl2R < at $y.swapEntry (http://127.0.0.1:4178/core/assets/index-Csc < at $y.swapNext (http://127.0.0.1:4178/core/assets/index-Cscz < at Object.al [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-CsczEl2R.js:47:69"
+     "stack": "at P.play (<anonymous>:9:134) < at $y.kick (http://127.0.0.1:4178/core/assets/index-Clw9yYhy < at $y.swapEntry (http://127.0.0.1:4178/core/assets/index-Clw < at $y.swapNext (http://127.0.0.1:4178/core/assets/index-Clw9 < at Object.al [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-Clw9yYhy.js:47:69"
     }
    ],
    "ok": true
