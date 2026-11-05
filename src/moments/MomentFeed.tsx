@@ -5,7 +5,7 @@ import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL, topicLabel } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { audioDeck, createPlayer, deckClipOf, HLS, LOCAL, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
-import type { DeckClip } from '../video/audioDeck';
+import { POOL_WINDOW, type DeckClip } from '../video/audioDeck';
 import { canWarm, coverMs, onNonCurrentPlaying, roleOf, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx, type WarmState } from '../video/warmup';
 import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, onGesture, type Gesture } from './gesture';
 import { hintVisible, SOUND_NONE } from './soundHint';
@@ -236,6 +236,11 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const played = useRef(new PlayTracker());
   const seenMarked = useRef(new Set<string>());
   const unplayedNoted = useRef(new Set<string>());
+  /** Verdeckt hängende Momente, für die schon "lock: stuck, stay" im Protokoll steht (Brief 14b): eine Zeile je Moment */
+  const stuckNoted = useRef(new Set<string>());
+  /** Vorrats-Tiefe, für die zuletzt "stock: low" kam, und Zeitpunkt des letzten Nachladens (Brief 14b, Schritt 1) */
+  const lowDepth = useRef(-1);
+  const lastResume = useRef(0);
   /** Offene Messung Wisch bis erstes Bild */
   const swipe = useRef<{ j: number; t0: number; buffered: boolean } | null>(null);
   /** Messung für die Zeile "video: ..." (Issue 22): Wisch bis Bereitschaft des Players und bis zum ersten PLAYING */
@@ -458,8 +463,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!pre) return;
     pre.setQueue(queue.current, at, rateRef.current);
     const w = pre.warmSet(queue.current, at, rateRef.current);
-    // Audio-Reiter (Brief 11, Schritt 9): die ersten zwei Vorrats-Momente der nächsten 6 halten ihre Blob-URL, damit nach einem Tausch sofort ein lokaler Kandidat da ist
-    if (form === 'audio') for (const m of queue.current.slice(at + 1, at + 7).filter((x) => pre.held(x.id)).slice(0, 2)) if (!w.includes(m)) w.push(m);
+    // Audio-Reiter (Brief 11, Schritt 9, Brief 14b): die ersten drei Vorrats-Momente der nächsten 6 halten ihre Blob-URL, damit der Element-Vorrat sie lokal laden
+    // kann (die Vorrats-Tiefe verlangt 3 von 6) und nach einem Tausch sofort ein lokaler Kandidat da ist. Ein widerrufener Blob würde dem Element die Quelle nehmen.
+    if (form === 'audio') for (const m of queue.current.slice(at + 1, at + 1 + POOL_WINDOW).filter((x) => pre.held(x.id)).slice(0, 3)) if (!w.includes(m)) w.push(m);
     void pre.warm(w);
     pre.trimWarm(new Set(w.map((x) => x.id)));
     saveQueue();
@@ -795,13 +801,26 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     const first = queue.current[idxRef.current + 1];
     if (first && !pre.held(first.id) && pre.poor()) pullBy((m) => pre.held(m.id), false);
     // Mindestens 3 der nächsten 6 liegen im Vorrat, sonst rücken Vorrats-Momente von weiter hinten in die ersten Plätze (idx+1 bleibt)
-    const d = depthPlan(queue.current, idxRef.current, (m) => pre.held(m.id));
+    const d = depthPlan(queue.current, idxRef.current, (m) => pre.held(m.id), 3, POOL_WINDOW);
     if (d.moved > 0) {
       applyQueue(d.queue);
       diag.current.push(`stock: depth ${d.have} of 6 (pulled ${d.moved})`);
     }
+    // Brief 14b, Schritt 1: hält der Vorrat weniger als 3 der nächsten 6, wird sichtbar sofort nachgeladen (Vorrats-Logik aus Brief 02: Fehlversuche vergessen,
+    // nächstgelegene fehlende Momente zuerst). Höchstens alle 5 s, damit ein Host ohne Antwort nicht gehämmert wird. Neuer Vorrat löst über das Abo unten einen neuen fillPool aus.
+    if (d.have < 3) {
+      if (lowDepth.current !== d.have) {
+        lowDepth.current = d.have;
+        diag.current.push(`stock: low ${d.have} of 6, loading`);
+      }
+      if (Date.now() - lastResume.current > 5000) {
+        lastResume.current = Date.now();
+        pre.resume();
+      }
+    } else lowDepth.current = -1;
+    // Kandidaten für den Element-Vorrat: die nächsten 6 (nicht mehr nur 5), das Deck wählt daraus lokale zuerst
     const next: Moment[] = [];
-    for (let j = idxRef.current + 1; j < queue.current.length && next.length < POOL_AHEAD; j++) {
+    for (let j = idxRef.current + 1; j < queue.current.length && next.length < POOL_WINDOW; j++) {
       const m = queue.current[j];
       if (!bad.current.has(m.videoId) && formOf(m) === 'audio' && deckClipOf(m)) next.push(m);
     }
@@ -878,6 +897,32 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   };
   const lockNextRef = useRef(lockNext);
   lockNextRef.current = lockNext;
+
+  /**
+   * Hänge-Überwachung verdeckt (Brief 14b, Issue 40, Entscheidung 45): ein Moment, der nach 12 s nicht anspielt, wird verdeckt nie übersprungen. Ist ein anderes
+   * Element des Vorrats bereit, tauscht das Deck darauf (wie Weiter am Sperrbildschirm, lokale zuerst). Sonst bleibt alles stehen, nichts wird geladen, nichts gezählt.
+   * Der hängende Moment bleibt ungesehen: er bekommt nur die Sitzungs-Sperre und eine eigene Zeile statt "skipped (not seen)".
+   * Zurück zum vorigen Element gibt es nicht: der Tausch hat es angehalten, und ein Schritt zurück verschöbe Warteschlange, Zähler und Signale.
+   */
+  const hungHidden = (m: Moment) => {
+    if (form === 'audio' && audioDeck.hungAction() === 'swap') {
+      const c = audioDeck.swapNext();
+      if (c) {
+        bad.current.add(m.videoId);
+        unplayedNoted.current.add(m.id);
+        placeNext(c.key);
+        goTo(idxRef.current + 1);
+        diag.current.push(`lock: stuck ${m.id}, not seen, swapped to ${queue.current[idxRef.current]?.id ?? c.id}`);
+        return;
+      }
+    }
+    if (!stuckNoted.current.has(m.id)) {
+      stuckNoted.current.add(m.id);
+      diag.current.push('lock: stuck, stay');
+    }
+  };
+  const hungHiddenRef = useRef(hungHidden);
+  hungHiddenRef.current = hungHidden;
 
   /**
    * Gescheiterte Momente aus dem Rest der Warteschlange nehmen (Wisch und Auto-Weiter lesen danach dieselbe Stelle). Verdeckt im Audio-Reiter nur entfernen, nie
@@ -1192,8 +1237,22 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       if (on) waitTimer = window.setTimeout(() => setDeckWait(true), 500);
       else setDeckWait(false);
     };
+    // Brief 14b, Schritt 1: kommt Vorrat dazu, wird einer warm oder fällt welcher weg, ordnet sich der Element-Vorrat neu (lokale zuerst). Sonst bliebe ein Vorrats-Moment, der erst
+    // nach dem letzten Füllen ankam, bis zum nächsten Wisch im Netz. fillPool tut verdeckt nichts. Nur wenn sich die Zahl ändert, kurz gebündelt.
+    const stockSig = () => (pre ? `${pre.stats().n}:${pre.warmCount()}` : '');
+    let stockN = stockSig();
+    let stockTimer = 0;
+    const offStock = pre?.subscribe(() => {
+      const n = stockSig();
+      if (n === stockN) return;
+      stockN = n;
+      window.clearTimeout(stockTimer);
+      stockTimer = window.setTimeout(() => fillPoolRef.current(), 250);
+    });
     return () => {
       window.clearTimeout(waitTimer);
+      window.clearTimeout(stockTimer);
+      offStock?.();
       audioDeck.release();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1579,6 +1638,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         setLoading(waited > 400);
         // Nur wenn in dieser Sitzung schon etwas lief (sonst blockiert z.B. der Stromsparmodus Autoplay und alles würde übersprungen)
         if (everPlayed.current && waited > 12_000 && c < m.start + 1) {
+          // Verdeckt nie überspringen (Brief 14b): tauschen auf ein bereites Element oder stehen bleiben, nächste Prüfung in 12 s
+          if (isBackground(document.visibilityState)) {
+            diag.current.push(`watchdog ${m.id} (hidden)`);
+            waitSince.current = Date.now();
+            hungHiddenRef.current(m);
+            return;
+          }
           diag.current.push(`watchdog ${m.id}`);
           bad.current.add(m.videoId);
           // Nie als gesehen: der Moment bekommt nur die Sitzungs-Sperre und kommt wieder, sobald er lädt (Entscheidung 45)

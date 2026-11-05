@@ -629,6 +629,70 @@ describe('Vorrat: fünf Elemente (Brief 14, Entscheidung 52)', () => {
     expect(t.deck.poolInfo().map((x) => x.id)).toEqual(['b']);
   });
 
+  it('fill wählt aus sechs Kandidaten lokale zuerst, das Netz füllt nur auf (Brief 14b, Schritt 1)', async () => {
+    const ids = ['b', 'c', 'd', 'e', 'f', 'g'];
+    const cs = ids.map(mk);
+    // lokal sind die hinteren drei (e, f, g), die vorderen drei kommen aus dem Netz
+    const t = setupPool({ local: { [cs[3].key]: { url: 'blob:e', offset: 0 }, [cs[4].key]: { url: 'blob:f', offset: 0 }, [cs[5].key]: { url: 'blob:g', offset: 0 } } });
+    await boot(t, sbA);
+    expect(t.deck.fill(cs)).toBe(5);
+    // Der nächste (b) bleibt, dann alle drei lokalen, dann ein Netz-Moment (c). d fällt heraus.
+    expect(t.deck.poolInfo().map((x) => x.id)).toEqual(['b', 'c', 'e', 'f', 'g']);
+    expect(t.lines).toContain('deck: pool fill 5/5 (local 3, net 2)');
+    // Lokale laden zuerst
+    expect(t.lines.filter((l) => l.startsWith('deck: pool load '))).toEqual([
+      'deck: pool load e src=local',
+      'deck: pool load f src=local',
+      'deck: pool load g src=local',
+      'deck: pool load b src=net',
+      'deck: pool load c src=net',
+    ]);
+  });
+
+  it('fill: sind mehr als fünf lokal, bleibt der nächste trotzdem im Vorrat (der sichtbare Wisch darauf tauscht sofort)', async () => {
+    const cs = ['b', 'c', 'd', 'e', 'f', 'g'].map(mk);
+    const t = setupPool({ local: Object.fromEntries(cs.slice(1).map((c) => [c.key, { url: `blob:${c.id}`, offset: 0 }])) });
+    await boot(t, sbA);
+    expect(t.deck.fill(cs)).toBe(5);
+    expect(t.deck.poolInfo().map((x) => x.id)).toEqual(['b', 'c', 'd', 'e', 'f']);
+    expect(t.lines).toContain('deck: pool fill 5/5 (local 4, net 1)');
+  });
+
+  it('fill ordnet neu, sobald lokale Quellen dazukommen: ein geladenes Netz-Element weicht, der Vorrat bleibt in Reihenfolge der Warteschlange', async () => {
+    const cs = ['b', 'c', 'd', 'e', 'f', 'g'].map(mk);
+    const t = setupPool();
+    await boot(t, sbA);
+    // Zuerst ist nichts lokal: die ersten fünf aus dem Netz
+    t.deck.fill(cs);
+    expect(t.deck.poolInfo().map((x) => x.id)).toEqual(['b', 'c', 'd', 'e', 'f']);
+    // Danach liegen f und g im Vorrat: g verdrängt das hinterste Netz-Element, f wird lokal neu geladen
+    t.local[cs[4].key] = { url: 'blob:f', offset: 0 };
+    t.local[cs[5].key] = { url: 'blob:g', offset: 0 };
+    t.deck.fill(cs);
+    expect(t.deck.poolInfo().map((x) => x.id)).toEqual(['b', 'c', 'd', 'f', 'g']);
+    expect(t.lines.filter((l) => l.startsWith('deck: pool dropped '))).toContain('deck: pool dropped e (left window)');
+  });
+
+  it('fill stellt ein Netz-Element auf lokal um, sobald sein Moment lokal verfügbar wird (Blob warm), auch der nächste', async () => {
+    const cs = ['b', 'c', 'd', 'e', 'f'].map(mk);
+    const t = setupPool();
+    await boot(t, sbA);
+    t.deck.fill(cs);
+    expect(t.lines).toContain('deck: pool fill 5/5 (local 0, net 5)');
+    t.local[cs[0].key] = { url: 'blob:b', offset: 0 };
+    t.local[cs[2].key] = { url: 'blob:d', offset: 0 };
+    t.deck.fill(cs);
+    expect(t.deck.poolInfo().map((x) => x.id)).toEqual(['b', 'c', 'd', 'e', 'f']);
+    expect(t.lines).toContain('deck: pool dropped b (now local)');
+    expect(t.lines).toContain('deck: pool dropped d (now local)');
+    expect(t.lines).toContain('deck: pool load b src=local');
+    expect(t.lines).toContain('deck: pool fill 5/5 (local 2, net 3)');
+    // Ein zweiter Lauf ohne Änderung lädt nichts mehr
+    const n = t.lines.length;
+    t.deck.fill(cs);
+    expect(t.lines.length).toBe(n);
+  });
+
   it('verdeckt wird nichts geladen: kein Element, kein load(), keine Quelle', async () => {
     const t = setupPool();
     await boot(t, sbA);
@@ -742,31 +806,83 @@ describe('Vorrat: fünf Elemente (Brief 14, Entscheidung 52)', () => {
     expect(t.deck.swapNext()?.id).toBe('b');
   });
 
-  it('fünf Mal tauschen, verdeckt, gemischt lokal und Netz: jedes Mal spielt das nächste Element sofort, nichts wird geladen', async () => {
+  it('fünf Mal tauschen, verdeckt, gemischt lokal und Netz: lokale zuerst, dann Netz, jedes Mal spielt das Element sofort, nichts wird geladen (Brief 14b)', async () => {
     const cs = ['b', 'c', 'd', 'e', 'f'].map(mk);
     const t = setupPool({ local: { [cs[0].key]: { url: 'blob:b', offset: 0 }, [cs[2].key]: { url: 'blob:d', offset: 0 }, [cs[4].key]: { url: 'blob:f', offset: 0 } } });
     await ready(t, mk('a'), cs);
     t.els.forEach((e) => (e.calls.length = 0));
     t.lines.length = 0;
-    for (const c of cs) {
+    // Verdeckt: die drei lokalen (b, d, f) in Reihenfolge der Warteschlange, danach die zwei aus dem Netz (c, e)
+    const order = ['b', 'd', 'f', 'c', 'e'];
+    for (const id of order) {
       const got = t.deck.swapNext(t.sink);
-      expect(got?.id).toBe(c.id);
+      expect(got?.id).toBe(id);
       expect(active(t).paused).toBe(false);
       expect(active(t).calls).toEqual(['play']);
     }
     expect(t.els).toHaveLength(6);
     expect(t.lines.filter((l) => /^deck: swap \S+ ready=true pool=\d$/.test(l))).toEqual([
       'deck: swap b ready=true pool=4',
-      'deck: swap c ready=true pool=3',
-      'deck: swap d ready=true pool=2',
-      'deck: swap e ready=true pool=1',
-      'deck: swap f ready=true pool=0',
+      'deck: swap d ready=true pool=3',
+      'deck: swap f ready=true pool=2',
+      'deck: swap c ready=true pool=1',
+      'deck: swap e ready=true pool=0',
     ]);
     expect(t.lines.some((l) => /ready=false/.test(l))).toBe(false);
     expect(t.els.flatMap((e) => e.calls).filter((c) => c === 'load' || c.startsWith('src:'))).toEqual([]);
     // Der sechste Tausch hat nichts mehr: kein Netzstart, keine Quelle
     expect(t.deck.swapNext(t.sink)).toBeNull();
     expect(t.lines).toContain('deck: swap none ready=false pool=0');
+  });
+
+  it('verdeckt geht ein bereites lokales Element einem früheren Netz-Element vor, auch wenn es erst readyState 3 hat; Netz nur, wenn kein lokales bereit ist (Brief 14b, Schritt 3)', async () => {
+    const [b, c, d] = ['b', 'c', 'd'].map(mk);
+    const t = setupPool({ local: { [d.key]: { url: 'blob:d', offset: 0 } } });
+    await boot(t, sbA);
+    t.deck.fill([b, c, d]);
+    fill(elOf(t, b));
+    fill(elOf(t, c));
+    // d ist lokal, hat aber nur readyState 3 (lokal genügt 3), b und c haben 4
+    fill(elOf(t, d), 3);
+    t.setHidden(true);
+    expect(t.deck.swapNext(t.sink)?.id).toBe('d');
+    // Kein lokales mehr: jetzt das Netz, in Reihenfolge der Warteschlange
+    expect(t.deck.swapNext(t.sink)?.id).toBe('b');
+    expect(t.deck.swapNext(t.sink)?.id).toBe('c');
+  });
+
+  it('ein lokales Element mit readyState 4 geht dem lokalen mit readyState 3 vor', async () => {
+    const [b, c] = ['b', 'c'].map(mk);
+    const t = setupPool({ local: { [b.key]: { url: 'blob:b', offset: 0 }, [c.key]: { url: 'blob:c', offset: 0 } } });
+    await boot(t, sbA);
+    t.deck.fill([b, c]);
+    fill(elOf(t, b), 3);
+    fill(elOf(t, c), 4);
+    t.setHidden(true);
+    expect(t.deck.swapNext(t.sink)?.id).toBe('c');
+    expect(t.deck.swapNext(t.sink)?.id).toBe('b');
+  });
+
+  it('sichtbar bleibt es bei der Reihenfolge der Warteschlange, ein lokales Element hat keinen Vorrang', async () => {
+    const [b, c, d] = ['b', 'c', 'd'].map(mk);
+    const t = setupPool({ local: { [d.key]: { url: 'blob:d', offset: 0 } } });
+    await boot(t, sbA);
+    t.deck.fill([b, c, d]);
+    fillAll(t, [b, c, d]);
+    expect(t.deck.swapNext(t.sink)?.id).toBe('b');
+    expect(t.deck.swapNext(t.sink)?.id).toBe('c');
+    expect(t.deck.swapNext(t.sink)?.id).toBe('d');
+  });
+
+  it('Auto-Weiter verdeckt nimmt ebenfalls das lokale Element zuerst', async () => {
+    const [b, c] = ['b', 'c'].map(mk);
+    const t = setupPool({ local: { [c.key]: { url: 'blob:c', offset: 0 } } });
+    await ready(t, clip('a', 0, 10), [b, c]);
+    let advanced = 0;
+    t.deck.onAdvance = () => advanced++;
+    (t.deck.element as PEl).tick(10);
+    expect(advanced).toBe(1);
+    expect(t.deck.clip?.id).toBe('c');
   });
 
   it('nach dem Tausch gelten die Ereignisse des neuen Elements: Ende im Hintergrund führt zum nächsten Element', async () => {
@@ -1019,5 +1135,51 @@ describe('Vorrat: fünf Elemente (Brief 14, Entscheidung 52)', () => {
     t.deck.release();
     expect(t.deck.readyCount()).toBe(0);
     expect(t.els.every((e) => e.paused)).toBe(true);
+  });
+});
+
+describe('Hänge-Überwachung verdeckt (Brief 14b, Issue 40, Entscheidung 45)', () => {
+  it('sichtbar darf die App den hängenden Moment überspringen, verdeckt nie', async () => {
+    const t = setupPool();
+    await boot(t, sbA);
+    expect(t.deck.hungAction()).toBe('skip');
+    t.setHidden(true);
+    expect(t.deck.hungAction()).not.toBe('skip');
+  });
+
+  it('verdeckt ohne bereites Element: stay, nichts wird geladen, nichts getauscht, das Element bleibt dasselbe', async () => {
+    const t = setupPool();
+    await boot(t, sbA);
+    t.deck.fill([sbB]);
+    // b lädt noch (kein canplaythrough): nichts bereit
+    t.setHidden(true);
+    const act = active(t);
+    t.els.forEach((e) => (e.calls.length = 0));
+    t.lines.length = 0;
+    expect(t.deck.hungAction()).toBe('stay');
+    expect(active(t)).toBe(act);
+    expect(t.deck.clip?.id).toBe('a');
+    expect(t.els.flatMap((e) => e.calls)).toEqual([]);
+    expect(t.lines).toEqual([]);
+  });
+
+  it('verdeckt mit bereitem Element: swap, und swapNext tauscht darauf (ein hängendes Netz-Element weicht einem lokalen)', async () => {
+    const [b, c] = ['b', 'c'].map(mk);
+    const t = setupPool({ local: { [c.key]: { url: 'blob:c', offset: 0 } } });
+    await ready(t, mk('a'), [b, c]);
+    expect(t.deck.hungAction()).toBe('swap');
+    expect(t.deck.swapNext(t.sink)?.id).toBe('c');
+    expect(t.deck.hungAction()).toBe('swap');
+    expect(t.deck.swapNext(t.sink)?.id).toBe('b');
+    // Vorrat verbraucht: wieder stay
+    expect(t.deck.hungAction()).toBe('stay');
+  });
+
+  it('ein von iOS verworfenes Element zählt nicht als bereit', async () => {
+    const t = setupPool();
+    await ready(t, mk('a'), [sbB]);
+    expect(t.deck.hungAction()).toBe('swap');
+    elOf(t, sbB).readyState = 0;
+    expect(t.deck.hungAction()).toBe('stay');
   });
 });

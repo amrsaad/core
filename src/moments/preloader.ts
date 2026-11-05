@@ -216,6 +216,10 @@ export class Preloader {
     for (const e of this.entries.values()) bytes += e.bytes;
     return { n: this.entries.size, bytes };
   }
+  /** Anzahl der Momente mit bereitstehender Blob-URL (lokal abspielbar) */
+  warmCount() {
+    return this.warmed.size;
+  }
   /** IDs der vorgeladenen Momente, für Tests und Diagnose */
   ids() {
     return [...this.entries.keys()];
@@ -422,6 +426,8 @@ export class Preloader {
       const url = this.d.createObjectURL(blob);
       LOCAL.set(key, { url, offset: e.offset });
       this.warmed.set(id, { key, url });
+      // Brief 14b: ein Moment, der erst jetzt lokal bereitsteht, soll den Element-Vorrat des Decks neu ordnen können
+      this.emit();
     } catch (err) {
       this.note(`warm ${id} failed ${err instanceof Error ? err.message : String(err)}`);
     }

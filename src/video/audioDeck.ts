@@ -37,6 +37,9 @@ const SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAA
 /** Größe des Element-Vorrats (Entscheidung 52, Brief 14): so viele nächste Momente liegen fertig geladen in eigenen Elementen, plus das aktive */
 export const POOL = 5;
 
+/** Aus so vielen nächsten Momenten wählt der Vorrat seine POOL Ausschnitte, lokale zuerst (Brief 14b, Entscheidung 45). Entspricht dem Fenster der Vorrats-Tiefe (3 der nächsten 6). */
+export const POOL_WINDOW = 6;
+
 type Lane = 'plain' | 'level';
 
 /** Ein Element des Vorrats: hält den Anfang eines Ausschnitts fertig geladen (Entscheidung 47 und 52, Brief 11 und 14) */
@@ -616,21 +619,30 @@ export class AudioDeck {
   }
 
   /**
-   * Vorrat auffüllen (Schritt 1): die nächsten POOL Ausschnitte der Warteschlange, in Reihenfolge, laden jeweils in ein freies Element (Quelle setzen, load(),
-   * Position auf den Start, bereit bei canplaythrough oder readyState 4, lokal genügt 3). Lokale Quellen starten zuerst, dann das Netz. Nur wenn die App
-   * sichtbar ist: verdeckt lädt iOS nichts nach, und ein load() verdeckt hängt das Element für immer. Bereits geladene Einträge bleiben. Was aus dem Fenster
-   * gefallen ist oder von iOS verworfen wurde, wird ersetzt. Gibt die Zahl der Einträge zurück (bereit oder ladend).
+   * Vorrat auffüllen (Schritt 1, Brief 14b): aus den Kandidaten (die nächsten Momente der Warteschlange, in Reihenfolge) kommen POOL Ausschnitte in je ein
+   * freies Element (Quelle setzen, load(), Position auf den Start, bereit bei canplaythrough oder readyState 4, lokal genügt 3). Die Auswahl nimmt lokale
+   * Quellen zuerst, das Netz füllt nur auf. Der nächste Kandidat bleibt immer dabei, damit der sichtbare Wisch auf ihn sofort tauscht. Lokale laden auch
+   * zuerst. Nur wenn die App sichtbar ist: verdeckt lädt iOS nichts nach, und ein load() verdeckt hängt das Element für immer. Bereits geladene Einträge
+   * bleiben. Was aus der Auswahl gefallen ist oder von iOS verworfen wurde, wird ersetzt. Gibt die Zahl der Einträge zurück (bereit oder ladend).
    */
   fill(clips: readonly DeckClip[], locOf: (key: string) => LocalClip | undefined = this.deps.local): number {
     if (!this.deps.standby || this.hidden()) return this.entries.length;
     // Ohne eine Geste hat kein Element je gespielt: ein Vorrat, der verdeckt nie starten darf, wäre wertlos
     if (!this.unlocked) return this.entries.length;
-    const want: DeckClip[] = [];
+    const cand: DeckClip[] = [];
     for (const c of clips) {
-      if (want.length >= POOL) break;
       if (this.clip?.key === c.key && !this.done) continue;
-      if (!want.some((w) => w.key === c.key)) want.push(c);
+      if (!cand.some((w) => w.key === c.key)) cand.push(c);
     }
+    const loc = new Map(cand.map((c) => [c.key, locOf(c.key)] as const));
+    // Auswahl: der nächste Kandidat, dann alle lokalen in Reihenfolge, dann Netz bis POOL. Der Vorrat bleibt in Reihenfolge der Warteschlange.
+    const chosen = new Set<string>(cand.slice(0, 1).map((c) => c.key));
+    const rest = cand.slice(1);
+    for (const c of [...rest.filter((x) => loc.get(x.key)), ...rest.filter((x) => !loc.get(x.key))]) {
+      if (chosen.size >= POOL) break;
+      chosen.add(c.key);
+    }
+    const want = cand.filter((c) => chosen.has(c.key));
     const keys = new Set(want.map((c) => c.key));
     let changed = false;
     for (const e of [...this.entries]) {
@@ -640,11 +652,14 @@ export class AudioDeck {
       } else if (!keys.has(e.clip.key)) {
         this.dropEntry(e, 'left window');
         changed = true;
+      } else if (!e.local && loc.get(e.clip.key)) {
+        // Der Moment wurde nach dem Laden lokal verfügbar (Blob-URL warm): vom Netz auf lokal umstellen, lokal ist in Millisekunden bereit und verdeckt zuverlässig
+        this.dropEntry(e, 'now local');
+        changed = true;
       }
     }
     // Lokale Quellen zuerst: sie sind in Millisekunden bereit, das Netz braucht Sekunden
     const missing = want.filter((c) => !this.entries.some((e) => e.clip.key === c.key));
-    const loc = new Map(missing.map((c) => [c.key, locOf(c.key)] as const));
     const order = [...missing.filter((c) => loc.get(c.key)), ...missing.filter((c) => !loc.get(c.key))];
     for (const c of order) {
       this.startEntry(c, loc.get(c.key));
@@ -753,9 +768,14 @@ export class AudioDeck {
    * Weiter ohne Quellwechsel (Schritt 1): das erste bereite Element in Reihenfolge der Warteschlange wird aktiv, play() läuft synchron auf ihm (im Call-Stack
    * des Handlers), danach hält das alte Element an und geht frei in den Vorrat zurück. Nichts wird geladen. Gibt den Ausschnitt zurück, der jetzt spielt.
    * null, wenn kein Element bereit ist: dann geschieht nichts.
+   * Verdeckt (Brief 14b, Schritt 3) gilt eine andere Reihenfolge: lokale Elemente mit readyState 4 zuerst, dann die übrigen lokalen, Netz-Elemente nur, wenn
+   * kein lokales bereit ist. iOS kann ein Netz-Element verdeckt trotz readyState 4 verwerfen, ein lokales nicht. Innerhalb jeder Stufe gilt die Warteschlange.
    */
   swapNext(sink: DeckSink | null = null): DeckClip | null {
-    for (const e of [...this.entries]) {
+    const hid = this.hidden();
+    const tier = (e: PoolEntry) => (!hid ? 0 : e.local ? (e.el.readyState >= 4 ? 0 : 1) : 2);
+    const order = this.entries.map((e, i) => ({ e, i })).sort((a, b) => tier(a.e) - tier(b.e) || a.i - b.i);
+    for (const { e } of order) {
       if (!e.ready) continue;
       if (!this.usable(e)) {
         // Verworfen, seit es bereit wurde: nicht abspielbar
@@ -773,6 +793,15 @@ export class AudioDeck {
     }
     this.diag('deck: swap none ready=false pool=0');
     return null;
+  }
+
+  /**
+   * Hänge-Überwachung (Brief 14b, Entscheidung 45, Issue 40): ein Moment spielt nach 12 s nicht an. Sichtbar darf die App ihn überspringen (skip, er bleibt
+   * ungesehen). Verdeckt nie: ist ein anderes Element des Vorrats bereit, tauscht die App darauf (swap, swapNext), sonst bleibt alles stehen (stay).
+   */
+  hungAction(): 'skip' | 'swap' | 'stay' {
+    if (!this.hidden()) return 'skip';
+    return this.entries.some((e) => this.usable(e)) ? 'swap' : 'stay';
   }
 
   /** Tausch auf den Eintrag mit diesem Schlüssel (Wisch auf einen Moment, den der Vorrat fertig hält). false, wenn er nicht bereit ist. */
