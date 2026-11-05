@@ -5,3 +5,4 @@ dist
 lighthouse-*.html
 pipeline/enrich/
 *.tsbuildinfo
+pipeline/out/gate-all/

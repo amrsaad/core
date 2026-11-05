@@ -20,7 +20,8 @@
     "sample": "tsx pipeline/sample.ts",
     "icons": "node scripts/icons.mjs",
     "verify": "tsx pipeline/verify.ts",
-    "e2e": "node tests/e2e/video.mjs"
+    "e2e": "node tests/e2e/video.mjs",
+    "gate:all": "node scripts/gate-all.mjs"
   },
   "dependencies": {
     "idb": "^8.0.4",
