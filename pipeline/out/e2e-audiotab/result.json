@@ -1,5 +1,5 @@
 {
- "at": "2026-11-05T12:44:54.095Z",
+ "at": "2026-11-05T15:35:15.658Z",
  "runs": [
   {
    "browser": "webkit",
@@ -100,76 +100,76 @@
     "tempoPaused": 10,
     "cue": {
      "worst": 0,
-     "n": 623,
+     "n": 622,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.34",
+       "3.38",
        34,
        34
       ],
       [
-       "4.62",
+       "4.67",
        47,
        47
       ],
       [
-       "5.91",
+       "5.96",
        60,
        60
       ],
       [
-       "7.19",
-       72,
-       72
+       "7.24",
+       73,
+       73
       ],
       [
-       "8.48",
-       85,
-       85
+       "8.53",
+       86,
+       86
       ],
       [
-       "9.77",
-       98,
-       98
+       "9.81",
+       99,
+       99
       ],
       [
-       "11.05",
-       111,
-       111
+       "11.10",
+       112,
+       112
       ],
       [
-       "12.34",
+       "12.39",
        124,
        124
       ],
       [
-       "13.63",
+       "13.67",
        137,
        137
       ],
       [
-       "14.91",
+       "14.96",
        150,
        150
       ],
       [
-       "16.20",
-       162,
-       162
+       "16.24",
+       163,
+       163
       ],
       [
-       "17.48",
-       175,
-       175
+       "17.53",
+       176,
+       176
       ]
      ],
      "rate": 2
     },
     "cueTempo": {
-     "worst": 1,
-     "n": 553,
+     "worst": 0,
+     "n": 543,
      "rates": [
       1,
       1.5,
@@ -181,7 +181,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805033
+       "dueAt": 1792756805058
       }
      ],
      "idx": 6,
@@ -333,7 +333,7 @@
        34
       ],
       [
-       "4.72",
+       "4.71",
        48,
        48
       ],
@@ -348,7 +348,7 @@
        74
       ],
       [
-       "8.72",
+       "8.71",
        88,
        88
       ],
@@ -363,7 +363,7 @@
        114
       ],
       [
-       "12.72",
+       "12.71",
        128,
        128
       ],
@@ -378,7 +378,7 @@
        154
       ],
       [
-       "16.72",
+       "16.71",
        168,
        168
       ],
@@ -391,7 +391,7 @@
      "rate": 2
     },
     "cueTempo": {
-     "worst": 1,
+     "worst": 0,
      "n": 541,
      "rates": [
       1,
@@ -404,7 +404,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804928
+       "dueAt": 1792756804926
       }
      ],
      "idx": 6,
@@ -479,6 +479,9 @@
     "lockBackLines": true,
     "lockNextAdvances": true,
     "lockPoolReadyBeforeHidden": true,
+    "lockHiddenUiSyncHook": true,
+    "lockHiddenUiSyncArt": true,
+    "lockHiddenUiSyncLine": true,
     "lockHiddenAdvances": true,
     "lockHiddenUnder1s": true,
     "lockHiddenSwaps": true,
@@ -500,7 +503,7 @@
      "pod-0008:22",
      "pod-0019:70"
     ],
-    "firstSoundMs": 174,
+    "firstSoundMs": 187,
     "diag": [
      "deck: start order head first=pod-0001:22 heads=6 usable=6 stock=6",
      "deck: src local pod-0001"
@@ -522,14 +525,23 @@
      "state": "playing",
      "pos": {
       "duration": 25,
-      "position": 0.0006277959183655923,
+      "position": 0.0007337959183679743,
       "playbackRate": 1
      },
      "cold": 0,
      "cloud": 0
     },
     "stockBehind": 4,
-    "lockNextMs": 6,
+    "lockHiddenUi": {
+     "moved": true,
+     "hookOk": true,
+     "artOk": true,
+     "hook": "Cold audio moment 14",
+     "art": "https://i.ytimg.com/vi/pod-0014/hqdefault.jpg",
+     "want": "https://i.ytimg.com/vi/pod-0014/hqdefault.jpg",
+     "id": "pod-0014:10"
+    },
+    "lockNextMs": 13,
     "lockNextLines": [
      "deck: swap pod-0014 ready=true pool=2",
      "deck play#3 swap rs=4 muted=false t=0.1",

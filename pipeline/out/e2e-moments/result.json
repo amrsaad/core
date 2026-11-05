@@ -1,5 +1,5 @@
 {
- "at": "2026-11-05T12:11:35.999Z",
+ "at": "2026-11-05T15:01:46.052Z",
  "runs": [
   {
    "browser": "webkit",
@@ -292,10 +292,10 @@
    "recall": [
     {
      "id": "test0000016:100",
-     "due": 1792929606804,
+     "due": 1792929607014,
      "results": [
       {
-       "at": 1792756806804,
+       "at": 1792756807014,
        "got": false
       }
      ]
@@ -360,9 +360,9 @@
    ],
    "band": {
     "bw": 361,
-    "bh": 203.06253051757812,
+    "bh": 203.0625,
     "fw": 361,
-    "fh": 203.06253051757812,
+    "fh": 203.0625,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -377,15 +377,15 @@
     "deck loadedmetadata rs=0 muted=false t=100.0"
    ],
    "tapToFill": {
-    "measured": 28,
-    "recorded": 28
+    "measured": 26,
+    "recorded": 29
    },
    "askPrompt": "Core moment from Kanal body 3, Testvideo, at 1:40.\nHook: Testmoment 67 body\nExcerpt: Sentence 1 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 2 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 3 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 4 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 5 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 6 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 7 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 8…\nContext: Context sentence one for Testmoment 67 body. Context sentence two names a term.\nSource: https://www.youtube.com/watch?v=test0000067&t=100\n\nMy question: ",
    "notesCount": 7,
    "posterCheck": {
-    "checksDone": 285,
+    "checksDone": 276,
     "violations": 0,
-    "endedSeen": 131
+    "endedSeen": 127
    },
    "posterState": {
     "idx": 29,
@@ -509,14 +509,14 @@
    },
    "latency": {
     "n": 40,
-    "buffered": 20,
+    "buffered": 19,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Weak | - | Video | 7febfec |\n| test0000005:100 | Testmoment 5 beat | - | The cut is two seconds late & the \"hook\" repeats. | Video | 7febfec |\n| test0000067:100 | Testmoment 67 body | Already known | - | Video | 7febfec |\n| test0000003:100 | Testmoment 3 beat | Wrong | - | Video | 7febfec |\n| test0000020:100 | Testmoment 20 brain | Weak | - | Video | 7febfec |\n| test0000063:100 | Testmoment 63 body | Not for me | - | Video | 7febfec |\n| test0000011:100 | Testmoment 11 beat | Mute speaker | - | Video | 7febfec |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Weak | - | Video | c391c32 |\n| test0000005:100 | Testmoment 5 beat | - | The cut is two seconds late & the \"hook\" repeats. | Video | c391c32 |\n| test0000067:100 | Testmoment 67 body | Already known | - | Video | c391c32 |\n| test0000003:100 | Testmoment 3 beat | Wrong | - | Video | c391c32 |\n| test0000020:100 | Testmoment 20 brain | Weak | - | Video | c391c32 |\n| test0000063:100 | Testmoment 63 body | Not for me | - | Video | c391c32 |\n| test0000011:100 | Testmoment 11 beat | Mute speaker | - | Video | c391c32 |",
    "promptDbg": {
     "prompt": false,
-    "notes": "[{\"key\":\"test0000028:100#1793880711463\",\"id\":\"test0000028:100\",\"hook\":\"Testmoment 28 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880711463,\"sent\":1793880743482},{\"key\":\"test0000005:100#1793880713275\",\"id\":\"test0000005:100\",\"hook\":\"Testmoment 5 beat\",\"chips\":[],\"text\":\"The cut is two seconds late & the \\\"hook\\\" repeats.\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880713275,\"sent\":1793880743482},{\"key\":\"test0000067:100#1793880715996\",\"id\":\"test0000067:100\",\"hook\":\"Testmoment 67 body\",\"chips\":[\"Already known\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880715996,\"sent\":1793880743482},{\"key\":\"test0000003:100#1793880719962\",\"id\":\"test0000003:100\",\"hook\":\"Testmoment 3 beat\",\"chips\":[\"Wrong\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880719962,\"sent\":1793880743482},{\"key\":\"test0000020:100#1793880723015\",\"id\":\"test0000020:100\",\"hook\":\"Testmoment 20 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880723015,\"sent\":1793880743482},{\"key\":\"test0000063:100#1793880727334\",\"id\":\"test0000063:100\",\"hook\":\"Testmoment 63 body\",\"chips\":[\"Not for me\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880727334,\"sent\":1793880743482},{\"key\":\"test0000011:100#1793880730156\",\"id\":\"test0000011:100\",\"hook\":\"Testmoment 11 beat\",\"chips\":[\"Mute speaker\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880730156,\"sent\":1793880743482},{\"key\":\"test0000090:100#1793880743851\",\"id\":\"test0000090:100\",\"hook\":\"Testmoment 90 brain\",\"chips\":[\"Bad cut\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880743851,\"sent\":1793880750680},{\"key\":\"test0000053:100#1793880748312\",\"id\":\"test0000053:100\",\"hook\":\"Testmoment 53 body\",\"chips\":[],\"text\":\"source: https://example.org/eyes-podcast\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880748312,\"sent\":1793880750712},{\"key\":\"test0000053:100#1793880749741\",\"id\":\"test0000053:100\",\"hook\":\"Testmoment 53 body\",\"chips\":[],\"text\":\"topic: IOL calculation after SMILE\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880749741}]",
-    "notesP2": "[{\"key\":\"test0000028:100#1793880711463\",\"id\":\"test0000028:100\",\"hook\":\"Testmoment 28 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880711463,\"sent\":1793880743482},{\"key\":\"test0000005:100#1793880713275\",\"id\":\"test0000005:100\",\"hook\":\"Testmoment 5 beat\",\"chips\":[],\"text\":\"The cut is two seconds late & the \\\"hook\\\" repeats.\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880713275,\"sent\":1793880743482},{\"key\":\"test0000067:100#1793880715996\",\"id\":\"test0000067:100\",\"hook\":\"Testmoment 67 body\",\"chips\":[\"Already known\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880715996,\"sent\":1793880743482},{\"key\":\"test0000003:100#1793880719962\",\"id\":\"test0000003:100\",\"hook\":\"Testmoment 3 beat\",\"chips\":[\"Wrong\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880719962,\"sent\":1793880743482},{\"key\":\"test0000020:100#1793880723015\",\"id\":\"test0000020:100\",\"hook\":\"Testmoment 20 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880723015,\"sent\":1793880743482},{\"key\":\"test0000063:100#1793880727334\",\"id\":\"test0000063:100\",\"hook\":\"Testmoment 63 body\",\"chips\":[\"Not for me\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880727334,\"sent\":1793880743482},{\"key\":\"test0000011:100#1793880730156\",\"id\":\"test0000011:100\",\"hook\":\"Testmoment 11 beat\",\"chips\":[\"Mute speaker\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880730156,\"sent\":1793880743482},{\"key\":\"test0000090:100#1793880743851\",\"id\":\"test0000090:100\",\"hook\":\"Testmoment 90 brain\",\"chips\":[\"Bad cut\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880743851,\"sent\":1793880750680},{\"key\":\"test0000053:100#1793880748312\",\"id\":\"test0000053:100\",\"hook\":\"Testmoment 53 body\",\"chips\":[],\"text\":\"source: https://example.org/eyes-podcast\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880748312,\"sent\":1793880750712},{\"key\":\"test0000053:100#1793880749741\",\"id\":\"test0000053:100\",\"hook\":\"Testmoment 53 body\",\"chips\":[],\"text\":\"topic: IOL calculation after SMILE\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880749741}]"
+    "notes": "[{\"key\":\"test0000028:100#1793890922393\",\"id\":\"test0000028:100\",\"hook\":\"Testmoment 28 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890922393,\"sent\":1793890955029},{\"key\":\"test0000005:100#1793890924191\",\"id\":\"test0000005:100\",\"hook\":\"Testmoment 5 beat\",\"chips\":[],\"text\":\"The cut is two seconds late & the \\\"hook\\\" repeats.\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890924191,\"sent\":1793890955029},{\"key\":\"test0000067:100#1793890927204\",\"id\":\"test0000067:100\",\"hook\":\"Testmoment 67 body\",\"chips\":[\"Already known\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890927204,\"sent\":1793890955029},{\"key\":\"test0000003:100#1793890931307\",\"id\":\"test0000003:100\",\"hook\":\"Testmoment 3 beat\",\"chips\":[\"Wrong\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890931307,\"sent\":1793890955029},{\"key\":\"test0000020:100#1793890934274\",\"id\":\"test0000020:100\",\"hook\":\"Testmoment 20 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890934274,\"sent\":1793890955029},{\"key\":\"test0000063:100#1793890938653\",\"id\":\"test0000063:100\",\"hook\":\"Testmoment 63 body\",\"chips\":[\"Not for me\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890938653,\"sent\":1793890955029},{\"key\":\"test0000011:100#1793890941460\",\"id\":\"test0000011:100\",\"hook\":\"Testmoment 11 beat\",\"chips\":[\"Mute speaker\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890941460,\"sent\":1793890955029},{\"key\":\"test0000022:100#1793890955415\",\"id\":\"test0000022:100\",\"hook\":\"Testmoment 22 brain\",\"chips\":[\"Bad cut\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890955415,\"sent\":1793890962349},{\"key\":\"test0000048:100#1793890959947\",\"id\":\"test0000048:100\",\"hook\":\"Testmoment 48 body\",\"chips\":[],\"text\":\"source: https://example.org/eyes-podcast\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890959947,\"sent\":1793890962380},{\"key\":\"test0000048:100#1793890961396\",\"id\":\"test0000048:100\",\"hook\":\"Testmoment 48 body\",\"chips\":[],\"text\":\"topic: IOL calculation after SMILE\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890961396}]",
+    "notesP2": "[{\"key\":\"test0000028:100#1793890922393\",\"id\":\"test0000028:100\",\"hook\":\"Testmoment 28 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890922393,\"sent\":1793890955029},{\"key\":\"test0000005:100#1793890924191\",\"id\":\"test0000005:100\",\"hook\":\"Testmoment 5 beat\",\"chips\":[],\"text\":\"The cut is two seconds late & the \\\"hook\\\" repeats.\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890924191,\"sent\":1793890955029},{\"key\":\"test0000067:100#1793890927204\",\"id\":\"test0000067:100\",\"hook\":\"Testmoment 67 body\",\"chips\":[\"Already known\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890927204,\"sent\":1793890955029},{\"key\":\"test0000003:100#1793890931307\",\"id\":\"test0000003:100\",\"hook\":\"Testmoment 3 beat\",\"chips\":[\"Wrong\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890931307,\"sent\":1793890955029},{\"key\":\"test0000020:100#1793890934274\",\"id\":\"test0000020:100\",\"hook\":\"Testmoment 20 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890934274,\"sent\":1793890955029},{\"key\":\"test0000063:100#1793890938653\",\"id\":\"test0000063:100\",\"hook\":\"Testmoment 63 body\",\"chips\":[\"Not for me\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890938653,\"sent\":1793890955029},{\"key\":\"test0000011:100#1793890941460\",\"id\":\"test0000011:100\",\"hook\":\"Testmoment 11 beat\",\"chips\":[\"Mute speaker\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890941460,\"sent\":1793890955029},{\"key\":\"test0000022:100#1793890955415\",\"id\":\"test0000022:100\",\"hook\":\"Testmoment 22 brain\",\"chips\":[\"Bad cut\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890955415,\"sent\":1793890962349},{\"key\":\"test0000048:100#1793890959947\",\"id\":\"test0000048:100\",\"hook\":\"Testmoment 48 body\",\"chips\":[],\"text\":\"source: https://example.org/eyes-podcast\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890959947,\"sent\":1793890962380},{\"key\":\"test0000048:100#1793890961396\",\"id\":\"test0000048:100\",\"hook\":\"Testmoment 48 body\",\"chips\":[],\"text\":\"topic: IOL calculation after SMILE\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793890961396}]"
    },
    "badWalk": [
     {
@@ -732,7 +732,7 @@
      "ctxPx": 0,
      "exPx": 17,
      "ctxColor": null,
-     "exColor": "rgb(195, 203, 209)",
+     "exColor": "rgb(198, 206, 212)",
      "ctxLabelPx": 0,
      "ctxLabelColor": null,
      "ctxCaps": null,
@@ -842,10 +842,10 @@
      "mctx": "Context sentence one for Testmoment 63 body. Context sentence two names a term.",
      "ctxPx": 15,
      "exPx": 17,
-     "ctxColor": "rgb(194, 202, 208)",
-     "exColor": "rgb(194, 202, 208)",
+     "ctxColor": "rgb(195, 203, 208)",
+     "exColor": "rgb(195, 203, 208)",
      "ctxLabelPx": 13,
-     "ctxLabelColor": "rgb(76, 217, 124)",
+     "ctxLabelColor": "rgb(76, 218, 124)",
      "ctxCaps": "uppercase",
      "ctxLabel": "Context",
      "hook": true,
@@ -1215,10 +1215,10 @@
    "recall": [
     {
      "id": "test0000016:100",
-     "due": 1792929606419,
+     "due": 1792929606354,
      "results": [
       {
-       "at": 1792756806419,
+       "at": 1792756806354,
        "got": false
       }
      ]
@@ -1283,9 +1283,9 @@
    ],
    "band": {
     "bw": 361,
-    "bh": 203.06246948242188,
+    "bh": 203.0625,
     "fw": 361,
-    "fh": 203.06246948242188,
+    "fh": 203.0625,
     "dx": 0,
     "dy": 0,
     "vw": 393
@@ -1300,7 +1300,7 @@
     "deck loadedmetadata rs=0 muted=false t=100.0"
    ],
    "tapToFill": {
-    "measured": 32.59999999997672,
+    "measured": 32.30000000001746,
     "recorded": 32
    },
    "askPrompt": "Core moment from Kanal brain 1, Testvideo, at 1:40.\nHook: Testmoment 17 brain\nExcerpt: Sentence 1 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 2 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 3 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 4 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 5 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 6 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 7 of the checked excerpt, long enough to need scrolling on a phone screen. Sentence 8…\nContext: Context sentence one for Testmoment 17 brain. Context sentence two names a term.\nSource: https://www.youtube.com/watch?v=test0000017&t=100\n\nMy question: ",
@@ -1435,11 +1435,11 @@
     "buffered": 21,
     "median": 0
    },
-   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Weak | - | Video | 7febfec |\n| test0000005:100 | Testmoment 5 beat | - | The cut is two seconds late & the \"hook\" repeats. | Video | 7febfec |\n| test0000017:100 | Testmoment 17 brain | Already known | - | Video | 7febfec |\n| test0000003:100 | Testmoment 3 beat | Wrong | - | Video | 7febfec |\n| test0000020:100 | Testmoment 20 brain | Weak | - | Video | 7febfec |\n| test0000063:100 | Testmoment 63 body | Not for me | - | Video | 7febfec |\n| test0000011:100 | Testmoment 11 beat | Mute speaker | - | Video | 7febfec |",
+   "notesIssueBody": "| Moment | Hook | Chips | Text | Tab | App |\n|---|---|---|---|---|---|\n| test0000028:100 | Testmoment 28 brain | Weak | - | Video | c391c32 |\n| test0000005:100 | Testmoment 5 beat | - | The cut is two seconds late & the \"hook\" repeats. | Video | c391c32 |\n| test0000017:100 | Testmoment 17 brain | Already known | - | Video | c391c32 |\n| test0000003:100 | Testmoment 3 beat | Wrong | - | Video | c391c32 |\n| test0000020:100 | Testmoment 20 brain | Weak | - | Video | c391c32 |\n| test0000063:100 | Testmoment 63 body | Not for me | - | Video | c391c32 |\n| test0000011:100 | Testmoment 11 beat | Mute speaker | - | Video | c391c32 |",
    "promptDbg": {
     "prompt": false,
-    "notes": "[{\"key\":\"test0000028:100#1793880796287\",\"id\":\"test0000028:100\",\"hook\":\"Testmoment 28 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880796287,\"sent\":1793880827926},{\"key\":\"test0000005:100#1793880798154\",\"id\":\"test0000005:100\",\"hook\":\"Testmoment 5 beat\",\"chips\":[],\"text\":\"The cut is two seconds late & the \\\"hook\\\" repeats.\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880798154,\"sent\":1793880827926},{\"key\":\"test0000017:100#1793880801453\",\"id\":\"test0000017:100\",\"hook\":\"Testmoment 17 brain\",\"chips\":[\"Already known\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880801453,\"sent\":1793880827926},{\"key\":\"test0000003:100#1793880804536\",\"id\":\"test0000003:100\",\"hook\":\"Testmoment 3 beat\",\"chips\":[\"Wrong\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880804536,\"sent\":1793880827926},{\"key\":\"test0000020:100#1793880807655\",\"id\":\"test0000020:100\",\"hook\":\"Testmoment 20 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880807655,\"sent\":1793880827926},{\"key\":\"test0000063:100#1793880812136\",\"id\":\"test0000063:100\",\"hook\":\"Testmoment 63 body\",\"chips\":[\"Not for me\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880812136,\"sent\":1793880827926},{\"key\":\"test0000011:100#1793880815053\",\"id\":\"test0000011:100\",\"hook\":\"Testmoment 11 beat\",\"chips\":[\"Mute speaker\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880815053,\"sent\":1793880827926},{\"key\":\"test0000025:100#1793880828336\",\"id\":\"test0000025:100\",\"hook\":\"Testmoment 25 brain\",\"chips\":[\"Bad cut\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880828336,\"sent\":1793880835051},{\"key\":\"test0000071:100#1793880832736\",\"id\":\"test0000071:100\",\"hook\":\"Testmoment 71 body\",\"chips\":[],\"text\":\"source: https://example.org/eyes-podcast\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880832736,\"sent\":1793880835084},{\"key\":\"test0000071:100#1793880834110\",\"id\":\"test0000071:100\",\"hook\":\"Testmoment 71 body\",\"chips\":[],\"text\":\"topic: IOL calculation after SMILE\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880834110}]",
-    "notesP2": "[{\"key\":\"test0000028:100#1793880796287\",\"id\":\"test0000028:100\",\"hook\":\"Testmoment 28 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880796287,\"sent\":1793880827926},{\"key\":\"test0000005:100#1793880798154\",\"id\":\"test0000005:100\",\"hook\":\"Testmoment 5 beat\",\"chips\":[],\"text\":\"The cut is two seconds late & the \\\"hook\\\" repeats.\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880798154,\"sent\":1793880827926},{\"key\":\"test0000017:100#1793880801453\",\"id\":\"test0000017:100\",\"hook\":\"Testmoment 17 brain\",\"chips\":[\"Already known\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880801453,\"sent\":1793880827926},{\"key\":\"test0000003:100#1793880804536\",\"id\":\"test0000003:100\",\"hook\":\"Testmoment 3 beat\",\"chips\":[\"Wrong\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880804536,\"sent\":1793880827926},{\"key\":\"test0000020:100#1793880807655\",\"id\":\"test0000020:100\",\"hook\":\"Testmoment 20 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880807655,\"sent\":1793880827926},{\"key\":\"test0000063:100#1793880812136\",\"id\":\"test0000063:100\",\"hook\":\"Testmoment 63 body\",\"chips\":[\"Not for me\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880812136,\"sent\":1793880827926},{\"key\":\"test0000011:100#1793880815053\",\"id\":\"test0000011:100\",\"hook\":\"Testmoment 11 beat\",\"chips\":[\"Mute speaker\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880815053,\"sent\":1793880827926},{\"key\":\"test0000025:100#1793880828336\",\"id\":\"test0000025:100\",\"hook\":\"Testmoment 25 brain\",\"chips\":[\"Bad cut\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880828336,\"sent\":1793880835051},{\"key\":\"test0000071:100#1793880832736\",\"id\":\"test0000071:100\",\"hook\":\"Testmoment 71 body\",\"chips\":[],\"text\":\"source: https://example.org/eyes-podcast\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880832736,\"sent\":1793880835084},{\"key\":\"test0000071:100#1793880834110\",\"id\":\"test0000071:100\",\"hook\":\"Testmoment 71 body\",\"chips\":[],\"text\":\"topic: IOL calculation after SMILE\",\"tab\":\"Video\",\"commit\":\"7febfec\",\"at\":1793880834110}]"
+    "notes": "[{\"key\":\"test0000028:100#1793891009421\",\"id\":\"test0000028:100\",\"hook\":\"Testmoment 28 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891009421,\"sent\":1793891041224},{\"key\":\"test0000005:100#1793891011320\",\"id\":\"test0000005:100\",\"hook\":\"Testmoment 5 beat\",\"chips\":[],\"text\":\"The cut is two seconds late & the \\\"hook\\\" repeats.\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891011320,\"sent\":1793891041224},{\"key\":\"test0000017:100#1793891014619\",\"id\":\"test0000017:100\",\"hook\":\"Testmoment 17 brain\",\"chips\":[\"Already known\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891014619,\"sent\":1793891041224},{\"key\":\"test0000003:100#1793891017736\",\"id\":\"test0000003:100\",\"hook\":\"Testmoment 3 beat\",\"chips\":[\"Wrong\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891017736,\"sent\":1793891041224},{\"key\":\"test0000020:100#1793891020870\",\"id\":\"test0000020:100\",\"hook\":\"Testmoment 20 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891020870,\"sent\":1793891041224},{\"key\":\"test0000063:100#1793891025352\",\"id\":\"test0000063:100\",\"hook\":\"Testmoment 63 body\",\"chips\":[\"Not for me\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891025352,\"sent\":1793891041224},{\"key\":\"test0000011:100#1793891028269\",\"id\":\"test0000011:100\",\"hook\":\"Testmoment 11 beat\",\"chips\":[\"Mute speaker\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891028269,\"sent\":1793891041224},{\"key\":\"test0000022:100#1793891041635\",\"id\":\"test0000022:100\",\"hook\":\"Testmoment 22 brain\",\"chips\":[\"Bad cut\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891041635,\"sent\":1793891048368},{\"key\":\"test0000069:100#1793891046052\",\"id\":\"test0000069:100\",\"hook\":\"Testmoment 69 body\",\"chips\":[],\"text\":\"source: https://example.org/eyes-podcast\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891046052,\"sent\":1793891048401},{\"key\":\"test0000069:100#1793891047427\",\"id\":\"test0000069:100\",\"hook\":\"Testmoment 69 body\",\"chips\":[],\"text\":\"topic: IOL calculation after SMILE\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891047427}]",
+    "notesP2": "[{\"key\":\"test0000028:100#1793891009421\",\"id\":\"test0000028:100\",\"hook\":\"Testmoment 28 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891009421,\"sent\":1793891041224},{\"key\":\"test0000005:100#1793891011320\",\"id\":\"test0000005:100\",\"hook\":\"Testmoment 5 beat\",\"chips\":[],\"text\":\"The cut is two seconds late & the \\\"hook\\\" repeats.\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891011320,\"sent\":1793891041224},{\"key\":\"test0000017:100#1793891014619\",\"id\":\"test0000017:100\",\"hook\":\"Testmoment 17 brain\",\"chips\":[\"Already known\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891014619,\"sent\":1793891041224},{\"key\":\"test0000003:100#1793891017736\",\"id\":\"test0000003:100\",\"hook\":\"Testmoment 3 beat\",\"chips\":[\"Wrong\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891017736,\"sent\":1793891041224},{\"key\":\"test0000020:100#1793891020870\",\"id\":\"test0000020:100\",\"hook\":\"Testmoment 20 brain\",\"chips\":[\"Weak\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891020870,\"sent\":1793891041224},{\"key\":\"test0000063:100#1793891025352\",\"id\":\"test0000063:100\",\"hook\":\"Testmoment 63 body\",\"chips\":[\"Not for me\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891025352,\"sent\":1793891041224},{\"key\":\"test0000011:100#1793891028269\",\"id\":\"test0000011:100\",\"hook\":\"Testmoment 11 beat\",\"chips\":[\"Mute speaker\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891028269,\"sent\":1793891041224},{\"key\":\"test0000022:100#1793891041635\",\"id\":\"test0000022:100\",\"hook\":\"Testmoment 22 brain\",\"chips\":[\"Bad cut\"],\"text\":\"\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891041635,\"sent\":1793891048368},{\"key\":\"test0000069:100#1793891046052\",\"id\":\"test0000069:100\",\"hook\":\"Testmoment 69 body\",\"chips\":[],\"text\":\"source: https://example.org/eyes-podcast\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891046052,\"sent\":1793891048401},{\"key\":\"test0000069:100#1793891047427\",\"id\":\"test0000069:100\",\"hook\":\"Testmoment 69 body\",\"chips\":[],\"text\":\"topic: IOL calculation after SMILE\",\"tab\":\"Video\",\"commit\":\"c391c32\",\"at\":1793891047427}]"
    },
    "badWalk": [
     {
@@ -1543,10 +1543,10 @@
      "mctx": "Context sentence one for Testmoment 0 beat. Context sentence two names a term.",
      "ctxPx": 15,
      "exPx": 15,
-     "ctxColor": "rgb(197, 189, 172)",
-     "exColor": "rgb(197, 189, 172)",
+     "ctxColor": "rgb(208, 198, 179)",
+     "exColor": "rgb(208, 198, 179)",
      "ctxLabelPx": 13,
-     "ctxLabelColor": "rgb(192, 164, 75)",
+     "ctxLabelColor": "rgb(204, 167, 75)",
      "ctxCaps": "uppercase",
      "ctxLabel": "Context",
      "hook": true,
@@ -1655,7 +1655,7 @@
      "ctxPx": 0,
      "exPx": 17,
      "ctxColor": null,
-     "exColor": "rgb(192, 199, 205)",
+     "exColor": "rgb(188, 196, 202)",
      "ctxLabelPx": 0,
      "ctxLabelColor": null,
      "ctxCaps": null,
@@ -1768,7 +1768,7 @@
      "ctxColor": "rgb(188, 196, 202)",
      "exColor": "rgb(188, 196, 202)",
      "ctxLabelPx": 13,
-     "ctxLabelColor": "rgb(79, 213, 119)",
+     "ctxLabelColor": "rgb(79, 213, 120)",
      "ctxCaps": "uppercase",
      "ctxLabel": "Context",
      "hook": true,
