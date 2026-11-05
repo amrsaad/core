@@ -132,7 +132,7 @@ export default function App() {
       {!desk && (
         <nav
           className={`absolute inset-x-0 bottom-0 z-[60] flex justify-around border-t transition-transform duration-200 ${showBar ? '' : 'translate-y-full'} ${dark ? 'border-[var(--hairline)] bg-[var(--stage)]' : 'border-[var(--line)] bg-[var(--bg)]'}`}
-          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+          style={{ paddingBottom: 'var(--safe-b)' }}
         >
           {(Object.keys(ICONS) as Tab[]).map((t) => (
             <button

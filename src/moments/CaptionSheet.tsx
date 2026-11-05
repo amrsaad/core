@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Icon } from '../components/Icon';
 import { askUrl } from './ask';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
@@ -24,13 +24,19 @@ export function ContextLine({ text, testid }: { text?: string; testid: string })
  * darunter der Kontext (falls vorhanden), dann Sprecher, Folge, Stelle. Das Video läuft darüber weiter, nichts wird pausiert.
  * Zu: Tipp außerhalb oder Wischen nach unten.
  */
-export function CaptionSheet({ m, speaker, onClose }: { m: Moment; speaker: string; onClose: () => void }) {
+export function CaptionSheet({ m, speaker, onClose, onEnd }: { m: Moment; speaker: string; onClose: () => void; /** Das Ende des Blatts ist sichtbar (Text-Reiter: gesehen, wenn der gekürzte Text hier zu Ende gelesen ist) */ onEnd?: () => void }) {
   const y = useRef(0);
   const [q, setQ] = useState('');
   const box = useRef<HTMLDivElement>(null);
   const t = momentText(m);
   const ar = isArabic(t);
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
+  const atEnd = () => {
+    const el = box.current;
+    if (onEnd && el && el.scrollTop + el.clientHeight >= el.scrollHeight - 4) onEnd();
+  };
+  // Passt alles ohne Scrollen auf das Blatt, ist das Ende sofort sichtbar
+  useEffect(atEnd, []);
   return (
     <>
       <div className="vcap-backdrop" data-testid="caption-backdrop" onPointerDown={stop} onPointerUp={(e) => { e.stopPropagation(); onClose(); }} onClick={stop} />
@@ -41,6 +47,7 @@ export function CaptionSheet({ m, speaker, onClose }: { m: Moment; speaker: stri
         style={{ ['--area' as string]: AREA_COLOR[m.area] }}
         onPointerDown={stop}
         onPointerUp={stop}
+        onScroll={atEnd}
         onTouchStart={(e) => (y.current = e.touches[0].clientY)}
         onTouchEnd={(e) => {
           if (closesCaption(e.changedTouches[0].clientY - y.current, box.current?.scrollTop ?? 0)) onClose();

@@ -301,6 +301,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const [forYou, setForYou] = useState<Moment | null>(null);
   /** Herz an der Tippstelle (400 ms) und kurze Bestätigung am Knopf (150 ms) */
   const [capOpen, setCapOpen] = useState(false);
+  /** Text-Reiter (Handy): der Text ist auf einen Bildschirm gekürzt, der Rest steht hinter "Read more" im Kontext (Entscheidung 25, Brief 17) */
+  const [truncated, setTruncated] = useState(false);
+  const truncRef = useRef(false);
   const [note, setNote] = useState<Moment | null>(null);
   /** Zeile "N notes, send?" beim ersten Öffnen am Tag */
   const [prompt, setPrompt] = useState(false);
@@ -1655,13 +1658,17 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   }, [form]);
 
   /** Textmodus: gesehen erst, wenn das Ende des Textes sichtbar ist */
+  const markTextSeen = () => {
+    if (textSeen.current === idxRef.current) return;
+    textSeen.current = idxRef.current;
+    markSeen(queue.current[idxRef.current]);
+  };
   const checkTextEnd = () => {
     const el = textBox.current;
     if (!textRef.current || !el || textSeen.current === idxRef.current) return;
-    if (textEndReached(el.scrollTop, el.clientHeight, el.scrollHeight)) {
-      textSeen.current = idxRef.current;
-      markSeen(queue.current[idxRef.current]);
-    }
+    // Handy: der Text steht gekürzt auf einem Bildschirm. Das Ende ist sichtbar, wenn nichts gekürzt wurde, sonst erst am Ende des Kontexts ("Read more").
+    // Desktop: der Text scrollt, gesehen am Ende des Scrollwegs.
+    if (deskRef.current ? textEndReached(el.scrollTop, el.clientHeight, el.scrollHeight) : !truncRef.current) markTextSeen();
   };
   useEffect(() => {
     if (form !== 'text') return;
@@ -2682,6 +2689,34 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     [],
   );
 
+  // Text-Reiter (Handy): Zeilenlimit nach dem Platz zwischen Hook und Leiste. Gemessen wird der volle Text, danach wird er auf die passenden Zeilen gekürzt.
+  useLayoutEffect(() => {
+    if (form !== 'text' || deskRef.current) {
+      truncRef.current = false;
+      setTruncated(false);
+      return;
+    }
+    const col = textBox.current?.querySelector<HTMLElement>('.vtext-col');
+    const body = col?.querySelector<HTMLElement>('.vtext-body');
+    if (!col || !body) return;
+    const fit = () => {
+      body.removeAttribute('data-clamp');
+      const avail = body.clientHeight;
+      const lh = parseFloat(getComputedStyle(body).lineHeight) || 27;
+      const cut = body.scrollHeight > avail + 1;
+      if (cut) {
+        body.style.setProperty('--lines', String(Math.max(1, Math.floor(avail / lh))));
+        body.setAttribute('data-clamp', '1');
+      }
+      truncRef.current = cut;
+      setTruncated(cut);
+    };
+    fit();
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(fit);
+    ro?.observe(col);
+    return () => ro?.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queue.current[idx]?.id, form, forYou, truncated]);
   useLayoutEffect(() => {
     // Hook nie kürzen: mehr als drei Zeilen in Normalgröße, dann eine Stufe kleiner
     const el = hookEl.current;
@@ -2734,9 +2769,58 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const saved = m && !!state.savedMoments[m.id];
   const liked = !!m && !!state.momentLiked?.[m.id];
   const captionsOn = !!m && form !== 'text' && captionsShown(form === 'audio' ? 'on' : state.settings.captionMode, m);
+  /** Audio-Reiter (Handy): Untertitel, Fortschritt, Transport, Quellzeile und Hook stehen in einer Spalte im Fluss, jede Ebene mit eigenem Platz (Brief 17, Issue 38) */
+  const stackOn = form === 'audio' && !desk && !!m && !forYou;
+  const audioRtl = form === 'audio' && !!m?.cues?.some((c) => isArabic(c[1]));
+
+  const captionEl = captionsOn && caption && !forYou ? (
+
+        <div className={`vcaption pointer-events-none ${m?.audio ? 'vcaption-audio' : form === 'audio' ? 'vcaption-big' : ''} ${isArabic(caption) ? 'vcaption-rtl' : ''}`} data-testid="caption">
+          {captionLines(caption).map((line, k) => (
+            <span key={k} dir={isArabic(line) ? 'rtl' : 'ltr'} lang={isArabic(line) ? 'ar' : 'en'} style={{ display: 'block' }}>{line}</span>
+          ))}
+        </div>
+      
+  ) : null;
+  const ctrlEl = m && !forYou && form === 'audio' && !desk ? (
+
+        <div className="vctrl" data-testid="audio-controls" onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
+          <div className="vtimes">
+            <span>{atTime(Math.round(progress * Math.max(0, m.end - m.start)))}</span>
+            {rateOf(state.settings) > 1 && <span>{rateOf(state.settings)}x</span>}
+            <span>{atTime(Math.max(0, m.end - m.start))}</span>
+          </div>
+          <div className="vtransport">
+            <button type="button" aria-label="Previous moment" data-testid="ctl-prev" onClick={() => goTo(idxRef.current - 1)}><Icon name="skip-back" size="var(--icon)" /></button>
+            <button type="button" className="vplaybtn" aria-label={paused ? 'Play' : 'Pause'} data-testid="ctl-play" onClick={() => togglePlay()}><Icon name={paused ? 'play' : 'pause'} size="var(--s-8)" /></button>
+            <button type="button" aria-label="Next moment" data-testid="ctl-next" onClick={() => goTo(idxRef.current + 1)}><Icon name="skip-forward" size="var(--icon)" /></button>
+          </div>
+        </div>
+      
+  ) : null;
+  const infoEl = m && !forYou && form !== 'text' && !desk ? (
+
+        <div className="vinfo pointer-events-none">
+          <div
+            className="vinfo-tap"
+            data-testid="info-tap"
+            onPointerDown={(e) => { onDown(e); infoDown.current = true; }}
+            onPointerMove={onMove}
+            onPointerCancel={cancelGesture}
+          >
+            <div className="vchannel" data-testid="speaker-line">
+              <span className="vdot" aria-hidden="true" />
+              <span style={{ color: AREA_COLOR[m.area] }}>{AREA_LABEL[m.area]}</span>
+              <span className="vspeaker">{speakerLine(m.channel)}</span>
+            </div>
+            <div className="vtitle" data-testid="hook" ref={hookEl}>{m.hook}</div>
+          </div>
+        </div>
+      
+  ) : null;
 
   return (
-    <div className="vfeed" ref={dragEl} data-form={form} data-surface={form === 'text' ? 'page' : 'media'} style={{ ['--area' as string]: m ? AREA_COLOR[m.area] : 'var(--on-media)' }}>
+    <div className="vfeed" ref={dragEl} data-form={form} data-rtl={audioRtl ? '' : undefined} data-surface={form === 'text' ? 'page' : 'media'} style={{ ['--area' as string]: m ? AREA_COLOR[m.area] : 'var(--on-media)' }}>
       <div className="vstage" ref={stageEl}>
       {slots.current.slice(0, SLOTS).map((slot, s) => {
         const j = slot.index;
@@ -2783,7 +2867,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       )}
       </div>
 
-      <div className="vtrack" />
+      {!stackOn && <div className="vtrack" />}
       {headEl}
       {form === 'text' && m && !forYou && (
         <div
@@ -2794,7 +2878,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           onScroll={checkTextEnd}
           onTouchStart={(e) => {
             const el = e.currentTarget;
-            tt.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, top: el.scrollTop <= 0, end: textEndReached(el.scrollTop, el.clientHeight, el.scrollHeight) };
+            tt.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, top: !desk || el.scrollTop <= 0, end: !desk || textEndReached(el.scrollTop, el.clientHeight, el.scrollHeight) };
           }}
           onTouchEnd={(e) => {
             const dx = e.changedTouches[0].clientX - tt.current.x;
@@ -2806,32 +2890,40 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           }}
           onDoubleClick={(e) => likeAt(e.clientX, e.clientY)}
         >
-          {!desk && (
-            <>
-              <div className="vkicker">{AREA_LABEL[m.area]} · {topicLabel(m.topic)}</div>
-              <h2 className="vtext-hook">{m.hook}</h2>
-            </>
-          )}
           {(() => {
             const t = momentText(m);
             const ar = isArabic(t);
-            return t ? (
-              <p className={`vtext-body ${ar ? 'vtext-rtl' : ''}`} dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'}>{t}</p>
-            ) : (
-              <p className="vtext-body vtext-empty">No text for this moment yet.</p>
+            const sl = desk ? null : sourceLine(m);
+            const label = sl ? `${sl.prefix}${sl.text}` : '';
+            const content = (
+              <>
+                {!desk && (
+                  <>
+                    <div className="vkicker">{AREA_LABEL[m.area]} · {topicLabel(m.topic)}</div>
+                    <h2 className="vtext-hook">{m.hook}</h2>
+                  </>
+                )}
+                {t ? (
+                  <p className={`vtext-body ${ar ? 'vtext-rtl' : ''}`} dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'}>{t}</p>
+                ) : (
+                  <p className="vtext-body vtext-empty">No text for this moment yet.</p>
+                )}
+                {!desk && truncated && (
+                  <button type="button" className="vtext-more" data-testid="text-more" onClick={() => setCapOpen(true)}>
+                    Read more
+                  </button>
+                )}
+                {sl &&
+                  (sl.url ? (
+                    <a className="vtext-source" data-testid="text-source" href={sl.url} target="_blank" rel="noopener noreferrer">{label}</a>
+                  ) : (
+                    <p className="vtext-source" data-testid="text-source">{label}</p>
+                  ))}
+                {desk && <div className="vtext-end" aria-hidden="true">Next moment: J, Down, or two fingers up</div>}
+              </>
             );
+            return desk ? content : <div className="vtext-col">{content}</div>;
           })()}
-          {!desk && (() => {
-            const sl = sourceLine(m);
-            if (!sl) return null;
-            const label = `${sl.prefix}${sl.text}`;
-            return sl.url ? (
-              <a className="vtext-source" data-testid="text-source" href={sl.url} target="_blank" rel="noopener noreferrer">{label}</a>
-            ) : (
-              <p className="vtext-source" data-testid="text-source">{label}</p>
-            );
-          })()}
-          <div className="vtext-end" aria-hidden="true">{desk ? 'Next moment: J, Down, or two fingers up' : 'Swipe up for the next moment'}</div>
         </div>
       )}
       {!forYou && !statusKind && !(prompt && unsent(state.feedbackNotes).length > 0) && (
@@ -2839,7 +2931,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           {todayLine(state.dayCount?.[today], true)}
         </div>
       )}
-      <div className="vprogress" style={{ transform: `scaleX(${progress})` }} />
+      {!stackOn && <div className="vprogress" style={{ transform: `scaleX(${progress})` }} />}
       {!forYou && <Status kind={statusKind} audio={form === 'audio'} />}
 
       <div
@@ -2858,46 +2950,22 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
           <span>This cut {atTime(m.start)} to {atTime(m.end)}</span>
         </div>
       )}
-      {captionsOn && caption && !forYou && (
-        <div className={`vcaption pointer-events-none ${m?.audio ? 'vcaption-audio' : form === 'audio' ? 'vcaption-big' : ''} ${isArabic(caption) ? 'vcaption-rtl' : ''}`} data-testid="caption">
-          {captionLines(caption).map((line, k) => (
-            <span key={k} dir={isArabic(line) ? 'rtl' : 'ltr'} lang={isArabic(line) ? 'ar' : 'en'} style={{ display: 'block' }}>{line}</span>
-          ))}
-        </div>
-      )}
-
-      {m && !forYou && form === 'audio' && !desk && (
-        <div className="vctrl" data-testid="audio-controls" onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
-          <div className="vtimes">
-            <span>{atTime(Math.round(progress * Math.max(0, m.end - m.start)))}</span>
-            {rateOf(state.settings) > 1 && <span>{rateOf(state.settings)}x</span>}
-            <span>{atTime(Math.max(0, m.end - m.start))}</span>
+      {stackOn ? (
+        <div className="vaudio-stack" data-testid="audio-stack">
+          <div className="vaudio-sub" data-testid="audio-sub">{captionEl}</div>
+          <div className="vaudio-bar">
+            <div className="vtrack" />
+            <div className="vprogress" style={{ transform: `scaleX(${progress})` }} />
           </div>
-          <div className="vtransport">
-            <button type="button" aria-label="Previous moment" data-testid="ctl-prev" onClick={() => goTo(idxRef.current - 1)}><Icon name="skip-back" size="var(--icon)" /></button>
-            <button type="button" className="vplaybtn" aria-label={paused ? 'Play' : 'Pause'} data-testid="ctl-play" onClick={() => togglePlay()}><Icon name={paused ? 'play' : 'pause'} size="var(--s-8)" /></button>
-            <button type="button" aria-label="Next moment" data-testid="ctl-next" onClick={() => goTo(idxRef.current + 1)}><Icon name="skip-forward" size="var(--icon)" /></button>
-          </div>
+          {ctrlEl}
+          {infoEl}
         </div>
-      )}
-
-      {m && !forYou && form !== 'text' && !desk && (
-        <div className="vinfo pointer-events-none">
-          <div
-            className="vinfo-tap"
-            data-testid="info-tap"
-            onPointerDown={(e) => { onDown(e); infoDown.current = true; }}
-            onPointerMove={onMove}
-            onPointerCancel={cancelGesture}
-          >
-            <div className="vchannel" data-testid="speaker-line">
-              <span className="vdot" aria-hidden="true" />
-              <span style={{ color: AREA_COLOR[m.area] }}>{AREA_LABEL[m.area]}</span>
-              <span className="vspeaker">{speakerLine(m.channel)}</span>
-            </div>
-            <div className="vtitle" data-testid="hook" ref={hookEl}>{m.hook}</div>
-          </div>
-        </div>
+      ) : (
+        <>
+          {captionEl}
+          {ctrlEl}
+          {infoEl}
+        </>
       )}
 
       {!forYou && (
@@ -2914,7 +2982,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       )}
       </div>
 
-      {capOpen && m && !forYou && form !== 'text' && !desk && <CaptionSheet m={m} speaker={speakerLine(m.channel)} onClose={() => setCapOpen(false)} />}
+      {capOpen && m && !forYou && !desk && <CaptionSheet m={m} speaker={speakerLine(m.channel)} onClose={() => setCapOpen(false)} onEnd={form === 'text' ? markTextSeen : undefined} />}
 
       {heart && (
         <svg key={heart.k} className="vheart pointer-events-none" data-testid="heart-burst" style={{ left: heart.x - 48, top: heart.y - 48 }} width="96" height="96" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">

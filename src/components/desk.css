@@ -55,7 +55,7 @@
 .desk .vaudio-art { top: calc(50% - 220px); width: 240px; }
 .desk .vcaption.vcaption-audio { top: calc(50% + var(--s-12)); }
 .desk .vnotes { top: var(--s-4); left: var(--s-4); }
-.desk .vtext { padding: var(--s-8) max(88px, calc((100% - var(--read-w, 640px)) / 2)) var(--s-14) max(var(--s-8), calc((100% - var(--read-w, 640px)) / 2)); }
+.desk .vtext { overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: var(--s-8) max(88px, calc((100% - var(--read-w, 640px)) / 2)) var(--s-14) max(var(--s-8), calc((100% - var(--read-w, 640px)) / 2)); }
 .desk .vtext-body { max-width: var(--read-w, 640px); font-size: 18px; line-height: 29px; }
 .desk .vtext-rtl { font-size: 21px; line-height: 37px; }
 /* Kompakte Spalte statt 48 pt, bei Video am rechten unteren Rand des Bildes */
