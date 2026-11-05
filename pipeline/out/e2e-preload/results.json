@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-05T09:32:26.612Z",
+  "at": "2026-11-05T11:18:29.246Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -50,7 +50,7 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1663,
+        "coldStartMs": 1669,
         "preloadedMoments": 30,
         "preloadedBytes": 6289238,
         "bytesPerMoment": 209641,
@@ -59,28 +59,28 @@
         "cachedStartMs": [
           7,
           6,
-          21,
-          8,
-          5,
-          8,
-          8,
-          7,
+          15,
           9,
+          6,
+          9,
+          10,
+          9,
+          8,
           6
         ],
-        "cachedStartMax": 21,
-        "cachedStartMedian": 8,
+        "cachedStartMax": 15,
+        "cachedStartMedian": 9,
         "firstFrames": [
-          "first-frame 30ms buffered local",
+          "first-frame 39ms buffered local",
           "first-frame 7ms buffered local",
           "first-frame 6ms buffered local",
-          "first-frame 21ms buffered local",
-          "first-frame 8ms buffered local",
-          "first-frame 5ms buffered local",
-          "first-frame 8ms buffered local",
-          "first-frame 8ms buffered local",
-          "first-frame 7ms buffered local",
+          "first-frame 15ms buffered local",
           "first-frame 9ms buffered local",
+          "first-frame 6ms buffered local",
+          "first-frame 9ms buffered local",
+          "first-frame 10ms buffered local",
+          "first-frame 9ms buffered local",
+          "first-frame 8ms buffered local",
           "first-frame 6ms buffered local"
         ],
         "settingsText": "Preloaded: 35 moments, 7.0 MB",
@@ -104,7 +104,7 @@
         ],
         "offlineStartMs": [
           7,
-          14,
+          7,
           7,
           6
         ],
@@ -136,9 +136,9 @@
           }
         ],
         "offlineRestartStartMs": [
+          9,
           8,
-          8,
-          9
+          10
         ],
         "poorYoutubeOf120": 58,
         "normalYoutubeOf120": 68,
