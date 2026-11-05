@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-05",
+ "records": [
+  {
+   "sourceId": "wiki:de:Streifenkreuzspinne",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Streifenkreuzspinne",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/05",
+    "status": 200
+   },
+   "title": "Streifenkreuzspinne",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Streifenkreuzspinne ist eine Spinne aus der Familie der Echten Radnetzspinnen (Araneidae). Sie ist paläarktisch verbreitet und bewohnt meistens offene und sonnige Habitate (Lebensräume), wo sich die Art bevorzugt in bodennaher Vegetation aufhält. Die markant gefärbte und eher kleine Spinne fällt vor allem durch ihre gelblichen Farbanteile auf und ist der einzige in Europa vorkommende Vertreter aus der gleichnamigen Gattung der Streifenkreuzspinnen (Mangora)."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-05T04:05:37.397Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Streifenkreuzspinne": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Shkodra",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Shkodra",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/05",
+    "status": 200
+   },
+   "title": "Shkodra",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Shkodra ist eine Stadt im Norden Albaniens. Sie liegt zwischen dem Skutarisee und den Flüssen Kir, Drin und Buna."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-05T04:05:37.397Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Shkodra": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Helen Purdy Beale",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Helen_Purdy_Beale",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/05",
+    "status": 200
+   },
+   "title": "Helen Purdy Beale",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Helen Alice Purdy Beale war eine US-amerikanische Virologin. Sie entwickelte Standardwerkzeuge für die Serologie, die heute in der Forschungspraxis und in der medizinischen Diagnose eingesetzt werden."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-05T04:05:37.397Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Helen_Purdy_Beale": 200
+   }
+  }
+ ]
+}
