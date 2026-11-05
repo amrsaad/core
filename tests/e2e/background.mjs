@@ -79,6 +79,7 @@ const bgStock = Array.from({ length: 12 }, (_, i) => bgMk(`bgstock${i}`, 'audio'
 // Brief 11, Schritt 9: Netz-Momente (m3u8, werden nicht vorgeladen) neben dem Vorrat. Sie liegen im Test vor dem Vorrat in der Warteschlange.
 const bgNet = Array.from({ length: 4 }, (_, i) => bgMk(`bgnet${i}`, 'audio', { audio: true, start: 10, end: 14, hls: `https://stream.test/bgnet${i}.m3u8` }));
 const poolBgStock = await encPool([...bgStock, ...bgNet]);
+const poolBgStockOnly = await encPool(bgStock);
 const MP3 = new Uint8Array(readFileSync(new URL('../fixtures/media/tone-cbr.mp3', import.meta.url)));
 const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'range', 'access-control-allow-methods': 'GET,OPTIONS' };
 const routeMp3 = (cx) => cx.route('https://stream.test/**', (route) => {
@@ -225,6 +226,49 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bgLockNextKeepsMoment = nx.idx === nxIdx && nx.st === 1;
     c.bgLockNextCountsNothing = !nx.seenNext;
     await fn.cx.close();
+
+    // Brief 20 (Issue 47): 'stock reaches 6 within 60 s after start' und 'pool fill local >= 3 after stock full'. Zwei Läufe mit lauter Vorrats-Momenten (mp3):
+    // einmal normal, einmal so, dass die ersten drei Abrufe des Vorrats (fetch, nicht die Audio-Elemente) nie antworten (hängende Verbindung, wie auf dem Gerät). Der Wächter bricht sie nach 20 s ab,
+    // die Plätze werden frei, der Vorrat steht trotzdem binnen 60 s bei 6 von 6, und jedes Ergebnis steht im Protokoll (stock: +1 ..., stock: fail ... / hang).
+    let hangHits = 0;
+    for (const hang of [false, true]) {
+      const tag = hang ? 'bgStockHung' : 'bgStock';
+      const fs6 = await freshPage(browser, url, k, poolBgStockOnly, '?now=2026-10-23&seed=3', [MS_SPY, IOS_GATE], async (cx) => {
+        await routeMp3(cx);
+        if (!hang) return;
+        await cx.route('https://stream.test/**', (route) => {
+          if (route.request().method() === 'OPTIONS' || route.request().resourceType() !== 'fetch' || hangHits++ >= 3) return route.fallback();
+          return undefined; // keine Antwort
+        });
+      });
+      const p6 = fs6.pg;
+      const t0 = Date.now();
+      await p6.waitForSelector('[data-testid=form-switch]');
+      await p6.click('[data-testid=form-switch] >> text=Audio');
+      await waitFor(p6, () => window.__core.moment()?.audio === true);
+      c[`${tag}SixIn60s`] = await waitFor(p6, () => window.__core.diag().some((x) => x === 'stock: 6 of 6'), undefined, 60000);
+      r[`${tag}Seconds`] = Math.round((Date.now() - t0) / 1000);
+      c[`${tag}SixOnce`] = (await p6.evaluate(() => window.__core.diag().filter((x) => x === 'stock: 6 of 6').length)) === 1;
+      const st = await p6.evaluate(() => {
+        const d = window.__core.diag();
+        const held = new Set(window.__core.preload().ids);
+        const idx = window.__core.idx();
+        const next6 = window.__core.queue().slice(idx + 1, idx + 7);
+        return { plus: d.filter((x) => /^stock: \+1 \S+ \(\d of 6\)$/.test(x)).length, fails: d.filter((x) => x.startsWith('stock: fail ') || /^stock: (host|defer) /.test(x)), n: held.size, next6: next6.filter((id) => held.has(id)).length };
+      });
+      r[`${tag}Stats`] = st;
+      c[`${tag}PlusLines`] = st.plus >= 6;
+      c[`${tag}AllSixHeld`] = st.n >= 6 && st.next6 >= 5;
+      // Die drei hängenden Abrufe wurden wirklich ausgelöst und blockieren den Vorrat nicht (ob der Wächter nach 20 s greift oder die Warteschlange den Moment vorher abbricht, hängt von der Reihenfolge ab, der Wächter selbst ist im Unit-Test belegt)
+      if (hang) c[`${tag}RequestsHung`] = hangHits >= 3;
+      // Pool: nach vollem Vorrat füllt er mindestens 3 der 5 lokal
+      c[`${tag}PoolLocalGe3`] = await waitFor(p6, () => {
+        const l = window.__core.diag().filter((x) => x.startsWith('deck: pool fill ')).slice(-1)[0] ?? '';
+        const m = /^deck: pool fill 5\/5 \(local (\d), net (\d)\)$/.exec(l);
+        return !!m && Number(m[1]) >= 3 && window.__core.deck().ready >= 5;
+      }, undefined, 15000);
+      await fs6.cx.close();
+    }
 
     // Brief 14 (Entscheidung 52, Issue 36) und 14b (Issue 40), 'five nexttrack hidden, all play within 1 s, no prepare while hidden, no skipped': der Vorrat hält die
     // nächsten fünf Momente fertig geladen, aus dem Speicher (Blob) und dem Netz, lokale zuerst. Weiter am Sperrbildschirm tauscht nur die Rollen: fünf Mal

@@ -241,6 +241,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   /** Vorrats-Tiefe, für die zuletzt "stock: low" kam, und Zeitpunkt des letzten Nachladens (Brief 14b, Schritt 1) */
   const lowDepth = useRef(-1);
   const lastResume = useRef(0);
+  const poolHold = useRef(0);
   /** Offene Messung Wisch bis erstes Bild */
   const swipe = useRef<{ j: number; t0: number; buffered: boolean } | null>(null);
   /** Messung für die Zeile "video: ..." (Issue 22): Wisch bis Bereitschaft des Players und bis zum ersten PLAYING */
@@ -836,9 +837,20 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       void pre.warm(wait).then(() => fillPoolRef.current());
     }
     const netOk = !pre.poor();
+    // Brief 20, Schritt 2: der Vorrat hat Vorrang. Solange er dünn ist (unter 3 der nächsten 6) und gerade lädt, startet der Pool keine NEUEN Netz-Elemente,
+    // höchstens 3 s ab dem ersten Warten. Danach (oder sobald der Vorrat reicht) lädt er wie gehabt vom Netz. Schon laufende Elemente bleiben unberührt.
+    const thin = d.have < 3 && pre.busy();
+    if (!thin) poolHold.current = 0;
+    else if (!poolHold.current) {
+      poolHold.current = Date.now();
+      window.setTimeout(() => fillPoolRef.current(), 3050);
+    }
+    const holding = thin && Date.now() - poolHold.current < 3000;
+    const inPool = holding ? new Set(audioDeck.poolInfo().map((p) => p.key)) : null;
     const clips: DeckClip[] = [];
     for (const m of next) {
       if (!LOCAL.has(keyOf(m)) && (wait.includes(m) || !netOk)) continue;
+      if (inPool && !LOCAL.has(keyOf(m)) && !inPool.has(keyOf(m))) continue;
       const c = deckClipOf(m);
       if (c) clips.push(c);
     }
@@ -1218,6 +1230,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   useEffect(() => {
     if (form !== 'audio') return;
     audioDeck.diag = (line) => diag.current.push(line);
+    // Brief 20: jedes Ergebnis des Vorrats-Ladens (+1, fail, 6 of 6) steht im Protokoll
+    pre?.setDiag((line) => diag.current.push(line));
     audioDeck.onAdvance = (_from, to) => {
       advancedTo.current = to.key;
       finishRef.current();
@@ -1266,6 +1280,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       window.clearTimeout(waitTimer);
       window.clearTimeout(stockTimer);
       offStock?.();
+      pre?.setDiag(null);
       audioDeck.release();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1503,13 +1518,25 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
             });
             // Das Vorschaubild liegt über dem IFrame in jedem Zustand außer PLAYING (Auftrag Max 29.10.2026). Der Zustandswechsel kommt
             // vom IFrame asynchron, also fällt data-live schon beim Befehl, der das Spielen beendet oder einen anderen Inhalt lädt.
+            // Issue 46 (Brief 20): Nach einem Pausebefehl zeigt der IFrame auf dem iPhone seine eigene Pausenansicht (Logo, Titel, Avatar, nächste Folge) über dem Standbild,
+            // denn sein Video-Layer liegt dort über dem DOM-Nachbarn. Darum ist der IFrame selbst unsichtbar (data-hold, CSS in feed.css), vom Pausebefehl bis zum nächsten
+            // Befehl, der etwas abspielt oder lädt. Gesetzt wird es hier beim Befehl, ohne React-Umweg.
             for (const k of ['pauseVideo', 'loadVideoById', 'cueVideoById'] as const) {
               const f = pl[k].bind(pl) as (a?: never) => void;
               pl[k] = ((arg?: never) => {
                 slot.el?.removeAttribute('data-live');
+                if (k === 'pauseVideo') slot.el?.setAttribute('data-hold', '');
+                else slot.el?.removeAttribute('data-hold');
                 setCover(slot, false);
                 f(arg);
               }) as never;
+            }
+            {
+              const play = pl.playVideo.bind(pl);
+              pl.playVideo = () => {
+                slot.el?.removeAttribute('data-hold');
+                play();
+              };
             }
             return pl;
           };
@@ -1573,6 +1600,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         window.clearTimeout(s.coverTimer);
         s.player?.destroy();
         s.el?.removeAttribute('data-live');
+        s.el?.removeAttribute('data-hold');
         Object.assign(s, { player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, stalls: 0, playedAt: 0 });
         if (s.cover) s.cover.style.visibility = 'hidden';
       }
