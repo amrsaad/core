@@ -79,18 +79,45 @@
   justify-content: center;
   background: var(--scrim);
 }
+/* Das Blatt lässt oben immer einen Streifen des Hintergrunds frei: Statusleiste plus 56 px. Die 92 % von früher endeten bei 59 px Statusleiste
+   auf dem iPhone fast ganz unter ihr, der Hintergrund war nicht zu treffen (Issue 39). Der Inhalt scrollt in .sheet-body, die Leiste oben bleibt stehen.
+   Die Animation füllt nur rückwärts (backwards), sonst überschreibt ihr Endzustand den Zug nach unten beim Wischen. */
 .sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: var(--desk-read);
+  max-height: calc(100% - var(--safe-t) - var(--s-14));
+  overflow: hidden;
   background: var(--surface);
   color: var(--text);
   border-radius: var(--r-sheet) var(--r-sheet) 0 0;
   box-shadow: var(--inset-hair);
-  padding: var(--s-2) var(--margin) calc(var(--safe-b) + var(--nav-h, 0px) + var(--s-4));
-  max-height: 92%;
+  transition: transform var(--dur-ui) var(--ease);
+  animation: sheet-in var(--dur-sheet) var(--spring) backwards;
+}
+.sheet-bar { position: relative; flex: none; height: var(--hit); touch-action: none; }
+.sheet-bar .sheet-grip { position: absolute; left: 50%; top: var(--s-2); transform: translateX(-50%); }
+.sheet-x {
+  position: absolute;
+  top: 0;
+  right: var(--s-2);
+  width: var(--hit);
+  height: var(--hit);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  color: var(--muted);
+}
+.sheet-x:active { background: var(--surface-2); }
+.sheet-body {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  animation: sheet-in var(--dur-sheet) var(--spring) both;
+  padding: 0 var(--margin) calc(var(--safe-b) + var(--nav-h, 0px) + var(--s-4));
 }
 .sheet-grip { width: var(--s-10); height: var(--s-1); border-radius: var(--r-pill); background: var(--tab-off); margin: 0 auto var(--s-3); }
 .sheet-head { display: flex; align-items: center; gap: var(--s-2); margin-bottom: var(--s-3); font-size: var(--t-meta); line-height: var(--t-meta-lh); color: var(--muted); }
@@ -168,7 +195,30 @@
   padding: var(--s-2) var(--s-5) var(--s-5);
   animation: sheet-in var(--dur-slow) var(--spring) both;
 }
-.vcap-grip { width: var(--s-10); height: var(--s-1); border-radius: var(--r-pill); background: var(--tab-off); margin: 0 auto var(--s-3); }
+/* Leiste oben im Kontext-Blatt: Griff in der Mitte, Schließen-Knopf rechts (44 px), bleibt beim Scrollen stehen und deckt den Inhalt darunter ab */
+.vcap-bar {
+  position: sticky;
+  top: calc(var(--s-2) * -1);
+  z-index: 2;
+  height: var(--hit);
+  margin: calc(var(--s-2) * -1) calc(var(--s-5) * -1) var(--s-1);
+  background: var(--surface);
+  touch-action: none;
+}
+.vcap-grip { position: absolute; left: 50%; top: var(--s-2); transform: translateX(-50%); width: var(--s-10); height: var(--s-1); border-radius: var(--r-pill); background: var(--tab-off); }
+.vcap-x {
+  position: absolute;
+  top: 0;
+  right: var(--s-2);
+  width: var(--hit);
+  height: var(--hit);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  color: var(--muted);
+}
+.vcap-x:active { background: var(--surface-2); }
 .vcap-hook { margin: 0 0 var(--s-3); font-size: var(--t-row); line-height: var(--t-row-lh); font-weight: var(--w-tab); }
 .vcap-text { margin: 0 0 var(--s-4); white-space: pre-line; font-size: var(--t-body); line-height: var(--t-body-lh); color: var(--body); }
 .vcap-text[dir='rtl'] { font-family: var(--font-ar); font-size: var(--t-reading); line-height: 1.9; }

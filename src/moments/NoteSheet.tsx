@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type MutableRefObject } from 'react';
 import { AREA_COLOR } from '../lib/labels';
 import { Icon } from '../components/Icon';
+import { Sheet } from '../components/Sheet';
 import type { IconName } from '../components/icons';
 import { CHIPS, INPUT_BUTTON, INPUT_CHIPS, INPUT_HINT, INPUT_LABEL, INPUT_MAX, TEXT_MAX, type Chip, type InputChip } from './note';
 import type { Moment } from './types';
@@ -35,7 +36,6 @@ export function NoteSheet({ m, speaker, onChip, onInput, onDone, onAsk, onCancel
     if (!mode || confirm || !value.trim()) return;
     onInput(mode, value);
   };
-  const stop = (e: React.SyntheticEvent) => e.stopPropagation();
   useEffect(() => {
     if (!ctl) return;
     ctl.current = { chip: (i) => CHIPS[i] && !confirm && onChip(CHIPS[i], text), focusText: () => field.current?.focus() };
@@ -44,9 +44,7 @@ export function NoteSheet({ m, speaker, onChip, onInput, onDone, onAsk, onCancel
     };
   });
   return (
-    <div className="sheet-backdrop" data-testid="note-sheet" onPointerDown={stop} onPointerUp={stop} onClick={(e) => e.target === e.currentTarget && onCancel()}>
-      <div className="sheet">
-        <div className="sheet-grip" aria-hidden="true" />
+    <Sheet testid="note-sheet" label="More" onClose={onCancel}>
         <div className="sheet-head">
           <span className="vdot" style={{ background: AREA_COLOR[m.area] }} aria-hidden="true" />
           <span>{speaker}</span>
@@ -131,7 +129,6 @@ export function NoteSheet({ m, speaker, onChip, onInput, onDone, onAsk, onCancel
           </button>
           </>
         )}
-      </div>
-    </div>
+    </Sheet>
   );
 }

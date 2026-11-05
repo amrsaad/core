@@ -46,7 +46,13 @@ export function CaptionSheet({ m, speaker, onClose }: { m: Moment; speaker: stri
           if (closesCaption(e.changedTouches[0].clientY - y.current, box.current?.scrollTop ?? 0)) onClose();
         }}
       >
-        <div className="vcap-grip" aria-hidden="true" />
+        {/* Griffleiste mit Schließen-Knopf oben rechts (Brief 17, Issue 39). Bleibt beim Scrollen oben stehen. Bleibt das erste Kind, die Reihenfolge ist getestet. */}
+        <div className="vcap-bar">
+          <div className="vcap-grip" aria-hidden="true" />
+          <button type="button" className="vcap-x" data-testid="caption-close" aria-label="Close" onClick={onClose}>
+            <Icon name="x" size="var(--icon)" />
+          </button>
+        </div>
         <h2 className="vcap-hook" data-testid="caption-hook">{m.hook}</h2>
         {t && (
           <p className="vcap-text" data-testid="caption-excerpt" dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'} style={ar ? { textAlign: 'right' } : undefined}>{t}</p>

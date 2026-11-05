@@ -1,4 +1,5 @@
 import { Icon } from './Icon';
+import { Sheet } from './Sheet';
 
 export interface ShareInfo {
   hook: string;
@@ -13,9 +14,7 @@ export interface ShareInfo {
  */
 export function ShareSheet({ info, onShare, onCopy, onClose }: { info: ShareInfo; onShare?: () => void; onCopy?: () => void; onClose: () => void }) {
   return (
-    <div className="sheet-backdrop" data-testid="share-sheet" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="sheet" role="dialog" aria-label="Share">
-        <div className="sheet-grip" aria-hidden="true" />
+    <Sheet testid="share-sheet" label="Share" onClose={onClose}>
         <h2 className="sheet-title">
           Share
           <small>{info.channel}</small>
@@ -38,7 +37,6 @@ export function ShareSheet({ info, onShare, onCopy, onClose }: { info: ShareInfo
           <Icon name="x" />
           Close
         </button>
-      </div>
-    </div>
+    </Sheet>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Sheet } from './Sheet';
 import { AREA_ORDER, clearFocus, focusActive, focusUntil, LANG_LABEL, LANGS, writeFocus, type Focus, type FocusDur, type Lang } from '../moments/focus';
 import { AREA_LABEL } from '../lib/labels';
 import type { Area } from '../types';
@@ -16,16 +17,13 @@ export function FocusSheet({ current, now, onClose }: { current: Focus | null; n
   const [langs, setLangs] = useState<Lang[]>(active?.langs ?? []);
   const [dur, setDur] = useState<FocusDur>(active?.dur ?? 'session');
   const toggle = <T,>(list: T[], v: T, set: (x: T[]) => void) => set(list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
-  const stop = (e: React.SyntheticEvent) => e.stopPropagation();
   const start = () => {
     writeFocus({ areas, langs, until: focusUntil(dur, now), dur });
     onClose();
   };
   const none = !areas.length && !langs.length;
   return (
-    <div className="sheet-backdrop" data-testid="focus-sheet" onPointerDown={stop} onPointerUp={stop} onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="sheet" role="dialog" aria-label="Focus">
-        <div className="sheet-grip" aria-hidden="true" />
+    <Sheet testid="focus-sheet" label="Focus" onClose={onClose}>
         <h2 className="sheet-title">Focus <small>Only on this device</small></h2>
         <div className="sheet-label">Areas</div>
         <div className="chips" role="group" aria-label="Areas">
@@ -49,7 +47,6 @@ export function FocusSheet({ current, now, onClose }: { current: Focus | null; n
         {active && (
           <button type="button" className="note-back" data-testid="focus-clear" onClick={() => { clearFocus(); onClose(); }}>End focus</button>
         )}
-      </div>
-    </div>
+    </Sheet>
   );
 }

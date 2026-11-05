@@ -121,10 +121,12 @@
   --s-14: 56px;
   --s-16: 64px;
   --margin: 16px;
-  --safe-t: env(safe-area-inset-top, 0px);
-  --safe-b: env(safe-area-inset-bottom, 0px);
-  --safe-l: env(safe-area-inset-left, 0px);
-  --safe-r: env(safe-area-inset-right, 0px);
+  /* Safe-Area: auf dem Gerät aus env(). --safe-top, --safe-bottom, --safe-left, --safe-right überschreiben sie von außen (Layout-Gate simuliert
+     damit die Statusleiste mit 59 px und die Home-Anzeige mit 34 px, Brief 17). Ohne Überschreibung gilt env() wie bisher. */
+  --safe-t: var(--safe-top, env(safe-area-inset-top, 0px));
+  --safe-b: var(--safe-bottom, env(safe-area-inset-bottom, 0px));
+  --safe-l: var(--safe-left, env(safe-area-inset-left, 0px));
+  --safe-r: var(--safe-right, env(safe-area-inset-right, 0px));
 
   /* Maße */
   --hit: 44px;              /* kleinste Berührfläche (Layout-Gate 43) */
