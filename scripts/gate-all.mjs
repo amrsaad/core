@@ -162,10 +162,12 @@ const runSuite = async (s) => {
   const found = perBrowser(dir, s.browsers);
   const fails = log.split('\n').filter((l) => /^\s*(FAIL|ROT)\b/.test(l)).map((l) => l.trim());
   const suiteOk = code === 0 && !timedOut && up;
+  // Nennt die Ergebnisdatei bei mindestens einem Browser einen Einzelbefund, ist die Suite dort rot und die übrigen Browser stehen nach ihren eigenen Prüfungen.
+  // Ist die Suite rot, ohne dass die Datei einen Einzelbefund nennt (Absturz, Zeitlimit, kein Server), steht sie in jeder Zeile rot.
+  const anyOwn = found.some((f) => f.bad && f.bad.length);
   for (const f of found) {
-    // Einzelne Zeile rot, wenn ihre Prüfungen rot sind. Ist die ganze Suite rot und die Datei nennt keinen Einzelbefund, steht die Suite rot in jeder Zeile.
     const own = f.bad && f.bad.length ? f.bad : null;
-    const ok = suiteOk && !own;
+    const ok = anyOwn ? !own && !timedOut && up : suiteOk;
     const note = ok ? '' : own ? own.slice(0, 4).join(', ') + (own.length > 4 ? ` (+${own.length - 4})` : '') : timedOut ? `Zeitlimit ${s.min} min` : !up ? log : fails.slice(0, 2).join(' | ') || `Exit ${code}`;
     rows.push({ suite: s.title, browser: f.browser, ok, time, note });
   }
