@@ -4,6 +4,7 @@
 // Jede Zeile trägt dafür die Uhrzeit (ms) und eine kurze Geräte-Kennung. Zusammengeführt wird nach Zeit,
 // die ältesten Zeilen fallen heraus. "Copy diagnostics" zeigt weiter nur die Zeilen dieser Sitzung.
 import type { AppState } from './state';
+import { lsKey } from './ns';
 
 /** Eine Zeile im Sync-Stand: t = Zeitpunkt (ms), d = Gerät, l = Text */
 export interface DiagEntry {
@@ -17,7 +18,7 @@ export const DIAG_MAX = 500;
 /** Längere Zeilen werden gekürzt, damit der Sync-Stand klein bleibt */
 export const DIAG_LINE_MAX = 240;
 
-const DEVICE_KEY = 'core.device.v1';
+const DEVICE_KEY = lsKey('device.v1');
 const t0 = Date.now();
 const entries: DiagEntry[] = [];
 let device: string | undefined;

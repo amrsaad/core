@@ -3,9 +3,10 @@
 // Vorher und bei jedem Fehler läuft das Element unverändert. Die Spurwahl steht in loudness.ts (laneFor).
 import { diagLog } from '../lib/diag';
 import { dbToLinear, LIMITER, type HostState } from './loudness';
+import { lsKey } from '../lib/ns';
 
-const KEY_ON = 'core.level.on';
-const KEY_CORS = 'core.level.cors';
+const KEY_ON = lsKey('level.on');
+const KEY_CORS = lsKey('level.cors');
 
 const store = (): Storage | null => {
   try {

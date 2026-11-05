@@ -2,6 +2,7 @@
 // der erste Moment einer neuen Sitzung kommt aus dem Offline-Vorrat. Reine Funktionen, die Ablage macht der Preloader und der Feed.
 import type { Form } from './form';
 import type { Moment } from './types';
+import { lsKey } from '../lib/ns';
 
 /**
  * So viele Momente bleiben über das Sitzungsende im Vorrat gehalten (nicht verdrängbar). Sechs statt drei (Brief 09, Ergänzung 03.11.):
@@ -13,7 +14,7 @@ export const PULL_WITHIN = 3;
 /** Wie lange das Deck beim Kaltstart auf die Blob-URL aus dem Vorrat wartet, bevor es vom Netz startet (ms) */
 export const HOLD_MS = 1200;
 
-export const headsKey = (form: Form) => `core.heads.v1.${form}`;
+export const headsKey = (form: Form) => lsKey(`heads.v1.${form}`);
 
 export interface Head {
   id: string;
@@ -64,7 +65,7 @@ export function startOrder(queue: readonly Moment[], held: (m: Moment) => boolea
 
 // ---- Zähler coldNetStarts (pro Tag) ----
 
-export const COLD_KEY = 'core.coldnet.v1';
+export const COLD_KEY = lsKey('coldnet.v1');
 const COLD_DAYS = 14;
 
 export type ColdLog = Record<string, number>;

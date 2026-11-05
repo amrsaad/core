@@ -1,16 +1,14 @@
 name: daily
 
-# Läuft immer auf dem Default-Branch des Repos (Name egal).
+# Auf dem Branch `preview` nur von Hand (Entscheidung 56). Push-Ereignisse nehmen den Workflow des gepushten Branches,
+# und die concurrency-Gruppe `daily` bricht laufende Läufe ab. Ein Push auf `preview` würde sonst den Hauptlauf abbrechen.
 on:
-  schedule:
-    - cron: '0 3 * * *'
   workflow_dispatch:
     inputs:
       seed:
         description: 'Seed-Lauf (5 Jahre fact, 30 Tage fresh, 66 Verse)'
         type: boolean
         default: false
-  push:
 
 permissions:
   contents: write

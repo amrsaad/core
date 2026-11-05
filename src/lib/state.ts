@@ -16,6 +16,7 @@ import type { NoteEntry } from '../moments/note';
 import type { TapLog } from '../moments/learn';
 import type { DigestLatest, DigestTaps } from '../moments/digest';
 import type { DiagEntry } from './diag';
+import { lsKey } from './ns';
 
 export interface SavedItem {
   card: Card;
@@ -179,7 +180,7 @@ export function adjustWeight(state: AppState, topic: string, factor: number): Ap
 // ---------- Reparatur 45 ----------
 
 /** Marker in localStorage: die einmalige Reparatur lief auf diesem Gerät */
-export const REPAIR45_KEY = 'core.repair45.v1';
+export const REPAIR45_KEY = lsKey('repair45.v1');
 const HUNG_LINE = /^(?:watchdog|skipped \(not seen\)) (\S+)/;
 
 /**
