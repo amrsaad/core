@@ -244,6 +244,25 @@ const runScenario = async (browser, sc) => {
   // (iPhone 15 mit 393 px: 361 x 203 bei x = 16). Desktop: Video höchstens 1280 px breit.
   c.band16by9 = !!pz.band && Math.abs(pz.band[0] / pz.band[1] - 16 / 9) < 0.03 && (sc.desk ? pz.band[0] <= 1280 : Math.abs(pz.band[0] - Math.min(pz.vw - 32, 640)) <= 1 && Math.abs(pz.left - (pz.vw - pz.band[0]) / 2) <= 1 && (pz.vw > 672 || Math.abs(pz.left - 16) <= 1));
   await page.screenshot({ path: `${out}/${sc.name}-pause.png` });
+  // Issue 46 (iPhone): Das Standbild deckt die Karte bei Pause auch dann ab, wenn data-live noch steht (Player-Callback kam nicht oder zu spät).
+  // Darunter pausiert der Player unsichtbar, die YouTube-Einblendung (Logo, Titel, Avatar, nächste Folge) bleibt verdeckt.
+  if (!sc.desk) {
+    const nz = await page.evaluate((EX) => {
+      const cur = document.querySelector('.vslot[aria-hidden=false]');
+      cur?.setAttribute('data-live', '');
+      const poster = cur?.querySelector('.vposter');
+      const host = cur?.querySelector('.vframe > div');
+      const vis = (e) => !!e && getComputedStyle(e).visibility !== 'hidden' && e.getBoundingClientRect().width > 0;
+      const pr = poster?.getBoundingClientRect();
+      const hr = host?.getBoundingClientRect();
+      const ex = new Function('return (' + EX + ')')()();
+      const covers = !!pr && !!hr && pr.left <= hr.left + 0.5 && pr.top <= hr.top + 0.5 && pr.right >= hr.right - 0.5 && pr.bottom >= hr.bottom - 0.5;
+      const zp = Number(getComputedStyle(poster).zIndex), zi = Number(getComputedStyle(cur.querySelector('.vplay') ?? poster).zIndex);
+      return { paused: cur?.hasAttribute('data-paused'), poster: vis(poster), covers, exposed: ex.n, checked: ex.checked, playAbove: zi > zp, w: Math.round(pr?.width ?? 0), h: Math.round(pr?.height ?? 0), x: Math.round(pr?.left ?? 0), vw: innerWidth };
+    }, EXPOSED.toString());
+    r.noOverlay = nz;
+    c.noOverlayWhenPaused = !!nz.paused && nz.poster && nz.covers && nz.exposed === 0 && nz.checked > 0 && nz.playAbove && nz.x === 16 && Math.abs(nz.w - (nz.vw - 32)) <= 1 && Math.abs(nz.h - (nz.vw - 32) * 9 / 16) <= 1; // iPhone 15 mit 393 px Viewport: 361 x 203 bei x = 16, hier 390 px: 358 x 201
+  }
   c.pageErrors = errors.length === 0;
   r.errors = errors.slice(0, 3);
   await ctx.close();

@@ -1,6 +1,6 @@
 import { diagLog, netType } from '../lib/diag';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { createPortal, flushSync } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL, topicLabel } from '../lib/labels';
 import type { AppState } from '../lib/state';
@@ -267,6 +267,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const moving = () => mot.current.busy || dragging.current;
 
   const [idx, setIdx] = useState(0);
+  /** Issue 44: erzwingt ein Rendern, wenn die Oberfläche hinter dem Moment zurückliegt, auf dem Deck und Index stehen */
+  const [, setUiTick] = useState(0);
+  /** Moment, den die letzte Zeichnung gezeigt hat (Issue 44) */
+  const shownId = useRef('');
   // Stimmung folgt dem Bereich des aktuellen Moments, außerhalb des Feeds gilt die neutrale Palette (Brief 06)
   const moodArea = queue.current[idx]?.area;
   useEffect(() => {
@@ -1144,7 +1148,16 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       if (dampened || attentionStarted) replanRef.current(next + 3);
       const nSrc = mediaWithSrc();
       if (nSrc > POOL_AHEAD + 1) diag.current.push(`media: ${nSrc} elements with src (limit ${POOL_AHEAD + 1})`);
-      setIdx(next);
+      // Issue 44: verdeckt (Sperrbildschirm, Weiter, Ende des Ausschnitts) wartet die Oberfläche nicht auf das Rendern im Hintergrund, das iOS drosselt:
+      // Index, Artwork, Hook und Quelle werden sofort gezeichnet, damit nach dem Entsperren kein alter Moment steht. Geladen wird dabei nichts.
+      if (form === 'audio' && isBackground(document.visibilityState)) {
+        try {
+          flushSync(() => setIdx(next));
+        } catch {
+          setIdx(next);
+        }
+        diag.current.push(`ui: synced to ${queue.current[next]?.id ?? next} after swap`);
+      } else setIdx(next);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [ensureQueue, assign, single],
@@ -2540,6 +2553,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       return;
     }
     diag.current.push(`bg: back ${m.id}`);
+    // Issue 44: Zeigt die Oberfläche nicht den Moment, auf dem Deck und Index stehen (Rendern verdeckt nicht gelaufen), sofort nachziehen, noch vor dem ersten Bild nach dem Entsperren
+    if (shownId.current && shownId.current !== m.id) {
+      try {
+        flushSync(() => setUiTick((n) => n + 1));
+      } catch {
+        setUiTick((n) => n + 1);
+      }
+      diag.current.push(`ui: synced to ${m.id} after swap (on return)`);
+    }
     // Sichtbar: der Element-Vorrat füllt sich wieder (Brief 14, Schritt 2)
     fillPoolRef.current();
     // Der laufende Moment ist jetzt zu sehen: gesehen (einmal), dann Karte oder Ton wieder aufnehmen
@@ -2848,6 +2870,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   const statusKind = statusOf({ offline: !online, syncError, loading: loading || (deckWait && form === 'audio'), background: bgShown && form === 'audio', muted: hint && form !== 'text' });
   const m = queue.current[idx];
+  shownId.current = m?.id ?? '';
   const recallEl = recall ? <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} rng={rng.current!} onAnswer={answerRecall} onClose={closeRecall} keys={!!desk} ctl={recallCtl} /> : null;
   const saved = m && !!state.savedMoments[m.id];
   const liked = !!m && !!state.momentLiked?.[m.id];
@@ -2917,7 +2940,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         const offset = single ? 0 : j - idx;
         const isCur = offset === 0;
         return (
-          <div key={s} ref={(el) => (slot.el = el)} className="vslot" style={{ ['--off' as string]: offset }} aria-hidden={!isCur}>
+          <div
+            key={s}
+            ref={(el) => (slot.el = el)}
+            className="vslot"
+            style={{ ['--off' as string]: offset }}
+            aria-hidden={!isCur}
+            // Issue 46: Pausiert der YouTube-Player, zeigt iOS darüber Logo, Titel, Avatar und die nächste Folge. Das Standbild deckt die Karte dann ab, der Player pausiert darunter.
+            data-paused={isCur && paused && !forYou && !desk && mm && mm.form !== 'text' && !mm.audio && streamKind(mm) === 'youtube' ? '' : undefined}
+          >
             <div className="vframe">
               <div ref={(el) => (slot.host = el)} />
             </div>

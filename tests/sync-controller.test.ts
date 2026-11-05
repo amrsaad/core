@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createSync, retryDelay, WRITE_DELAY_MS, type Sync } from '../src/lib/sync/controller';
+import { createSync, PAUSE_MAX_MS, retryDelay, WRITE_DELAY_MS, type Sync } from '../src/lib/sync/controller';
 import { decryptDoc, encryptDoc } from '../src/lib/sync/crypto';
 import { emptyDoc } from '../src/lib/sync/merge';
 import { stampChanges } from '../src/lib/sync/merge';
@@ -311,5 +311,137 @@ describe('Netzabbruch (Issue 9)', () => {
     await advance(15_100);
     expect(s.status().error).toBeNull();
     expect(s.status().hasToken).toBe(true);
+  });
+});
+
+describe('Sync-Fehler sind lesbar, ein fehlendes online-Ereignis sperrt nie (Issue 45)', () => {
+  function plain(fetchImpl: typeof fetch) {
+    const lines: string[] = [];
+    const d = { state: emptyState() };
+    const s = createSync({ getState: () => d.state, adopt: (fn) => (d.state = fn(d.state)), getKey: () => rawKey(5), getToken: async () => TOKEN, fetchImpl, now: () => Date.now(), log: (l) => lines.push(l) });
+    running.push(s);
+    return { s, d, lines };
+  }
+  const status = (code: number, headers: Record<string, string> = {}) => (async () => new Response('{}', { status: code, headers })) as unknown as typeof fetch;
+
+  it('Kontingent aufgebraucht: die Zeile nennt Anfrage, Status und Rate-Limit', async () => {
+    const { s, lines } = plain(status(403, { 'x-ratelimit-remaining': '0' }));
+    await s.start();
+    await advance(10);
+    expect(lines).toContain('sync: GET contents 403 rate limit');
+    expect(s.status().error).toMatch(/rate limit/);
+  });
+
+  it('zweite Sperre (403 mit retry-after) zählt als Rate-Limit und wird wiederholt, nicht als fehlende Berechtigung', async () => {
+    const { s, lines } = plain(status(403, { 'retry-after': '60', 'x-ratelimit-remaining': '12' }));
+    await s.start();
+    await advance(10);
+    expect(lines[0]).toBe('sync: GET contents 403 rate limit');
+    const before = lines.length;
+    await advance(15_100);
+    expect(lines.length).toBeGreaterThan(before);
+  });
+
+  it('abgelehntes Token und fehlende Berechtigung bleiben getrennt benannt', async () => {
+    const a = plain(status(401));
+    await a.s.start();
+    await advance(10);
+    expect(a.lines).toContain('sync: GET contents 401 token rejected');
+    const b = plain(status(403));
+    await b.s.start();
+    await advance(10);
+    expect(b.lines).toContain('sync: GET contents 403 no write access');
+  });
+
+  it('Netzfehler: die Zeile sagt, dass es ein Netzfehler war, und nennt den Fehlertyp', async () => {
+    const api = fakeApi();
+    api.offline = true;
+    const { s, lines } = plain(api.fetch);
+    await s.start();
+    await advance(10);
+    expect(lines[0]).toMatch(/^sync: GET contents network TypeError/);
+    expect(s.status().error).toMatch(/No connection/);
+  });
+
+  it('keine Antwort nach 20 s: eigene Meldung und Zeile "timeout 20s", nicht "No connection"', async () => {
+    const hang = ((_u: string, init?: RequestInit) =>
+      new Promise((_res, rej) => init?.signal?.addEventListener('abort', () => rej(new DOMException('aborted', 'AbortError'))))) as unknown as typeof fetch;
+    const { s, lines } = plain(hang);
+    void s.start();
+    await advance(20_100);
+    expect(lines[0]).toBe('sync: GET contents timeout 20s');
+    expect(s.status().error).toMatch(/did not answer/);
+    expect(s.status().error).not.toMatch(/No connection/);
+  });
+
+  it('scheitert das Schreiben, steht PUT in der Zeile, und nach der Erholung steht "ok again"', async () => {
+    const api = fakeApi();
+    let failPut = true;
+    const f = ((u: string, i?: RequestInit) => (i?.method === 'PUT' && failPut ? Promise.resolve(new Response('{}', { status: 500 })) : api.fetch(u, i))) as unknown as typeof fetch;
+    const { s, lines } = plain(f);
+    await s.start();
+    await advance(10);
+    expect(lines).toContain('sync: PUT contents 500 server error');
+    failPut = false;
+    await advance(15_100);
+    expect(lines).toContain('sync: ok again after 1 failed run');
+    expect(s.status().error).toBeNull();
+  });
+
+  it('kein Token und keine Zeile im Protokoll', async () => {
+    const { s, lines } = plain(status(401));
+    await s.start();
+    await advance(10);
+    expect(lines.join('\n')).not.toContain(TOKEN);
+    void s;
+  });
+
+  it('online-Ereignis bleibt aus: Rückkehr in den Vordergrund beendet die Pause und holt nach', async () => {
+    const api = fakeApi();
+    const a = device(api);
+    await a.sync.start();
+    await advance(10);
+    expect(api.puts).toBe(1);
+    a.sync.offline();
+    a.change(saveMoment('v1'));
+    await advance(WRITE_DELAY_MS + 60_000);
+    expect(api.puts).toBe(1);
+    a.sync.visible(false);
+    await advance(10);
+    expect(api.puts).toBe(1); // verborgen bleibt die Pause
+    a.sync.visible(true);
+    await advance(10);
+    expect(api.puts).toBe(2);
+    expect(a.sync.status().error).toBeNull();
+  });
+
+  it('online-Ereignis bleibt aus und die App bleibt vorn: nach 5 Minuten läuft der Sync von selbst', async () => {
+    const api = fakeApi();
+    const a = device(api);
+    await a.sync.start();
+    await advance(10);
+    a.sync.offline();
+    a.change(saveMoment('v2'));
+    await advance(PAUSE_MAX_MS - 5_000);
+    expect(api.puts).toBe(1);
+    await advance(5_100);
+    expect(api.puts).toBe(2);
+    expect(a.sync.status().error).toBeNull();
+  });
+
+  it('Rückkehr in den Vordergrund ohne Netz: der Lauf scheitert lesbar und wird mit Wartezeit wiederholt', async () => {
+    const api = fakeApi();
+    const { s, lines } = plain(api.fetch);
+    await s.start();
+    await advance(10);
+    s.offline();
+    api.offline = true;
+    s.visible(true);
+    await advance(10);
+    expect(s.status().error).toMatch(/No connection/);
+    expect(lines.some((l) => l.startsWith('sync: GET contents network'))).toBe(true);
+    api.offline = false;
+    await advance(15_100);
+    expect(s.status().error).toBeNull();
   });
 });

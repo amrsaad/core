@@ -13,7 +13,8 @@
  * - Zähler je Tag (Tageszahl, Zeit im Feed): der größere Wert.
  * - Abgelehnte Momente (Entscheidung 36): vereinigt, frühester Zeitpunkt.
  * - Gelöschte Gesehen-Einträge (Entscheidung 45, momentUnseen): vereinigt, spätester Zeitpunkt. Ein Eintrag in momentSeen, der nicht jünger ist als der Zeitpunkt
- *   seiner Löschung, gilt nicht (sonst käme er vom anderen Gerät zurück). Ein späteres, echtes Ansehen (jünger als die Löschung) bleibt.
+ *   seiner Löschung, gilt nicht (sonst käme er vom anderen Gerät zurück). Ein späteres, echtes Ansehen (jünger als die Löschung) bleibt, auch wenn das andere
+ *   Gerät noch den alten Eintrag hat: gestrichen wird je Seite vor dem Vereinigen (mergeSeen).
  * - Signale (moments/signals.ts): Zähler je Feld und Tag der größere Wert, missed vereinigt je Moment-ID mit dem jüngsten Eintrag, höchstens 20.
  * - Diagnose (lib/diag.ts, Entscheidung 31): Zeilen vereinigt nach Zeit, die letzten 500 bleiben. Das Feld löst allein keinen Sync aus (nicht in syncedChanged).
  */
@@ -321,7 +322,7 @@ export function mergeDocs(a: SyncDoc, b: SyncDoc): SyncDoc {
   const out: SyncDoc = {
     v: SYNC_VERSION,
     state: {
-      momentSeen: Object.fromEntries(Object.entries(maxMapMin(x.momentSeen, y.momentSeen)).filter(([id, at]) => !(id in unseen) || at > unseen[id])),
+      momentSeen: mergeSeen(x.momentSeen, y.momentSeen, unseen),
       momentLog: mergeLog(x.momentLog, y.momentLog),
       dayCount: mergeDayCount(x.dayCount, y.dayCount),
       savedMoments: lww(x.savedMoments, y.savedMoments, a.ts, b.ts, tsKey.saved, combineSaved),
@@ -376,6 +377,16 @@ function mergeQueue(p: QueueEntry[] | undefined, q: QueueEntry[] | undefined, tp
 }
 
 /** gesehen: der frühere Zeitpunkt */
+/**
+ * Gesehen: erst je Seite die Einträge streichen, die nicht jünger sind als ihre Löschung (momentUnseen), dann der früheste Zeitpunkt.
+ * Umgekehrt (erst früheste, dann streichen) ging ein echtes Ansehen nach der Reparatur verloren, sobald das andere Gerät
+ * noch den alten Eintrag von vor der Löschung hatte: der alte war der früheste und wurde gestrichen, der neue mit ihm (Issue 45, "Gesehen bleibt gesehen").
+ */
+function mergeSeen(a: Record<string, number>, b: Record<string, number>, unseen: Record<string, number>): Record<string, number> {
+  const live = (m: Record<string, number>) => Object.fromEntries(Object.entries(m).filter(([id, at]) => !(id in unseen) || at > unseen[id]));
+  return maxMapMin(live(a), live(b));
+}
+
 function maxMapMin(a: Record<string, number>, b: Record<string, number>): Record<string, number> {
   const out: Record<string, number> = { ...a };
   for (const [k, v] of Object.entries(b)) out[k] = k in out ? Math.min(out[k], v) : v;

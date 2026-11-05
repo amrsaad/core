@@ -191,6 +191,9 @@ const HUNG_LINE = /^(?:watchdog|skipped \(not seen\)) (\S+)/;
  */
 export function repair45(s: AppState, now: number): { state: AppState; removed: string[] } {
   if (!s.momentLog.length) return { state: s, removed: [] };
+  // Stehen schon Löschmarken im Stand, lief die Reparatur auf diesem oder einem anderen Gerät. Fehlt nur der Marker (localStorage geleert, Gerät neu verbunden),
+  // darf sie nicht noch einmal laufen: sonst kommen Momente ein zweites Mal zurück (Issue 45).
+  if (s.momentUnseen && Object.keys(s.momentUnseen).length) return { state: s, removed: [] };
   const played = new Set<string>();
   const ended = new Set<string>();
   let first = '';

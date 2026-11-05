@@ -401,7 +401,20 @@ window.onYouTubeIframeAPIReady&&window.onYouTubeIframeAPIReady();`;
     const len1 = await s2.pg.evaluate(() => window.__core.diag().length);
     await s2.pg.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }); document.dispatchEvent(new Event('visibilitychange')); });
     const tNext = Date.now();
-    await s2.pg.evaluate(() => window.__ms.nexttrack());
+    // Issue 44: gleich nach dem Handler, im selben Tick und verdeckt, zeigt die Oberfläche schon den neuen Moment (Hook, Artwork, Quelle), nicht erst nach dem Entsperren
+    const ui = await s2.pg.evaluate(() => {
+      const before = window.__core.moment();
+      window.__ms.nexttrack();
+      const m = window.__core.moment();
+      const hook = document.querySelector('[data-testid=hook]')?.textContent ?? null;
+      const art = document.querySelector('.vslot[aria-hidden=false] .vaudio-art')?.getAttribute('src') ?? null;
+      const want = m.thumb ?? `https://i.ytimg.com/vi/${m.videoId}/hqdefault.jpg`;
+      return { moved: m.id !== before.id, hookOk: hook === m.hook, artOk: art === want, hook, art, want, id: m.id };
+    });
+    r.notes.lockHiddenUi = ui;
+    c.lockHiddenUiSyncHook = ui.moved && ui.hookOk;
+    c.lockHiddenUiSyncArt = ui.moved && ui.artOk;
+    c.lockHiddenUiSyncLine = (await s2.pg.evaluate(() => window.__core.diag())).some((x) => x === `ui: synced to ${ui.id} after swap`);
     c.lockHiddenAdvances = await waitFor(s2.pg, (i) => window.__core.idx() === i + 1 && window.__core.state() === 1, i1, 3000);
     r.notes.lockNextMs = Date.now() - tNext;
     const dn = await s2.pg.evaluate(() => window.__core.diag());

@@ -8,13 +8,32 @@ export const DIGEST_PATH = 'state/digest-latest.enc';
 
 export type SyncErrorKind = 'auth' | 'forbidden' | 'notfound' | 'conflict' | 'rate' | 'offline' | 'server' | 'format' | 'key' | 'setup';
 
+/** Kurzer Zusatz hinter dem Status in der Diagnose-Zeile (Issue 45) */
+const STATUS_TEXT: Partial<Record<SyncErrorKind, string>> = {
+  rate: 'rate limit',
+  auth: 'token rejected',
+  forbidden: 'no write access',
+  notfound: 'repo not found',
+  conflict: 'file changed',
+  server: 'server error',
+};
+
 export class SyncError extends Error {
+  /** Anfrage, die gescheitert ist: 'GET contents', 'GET blob', 'GET digest' oder 'PUT contents' (nur für die Diagnose) */
+  where?: string;
+  /** Bei Abbruch ohne Antwort: 'timeout 20s' oder 'network TypeError online=true' (nur für die Diagnose) */
+  detail?: string;
   constructor(public kind: SyncErrorKind, message: string, public status?: number) {
     super(message);
   }
   /** Lohnt sich ein späterer Versuch ohne Zutun des Nutzers? */
   get retry() {
     return this.kind === 'offline' || this.kind === 'server' || this.kind === 'rate';
+  }
+  /** Eine Zeile für das Diagnose-Protokoll, z. B. "sync: GET contents 403 rate limit". Nie Token, nie Antwortinhalt. */
+  get diagLine(): string {
+    const what = this.status ? `${this.status} ${STATUS_TEXT[this.kind] ?? ''}`.trim() : (this.detail ?? this.kind);
+    return `sync: ${this.where ?? 'run'} ${what}`;
   }
 }
 
@@ -33,8 +52,14 @@ const toB64 = (text: string): string => {
   return btoa(s);
 };
 
-/** Fehlertext in einer Zeile, ohne Token oder Antwortinhalt */
-export function failure(status: number, rateLimited = false): SyncError {
+/** Fehlertext in einer Zeile, ohne Token oder Antwortinhalt. where nennt die Anfrage für die Diagnose. */
+export function failure(status: number, rateLimited = false, where?: string): SyncError {
+  const e = failureOf(status, rateLimited);
+  e.where = where;
+  return e;
+}
+
+function failureOf(status: number, rateLimited: boolean): SyncError {
   if (status === 401) return new SyncError('auth', 'GitHub rejected the token (401). Paste a new one.', status);
   if (status === 403 && rateLimited) return new SyncError('rate', 'GitHub rate limit reached (403). Will retry.', status);
   if (status === 429) return new SyncError('rate', 'GitHub rate limit reached (429). Will retry.', status);
@@ -44,48 +69,68 @@ export function failure(status: number, rateLimited = false): SyncError {
   return new SyncError('server', `GitHub is not available (${status}). Will retry.`, status);
 }
 
-const net = (): SyncError => new SyncError('offline', 'No connection to GitHub. Will retry.');
-
 /** Eine Anfrage, die nach einem Netzabbruch hängt, blockiert sonst jeden weiteren Lauf. Nach 20 s zählt sie als kein Netz. */
 export const REQUEST_TIMEOUT_MS = 20_000;
-async function req(f: Fetch, url: string, init: RequestInit): Promise<Response> {
+
+/** Kein Ergebnis von GitHub: Zeitlimit oder Netzfehler. Beides heißt "offline" (Wiederholung), aber die Diagnose sagt, was es war (Issue 45). */
+function noAnswer(where: string, timedOut: boolean, e: unknown): SyncError {
+  const err = new SyncError('offline', timedOut ? 'GitHub did not answer in 20 s. Will retry.' : 'No connection to GitHub. Will retry.');
+  err.where = where;
+  const online = typeof navigator !== 'undefined' ? ` online=${navigator.onLine}` : '';
+  const name = e instanceof Error ? e.name : typeof e;
+  err.detail = timedOut ? `timeout ${REQUEST_TIMEOUT_MS / 1000}s` : `network ${name}${online}`;
+  return err;
+}
+
+async function req(f: Fetch, url: string, init: RequestInit, where: string): Promise<Response> {
   const c = new AbortController();
-  const t = setTimeout(() => c.abort(), REQUEST_TIMEOUT_MS);
+  let timedOut = false;
+  const t = setTimeout(() => {
+    timedOut = true;
+    c.abort();
+  }, REQUEST_TIMEOUT_MS);
   try {
     return await f(url, { ...init, signal: c.signal });
-  } catch {
-    throw net();
+  } catch (e) {
+    throw noAnswer(where, timedOut, e);
   } finally {
     clearTimeout(t);
   }
 }
 
-const rateLimited = (r: Response) => r.headers.get('x-ratelimit-remaining') === '0';
+/** Ausgeschöpftes Kontingent (remaining 0) oder zweite Sperre mit retry-after (GitHub antwortet dann ebenfalls mit 403): beides später noch einmal versuchen */
+const rateLimited = (r: Response) => r.headers.get('x-ratelimit-remaining') === '0' || r.headers.has('retry-after');
 
 /** null, wenn die Datei noch nicht existiert */
 export async function readRemote(token: string, f: Fetch = fetch, path: string = STATE_PATH): Promise<{ text: string; sha: string } | null> {
-  const r = await req(f, `${API_HOST}/repos/${REPO}/contents/${path}`, { headers: headers(token), cache: 'no-store' });
+  const where = path === DIGEST_PATH ? 'GET digest' : 'GET contents';
+  const r = await req(f, `${API_HOST}/repos/${REPO}/contents/${path}`, { headers: headers(token), cache: 'no-store' }, where);
   if (r.status === 404) return null;
-  if (!r.ok) throw failure(r.status, rateLimited(r));
+  if (!r.ok) throw failure(r.status, rateLimited(r), where);
   const j = (await r.json()) as { sha?: string; size?: number; content?: string; encoding?: string };
   if (!j.sha) throw new SyncError('format', 'GitHub sent an unexpected answer.');
   if (j.encoding === 'base64' && typeof j.content === 'string' && (j.content.length > 0 || j.size === 0)) return { text: utf8(j.content), sha: j.sha };
   // Dateien über 1 MB liefert die Contents API ohne Inhalt, dann über den Blob
-  const b = await req(f, `${API_HOST}/repos/${REPO}/git/blobs/${j.sha}`, { headers: headers(token), cache: 'no-store' });
-  if (!b.ok) throw failure(b.status, rateLimited(b));
+  const b = await req(f, `${API_HOST}/repos/${REPO}/git/blobs/${j.sha}`, { headers: headers(token), cache: 'no-store' }, 'GET blob');
+  if (!b.ok) throw failure(b.status, rateLimited(b), 'GET blob');
   const blob = (await b.json()) as { content?: string; encoding?: string };
   if (blob.encoding !== 'base64' || typeof blob.content !== 'string') throw new SyncError('format', 'GitHub sent an unexpected answer.');
   return { text: utf8(blob.content), sha: j.sha };
 }
 
 export async function writeRemote(token: string, text: string, sha: string | null, message: string, f: Fetch = fetch): Promise<string> {
-  const r = await req(f, `${API_HOST}/repos/${REPO}/contents/${STATE_PATH}`, {
-    method: 'PUT',
-    headers: { ...headers(token), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message, content: toB64(text), ...(sha ? { sha } : {}) }),
-    cache: 'no-store',
-  });
-  if (!r.ok) throw failure(r.status, rateLimited(r));
+  const r = await req(
+    f,
+    `${API_HOST}/repos/${REPO}/contents/${STATE_PATH}`,
+    {
+      method: 'PUT',
+      headers: { ...headers(token), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, content: toB64(text), ...(sha ? { sha } : {}) }),
+      cache: 'no-store',
+    },
+    'PUT contents',
+  );
+  if (!r.ok) throw failure(r.status, rateLimited(r), 'PUT contents');
   const j = (await r.json()) as { content?: { sha?: string } };
   return j.content?.sha ?? '';
 }

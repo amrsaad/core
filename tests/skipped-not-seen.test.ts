@@ -136,6 +136,72 @@ describe('Schritt 2: der Sync holt gelöschte Einträge nicht zurück', () => {
   });
 });
 
+describe('Issue 45: Gesehen bleibt gesehen, auch gegen alte Einträge des anderen Geräts', () => {
+  it('Ansehen nach der Reparatur geht am alten Eintrag von vor der Löschung nicht verloren, in beide Richtungen', () => {
+    const repaired = doc({ momentSeen: { x: 300 }, momentUnseen: { x: 200 } });
+    const stale = doc({ momentSeen: { x: 100 } });
+    expect(mergeDocs(repaired, stale).state.momentSeen).toEqual({ x: 300 });
+    expect(mergeDocs(stale, repaired).state.momentSeen).toEqual({ x: 300 });
+  });
+  it('das zusammengeführte Dokument überschreibt das Gerät nicht mit einem Stand ohne den Moment', () => {
+    const s = { ...emptyState(), momentSeen: { x: 300 }, momentUnseen: { x: 200 } };
+    const next = applyDoc(s, mergeDocs(toDoc(s), doc({ momentSeen: { x: 100 } })));
+    expect(next.momentSeen).toEqual({ x: 300 });
+  });
+  it('zwei Geräte, mehrere Runden über ein gemeinsames Dokument: der Moment bleibt gesehen und die Runde endet', () => {
+    let a: AppState = { ...emptyState(), momentSeen: { x: 300 }, momentUnseen: { x: 200 } }; // Reparatur bei 200, danach echt gesehen
+    let b: AppState = { ...emptyState(), momentSeen: { x: 100, other: 50 } }; // alter Stand
+    let remote = emptyDoc();
+    for (let round = 0; round < 3; round++) {
+      remote = mergeDocs(toDoc(a), remote);
+      a = applyDoc(a, remote);
+      remote = mergeDocs(toDoc(b), remote);
+      b = applyDoc(b, remote);
+    }
+    remote = mergeDocs(toDoc(a), remote);
+    expect(a.momentSeen).toEqual({ x: 300, other: 50 });
+    expect(b.momentSeen).toEqual({ x: 300, other: 50 });
+    expect(canon(mergeDocs(toDoc(a), toDoc(b)))).toBe(canon(mergeDocs(toDoc(b), toDoc(a))));
+  });
+  it('Zufallsprüfung mit Löschmarken: vertauschbar, wiederholbar, nie ein gelöschter Eintrag zurück, nie ein jüngeres Ansehen verloren', () => {
+    let seed = 45;
+    const r = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+    const ids = ['a', 'b', 'c', 'd'];
+    const rnd = () => {
+      const seen: Record<string, number> = {};
+      const unseen: Record<string, number> = {};
+      for (const id of ids) {
+        if (r() < 0.6) seen[id] = 1 + Math.floor(r() * 10);
+        if (r() < 0.4) unseen[id] = 1 + Math.floor(r() * 10);
+      }
+      return doc({ momentSeen: seen, ...(Object.keys(unseen).length ? { momentUnseen: unseen } : {}) });
+    };
+    for (let i = 0; i < 400; i++) {
+      const x = rnd();
+      const y = rnd();
+      const m = mergeDocs(x, y);
+      expect(canon(m)).toBe(canon(mergeDocs(y, x)));
+      expect(canon(mergeDocs(m, y))).toBe(canon(m));
+      expect(canon(mergeDocs(m, m))).toBe(canon(m));
+      const u = m.state.momentUnseen ?? {};
+      for (const [id, at] of Object.entries(m.state.momentSeen)) expect(!(id in u) || at > u[id]).toBe(true);
+      for (const side of [x, y]) {
+        for (const [id, at] of Object.entries(side.state.momentSeen)) {
+          if (!(id in u) || at > u[id]) expect(m.state.momentSeen[id]).toBeDefined();
+        }
+      }
+    }
+  });
+  it('fehlt nur der Marker der Reparatur (Stand hat schon Löschmarken), löscht sie nichts noch einmal', () => {
+    const s = withLog();
+    const done = { ...s, momentUnseen: { earlier: 4000 } };
+    const r = repair45(done, 9000);
+    expect(r.removed).toEqual([]);
+    expect(r.state).toBe(done);
+    expect(Object.keys(r.state.momentSeen)).toEqual(Object.keys(s.momentSeen));
+  });
+});
+
 describe('Schritt 3: Leer-Seite wartet aufs Netz', () => {
   const pool = [mom('1'), mom('2'), mom('3', { form: 'audio', audio: true }), mom('4')];
   it('gesperrte Momente zählen als ungesehen und werden als gesperrt gezählt', () => {

@@ -34,6 +34,10 @@
 .vcover { border-radius: var(--r-card); }
 /* Sichtbar, solange der Slot nicht der aktuelle ist oder sein Player nicht abspielt (data-live setzt der Player-Callback) */
 .vslot[data-live][aria-hidden='false'] .vposter { visibility: hidden; }
+/* Issue 46: Bei Pause deckt das Standbild die Karte ab (gleiche Fläche wie der Player, 361 x 203 bei x = 16 auf dem iPhone), egal ob data-live noch steht. Das Pause-Symbol (.vplay) liegt darüber. */
+.vslot[data-paused][aria-hidden='false'] .vposter,
+.vslot[data-paused][data-live][aria-hidden='false'] .vposter { visibility: visible; z-index: 2; }
+.vslot[data-paused] .vplay { z-index: 3; }
 
 /* Ambient: das Vorschaubild weich und dunkel hinter der Karte, nur Video.
    Kein filter: blur(48px). WebKit ohne GPU rechnet ihn bei jedem Frame neu (CI-Runner: 12 Hz im Leerlauf, 94 % verlorene Frames beim Wischen).

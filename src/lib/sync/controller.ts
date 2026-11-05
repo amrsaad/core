@@ -12,9 +12,11 @@ import { applyDoc, canon, canonNoDiag, mergeDocs, SYNC_VERSION, toDoc, withDiag,
 import { CryptoFail, decryptDoc, decryptLatest, encryptDoc } from './crypto';
 import { DIGEST_PATH, readRemote, SyncError, writeRemote } from './github';
 import type { DigestLatest } from '../../moments/digest';
-import type { DiagEntry } from '../diag';
+import { diagLog, type DiagEntry } from '../diag';
 
 export const WRITE_DELAY_MS = 10_000;
+/** Offline-Pause: Meldet der Browser das Netz nicht zurück (iOS lässt das online-Ereignis manchmal aus), endet sie nach 5 Minuten von selbst (Issue 45) */
+export const PAUSE_MAX_MS = 5 * 60_000;
 export const MAX_ATTEMPTS = 4;
 /** Unterscheidet sich nur das Diagnose-Protokoll, schreibt der Sync höchstens alle 5 Minuten, sofort beim Verlassen der App und bei Sync now (Entscheidung 31) */
 export const DIAG_FLUSH_MS = 5 * 60_000;
@@ -43,6 +45,8 @@ export interface SyncDeps {
   adoptDigest?(latest: DigestLatest): void;
   /** Entscheidung 31: Diagnose-Zeilen dieser Sitzung (lib/diag.ts). Sie gehen in jedes Schreiben mit, auch wenn der Zustand sie noch nicht enthält. */
   diag?(): readonly DiagEntry[];
+  /** Eine Zeile ins Diagnose-Protokoll (Issue 45). Ohne Angabe geht sie in lib/diag.ts. */
+  log?(line: string): void;
   fetchImpl?: typeof fetch;
   now?: () => number;
   loadMeta?: () => Promise<{ lastSync?: number } | undefined>;
@@ -70,6 +74,7 @@ export interface Sync {
 
 export function createSync(deps: SyncDeps): Sync {
   const now = deps.now ?? Date.now;
+  const log = deps.log ?? ((line: string) => diagLog.push(line));
   let st: SyncStatus = { hasToken: false, lastSync: null, error: null, running: false };
   let timer: ReturnType<typeof setTimeout> | undefined;
   let retryTimer: ReturnType<typeof setTimeout> | undefined;
@@ -79,8 +84,9 @@ export function createSync(deps: SyncDeps): Sync {
   let active: Promise<void> | null = null;
   let again = false;
   let stopped = false;
-  /** Offline-Ereignis: keine automatischen Läufe, bis das Netz zurück ist */
+  /** Offline-Ereignis: keine automatischen Läufe, bis das Netz zurück ist (höchstens PAUSE_MAX_MS, oder bis die App wieder im Vordergrund ist) */
   let paused = false;
+  let pausedAt = 0;
   /** Version der zuletzt gelesenen Wochenkarte, damit dieselbe Datei nicht noch einmal entschlüsselt wird */
   let digestSha: string | null = null;
   /** Diagnose: Zeitpunkt des letzten Schreibens mit Protokoll, jüngste Zeile, die schon auf GitHub liegt, und ob beim nächsten Lauf gespült werden soll */
@@ -184,7 +190,12 @@ export function createSync(deps: SyncDeps): Sync {
   }
 
   async function run(force = false): Promise<void> {
-    if (stopped || (paused && !force)) return;
+    if (stopped) return;
+    if (paused && !force) {
+      if (now() - pausedAt < PAUSE_MAX_MS) return;
+      paused = false;
+      log('sync: pause ended after 5 min, no online event came');
+    }
     if (active) {
       again = true;
       return active;
@@ -196,6 +207,7 @@ export function createSync(deps: SyncDeps): Sync {
       try {
         await attempt();
         await loadDigest();
+        if (fails > 0) log(`sync: ok again after ${fails} failed ${fails === 1 ? 'run' : 'runs'}`);
         fails = 0;
         clearTimeout(retryTimer);
         if (rev === startRev) pending = false;
@@ -207,6 +219,8 @@ export function createSync(deps: SyncDeps): Sync {
       } catch (e) {
         const err = e instanceof SyncError ? e : new SyncError('server', 'Sync failed. Will retry.');
         set({ error: err.message });
+        // Welche Anfrage scheitert und womit, statt nur "No connection" (Issue 45)
+        log(err.diagLine);
         if (err.retry) {
           fails++;
           clearTimeout(retryTimer);
@@ -241,6 +255,14 @@ export function createSync(deps: SyncDeps): Sync {
     },
     visible(v) {
       if (stopped) return;
+      // Zurück im Vordergrund gilt eine Offline-Pause nicht mehr: iOS meldet das online-Ereignis nicht immer, die Pause blieb dann für immer (Issue 45).
+      // Ist das Netz wirklich weg, scheitert der Lauf und die Wiederholung (15 s, 1 min, 5 min) übernimmt.
+      if (v && paused) {
+        paused = false;
+        fails = 0;
+        clearTimers();
+        log('sync: pause ended on foreground, no online event came');
+      }
       // Beim Verlassen sofort schreiben, was noch wartet. Beim Zurückkommen laden, was das andere Gerät geschrieben hat.
       if (!v && !pending && !timer && !diagUnsynced()) return;
       if (!v) flushDiag = true;
@@ -249,8 +271,12 @@ export function createSync(deps: SyncDeps): Sync {
     offline() {
       if (stopped) return;
       paused = true;
+      pausedAt = now();
       // Wartende Schreib- und Wiederholungstimer ruhen. pending bleibt stehen, der Lauf nach der Rückkehr holt alles nach.
       clearTimers();
+      log('sync: paused, offline event');
+      // Bleibt das online-Ereignis aus, versucht es der Sync nach PAUSE_MAX_MS von selbst (höchstens ein Lauf alle 5 Minuten)
+      retryTimer = setTimeout(() => void run(), PAUSE_MAX_MS);
     },
     online() {
       if (stopped) return;
