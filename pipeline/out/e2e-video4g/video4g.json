@@ -1,5 +1,5 @@
 {
- "at": "2026-11-05T20:13:08.459Z",
+ "at": "2026-11-06T04:21:37.637Z",
  "url": "http://127.0.0.1:4188/core/",
  "model": "Nachbau der IFrame-API mit Latenzmodell, kein echtes YouTube",
  "swipes": 20,
@@ -34,48 +34,48 @@
     "pageErrors": true
    },
    "ms": [
-    90,
-    53,
-    100,
-    85,
-    93,
-    55,
-    46,
-    48,
-    50,
-    45,
-    47,
-    60,
-    71,
-    80,
+    86,
+    44,
+    95,
     82,
+    100,
+    56,
+    39,
+    43,
+    51,
+    47,
     46,
-    77,
-    98,
+    66,
+    70,
+    81,
+    82,
+    52,
+    68,
+    96,
     46,
-    96
+    99
    ],
    "appMs": [
-    102,
-    56,
-    95,
-    89,
-    99,
-    60,
-    48,
+    93,
     53,
-    56,
-    53,
-    53,
-    70,
-    77,
-    81,
-    86,
-    53,
-    76,
+    98,
+    87,
     103,
+    62,
+    43,
+    54,
+    56,
+    53,
     46,
-    98
+    73,
+    72,
+    80,
+    86,
+    55,
+    74,
+    98,
+    49,
+    103
    ],
    "exposed": [
     {
@@ -91,9 +91,9 @@
       0,
       0
      ],
-     "checked": 2,
+     "checked": 0,
      "reloaded": false,
-     "ms": 90
+     "ms": 86
     },
     {
      "n": 1,
@@ -108,9 +108,9 @@
       0,
       0
      ],
-     "checked": 0,
+     "checked": 2,
      "reloaded": false,
-     "ms": 53
+     "ms": 44
     },
     {
      "n": 2,
@@ -127,7 +127,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 100
+     "ms": 95
     },
     {
      "n": 3,
@@ -144,7 +144,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 85
+     "ms": 82
     },
     {
      "n": 4,
@@ -159,9 +159,9 @@
       0,
       0
      ],
-     "checked": 2,
+     "checked": 0,
      "reloaded": false,
-     "ms": 93
+     "ms": 100
     },
     {
      "n": 5,
@@ -178,7 +178,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 55
+     "ms": 56
     },
     {
      "n": 6,
@@ -195,7 +195,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 46
+     "ms": 39
     },
     {
      "n": 7,
@@ -212,7 +212,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 48
+     "ms": 43
     },
     {
      "n": 8,
@@ -229,7 +229,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 50
+     "ms": 51
     },
     {
      "n": 9,
@@ -246,7 +246,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 45
+     "ms": 47
     },
     {
      "n": 10,
@@ -263,7 +263,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 47
+     "ms": 46
     },
     {
      "n": 11,
@@ -278,9 +278,9 @@
       0,
       0
      ],
-     "checked": 2,
+     "checked": 0,
      "reloaded": false,
-     "ms": 60
+     "ms": 66
     },
     {
      "n": 12,
@@ -297,7 +297,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 71
+     "ms": 70
     },
     {
      "n": 13,
@@ -314,7 +314,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 80
+     "ms": 81
     },
     {
      "n": 14,
@@ -348,7 +348,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 46
+     "ms": 52
     },
     {
      "n": 16,
@@ -363,9 +363,9 @@
       0,
       0
      ],
-     "checked": 0,
+     "checked": 2,
      "reloaded": false,
-     "ms": 77
+     "ms": 68
     },
     {
      "n": 17,
@@ -382,7 +382,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 98
+     "ms": 96
     },
     {
      "n": 18,
@@ -416,26 +416,26 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 96
+     "ms": 99
     }
    ],
    "reloads": 0,
    "log": {
     "videoLines": [
-     "video: swipe→ready 0ms, →playing 76ms, net 4g, warm",
+     "video: swipe→ready 0ms, →playing 74ms, net 4g, warm",
      "video: warm done slot0 test0000040:100 played 3.8s net 4g",
      "video: warm start slot1 test0000053:100 st=2",
-     "first-frame 103ms buffered",
-     "video: swipe→ready 0ms, →playing 103ms, net 4g, warm",
-     "video: warm done slot1 test0000053:100 played 4.1s net 4g",
-     "video: warm start slot2 test0000039:100 st=2",
-     "first-frame 46ms buffered",
-     "video: swipe→ready 0ms, →playing 46ms, net 4g, warm",
-     "video: warm done slot2 test0000039:100 played 3.7s net 4g",
-     "video: warm start slot0 test0000022:100 st=2",
      "first-frame 98ms buffered",
      "video: swipe→ready 0ms, →playing 98ms, net 4g, warm",
-     "video: median 70ms, p90 99ms over last 20 swipes"
+     "video: warm done slot1 test0000053:100 played 4.1s net 4g",
+     "video: warm start slot2 test0000039:100 st=2",
+     "first-frame 49ms buffered",
+     "video: swipe→ready 0ms, →playing 49ms, net 4g, warm",
+     "video: warm done slot2 test0000039:100 played 3.7s net 4g",
+     "video: warm start slot0 test0000022:100 st=2",
+     "first-frame 103ms buffered",
+     "video: swipe→ready 0ms, →playing 103ms, net 4g, warm",
+     "video: median 72ms, p90 98ms over last 20 swipes"
     ]
    },
    "firstLoads": [
@@ -471,26 +471,26 @@
    ],
    "video": {
     "frames": [
-     102,
-     56,
-     95,
-     89,
-     99,
-     60,
-     48,
+     93,
      53,
-     56,
-     53,
-     53,
-     70,
-     77,
-     81,
-     86,
-     53,
-     76,
+     98,
+     87,
      103,
+     62,
+     43,
+     54,
+     56,
+     53,
      46,
-     98
+     73,
+     72,
+     80,
+     86,
+     55,
+     74,
+     98,
+     49,
+     103
     ],
     "gate": true,
     "slots": [
@@ -517,13 +517,13 @@
      }
     ]
    },
-   "median": 60,
+   "median": 66,
    "p90": 96,
    "n": 20,
-   "appMedian": 70,
-   "appP90": 99,
+   "appMedian": 72,
+   "appP90": 98,
    "exposedSwipes": 0,
-   "probesChecked": 6,
+   "probesChecked": 4,
    "iframePaused": {
     "vis": "hidden",
     "tapTarget": "vgesture no-callout",
@@ -592,48 +592,48 @@
     "pageErrors": true
    },
    "ms": [
-    36,
-    28,
-    56,
-    83,
-    87,
-    84,
-    55,
-    58,
-    86,
-    77,
-    44,
-    62,
-    87,
-    79,
-    45,
-    67,
-    70,
-    81,
+    32,
+    50,
     61,
-    65
+    75,
+    91,
+    89,
+    67,
+    43,
+    86,
+    71,
+    50,
+    70,
+    91,
+    89,
+    60,
+    65,
+    68,
+    87,
+    61,
+    79
    ],
    "appMs": [
     47,
-    47,
-    75,
-    87,
-    99,
-    99,
-    76,
-    63,
-    91,
-    90,
-    63,
+    50,
     67,
-    98,
-    91,
-    65,
-    75,
-    72,
-    91,
+    87,
+    95,
+    96,
     79,
-    97
+    63,
+    91,
+    84,
+    67,
+    78,
+    105,
+    96,
+    64,
+    76,
+    74,
+    98,
+    83,
+    83
    ],
    "exposed": [
     {
@@ -651,7 +651,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 36
+     "ms": 32
     },
     {
      "n": 1,
@@ -668,7 +668,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 28
+     "ms": 50
     },
     {
      "n": 2,
@@ -683,9 +683,9 @@
       0,
       0
      ],
-     "checked": 2,
+     "checked": 0,
      "reloaded": false,
-     "ms": 56
+     "ms": 61
     },
     {
      "n": 3,
@@ -702,7 +702,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 83
+     "ms": 75
     },
     {
      "n": 4,
@@ -719,7 +719,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 87
+     "ms": 91
     },
     {
      "n": 5,
@@ -736,7 +736,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 84
+     "ms": 89
     },
     {
      "n": 6,
@@ -753,7 +753,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 55
+     "ms": 67
     },
     {
      "n": 7,
@@ -770,7 +770,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 58
+     "ms": 43
     },
     {
      "n": 8,
@@ -804,7 +804,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 77
+     "ms": 71
     },
     {
      "n": 10,
@@ -821,7 +821,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 44
+     "ms": 50
     },
     {
      "n": 11,
@@ -836,9 +836,9 @@
       0,
       0
      ],
-     "checked": 0,
+     "checked": 2,
      "reloaded": false,
-     "ms": 62
+     "ms": 70
     },
     {
      "n": 12,
@@ -855,7 +855,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 87
+     "ms": 91
     },
     {
      "n": 13,
@@ -872,7 +872,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 79
+     "ms": 89
     },
     {
      "n": 14,
@@ -889,7 +889,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 45
+     "ms": 60
     },
     {
      "n": 15,
@@ -906,7 +906,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 67
+     "ms": 65
     },
     {
      "n": 16,
@@ -923,7 +923,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 70
+     "ms": 68
     },
     {
      "n": 17,
@@ -940,7 +940,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 81
+     "ms": 87
     },
     {
      "n": 18,
@@ -974,26 +974,26 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 65
+     "ms": 79
     }
    ],
    "reloads": 0,
    "log": {
     "videoLines": [
-     "video: swipe→ready 0ms, →playing 72ms, net 4g, warm",
+     "video: swipe→ready 0ms, →playing 74ms, net 4g, warm",
      "video: warm done slot0 test0000040:100 played 3.6s net 4g",
      "video: warm start slot1 test0000053:100 st=2",
-     "first-frame 91ms buffered",
-     "video: swipe→ready 0ms, →playing 91ms, net 4g, warm",
+     "first-frame 98ms buffered",
+     "video: swipe→ready 0ms, →playing 98ms, net 4g, warm",
      "video: warm done slot1 test0000053:100 played 3.8s net 4g",
      "video: warm start slot2 test0000039:100 st=2",
-     "first-frame 79ms buffered",
-     "video: swipe→ready 0ms, →playing 79ms, net 4g, warm",
+     "first-frame 83ms buffered",
+     "video: swipe→ready 0ms, →playing 83ms, net 4g, warm",
      "video: warm done slot2 test0000039:100 played 4.1s net 4g",
      "video: warm start slot0 test0000022:100 st=2",
-     "first-frame 97ms buffered",
-     "video: swipe→ready 0ms, →playing 97ms, net 4g, warm",
-     "video: median 76ms, p90 98ms over last 20 swipes"
+     "first-frame 83ms buffered",
+     "video: swipe→ready 0ms, →playing 83ms, net 4g, warm",
+     "video: median 79ms, p90 96ms over last 20 swipes"
     ]
    },
    "firstLoads": [
@@ -1030,25 +1030,25 @@
    "video": {
     "frames": [
      47,
-     47,
-     75,
-     87,
-     99,
-     99,
-     76,
-     63,
-     91,
-     90,
-     63,
+     50,
      67,
-     98,
-     91,
-     65,
-     75,
-     72,
-     91,
+     87,
+     95,
+     96,
      79,
-     97
+     63,
+     91,
+     84,
+     67,
+     78,
+     105,
+     96,
+     64,
+     76,
+     74,
+     98,
+     83,
+     83
     ],
     "gate": true,
     "slots": [
@@ -1075,11 +1075,11 @@
      }
     ]
    },
-   "median": 65,
-   "p90": 86,
+   "median": 68,
+   "p90": 89,
    "n": 20,
-   "appMedian": 76,
-   "appP90": 98,
+   "appMedian": 79,
+   "appP90": 96,
    "exposedSwipes": 0,
    "probesChecked": 28,
    "iframePaused": {
@@ -1140,47 +1140,47 @@
    },
    "ms": [
     98,
-    49,
-    86,
-    96,
-    46,
-    60,
+    57,
+    85,
+    90,
     43,
-    70,
-    70,
-    63,
-    79,
-    69,
-    73,
+    59,
     47,
-    77,
+    68,
+    64,
+    64,
+    70,
+    69,
     62,
-    83,
-    71,
-    80,
-    72
+    48,
+    82,
+    56,
+    89,
+    72,
+    77,
+    67
    ],
    "appMs": [
-    94,
-    55,
-    91,
+    100,
+    61,
+    90,
     103,
-    53,
-    66,
-    53,
-    75,
-    75,
+    46,
+    63,
+    56,
+    74,
     70,
-    87,
-    75,
+    70,
     76,
+    76,
+    70,
     53,
     86,
-    62,
-    87,
-    75,
-    87,
-    75
+    60,
+    93,
+    77,
+    81,
+    73
    ],
    "exposed": [
     {
@@ -1211,7 +1211,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 49
+     "ms": 57
     },
     {
      "n": 2,
@@ -1226,7 +1226,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 86
+     "ms": 85
     },
     {
      "n": 3,
@@ -1241,7 +1241,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 96
+     "ms": 90
     },
     {
      "n": 4,
@@ -1256,7 +1256,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 46
+     "ms": 43
     },
     {
      "n": 5,
@@ -1271,7 +1271,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 60
+     "ms": 59
     },
     {
      "n": 6,
@@ -1286,7 +1286,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 43
+     "ms": 47
     },
     {
      "n": 7,
@@ -1301,7 +1301,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 70
+     "ms": 68
     },
     {
      "n": 8,
@@ -1316,7 +1316,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 70
+     "ms": 64
     },
     {
      "n": 9,
@@ -1331,7 +1331,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 63
+     "ms": 64
     },
     {
      "n": 10,
@@ -1346,7 +1346,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 79
+     "ms": 70
     },
     {
      "n": 11,
@@ -1376,7 +1376,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 73
+     "ms": 62
     },
     {
      "n": 13,
@@ -1391,7 +1391,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 47
+     "ms": 48
     },
     {
      "n": 14,
@@ -1406,7 +1406,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 77
+     "ms": 82
     },
     {
      "n": 15,
@@ -1421,7 +1421,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 62
+     "ms": 56
     },
     {
      "n": 16,
@@ -1436,7 +1436,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 83
+     "ms": 89
     },
     {
      "n": 17,
@@ -1451,7 +1451,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 71
+     "ms": 72
     },
     {
      "n": 18,
@@ -1466,7 +1466,7 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 80
+     "ms": 77
     },
     {
      "n": 19,
@@ -1481,26 +1481,26 @@
      ],
      "checked": 4,
      "reloaded": false,
-     "ms": 72
+     "ms": 67
     }
    ],
    "reloads": 0,
    "log": {
     "videoLines": [
-     "video: swipe→ready 0ms, →playing 87ms, net 4g, warming",
+     "video: swipe→ready 0ms, →playing 93ms, net 4g, warming",
      "video: warm start slot1 test0000029:100 st=2",
-     "video: cover on test0000043:100 1447 ms",
-     "first-frame 75ms cold",
-     "video: swipe→ready 0ms, →playing 75ms, net 4g, warming",
+     "video: cover on test0000043:100 1443 ms",
+     "first-frame 77ms cold",
+     "video: swipe→ready 0ms, →playing 77ms, net 4g, warming",
      "video: warm start slot2 test0000042:100 st=2",
      "video: cover on test0000029:100 1370 ms",
-     "first-frame 87ms cold",
-     "video: swipe→ready 0ms, →playing 87ms, net 4g, warming",
+     "first-frame 81ms cold",
+     "video: swipe→ready 0ms, →playing 81ms, net 4g, warming",
      "video: warm start slot0 test0000016:100 st=2",
-     "video: cover on test0000042:100 1404 ms",
-     "first-frame 75ms cold",
-     "video: swipe→ready 0ms, →playing 75ms, net 4g, warming",
-     "video: median 75ms, p90 91ms over last 20 swipes"
+     "video: cover on test0000042:100 1420 ms",
+     "first-frame 73ms cold",
+     "video: swipe→ready 0ms, →playing 73ms, net 4g, warming",
+     "video: median 73ms, p90 93ms over last 20 swipes"
     ]
    },
    "firstLoads": [
@@ -1536,26 +1536,26 @@
    ],
    "video": {
     "frames": [
-     94,
-     55,
-     91,
+     100,
+     61,
+     90,
      103,
-     53,
-     66,
-     53,
-     75,
-     75,
+     46,
+     63,
+     56,
+     74,
      70,
-     87,
-     75,
+     70,
      76,
+     76,
+     70,
      53,
      86,
-     62,
-     87,
-     75,
-     87,
-     75
+     60,
+     93,
+     77,
+     81,
+     73
     ],
     "gate": true,
     "slots": [
@@ -1582,11 +1582,11 @@
      }
     ]
    },
-   "median": 70,
-   "p90": 86,
+   "median": 67,
+   "p90": 89,
    "n": 20,
-   "appMedian": 75,
-   "appP90": 91,
+   "appMedian": 73,
+   "appP90": 93,
    "exposedSwipes": 0,
    "probesChecked": 76,
    "iframePaused": {
@@ -1657,48 +1657,48 @@
     "pageErrors": true
    },
    "ms": [
-    25,
-    48,
-    72,
-    92,
-    55,
-    40,
-    67,
-    44,
     43,
-    91,
-    73,
-    62,
-    56,
-    84,
-    68,
-    72,
-    73,
+    45,
+    67,
+    89,
     54,
+    37,
+    77,
+    27,
+    42,
+    86,
+    71,
     55,
-    49
+    70,
+    95,
+    54,
+    73,
+    69,
+    54,
+    67,
+    44
    ],
    "appMs": [
+    51,
+    57,
+    89,
+    95,
+    63,
+    51,
+    95,
+    48,
     47,
-    51,
-    79,
-    100,
-    68,
-    53,
-    90,
-    51,
-    52,
     99,
     86,
-    79,
+    78,
     76,
-    107,
-    72,
-    83,
-    83,
-    73,
-    76,
-    52
+    105,
+    74,
+    82,
+    75,
+    74,
+    71,
+    51
    ],
    "exposed": [
     {
@@ -1714,7 +1714,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 25
+     "ms": 43
     },
     {
      "n": 1,
@@ -1729,7 +1729,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 48
+     "ms": 45
     },
     {
      "n": 2,
@@ -1744,7 +1744,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 72
+     "ms": 67
     },
     {
      "n": 3,
@@ -1759,7 +1759,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 92
+     "ms": 89
     },
     {
      "n": 4,
@@ -1774,7 +1774,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 55
+     "ms": 54
     },
     {
      "n": 5,
@@ -1789,7 +1789,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 40
+     "ms": 37
     },
     {
      "n": 6,
@@ -1804,7 +1804,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 67
+     "ms": 77
     },
     {
      "n": 7,
@@ -1819,7 +1819,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 44
+     "ms": 27
     },
     {
      "n": 8,
@@ -1834,7 +1834,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 43
+     "ms": 42
     },
     {
      "n": 9,
@@ -1849,7 +1849,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 91
+     "ms": 86
     },
     {
      "n": 10,
@@ -1864,7 +1864,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 73
+     "ms": 71
     },
     {
      "n": 11,
@@ -1879,7 +1879,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 62
+     "ms": 55
     },
     {
      "n": 12,
@@ -1894,7 +1894,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 56
+     "ms": 70
     },
     {
      "n": 13,
@@ -1909,7 +1909,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 84
+     "ms": 95
     },
     {
      "n": 14,
@@ -1924,7 +1924,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 68
+     "ms": 54
     },
     {
      "n": 15,
@@ -1939,7 +1939,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 72
+     "ms": 73
     },
     {
      "n": 16,
@@ -1954,7 +1954,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 73
+     "ms": 69
     },
     {
      "n": 17,
@@ -1984,7 +1984,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 55
+     "ms": 67
     },
     {
      "n": 19,
@@ -1999,26 +1999,26 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 49
+     "ms": 44
     }
    ],
    "reloads": 0,
    "log": {
     "videoLines": [
-     "video: swipe→ready 0ms, →playing 83ms, net 4g, warming",
+     "video: swipe→ready 0ms, →playing 75ms, net 4g, warming",
      "video: warm start slot1 test0000029:100 st=2",
-     "video: cover on test0000043:100 1537 ms",
-     "first-frame 73ms cold",
-     "video: swipe→ready 0ms, →playing 73ms, net 4g, warming",
+     "video: cover on test0000043:100 1542 ms",
+     "first-frame 74ms cold",
+     "video: swipe→ready 0ms, →playing 74ms, net 4g, warming",
      "video: warm start slot2 test0000042:100 st=2",
-     "video: cover on test0000029:100 1559 ms",
-     "first-frame 76ms cold",
-     "video: swipe→ready 0ms, →playing 76ms, net 4g, warming",
+     "video: cover on test0000029:100 1552 ms",
+     "first-frame 71ms cold",
+     "video: swipe→ready 0ms, →playing 71ms, net 4g, warming",
      "video: warm start slot0 test0000016:100 st=2",
-     "video: cover on test0000042:100 1561 ms",
+     "video: cover on test0000042:100 1559 ms",
      "first-frame 51ms cold",
-     "video: swipe→ready 0ms, →playing 52ms, net 4g, warming",
-     "video: median 76ms, p90 99ms over last 20 swipes"
+     "video: swipe→ready 0ms, →playing 51ms, net 4g, warming",
+     "video: median 74ms, p90 95ms over last 20 swipes"
     ]
    },
    "firstLoads": [
@@ -2054,26 +2054,26 @@
    ],
    "video": {
     "frames": [
+     51,
+     57,
+     89,
+     95,
+     63,
+     51,
+     95,
+     48,
      47,
-     51,
-     79,
-     100,
-     68,
-     53,
-     90,
-     51,
-     52,
      99,
      86,
-     79,
+     78,
      76,
-     107,
-     72,
-     83,
-     83,
-     73,
-     76,
-     52
+     105,
+     74,
+     82,
+     75,
+     74,
+     71,
+     51
     ],
     "gate": true,
     "slots": [
@@ -2100,11 +2100,11 @@
      }
     ]
    },
-   "median": 56,
-   "p90": 84,
+   "median": 55,
+   "p90": 86,
    "n": 20,
-   "appMedian": 76,
-   "appP90": 99,
+   "appMedian": 74,
+   "appP90": 95,
    "exposedSwipes": 0,
    "probesChecked": 114,
    "iframePaused": {
