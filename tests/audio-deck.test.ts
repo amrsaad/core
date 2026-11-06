@@ -1,6 +1,6 @@
 // Issue 11: ein dauerhaftes Audio-Element, Quellwechsel und play() synchron im Ende-Handler.
 // Der Nachbau des Elements verhält sich wie ein Browser: load() setzt die Position zurück, Ereignisse kommen nur durch emit.
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { AudioDeck, POOL, withStart, type DeckClip, type DeckEl, type DeckSink } from '../src/video/audioDeck';
 
 class FakeEl implements DeckEl {
@@ -583,14 +583,71 @@ describe('Vorrat: fünf Elemente (Brief 14, Entscheidung 52)', () => {
     expect(t.deck.readyCount()).toBe(0);
   });
 
-  it('fill tut nichts vor der ersten Geste: ein Element, das nie gespielt hat, dürfte verdeckt nicht starten', async () => {
+  it('fill lädt schon vor dem ersten play() und vor der ersten Geste (Brief 22, Entscheidung 57: der Pool ist der Vorrat)', () => {
     const t = setupPool();
-    t.deck.load(sbA, t.sink, { play: true, muted: false });
-    expect(t.deck.fill([sbB])).toBe(0);
-    expect(t.els).toHaveLength(1);
+    const cs = ['b', 'c', 'd', 'e', 'f'].map(mk);
+    expect(t.deck.fill(cs)).toBe(5);
+    expect(t.els).toHaveLength(5);
+    expect(t.lines).toContain('deck: pool fill 5/5 (local 0, net 5)');
+    fillAll(t, cs);
+    expect(t.deck.readyCount()).toBe(5);
+    // Kein play() auf den Elementen des Vorrats: sie laden nur
+    expect(t.els.every((e) => !e.calls.includes('play'))).toBe(true);
+  });
+
+  it('die erste Geste spielt jedes vorher gefüllte Element stumm an und hält es gleich wieder an: Quelle und Stummschaltung bleiben, einmal je Element', async () => {
+    const t = setupPool();
+    const cs = ['b', 'c', 'd', 'e', 'f'].map(mk);
+    t.deck.fill(cs);
+    fillAll(t, cs);
+    for (const e of t.els) e.muted = false;
+    const n = t.lines.length;
+    t.deck.unlock();
     await settle();
-    expect(t.deck.fill([sbB])).toBe(1);
-    expect(t.els).toHaveLength(2);
+    const pooled = cs.map((c) => elOf(t, c));
+    for (const e of pooled) {
+      expect(e.calls.filter((c) => c === 'play')).toHaveLength(1);
+      expect(e.paused).toBe(true);
+      expect(e.muted).toBe(false);
+      expect(e.src.startsWith('https://pod.test/')).toBe(true);
+    }
+    // Der Vorrat bleibt bereit, nichts wurde verworfen oder neu geladen
+    expect(t.deck.readyCount()).toBe(5);
+    expect(t.lines.slice(n).some((l) => /^deck: pool (dropped|load|evicted)/.test(l))).toBe(false);
+    // Die zweite Geste lässt die Elemente in Ruhe
+    t.deck.unlock();
+    for (const e of pooled) expect(e.calls.filter((c) => c === 'play')).toHaveLength(1);
+    // Das Element, das nach der Geste frei blieb, hat die Stille gesehen (ohne laufenden Ausschnitt spielt unlock sie auch auf dem künftigen aktiven Element)
+    const spare = t.els.find((e) => !pooled.includes(e));
+    expect(spare?.calls.filter((c) => c === 'play').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('nach 8 s ohne Bereitschaft bleibt der Eintrag im Vorrat, es gibt nur die Zeile "pool slow" (Brief 22)', async () => {
+    vi.useFakeTimers();
+    try {
+      const t = setupPool();
+      t.deck.fill([sbB]);
+      vi.advanceTimersByTime(8100);
+      expect(t.lines.some((l) => /^deck: pool slow b 8000 ms rs=0 meta=false$/.test(l))).toBe(true);
+      expect(t.deck.poolInfo().map((x) => x.id)).toEqual(['b']);
+      // Erst ein Fehler-Ereignis nimmt ihn heraus
+      elOf(t, sbB).emit('error');
+      expect(t.deck.poolInfo()).toHaveLength(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('onReady meldet jede neue Bereitschaft mit der Zahl der bereiten Elemente (Brief 22)', async () => {
+    const t = setupPool();
+    const got: number[] = [];
+    t.deck.onReady = (n) => got.push(n);
+    const cs = ['b', 'c', 'd'].map(mk);
+    t.deck.fill(cs);
+    fillAll(t, cs);
+    expect(got).toEqual([1, 2, 3]);
+    t.deck.release();
+    expect(t.deck.onReady).toBeNull();
   });
 
   it('fill lädt in freie Elemente, lokal zuerst, dann Netz; die Reihenfolge des Vorrats ist die der Warteschlange', async () => {

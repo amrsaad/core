@@ -157,8 +157,20 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const fr = await freshPage(browser, url, k, poolBgAudio, '?now=2026-10-23&seed=3');
     const pr = fr.pg;
     await pr.waitForSelector('[data-testid=form-switch]');
+    const tRow0 = Date.now();
     await pr.click('[data-testid=form-switch] >> text=Audio');
+    // Brief 22 (Entscheidung 57), 'pool 5/5 ready within 6 s after start, before first play': der Pool füllt sich sofort beim Start, die Zeile 'pool 5/5 ready'
+    // steht binnen 6 s, und 'deck: pool fill' steht im Protokoll vor dem ersten erfüllten play(). Kein Platten-Vorrat für Audio: keine Zeile 'stock: ...'.
+    c.bgPoolFiveIn6s = await waitFor(pr, () => window.__core.diag().some((x) => x === 'pool 5/5 ready'), undefined, 6000);
+    r.bgPoolFiveMs = Date.now() - tRow0;
     await waitFor(pr, () => window.__core.state() === 1 && window.__core.moment()?.audio === true);
+    const poolStart = await pr.evaluate(() => {
+      const d = window.__core.diag();
+      return { fill: d.findIndex((x) => x.startsWith('deck: pool fill ')), ok: d.findIndex((x) => /^deck play#\d+ ok$/.test(x)), stock: d.filter((x) => x.startsWith('stock: ')) };
+    });
+    r.bgPoolStart = poolStart;
+    c.bgPoolFillBeforeFirstPlay = poolStart.fill >= 0 && (poolStart.ok < 0 || poolStart.fill < poolStart.ok);
+    c.bgPoolNoStockLines = poolStart.stock.length === 0;
     c.bgRowPoolFilled = await waitFor(pr, () => window.__core.deck().ready >= 5, undefined, 8000);
     const rowLen0 = await pr.evaluate(() => { window.__node = document.querySelector('audio'); return window.__core.diag().length; });
     await setVisibility(pr, 'hidden');
@@ -206,8 +218,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bgRejectResumesOnReturn = await waitFor(pe, (idx) => window.__core.state() === 1 && window.__core.idx() === idx, atReject, 4000);
     await fe.cx.close();
 
-    // Brief 14: Weiter am Sperrbildschirm ohne bereites Element im Vorrat (hier kommt kein canplaythrough) tut nichts: kein Netzstart, kein Wechsel, nichts gezählt.
-    // Der laufende Moment spielt weiter, die Diagnose sagt es.
+    // Brief 14: Weiter am Sperrbildschirm ohne bereites Element im Vorrat (hier kommt kein canplaythrough) lädt nichts: kein Netzstart, kein Wechsel, nichts gezählt.
+    // Der laufende Moment spielt weiter. Brief 22: das Weiter wird vorgemerkt ('lock next: queued, pool empty'), nicht verworfen.
     const fn = await freshPage(browser, url, k, poolBgAudio, '?now=2026-10-23&seed=3', [MS_SPY, () => { window.__noCpt = true; }]);
     const pn = fn.pg;
     await pn.waitForSelector('[data-testid=form-switch]');
@@ -219,7 +231,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const nxNet0 = await pn.evaluate(() => window.__core.diag().filter((x) => /^deck: src net /.test(x)).length);
     await setVisibility(pn, 'hidden');
     await pn.evaluate(() => window.__ms.nexttrack());
-    c.bgLockNextStayLine = await waitFor(pn, () => window.__core.diag().some((x) => x === 'lock next: stay (pool empty)'), undefined, 3000);
+    c.bgLockNextQueuedLine = await waitFor(pn, () => window.__core.diag().some((x) => x === 'lock next: queued, pool empty'), undefined, 3000);
     await pn.waitForTimeout(500);
     const nx = await pn.evaluate(() => ({ idx: window.__core.idx(), st: window.__core.state(), net: window.__core.diag().filter((x) => /^deck: src net /.test(x)).length, seenNext: window.__core.seen(window.__core.queue()[window.__core.idx() + 1]) }));
     c.bgLockNextNoNetStart = nx.net === nxNet0;
@@ -227,79 +239,49 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bgLockNextCountsNothing = !nx.seenNext;
     await fn.cx.close();
 
-    // Brief 20 (Issue 47): 'stock reaches 6 within 60 s after start' und 'pool fill local >= 3 after stock full'. Zwei Läufe mit lauter Vorrats-Momenten (mp3):
-    // einmal normal, einmal so, dass die ersten drei Abrufe des Vorrats (fetch, nicht die Audio-Elemente) nie antworten (hängende Verbindung, wie auf dem Gerät). Der Wächter bricht sie nach 20 s ab,
-    // die Plätze werden frei, der Vorrat steht trotzdem binnen 60 s bei 6 von 6, und jedes Ergebnis steht im Protokoll (stock: +1 ..., stock: fail ... / hang).
-    let hangHits = 0;
-    for (const hang of [false, true]) {
-      const tag = hang ? 'bgStockHung' : 'bgStock';
+    // Brief 22 (Entscheidung 57) ersetzt die Fälle aus Brief 20 ('stock reaches 6 within 60 s', 'pool fill local >= 3'): der Platten-Vorrat lädt für Audio nichts mehr.
+    // Lauter mp3-Momente (vorher der Vorrats-Fall): kein Range-Abruf per fetch, keine Zeile 'stock: +1/fail/low/6 of 6', der Pool füllt sich binnen 6 s aus dem Netz.
+    {
+      const fetches = [];
       const fs6 = await freshPage(browser, url, k, poolBgStockOnly, '?now=2026-10-23&seed=3', [MS_SPY, IOS_GATE], async (cx) => {
         await routeMp3(cx);
-        if (!hang) return;
         await cx.route('https://stream.test/**', (route) => {
-          if (route.request().method() === 'OPTIONS' || route.request().resourceType() !== 'fetch' || hangHits++ >= 3) return route.fallback();
-          return undefined; // keine Antwort
+          const req = route.request();
+          if (req.resourceType() === 'fetch') fetches.push({ url: req.url(), range: req.headers().range ?? null });
+          return route.fallback();
         });
       });
       const p6 = fs6.pg;
-      const t0 = Date.now();
       await p6.waitForSelector('[data-testid=form-switch]');
       await p6.click('[data-testid=form-switch] >> text=Audio');
       await waitFor(p6, () => window.__core.moment()?.audio === true);
-      c[`${tag}SixIn60s`] = await waitFor(p6, () => window.__core.diag().some((x) => x === 'stock: 6 of 6'), undefined, 60000);
-      r[`${tag}Seconds`] = Math.round((Date.now() - t0) / 1000);
-      c[`${tag}SixOnce`] = (await p6.evaluate(() => window.__core.diag().filter((x) => x === 'stock: 6 of 6').length)) === 1;
-      const st = await p6.evaluate(() => {
-        const d = window.__core.diag();
-        const held = new Set(window.__core.preload().ids);
-        const idx = window.__core.idx();
-        const next6 = window.__core.queue().slice(idx + 1, idx + 7);
-        return { plus: d.filter((x) => /^stock: \+1 \S+ \(\d of 6\)$/.test(x)).length, fails: d.filter((x) => x.startsWith('stock: fail ') || /^stock: (host|defer) /.test(x)), n: held.size, next6: next6.filter((id) => held.has(id)).length };
-      });
-      r[`${tag}Stats`] = st;
-      c[`${tag}PlusLines`] = st.plus >= 6;
-      c[`${tag}AllSixHeld`] = st.n >= 6 && st.next6 >= 5;
-      // Die drei hängenden Abrufe wurden wirklich ausgelöst und blockieren den Vorrat nicht (ob der Wächter nach 20 s greift oder die Warteschlange den Moment vorher abbricht, hängt von der Reihenfolge ab, der Wächter selbst ist im Unit-Test belegt)
-      if (hang) c[`${tag}RequestsHung`] = hangHits >= 3;
-      // Pool: nach vollem Vorrat füllt er mindestens 3 der 5 lokal
-      c[`${tag}PoolLocalGe3`] = await waitFor(p6, () => {
-        const l = window.__core.diag().filter((x) => x.startsWith('deck: pool fill ')).slice(-1)[0] ?? '';
-        const m = /^deck: pool fill 5\/5 \(local (\d), net (\d)\)$/.exec(l);
-        return !!m && Number(m[1]) >= 3 && window.__core.deck().ready >= 5;
-      }, undefined, 15000);
+      c.bgStockOffPoolFiveIn6s = await waitFor(p6, () => window.__core.diag().some((x) => x === 'pool 5/5 ready'), undefined, 6000);
+      await p6.waitForTimeout(3000);
+      const st = await p6.evaluate(() => ({ stock: window.__core.diag().filter((x) => x.startsWith('stock: ')), n: window.__core.preload().stats.n, fill: window.__core.diag().filter((x) => x.startsWith('deck: pool fill ')).slice(-1)[0] ?? '' }));
+      r.bgStockOffStats = { ...st, fetches };
+      c.bgStockOffNoStockLines = st.stock.length === 0;
+      c.bgStockOffNothingHeld = st.n === 0;
+      c.bgStockOffNoRangeFetch = !fetches.some((f) => /^bytes=\d+-\d+$/.test(f.range ?? ''));
+      c.bgStockOffPoolFromNet = /^deck: pool fill 5\/5 \(local 0, net 5\)$/.test(st.fill);
       await fs6.cx.close();
     }
 
     // Brief 14 (Entscheidung 52, Issue 36) und 14b (Issue 40), 'five nexttrack hidden, all play within 1 s, no prepare while hidden, no skipped': der Vorrat hält die
-    // nächsten fünf Momente fertig geladen, aus dem Speicher (Blob) und dem Netz, lokale zuerst. Weiter am Sperrbildschirm tauscht nur die Rollen: fünf Mal
-    // hintereinander, verdeckt zuerst die lokalen, dann das Netz, jedes Mal Ton binnen 1 s, ohne Rückkehr in die App, ohne neue Quelle, ohne Laden, ohne
-    // "skipped". IOS_GATE sperrt jedes play() außerhalb des Handlers, das tauschende play() läuft im Handler.
+    // nächsten fünf Momente fertig geladen. Seit Brief 22 (Entscheidung 57) kommen alle aus dem Netz (der Platten-Vorrat lädt für Audio nichts mehr, Blob-URLs gibt
+    // es nicht). Weiter am Sperrbildschirm tauscht nur die Rollen: fünf Mal hintereinander in Reihenfolge der Warteschlange, jedes Mal Ton binnen 1 s, ohne Rückkehr
+    // in die App, ohne neue Quelle, ohne Laden, ohne "skipped". IOS_GATE sperrt jedes play() außerhalb des Handlers, das tauschende play() läuft im Handler.
     const fk = await freshPage(browser, url, k, poolBgStock, '?now=2026-10-23&seed=3', [MS_SPY, IOS_GATE], routeMp3);
     const pk = fk.pg;
     await pk.waitForSelector('[data-testid=form-switch]');
     await pk.click('[data-testid=form-switch] >> text=Audio');
     await waitFor(pk, () => window.__core.state() === 1 && window.__core.moment()?.audio === true);
-    c.bgNextStockFills = await waitFor(pk, () => window.__core.preload().stats.n >= 8, undefined, 30000);
-    // Warteschlange: nur zwei Vorrats-Momente unter den nächsten sechs (Netz, Speicher, Netz, Speicher, Netz, Netz). Die Vorrats-Tiefe (3 von 6) zieht einen dritten nach vorn.
-    const arr = await pk.evaluate(() => {
-      const held = new Set(window.__core.preload().ids);
-      const cur = window.__core.moment().id;
-      const q = window.__core.queue();
-      const nets = q.filter((id) => id.startsWith('bgnet') && id !== cur).slice(0, 4);
-      const stock = q.filter((id) => held.has(id) && id !== cur).slice(0, 2);
-      const order = [nets[0], stock[0], nets[1], stock[1], nets[2], nets[3]];
-      return { n: window.__core.arrange([...order, ...q.filter((id) => !order.includes(id) && id !== cur)]), order, nets, stock };
-    });
-    r.bgNextArranged = arr;
-    c.bgNextArranged = arr.nets.length === 4 && arr.stock.length === 2 && arr.order.every(Boolean);
-    // Sichtbar füllt das Deck den Vorrat: fünf Elemente bereit, lokale zuerst gewählt, der nächste Moment bleibt dabei
+    // Sichtbar füllt das Deck den Vorrat: fünf Elemente bereit, alle vom Netz, der nächste Moment bleibt dabei
     c.bgNextPoolReady = await waitFor(pk, () => window.__core.deck().ready >= 5, undefined, 8000);
-    // Vorrats-Momente werden asynchron warm (Blob-URL); der Pool ordnet sich dann neu, lokale zuerst. Danach spielt der erste Moment noch 1,3 s sichtbar,
-    // dann folgt ein einziger Schnappschuss von Index und Pool, unmittelbar vor dem Sperren (Entscheidung 45: unter 1 s gespielt bleibt ungesehen).
-    const localReady = () => waitFor(pk, () => /\(local ([3-5]),/.test(window.__core.diag().filter((x) => x.startsWith('deck: pool fill ')).slice(-1)[0] ?? '') && window.__core.deck().ready >= 5, undefined, 8000);
-    await localReady();
+    // Der erste Moment spielt noch 1,3 s sichtbar, dann folgt ein einziger Schnappschuss von Index und Pool, unmittelbar vor dem Sperren (Entscheidung 45: unter 1 s gespielt bleibt ungesehen).
+    const netReady = () => waitFor(pk, () => /\(local 0, net 5\)$/.test(window.__core.diag().filter((x) => x.startsWith('deck: pool fill ')).slice(-1)[0] ?? '') && window.__core.deck().ready >= 5, undefined, 8000);
+    await netReady();
     await pk.waitForTimeout(1300);
-    await localReady();
+    await netReady();
     const kIdx = await pk.evaluate(() => window.__core.idx());
     const curId = await pk.evaluate(() => window.__core.moment().id);
     const poolState = await pk.evaluate(() => {
@@ -316,10 +298,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bgNextPoolFive = poolState.pool.length === 5;
     c.bgNextPoolNearestStays = poolState.pool.includes(vid(poolState.q[0]));
     c.bgNextPoolInWindow = poolState.pool.every((id) => poolState.q.some((m) => vid(m) === id));
-    // Brief 14b: mindestens 3 von 5 lokal, und 'pool fill' sagt es
-    c.bgNextPoolThreeLocal = poolLocal.length >= 3 && poolNet.length >= 1;
-    c.bgNextPoolFillLine = new RegExp(`^deck: pool fill 5/5 \\(local ${poolLocal.length}, net ${poolNet.length}\\)$`).test(poolState.fill);
-    // Verdeckt zuerst die lokalen (in Reihenfolge des Vorrats), dann das Netz
+    // Brief 22: alle fünf vom Netz, und 'pool fill' sagt es
+    c.bgNextPoolAllNet = poolLocal.length === 0 && poolNet.length === 5;
+    c.bgNextPoolFillLine = /^deck: pool fill 5\/5 \(local 0, net 5\)$/.test(poolState.fill);
+    // Verdeckt in Reihenfolge des Vorrats (der Warteschlange)
     const expected = [...poolLocal, ...poolNet];
     const press = () => pk.evaluate(() => { window.__sync = true; try { window.__ms.nexttrack(); } finally { window.__sync = false; } });
     const hidLen = await pk.evaluate(() => window.__core.diag().length);
@@ -341,7 +323,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       five.noSrc &&= !lines.some((x) => /^deck: src /.test(x));
       five.noLoad &&= !lines.some((x) => /^deck: pool (load|fill) /.test(x));
       five.noVisible &&= !lines.some((x) => /app: visible|page visible/.test(x));
-      five.noStay &&= !lines.some((x) => /^lock next: stay/.test(x));
+      five.noStay &&= !lines.some((x) => /^lock next: (stay|queued)/.test(x));
       five.order &&= (await pk.evaluate(() => window.__core.moment().id)) === `${expected[i - 1]}:0`;
       if (i === 1) r.bgNextFirstLines = lines.filter((x) => /^lock next: |^deck: (swap|pool)|^deck play#/.test(x));
     }
@@ -350,7 +332,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bgNextFiveAdvance = five.adv;
     c.bgNextFivePlayOk = five.ok && five.ms.every((m) => m < 2500);
     c.bgNextFiveSwapLines = five.swap;
-    c.bgNextFiveLocalFirst = five.order;
+    c.bgNextFiveInOrder = five.order;
     c.bgNextFiveNoNewSource = five.noSrc;
     c.bgNextFiveNoLoad = five.noLoad;
     c.bgNextFiveNoVisible = five.noVisible;
@@ -364,15 +346,25 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bgNextNoGatedPlay = (await pk.evaluate(() => window.__gated)) === 0;
     c.bgNextColdUnder2 = (await pk.evaluate(() => window.__core.lock().cold)) < 2;
     r.bgNextPlays = await pk.evaluate(() => window.__plays);
-    // Der Vorrat ist leer: das sechste Weiter tut nichts, sagt es und der Moment spielt weiter (kein Netzstart verdeckt)
+    // Der Vorrat ist leer: das sechste Weiter lädt nichts, wird vorgemerkt (Brief 22) und der Moment spielt weiter (kein Netzstart verdeckt)
     const len6 = await pk.evaluate(() => window.__core.diag().length);
     await press();
-    c.bgNextSixthStays = await waitFor(pk, (n) => window.__core.diag().slice(n).some((x) => x === 'lock next: stay (pool empty)'), len6, 2000);
+    c.bgNextSixthQueued = await waitFor(pk, (n) => window.__core.diag().slice(n).some((x) => x === 'lock next: queued, pool empty'), len6, 2000);
+    await pk.waitForTimeout(500);
     c.bgNextSixthKeeps = (await pk.evaluate(() => window.__core.idx())) === kIdx + 5;
+    c.bgNextSixthNoLoad = !(await pk.evaluate((n) => window.__core.diag().slice(n).some((x) => /^deck: (src|pool load) /.test(x)), len6));
     // Die Sperre ist wirksam: ein play() außerhalb des Handlers bleibt verdeckt ausstehend (so scheiterte jeder Wechsel einer Quelle im Hintergrund)
     c.bgNextGateActive = (await pk.evaluate(() => { document.querySelector('audio').play(); return window.__gated; })) === 1;
-    // Zurück in die App: der Vorrat füllt sich wieder
+    // Brief 22, 'lock next queued then swaps when first element ready': zurück in die App füllt sich der Vorrat, und sobald das erste Element bereit ist,
+    // wird das vorgemerkte Weiter eingelöst (Tausch, kein Netzstart des aktiven Elements), danach füllt sich der Vorrat wieder
+    const lenV = await pk.evaluate(() => window.__core.diag().length);
     await setVisibility(pk, 'visible');
+    c.bgNextQueuedSwaps = await waitFor(pk, (n) => window.__core.idx() === n && window.__core.state() === 1, kIdx + 6, 4000);
+    const qv = await pk.evaluate((n) => window.__core.diag().slice(n), lenV);
+    r.bgNextQueuedLines = qv.filter((x) => /^lock next: |^deck: (swap|pool fill|pool ready)|^pool \d\/5 ready$|^deck play#|^go /.test(x));
+    c.bgNextQueuedSwapLine = qv.some((x) => /^lock next: queued swap \S+$/.test(x));
+    c.bgNextQueuedNoNetStart = !qv.some((x) => /^deck: src net /.test(x));
+    c.bgNextQueuedOnce = qv.filter((x) => /^lock next: queued swap /.test(x)).length === 1 && qv.filter((x) => /^go \d+->\d+$/.test(x)).length === 1;
     c.bgNextRefill = await waitFor(pk, () => window.__core.diag().some((x) => x === 'deck: pool refill 5/5'), undefined, 8000);
     // Aktives Element plus fünf im Vorrat
     c.bgNextAtMostPoolSrc = (await pk.evaluate(() => window.__core.media())) <= 6;
@@ -387,7 +379,6 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await ph.waitForSelector('[data-testid=form-switch]');
     await ph.click('[data-testid=form-switch] >> text=Audio');
     await waitFor(ph, () => window.__core.state() === 1 && window.__core.moment()?.audio === true);
-    c.bgHungStockFills = await waitFor(ph, () => window.__core.preload().stats.n >= 8, undefined, 30000);
     c.bgHungPoolReady = await waitFor(ph, () => window.__core.deck().ready >= 5, undefined, 8000);
     await ph.waitForTimeout(1500);
     const hIdx = await ph.evaluate(() => window.__core.idx());

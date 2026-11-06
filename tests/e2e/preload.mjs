@@ -1,6 +1,10 @@
 // E2E des Offline-Vorrats mit echter mp3-Wiedergabe in Chromium und gedrosseltem Netz (Playwright route mit Verzögerung).
 // Der Stream-Host stream.test wird von Playwright bedient: Range-Abrufe wie bei echten Podcast-Hosts (206, Content-Range nicht lesbar
 // über CORS), jede Antwort kommt um DELAY ms verspätet. Die YouTube-API ist nachgebaut (kein Netz im Runner).
+// Brief 22 (Entscheidung 57): der Platten-Vorrat lädt für Audio nichts mehr, der Pool aus fünf Audio-Elementen ist der Vorrat. Die Abschnitte 2 bis 6
+// (Vorrat füllt sich, Start aus dem Vorrat, Settings-Zeile, offline aus dem Vorrat, Neustart ohne Netz) prüfen genau diesen Audio-Vorrat. Sie bleiben
+// als Code erhalten, laufen aber nur mit AUDIO_STOCK=1 (übersprungen, nicht gelöscht). Dafür prüft Abschnitt 1b, dass nach dem Start kein Range-Abruf
+// per fetch auf einen Audio-Host geht. Video-Momente mit mp4 waren nie vorladbar (nur mp3), eine Umstellung auf Video ist darum nicht möglich.
 // Aufruf: node tests/e2e/preload.mjs <url> <ausgabeordner>   (vorher npm run build, dann vite preview)
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
@@ -10,6 +14,8 @@ const [url = 'http://127.0.0.1:4177/core/', out = 'pipeline/out/e2e-preload'] = 
 mkdirSync(out, { recursive: true });
 const FILE = new Uint8Array(readFileSync(new URL('../fixtures/media/tone-cbr.mp3', import.meta.url)));
 const DELAY = Number(process.env.PRELOAD_DELAY ?? 1500);
+/** Brief 22: die Abschnitte zum Audio-Platten-Vorrat laufen nur noch auf Wunsch (AUDIO_STOCK=1), der Vorrat ist für Audio abgeschaltet */
+const AUDIO_STOCK = process.env.AUDIO_STOCK === '1';
 
 const FAKE_YT = `window.YT={PlayerState:{ENDED:0,PLAYING:1,PAUSED:2,BUFFERING:3,CUED:5},Player:function(el,o){const ev=o.events||{};el.replaceWith(document.createElement('div'));
 this.loadVideoById=()=>{};this.cueVideoById=()=>{};this.playVideo=()=>{};this.pauseVideo=()=>{};this.mute=()=>{};this.unMute=()=>{};this.isMuted=()=>true;
@@ -97,9 +103,22 @@ try {
   c.coldStartSlow = num.coldStartMs > 1000;
   await page.screenshot({ path: `${out}/chromium-1-cold-start.png` });
 
+  // ---- 1b. Brief 22, 'no audio range fetch after start': kein Range-Abruf per fetch auf den Audio-Host, nichts im Platten-Vorrat, keine Zeile 'stock: ...'.
+  // Die Audio-Elemente des Pools dürfen den Host lesen (das sind Medienabrufe, kein fetch mit 'bytes=von-bis'). Der Pool steht binnen 6 s.
+  c.poolFiveIn6s = await waitFor(page, () => window.__core.diag().some((x) => x === 'pool 5/5 ready'), null, 6000);
+  await sleep(10000);
+  const rangeAfterStart = net.log.filter((x) => /^bytes=\d+-\d+$/.test(x.range ?? ''));
+  num.rangeFetchesAfterStart = rangeAfterStart.length;
+  num.requestsAfterStart = net.log.length;
+  c.noAudioRangeFetch = rangeAfterStart.length === 0;
+  const stockState = await page.evaluate(() => ({ n: window.__core.preload().stats.n, lines: window.__core.diag().filter((x) => x.startsWith('stock: ')) }));
+  num.stockLines = stockState.lines;
+  c.nothingPreloaded = stockState.n === 0;
+  c.noStockLines = stockState.lines.length === 0;
+  c.queueIs32Deep = (await page.evaluate(() => window.__core.queue())).length >= 32;
+
+  if (AUDIO_STOCK) {
   // ---- 2. Vorrat füllt sich im Hintergrund ----
-  const queue0 = await page.evaluate(() => window.__core.queue());
-  c.queueIs32Deep = queue0.length >= 32;
   c.filled = await waitFor(page, () => window.__core.preload().stats.n >= 30, null, 150000);
   const p1 = await pre(page);
   num.preloadedMoments = p1.stats.n;
@@ -256,6 +275,7 @@ try {
   net.down = false;
   net.ytDown = false;
   await page2.close();
+  }
 
   // ---- 7. Netz-bewusste Mischung (Video-Form: Streams vor YouTube im schlechten Netz, Regeln bleiben) ----
   const mixCase = async (offline, name, seed = 3) => {

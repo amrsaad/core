@@ -326,10 +326,11 @@ describe('Preloader: Köpfe über das Sitzungsende', () => {
   beforeEach(() => LOCAL.clear());
   it('Neustart: held() gilt sofort aus dem Index, Blob-URL der Köpfe liegt nach init bereit, pendingWarm löst sich', async () => {
     const w = preSetup();
-    const ms = [mom(1), mom(2), mom(3)];
+    // Brief 22: der Platten-Vorrat lädt nur noch Video. Die Köpfe-Mechanik wird mit Video-Momenten (mp3-Quelle) geprüft.
+    const ms = [mom(1, { form: 'video' }), mom(2, { form: 'video' }), mom(3, { form: 'video' })];
     for (const m of ms) w.files.set(m.hls!, synthMp3({ frames: 20_000, bitrate: 128 }).bytes);
     const a = w.make();
-    a.setQueue([mom(0), ...ms], 0);
+    a.setQueue([mom(0, { form: 'video' }), ...ms], 0);
     await until(() => ms.every((m) => a.has(m.id)));
     expect(ms.every((m) => a.has(m.id))).toBe(true);
     a.setHeads(pickHeads([mom(0), ...ms], 0, () => true, keyOf));

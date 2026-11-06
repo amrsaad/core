@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { LOCAL } from '../src/video/ytApi';
-import { CACHE_NAME, Preloader, type CacheLike, type PreloaderDeps } from '../src/moments/preloader';
+import { CACHE_NAME, nextCalendarDay, Preloader, type CacheLike, type PreloaderDeps } from '../src/moments/preloader';
 import { PRELOAD_CAP_BYTES } from '../src/moments/preload';
 import { keyOf } from '../src/moments/preload';
 import type { Moment } from '../src/moments/types';
@@ -73,7 +73,12 @@ function setup(extra: Partial<PreloaderDeps> = {}): { w: World; cache: FakeCache
   return { w, cache, store, make: () => new Preloader(deps), revoked };
 }
 
-const mom = (i: number, o: Partial<Moment> = {}): Moment => ({ id: 'm' + i, videoId: 'pod-' + i, start: 100, end: 147, channel: 'c', videoTitle: '', area: 'brain', topic: 't', hook: '', kind: 'story', createdAt: '', form: 'audio', hls: `https://cdn${o.hls ?? ''}.test/ep${i}.mp3`, ...o });
+// Brief 22 (Entscheidung 57): der Platten-Vorrat lädt nur noch Video-Momente. Die Lade-Mechanik (Range, Verdrängung, Host-Sperre, Wächter) wird darum mit
+// Video-Momenten geprüft, deren Quelle eine mp3 ist. Audio-Momente werden übersprungen, das prüft der letzte Block.
+const mom = (i: number, o: Partial<Moment> = {}): Moment => ({ id: 'm' + i, videoId: 'pod-' + i, start: 100, end: 147, channel: 'c', videoTitle: '', area: 'brain', topic: 't', hook: '', kind: 'story', createdAt: '', form: 'video', hls: `https://cdn${o.hls ?? ''}.test/ep${i}.mp3`, ...o });
+const audioMom = (i: number, o: Partial<Moment> = {}): Moment => mom(i, { form: 'audio', audio: true, ...o });
+/** Zwei Kalendertage weiter (die Host-Sperre endet am nächsten Kalendertag, Ortszeit) */
+const TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
 const settle = async (p: Preloader, ms = 60) => {
   for (let i = 0; i < ms; i++) await new Promise((r) => setTimeout(r, 2));
   await p.whenReady();
@@ -324,7 +329,7 @@ describe('Preloader: der Vorrat füllt sich auch bei hängenden Abrufen und Netz
     expect(p.whyNot(q[1])).toBeNull();
   });
 
-  it('Netzfehler am Start sperren den Host nur für RETRY_MS, danach füllt sich der Vorrat', async () => {
+  it('Netzfehler am Start sperren den Host bis zum nächsten Kalendertag (Brief 22), danach füllt sich der Vorrat', async () => {
     const { w, make } = setup({ retryMs: 100_000 });
     const q = queue(5);
     prime(w, q);
@@ -336,10 +341,17 @@ describe('Preloader: der Vorrat füllt sich auch bei hängenden Abrufen und Netz
     await settle(p, 20);
     expect(p.stats().n).toBe(0);
     expect(p.whyNot(q[1])).toBe('host');
-    expect(lines.some((l) => /^stock: host cdn\.test paused 100 s after 2 network errors$/.test(l))).toBe(true);
-    // Das Netz ist wieder da, die Aussetzung läuft ab: der nächste resume holt alles
+    expect(lines).toContain('stock: host cdn.test blocked until tomorrow');
+    // Das Netz ist wieder da, aber derselbe Tag: der Host bleibt gesperrt, kein weiterer Abruf (kein Hämmern)
     w.failHosts.clear();
+    const calls = w.calls.length;
     w.clock += 150_000;
+    p.resume();
+    await settle(p, 10);
+    expect(p.whyNot(q[1])).toBe('host');
+    expect(w.calls.length).toBe(calls);
+    // Nächster Kalendertag: der nächste resume holt alles
+    w.clock += TWO_DAYS;
     p.resume();
     await until(() => p.depth() >= 4);
     expect(p.depth()).toBeGreaterThanOrEqual(4);
@@ -406,5 +418,67 @@ describe('Preloader: der Vorrat füllt sich auch bei hängenden Abrufen und Netz
     const lines: string[] = [];
     p.setDiag((l) => lines.push(l));
     expect(lines).toContain('stock: fail init quota');
+  });
+});
+
+describe('Preloader: Audio wird nicht mehr vorgeladen, der Pool ist der Vorrat (Brief 22, Entscheidung 57)', () => {
+  beforeEach(() => LOCAL.clear());
+  const file = synthMp3({ frames: 20_000 }).bytes;
+
+  it('Audio-Momente lösen keinen Abruf aus, keine Zeile "stock: low" und keinen Host-Strike, Video im selben Fenster lädt wie bisher', async () => {
+    const { w, make } = setup();
+    const q = [audioMom(0), audioMom(1), audioMom(2), mom(3), audioMom(4, { hls: 'https://blocked.test/a.mp3' }), mom(5)];
+    for (const m of q) w.files.set(m.hls!, file);
+    w.failHosts.add('blocked.test');
+    const lines: string[] = [];
+    const p = make();
+    p.setDiag((l) => lines.push(l));
+    p.setQueue(q, 0);
+    await until(() => p.has('m3') && p.has('m5'));
+    await settle(p, 10);
+    expect(p.ids().sort()).toEqual(['m3', 'm5']);
+    expect(w.calls.every((c) => /ep[35]\.mp3$/.test(c.url))).toBe(true);
+    expect(w.calls.some((c) => c.url.includes('blocked.test'))).toBe(false);
+    expect(lines.some((l) => /^stock: (fail|host|low)/.test(l))).toBe(false);
+    expect(p.has('m1')).toBe(false);
+    expect(p.held('m1')).toBe(false);
+  });
+
+  it('alte Audio-Einträge im Cache werden beim Start einmal gelöscht und gemeldet, Video bleibt', async () => {
+    const { w, cache, store, make } = setup();
+    const q = [mom(0), mom(1), mom(2)];
+    for (const m of q) w.files.set(m.hls!, file);
+    const p1 = make();
+    p1.setQueue(q, 0);
+    await until(() => p1.has('m1') && p1.has('m2'));
+    // Stand vor Brief 22 nachstellen: Einträge ohne form (so lagen alle Audio-Ausschnitte im Index)
+    const idx = JSON.parse(store.get('core.preload.v1')!) as { id: string; form?: string }[];
+    expect(idx.every((e) => e.form === 'video')).toBe(true);
+    store.set('core.preload.v1', JSON.stringify(idx.map((e) => (e.id === 'm1' ? { ...e, form: undefined } : e))));
+    const lines: string[] = [];
+    const p2 = make();
+    p2.setDiag((l) => lines.push(l));
+    // Vor init zählt nur Video als Vorrat: das Deck wartet nie auf einen Audio-Ausschnitt
+    expect(p2.held('m1')).toBe(false);
+    expect(p2.held('m2')).toBe(true);
+    expect(p2.pendingWarm('m1', keyOf(q[1]))).toBeNull();
+    await p2.whenReady();
+    expect(p2.ids()).toEqual(['m2']);
+    expect(cache.map.has('https://app.test/core/__preload/m1')).toBe(false);
+    expect(cache.map.has('https://app.test/core/__preload/m2')).toBe(true);
+    expect(lines).toContain('stock: cleared 1 audio entries');
+    expect(store.get('core.preload.v1')).not.toContain('m1');
+    // Ohne Audio-Einträge keine Meldung
+    const lines3: string[] = [];
+    const p3 = make();
+    p3.setDiag((l) => lines3.push(l));
+    await p3.whenReady();
+    expect(lines3.some((l) => l.startsWith('stock: cleared'))).toBe(false);
+  });
+
+  it('nextCalendarDay: Mitternacht Ortszeit nach dem Zeitpunkt', () => {
+    const t = new Date(2026, 10, 6, 15, 30).getTime();
+    expect(new Date(nextCalendarDay(t)).getTime()).toBe(new Date(2026, 10, 7, 0, 0).getTime());
+    expect(nextCalendarDay(new Date(2026, 10, 6, 23, 59, 59).getTime())).toBe(new Date(2026, 10, 7).getTime());
   });
 });

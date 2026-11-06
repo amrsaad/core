@@ -5,7 +5,7 @@ import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL, topicLabel } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { audioDeck, createPlayer, deckClipOf, HLS, LOCAL, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
-import { POOL_WINDOW, type DeckClip } from '../video/audioDeck';
+import { POOL, POOL_WINDOW, type DeckClip } from '../video/audioDeck';
 import { canWarm, coverMs, onNonCurrentPlaying, roleOf, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx, type WarmState } from '../video/warmup';
 import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, onGesture, type Gesture } from './gesture';
 import { hintVisible, SOUND_NONE } from './soundHint';
@@ -16,7 +16,7 @@ import { loudLine, recordLoud } from './loudness';
 import { browserPreloader } from './preloader';
 import { isPreloadable, keyOf, netRank, queueAhead, streamKind } from './preload';
 import { coldToday, countColdStart, pickHeads, startOrder } from './startHead';
-import { depthPlan, lockMeta, lockNextPlan, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS } from './lockScreen';
+import { lockMeta, lockNextPlan, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS } from './lockScreen';
 import { cursorFor, historyBefore, parseSaved, POOL_AHEAD, pruneAndHeal, pruneOnly, queueKey, recentFromLog, releaseTail, remixTail, replanStart, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMoment, sessionSkip, SIGNAL, type MomentCursor } from './mix';
 import { attentionStep, makeCtx, newAttention, readConn, type Attention } from './context';
@@ -238,10 +238,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const unplayedNoted = useRef(new Set<string>());
   /** Verdeckt hängende Momente, für die schon "lock: stuck, stay" im Protokoll steht (Brief 14b): eine Zeile je Moment */
   const stuckNoted = useRef(new Set<string>());
-  /** Vorrats-Tiefe, für die zuletzt "stock: low" kam, und Zeitpunkt des letzten Nachladens (Brief 14b, Schritt 1) */
-  const lowDepth = useRef(-1);
-  const lastResume = useRef(0);
-  const poolHold = useRef(0);
+  /** Brief 22: Weiter am Sperrbildschirm kam, als kein Pool-Element bereit war. Es wird eingelöst, sobald sichtbar das erste Element bereit ist. */
+  const queuedNext = useRef(false);
   /** Offene Messung Wisch bis erstes Bild */
   const swipe = useRef<{ j: number; t0: number; buffered: boolean } | null>(null);
   /** Messung für die Zeile "video: ..." (Issue 22): Wisch bis Bereitschaft des Players und bis zum ersten PLAYING */
@@ -468,9 +466,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!pre) return;
     pre.setQueue(queue.current, at, rateRef.current);
     const w = pre.warmSet(queue.current, at, rateRef.current);
-    // Audio-Reiter (Brief 11, Schritt 9, Brief 14b): die ersten drei Vorrats-Momente der nächsten 6 halten ihre Blob-URL, damit der Element-Vorrat sie lokal laden
-    // kann (die Vorrats-Tiefe verlangt 3 von 6) und nach einem Tausch sofort ein lokaler Kandidat da ist. Ein widerrufener Blob würde dem Element die Quelle nehmen.
-    if (form === 'audio') for (const m of queue.current.slice(at + 1, at + 1 + POOL_WINDOW).filter((x) => pre.held(x.id)).slice(0, 3)) if (!w.includes(m)) w.push(m);
+    // Brief 22: für Audio hält der Platten-Vorrat nichts mehr, Blob-URLs gibt es nur noch für Video
     void pre.warm(w);
     pre.trimWarm(new Set(w.map((x) => x.id)));
     saveQueue();
@@ -792,65 +788,21 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const pullStock = (hidden: boolean) => (pre ? pullBy((m) => LOCAL.has(keyOf(m)) || pre.held(m.id), hidden) : { how: 'none' as const });
 
   /**
-   * Element-Vorrat füllen (Entscheidung 52, Brief 14): solange die App sichtbar ist, halten fünf Audio-Elemente die nächsten fünf Momente fertig geladen, lokal
-   * bevorzugt, sonst Netz. Aufruf nach jedem Wisch, nach jedem "deck play ok", beim Wechsel in den Audio-Reiter und bei der Rückkehr in die App. Verdeckt
-   * tut er nichts (iOS lädt dann nichts nach, die Warteschlange bleibt stehen).
+   * Element-Vorrat füllen (Entscheidung 52, Brief 14; Entscheidung 57, Brief 22): solange die App sichtbar ist, halten fünf Audio-Elemente die nächsten
+   * fünf Momente fertig geladen, aus dem Netz. Der Pool ist der Vorrat: der Platten-Vorrat lädt für Audio nichts mehr (fremde Podcast-Hosts erlauben kein
+   * fetch), darum gibt es keine Vorrats-Tiefe, kein "stock: low" und keine Wartezeit auf den Vorrat mehr. Aufruf beim Start (vor dem ersten play), nach jedem
+   * Wisch, nach jedem "deck play ok", beim Wechsel in den Audio-Reiter und bei der Rückkehr in die App. Verdeckt tut er nichts (iOS lädt dann nichts nach).
    */
-  const warmTried = useRef(new Set<string>());
   const fillPool = () => {
     if (form !== 'audio' || !pre || !activeRef.current) return;
     if (isBackground(document.visibilityState)) return;
     pruneBad();
     ensureQueue(idxRef.current + 1 + POOL_AHEAD + 3);
-    // Schwaches Netz und der Nachfolger liegt nicht im Vorrat: ein Vorrats-Moment aus den nächsten drei rückt nach idx+1, damit das erste Element lokal wird
-    const first = queue.current[idxRef.current + 1];
-    if (first && !pre.held(first.id) && pre.poor()) pullBy((m) => pre.held(m.id), false);
-    // Mindestens 3 der nächsten 6 liegen im Vorrat, sonst rücken Vorrats-Momente von weiter hinten in die ersten Plätze (idx+1 bleibt)
-    const d = depthPlan(queue.current, idxRef.current, (m) => pre.held(m.id), 3, POOL_WINDOW);
-    if (d.moved > 0) {
-      applyQueue(d.queue);
-      diag.current.push(`stock: depth ${d.have} of 6 (pulled ${d.moved})`);
-    }
-    // Brief 14b, Schritt 1: hält der Vorrat weniger als 3 der nächsten 6, wird sichtbar sofort nachgeladen (Vorrats-Logik aus Brief 02: Fehlversuche vergessen,
-    // nächstgelegene fehlende Momente zuerst). Höchstens alle 5 s, damit ein Host ohne Antwort nicht gehämmert wird. Neuer Vorrat löst über das Abo unten einen neuen fillPool aus.
-    if (d.have < 3) {
-      if (lowDepth.current !== d.have) {
-        lowDepth.current = d.have;
-        diag.current.push(`stock: low ${d.have} of 6, loading`);
-      }
-      if (Date.now() - lastResume.current > 5000) {
-        lastResume.current = Date.now();
-        pre.resume();
-      }
-    } else lowDepth.current = -1;
-    // Kandidaten für den Element-Vorrat: die nächsten 6 (nicht mehr nur 5), das Deck wählt daraus lokale zuerst
-    const next: Moment[] = [];
-    for (let j = idxRef.current + 1; j < queue.current.length && next.length < POOL_WINDOW; j++) {
-      const m = queue.current[j];
-      if (!bad.current.has(m.videoId) && formOf(m) === 'audio' && deckClipOf(m)) next.push(m);
-    }
-    // Ein Vorrats-Moment ohne Blob-URL bekommt sie zuerst (keine zweite Netzverbindung neben dem Vorrat, Entscheidung 45), dann lädt sein Element lokal.
-    // Einmal je Moment: kommt die Blob-URL nicht, lädt er danach vom Netz.
-    const wait = next.filter((m) => !LOCAL.has(keyOf(m)) && pre.held(m.id) && !warmTried.current.has(m.id));
-    if (wait.length) {
-      for (const m of wait) warmTried.current.add(m.id);
-      void pre.warm(wait).then(() => fillPoolRef.current());
-    }
-    const netOk = !pre.poor();
-    // Brief 20, Schritt 2: der Vorrat hat Vorrang. Solange er dünn ist (unter 3 der nächsten 6) und gerade lädt, startet der Pool keine NEUEN Netz-Elemente,
-    // höchstens 3 s ab dem ersten Warten. Danach (oder sobald der Vorrat reicht) lädt er wie gehabt vom Netz. Schon laufende Elemente bleiben unberührt.
-    const thin = d.have < 3 && pre.busy();
-    if (!thin) poolHold.current = 0;
-    else if (!poolHold.current) {
-      poolHold.current = Date.now();
-      window.setTimeout(() => fillPoolRef.current(), 3050);
-    }
-    const holding = thin && Date.now() - poolHold.current < 3000;
-    const inPool = holding ? new Set(audioDeck.poolInfo().map((p) => p.key)) : null;
+    // Kandidaten für den Element-Vorrat: die nächsten 6, das Deck nimmt die ersten fünf in Reihenfolge der Warteschlange
     const clips: DeckClip[] = [];
-    for (const m of next) {
-      if (!LOCAL.has(keyOf(m)) && (wait.includes(m) || !netOk)) continue;
-      if (inPool && !LOCAL.has(keyOf(m)) && !inPool.has(keyOf(m))) continue;
+    for (let j = idxRef.current + 1; j < queue.current.length && clips.length < POOL_WINDOW; j++) {
+      const m = queue.current[j];
+      if (bad.current.has(m.videoId) || formOf(m) !== 'audio') continue;
       const c = deckClipOf(m);
       if (c) clips.push(c);
     }
@@ -884,11 +836,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   /**
    * Weiter vom Sperrbildschirm oder der Medientaste (Brief 14, Entscheidung 52): das Deck tauscht auf das erste bereite Element des Vorrats, es wird nichts geladen
-   * und keine Quelle gewechselt. Ist keins bereit, geschieht verdeckt nichts: der laufende Moment spielt zu Ende, nichts wird gezählt, nie ein Netzstart
-   * verdeckt. Sichtbar ohne bereites Element gilt der normale Weg (Vorrat zuerst, sonst Netz mit der Laden-Pille).
+   * und keine Quelle gewechselt. Ist keins bereit, wird verdeckt nichts geladen und nichts gezählt, nie ein Netzstart verdeckt. Brief 22: das Weiter wird dann
+   * vorgemerkt ("lock next: queued, pool empty") und eingelöst, sobald sichtbar das erste Pool-Element bereit ist (onReady unten). Sichtbar ohne bereites
+   * Element gilt der normale Weg (Vorrat zuerst, sonst Netz mit der Laden-Pille).
    */
-  const lockNext = () => {
+  const lockNext = (queued = false) => {
     const hidden = isBackground(document.visibilityState);
+    queuedNext.current = false;
     if (form !== 'audio' || !pre) {
       goTo(idxRef.current + 1);
       return;
@@ -896,12 +850,14 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     pruneBad();
     const c = audioDeck.swapNext();
     if (c) {
+      if (queued) diag.current.push(`lock next: queued swap ${c.id}`);
       placeNext(c.key);
       goTo(idxRef.current + 1);
       return;
     }
     if (hidden) {
-      diag.current.push('lock next: stay (pool empty)');
+      queuedNext.current = true;
+      diag.current.push('lock next: queued, pool empty');
       return;
     }
     ensureQueue(idxRef.current + 1 + queueAhead(rateRef.current));
@@ -1027,6 +983,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       syncPre(next);
       const prev = idxRef.current;
       diag.current.push(`go ${prev}->${next}`);
+      // Jeder Wechsel löst ein vorgemerktes Weiter vom Sperrbildschirm ein oder macht es gegenstandslos (Brief 22)
+      queuedNext.current = false;
       const prevM = queue.current[prev];
       // Entscheidung 45: der verlassene Moment ist gesehen, wenn er mindestens eine Sekunde gespielt hat, sonst bleibt er ungesehen im Pool
       if (prevM && !textRef.current) {
@@ -1239,6 +1197,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     // Nach jedem erfüllten play() den Vorrat auffüllen (Brief 14, Schritt 2). Verdeckt tut das nichts.
     audioDeck.onPlayed = () => fillPoolRef.current();
     audioDeck.onNeedFill = () => fillPoolRef.current();
+    // Brief 22: jede neue Bereitschaft steht im Protokoll ("pool n/5 ready"). Ein vorgemerktes Weiter vom Sperrbildschirm wird eingelöst, sobald die App
+    // sichtbar ist und ein Element bereit steht. Verdeckt bleibt es vorgemerkt (nie ein Netzstart verdeckt, Entscheidung 45).
+    audioDeck.onReady = (n) => {
+      diag.current.push(`pool ${n}/${POOL} ready`);
+      if (queuedNext.current && !isBackground(document.visibilityState)) lockNextRef.current(true);
+    };
     // Kaltstart: auf die Blob-URL aus dem Vorrat warten statt vom Netz zu starten
     audioDeck.pending = (id, key) => pre?.pendingWarm(id, key) ?? null;
     // Zähler coldNetStarts: jeder Start einer Quelle vom Netz, pro Tag
@@ -2592,6 +2556,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     }
     // Sichtbar: der Element-Vorrat füllt sich wieder (Brief 14, Schritt 2)
     fillPoolRef.current();
+    // Brief 22: ein verdeckt vorgemerktes Weiter wird jetzt eingelöst, wenn ein Element schon bereit steht (sonst beim nächsten "pool n/5 ready")
+    if (queuedNext.current && form === 'audio' && playable && !userPaused.current && audioDeck.poolReady()) {
+      leftPaused.current = false;
+      lockNextRef.current(true);
+      return;
+    }
     // Der laufende Moment ist jetzt zu sehen: gesehen (einmal), dann Karte oder Ton wieder aufnehmen
     if (!textRef.current && played.current.enough(m.id)) markSeen(m);
     if (!recallRef.current && (stateRef.current.recallQueue?.length ?? 0) > 0) {

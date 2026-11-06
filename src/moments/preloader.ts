@@ -1,8 +1,14 @@
 // Offline-Vorrat im Browser: lädt die nächsten 30 Momente der Warteschlange als Ausschnitt start bis end per Range-Request
 // in die Cache API (Name core-preload-v1) und gibt sie dem Player als Blob-URL. Läuft im Hintergrund, ein Abruf nach dem anderen,
 // bei WLAN und Mobilfunk gleich. Die Regeln (Auswahl, Verdrängung, Netzzustand) stehen in preload.ts.
+//
+// Brief 22 (Entscheidung 57, Issue 47): Audio-Momente werden hier nicht mehr vorgeladen. Fremde Podcast-Hosts erlauben kein fetch aus dem Browser
+// (CORS) oder ignorieren Range, jeder Abruf scheiterte auf dem Gerät. Der Pool aus fünf Audio-Elementen (audioDeck.ts) ist der Vorrat, Audio-Elemente
+// brauchen kein CORS. Die Weiche läuft über die Form des Moments: Video bleibt genau wie bisher, Audio wird übersprungen, alte Audio-Einträge im Cache
+// werden beim Start einmal gelöscht.
 import { LOCAL } from '../video/ytApi';
 import { connPoor, readConn, type Conn } from './context';
+import { formOf } from './form';
 import { Mp3Error, readHead, sliceMp3, type Mp3Head, type RangeFetch } from './mp3range';
 import { addNet, isPoorNet, keyOf, nextToLoad, planEviction, PRELOAD_CAP_BYTES, windowOfTime, type NetSample, type Ranked, type Stored } from './preload';
 import { headsKey, parseHeads, type Head } from './startHead';
@@ -25,8 +31,17 @@ const CONCURRENCY = 3;
  * und der Vorrat füllt sich nie, ohne dass ein Fehler im Protokoll steht.
  */
 export const STALL_MS = 20000;
-/** So lange bleibt ein Moment nach MAX_FAILS Fehlversuchen und ein Host nach HOST_STRIKES Netzfehlern ausgesetzt. Danach gibt es einen neuen Versuch (vorher: bis zum Ende der Sitzung). */
+/** So lange bleibt ein Moment nach MAX_FAILS Fehlversuchen ausgesetzt. Danach gibt es einen neuen Versuch (vorher: bis zum Ende der Sitzung). */
 export const RETRY_MS = 30000;
+/**
+ * Brief 22: ein Host mit HOST_STRIKES Netzfehlern (TypeError, meist CORS oder Range nicht erlaubt) bleibt bis zum nächsten Kalendertag gesperrt, nicht mehr 30 s.
+ * Vorher ging das Hämmern nach jeder Pause von vorn los (Diag 06.11. 03:59: Dutzende Fehlabrufe pro Minute). Ortszeit des Geräts.
+ */
+export const nextCalendarDay = (t: number): number => {
+  const d = new Date(t);
+  d.setHours(24, 0, 0, 0);
+  return d.getTime();
+};
 /** So lange wartet ein Moment nach einem Abruf, der verdeckt scheiterte oder hing (nicht gezählt), bevor er neu gestartet wird. Ohne Wartezeit liefe ein sofort scheiternder Abruf in einer engen Schleife. */
 export const HOLD_MS = 5000;
 /** Vorrats-Tiefe: so viele der nächsten Momente zählen. Liegen weniger als DEPTH_URGENT davon im Vorrat, laufen die Abrufe mit hoher Priorität. */
@@ -70,6 +85,8 @@ interface Entry extends Stored {
   /** Tonzeit des ersten Bytes in der Quelle, Sekunden */
   offset: number;
   duration: number;
+  /** Form des Moments (Brief 22). Fehlt sie, stammt der Eintrag aus der Zeit vor Brief 22 und ist ein Audio-Ausschnitt: er wird beim Start gelöscht. */
+  form?: 'video' | 'audio' | 'text';
 }
 
 class HttpError extends Error {
@@ -143,7 +160,8 @@ export class Preloader {
   private readSync() {
     try {
       const raw = this.d.storage?.getItem(INDEX_KEY);
-      if (raw) for (const e of JSON.parse(raw) as Entry[]) if (e && typeof e.id === 'string') this.indexIds.add(e.id);
+      // Brief 22: nur Video-Einträge zählen als Vorrat. Audio-Einträge (ohne form oder form audio) löscht init gleich, das Deck soll nicht auf sie warten.
+      if (raw) for (const e of JSON.parse(raw) as Entry[]) if (e && typeof e.id === 'string' && e.form === 'video') this.indexIds.add(e.id);
       this.headList = parseHeads(this.d.storage?.getItem(headsKey('audio')));
       this.pinned = new Set(this.headList.map((h) => h.id));
     } catch {
@@ -238,11 +256,22 @@ export class Preloader {
       const raw = this.d.storage?.getItem(INDEX_KEY);
       const idx: Entry[] = raw ? (JSON.parse(raw) as Entry[]) : [];
       const keys = new Set((await this.cache.keys()).map((k) => k.url));
-      for (const e of idx) if (keys.has(this.keyFor(e.id))) this.entries.set(e.id, e);
-      // Verwaiste Ausschnitte ohne Eintrag im Index räumen
+      // Brief 22: Audio-Einträge (alle vor Brief 22 abgelegten, erkennbar am fehlenden form) werden einmal gelöscht. Nur Video bleibt im Vorrat.
+      let cleared = 0;
+      for (const e of idx) {
+        if (!keys.has(this.keyFor(e.id))) continue;
+        if (e.form === 'video') this.entries.set(e.id, e);
+        else cleared++;
+      }
+      // Verwaiste Ausschnitte ohne Eintrag im Index räumen (die gelöschten Audio-Einträge gleich mit)
       for (const k of keys) {
         const id = decodeURIComponent(k.slice(k.lastIndexOf('/') + 1));
         if (!this.entries.has(id)) await this.cache.delete(k);
+      }
+      if (cleared > 0) {
+        this.persist();
+        this.note(`cleared ${cleared} audio entries`);
+        this.say(`cleared ${cleared} audio entries`);
       }
       // Die Köpfe sofort als Blob-URL bereitstellen, bevor der erste Moment startet
       for (const h of this.headList) await this.warmKey(h.id, h.key);
@@ -332,11 +361,11 @@ export class Preloader {
     this.fill();
   }
 
-  /** Host gesperrt (CORS oder Range nicht erlaubt)? Die Sperre gilt RETRY_MS, danach braucht der Host wieder zwei Netzfehler. */
+  /** Host gesperrt (CORS oder Range nicht erlaubt)? Die Sperre gilt bis zum nächsten Kalendertag (Brief 22), danach braucht der Host wieder zwei Netzfehler. */
   private blocked(m: Moment) {
     const h = hostOf(m.hls ?? '');
     if ((this.hostStrikes.get(h) ?? 0) < HOST_STRIKES || this.hostOk.has(h)) return false;
-    if (this.d.now() - (this.strikeAt.get(h) ?? 0) < (this.d.retryMs ?? RETRY_MS)) return true;
+    if (this.d.now() < nextCalendarDay(this.strikeAt.get(h) ?? 0)) return true;
     this.hostStrikes.delete(h);
     this.strikeAt.delete(h);
     return false;
@@ -355,12 +384,12 @@ export class Preloader {
     return null;
   }
 
-  /** Startet Abrufe, bis CONCURRENCY laufen: nächstgelegener fehlender Moment im Fenster zuerst */
+  /** Startet Abrufe, bis CONCURRENCY laufen: nächstgelegener fehlender Moment im Fenster zuerst. Audio wird übersprungen (Brief 22), nur Video lädt. */
   private fill() {
     if (!this.cache || !this.d.online()) return;
     while (this.active.size < CONCURRENCY) {
       const taken = new Set([...this.entries.keys(), ...this.active.keys()]);
-      const job = nextToLoad(this.win, taken, (m) => this.whyNot(m) !== null || this.deferred.has(m.id));
+      const job = nextToLoad(this.win, taken, (m) => formOf(m) === 'audio' || this.whyNot(m) !== null || this.deferred.has(m.id));
       if (!job) break;
       this.start(job);
     }
@@ -491,7 +520,7 @@ export class Preloader {
       // Die echte Größe bleibt bis zum Eintrag reserviert, sonst nutzt ein anderer Abruf den Platz während des Schreibens
       this.reserved.set(m.id, slice.bytes.length);
       await this.cache!.put(this.keyFor(m.id), new Response(new Blob([slice.bytes as BlobPart], { type: 'audio/mpeg' }), { headers: { 'Content-Type': 'audio/mpeg', 'X-Offset': String(slice.offset), 'X-Src': url } }));
-      this.entries.set(m.id, { id: m.id, bytes: slice.bytes.length, at: this.d.now(), offset: slice.offset, duration: slice.duration });
+      this.entries.set(m.id, { id: m.id, bytes: slice.bytes.length, at: this.d.now(), offset: slice.offset, duration: slice.duration, form: formOf(m) });
       this.reserved.delete(m.id);
       // Ein Erfolg löscht die Fehlversuche dieses Moments (sonst bliebe er nach zwei alten Fehlern bei jedem späteren Fehler sofort ausgesetzt)
       this.fails.delete(m.id);
@@ -534,7 +563,7 @@ export class Preloader {
         const n = (this.hostStrikes.get(host) ?? 0) + 1;
         this.hostStrikes.set(host, n);
         this.strikeAt.set(host, at);
-        if (n === HOST_STRIKES) this.say(`host ${host} paused ${(this.d.retryMs ?? RETRY_MS) / 1000} s after ${n} network errors`);
+        if (n === HOST_STRIKES) this.say(`host ${host} blocked until tomorrow`);
       }
       this.note(`fail ${m.id} ${why}`);
       this.say(`fail ${m.id} ${why}`);
