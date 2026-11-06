@@ -26,6 +26,8 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # 06.11.2026: die apt-Installation von ffmpeg hing 30 Minuten ohne Ende (Lauf 42169806482). Ein hängender Schritt bricht nach 8 Minuten ab statt nach 6 Stunden.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -35,6 +37,7 @@ jobs:
       - run: npm ci
       # ffmpeg misst im Lautheits-Test (tests/moments-loudness.test.ts) die Fixtures. Ohne ffmpeg würde der Test still übersprungen.
       - name: ffmpeg für den Lautheits-Test
+        timeout-minutes: 8
         run: command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
       - run: npm test
       - run: npm run build
