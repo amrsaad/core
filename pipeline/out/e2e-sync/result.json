@@ -1,5 +1,5 @@
 {
- "at": "2026-11-05T19:38:44.460Z",
+ "at": "2026-11-06T04:21:00.238Z",
  "runs": [
   {
    "browser": "webkit",
@@ -49,12 +49,12 @@
    },
    "diagLines": 12,
    "diagSample": [
-    "5q13 slot0 sy1:1 state 2",
-    "5q13 slot1 sy4:1 state 0",
-    "5q13 video: warm ended early slot1 sy4:1",
-    "5q13 app: hidden"
+    "rn3q slot0 sy2:1 state 2",
+    "rn3q slot1 sy5:1 state 0",
+    "rn3q video: warm ended early slot1 sy5:1",
+    "rn3q app: hidden"
    ],
-   "writeDelayMs": 10033,
+   "writeDelayMs": 10031,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -109,14 +109,14 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "diagLines": 10,
+   "diagLines": 12,
    "diagSample": [
-    "xcro slot2 sy0:1 state 1",
-    "xcro slot2 sy0:1 state 2",
-    "xcro slot0 sy2:1 state 2",
-    "xcro app: hidden"
+    "1vee slot0 sy5:1 state 2",
+    "1vee slot1 sy6:1 state 0",
+    "1vee video: warm ended early slot1 sy6:1",
+    "1vee app: hidden"
    ],
-   "writeDelayMs": 10021,
+   "writeDelayMs": 10020,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
