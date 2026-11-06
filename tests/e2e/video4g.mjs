@@ -223,9 +223,31 @@ const runScenario = async (browser, sc) => {
 
   // Pause: eigenes Standbild mit Hook und Pausensymbol liegt über dem IFrame, nie die YouTube-Pausenansicht
   await page.waitForTimeout(3500);
+  // Brief 20 (Issue 46): ein echtes IFrame im Player-Rahmen, wie es YouTube einsetzt (der Nachbau fakeyt.js zeichnet keins). Es muss Zeiger ignorieren und bei Pause unsichtbar sein.
+  const ifr = await page.evaluate(() => {
+    const host = document.querySelector('.vslot[aria-hidden=false] .vframe > div');
+    if (!host) return null;
+    const f = document.createElement('iframe');
+    f.id = 'e2e-yt-iframe';
+    f.src = 'about:blank';
+    f.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0';
+    host.append(f);
+    return { pe: getComputedStyle(f).pointerEvents, vis: getComputedStyle(f).visibility };
+  });
+  c.iframeIgnoresPointer = !!ifr && ifr.pe === 'none';
+  c.iframeVisiblePlaying = !!ifr && ifr.vis === 'visible';
   if (sc.desk) await page.keyboard.press('Space'); else await page.mouse.click(vp.width / 2, vp.height / 2);
   await page.waitForTimeout(500);
-  const pz = await page.evaluate((EX) => {
+  const ifPaused = await page.evaluate(() => {
+    const f = document.getElementById('e2e-yt-iframe');
+    const cur = document.querySelector('.vslot[aria-hidden=false]');
+    const top = f ? document.elementFromPoint(innerWidth / 2, innerHeight / 2) : null;
+    return { vis: f ? getComputedStyle(f).visibility : null, tapTarget: top ? top.className : null, held: !!cur?.hasAttribute('data-hold'), paused: !!cur?.hasAttribute('data-paused') };
+  });
+  r.iframePaused = ifPaused;
+  c.iframeHiddenWhilePaused = ifPaused.vis === 'hidden';
+  c.tapGoesToOurSurface = typeof ifPaused.tapTarget === 'string' && !/\bvframe\b/.test(ifPaused.tapTarget) && ifPaused.tapTarget !== '';
+  const pz =await page.evaluate((EX) => {
     const cur = document.querySelector('.vslot[aria-hidden=false]');
     const poster = cur?.querySelector('.vposter');
     const hookText = window.__core.moment().hook;
@@ -263,6 +285,17 @@ const runScenario = async (browser, sc) => {
     r.noOverlay = nz;
     c.noOverlayWhenPaused = !!nz.paused && nz.poster && nz.covers && nz.exposed === 0 && nz.checked > 0 && nz.playAbove && nz.x === 16 && Math.abs(nz.w - (nz.vw - 32)) <= 1 && Math.abs(nz.h - (nz.vw - 32) * 9 / 16) <= 1; // iPhone 15 mit 393 px Viewport: 361 x 203 bei x = 16, hier 390 px: 358 x 201
   }
+  // Brief 20: Weiterspielen macht das IFrame wieder sichtbar (data-hold weg, data-paused weg)
+  await page.evaluate(() => document.querySelector('.vslot[aria-hidden=false]')?.removeAttribute('data-live'));
+  if (sc.desk) await page.keyboard.press('Space'); else await page.mouse.click(vp.width / 2, vp.height / 2);
+  await page.waitForTimeout(600);
+  const ifPlay = await page.evaluate(() => {
+    const f = document.getElementById('e2e-yt-iframe');
+    const cur = document.querySelector('.vslot[aria-hidden=false]');
+    return { vis: f ? getComputedStyle(f).visibility : null, held: !!cur?.hasAttribute('data-hold'), paused: !!cur?.hasAttribute('data-paused') };
+  });
+  r.iframeResumed = ifPlay;
+  c.iframeVisibleAfterResume = ifPlay.vis === 'visible' && !ifPlay.held && !ifPlay.paused;
   c.pageErrors = errors.length === 0;
   r.errors = errors.slice(0, 3);
   await ctx.close();

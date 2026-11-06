@@ -38,6 +38,12 @@
 .vslot[data-paused][aria-hidden='false'] .vposter,
 .vslot[data-paused][data-live][aria-hidden='false'] .vposter { visibility: visible; z-index: 2; }
 .vslot[data-paused] .vplay { z-index: 3; }
+/* Brief 20 (Issue 46): Der Tipp gehört immer unserer Tippfläche (.vgesture), nie dem YouTube-IFrame. Der IFrame nimmt keine Zeiger an, pausiert und startet nur über die Player-API.
+   Und bei Pause ist der IFrame selbst unsichtbar: Auf dem iPhone liegt sein Video-Layer über den DOM-Nachbarn, das Standbild allein reichte nicht. data-hold setzt der Player-Wrapper
+   beim Pausebefehl und nimmt es beim nächsten Abspielen oder Laden wieder weg, data-paused kommt aus dem Zustand des Feeds. */
+.vframe iframe { pointer-events: none; }
+.vslot[data-hold] .vframe iframe,
+.vslot[data-paused] .vframe iframe { visibility: hidden !important; }
 
 /* Ambient: das Vorschaubild weich und dunkel hinter der Karte, nur Video.
    Kein filter: blur(48px). WebKit ohne GPU rechnet ihn bei jedem Frame neu (CI-Runner: 12 Hz im Leerlauf, 94 % verlorene Frames beim Wischen).

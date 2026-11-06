@@ -16,19 +16,21 @@ class FakeCache implements CacheLike {
 
 interface World {
   files: Map<string, Uint8Array>;
-  calls: { url: string; range: string }[];
+  calls: { url: string; range: string; priority?: string }[];
   bytesServed: number;
   online: boolean;
   failHosts: Set<string>;
   clock: number;
   perf: number;
   delayMs: number;
+  /** Die nächsten so vielen Abrufe antworten nie (iOS hält sie zurück), reagieren aber auf den Abbruch */
+  hang: number;
   /** Netz weg mitten in der Antwort: Länge angekündigt, aber weniger Bytes geliefert */
   truncate?: boolean;
 }
 
-function setup(): { w: World; cache: FakeCache; store: Map<string, string>; make: () => Preloader; revoked: string[] } {
-  const w: World = { files: new Map(), calls: [], bytesServed: 0, online: true, failHosts: new Set(), clock: 1000, perf: 0, delayMs: 0 };
+function setup(extra: Partial<PreloaderDeps> = {}): { w: World; cache: FakeCache; store: Map<string, string>; make: () => Preloader; revoked: string[] } {
+  const w: World = { files: new Map(), calls: [], bytesServed: 0, online: true, failHosts: new Set(), clock: 1000, perf: 0, delayMs: 0, hang: 0 };
   const cache = new FakeCache();
   const store = new Map<string, string>();
   const revoked: string[] = [];
@@ -36,9 +38,13 @@ function setup(): { w: World; cache: FakeCache; store: Map<string, string>; make
   const fetchFn = (async (input: string, init: RequestInit) => {
     const url = String(input);
     const range = (init.headers as Record<string, string>).Range;
-    w.calls.push({ url, range });
+    w.calls.push({ url, range, priority: (init as RequestInit & { priority?: string }).priority });
     const host = new URL(url).host;
     if (w.failHosts.has(host)) throw new TypeError('Failed to fetch');
+    if (w.hang > 0) {
+      w.hang--;
+      return new Promise<Response>((_, rej) => init.signal?.addEventListener('abort', () => rej(new DOMException('aborted', 'AbortError'))));
+    }
     if (init.signal?.aborted) throw new DOMException('aborted', 'AbortError');
     const file = w.files.get(url);
     if (!file) return new Response('', { status: 404 });
@@ -62,6 +68,7 @@ function setup(): { w: World; cache: FakeCache; store: Map<string, string>; make
     createObjectURL: () => `blob:fake/${++n}`,
     revokeObjectURL: (u) => void revoked.push(u),
     keyBase: 'https://app.test/core/',
+    ...extra,
   };
   return { w, cache, store, make: () => new Preloader(deps), revoked };
 }
@@ -275,4 +282,129 @@ describe('Preloader: Ausschnitte in die Cache API', () => {
   });
 
   it('Cache-Name', () => expect(CACHE_NAME).toBe('core-preload-v1'));
+});
+
+describe('Preloader: der Vorrat füllt sich auch bei hängenden Abrufen und Netzfehlern am Start (Brief 20, Issue 47)', () => {
+  beforeEach(() => LOCAL.clear());
+  const file = synthMp3({ frames: 20_000 }).bytes;
+  const queue = (n: number) => Array.from({ length: n }, (_, i) => mom(i));
+  const prime = (w: World, q: Moment[]) => {
+    for (const m of q) if (m.hls?.endsWith('.mp3')) w.files.set(m.hls, file);
+  };
+
+  it('drei hängende Abrufe belegen die Plätze nicht für immer: der Wächter bricht sie ab, der Vorrat steht auf 6 von 6', async () => {
+    const { w, make } = setup({ stallMs: 60 });
+    const q = queue(8);
+    prime(w, q);
+    w.hang = 3;
+    const lines: string[] = [];
+    const p = make();
+    p.setDiag((l) => lines.push(l));
+    p.setQueue(q, 0);
+    await until(() => p.depth() >= 6);
+    expect(p.depth()).toBeGreaterThanOrEqual(6);
+    expect(p.busy() || p.stats().n >= 6).toBe(true);
+    // Jeder hängende Abruf steht mit Grund im Protokoll, jedes Ergebnis auch
+    expect(lines.filter((l) => /^stock: fail m\d+ stall 60 ms$/.test(l)).length).toBe(3);
+    expect(lines.some((l) => /^stock: \+1 m\d+ \(\d of 6\)$/.test(l))).toBe(true);
+    expect(lines).toContain('stock: 6 of 6');
+    expect(lines.filter((l) => l === 'stock: 6 of 6')).toHaveLength(1);
+  });
+
+  it('ein hängender Abruf zählt als Fehlversuch des Moments, nie gegen den Host', async () => {
+    const { w, make } = setup({ stallMs: 40 });
+    const q = queue(2);
+    prime(w, q);
+    w.hang = 1;
+    const p = make();
+    p.setQueue(q, 0);
+    await until(() => p.has('m1'));
+    // m1 hing einmal, kam beim zweiten Versuch: der Host ist nicht gesperrt
+    expect(p.has('m1')).toBe(true);
+    expect(p.whyNot(q[1])).toBeNull();
+  });
+
+  it('Netzfehler am Start sperren den Host nur für RETRY_MS, danach füllt sich der Vorrat', async () => {
+    const { w, make } = setup({ retryMs: 100_000 });
+    const q = queue(5);
+    prime(w, q);
+    w.failHosts.add('cdn.test');
+    const lines: string[] = [];
+    const p = make();
+    p.setDiag((l) => lines.push(l));
+    p.setQueue(q, 0);
+    await settle(p, 20);
+    expect(p.stats().n).toBe(0);
+    expect(p.whyNot(q[1])).toBe('host');
+    expect(lines.some((l) => /^stock: host cdn\.test paused 100 s after 2 network errors$/.test(l))).toBe(true);
+    // Das Netz ist wieder da, die Aussetzung läuft ab: der nächste resume holt alles
+    w.failHosts.clear();
+    w.clock += 150_000;
+    p.resume();
+    await until(() => p.depth() >= 4);
+    expect(p.depth()).toBeGreaterThanOrEqual(4);
+    expect(p.whyNot(q[1])).toBeNull();
+  });
+
+  it('ein Moment mit zwei Fehlversuchen bekommt nach RETRY_MS einen neuen Versuch', async () => {
+    const { w, make } = setup({ retryMs: 100_000 });
+    const q = queue(2);
+    // Die Datei fehlt: 404, zwei Fehlversuche, dann ausgesetzt
+    const p = make();
+    p.setQueue(q, 0);
+    await settle(p, 20);
+    p.resume();
+    await settle(p, 20);
+    expect(p.whyNot(q[1])).toBe('failed');
+    prime(w, q);
+    w.clock += 150_000;
+    p.resume();
+    await until(() => p.has('m1'));
+    expect(p.has('m1')).toBe(true);
+  });
+
+  it('verdeckt scheiternde Abrufe zählen weder gegen den Moment noch gegen den Host', async () => {
+    let hidden = true;
+    const { w, make } = setup({ hidden: () => hidden });
+    const q = queue(4);
+    prime(w, q);
+    w.failHosts.add('cdn.test');
+    const lines: string[] = [];
+    const p = make();
+    p.setDiag((l) => lines.push(l));
+    p.setQueue(q, 0);
+    await settle(p, 20);
+    // Nicht gezählt: weder gesperrter Host noch ausgesetzter Moment, nur eine kurze Wartezeit. Und keine enge Schleife: wenige Abrufe, nicht Tausende.
+    expect(p.whyNot(q[1])).toBe('paused');
+    expect(w.calls.length).toBeLessThanOrEqual(6);
+    expect(lines.some((l) => /^stock: fail m\d+ .*\(hidden, not counted\)$/.test(l))).toBe(true);
+    hidden = false;
+    w.failHosts.clear();
+    w.clock += 10_000;
+    p.resume();
+    await until(() => p.depth() >= 3);
+    expect(p.depth()).toBeGreaterThanOrEqual(3);
+    expect(p.whyNot(q[1])).toBeNull();
+  });
+
+  it('dünner Vorrat lädt mit hoher Priorität, ein gefüllter leise im Hintergrund', async () => {
+    const { w, make } = setup();
+    const q = queue(12);
+    prime(w, q);
+    const p = make();
+    p.setQueue(q, 0);
+    await until(() => p.stats().n >= 8);
+    const first = w.calls.slice(0, 3).map((c) => c.priority);
+    expect(first.every((x) => x === 'high')).toBe(true);
+    expect(w.calls.some((c) => c.priority === 'low')).toBe(true);
+  });
+
+  it('Fehler beim Öffnen des Speichers steht im Protokoll, auch wenn sich der Feed erst danach anmeldet', async () => {
+    const { make } = setup({ openCache: async () => { throw new Error('quota'); } });
+    const p = make();
+    await p.whenReady();
+    const lines: string[] = [];
+    p.setDiag((l) => lines.push(l));
+    expect(lines).toContain('stock: fail init quota');
+  });
 });
