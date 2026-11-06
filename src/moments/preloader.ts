@@ -7,9 +7,10 @@ import { Mp3Error, readHead, sliceMp3, type Mp3Head, type RangeFetch } from './m
 import { addNet, isPoorNet, keyOf, nextToLoad, planEviction, PRELOAD_CAP_BYTES, windowOfTime, type NetSample, type Ranked, type Stored } from './preload';
 import { headsKey, parseHeads, type Head } from './startHead';
 import type { Moment } from './types';
+import { dashName, lsKey } from '../lib/ns';
 
-export const CACHE_NAME = 'core-preload-v1';
-const INDEX_KEY = 'core.preload.v1';
+export const CACHE_NAME = dashName('core-preload-v1');
+const INDEX_KEY = lsKey('preload.v1');
 /** Ausschnitte im Speicher als Blob-URL: ein paar zurück (Slots nutzen sie noch) und die nächsten */
 const WARM_BACK = 3;
 const WARM_AHEAD = 5;

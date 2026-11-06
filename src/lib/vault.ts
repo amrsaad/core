@@ -4,12 +4,13 @@
 // Geräte-Sync (Max, 28.10.2026): dazu kommt das GitHub-Token, mit dem Pool-Schlüssel verschlüsselt, am selben Ort (IndexedDB und Cache Storage).
 // Das Token verlässt das Gerät nur im QR-Code von "Unlock another device", wieder verschlüsselt, und beim Sync zu api.github.com.
 import { decryptToken, encryptToken, TOKEN_OK } from './sync/crypto';
+import { dashName } from './ns';
 
 const b64u = (s: string) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)), (c) => c.charCodeAt(0));
 
 function db(): Promise<IDBDatabase> {
   return new Promise((res, rej) => {
-    const r = indexedDB.open('core-key', 1);
+    const r = indexedDB.open(dashName('core-key'), 1);
     r.onupgradeneeded = () => r.result.createObjectStore('k');
     r.onsuccess = () => res(r.result);
     r.onerror = () => rej(r.error);
@@ -26,7 +27,7 @@ async function idb<T>(mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRe
   });
 }
 
-const KEY_CACHE = 'core-key';
+const KEY_CACHE = dashName('core-key');
 const keyUrl = () => new URL(`${import.meta.env.BASE_URL}__key`, location.origin).href;
 const RAW = /^[A-Za-z0-9_-]{40,}$/;
 
@@ -87,7 +88,7 @@ export async function syncKey(): Promise<CryptoKey | null> {
 
 // ---------- GitHub-Token für den Sync ----------
 
-const TOKEN_CACHE = 'core-token';
+const TOKEN_CACHE = dashName('core-token');
 const tokenUrl = () => new URL(`${import.meta.env.BASE_URL}__token`, location.origin).href;
 
 async function tokenCacheRead(): Promise<string | null> {

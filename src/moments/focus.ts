@@ -10,6 +10,7 @@
 import type { Area } from '../types';
 import { AREA_LABEL } from '../lib/labels';
 import type { Moment } from './types';
+import { dashName } from '../lib/ns';
 
 export type Lang = 'ar' | 'de' | 'en';
 export type FocusUntil = number | 'session';
@@ -23,7 +24,7 @@ export interface Focus {
   dur?: FocusDur;
 }
 
-export const FOCUS_KEY = 'core-focus';
+export const FOCUS_KEY = dashName('core-focus');
 /** Ereignis am window, wenn sich der Fokus an diesem Gerät ändert (storage meldet das nur anderen Tabs) */
 export const FOCUS_EVENT = 'core-focus-changed';
 

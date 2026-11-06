@@ -1,6 +1,6 @@
 name: daily
 
-# Läuft immer auf dem Default-Branch des Repos (Name egal).
+# Läuft immer auf dem Default-Branch des Repos (Name egal). Push nur auf diesen Branch: ein Push auf `preview` startet preview.yml (Entscheidung 56).
 on:
   schedule:
     - cron: '0 3 * * *'
@@ -11,6 +11,7 @@ on:
         type: boolean
         default: false
   push:
+    branches: [claude/core-v1]
 
 permissions:
   contents: write
@@ -121,141 +122,166 @@ jobs:
           echo "::error::Teilfehler: videos=${{ steps.videos.outcome }} fetch=${{ steps.fetch.outcome }} cards=${{ steps.cards.outcome }} verify=${{ steps.verify.outcome }}"
           exit 1
 
-  # E2E (nachgebaute YouTube-API, WebKit und Chromium) bei jedem Lauf. Deploy nur nach grünem E2E (Max, 26.10.2026).
-  # Ergebnisse und Screenshots werden committet. Ausgabe sha = der getestete Stand, genau der wird deployt.
-  e2e:
+  # Prüft, welcher Stand getestet und deployt wird: einmal bestimmt, damit alle vier E2E-Gruppen und der Deploy denselben Commit nehmen
+  # (die Gruppen pushen ihre Ergebnisse, der Branch-Kopf wandert während des Laufs).
+  tested:
     needs: [test, pipeline]
     if: always() && needs.test.result == 'success' && needs.pipeline.result != 'cancelled'
     outputs:
       sha: ${{ steps.tested.outputs.sha }}
     runs-on: ubuntu-latest
-    # Die E2E-Schritte summieren sich auf rund 150 Minuten Höchstdauer, 45 waren seit heute zu knapp (jeder Lauf lief in den Timeout)
-    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - id: tested
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  # E2E (nachgebaute YouTube-API, WebKit und Chromium) bei jedem Lauf, in vier parallelen Gruppen (Brief 21, Schritt 10).
+  # Deploy nur nach grünem E2E aller Gruppen (Max, 26.10.2026). Ergebnisse und Screenshots werden je Gruppe committet.
+  e2e:
+    name: e2e ${{ matrix.group }}
+    needs: [test, pipeline, tested]
+    if: always() && needs.tested.result == 'success'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: 1
+            dirs: pipeline/out/e2e-moments pipeline/out/e2e-desktop pipeline/out/e2e-keyrestore pipeline/out/e2e-sync
+          - group: 2
+            dirs: pipeline/out/e2e-digest pipeline/out/e2e-background pipeline/out/e2e-preload pipeline/out/e2e-endpage pipeline/out/e2e-swipe
+          - group: 3
+            dirs: pipeline/out/e2e-loudness pipeline/out/e2e-offline pipeline/out/e2e-tempo pipeline/out/e2e-tempoperf
+          - group: 4
+            dirs: pipeline/out/e2e-recallqueue pipeline/out/e2e-audiotab pipeline/out/e2e-video4g pipeline/out/e2e-layout/run/results.json
+    runs-on: ubuntu-latest
+    # Je Gruppe die Summe ihrer Schritt-Zeitlimits (Gruppe 4 mit dem Layout-Gate ist die längste)
+    timeout-minutes: 90
     # Offizielles Image: Browser und Systempakete sind vorinstalliert (apt-Installation hing im Runner)
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ needs.tested.outputs.sha }}
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      - id: tested
-        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - run: npm ci
       - run: npm run build
       - name: Momente-Feed testen (nachgebaute YouTube-API, WebKit und Chromium)
+        if: matrix.group == 1
         timeout-minutes: 12
         run: |
           npx vite preview --host 127.0.0.1 --port 4173 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4173/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/moments.mjs http://127.0.0.1:4173/core/ pipeline/out/e2e-moments
       - name: Desktop-Modus testen (Chromium 1440x900, jede Taste, Panel, Trackpad, PWA)
-        if: always()
+        if: always() && matrix.group == 1
         timeout-minutes: 10
         run: |
           npx vite preview --host 127.0.0.1 --port 4175 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4175/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/desktop.mjs http://127.0.0.1:4175/core/ pipeline/out/e2e-desktop
       - name: Schlüsselsicherung testen (3 Läufe je Browser, alle müssen grün sein)
-        if: always()
+        if: always() && matrix.group == 1
         timeout-minutes: 8
         run: |
           npx vite preview --host 127.0.0.1 --port 4174 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4174/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           RUNS=3 node tests/e2e/keyrestore.mjs http://127.0.0.1:4174/core/ pipeline/out/e2e-keyrestore
       - name: Geräte-Sync testen (nachgebaute GitHub API, zwei Geräte, WebKit und Chromium)
-        if: always()
+        if: always() && matrix.group == 1
         timeout-minutes: 10
         run: |
           npx vite preview --host 127.0.0.1 --port 4176 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4176/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/sync.mjs http://127.0.0.1:4176/core/ pipeline/out/e2e-sync
       - name: Core Digest testen (Wochenkarte, Taps, zweites Gerät, nachgebaute GitHub API, WebKit und Chromium)
-        if: always()
+        if: matrix.group == 2
         timeout-minutes: 10
         run: |
           npx vite preview --host 127.0.0.1 --port 4177 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4177/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/digest.mjs http://127.0.0.1:4177/core/ pipeline/out/e2e-digest
       - name: Hintergrund-Wiedergabe testen (Audio läuft weiter, Video bis zum Ende, YouTube hält an; WebKit und Chromium)
-        if: always()
+        if: always() && matrix.group == 2
         timeout-minutes: 8
         run: |
           npx vite preview --host 127.0.0.1 --port 4178 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4178/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/background.mjs http://127.0.0.1:4178/core/ pipeline/out/e2e-background
       - name: Offline-Vorrat testen (gedrosseltes Netz 1,5 s, Start aus dem Cache unter 100 ms, offline, Chromium)
-        if: always()
+        if: always() && matrix.group == 2
         timeout-minutes: 8
         run: |
           npx vite preview --host 127.0.0.1 --port 4179 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4179/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/preload.mjs http://127.0.0.1:4179/core/ pipeline/out/e2e-preload
       - name: Endseite testen (gesehen bleibt gesehen, Zahlen der anderen Reiter, Abrufkarte vor der Endseite)
-        if: always()
+        if: always() && matrix.group == 2
         timeout-minutes: 6
         run: |
           npx vite preview --host 127.0.0.1 --port 4180 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4180/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/endpage.mjs http://127.0.0.1:4180/core/ pipeline/out/e2e-endpage
       - name: Wischübergang messen (10 Wische, verlorene Frames, Ziel unter 2 Prozent; WebKit relativ zum Leerlauf-Boden des Runners)
-        if: always()
+        if: always() && matrix.group == 2
         timeout-minutes: 8
         run: |
           npx vite preview --host 127.0.0.1 --port 4181 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4181/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/swipe.mjs http://127.0.0.1:4181/core/ pipeline/out/e2e-swipe
       - name: Gleiche Lautheit testen (GainNode je Moment, YouTube nur absenken, kein CORS und HLS unverändert, Settings-Diagnose; Chromium)
-        if: always()
+        if: matrix.group == 3
         timeout-minutes: 6
         run: |
           npx vite preview --host 127.0.0.1 --port 4182 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4182/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           E2E_BROWSERS=chromium node tests/e2e/loudness.mjs http://127.0.0.1:4182/core/ pipeline/out/e2e-loudness
       - name: Netzabbruch testen (5, 20 und 60 s offline mitten im Abspielen, Streams und YouTube, WebKit und Chromium)
-        if: always()
+        if: always() && matrix.group == 3
         timeout-minutes: 14
         run: |
           npx vite preview --host 127.0.0.1 --port 4183 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4183/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/offline.mjs http://127.0.0.1:4183/core/ pipeline/out/e2e-offline
       - name: Tempo testen (langes Drücken, Anzeige, Reiter, Settings, Neustart, Streams und YouTube, WebKit und Chromium)
-        if: always()
+        if: always() && matrix.group == 3
         timeout-minutes: 8
         run: |
           npx vite preview --host 127.0.0.1 --port 4184 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4184/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/tempo.mjs http://127.0.0.1:4184/core/ pipeline/out/e2e-tempo
       - name: Tempo flüssig testen (Issue 13, echte Wiedergabe, Stalls, Netzanfragen beim Wechsel, Elemente mit Quelle; Chromium mit CPU-Drossel 4x; WebKit läuft auf dem Runner unter Last instabil und bleibt eine manuelle Messung)
-        if: always()
+        if: always() && matrix.group == 3
         timeout-minutes: 20
         run: |
           npx vite preview --host 127.0.0.1 --port 4186 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4186/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           E2E_BROWSERS=chromium CHECK=1 node tests/e2e/tempoperf.mjs http://127.0.0.1:4186/core/ pipeline/out/e2e-tempoperf
       - name: Abrufkarten-Warteschlange testen (Settings, Saved, Feedback-Blatt, Hintergrund; WebKit und Chromium)
-        if: always()
+        if: matrix.group == 4
         timeout-minutes: 8
         run: |
           npx vite preview --host 127.0.0.1 --port 4185 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4185/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/recallqueue.mjs http://127.0.0.1:4185/core/ pipeline/out/e2e-recallqueue
       - name: Audio-Reiter testen (Issue 11, 13, 14, 15; erste Geste, Hintergrund, Abrufkarte, Tempo 2x, Untertitel; WebKit und Chromium)
-        if: always()
+        if: always() && matrix.group == 4
         timeout-minutes: 12
         run: |
           npx vite preview --host 127.0.0.1 --port 4187 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4187/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/audiotab.mjs http://127.0.0.1:4187/core/ pipeline/out/e2e-audiotab
       - name: Video-Start unter 4G testen (Issue 22, YouTube-Nachbau, Einblendung darf nie sichtbar sein; Chromium)
-        if: always()
+        if: always() && matrix.group == 4
         timeout-minutes: 15
         run: |
           npx vite preview --host 127.0.0.1 --port 4188 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4188/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           E2E_BROWSERS=chromium node tests/e2e/video4g.mjs http://127.0.0.1:4188/core/ pipeline/out/e2e-video4g
       - name: Layout-Gate (Entscheidung 43, Brief 06 und 17; Chromium mit vier Breiten und WebKit mit iPhone-Profilen 390x844 und 430x932 mit Sicherheitsrand 59/34; Überlauf, Kontrast AA, 44 px, keine überlagerten Textblöcke, kein Seitenscroll, Leiste im Fenster, Blätter schließen; ein roter Befund bricht den Deploy)
-        if: always()
+        if: always() && matrix.group == 4
         timeout-minutes: 45
         run: |
           npx vite preview --host 127.0.0.1 --port 4189 --strictPort &
@@ -264,16 +290,22 @@ jobs:
       - name: Ergebnisse committen
         if: always()
         run: |
-          [ -d pipeline/out/e2e-loudness ] || [ -d pipeline/out/e2e-moments ] || [ -d pipeline/out/e2e-keyrestore ] || [ -d pipeline/out/e2e-desktop ] || [ -d pipeline/out/e2e-sync ] || [ -d pipeline/out/e2e-digest ] || [ -d pipeline/out/e2e-background ] || [ -d pipeline/out/e2e-preload ] || [ -d pipeline/out/e2e-endpage ] || [ -d pipeline/out/e2e-swipe ] || [ -d pipeline/out/e2e-offline ] || [ -d pipeline/out/e2e-tempo ] || [ -d pipeline/out/e2e-tempoperf ] || [ -d pipeline/out/e2e-recallqueue ] || [ -d pipeline/out/e2e-audiotab ] || [ -d pipeline/out/e2e-video4g ] || [ -d pipeline/out/e2e-layout ] || { echo "Keine E2E-Ergebnisse."; exit 0; }
           git config user.name "core-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pipeline/out/e2e-loudness pipeline/out/e2e-moments pipeline/out/e2e-keyrestore pipeline/out/e2e-desktop pipeline/out/e2e-sync pipeline/out/e2e-digest pipeline/out/e2e-background pipeline/out/e2e-preload pipeline/out/e2e-endpage pipeline/out/e2e-swipe pipeline/out/e2e-offline pipeline/out/e2e-tempo pipeline/out/e2e-tempoperf pipeline/out/e2e-recallqueue pipeline/out/e2e-audiotab pipeline/out/e2e-video4g pipeline/out/e2e-layout/run/results.json 2>/dev/null || true
-          git diff --cached --quiet && exit 0
-          git commit -m "e2e: Momente-Feed $(date -u +%FT%H:%M)"
-          for i in 1 2 3; do git pull --rebase -q origin "${{ github.ref_name }}" && git push origin "HEAD:${{ github.ref_name }}" && break; sleep 5; done
+          for d in ${{ matrix.dirs }}; do [ -e "$d" ] && git add "$d"; done
+          git diff --cached --quiet && { echo "Keine E2E-Ergebnisse."; exit 0; }
+          git commit -m "e2e: Momente-Feed $(date -u +%FT%H:%M) (Gruppe ${{ matrix.group }})"
+          # Vier Gruppen pushen gleichzeitig, die Ordner sind getrennt. Der Checkout ist ein fester Commit, daher fetch und rebase statt pull.
+          for i in 1 2 3 4 5 6; do
+            git fetch -q origin "${{ github.ref_name }}" && git rebase -q FETCH_HEAD && git push origin "HEAD:${{ github.ref_name }}" && exit 0
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 4))
+          done
+          echo "Push der Ergebnisse nach 6 Versuchen fehlgeschlagen" >&2
+          exit 1
 
   deploy:
-    needs: [test, pipeline, e2e]
+    needs: [test, pipeline, tested, e2e]
     # Nur nach grünem E2E, und genau der getestete Stand. Teilfehler der Pipeline blockieren nicht: committet wird nur, was bestanden hat
     if: always() && needs.test.result == 'success' && needs.e2e.result == 'success' && needs.pipeline.result != 'cancelled' && github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
@@ -283,13 +315,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.e2e.outputs.sha }}
+          ref: ${{ needs.tested.outputs.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
       - run: npm ci
       - run: npm run build
+      # Vorschau-Kanal (Entscheidung 56): ein Hauptdeploy darf /core/preview/ nicht löschen. Den Branch `preview` mitbauen, falls er existiert.
+      # Der Stand von `preview` kommt aus seinem eigenen Build (eigene vite.config.ts), der Hauptstand bleibt unberührt.
+      - name: Vorschau mitbauen (Branch preview, falls vorhanden)
+        run: |
+          if git fetch --depth 1 origin preview 2>/dev/null; then
+            git worktree add ../preview-src FETCH_HEAD
+            (cd ../preview-src && npm ci && CORE_BASE=/core/preview/ npm run build)
+            test -f ../preview-src/dist/preview/index.html
+            mkdir -p dist/preview
+            cp -a ../preview-src/dist/preview/. dist/preview/
+            echo "Vorschau gebaut aus preview $(git -C ../preview-src rev-parse --short HEAD)"
+          else
+            echo "Kein Branch preview, nur die echte App."
+          fi
       - uses: actions/configure-pages@v5
         with:
           enablement: true

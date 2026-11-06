@@ -21,6 +21,7 @@ import { diagLog } from '../lib/diag';
 import { backgroundLine } from '../moments/background';
 import { contextState, levelBroken, levelOn, setLevelOn } from '../moments/audioGraph';
 import { loudLog } from '../moments/loudness';
+import { CHANNEL } from '../lib/ns';
 
 const AREAS: Area[] = ['brain', 'body', 'beat'];
 
@@ -299,6 +300,7 @@ export function diagnosticsText(state: AppState, moments: MomentPool | null, ski
   const lat = latencyStats(state.playLatency, true);
   const head = [
     `Core ${__APP_VERSION__}, ${new Date().toISOString()}`,
+    `channel ${CHANNEL}, commit ${__APP_COMMIT__}`,
     `pool ${moments?.updatedAt ? new Date(moments.updatedAt).toISOString() : 'unknown'}, ${moments?.moments.length ?? 0} moments, skipped ${skipped}`,
     `device ${typeof navigator !== 'undefined' ? navigator.userAgent : ''}`,
     `online ${typeof navigator !== 'undefined' ? navigator.onLine : ''}, standalone ${typeof window !== 'undefined' && window.matchMedia?.('(display-mode: standalone)').matches}`,

@@ -1,8 +1,9 @@
 // Einziger Netzwerkzugriff des Syncs: api.github.com, Contents API, eine Datei in core-content.
 // Gleiche Regeln in ios/Core/SyncClient.swift. Das Token kommt von außen und steht nie im Code.
+import { remoteName } from '../ns';
 export const API_HOST = 'https://api.github.com';
 export const REPO = 'amrsaad/core-content';
-export const STATE_PATH = 'state/core-state.enc';
+export const STATE_PATH = remoteName('state/core-state.enc');
 /** Core Digest: Wochenkarte, wöchentlich von der Aufgabe geschrieben, von der App nur gelesen */
 export const DIGEST_PATH = 'state/digest-latest.enc';
 

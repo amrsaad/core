@@ -1,8 +1,9 @@
 import { openDB, type IDBPDatabase } from 'idb';
 import { emptyState, repair45, REPAIR45_KEY, type AppState } from './state';
 import { diagLog } from './diag';
+import { dashName } from './ns';
 
-const DB = 'core';
+const DB = dashName('core');
 const STORE = 'kv';
 const KEY = 'state';
 

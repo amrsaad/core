@@ -5,6 +5,7 @@
 import { episodeOf, HISTORY, isNewEpisode, newMomentCursor, nextMoment, TOP_RATE, type MomentCursor, type MomentPrefs } from './mix';
 import type { Form } from './form';
 import type { Moment } from './types';
+import { lsKey } from '../lib/ns';
 
 export interface SavedQueue {
   /** Lokaler Tag. Ein neuer Tag beginnt mit frischer Mischung (Beat zuerst) */
@@ -12,7 +13,7 @@ export interface SavedQueue {
   ids: string[];
 }
 
-export const queueKey = (form: Form) => `core.queue.v1.${form}`;
+export const queueKey = (form: Form) => lsKey(`queue.v1.${form}`);
 
 export function parseSaved(raw: string | null | undefined): SavedQueue | null {
   if (!raw) return null;

@@ -6,9 +6,10 @@ import { Icon } from '../components/Icon';
 import { MomentModal } from './MomentModal';
 import { DigestCard } from './DigestCard';
 import { fullVideoUrl, thumbOf, type Moment } from './types';
+import { lsKey } from '../lib/ns';
 
 type View = 'grid' | 'list';
-const VIEW_KEY = 'core.saved.view';
+const VIEW_KEY = lsKey('saved.view');
 const readView = (): View => {
   try {
     return localStorage.getItem(VIEW_KEY) === 'list' ? 'list' : 'grid';

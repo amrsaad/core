@@ -19,6 +19,7 @@
     "enrich": "tsx pipeline/enrich.ts",
     "sample": "tsx pipeline/sample.ts",
     "icons": "node scripts/icons.mjs",
+    "icons:preview": "node scripts/preview-icons.mjs",
     "verify": "tsx pipeline/verify.ts",
     "e2e": "node tests/e2e/video.mjs",
     "gate:all": "node scripts/gate-all.mjs"
