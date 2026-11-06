@@ -1,5 +1,5 @@
 {
- "at": "2026-11-06T11:11:59.273Z",
+ "at": "2026-11-06T14:25:05.391Z",
  "runs": [
   {
    "browser": "webkit",
@@ -105,17 +105,17 @@
      "shownNow": 0,
      "gaps": [
       [
-       "3.37",
+       "3.38",
        34,
        34
       ],
       [
-       "4.66",
+       "4.67",
        47,
        47
       ],
       [
-       "5.95",
+       "5.96",
        60,
        60
       ],
@@ -125,19 +125,19 @@
        73
       ],
       [
-       "8.52",
+       "8.53",
        86,
        86
       ],
       [
-       "9.81",
+       "9.82",
        99,
        99
       ],
       [
-       "11.10",
-       111,
-       111
+       "11.11",
+       112,
+       112
       ],
       [
        "12.39",
@@ -169,7 +169,7 @@
     },
     "cueTempo": {
      "worst": 1,
-     "n": 543,
+     "n": 532,
      "rates": [
       1,
       1.5,
@@ -181,7 +181,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805126
+       "dueAt": 1792756805144
       }
      ],
      "idx": 6,
@@ -404,7 +404,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804942
+       "dueAt": 1792756804954
       }
      ],
      "idx": 6,
@@ -503,7 +503,7 @@
      "pod-0008:22",
      "pod-0019:70"
     ],
-    "firstSoundMs": 244,
+    "firstSoundMs": 259,
     "diag": [
      "deck: start order head first=pod-0001:22 heads=6 usable=6 stock=6",
      "deck: src local pod-0001"
@@ -525,7 +525,7 @@
      "state": "playing",
      "pos": {
       "duration": 25,
-      "position": 0.0007547959183682451,
+      "position": 0.0011167959183673304,
       "playbackRate": 1
      },
      "cold": 0,
@@ -541,7 +541,7 @@
      "want": "https://i.ytimg.com/vi/pod-0014/hqdefault.jpg",
      "id": "pod-0014:10"
     },
-    "lockNextMs": 16,
+    "lockNextMs": 17,
     "lockNextLines": [
      "deck: swap pod-0014 ready=true pool=2",
      "deck play#3 swap rs=4 muted=false t=0.1",
