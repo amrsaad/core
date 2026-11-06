@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-06",
+ "records": [
+  {
+   "sourceId": "wiki:de:Syllogismus",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Syllogismus",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/06",
+    "status": 200
+   },
+   "title": "Syllogismus",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Syllogismen sind ein Katalog bestimmter Typen logischer Schlüsse. Sie bilden den Kern der im vierten Jahrhundert vor unserer Zeitrechnung entstandenen antiken Logik des Aristoteles und der traditionellen Logik bis ins 19. Jahrhundert. Als Haupttechnik der Logik abgelöst wurde der syllogistische Ansatz erst durch die Integration der Logik in die Mathematik, im Gefolge der Arbeiten von George Boole und Gottlob Frege im 19. und frühen 20. Jahrhundert."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-06T04:52:34.840Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Syllogismus": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Sabena",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Sabena",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/06",
+    "status": 200
+   },
+   "title": "Sabena",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Sabena war von 1923 bis zu ihrer Liquidation 2001 die nationale Fluggesellschaft Belgiens mit Sitz in Brüssel und Basis auf dem Flughafen Brüssel-Zaventem. Teile der Gesellschaft leben in der heutigen Fluggesellschaft Brussels Airlines fort."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-06T04:52:34.840Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Sabena": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Sambesi",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Sambesi",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/06",
+    "status": 200
+   },
+   "title": "Sambesi",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Der Sambesi ist nach Nil, Kongo und Niger mit 2574 km Fließstrecke der viertlängste Fluss in Afrika und der größte afrikanische Strom, der in den Indischen Ozean fließt. Das Einzugsgebiet umfasst Gebiete in acht Staaten im südlichen Afrika und umfasst etwa 1,33 Millionen Quadratkilometer (km²), was etwa der Hälfte dessen des Nil entspricht. Damit handelt es sich um das viertgrößte Flusssystem in Afrika. Weltweit ist er vor allem durch die Victoriafälle bekannt. Er liegt im südlichen Afrika."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-06T04:52:34.840Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Sambesi": 200
+   }
+  }
+ ]
+}
