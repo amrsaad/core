@@ -3,6 +3,15 @@
  * Alle Maße aus tokens.css. Handy und Tablet: Karte mit Rand, Desktop (.desk) überschreibt unten.
  * Die Zahlen für Band und Rand stehen nur hier, damit Bild, Poster, Abdeckung und Caption dieselbe Rechnung nutzen.
  */
+/* Einhändig (Entscheidung 54, Brief 16): die Hand steht am html-Element. Rechts ist Standard, Max nutzt nur rechts, kein Schalter in Settings.
+   Alles Seitenabhängige (Leiste, Schließen-Knöpfe der Blätter) hängt an --hand-dir: ltr legt es an den rechten Rand, rtl an den linken.
+   Ein späterer Schalter setzt nur diese zwei Zeilen um (left, rtl). Die Blätter selbst bleiben in den unteren 65 Prozent (--thumb-h), Inhalt scrollt. */
+html {
+  --hand: right;
+  --hand-dir: ltr;
+  --thumb-h: 65%;
+}
+
 .vfeed {
   --band-w: min(calc(100vw - var(--safe-l) - var(--safe-r) - 2 * var(--margin)), 640px);
   --band-h: calc(var(--band-w) * 9 / 16);
@@ -176,11 +185,12 @@
 }
 .vtitle[data-step='1'] { font-size: var(--t-row); line-height: var(--t-row-lh); }
 
-/* Leiste rechts */
+/* Leiste auf der Daumenseite (--hand): inset-inline-end folgt der Schreibrichtung des Elements, ltr heißt rechts. Die Beschriftungen bleiben zentriert. */
 .vactions {
   position: absolute;
   z-index: var(--z-ui);
-  right: calc(var(--safe-r) + var(--s-2));
+  direction: var(--hand-dir);
+  inset-inline-end: calc(var(--safe-r) + var(--s-2));
   width: var(--rail-w);
   bottom: calc(var(--safe-b) + var(--nav-h, 0px) + var(--s-6));
   display: flex;
@@ -386,3 +396,12 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 
 /* Kontext-Blatt im Text-Reiter ("Read more"): es gibt kein Bildband, das Blatt beginnt unter der Kopfzeile */
 .vfeed[data-form='text'] .vcap-sheet { top: calc(var(--safe-t) + var(--head-h) + var(--s-2)); }
+
+/* ---------- Blätter einhändig (Entscheidung 54, Brief 16) ----------
+   Jedes Blatt von unten (More, Fokus, Share) endet oben bei 35 Prozent der Höhe, damit jede Aktion darin in der Daumenzone liegt. Längerer Inhalt scrollt in .sheet-body.
+   Der Schließen-Knopf der Griffleiste liegt auf der Daumenseite (--hand-dir), der Griff bleibt in der Mitte. Kontext-Blatt: gleiche Seite für den Knopf. */
+:root .sheet { max-height: var(--thumb-h); }
+:root .sheet-bar, :root .vcap-bar { direction: var(--hand-dir); }
+:root .sheet-x, :root .vcap-x { right: auto; inset-inline-end: var(--s-2); }
+/* Kontext-Blatt: unter dem Band liegt es bei 390x844 und 430x932 schon unter 35 Prozent, bei flacheren Fenstern zieht die Daumenzone die Oberkante nach unten */
+:root .vcap-sheet { top: max(calc(var(--band-top) + var(--band-h) + var(--s-6)), calc(100% - var(--thumb-h))); }

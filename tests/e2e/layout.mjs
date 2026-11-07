@@ -133,8 +133,39 @@ const probe = () => {
     const w = Math.min(a.r, c.r) - Math.max(a.l, c.l), h = Math.min(a.b, c.b) - Math.max(a.t, c.t);
     if (w > 1 && h > 1) res.overlaps.push(`${a.name} x ${c.name} ${Math.round(w)}x${Math.round(h)}`);
   }
+  // Daumenzone (Entscheidung 54, Brief 16): jedes Pflicht-Tippziel liegt mit seiner Oberkante unter 35 Prozent der Höhe, also in den unteren 65 Prozent.
+  // Pflicht sind alle Elemente mit data-primary="true" (Leiste) und alle Knöpfe in Blättern, Abrufkarte, Kontext, Endseite und auf dem Unlock-Screen.
+  // Oben liegt nur Anzeige (Reiter, Pille, Status), die trägt kein data-primary und steht nicht in dieser Liste.
+  const PRIMARY = '[data-primary="true"], .sheet-body button, .vcap-sheet button, .recall button, .vend-btn, [data-testid=unlock-screen] button';
+  res.thumb = [];
+  res.thumbCount = 0;
+  for (const el of document.querySelectorAll(PRIMARY)) {
+    const r = el.getBoundingClientRect();
+    const cs = getComputedStyle(el);
+    if (!r.width || !r.height || cs.visibility === 'hidden' || cs.display === 'none' || +cs.opacity === 0) continue;
+    if (el.closest('[aria-hidden="true"]') || el.closest('.vslot')) continue;
+    if (r.bottom <= 0 || r.top >= H || r.right <= 0 || r.left >= W) continue;
+    res.thumbCount++;
+    if (r.top < H * 0.35) res.thumb.push(`${el.tagName}.${String(el.className).slice(0, 24)}[${el.getAttribute('data-testid') ?? el.getAttribute('aria-label') ?? el.textContent?.trim().slice(0, 12)}] top ${Math.round(r.top)} = ${Math.round((r.top / H) * 100)} %`);
+  }
   return res;
 };
+
+/** Bild mit markierter 65-Prozent-Linie (Brief 16, Abschlussblock): rote Linie bei 35 Prozent der Höhe, darunter die Daumenzone */
+async function thumbShot(pg, path) {
+  await pg.evaluate(() => {
+    const d = document.createElement('div');
+    d.id = '__thumbline';
+    d.style.cssText = 'position:fixed;left:0;right:0;top:35%;height:0;border-top:2px dashed #ff3b30;z-index:99999;pointer-events:none';
+    const t = document.createElement('span');
+    t.textContent = 'thumb zone, lower 65 %';
+    t.style.cssText = 'position:absolute;right:8px;top:2px;font:12px sans-serif;color:#ff3b30;background:rgba(0,0,0,.6);padding:2px 6px;border-radius:4px';
+    d.appendChild(t);
+    document.body.appendChild(d);
+  });
+  await pg.screenshot({ path });
+  await pg.evaluate(() => document.getElementById('__thumbline')?.remove());
+}
 
 async function open(area, vp, scheme, p) {
   const cx = await newCtx(vp, scheme);
@@ -161,6 +192,8 @@ async function check(pg, label, { skipSmall = false, flow = false } = {}) {
     if (r.scrollH > r.innerH + 1) fail(`${label} Seite scrollt nicht`, `scrollHeight ${r.scrollH} > innerHeight ${r.innerH}`); else ok(`${label} Seite scrollt nicht`);
     if (r.bar && (r.bar.top < 0 || r.bar.bottom > r.innerH + 0.5)) fail(`${label} Leiste im Fenster`, JSON.stringify(r.bar)); else ok(`${label} Leiste im Fenster`);
   }
+  // Daumenzone nur auf dem Handy (390x844 und 430x932, Entscheidung 54); Tablet und Desktop werden mit zwei Händen bedient
+  if (r.innerW <= 430) { if (r.thumb.length) fail(`${label} Daumenzone`, r.thumb.slice(0, 4).join(' | ')); else ok(`${label} Daumenzone`); }
   if (r.overflowX) fail(`${label} kein Seitwärtsscrollen`, 'scrollWidth größer als Fenster'); else ok(`${label} kein Seitwärtsscrollen`);
   if (r.outside.length) fail(`${label} nichts außerhalb`, r.outside.slice(0, 4).join(' | ')); else ok(`${label} nichts außerhalb`);
   if (r.lowContrast.length) fail(`${label} Kontrast AA`, r.lowContrast.slice(0, 4).join(' | ')); else ok(`${label} Kontrast AA`);
@@ -209,6 +242,7 @@ for (const area of MOODS) {
       const r = await check(pg, `feed ${tag}`, { skipSmall: !strict, flow: true });
       if (r.mood !== area) fail(`stimmung ${tag}`, `data-mood ist ${r.mood}`); else ok(`stimmung ${tag}`);
       await pg.screenshot({ path: `${dir}/feed-${area}-${vp.name}${scheme === 'light' ? '-hell' : ''}.png` });
+      if (area === 'body' && vp.width <= 430) await thumbShot(pg, `${dir}/thumb-feed-${vp.name}.png`);
       if (area === 'body') {
         // Zustände der Leiste und der Status-Zeile (Entscheidung 50 und 22E): Stumm kommt vom Start, Offline per Netz aus
         const st = await pg.evaluate(() => { const e = document.querySelector('[data-status]'); return e ? { kind: e.getAttribute('data-status'), text: e.textContent.trim() } : null; });
@@ -251,7 +285,8 @@ for (const area of MOODS) {
             await snap('fokus-aktiv');
             await pg.evaluate(() => localStorage.removeItem('core-focus')); await pg.reload(); await pg.waitForFunction(() => !!window.__core?.moment(), null, { timeout: 8000 }); await pg.waitForTimeout(500);
           } catch (e) { fail(`fokus ${tag}`, String(e).slice(0, 80)); }
-          try { await pg.evaluate(() => window.__core.openNote()); await pg.waitForSelector('[data-testid=note-sheet]', { timeout: 2500 }); await pg.waitForTimeout(500); await snap('more');
+          try { await pg.locator('[data-testid=more]').first().click({ timeout: 2500, force: true }); await pg.waitForSelector('[data-testid=note-sheet]', { timeout: 2500 }); await pg.waitForTimeout(500); await snap('more');
+            if (vp.width <= 430) await thumbShot(pg, `${dir}/thumb-more-${vp.name}.png`);
             await sheetCheck(pg, `more ${tag}`, '[data-testid=note-sheet] .sheet', '[data-testid=note-sheet-close]');
             await closeTests(pg, `more ${tag}`, { sheet: '[data-testid=note-sheet]', sheetSel: '[data-testid=note-sheet] .sheet', closeSel: '[data-testid=note-sheet-close]', x: vp.width / 2, reopen: () => pg.evaluate(() => window.__core.openNote()) });
             await pg.locator('[data-testid=note-chip-Wrong]').click(); await pg.waitForTimeout(300); if (await pg.locator('[data-testid=toast]').count()) await snap('toast'); await pg.waitForTimeout(1500); } catch (e) { fail(`more ${tag}`, String(e).slice(0, 80)); }

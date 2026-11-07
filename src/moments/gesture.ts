@@ -67,3 +67,33 @@ export function resetGesturesForTest(): void {
   firstPointer = -1;
   subs.clear();
 }
+
+// ---------- Einhändig (Entscheidung 54, Brief 16): waagerechter Wisch auf dem Moment wechselt den Reiter ----------
+// Reihenfolge der Reiter wie in der Kopfzeile. Links (dx negativ) heißt nächster Reiter, rechts heißt voriger. Am Rand passiert nichts.
+// Ein Wisch zählt waagerecht ab 60 px und nur, wenn er flacher als 30 Grad läuft. Alles Steilere ist ein senkrechter Wisch (Moment weiter oder zurück).
+
+/** Wischweg in px, ab dem ein waagerechter Wisch den Reiter wechselt */
+export const TAB_SWIPE_PX = 60;
+/** Größter Winkel zur Waagerechten in Grad, bis zu dem ein Wisch als waagerecht gilt */
+export const TAB_SWIPE_DEG = 30;
+const TAN_LIMIT = Math.tan((TAB_SWIPE_DEG * Math.PI) / 180);
+
+/** Läuft der Wisch flacher als 30 Grad? Entscheidet die Achse, sobald der Finger sich bewegt hat. */
+export const isFlat = (dx: number, dy: number): boolean => Math.abs(dx) > 0 && Math.abs(dy) <= Math.abs(dx) * TAN_LIMIT;
+
+export type TabSwipe = 'tabNext' | 'tabPrev' | null;
+
+/** Waagerechter Wisch: ab 60 px und flacher als 30 Grad. Links ist der nächste Reiter, rechts der vorige. */
+export function tabSwipe(dx: number, dy: number): TabSwipe {
+  if (Math.abs(dx) < TAB_SWIPE_PX || !isFlat(dx, dy)) return null;
+  return dx < 0 ? 'tabNext' : 'tabPrev';
+}
+
+/** Der Reiter nach dem Wisch, oder null am Rand der Reihe (kein Umlauf, sonst springt der Finger von Text zurück auf Video) */
+export function tabAfterSwipe<T>(order: readonly T[], current: T, sw: TabSwipe): T | null {
+  if (!sw) return null;
+  const i = order.indexOf(current);
+  if (i < 0) return null;
+  const j = sw === 'tabNext' ? i + 1 : i - 1;
+  return j >= 0 && j < order.length ? order[j] : null;
+}
