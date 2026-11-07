@@ -1,5 +1,5 @@
 import { diagLog, netType } from '../lib/diag';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal, flushSync } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL, topicLabel } from '../lib/labels';
@@ -41,6 +41,7 @@ import { DeskPanel } from './DeskShell';
 import { speakerLine } from './speaker';
 import { chipEffect, CONFIRM_SHEET_MS, MUTE_UNDO_MS, firstOpenOfDay, inputConfirm, makeEntry, makeInputEntry, markSent, nextIssue, promptLine, unsent, type Chip, type InputChip } from './note';
 import { HOOK_LINE_PT, hookStep } from './hook';
+import { cleanText, cutText, FIT_FULL, fitCut, isTruncated, sameFit, sentenceEnds, TEXT_STEPS, versePieces, type TextFit } from './textfit';
 import { makeRng } from './rng';
 import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
 import { addFrames, atRest, commitVelocity, dragY, frameSample, release, SPRING_BACK, SPRING_COMMIT, stepSpring, Velocity, type Spring, type SpringState } from './swipe';
@@ -337,9 +338,11 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const [forYou, setForYou] = useState<Moment | null>(null);
   /** Herz an der Tippstelle (400 ms) und kurze Bestätigung am Knopf (150 ms) */
   const [capOpen, setCapOpen] = useState(false);
-  /** Text-Reiter (Handy): der Text ist auf einen Bildschirm gekürzt, der Rest steht hinter "Read more" im Kontext (Entscheidung 25, Brief 17) */
-  const [truncated, setTruncated] = useState(false);
+  /** Text-Reiter (Handy): Schriftstufe und Schnitt am Satzende, gemessen am Container (Brief 18, Issue 41). Gekürzt heißt: der Rest steht im Blatt mit dem ganzen Text. */
+  const [textFit, setTextFit] = useState<TextFit>(FIT_FULL);
   const truncRef = useRef(false);
+  /** Tipp auf den Text öffnet das Blatt, mit Aufschub, damit der Doppeltipp (Herz) ihn abfangen kann */
+  const textTap = useRef(0);
   const [note, setNote] = useState<Moment | null>(null);
   /** Zeile "N notes, send?" beim ersten Öffnen am Tag */
   const [prompt, setPrompt] = useState(false);
@@ -1928,7 +1931,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const checkTextEnd = () => {
     const el = textBox.current;
     if (!textRef.current || !el || textSeen.current === idxRef.current) return;
-    // Handy: der Text steht gekürzt auf einem Bildschirm. Das Ende ist sichtbar, wenn nichts gekürzt wurde, sonst erst am Ende des Kontexts ("Read more").
+    // Handy: der Text steht auf einem Bildschirm. Das Ende ist sichtbar, wenn nichts gekürzt wurde, sonst erst am Ende des Blatts mit dem ganzen Text (Tipp auf den Text).
     // Desktop: der Text scrollt, gesehen am Ende des Scrollwegs.
     if (deskRef.current ? textEndReached(el.scrollTop, el.clientHeight, el.scrollHeight) : !truncRef.current) markTextSeen();
   };
@@ -3019,34 +3022,80 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     [],
   );
 
-  // Text-Reiter (Handy): Zeilenlimit nach dem Platz zwischen Hook und Leiste. Gemessen wird der volle Text, danach wird er auf die passenden Zeilen gekürzt.
+  // Text-Reiter (Handy, Brief 18, Issue 41): der Text passt auf einen Bildschirm. Gemessen wird immer der volle Text in der unsichtbaren Messkopie (.vtext-measure),
+  // die dieselbe Fläche und Schrift hat wie der sichtbare Text. Erst die drei Schriftstufen, passt keine, der Schnitt am letzten sichtbaren Satzende.
+  // Kein Satzende sichtbar (ein einziger langer Satz): Notnagel per Zeilenzahl. Die Messung hängt nicht vom Ergebnis ab, darum keine Schleife.
   useLayoutEffect(() => {
     if (form !== 'text' || deskRef.current) {
       truncRef.current = false;
-      setTruncated(false);
+      setTextFit(FIT_FULL);
       return;
     }
     const col = textBox.current?.querySelector<HTMLElement>('.vtext-col');
-    const body = col?.querySelector<HTMLElement>('.vtext-body');
-    if (!col || !body) return;
-    const fit = () => {
-      body.removeAttribute('data-clamp');
-      const avail = body.clientHeight;
-      const lh = parseFloat(getComputedStyle(body).lineHeight) || 27;
-      const cut = body.scrollHeight > avail + 1;
-      if (cut) {
-        body.style.setProperty('--lines', String(Math.max(1, Math.floor(avail / lh))));
-        body.setAttribute('data-clamp', '1');
+    const meas = col?.querySelector<HTMLElement>('.vtext-measure');
+    if (!col || !meas) return;
+    let last: TextFit | null = null;
+    let dead = false;
+    const put = (f: TextFit) => {
+      if (dead) return;
+      col.dataset.step = String(f.step);
+      truncRef.current = isTruncated(f);
+      if (last && sameFit(last, f)) return;
+      last = f;
+      setTextFit(f);
+    };
+    /** Position eines Zeichens im Textknoten der Messkopie */
+    const nodeAt = (offset: number): { node: Text; at: number } | null => {
+      const walker = document.createTreeWalker(meas, NodeFilter.SHOW_TEXT);
+      let seen = 0;
+      for (let n = walker.nextNode() as Text | null; n; n = walker.nextNode() as Text | null) {
+        const len = n.data.length;
+        if (offset < seen + len) return { node: n, at: offset - seen };
+        seen += len;
       }
-      truncRef.current = cut;
-      setTruncated(cut);
+      return null;
+    };
+    const fit = () => {
+      if (dead) return;
+      let step = 0;
+      for (; step < TEXT_STEPS; step++) {
+        col.dataset.step = String(step);
+        if (meas.scrollHeight <= meas.clientHeight + 1) return put({ step, cut: null, clamp: false });
+      }
+      step = TEXT_STEPS - 1;
+      col.dataset.step = String(step);
+      const box = meas.getBoundingClientRect();
+      const full = meas.textContent ?? '';
+      const lh = parseFloat(getComputedStyle(meas).lineHeight) || 23;
+      const visible = (end: number) => {
+        const p = nodeAt(end - 1);
+        if (!p) return false;
+        const r = document.createRange();
+        r.setStart(p.node, p.at);
+        r.setEnd(p.node, p.at + 1);
+        const rr = r.getBoundingClientRect();
+        // Das Zeichen misst nur seinen Schriftkasten, die Zeile ist höher: die ganze Zeile muss in die Fläche passen
+        return rr.height > 0 && rr.bottom + Math.max(0, (lh - rr.height) / 2) <= box.bottom + 1;
+      };
+      const cut = fitCut(sentenceEnds(full), visible);
+      if (cut !== null) return put({ step, cut, clamp: false });
+      col.style.setProperty('--lines', String(Math.max(1, Math.floor(meas.clientHeight / lh))));
+      put({ step, cut: null, clamp: true });
     };
     fit();
+    // Die Lesefläche schrumpft, wenn der Hook nach dem Nachladen seiner Schrift (Source Serif 4) höher wird: dann noch einmal messen
     const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(fit);
     ro?.observe(col);
-    return () => ro?.disconnect();
+    const read = col.querySelector<HTMLElement>('.vtext-read');
+    if (read) ro?.observe(read);
+    // Schriften kommen nachgeladen (Noto Sans Arabic, Amiri): danach noch einmal messen
+    document.fonts?.ready.then(fit).catch(() => {});
+    return () => {
+      dead = true;
+      ro?.disconnect();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queue.current[idx]?.id, form, forYou, truncated]);
+  }, [queue.current[idx]?.id, form, forYou]);
   useLayoutEffect(() => {
     // Hook nie kürzen: mehr als drei Zeilen in Normalgröße, dann eine Stufe kleiner
     const el = hookEl.current;
@@ -3241,13 +3290,34 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
             else if (sw === 'next' && tt.current.end) goTo(idxRef.current + 1);
             else if (sw === 'prev' && tt.current.top) goTo(idxRef.current - 1);
           }}
-          onDoubleClick={(e) => likeAt(e.clientX, e.clientY)}
+          onDoubleClick={(e) => {
+            window.clearTimeout(textTap.current);
+            likeAt(e.clientX, e.clientY);
+          }}
+          onClick={(e) => {
+            // Gekürzter Text (Brief 18): ein Tipp auf den Text öffnet das Blatt mit dem ganzen Text. Der Doppeltipp (Herz) fängt ihn in den ersten 300 ms ab.
+            // Die Quellenzeile (Link) und Knöpfe gehören sich selbst.
+            if (desk || !truncRef.current || (e.target as Element).closest('a, button')) return;
+            window.clearTimeout(textTap.current);
+            textTap.current = window.setTimeout(() => setCapOpen(true), 300);
+          }}
         >
           {(() => {
-            const t = momentText(m);
+            const t = cleanText(momentText(m));
             const ar = isArabic(t);
             const sl = desk ? null : sourceLine(m);
             const label = sl ? `${sl.prefix}${sl.text}` : '';
+            // Arabisch (Entscheidung 22, Issue 43): Verse in { } in Amiri, Erklärtext in Noto Sans Arabic. Lateinisch bleibt ein Stück.
+            const pieces = (txt: string) => (ar ? versePieces(txt).map((pc, k) => (pc.verse ? <span key={k} className="verse" data-testid="verse">{pc.text}</span> : <Fragment key={k}>{pc.text}</Fragment>)) : txt);
+            const bodyCls = `vtext-body ${ar ? 'vtext-rtl' : ''}`;
+            const shown = desk ? t : cutText(t, textFit.cut);
+            const body = t ? (
+              <p className={bodyCls} dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'} data-cut={!desk && isTruncated(textFit) ? '' : undefined} data-clamp={!desk && textFit.clamp ? '' : undefined} data-testid="text-body">
+                {pieces(shown)}
+              </p>
+            ) : (
+              <p className="vtext-body vtext-empty" data-testid="text-body">No text for this moment yet.</p>
+            );
             const content = (
               <>
                 {!desk && (
@@ -3256,15 +3326,18 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                     <h2 className="vtext-hook">{m.hook}</h2>
                   </>
                 )}
-                {t ? (
-                  <p className={`vtext-body ${ar ? 'vtext-rtl' : ''}`} dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'}>{t}</p>
+                {desk ? (
+                  body
                 ) : (
-                  <p className="vtext-body vtext-empty">No text for this moment yet.</p>
-                )}
-                {!desk && truncated && (
-                  <button type="button" className="vtext-more" data-testid="text-more" onClick={() => setCapOpen(true)}>
-                    Read more
-                  </button>
+                  /* Lesefläche: sichtbarer Text und darunter die unsichtbare Messkopie mit dem ganzen Text (gleiche Fläche, gleiche Stufe) */
+                  <div className="vtext-read">
+                    {body}
+                    {t && (
+                      <p className={`${bodyCls} vtext-measure`} dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'} aria-hidden="true">
+                        {pieces(t)}
+                      </p>
+                    )}
+                  </div>
                 )}
                 {sl &&
                   (sl.url ? (
@@ -3275,7 +3348,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                 {desk && <div className="vtext-end" aria-hidden="true">Next moment: J, Down, or two fingers up</div>}
               </>
             );
-            return desk ? content : <div className="vtext-col">{content}</div>;
+            return desk ? content : <div className="vtext-col" data-step={textFit.step}>{content}</div>;
           })()}
         </div>
       )}
@@ -3343,7 +3416,22 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         </svg>
       )}
 
-      {recall && !desk && recallEl}
+      {recall && !desk && form !== 'text' && recallEl}
+      {recall && !desk && form === 'text' && (() => {
+        // Ergänzung 35 (Issue 42): im Text-Reiter ist die Abrufkarte ein eigener Vollbild-Moment, nie ein Overlay über dem Lesetext.
+        // Oben Hook und Quelle des Ursprungs-Moments als Bezug, darunter Frage und Antworten. Wischen nach oben auf der Karte schließt wie bisher.
+        const src = sourceLine(recall.m);
+        return (
+          <div className="vrecall-page" data-testid="recall-page" data-area={recall.m.area} style={{ ['--area' as string]: AREA_COLOR[recall.m.area] }}>
+            <div className="vrecall-origin" data-testid="recall-origin">
+              <div className="vkicker">{AREA_LABEL[recall.m.area]} · {topicLabel(recall.m.topic)}</div>
+              <h2 className="vtext-hook" dir="auto">{recall.m.hook}</h2>
+              {src && <p className="vtext-source" dir="auto">{src.prefix}{src.text}</p>}
+            </div>
+            {recallEl}
+          </div>
+        );
+      })()}
       {desk?.panel &&
         createPortal(
           <DeskPanel m={m} speaker={m ? speakerLine(m.channel) : ''} form={form} capOpen={capOpen} onCaption={() => setCapOpen((o) => !o)} onSource={openFull} recall={recall ? recallEl : null} />,

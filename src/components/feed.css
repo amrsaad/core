@@ -313,7 +313,10 @@
   align-items: flex-start;
 }
 
-/* ---------- Text (Brain-Board): Seite auf Papier, Serif-Hook nur im Brain, Lesetext in der Systemschrift ---------- */
+/* ---------- Text (Brain-Board): Seite auf Papier, Serif-Hook nur im Brain, Lesetext in der Systemschrift ----------
+   Brief 18 (Issue 41, Entscheidung 25): alles auf einem Bildschirm. Hook eine Stufe (Brain 24/30 statt 34/40), Fließtext in drei Stufen
+   17/27, 16/25, 15/23 (arabisch 15/24, 14/23, 13/22, Entscheidung 22). Die Stufe misst MomentFeed am Container und setzt data-step an die Spalte.
+   Passt der Text in keiner Stufe, schneidet MomentFeed am Satzende, der Rest steht im Blatt. Kein "Read more". Quelle und Leiste bleiben sichtbar. */
 .vtext {
   position: absolute;
   inset: 0;
@@ -322,7 +325,7 @@
   background: var(--bg);
   color: var(--text);
 }
-/* Handy: eine Spalte mit festem Platz zwischen Kopfzeile und Leiste. Nichts scrollt, der Text wird auf die passenden Zeilen gekürzt (Entscheidung 25, Issue 37).
+/* Handy: eine Spalte mit festem Platz zwischen Kopfzeile und Leiste. Nichts scrollt.
    Kopfzeile und Zähler liegen über dem oberen Rand der Spalte, nie über dem Inhalt. Die Leiste liegt unter dem unteren Rand. */
 .vtext-col {
   position: absolute;
@@ -335,7 +338,14 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  /* Stufe 0 aus den Tokens, Stufe 1 und 2 je eine Stufe kleiner (nur hier, Brief 18) */
+  --read: var(--t-reading);
+  --read-lh: var(--t-reading-lh);
+  --read-ar: var(--t-ar);
+  --read-ar-lh: var(--t-ar-lh);
 }
+.vtext-col[data-step='1'] { --read: 16px; --read-lh: 25px; --read-ar: 14px; --read-ar-lh: 23px; }
+.vtext-col[data-step='2'] { --read: 15px; --read-lh: 23px; --read-ar: 13px; --read-ar-lh: 22px; }
 .desk .vtext > * { max-width: var(--desk-read); margin-left: auto; margin-right: auto; }
 .vkicker {
   font-size: var(--t-meta);
@@ -347,33 +357,61 @@
   margin-bottom: var(--s-3);
   flex: none;
 }
-.vtext-hook { flex: none; margin: 0 0 var(--s-5); font-size: var(--t-hook); line-height: var(--t-hook-lh); font-weight: var(--w-hook); letter-spacing: var(--tracking-title); }
-.vtext[data-area='brain'] .vtext-hook {
+.vtext-hook { flex: none; margin: 0 0 var(--s-5); font-size: var(--t-hook); line-height: var(--t-hook-lh); font-weight: var(--w-hook); letter-spacing: var(--tracking-title); overflow-wrap: anywhere; }
+/* Brain: Serif bleibt, aber eine Stufe (24/30), keine Riesenüberschrift mehr (Issue 41) */
+.vtext[data-area='brain'] .vtext-hook,
+.vrecall-page[data-area='brain'] .vtext-hook {
   font-family: var(--font-brain);
-  font-size: var(--t-brain-hook);
-  line-height: var(--t-brain-hook-lh);
+  font-size: 24px;
+  line-height: 30px;
   font-weight: var(--w-brain-hook);
 }
-.vtext-body { flex: 1 1 auto; min-height: 0; overflow: hidden; margin: 0; white-space: pre-line; font-size: var(--t-reading); line-height: var(--t-reading-lh); color: var(--body); }
-/* Zeilenlimit: die Zahl der Zeilen setzt MomentFeed aus dem freien Platz (--lines), der Rest steht hinter "Read more" im Kontext */
+/* Lesefläche: sichtbarer Text und Messkopie teilen dieselbe Fläche */
+.vtext-read { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+.vtext-read .vtext-body { position: absolute; inset: 0; }
+.vtext-body { flex: 1 1 auto; min-height: 0; overflow: hidden; margin: 0; white-space: pre-line; font-size: var(--read, var(--t-reading)); line-height: var(--read-lh, var(--t-reading-lh)); color: var(--body); }
+.vtext-measure { visibility: hidden; pointer-events: none; }
+/* Notnagel: kein Satzende sichtbar (ein einziger langer Satz), Zeilenzahl aus dem freien Platz (--lines) */
 .vtext-body[data-clamp] { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--lines, 6); line-clamp: var(--lines, 6); }
-.vtext-more {
-  flex: none;
-  align-self: flex-start;
-  min-height: var(--hit);
-  padding: 0 var(--s-1);
-  color: var(--text);
-  font-size: var(--t-body);
-  line-height: var(--t-body-lh);
-  font-weight: var(--w-tab);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.vtext-rtl { text-align: right; font-family: var(--font-ar); font-size: var(--t-reading); line-height: 1.9; }
+/* Arabisch (Entscheidung 22): Erklärtext Noto Sans Arabic, Verse in { } in Amiri, eine Stufe größer, gleiche Zeilenhöhe */
+.vtext-rtl { text-align: right; font-family: var(--font-ar); font-size: var(--read-ar, var(--t-ar)); line-height: var(--read-ar-lh, var(--t-ar-lh)); }
+.vtext-rtl .verse { font-family: var(--font-verse); font-size: calc(var(--read-ar, var(--t-ar)) + 2px); }
 .vtext-source { flex: none; display: block; margin: var(--s-1) 0 0; min-height: var(--hit); font-size: var(--t-meta); line-height: var(--t-meta-lh); color: var(--muted); text-decoration: none; overflow-wrap: anywhere; }
 a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 .vtext-end { margin-top: var(--s-8); padding-top: var(--s-4); border-top: 1px solid var(--hairline); font-size: var(--t-meta); color: var(--soft); }
 .vtext-empty { color: var(--muted); }
+
+/* Abrufkarte im Text-Reiter (Ergänzung 35, Issue 42): eigener Vollbild-Moment auf dem Papier, deckt den Lesetext ganz ab, kein Overlay.
+   Oben Hook und Quelle des Ursprungs-Moments, darunter die Karte im Fluss. Liegt über Text (12) und Leiste (20), unter Blättern (80). */
+.vrecall-page {
+  position: absolute;
+  z-index: 34;
+  left: 0;
+  right: 0;
+  top: calc(var(--safe-t) + var(--head-h));
+  bottom: 0;
+  padding: var(--s-10) calc(var(--safe-r) + var(--margin)) calc(var(--safe-b) + var(--s-4)) calc(var(--safe-l) + var(--margin));
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  overflow: hidden;
+}
+.vrecall-origin { flex: none; display: flex; flex-direction: column; max-width: var(--desk-read); width: 100%; margin-inline: auto; }
+.vrecall-origin .vtext-hook { margin-bottom: var(--s-2); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.vrecall-origin .vtext-source { min-height: 0; }
+.vrecall-page .recall { position: relative; inset: auto; top: auto; bottom: auto; left: auto; right: auto; flex: 0 1 auto; min-height: 0; width: 100%; animation: none; }
+/* Bereich und Sprecher stehen schon im Kopf der Seite, das Vorschaubild hat ein Text-Moment nicht */
+.vrecall-page .recall-source { display: none; }
+
+/* Notiz-Blase "N notes, send?" (Issue 49): im Video-Reiter nie über dem Bild. Sie steht als Zeile unter der Karte und unter dem Platz der Untertitel,
+   links an der Karte, damit sie als Tippziel in den unteren 65 Prozent liegt (Daumenzone, Entscheidung 54). */
+.vfeed[data-form='video'] .vnotes {
+  top: calc(var(--band-top) + var(--band-h) + var(--s-10) + 2 * var(--t-body-lh) + var(--s-3));
+  right: auto;
+  left: var(--band-left);
+}
 
 /* Text und Papier: Tinte der Kopfzeile folgt der Stimmung */
 .desk .vctrl { display: none; }
@@ -384,5 +422,5 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 .vfeed[data-form='text'] .vtrack, .vfeed[data-form='text'] .vprogress { display: none; }
 .desk .vtext { bottom: 0; }
 
-/* Kontext-Blatt im Text-Reiter ("Read more"): es gibt kein Bildband, das Blatt beginnt unter der Kopfzeile */
+/* Blatt mit dem ganzen Text im Text-Reiter (Tipp auf gekürzten Text): es gibt kein Bildband, das Blatt beginnt unter der Kopfzeile */
 .vfeed[data-form='text'] .vcap-sheet { top: calc(var(--safe-t) + var(--head-h) + var(--s-2)); }

@@ -44,6 +44,8 @@ const newCtx = async (vp, scheme) => {
 const MOODS = ['beat', 'body', 'brain'];
 const SCHEMES = ['dark', 'light'];
 
+const EX_SHORT = 'Short passage that fits the first step. Two sentences are enough.';
+const AREX = 'قال الشيخ السعدي في تفسير قوله تعالى {فَإِنَّ مَعَ الْعُسْرِ يُسْرًا * إِنَّ مَعَ الْعُسْرِ يُسْرًا}: أي إن العسر لا يخلو من يسر يصاحبه، ولهذا قال النبي صلى الله عليه وسلم \\" لن يغلب عسر يسرين \\" وهذه قاعدة عظيمة. ومن قواعد الفقه \\" المشقة تجلب التيسير \\" فكلما ضاق الأمر اتسع. ثم قال تعالى {فَإِذَا فَرَغْتَ فَانصَبْ} أي إذا فرغت من أشغالك فاجتهد في العبادة والدعاء. وهذا يدل على أن المؤمن لا يكون فارغا أبدا، بل ينتقل من طاعة إلى طاعة.';
 const EX = Array.from({ length: 30 }, (_, i) => `Sentence ${i + 1} of the checked excerpt, long enough to wrap over several lines in the reading column.`).join('\n');
 const mk = (i, area, extra = {}) => ({
   id: `test${String(i).padStart(7, '0')}:100`, videoId: `test${String(i).padStart(7, '0')}`, start: 100, end: 160 + (i % 3) * 20,
@@ -56,7 +58,8 @@ async function pool(area) {
   const moments = [
     ...Array.from({ length: 14 }, (_, i) => mk(i, area)),
     ...Array.from({ length: 6 }, (_, i) => mk(40 + i, area, { form: 'audio', audio: true, hls: `https://stream.test/${40 + i}.m3u8`, cues: [[0, area === 'beat' ? 'لَا تَقْصُصْ رُؤْيَاكَ عَلَىٰ إِخْوَتِكَ فَيَكِيدُوا لَكَ كَيْدًا' : area === 'brain' ? 'Audio caption one, a marketing message that is quite a bit longer than one line to test wrapping' : 'Audio caption one, a marketing message that is quite a bit longer than one line, so that the subtitle line wraps over a second and a third line on a phone'], [2, 'two']] })),
-    ...Array.from({ length: 6 }, (_, i) => mk(60 + i, area, { form: 'text', videoId: `texto${String(60 + i).padStart(5, '0')}`, author: `Author ${i}`, ref: `Ref ${i}`, sourceUrl: `https://example.org/s/${i}`, license: 'CC BY 4.0', hook: i === 1 ? 'A very long hook that keeps going over several lines to test wrapping in the page, with many words and a clause or two' : `Check lens status before the next injection ${i}` })),
+    // Text (Brief 18): 0 und 1 lang (Schnitt am Satzende), 2 arabisch mit Vers in { } und Backslash-Anführungszeichen aus der Pipeline (Issue 43), 3 bis 5 kurz (passen in Stufe 0, gelten als gesehen, bringen die Abrufkarte)
+    ...Array.from({ length: 6 }, (_, i) => mk(60 + i, area, { form: 'text', videoId: `texto${String(60 + i).padStart(5, '0')}`, author: `Author ${i}`, ref: `Ref ${i}`, sourceUrl: `https://example.org/s/${i}`, license: 'CC BY 4.0', hook: i === 1 ? 'A very long hook that keeps going over several lines to test wrapping in the page, with many words and a clause or two' : i === 2 ? 'تفسير السعدي: مع العسر يسرا' : `Check lens status before the next injection ${i}`, ...(i === 2 ? { topic: 'islam', excerpt: AREX } : i >= 3 ? { excerpt: EX_SHORT } : {}) })),
   ];
   const raw = crypto.getRandomValues(new Uint8Array(32));
   const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt']);
@@ -183,6 +186,76 @@ async function sheetCheck(pg, label, sheetSel, closeSel) {
   if (g.sheet.t - g.safeT < 44) fail(`${label} Hintergrundstreifen oben`, `${Math.round(g.sheet.t - g.safeT)} px unter der Statusleiste`); else ok(`${label} Hintergrundstreifen oben`);
 }
 const gone = (pg, sel) => pg.waitForSelector(sel, { state: 'detached', timeout: 1500 }).then(() => true, () => false);
+
+/**
+ * Text-Reiter (Brief 18, Issues 41, 42, 43), Handy und Tablet. Geht die Text-Momente der Reihe nach durch und sammelt:
+ * kein Überlauf im sichtbaren Text, kein "Read more", Schnitt endet am Satzende, Leiste ganz im Fenster, arabischer Moment mit Vers in Amiri
+ * und Erklärtext in Noto Sans Arabic ohne Backslash, Abrufkarte als eigene Seite über dem Lesetext (kein Overlay).
+ */
+async function textChecks(pg, tag, vp, dir, { area, scheme }) {
+  const suffix = scheme === 'light' ? '-hell' : '';
+  const seen = { cut: null, ar: null, recall: null, readMore: false, overflow: [], bar: [] };
+  for (let i = 0; i < 9; i++) {
+    const r = await pg.evaluate(() => {
+      const b = document.querySelector('[data-testid=text-body]');
+      const col = document.querySelector('.vtext-col');
+      const page = document.querySelector('[data-testid=recall-page]');
+      const bar = document.querySelector('.vactions');
+      const br = bar?.getBoundingClientRect();
+      const out = { id: window.__core.moment()?.id, readMore: !!document.querySelector('[data-testid=text-more]') || /Read more/.test(document.querySelector('[data-testid=text-view]')?.textContent ?? ''), bar: br ? { top: Math.round(br.top), bottom: Math.round(br.bottom), H: innerHeight, btns: bar.querySelectorAll('button').length } : null };
+      if (page) {
+        const card = document.querySelector('[data-testid=recall-card]');
+        const text = document.querySelector('[data-testid=text-view]');
+        const tr = text?.getBoundingClientRect();
+        // Steht an einer Stelle mitten im Lesetext die Abrufseite oben, ist der Text verdeckt, nicht teilweise lesbar
+        const hit = tr ? document.elementFromPoint(tr.left + tr.width / 2, Math.min(innerHeight - 1, tr.top + 140)) : null;
+        const pr = page.getBoundingClientRect();
+        out.recall = { card: !!card, covers: !!hit && !!hit.closest('[data-testid=recall-page]'), origin: document.querySelector('[data-testid=recall-origin]')?.textContent ?? '', pageTop: Math.round(pr.top), pageBottom: Math.round(pr.bottom), H: innerHeight, opts: [...document.querySelectorAll('[data-testid=recall-option]')].map((o) => Math.round(o.getBoundingClientRect().top)) };
+        return out;
+      }
+      if (!b) return out;
+      const t = (b.textContent ?? '').trimEnd();
+      const cs = getComputedStyle(b);
+      const v = document.querySelector('[data-testid=verse]');
+      out.text = { cut: b.hasAttribute('data-cut'), clamp: b.hasAttribute('data-clamp'), step: col?.dataset.step, overflow: b.scrollHeight > b.clientHeight + 1, sentenceEnd: /[.!?؟…]["'”’»)\]}]*$/.test(t), ar: b.getAttribute('dir') === 'rtl', font: cs.fontFamily, size: cs.fontSize, lh: cs.lineHeight, backslash: t.includes('\\'), verse: v ? { font: getComputedStyle(v).fontFamily, size: getComputedStyle(v).fontSize } : null, hookSize: getComputedStyle(document.querySelector('.vtext-hook')).fontSize, colBottom: Math.round(col.getBoundingClientRect().bottom) };
+      return out;
+    });
+    if (r.readMore) seen.readMore = true;
+    if (r.bar) seen.bar.push(r.bar);
+    if (r.recall) {
+      if (!seen.recall) { seen.recall = r.recall; await pg.screenshot({ path: `${dir}/text-abruf-${area}-${vp.name}${suffix}.png` }); }
+      await pg.evaluate(() => window.__core.skipRecall()); await pg.waitForTimeout(400);
+      continue;
+    }
+    if (r.text) {
+      if (r.text.overflow) seen.overflow.push(r.id);
+      if (r.text.cut && !seen.cut) { seen.cut = r.text; await pg.screenshot({ path: `${dir}/text-schnitt-${area}-${vp.name}${suffix}.png` }); }
+      if (r.text.ar && !seen.ar) { seen.ar = r.text; await pg.screenshot({ path: `${dir}/text-arabisch-${area}-${vp.name}${suffix}.png` }); }
+    }
+    await pg.evaluate(() => window.__core.next()); await pg.waitForTimeout(500);
+  }
+  if (seen.readMore) fail(`text kein Read more ${tag}`, 'Read more im Text-Reiter'); else ok(`text kein Read more ${tag}`);
+  if (seen.overflow.length) fail(`text ohne Überlauf ${tag}`, seen.overflow.join(', ')); else ok(`text ohne Überlauf ${tag}`);
+  if (!seen.bar.length || seen.bar.some((b) => b.top < b.H * 0.35 || b.bottom > b.H + 0.5 || b.btns < 3)) fail(`text Leiste sichtbar ${tag}`, JSON.stringify(seen.bar[0])); else ok(`text Leiste sichtbar ${tag}`);
+  if (!seen.cut) fail(`text Schnitt am Satzende ${tag}`, 'kein gekürzter Moment gesehen');
+  else if (!seen.cut.sentenceEnd || seen.cut.step !== '2' || seen.cut.clamp) fail(`text Schnitt am Satzende ${tag}`, JSON.stringify(seen.cut)); else ok(`text Schnitt am Satzende ${tag}`);
+  if (seen.cut && area === 'brain' && parseFloat(seen.cut.hookSize) > 24.5) fail(`text Hook klein ${tag}`, seen.cut.hookSize); else ok(`text Hook klein ${tag}`);
+  if (!seen.ar) fail(`text arabisch ${tag}`, 'kein arabischer Moment gesehen');
+  else {
+    const a = seen.ar;
+    if (!/^"?Noto Sans Arabic/.test(a.font) || a.size !== '15px' && a.size !== '14px' && a.size !== '13px') fail(`text arabisch Noto Sans Arabic ${tag}`, `${a.font} ${a.size}/${a.lh}`); else ok(`text arabisch Noto Sans Arabic ${tag}`);
+    if (!a.verse || !/^"?Amiri/.test(a.verse.font) || parseFloat(a.verse.size) <= parseFloat(a.size)) fail(`text arabisch Vers in Amiri ${tag}`, JSON.stringify(a.verse)); else ok(`text arabisch Vers in Amiri ${tag}`);
+    if (a.backslash) fail(`text arabisch ohne Backslash ${tag}`, 'Backslash im Text'); else ok(`text arabisch ohne Backslash ${tag}`);
+    if (a.overflow) fail(`text arabisch ohne Überlauf ${tag}`, `Stufe ${a.step}`); else ok(`text arabisch ohne Überlauf ${tag}`);
+  }
+  if (!seen.recall) fail(`text Abrufseite ${tag}`, 'keine Abrufkarte im Text-Reiter nach 9 Momenten');
+  else {
+    const q = seen.recall;
+    if (!q.card || !q.covers) fail(`text Abrufseite kein Overlay ${tag}`, JSON.stringify(q)); else ok(`text Abrufseite kein Overlay ${tag}`);
+    if (!/Check lens status|A very long hook|تفسير السعدي/.test(q.origin) || !/Author \d/.test(q.origin)) fail(`text Abrufseite Hook und Quelle ${tag}`, q.origin.slice(0, 80)); else ok(`text Abrufseite Hook und Quelle ${tag}`);
+    if (q.pageBottom < q.H - 0.5 || q.opts.length < 3 || (vp.width < 768 && q.opts.some((y) => y < q.H * 0.35))) fail(`text Abrufseite Vollbild und Daumenzone ${tag}`, JSON.stringify(q)); else ok(`text Abrufseite Vollbild und Daumenzone ${tag}`);
+  }
+}
 /** Schließen per Knopf und per Tipp auf den Hintergrund; danach wieder öffnen (reopen) */
 async function closeTests(pg, label, { sheet, sheetSel, closeSel, reopen, x }) {
   await pg.locator(closeSel).first().click({ timeout: 2000 }).catch(() => {});
@@ -270,12 +343,36 @@ for (const area of MOODS) {
           const got = await pg.waitForSelector('[data-testid=recall-card]', { timeout: 6000 }).then(() => true, () => false);
           if (got) { await pg.waitForTimeout(600); await snap('abruf'); } else fail(`abruf ${tag}`, 'keine Karte nach vier Wischen');
         } catch (e) { fail(`abruf ${tag}`, String(e).slice(0, 80)); }
+        if (!isDesk) {
+          // Issue 49 (Brief 18): neuer Tag mit der ungesendeten Notiz aus dem More-Test, Zeile "1 note, send?" im Video-Reiter nie über dem Bild, als Tippziel in den unteren 65 Prozent (54)
+          try {
+            await pg.goto(`${url}?now=2026-10-24&seed=3#k=${p.k}`); await pg.waitForFunction(() => !!window.__core?.moment(), null, { timeout: 8000 }); await pg.waitForTimeout(700);
+            const np = await pg.evaluate(() => {
+              const n = document.querySelector('[data-testid=notes-prompt]');
+              const card = document.querySelector('.vslot[aria-hidden=false] .vframe > div');
+              if (!n) return null;
+              const a = n.getBoundingClientRect(); const b = card?.getBoundingClientRect();
+              const overlap = !!b && Math.min(a.right, b.right) > Math.max(a.left, b.left) && Math.min(a.bottom, b.bottom) > Math.max(a.top, b.top);
+              return { form: document.querySelector('.vfeed')?.dataset.form, top: Math.round(a.top), bottom: Math.round(a.bottom), H: innerHeight, card: !!b, cardBottom: b ? Math.round(b.bottom) : null, overlap };
+            });
+            if (!np) fail(`notiz-zeile ${tag}`, 'keine Zeile "1 note, send?" am neuen Tag');
+            else {
+              ok(`notiz-zeile ${tag}`);
+              if (np.form !== 'video' || !np.card || np.overlap) fail(`notiz-zeile nicht über dem Bild ${tag}`, JSON.stringify(np)); else ok(`notiz-zeile nicht über dem Bild ${tag}`);
+              if (np.top < np.H * 0.35) fail(`notiz-zeile Daumenzone ${tag}`, `oben bei ${np.top} von ${np.H}`); else ok(`notiz-zeile Daumenzone ${tag}`);
+              await check(pg, `notiz-zeile ${tag}`, { skipSmall: !strict, flow: true });
+              await pg.screenshot({ path: `${dir}/state-notiz-zeile-${vp.name}.png` });
+            }
+            await pg.goto(`${url}?now=2026-10-23&seed=3#k=${p.k}`); await pg.waitForFunction(() => !!window.__core?.moment(), null, { timeout: 8000 }); await pg.waitForTimeout(500);
+          } catch (e) { fail(`notiz-zeile ${tag}`, String(e).slice(0, 80)); }
+        }
       }
       for (const [form, label] of [['audio', 'Audio'], ['text', 'Text']]) {
         const tab = vp.width >= 1181 ? pg.locator(`[data-testid="desk-tab-${form}"]`) : pg.locator(`[data-testid=form-switch] button:has-text("${label}")`);
         try { await tab.first().click({ timeout: 2500 }); await pg.waitForTimeout(900); } catch { fail(`${form} öffnen ${tag}`, 'Reiter nicht erreichbar'); continue; }
         await check(pg, `${form} ${tag}`, { skipSmall: !strict, flow: true });
         await pg.screenshot({ path: `${dir}/${form}-${area}-${vp.name}${scheme === 'light' ? '-hell' : ''}.png` });
+        if (form === 'text' && vp.width < 1181) await textChecks(pg, tag, vp, dir, { area, scheme });
       }
       try { const tab = vp.width >= 1181 ? pg.locator('[data-testid="desk-tab-video"]') : pg.locator('[data-testid=form-switch] button:has-text("Video")'); await tab.first().click({ timeout: 1500 }); await pg.waitForTimeout(500); } catch {}
       if (area === 'body' || (area === 'brain' && scheme === 'light')) {

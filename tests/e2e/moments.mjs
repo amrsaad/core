@@ -382,13 +382,23 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const tid = await page.evaluate(() => window.__core.moment().id);
     c.textNotSeenBeforeEnd = !(await page.evaluate((id) => window.__core.seen(id), tid));
     await page.screenshot({ path: `${out}/${name}-9-text.png` });
-    // Handy (Brief 17, Issue 37): der Text ist auf einen Schirm gekürzt, "Read more" öffnet den ganzen Text im Blatt, am Ende des Blatts gilt er als gesehen.
-    // Desktop und alles, was ohne Kürzung passt: wie bisher am Ende des Texts.
-    const more = await page.$('[data-testid=text-more]');
+    // Handy (Brief 18, Issue 41): der Text passt auf einen Schirm, kein "Read more". Ist er am Satzende geschnitten (data-cut), öffnet ein Tipp auf den Text
+    // das Blatt mit dem ganzen Text, am Ende des Blatts gilt er als gesehen. Desktop und alles, was ohne Kürzung passt: wie bisher am Ende des Texts.
+    c.textNoReadMore = await page.evaluate(() => !document.querySelector('[data-testid=text-more]') && !/Read more/.test(document.querySelector('[data-testid=text-view]')?.textContent ?? ''));
+    const cutInfo = await page.evaluate(() => {
+      const b = document.querySelector('[data-testid=text-body]');
+      if (!b) return null;
+      const t = (b.textContent ?? '').trimEnd();
+      return { cut: b.hasAttribute('data-cut'), clamp: b.hasAttribute('data-clamp'), sentenceEnd: /[.!?؟…]["'”’»)\]}]*$/.test(t), overflow: b.scrollHeight > b.clientHeight + 1, step: document.querySelector('.vtext-col')?.dataset.step };
+    });
+    r.textCut = cutInfo;
+    c.textNoOverflow = !!cutInfo && !cutInfo.overflow;
+    const more = cutInfo?.cut ? await page.$('[data-testid=text-body]') : null;
     if (more) {
-      c.textMoreShown = true;
-      await more.click();
-      await page.waitForSelector('[data-testid=caption-sheet]', { timeout: 3000 });
+      c.textCutAtSentenceEnd = cutInfo.sentenceEnd;
+      c.textCutStepSmallest = cutInfo.step === '2';
+      await more.tap();
+      c.textTapOpensSheet = await waitFor(page, () => !!document.querySelector('[data-testid=caption-sheet]'), undefined, 3000);
       await page.waitForTimeout(300);
       c.textNotSeenInSheetTop = !(await page.evaluate((id) => window.__core.seen(id), tid));
       await page.evaluate(() => { const el = document.querySelector('[data-testid=caption-sheet]'); el.scrollTop = el.scrollHeight; el.dispatchEvent(new Event('scroll')); });
@@ -828,6 +838,18 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.notesUnsentBefore = allNotes.length === r.notesCount && allNotes.every((x) => x.sent === undefined);
     c.promptLine = await waitFor(p2, (t) => document.querySelector('[data-testid=notes-prompt]')?.textContent === t, `${allNotes.length} notes, send?`);
     await p2.screenshot({ path: `${out}/${name}-22-notes-send.png` });
+    // Issue 49 (Brief 18): die Zeile liegt im Video-Reiter nie über dem Bild, und als Tippziel in den unteren 65 Prozent (Entscheidung 54)
+    r.promptPos = await p2.evaluate(() => {
+      const n = document.querySelector('[data-testid=notes-prompt]');
+      const card = document.querySelector('.vslot[aria-hidden=false] .vframe > div');
+      if (!n) return null;
+      const a = n.getBoundingClientRect();
+      const b = card?.getBoundingClientRect();
+      const overlap = !!b && Math.min(a.right, b.right) > Math.max(a.left, b.left) && Math.min(a.bottom, b.bottom) > Math.max(a.top, b.top);
+      return { form: document.querySelector('.vfeed')?.dataset.form, top: Math.round(a.top), H: innerHeight, card: !!b, overlap };
+    });
+    c.promptNotOverVideo = !!r.promptPos && r.promptPos.form === 'video' && r.promptPos.card && !r.promptPos.overlap;
+    c.promptInThumbZone = !!r.promptPos && r.promptPos.top >= r.promptPos.H * 0.35;
     await p2.evaluate(() => { window.__opened = []; window.open = (u, t, f) => { window.__opened.push({ u, t, f }); return null; }; });
     await p2.click('[data-testid=notes-prompt]');
     const opN = await p2.evaluate(() => window.__opened);
