@@ -382,13 +382,23 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const tid = await page.evaluate(() => window.__core.moment().id);
     c.textNotSeenBeforeEnd = !(await page.evaluate((id) => window.__core.seen(id), tid));
     await page.screenshot({ path: `${out}/${name}-9-text.png` });
-    // Handy (Brief 17, Issue 37): der Text ist auf einen Schirm gekürzt, "Read more" öffnet den ganzen Text im Blatt, am Ende des Blatts gilt er als gesehen.
-    // Desktop und alles, was ohne Kürzung passt: wie bisher am Ende des Texts.
-    const more = await page.$('[data-testid=text-more]');
+    // Handy (Brief 18, Issue 41): der Text passt auf einen Schirm, kein "Read more". Ist er am Satzende geschnitten (data-cut), öffnet ein Tipp auf den Text
+    // das Blatt mit dem ganzen Text, am Ende des Blatts gilt er als gesehen. Desktop und alles, was ohne Kürzung passt: wie bisher am Ende des Texts.
+    c.textNoReadMore = await page.evaluate(() => !document.querySelector('[data-testid=text-more]') && !/Read more/.test(document.querySelector('[data-testid=text-view]')?.textContent ?? ''));
+    const cutInfo = await page.evaluate(() => {
+      const b = document.querySelector('[data-testid=text-body]');
+      if (!b) return null;
+      const t = (b.textContent ?? '').trimEnd();
+      return { cut: b.hasAttribute('data-cut'), clamp: b.hasAttribute('data-clamp'), sentenceEnd: /[.!?؟…]["'”’»)\]}]*$/.test(t), overflow: b.scrollHeight > b.clientHeight + 1, step: document.querySelector('.vtext-col')?.dataset.step };
+    });
+    r.textCut = cutInfo;
+    c.textNoOverflow = !!cutInfo && !cutInfo.overflow;
+    const more = cutInfo?.cut ? await page.$('[data-testid=text-body]') : null;
     if (more) {
-      c.textMoreShown = true;
-      await more.click();
-      await page.waitForSelector('[data-testid=caption-sheet]', { timeout: 3000 });
+      c.textCutAtSentenceEnd = cutInfo.sentenceEnd;
+      c.textCutStepSmallest = cutInfo.step === '2';
+      await more.tap();
+      c.textTapOpensSheet = await waitFor(page, () => !!document.querySelector('[data-testid=caption-sheet]'), undefined, 3000);
       await page.waitForTimeout(300);
       c.textNotSeenInSheetTop = !(await page.evaluate((id) => window.__core.seen(id), tid));
       await page.evaluate(() => { const el = document.querySelector('[data-testid=caption-sheet]'); el.scrollTop = el.scrollHeight; el.dispatchEvent(new Event('scroll')); });
@@ -477,12 +487,15 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.likeButtonFills = await page.evaluate((id) => window.__core.liked(id), op.id);
     await page.click('[data-testid=save]');
     c.saveFills = await page.evaluate((id) => window.__core.saved(id) && document.querySelector('[data-testid=save]').getAttribute('aria-pressed') === 'true', op.id);
-    // Spalte: vier Knöpfe, Ziele mindestens 48 pt, Abstände, Beschriftung
-    const col = await page.evaluate(() => [...document.querySelectorAll('.vactions button')].map((b) => { const r = b.getBoundingClientRect(); return { id: b.dataset.testid, w: r.width, h: r.height, top: r.top, bottom: r.bottom, text: b.textContent }; }));
-    c.columnOrder = col.map((x) => x.id).join() === 'like,save,share,source';
+    // Spalte: fünf Knöpfe (Brief 16: More öffnet das Blatt, der Wisch nach links gehört dem Reiterwechsel), Ziele mindestens 48 pt, Abstände, Beschriftung
+    const col = await page.evaluate(() => [...document.querySelectorAll('.vactions button')].map((b) => { const r = b.getBoundingClientRect(); return { id: b.dataset.testid, w: r.width, h: r.height, top: r.top, bottom: r.bottom, text: b.textContent, primary: b.dataset.primary }; }));
+    c.columnOrder = col.map((x) => x.id).join() === 'like,save,share,source,more';
     c.columnTargets48 = col.every((x) => x.w >= 48 && x.h >= 48);
     c.columnSpacing = col.slice(1).every((x, i) => x.top - col[i].bottom >= 16);
-    c.columnLabels = col.map((x) => x.text).join('|') === 'More|Save|Share|Source';
+    c.columnLabels = col.map((x) => x.text).join('|') === 'Like|Save|Share|Source|More';
+    // Entscheidung 54: jeder Knopf der Leiste ist ein Pflicht-Tippziel (data-primary). Die Daumenzone selbst prüft das Layout-Gate bei 390x844 und 430x932,
+    // hier ist das Fenster nur 659 px hoch (Safari-Profil mit Leiste)
+    c.columnPrimary = col.every((x) => x.primary === 'true');
     // Das "…"-Menü entfällt
     c.noOptionsButton = !(await page.$('[data-testid=options]')) && !(await page.$('[aria-label=Options]'));
     await page.screenshot({ path: `${out}/${name}-12-spalte.png` });
@@ -511,25 +524,18 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     r.tapToFill.recorded = med(rec);
     c.tapRecorded = rec.length >= 6 && r.tapToFill.recorded < 100;
 
-    // Rückmeldung in einer Ebene (27.10.2026): Wisch nach links öffnet das Blatt, ein Tipp auf einen Chip speichert lokal und geht weiter, kein Netzwerkaufruf
+    // Rückmeldung in einer Ebene (27.10.2026, seit Brief 16 über den Knopf More statt per Wisch): ein Tipp auf einen Chip speichert lokal und geht weiter, kein Netzwerkaufruf
     const gh = [];
     page.on('request', (q) => { if (/github\.com/.test(q.url())) gh.push(q.url()); });
     await page.evaluate(() => { window.__opened = []; window.open = (u, t, f) => { window.__opened.push({ u, t, f }); return null; }; });
-    const swipeLeft = async (dxFrac = 0.5) => {
-      const y = vp.height * 0.45;
-      await page.mouse.move(vp.width * 0.8, y);
-      await page.mouse.down();
-      for (let i = 1; i <= 6; i++) await page.mouse.move(vp.width * (0.8 - (dxFrac / 6) * i), y + i);
-      await page.mouse.up();
-    };
     const openSheet = async () => {
-      // Im Zeitraffer kann der Moment unter dem Wisch enden (Abrufkarte, Wechsel): bis zu zwölfmal neu ansetzen
+      // Im Zeitraffer kann der Moment unter dem Tipp enden (Abrufkarte, Wechsel): bis zu zwölfmal neu ansetzen
       let ok = false;
       for (let k = 0; k < 12 && !ok; k++) {
         await settled(page); await skipRecall(page, name, out);
         // Fing die Maus eine laufende Feder (im Zeitraffer wechselt der Feed ständig) und ging das Loslassen auf einer anderen Ebene verloren, bleibt der Griff offen: erst loslassen
         if (await page.evaluate(() => window.__core.motion().drag)) await page.mouse.up();
-        await swipeLeft();
+        await page.locator('[data-testid=more]').click({ timeout: 2000 }).catch(() => {});
         ok = await waitFor(page, () => !!document.querySelector('[data-testid=note-sheet]'), undefined, 1500);
       }
       if (!ok) await page.screenshot({ path: `${out}/${name}-openfail.png` }).catch(() => {});
@@ -540,8 +546,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const nm = await page.evaluate(() => window.__core.moment());
     const idxBefore = await page.evaluate(() => window.__core.idx());
     const likedBefore = await page.evaluate((id) => window.__core.liked(id), nm.id);
-    c.swipeLeftOpensNote = await openSheet();
-    c.swipeLeftStaysOnMoment = (await page.evaluate(() => window.__core.idx())) === idxBefore;
+    c.moreButtonOpensNote = await openSheet();
+    c.moreButtonStaysOnMoment = (await page.evaluate(() => window.__core.idx())) === idxBefore;
     const chipsSeen = await page.evaluate(() => [...document.querySelectorAll('[data-testid^=note-chip-]')].map((x) => x.textContent));
     // Sechs Rückmeldungs-Chips, dazu Source und Topic (Entscheidung 20)
     c.noteEightChips = chipsSeen.join() === 'Already known,Not for me,Weak,Wrong,Bad cut,Mute speaker,Source,Topic' && !chipsSeen.includes('Great') && !chipsSeen.includes('Boring');
@@ -587,19 +593,28 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.click('[data-testid=note-done]');
     await page.waitForTimeout(300);
     c.noteEmptyDoneNoNote = (await notes()).length === 2 && !(await page.$('[data-testid=note-sheet]'));
-    // Wisch nach rechts und kurzer Zug nach links tun nichts
+    // Brief 16: Wisch nach rechts im ersten Reiter (kein voriger) und kurzer Zug nach links tun nichts, kein Blatt, Reiter bleibt Video
+    await settled(page); await skipRecall(page, name, out);
+    const formNow = () => page.evaluate(() => document.querySelector('[data-testid=form-switch] [aria-checked="true"] .head-name')?.textContent?.trim().toLowerCase());
     await page.mouse.move(vp.width * 0.3, vp.height * 0.45);
     await page.mouse.down();
     for (let i = 1; i <= 6; i++) await page.mouse.move(vp.width * (0.3 + 0.08 * i), vp.height * 0.45 + i);
     await page.mouse.up();
-    await swipeLeft(0.08);
     await page.waitForTimeout(250);
-    c.noteOnlyLongLeftSwipe = !(await page.$('[data-testid=note-sheet]'));
+    c.rightSwipeAtFirstTabStays = (await formNow()) === 'video';
+    await page.mouse.move(vp.width * 0.6, vp.height * 0.45);
+    await page.mouse.down();
+    for (let i = 1; i <= 6; i++) await page.mouse.move(vp.width * (0.6 - (0.08 / 6) * i), vp.height * 0.45 + i);
+    await page.mouse.up();
+    await page.waitForTimeout(250);
+    c.shortLeftSwipeDoesNothing = !(await page.$('[data-testid=note-sheet]')) && (await formNow()) === 'video';
     c.noteNoNetwork = gh.length === 0;
 
     // Ask (Entscheidung 18): Knopf oberhalb der Chips, öffnet claude.ai/new mit Prompt, zählt wie More, setzt askedAt, schließt das Blatt, keine Notiz
     {
       await page.evaluate(() => { window.__opened = []; });
+      // Echtzeit-Uhr: im Zeitraffer endet der Moment zwischen dem Tipp auf More und dem Tipp auf Ask, Ask hielte dann einen schon beendeten Moment an (Brief 16: More per Knopf ist schneller als der Wisch davor)
+      await page.evaluate(() => { window.__ytSlow = true; });
       const okAsk = await openSheet();
       const notesBefore = (await notes()).length;
       c.askButtonAboveChips = okAsk && (await page.evaluate(() => {
@@ -828,6 +843,18 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.notesUnsentBefore = allNotes.length === r.notesCount && allNotes.every((x) => x.sent === undefined);
     c.promptLine = await waitFor(p2, (t) => document.querySelector('[data-testid=notes-prompt]')?.textContent === t, `${allNotes.length} notes, send?`);
     await p2.screenshot({ path: `${out}/${name}-22-notes-send.png` });
+    // Issue 49 (Brief 18): die Zeile liegt im Video-Reiter nie über dem Bild, und als Tippziel in den unteren 65 Prozent (Entscheidung 54)
+    r.promptPos = await p2.evaluate(() => {
+      const n = document.querySelector('[data-testid=notes-prompt]');
+      const card = document.querySelector('.vslot[aria-hidden=false] .vframe > div');
+      if (!n) return null;
+      const a = n.getBoundingClientRect();
+      const b = card?.getBoundingClientRect();
+      const overlap = !!b && Math.min(a.right, b.right) > Math.max(a.left, b.left) && Math.min(a.bottom, b.bottom) > Math.max(a.top, b.top);
+      return { form: document.querySelector('.vfeed')?.dataset.form, top: Math.round(a.top), H: innerHeight, card: !!b, overlap };
+    });
+    c.promptNotOverVideo = !!r.promptPos && r.promptPos.form === 'video' && r.promptPos.card && !r.promptPos.overlap;
+    c.promptInThumbZone = !!r.promptPos && r.promptPos.top >= r.promptPos.H * 0.35;
     await p2.evaluate(() => { window.__opened = []; window.open = (u, t, f) => { window.__opened.push({ u, t, f }); return null; }; });
     await p2.click('[data-testid=notes-prompt]');
     const opN = await p2.evaluate(() => window.__opened);

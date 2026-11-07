@@ -1,0 +1,8 @@
+/* Clip-Seite (Brief 05): Ergänzungen zur Darstellung aus src/components/clip.css. Nur Werte aus tokens.css. */
+.clip-player, .clip-fail { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--s-3); width: 100%; height: 100%; padding: var(--s-4); }
+.clip-player audio, .clip-player video, .clip-fail audio, .clip-fail video { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.clip-time { margin: 0; color: var(--muted); font-size: var(--t-meta); line-height: var(--t-meta-lh); font-weight: var(--w-meta); font-variant-numeric: tabular-nums; direction: ltr; }
+.clip-fail { color: var(--muted); text-align: center; }
+.clip-fail p { margin: 0; font-size: var(--t-meta); line-height: var(--t-meta-lh); }
+.clip-fail a { display: inline-flex; align-items: center; min-height: var(--hit); padding: 0 var(--s-4); border-radius: var(--r-pill); background: var(--accent); color: var(--on-accent); font-size: var(--t-row); font-weight: var(--w-row); text-decoration: none; }
+.clip-note { margin: 0; color: var(--muted); font-size: var(--t-caption); line-height: var(--t-caption-lh); }

@@ -35,10 +35,12 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      # ffmpeg misst im Lautheits-Test (tests/moments-loudness.test.ts) die Fixtures. Ohne ffmpeg würde der Test still übersprungen.
+      # ffmpeg misst im Lautheits-Test (tests/moments-loudness.test.ts) die Fixtures. Es kommt seit Issue 50 aus der devDependency
+      # ffmpeg-static (statischer Build mit ebur128, geladen beim npm ci), nicht mehr per apt (hing am 06.11.2026 zweimal).
+      # Ohne ffmpeg würde der Test still übersprungen, daher wird das Binär hier ausdrücklich geprüft.
       - name: ffmpeg für den Lautheits-Test
         timeout-minutes: 8
-        run: command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
+        run: node -e "const f=require('ffmpeg-static');if(!f||!require('fs').existsSync(f))process.exit(1);console.log(f)" && "$(node -p "require('ffmpeg-static')")" -hide_banner -version | head -1
       - run: npm test
       - run: npm run build
 
