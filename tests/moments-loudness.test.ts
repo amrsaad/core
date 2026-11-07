@@ -1,7 +1,8 @@
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import ffmpegStatic from 'ffmpeg-static';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { clampGain, dbToLinear, gainDbFor, GAIN_MAX_DB, GAIN_MIN_DB, laneFor, loudLine, loudLog, LIMITER, recordLoud, resetLoudLog, TARGET_LUFS, youtubeVolume } from '../src/moments/loudness';
 import { validateMoments } from '../src/moments/contract';
@@ -129,9 +130,12 @@ describe('Vertrag: lufs und gainDb im Pool', () => {
 
 // Fixture: zwei Dateien mit -12 und -24 LUFS. Der Gain aus der Rechnung wird mit ffmpeg angewendet (statt des GainNode im Browser)
 // und die Differenz danach mit ffmpeg gemessen.
-const hasFfmpeg = spawnSync('ffmpeg', ['-version']).status === 0;
+// ffmpeg kommt aus der devDependency ffmpeg-static (statischer Build mit ebur128), damit CI kein apt braucht (Issue 50: die
+// apt-Installation hing am 06.11.2026 zweimal). Fällt das Paket aus (fremde Plattform, Download fehlgeschlagen), gilt ffmpeg im PATH.
+const FFMPEG = ffmpegStatic && existsSync(ffmpegStatic) ? ffmpegStatic : 'ffmpeg';
+const hasFfmpeg = spawnSync(FFMPEG, ['-version']).status === 0;
 const lufs = (file: string): number => {
-  const r = spawnSync('ffmpeg', ['-hide_banner', '-nostats', '-i', file, '-af', 'ebur128=peak=true', '-f', 'null', '-'], { encoding: 'utf8' });
+  const r = spawnSync(FFMPEG, ['-hide_banner', '-nostats', '-i', file, '-af', 'ebur128=peak=true', '-f', 'null', '-'], { encoding: 'utf8' });
   const m = /Integrated loudness:\s+I:\s+(-?[\d.]+) LUFS/.exec(r.stderr);
   if (!m) throw new Error(`keine Messung: ${r.stderr.slice(-300)}`);
   return Number(m[1]);
@@ -142,14 +146,18 @@ describe.skipIf(!hasFfmpeg)('Lautheits-Fixture (ffmpeg)', () => {
   afterAll(() => rmSync(dir, { recursive: true, force: true }));
   const apply = (name: string, db: number) => {
     const out = join(dir, `${name}-leveled.wav`);
-    const r = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', join(FIX, `${name}.wav`), '-af', `volume=${db}dB`, '-c:a', 'pcm_s16le', out]);
+    const r = spawnSync(FFMPEG, ['-y', '-loglevel', 'error', '-i', join(FIX, `${name}.wav`), '-af', `volume=${db}dB`, '-c:a', 'pcm_s16le', out]);
     expect(r.status).toBe(0);
     return out;
   };
 
   it('die Testdateien liegen bei -12 und -24 LUFS', () => {
-    expect(lufs(join(FIX, 'loud-m12.wav'))).toBeCloseTo(-12, 0);
-    expect(lufs(join(FIX, 'loud-m24.wav'))).toBeCloseTo(-24, 0);
+    const loud = lufs(join(FIX, 'loud-m12.wav'));
+    const quiet = lufs(join(FIX, 'loud-m24.wav'));
+    // Im CI-Log sichtbar, dass die Messung wirklich lief und woher ffmpeg kam
+    console.log(`Lautheits-Fixture: ${FFMPEG} misst loud-m12 ${loud} LUFS, loud-m24 ${quiet} LUFS`);
+    expect(loud).toBeCloseTo(-12, 0);
+    expect(quiet).toBeCloseTo(-24, 0);
   });
 
   it('nach dem Angleichen liegen beide bei -16 LUFS und die Differenz ist unter 1 dB', () => {
