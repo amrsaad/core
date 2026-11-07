@@ -182,6 +182,8 @@ export class AudioDeck {
   onPlayed: (() => void) | null = null;
   /** Ein Eintrag fiel sichtbar aus (Fehler), der Host soll den Vorrat neu füllen */
   onNeedFill: (() => void) | null = null;
+  /** Ein Eintrag des Vorrats wurde bereit (Brief 22): Zahl der bereiten Elemente. Der Host schreibt "pool n/5 ready" und löst ein vorgemerktes Weiter ein. */
+  onReady: ((ready: number) => void) | null = null;
   private loudInfo: { db: number; how: string } = { db: 0, how: 'unchanged: no value' };
   private loudLinear: (() => number) | null = null;
   /** Quelle, die in der geregelten Spur nicht lud. Lädt sie danach unverändert, gilt der Host als ohne CORS. */
@@ -624,11 +626,11 @@ export class AudioDeck {
    * Quellen zuerst, das Netz füllt nur auf. Der nächste Kandidat bleibt immer dabei, damit der sichtbare Wisch auf ihn sofort tauscht. Lokale laden auch
    * zuerst. Nur wenn die App sichtbar ist: verdeckt lädt iOS nichts nach, und ein load() verdeckt hängt das Element für immer. Bereits geladene Einträge
    * bleiben. Was aus der Auswahl gefallen ist oder von iOS verworfen wurde, wird ersetzt. Gibt die Zahl der Einträge zurück (bereit oder ladend).
+   * Brief 22 (Entscheidung 57): der Vorrat füllt sich sofort beim Start, vor dem ersten play() und vor der ersten Geste. Die Geste holt unlock() nach:
+   * sie spielt jedes Element des Vorrats, das sie noch nicht gesehen hat, stumm an und hält es gleich wieder an (gesturePool).
    */
   fill(clips: readonly DeckClip[], locOf: (key: string) => LocalClip | undefined = this.deps.local): number {
     if (!this.deps.standby || this.hidden()) return this.entries.length;
-    // Ohne eine Geste hat kein Element je gespielt: ein Vorrat, der verdeckt nie starten darf, wäre wertlos
-    if (!this.unlocked) return this.entries.length;
     const cand: DeckClip[] = [];
     for (const c of clips) {
       if (this.clip?.key === c.key && !this.done) continue;
@@ -706,8 +708,9 @@ export class AudioDeck {
     } catch {
       /* nach loadedmetadata */
     }
+    // Brief 22: nach 8 s ohne Bereitschaft nur eine Zeile, der Eintrag bleibt. Er fällt erst heraus, wenn er das Fenster verlässt oder ein Fehler-Ereignis kommt.
     setTimeout(() => {
-      if (this.entries.includes(s) && !s.ready) this.diag(`deck: pool not ready ${clip.id} after 8000 ms rs=${el.readyState} meta=${s.meta}`);
+      if (this.entries.includes(s) && !s.ready) this.diag(`deck: pool slow ${clip.id} 8000 ms rs=${el.readyState} meta=${s.meta}`);
     }, 8000);
     this.checkEntry(s);
     return s;
@@ -736,6 +739,12 @@ export class AudioDeck {
     if (this.depleted && this.entries.every((x) => this.usable(x))) {
       this.depleted = false;
       this.diag(`deck: pool refill ${this.entries.length}/${POOL}`);
+    }
+    // Brief 22: der Host erfährt jede neue Bereitschaft (Zeile "pool n/5 ready", vorgemerktes Weiter)
+    try {
+      this.onReady?.(this.readyCount());
+    } catch (e) {
+      this.diag(`deck onReady failed ${e instanceof Error ? e.message : String(e)}`);
     }
   }
 
@@ -976,6 +985,7 @@ export class AudioDeck {
     this.onMedia = null;
     this.onPlayed = null;
     this.onNeedFill = null;
+    this.onReady = null;
     this.diag = () => {};
     this.entries = [];
     this.depleted = false;
@@ -1119,6 +1129,34 @@ export class AudioDeck {
   private unlockSpares() {
     this.ensureCount('plain', POOL + 1);
     for (const el of this.pool.plain) this.silentPlay(el);
+    this.gesturePool();
+  }
+
+  /**
+   * Brief 22: der Vorrat füllt sich schon vor der ersten Geste. Ein Element, das dabei seine Quelle bekam, hat die Geste nie gesehen und dürfte verdeckt
+   * nicht starten. Darum spielt die Geste jedes solche Element stumm an und hält es sofort wieder an: play() in der Geste hebt die Sperre des Elements auf,
+   * die Quelle bleibt, die Position bleibt (checkEntry zieht sie nach), kein Ton. Einmal je Element.
+   */
+  private gesturePool() {
+    for (const e of this.entries) {
+      const el = e.el;
+      if (el === this.el || this.unlockedEls.has(el)) continue;
+      this.unlockedEls.add(el);
+      const wasMuted = el.muted;
+      try {
+        el.muted = true;
+        const p = el.play();
+        this.halt(el, 'app: gesture unlock');
+        el.muted = wasMuted;
+        // Das sofort unterbrochene play() lehnt mit AbortError ab, das ist kein Fehler
+        p?.then?.(
+          () => {},
+          () => {},
+        );
+      } catch {
+        el.muted = wasMuted;
+      }
+    }
   }
 
   time(sink: DeckSink): number | null {

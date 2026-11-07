@@ -4,8 +4,8 @@ import { createPortal, flushSync } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL, topicLabel } from '../lib/labels';
 import type { AppState } from '../lib/state';
-import { audioDeck, createPlayer, deckClipOf, HLS, LOCAL, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
-import { POOL_WINDOW, type DeckClip } from '../video/audioDeck';
+import { audioDeck, createPlayer, deckClipOf, HLS, isIOS, LOCAL, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
+import { POOL, POOL_WINDOW, type DeckClip } from '../video/audioDeck';
 import { canWarm, coverMs, onNonCurrentPlaying, roleOf, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx, type WarmState } from '../video/warmup';
 import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, onGesture, type Gesture } from './gesture';
 import { hintVisible, SOUND_NONE } from './soundHint';
@@ -16,7 +16,7 @@ import { loudLine, recordLoud } from './loudness';
 import { browserPreloader } from './preloader';
 import { isPreloadable, keyOf, netRank, queueAhead, streamKind } from './preload';
 import { coldToday, countColdStart, pickHeads, startOrder } from './startHead';
-import { depthPlan, lockMeta, lockNextPlan, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS } from './lockScreen';
+import { lockMeta, lockNextPlan, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS } from './lockScreen';
 import { cursorFor, historyBefore, parseSaved, POOL_AHEAD, pruneAndHeal, pruneOnly, queueKey, recentFromLog, releaseTail, remixTail, replanStart, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMoment, sessionSkip, SIGNAL, type MomentCursor } from './mix';
 import { attentionStep, makeCtx, newAttention, readConn, type Attention } from './context';
@@ -24,7 +24,7 @@ import { addMissed, bumpCell, bumpColdNetStart, bumpPair, hourKey } from './sign
 import { clearFocus, focusActive, focusFilter, inFocus, readFocus, subscribeFocus, type Focus } from './focus';
 import { bumpStart, dropOverStarted, isQuickSkip, markRejected, quickSkip, resumeSaved, setTabCursor, START_MAX } from './tabs';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
-import { clampRate, DEFAULT_RATE, nextRate, rateOf, type Rate } from '../lib/state';
+import { blockedIds, clampRate, clearSwipe, DEFAULT_RATE, dropBlocked, nextRate, rateOf, swipeAway, swipeBlocked, SWIPE_BLOCK_DAYS, type Rate } from '../lib/state';
 import { addSample } from './latency';
 import { captionLines, captionsShown } from './captions';
 import { CueClock, cueIndexAt } from './cueClock';
@@ -112,8 +112,32 @@ interface Slot {
   stalls: number;
   /** Zeitpunkt des ersten PLAYING als aktueller Moment (0: noch nicht gelaufen) */
   playedAt: number;
+  /** Brief 23: der letzte Pausebefehl kam von uns (Wisch, Tipp, Ende, Vorladen). Ein PAUSED ohne diesen Befehl ist eine Fremdpause des Players. */
+  ownPause: boolean;
+  /** Brief 23: Zeitpunkt des letzten eigenen Start- oder Ladebefehls (0: keiner), für die Zeile "yt: self-pause ... after N ms" */
+  sentPlayAt: number;
+  /** Brief 23 (iOS): Zeitpunkt des Starts direkt im Wisch-Handler (0: nicht so gestartet) und ob sein PLAYING schon in der Diag steht */
+  gestureAt: number;
+  gestureLogged: boolean;
+  /** Brief 23 (iOS, Sicherheitsnetz c): Fremdpausen dieses Moments als aktueller Moment, Zeitpunkt des einen Weiterstart-Versuchs (0: keiner) und sein Zeitgeber */
+  selfPauses: number;
+  resumeAt: number;
+  resumeTimer: number;
 }
-const newSlot = (): Slot => ({ host: null, el: null, player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, cover: null, stalls: 0, playedAt: 0 });
+const newSlot = (): Slot => ({ host: null, el: null, player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, cover: null, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0 });
+/**
+ * Brief 23 (Issue 48): Auf iOS laufen YouTube-Momente nicht stumm vorgewärmt (WebKit hält sie beim Lautschalten ohne Geste an). Sie werden nur
+ * per cue vorbereitet und beim Wisch direkt im Handler der Berührung laut gestartet (Variante a des Briefs). Eigene Streams sind nicht betroffen.
+ * Sicherheitsnetz (Variante c, nur wenn a auf dem Gerät nicht trägt): hält der Player sich trotzdem kurz nach dem eigenen Start an, kommt ein einziger
+ * Weiterstart ohne Tonänderung, danach die Tippfläche "Tap to play". Kein Watchdog-Skip mehr für einen YouTube-Moment, der sich selbst angehalten hat.
+ */
+const IOS = isIOS();
+/** Zeitfenster, in dem ein Start im Wisch-Handler für den folgenden goTo gilt */
+const GESTURE_MS = 3000;
+/** Fremdpause so kurz nach dem eigenen Start zählt als Selbstpause des Players (Brief 23, Variante c: "innerhalb 2 s") */
+const SELF_PAUSE_MS = 2500;
+/** So lange darf der eine Weiterstart nach der Selbstpause brauchen, bis die Tippfläche kommt */
+const RESUME_MS = 1500;
 /** Zeit, die der Start der Vorlade-Player nach dem Kaltstart höchstens hinter dem aktuellen Moment wartet (Issue 22) */
 const GATE_MS = 3500;
 /** Zwei Zeilen Abdeckfläche über dem YouTube-Titelbereich (60 px) und dem Logo-Bereich (48 px) des 16:9-Bildes */
@@ -133,7 +157,7 @@ const load = (m: Moment) => ({ videoId: m.videoId, startSeconds: m.start, endSec
 /** Anzahl der Medien-Elemente mit gesetzter Quelle (Vorgabe: höchstens 3 gleichzeitig) */
 const mediaWithSrc = (): number => (typeof document === 'undefined' ? 0 : [...document.querySelectorAll('audio,video')].filter((e) => !!e.getAttribute('src')).length);
 
-export function MomentFeed({ pool: allPool, state, update, active, onPausedChange, syncError = null, desk }: Props) {
+export function MomentFeed({ pool: rawPool, state, update, active, onPausedChange, syncError = null, desk }: Props) {
   const single = state.settings.playerMode === 'single';
   const SLOTS = single ? 1 : 3;
   const stateRef = useRef(state);
@@ -157,6 +181,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const [focus, setFocus] = useState<Focus | null>(() => readFocus(clockNow().getTime()));
   const focusRef = useRef(focus);
   focusRef.current = focus;
+  // Brief 24 (Ergänzung 45): zweimal ohne Wiedergabe weggewischte Momente sind 30 Tage gesperrt und fehlen in Reihenfolge und Zählern (Endseite)
+  const blockedKey = blockedIds(state.momentSwipes, clockNow().getTime()).join(' ');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const allPool = useMemo(() => dropBlocked(rawPool, state.momentSwipes, clockNow().getTime()), [rawPool, blockedKey]);
   const formPool = useMemo(() => filterPool(allPool, form), [allPool, form]);
   const pool = useMemo(() => focusFilter(formPool, focus, clockNow().getTime()), [formPool, focus]);
   useEffect(() => subscribeFocus(() => setFocus(readFocus(clockNow().getTime()))), []);
@@ -238,10 +266,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const unplayedNoted = useRef(new Set<string>());
   /** Verdeckt hängende Momente, für die schon "lock: stuck, stay" im Protokoll steht (Brief 14b): eine Zeile je Moment */
   const stuckNoted = useRef(new Set<string>());
-  /** Vorrats-Tiefe, für die zuletzt "stock: low" kam, und Zeitpunkt des letzten Nachladens (Brief 14b, Schritt 1) */
-  const lowDepth = useRef(-1);
-  const lastResume = useRef(0);
-  const poolHold = useRef(0);
+  /** Brief 22: Weiter am Sperrbildschirm kam, als kein Pool-Element bereit war. Es wird eingelöst, sobald sichtbar das erste Element bereit ist. */
+  const queuedNext = useRef(false);
   /** Offene Messung Wisch bis erstes Bild */
   const swipe = useRef<{ j: number; t0: number; buffered: boolean } | null>(null);
   /** Messung für die Zeile "video: ..." (Issue 22): Wisch bis Bereitschaft des Players und bis zum ersten PLAYING */
@@ -416,6 +442,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         }
         cursor.current = saved.length ? cursorFor(saved, false, clockNow().getTime()) : newMomentCursor(s.momentDay !== today);
         seedHist.current = recentFromLog(s.momentLog, pool);
+        diag.current.push(`skip: ${rawPool.length - allPool.length} blocked`);
         queue.current.push(...saved);
         poorRef.current = pre?.poor() ?? false;
       }
@@ -468,9 +495,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (!pre) return;
     pre.setQueue(queue.current, at, rateRef.current);
     const w = pre.warmSet(queue.current, at, rateRef.current);
-    // Audio-Reiter (Brief 11, Schritt 9, Brief 14b): die ersten drei Vorrats-Momente der nächsten 6 halten ihre Blob-URL, damit der Element-Vorrat sie lokal laden
-    // kann (die Vorrats-Tiefe verlangt 3 von 6) und nach einem Tausch sofort ein lokaler Kandidat da ist. Ein widerrufener Blob würde dem Element die Quelle nehmen.
-    if (form === 'audio') for (const m of queue.current.slice(at + 1, at + 1 + POOL_WINDOW).filter((x) => pre.held(x.id)).slice(0, 3)) if (!w.includes(m)) w.push(m);
+    // Brief 22: für Audio hält der Platten-Vorrat nichts mehr, Blob-URLs gibt es nur noch für Video
     void pre.warm(w);
     pre.trimWarm(new Set(w.map((x) => x.id)));
     saveQueue();
@@ -511,6 +536,74 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const slotFor = (j: number) => slots.current[single ? 0 : ((j % 3) + 3) % 3];
   const current = () => slotFor(idxRef.current);
   const applySound = (p: YTPlayer) => (soundOn.current ? p.unMute() : p.mute());
+  /** Brief 23: YouTube-Moment auf iOS (nur cue, Start im Wisch-Handler) */
+  const iosYt = (m: Moment | undefined): boolean => IOS && !!m && m.form !== 'text' && !m.audio && !ytStub.current && streamKind(m) === 'youtube';
+  /** Ein im Wisch-Handler gestarteter Moment, der nie aktuell wurde (Finger fängt die Feder, Seite federt zurück): anhalten, der aktuelle läuft weiter */
+  const undoGesturePlay = (keep?: Slot) => {
+    let undone = false;
+    for (const sl of slots.current) {
+      if (sl === keep || !sl.gestureAt || sl.index === idxRef.current) continue;
+      sl.gestureAt = 0;
+      sl.gestureLogged = false;
+      undone = true;
+      try {
+        sl.player?.pauseVideo();
+        const mw = queue.current[sl.index];
+        if (mw) sl.player?.seekTo?.(mw.start, true);
+      } catch {
+        /* Player nicht bereit */
+      }
+      diag.current.push(`yt: gesture play undone ${sl.mid}`);
+    }
+    // Der aktuelle Moment wurde im Wisch-Handler angehalten, ohne dass ein Wechsel folgte: weiter (der Player hat in einer Geste gespielt, der Befehl braucht keine)
+    const cs = current();
+    if (undone && !keep && cs.st === STATE.PAUSED && !userPaused.current && endedAt.current !== idxRef.current && !textRef.current && !forYouRef.current && !recallRef.current) {
+      try {
+        cs.player?.playVideo();
+      } catch {
+        /* Player nicht bereit */
+      }
+    }
+  };
+  /**
+   * Brief 23 (iOS, Variante a): Der Wisch ist entschieden, die Feder läuft noch. Der nächste YouTube-Moment startet jetzt, synchron im Handler
+   * der Berührung, damit die Geste über postMessage im IFrame ankommt. goTo am Ende der Feder findet ihn dann schon spielend vor
+   * (wie nach einem Warmlauf) und startet nichts Zweites. Der verlassene Moment hält sofort an, sonst spielen beide bis zum Ende der Feder.
+   */
+  const playInGesture = (next: number) => {
+    if (!IOS || single || textRef.current || forYouRef.current || recallRef.current) return;
+    const m = queue.current[next];
+    const sl = slotFor(next);
+    if (!iosYt(m) || !sl.player || !sl.ready || sl.mid !== m!.id || sl.broken || sl.st === STATE.PLAYING) return;
+    try {
+      undoGesturePlay(sl);
+      current().player?.pauseVideo();
+      if (soundOn.current) sl.player.unMute();
+      sl.player.playVideo();
+      sl.gestureAt = performance.now();
+      sl.gestureLogged = false;
+      // Tempo gleich mit, der Zustandswechsel PLAYING kommt hier vor goTo und setzt es nicht mehr (ytApi prüft es nach)
+      sl.player.setPlaybackRate(clampRate(rateRef.current));
+      diag.current.push(`yt: play in gesture ${m!.id}${soundOn.current ? '' : ' (muted)'}`);
+    } catch {
+      /* Player nicht bereit, goTo startet wie bisher */
+    }
+  };
+  /** Brief 23 (Variante c): Tippfläche "Tap to play" für den aktuellen YouTube-Moment, der sich zweimal selbst angehalten hat. Leer: keine. */
+  const [tapPlay, setTapPlay] = useState('');
+  const tapRef = useRef('');
+  const showTapPlay = (sl: Slot) => {
+    if (tapRef.current === sl.mid) return;
+    tapRef.current = sl.mid;
+    setTapPlay(sl.mid);
+    setLoading(false);
+    diag.current.push(`yt: tap to play ${sl.mid}`);
+  };
+  const clearTapPlay = () => {
+    if (!tapRef.current) return;
+    tapRef.current = '';
+    setTapPlay('');
+  };
 
   // ---- Video-Reiter: Warmlauf, Abdeckfläche, Vorlade-Gate (Issue 22, Entscheidung 29). Nur Referenzen, damit auch ältere Closures stimmen. ----
   /** Kontext für die Warmlauf-Regeln (warmup.ts) */
@@ -583,6 +676,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   };
   /** Nach dem Wisch ist der übernächste Moment der nächste: sein Warmlauf beginnt jetzt. Wartet er noch am ersten Bild, läuft er an, sonst kommt er von selbst. */
   const promoteWarm = (slot: Slot, n: number) => {
+    // iOS, Brief 23: YouTube-Momente laufen nicht stumm warm, der Slot bleibt beim cue stehen (keine Zeile, die Zeile "yt: warm cue" kam schon beim Laden)
+    if (iosYt(queue.current[slot.index])) return;
     slot.warm = 'running';
     slot.warmAt = 0;
     diag.current.push(`video: warm start slot${n} ${slot.mid} st=${slot.st}`);
@@ -665,9 +760,16 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         slot.st = STATE.UNSTARTED;
         slot.broken = false;
         slot.tries = 0;
+        slot.gestureAt = 0;
+        slot.gestureLogged = false;
+        slot.selfPauses = 0;
+        slot.resumeAt = 0;
+        window.clearTimeout(slot.resumeTimer);
+        slot.resumeTimer = 0;
         resetWarm(slot);
         // Der nächste Moment läuft nach dem Laden stumm warm, der übernächste hält am ersten Bild. Ein aktueller Moment ohne Warmlauf bekommt die Abdeckfläche.
-        if (!play && canWarm(roleOf(j, idxRef.current), warmCtxOf(j))) slot.warm = 'running';
+        // iOS (Brief 23): YouTube-Momente laufen nie warm, sie werden nur per cue vorbereitet.
+        if (!play && !iosYt(m) && canWarm(roleOf(j, idxRef.current), warmCtxOf(j))) slot.warm = 'running';
         slot.coverMs = play && streamKind(m) === 'youtube' ? coverMs('idle', 0) : 0;
         // Nach dem Neuaufbau der Player (YouTube-API kam zurück) läuft der Moment an derselben Stelle weiter, nicht von vorn
         const at = resume.current?.mid === m.id ? resume.current.pos : undefined;
@@ -675,13 +777,20 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         slot.pos = at ?? m.start;
         const arg = at === undefined ? load(m) : { ...load(m), startSeconds: resumePos(at, m) };
         if (play) slot.player.loadVideoById(arg);
+        else if (iosYt(m)) {
+          // iOS (Brief 23): nur Metadaten und Vorschaubild, kein stummer Start. Der Start kommt im Wisch-Handler (playInGesture).
+          slot.player.cueVideoById(arg);
+          diag.current.push(`yt: warm cue slot${slots.current.indexOf(slot)} ${m.id}`);
+        }
         // YouTube lädt bei cue nur das Vorschaubild. Darum stumm laden, der Player hält beim ersten Bild an (siehe onState).
         else if (!HLS.has(m.videoId)) slot.player.loadVideoById(arg);
         else slot.player.cueVideoById(arg);
       } else if (play) {
         // Wisch während des Warmlaufs: der Moment lief schon stumm weiter und beginnt wieder am Anfang des Ausschnitts
         if (slot.warm === 'running') slot.player.seekTo?.(m.start, true);
-        slot.player.playVideo();
+        // iOS (Brief 23): im Wisch-Handler schon gestartet, kein zweiter Startbefehl, auch wenn PLAYING noch aussteht (er trüge keine Geste und wäre nur
+        // Rauschen in der Diag). Kommt der Start nicht an, greift soundGuard nach 1,5 s wie bisher.
+        if (!(slot.gestureAt && performance.now() - slot.gestureAt < GESTURE_MS)) slot.player.playVideo();
       } else slot.player.pauseVideo();
       if (play) slot.visited = true;
     } catch (e) {
@@ -704,7 +813,11 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   const markSeen = (m: Moment | undefined) => {
     if (!m) return;
-    update((s) => (s.momentSeen[m.id] ? { ...s, momentDay: today } : bumpCell({ ...s, momentDay: today, momentSeen: { ...s.momentSeen, [m.id]: Date.now() }, dayCount: countSeen(s.dayCount, today) }, today, hourKey(clockNow()), m, 'seen')));
+    // Gespielt: der Zähler der Wegwischer ohne Wiedergabe ist weg (Brief 24)
+    update((s0) => {
+      const s = clearSwipe(s0, m.id);
+      return s.momentSeen[m.id] ? { ...s, momentDay: today } : bumpCell({ ...s, momentDay: today, momentSeen: { ...s.momentSeen, [m.id]: Date.now() }, dayCount: countSeen(s.dayCount, today) }, today, hourKey(clockNow()), m, 'seen');
+    });
   };
 
   const markSeenRef = useRef(markSeen);
@@ -714,6 +827,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (played.current.enough(m.id) || stateRef.current.momentSeen[m.id] || unplayedNoted.current.has(m.id)) return;
     unplayedNoted.current.add(m.id);
     diag.current.push(`skipped (not seen) ${m.id}`);
+    // Brief 24: nur ein Wegwischen durch den Nutzer zählt, kein Moment, den die App selbst übersprungen hat (Hänge-Überwachung, Fehler, Sitzungs-Sperre)
+    if (bad.current.has(m.videoId)) return;
+    const nowMs = clockNow().getTime();
+    const r = swipeAway(stateRef.current, m.id, nowMs);
+    if (r.blocked) diag.current.push(`skip: ${m.id} blocked ${SWIPE_BLOCK_DAYS} d (${r.n} skips)`);
+    update((s) => swipeAway(s, m.id, nowMs).state);
   };
 
   // Erkennt, ob der Browser die Wiedergabe mit Ton verweigert hat. Puffern (langsames Netz, Podcast-Stream) ist keine
@@ -725,6 +844,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       const sl = slotFor(j);
       if (idxRef.current !== j || userPaused.current || !sl.player || forYouRef.current || recallRef.current) return;
       if (sl.st === STATE.PLAYING || !soundOn.current) return;
+      // Brief 23 (iOS, Variante c): nach einer Selbstpause des Players kein Nachstoßen mehr, es gibt einen Weiterstart und dann die Tippfläche
+      if (IOS && sl.selfPauses > 0) return;
       diag.current.push(`soundGuard slot${sl.index} st=${sl.st} attempt=${attempt}`);
       try { sl.player.playVideo(); } catch { /* Player noch nicht bereit */ }
       if (attempt < 3) soundGuard(j, attempt + 1);
@@ -792,65 +913,21 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const pullStock = (hidden: boolean) => (pre ? pullBy((m) => LOCAL.has(keyOf(m)) || pre.held(m.id), hidden) : { how: 'none' as const });
 
   /**
-   * Element-Vorrat füllen (Entscheidung 52, Brief 14): solange die App sichtbar ist, halten fünf Audio-Elemente die nächsten fünf Momente fertig geladen, lokal
-   * bevorzugt, sonst Netz. Aufruf nach jedem Wisch, nach jedem "deck play ok", beim Wechsel in den Audio-Reiter und bei der Rückkehr in die App. Verdeckt
-   * tut er nichts (iOS lädt dann nichts nach, die Warteschlange bleibt stehen).
+   * Element-Vorrat füllen (Entscheidung 52, Brief 14; Entscheidung 57, Brief 22): solange die App sichtbar ist, halten fünf Audio-Elemente die nächsten
+   * fünf Momente fertig geladen, aus dem Netz. Der Pool ist der Vorrat: der Platten-Vorrat lädt für Audio nichts mehr (fremde Podcast-Hosts erlauben kein
+   * fetch), darum gibt es keine Vorrats-Tiefe, kein "stock: low" und keine Wartezeit auf den Vorrat mehr. Aufruf beim Start (vor dem ersten play), nach jedem
+   * Wisch, nach jedem "deck play ok", beim Wechsel in den Audio-Reiter und bei der Rückkehr in die App. Verdeckt tut er nichts (iOS lädt dann nichts nach).
    */
-  const warmTried = useRef(new Set<string>());
   const fillPool = () => {
     if (form !== 'audio' || !pre || !activeRef.current) return;
     if (isBackground(document.visibilityState)) return;
     pruneBad();
     ensureQueue(idxRef.current + 1 + POOL_AHEAD + 3);
-    // Schwaches Netz und der Nachfolger liegt nicht im Vorrat: ein Vorrats-Moment aus den nächsten drei rückt nach idx+1, damit das erste Element lokal wird
-    const first = queue.current[idxRef.current + 1];
-    if (first && !pre.held(first.id) && pre.poor()) pullBy((m) => pre.held(m.id), false);
-    // Mindestens 3 der nächsten 6 liegen im Vorrat, sonst rücken Vorrats-Momente von weiter hinten in die ersten Plätze (idx+1 bleibt)
-    const d = depthPlan(queue.current, idxRef.current, (m) => pre.held(m.id), 3, POOL_WINDOW);
-    if (d.moved > 0) {
-      applyQueue(d.queue);
-      diag.current.push(`stock: depth ${d.have} of 6 (pulled ${d.moved})`);
-    }
-    // Brief 14b, Schritt 1: hält der Vorrat weniger als 3 der nächsten 6, wird sichtbar sofort nachgeladen (Vorrats-Logik aus Brief 02: Fehlversuche vergessen,
-    // nächstgelegene fehlende Momente zuerst). Höchstens alle 5 s, damit ein Host ohne Antwort nicht gehämmert wird. Neuer Vorrat löst über das Abo unten einen neuen fillPool aus.
-    if (d.have < 3) {
-      if (lowDepth.current !== d.have) {
-        lowDepth.current = d.have;
-        diag.current.push(`stock: low ${d.have} of 6, loading`);
-      }
-      if (Date.now() - lastResume.current > 5000) {
-        lastResume.current = Date.now();
-        pre.resume();
-      }
-    } else lowDepth.current = -1;
-    // Kandidaten für den Element-Vorrat: die nächsten 6 (nicht mehr nur 5), das Deck wählt daraus lokale zuerst
-    const next: Moment[] = [];
-    for (let j = idxRef.current + 1; j < queue.current.length && next.length < POOL_WINDOW; j++) {
-      const m = queue.current[j];
-      if (!bad.current.has(m.videoId) && formOf(m) === 'audio' && deckClipOf(m)) next.push(m);
-    }
-    // Ein Vorrats-Moment ohne Blob-URL bekommt sie zuerst (keine zweite Netzverbindung neben dem Vorrat, Entscheidung 45), dann lädt sein Element lokal.
-    // Einmal je Moment: kommt die Blob-URL nicht, lädt er danach vom Netz.
-    const wait = next.filter((m) => !LOCAL.has(keyOf(m)) && pre.held(m.id) && !warmTried.current.has(m.id));
-    if (wait.length) {
-      for (const m of wait) warmTried.current.add(m.id);
-      void pre.warm(wait).then(() => fillPoolRef.current());
-    }
-    const netOk = !pre.poor();
-    // Brief 20, Schritt 2: der Vorrat hat Vorrang. Solange er dünn ist (unter 3 der nächsten 6) und gerade lädt, startet der Pool keine NEUEN Netz-Elemente,
-    // höchstens 3 s ab dem ersten Warten. Danach (oder sobald der Vorrat reicht) lädt er wie gehabt vom Netz. Schon laufende Elemente bleiben unberührt.
-    const thin = d.have < 3 && pre.busy();
-    if (!thin) poolHold.current = 0;
-    else if (!poolHold.current) {
-      poolHold.current = Date.now();
-      window.setTimeout(() => fillPoolRef.current(), 3050);
-    }
-    const holding = thin && Date.now() - poolHold.current < 3000;
-    const inPool = holding ? new Set(audioDeck.poolInfo().map((p) => p.key)) : null;
+    // Kandidaten für den Element-Vorrat: die nächsten 6, das Deck nimmt die ersten fünf in Reihenfolge der Warteschlange
     const clips: DeckClip[] = [];
-    for (const m of next) {
-      if (!LOCAL.has(keyOf(m)) && (wait.includes(m) || !netOk)) continue;
-      if (inPool && !LOCAL.has(keyOf(m)) && !inPool.has(keyOf(m))) continue;
+    for (let j = idxRef.current + 1; j < queue.current.length && clips.length < POOL_WINDOW; j++) {
+      const m = queue.current[j];
+      if (bad.current.has(m.videoId) || formOf(m) !== 'audio') continue;
       const c = deckClipOf(m);
       if (c) clips.push(c);
     }
@@ -884,11 +961,13 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   /**
    * Weiter vom Sperrbildschirm oder der Medientaste (Brief 14, Entscheidung 52): das Deck tauscht auf das erste bereite Element des Vorrats, es wird nichts geladen
-   * und keine Quelle gewechselt. Ist keins bereit, geschieht verdeckt nichts: der laufende Moment spielt zu Ende, nichts wird gezählt, nie ein Netzstart
-   * verdeckt. Sichtbar ohne bereites Element gilt der normale Weg (Vorrat zuerst, sonst Netz mit der Laden-Pille).
+   * und keine Quelle gewechselt. Ist keins bereit, wird verdeckt nichts geladen und nichts gezählt, nie ein Netzstart verdeckt. Brief 22: das Weiter wird dann
+   * vorgemerkt ("lock next: queued, pool empty") und eingelöst, sobald sichtbar das erste Pool-Element bereit ist (onReady unten). Sichtbar ohne bereites
+   * Element gilt der normale Weg (Vorrat zuerst, sonst Netz mit der Laden-Pille).
    */
-  const lockNext = () => {
+  const lockNext = (queued = false) => {
     const hidden = isBackground(document.visibilityState);
+    queuedNext.current = false;
     if (form !== 'audio' || !pre) {
       goTo(idxRef.current + 1);
       return;
@@ -896,12 +975,14 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     pruneBad();
     const c = audioDeck.swapNext();
     if (c) {
+      if (queued) diag.current.push(`lock next: queued swap ${c.id}`);
       placeNext(c.key);
       goTo(idxRef.current + 1);
       return;
     }
     if (hidden) {
-      diag.current.push('lock next: stay (pool empty)');
+      queuedNext.current = true;
+      diag.current.push('lock next: queued, pool empty');
       return;
     }
     ensureQueue(idxRef.current + 1 + queueAhead(rateRef.current));
@@ -948,7 +1029,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     const from = idxRef.current + 1;
     // Entscheidung 45: fehlt ein Nachbar an idx+1 oder idx+2, füllt der nächste Moment mit anderem Bereich die Lücke (pruneAndHeal)
     const prune = form === 'audio' && isBackground(document.visibilityState) ? pruneOnly : pruneAndHeal;
-    const next = prune(queue.current, idxRef.current, (x) => bad.current.has(x.videoId));
+    const nowMs = clockNow().getTime();
+    const sw = stateRef.current.momentSwipes;
+    // Gesperrte Momente (Brief 24) verlassen den Rest der Warteschlange wie gescheiterte
+    const next = prune(queue.current, idxRef.current, (x) => bad.current.has(x.videoId) || swipeBlocked(sw?.[x.id], nowMs));
     if (next.length !== queue.current.length) {
       queue.current = next;
       for (const sl of slots.current) if (sl.index >= from) sl.index = -1;
@@ -1027,6 +1111,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       syncPre(next);
       const prev = idxRef.current;
       diag.current.push(`go ${prev}->${next}`);
+      // Jeder Wechsel löst ein vorgemerktes Weiter vom Sperrbildschirm ein oder macht es gegenstandslos (Brief 22)
+      queuedNext.current = false;
       const prevM = queue.current[prev];
       // Entscheidung 45: der verlassene Moment ist gesehen, wenn er mindestens eine Sekunde gespielt hat, sonst bleibt er ungesehen im Pool
       if (prevM && !textRef.current) {
@@ -1112,14 +1198,18 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
       // Gepuffert heißt: der Vorlade-Player hält genau diesen Moment schon angehalten am Start
       // Ein Stream-Moment (Podcast, Vorrat) hält angehalten im Zustand CUED und gilt als geladen, sobald das erste Bild Daten hat
       const holds = !single && !!nm && target.mid === nm.id;
-      const ready = !single && !!nm && target.ready && holds && (target.warm === 'done' || target.st === STATE.PAUSED || (target.st === STATE.CUED && !!target.player?.isBuffered?.()));
       const t0 = performance.now();
+      // iOS (Brief 23): "gesture" heißt im Wisch-Handler gestartet, der Slot gilt wie nach einem Warmlauf als gepuffert
+      const gesture = !!target.gestureAt && t0 - target.gestureAt < GESTURE_MS;
+      const ready = !single && !!nm && target.ready && holds && (gesture || target.warm === 'done' || target.st === STATE.PAUSED || (target.st === STATE.CUED && !!target.player?.isBuffered?.()));
+      clearTapPlay();
       swipe.current = { j: next, t0, buffered: ready };
       // Warmlauf, Abdeckfläche und Nachrücken (warmup.ts), bevor assign den Slot anfasst
       const plan = single
         ? null
         : swipePlan(next, slots.current.slice(0, SLOTS).map((x): SlotView => ({ index: x.index, warm: x.warm, visited: x.visited, warmPlayedMs: x.warm === 'running' && x.warmAt ? t0 - x.warmAt : 0 })), warmCtxOf);
-      vstat.current = { j: next, t0, readyAt: ready ? 0 : null, mode: holds ? (target.warm === 'done' ? 'warm' : target.warm === 'running' ? 'warming' : ready ? 'paused' : 'cold') : 'cold', done: false };
+      // "cued" heißt nur vorbereitet (iOS, kein Warmlauf)
+      vstat.current = { j: next, t0, readyAt: ready ? 0 : null, mode: holds ? (gesture ? 'gesture' : target.warm === 'done' ? 'warm' : target.warm === 'running' ? 'warming' : ready ? 'paused' : target.st === STATE.CUED ? 'cued' : 'cold') : 'cold', done: false };
       const play = !textRef.current;
       // Lief der Vorlade-Player schon (Warmlauf), kommt kein neues PLAYING: die Spielzeit beginnt jetzt
       if (play && holds && nm && target.st === STATE.PLAYING) played.current.set(nm.id, true);
@@ -1239,6 +1329,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     // Nach jedem erfüllten play() den Vorrat auffüllen (Brief 14, Schritt 2). Verdeckt tut das nichts.
     audioDeck.onPlayed = () => fillPoolRef.current();
     audioDeck.onNeedFill = () => fillPoolRef.current();
+    // Brief 22: jede neue Bereitschaft steht im Protokoll ("pool n/5 ready"). Ein vorgemerktes Weiter vom Sperrbildschirm wird eingelöst, sobald die App
+    // sichtbar ist und ein Element bereit steht. Verdeckt bleibt es vorgemerkt (nie ein Netzstart verdeckt, Entscheidung 45).
+    audioDeck.onReady = (n) => {
+      diag.current.push(`pool ${n}/${POOL} ready`);
+      if (queuedNext.current && !isBackground(document.visibilityState)) lockNextRef.current(true);
+    };
     // Kaltstart: auf die Blob-URL aus dem Vorrat warten statt vom Netz zu starten
     audioDeck.pending = (id, key) => pre?.pendingWarm(id, key) ?? null;
     // Zähler coldNetStarts: jeder Start einer Quelle vom Netz, pro Tag
@@ -1397,6 +1493,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         window.clearTimeout(gateTimer.current);
         gateTimer.current = window.setTimeout(() => openGateRef.current('timeout'), GATE_MS);
         vstat.current = { j: idxRef.current, t0: performance.now(), readyAt: null, mode: 'cold start', done: false, start: true };
+        // Brief 23: auf dem iPhone steht der iOS-Weg in der Diag, damit Max sieht, dass er aktiv ist
+        if (IOS && !ytStub.current) diag.current.push('yt: ios mode (cue only, play in gesture)');
         const failedCurrent: number[] = [];
         for (let s = 0; s < SLOTS; s++) {
           const slot = slots.current[s];
@@ -1454,6 +1552,55 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                   everPlayed.current = true;
                   slot.broken = false;
                   slot.tries = 0;
+                  if (slot.gestureAt && !slot.gestureLogged) {
+                    // Brief 23: der Start aus dem Wisch-Handler ist angekommen (einmal je Moment)
+                    slot.gestureLogged = true;
+                    diag.current.push(`yt: playing after gesture ${slot.mid} ${Math.round(performance.now() - slot.gestureAt)} ms`);
+                  }
+                  if (slot.resumeAt) {
+                    // Brief 23 (Variante c): der eine Weiterstart nach der Selbstpause hat gegriffen
+                    diag.current.push(`yt: resumed after self-pause ${slot.mid} ${Math.round(performance.now() - slot.resumeAt)} ms`);
+                    slot.resumeAt = 0;
+                    window.clearTimeout(slot.resumeTimer);
+                    slot.resumeTimer = 0;
+                  }
+                  if (slot.index === idxRef.current && tapRef.current === slot.mid) clearTapPlay();
+                  // sentPlayAt bleibt stehen: die Selbstpause kommt nach PLAYING (Max' Diag: state 1, dann 2), die Zeile braucht den Abstand zum Start
+                }
+                // Brief 23 (Issue 48, Issue 46): PAUSED ohne eigenen Pausebefehl ist eine Fremdpause des Players (iOS hält ein ohne Geste laut geschaltetes Video an).
+                // Dann liegt unser Standbild über dem IFrame (data-hold wie bei unserer Pause), und die Diag zeigt, wie lange nach dem eigenen Start es kam.
+                if (st === STATE.PAUSED && !slot.ownPause && pm && streamKind(pm) === 'youtube') {
+                  slot.el?.setAttribute('data-hold', '');
+                  const sinceStart = slot.sentPlayAt ? Math.round(performance.now() - slot.sentPlayAt) : -1;
+                  const isCur = slot.index === idxRef.current;
+                  diag.current.push(`yt: self-pause ${slot.mid}${sinceStart >= 0 ? ` after ${sinceStart} ms` : ''} (${slot.gestureAt ? 'started in gesture' : 'started without gesture'}${isCur ? '' : ', not current'})`);
+                  slot.sentPlayAt = 0;
+                  // Variante c (nur iOS, nur sichtbar, nur der aktuelle Moment kurz nach dem eigenen Start): ein Weiterstart ohne Tonänderung, dann die Tippfläche
+                  if (IOS && isCur && sinceStart >= 0 && sinceStart < SELF_PAUSE_MS && !userPaused.current && !textRef.current && !forYouRef.current && !recallRef.current && document.visibilityState === 'visible') {
+                    slot.selfPauses++;
+                    if (slot.selfPauses === 1) {
+                      diag.current.push(`yt: resume after self-pause ${slot.mid}`);
+                      slot.resumeAt = performance.now();
+                      const mid = slot.mid;
+                      window.clearTimeout(slot.resumeTimer);
+                      slot.resumeTimer = window.setTimeout(() => {
+                        slot.resumeTimer = 0;
+                        if (slot.mid !== mid || slot.index !== idxRef.current || slot.st === STATE.PLAYING || userPaused.current) return;
+                        slot.resumeAt = 0;
+                        showTapPlay(slot);
+                      }, RESUME_MS);
+                      try {
+                        slot.player?.playVideo();
+                      } catch {
+                        /* Player nicht bereit */
+                      }
+                    } else {
+                      slot.resumeAt = 0;
+                      window.clearTimeout(slot.resumeTimer);
+                      slot.resumeTimer = 0;
+                      showTapPlay(slot);
+                    }
+                  }
                 }
                 // Der Warmlauf kam vor dem Ablauf der Zeit ans Ende des Ausschnitts: zurück auf den Start und fertig (Sicherheitsnetz, kurze Momente laufen nicht warm)
                 if (st === STATE.ENDED && slot.index !== idxRef.current && slot.warm === 'running') {
@@ -1483,7 +1630,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
                 if (st === STATE.PLAYING && slot.index === idxRef.current) slot.player?.setPlaybackRate(clampRate(rateRef.current));
                 if (slot.index === idxRef.current) syncHintRef.current();
                 if (st === STATE.ENDED && slot.index === idxRef.current) finish();
-                if (st === STATE.PLAYING && (slot.index !== idxRef.current || forYouRef.current || textRef.current || recallRef.current)) {
+                // Brief 23 (iOS): im Wisch-Handler gestartet, goTo kommt mit dem Ende der Feder. Bis dahin ist der Slot noch nicht der aktuelle, darf aber nicht anhalten.
+                const pendingGesture = !!slot.gestureAt && performance.now() - slot.gestureAt < GESTURE_MS && Math.abs(slot.index - idxRef.current) === 1;
+                if (st === STATE.PLAYING && !pendingGesture && (slot.index !== idxRef.current || forYouRef.current || textRef.current || recallRef.current)) {
                   // Der nächste Moment läuft stumm weiter (Warmlauf, bis die YouTube-Einblendung weg ist), jeder andere hält am ersten Bild
                   const role = roleOf(slot.index, idxRef.current);
                   if (slot.index !== idxRef.current && onNonCurrentPlaying(slot.warm, role, canWarm(role, warmCtxOf(slot.index))) === 'hold') startWarmTimer(slot);
@@ -1521,12 +1670,15 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
             // Issue 46 (Brief 20): Nach einem Pausebefehl zeigt der IFrame auf dem iPhone seine eigene Pausenansicht (Logo, Titel, Avatar, nächste Folge) über dem Standbild,
             // denn sein Video-Layer liegt dort über dem DOM-Nachbarn. Darum ist der IFrame selbst unsichtbar (data-hold, CSS in feed.css), vom Pausebefehl bis zum nächsten
             // Befehl, der etwas abspielt oder lädt. Gesetzt wird es hier beim Befehl, ohne React-Umweg.
+            // Brief 23: ownPause und sentPlayAt merken, welcher Befehl zuletzt von uns kam (Fremdpause erkennen, Zeile "yt: self-pause ... after N ms")
             for (const k of ['pauseVideo', 'loadVideoById', 'cueVideoById'] as const) {
               const f = pl[k].bind(pl) as (a?: never) => void;
               pl[k] = ((arg?: never) => {
                 slot.el?.removeAttribute('data-live');
                 if (k === 'pauseVideo') slot.el?.setAttribute('data-hold', '');
                 else slot.el?.removeAttribute('data-hold');
+                slot.ownPause = k === 'pauseVideo';
+                slot.sentPlayAt = k === 'loadVideoById' ? performance.now() : 0;
                 setCover(slot, false);
                 f(arg);
               }) as never;
@@ -1535,6 +1687,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
               const play = pl.playVideo.bind(pl);
               pl.playVideo = () => {
                 slot.el?.removeAttribute('data-hold');
+                slot.ownPause = false;
+                slot.sentPlayAt = performance.now();
                 play();
               };
             }
@@ -1601,7 +1755,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         s.player?.destroy();
         s.el?.removeAttribute('data-live');
         s.el?.removeAttribute('data-hold');
-        Object.assign(s, { player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, stalls: 0, playedAt: 0 });
+        Object.assign(s, { player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0 });
         if (s.cover) s.cover.style.visibility = 'hidden';
       }
     };
@@ -1667,8 +1821,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         seenMarked.current.add(m.id);
         markSeenRef.current(m);
       }
-      // Laden sichtbar machen, hängende Momente überspringen
-      if (sl.st === STATE.PLAYING || userPaused.current) {
+      // Laden sichtbar machen, hängende Momente überspringen. Brief 23 (iOS, Variante c): ein YouTube-Moment, der sich selbst angehalten hat,
+      // wartet auf den Weiterstart oder auf den Tipp, er zählt nicht als hängend und wird nie übersprungen (gesehen erst nach Max' Wischen).
+      if (sl.st === STATE.PLAYING || userPaused.current || (IOS && sl.selfPauses > 0)) {
         waitSince.current = 0;
         setLoading(false);
       } else {
@@ -1853,6 +2008,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const settle = (dir: 1 | -1 | 0, v: number) => {
     const H = g.current.h || dragEl.current?.clientHeight || window.innerHeight;
     if (dir === 0) {
+      // Brief 23 (iOS): ein im Wisch-Handler gestarteter Nachbar bleibt nicht laufen, wenn die Seite zurückfedert
+      undoGesturePlay();
       springTo(0, v * 1000, SPRING_BACK, () => {
         endMotion();
         endMeter(true);
@@ -2298,6 +2455,9 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         const v = vel.current.at(e.timeStamp);
         const y = mot.current.y;
         const res = release(y, v, r.h, canNext(), canPrev());
+        // Brief 23 (iOS): der Zielmoment startet jetzt, noch im Handler der Berührung, die Feder läuft derweil
+        if (res === 'next') playInGesture(idxRef.current + 1);
+        else if (res === 'prev') playInGesture(idxRef.current - 1);
         settle(res === 'next' ? 1 : res === 'prev' ? -1 : 0, v);
         return;
       }
@@ -2333,6 +2493,25 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         infoDown.current = false;
         setCapOpen(true);
       }
+      return;
+    }
+    // Brief 23 (iOS, Variante c): Tipp auf "Tap to play". Der Startbefehl geht synchron hier ab, damit die Geste über postMessage im IFrame ankommt
+    // (ein Zeitgeber wie beim Pausentipp trüge sie nicht). Kein Pausentipp, kein Doppeltipp.
+    if (tapRef.current && current().mid === tapRef.current) {
+      const sl = current();
+      try {
+        if (soundOn.current) sl.player?.unMute();
+        sl.player?.playVideo();
+        sl.gestureAt = performance.now();
+        sl.gestureLogged = false;
+      } catch {
+        /* Player nicht bereit */
+      }
+      diag.current.push(`yt: play in gesture ${sl.mid} (tap)`);
+      clearTapPlay();
+      userPaused.current = false;
+      setPaused(false);
+      infoDown.current = false;
       return;
     }
     if (infoDown.current) {
@@ -2592,6 +2771,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     }
     // Sichtbar: der Element-Vorrat füllt sich wieder (Brief 14, Schritt 2)
     fillPoolRef.current();
+    // Brief 22: ein verdeckt vorgemerktes Weiter wird jetzt eingelöst, wenn ein Element schon bereit steht (sonst beim nächsten "pool n/5 ready")
+    if (queuedNext.current && form === 'audio' && playable && !userPaused.current && audioDeck.poolReady()) {
+      leftPaused.current = false;
+      lockNextRef.current(true);
+      return;
+    }
     // Der laufende Moment ist jetzt zu sehen: gesehen (einmal), dann Karte oder Ton wieder aufnehmen
     if (!textRef.current && played.current.enough(m.id)) markSeen(m);
     if (!recallRef.current && (stateRef.current.recallQueue?.length ?? 0) > 0) {
@@ -2631,8 +2816,20 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   // Erste Geste irgendwo im Dokument (auch auf den Reitern und der Leiste) schaltet den Ton frei, nicht nur ein Tipp im Feed (gesture.ts).
   // Jede weitere Geste hebt eine vom Browser verworfene Stummschaltung auf (iOS zählt erst touchend und click, pointerdown reicht dafür nicht).
   const gestureRef = useRef<(g: Gesture) => void>(() => {});
+  // Brief 23 (iOS): pointerdown ist auf iOS keine Aktivierung für Ton. Ein unMute dort hielte den stumm laufenden Kaltstart-Moment an (Selbstpause).
+  // Die erste Freischaltung wartet auf das Ende derselben Berührung (pointerup, touchend, click) oder eine Taste.
+  const firstPending = useRef(false);
   gestureRef.current = (g) => {
-    if (g.first) {
+    let first = g.first;
+    if (IOS && first && g.type === 'pointerdown') {
+      firstPending.current = true;
+      return;
+    }
+    if (IOS && firstPending.current && g.type !== 'pointerdown') {
+      firstPending.current = false;
+      first = true;
+    }
+    if (first) {
       soundOn.current = true;
       unlockLevel();
       for (const sl of slots.current) sl.player?.unMute();
@@ -2976,6 +3173,8 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
             aria-hidden={!isCur}
             // Issue 46: Pausiert der YouTube-Player, zeigt iOS darüber Logo, Titel, Avatar und die nächste Folge. Das Standbild deckt die Karte dann ab, der Player pausiert darunter.
             data-paused={isCur && paused && !forYou && !desk && mm && mm.form !== 'text' && !mm.audio && streamKind(mm) === 'youtube' ? '' : undefined}
+            // Brief 23 (iOS, Variante c): der Player hat sich selbst angehalten und der Weiterstart griff nicht. Standbild und Tippfläche, kein YouTube-Element.
+            data-tap={isCur && !!tapPlay && !!mm && tapPlay === mm.id && !forYou ? '' : undefined}
           >
             <div className="vframe">
               <div ref={(el) => (slot.host = el)} />
@@ -2998,6 +3197,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
             </div>
             {isCur && paused && !forYou && (
               <Icon name="play" size="var(--s-16)" className="vplay" label="Pausiert" />
+            )}
+            {isCur && !paused && !!mm && tapPlay === mm.id && !forYou && (
+              <>
+                <Icon name="play" size="var(--s-16)" className="vplay" label="Tap to play" />
+                <div className="vtap" data-testid="tap-to-play" aria-hidden="true">Tap to play</div>
+              </>
             )}
           </div>
         );

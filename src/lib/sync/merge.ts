@@ -15,10 +15,12 @@
  * - Gelöschte Gesehen-Einträge (Entscheidung 45, momentUnseen): vereinigt, spätester Zeitpunkt. Ein Eintrag in momentSeen, der nicht jünger ist als der Zeitpunkt
  *   seiner Löschung, gilt nicht (sonst käme er vom anderen Gerät zurück). Ein späteres, echtes Ansehen (jünger als die Löschung) bleibt, auch wenn das andere
  *   Gerät noch den alten Eintrag hat: gestrichen wird je Seite vor dem Vereinigen (mergeSeen).
+ * - Wegwischer ohne Wiedergabe (Brief 24, momentSwipes): vereinigt je Moment-ID. Ein Wegwischen ist ein Ereignis, kein Zähler je Gerät: je ID das Maximum von n
+ *   und die spätere Sperre, nie die Summe. Liegt das letzte Wegwischen einer Seite nach der abgelaufenen Sperre der anderen, gilt nur die spätere Seite (Neuanfang mit n = 1).
  * - Signale (moments/signals.ts): Zähler je Feld und Tag der größere Wert, missed vereinigt je Moment-ID mit dem jüngsten Eintrag, höchstens 20.
  * - Diagnose (lib/diag.ts, Entscheidung 31): Zeilen vereinigt nach Zeit, die letzten 500 bleiben. Das Feld löst allein keinen Sync aus (nicht in syncedChanged).
  */
-import type { AppState, SavedMoment, Settings } from '../state';
+import type { AppState, SavedMoment, Settings, Swipe } from '../state';
 import type { Weights } from '../../moments/mix';
 import type { Moment, MomentLogEntry } from '../../moments/types';
 import type { DayCount } from '../../moments/today';
@@ -58,6 +60,8 @@ export interface SyncState {
   momentRejected?: Record<string, number>;
   /** Entscheidung 45: Zeitpunkt, zu dem ein Gesehen-Eintrag gelöscht wurde (Reparatur). Fehlt bei Geräten ohne Löschung. */
   momentUnseen?: Record<string, number>;
+  /** Brief 24: Wegwischer ohne Wiedergabe je Moment, je ID das Maximum (mergeSwipes). Fehlt bei Geräten ohne Wegwischer. */
+  momentSwipes?: Record<string, Swipe>;
   /** Diagnose-Zeilen aller Geräte (Entscheidung 31), Ringpuffer mit 500 Zeilen, nach Zeit zusammengeführt. Fehlt bei Geräten ohne Zeilen. */
   diag?: DiagEntry[];
   momentLiked: Record<string, number>;
@@ -350,6 +354,8 @@ export function mergeDocs(a: SyncDoc, b: SyncDoc): SyncDoc {
   if (!signalsEmpty(sg)) out.state.signals = sg;
   if (x.momentRejected || y.momentRejected) out.state.momentRejected = maxMapMin(x.momentRejected ?? {}, y.momentRejected ?? {});
   if (Object.keys(unseen).length) out.state.momentUnseen = unseen;
+  const sw = mergeSwipes(x.momentSwipes, y.momentSwipes);
+  if (sw) out.state.momentSwipes = sw;
   const dg = mergeDiag(x.diag, y.diag);
   if (dg) out.state.diag = dg;
   return out;
@@ -385,6 +391,25 @@ function mergeQueue(p: QueueEntry[] | undefined, q: QueueEntry[] | undefined, tp
 function mergeSeen(a: Record<string, number>, b: Record<string, number>, unseen: Record<string, number>): Record<string, number> {
   const live = (m: Record<string, number>) => Object.fromEntries(Object.entries(m).filter(([id, at]) => !(id in unseen) || at > unseen[id]));
   return maxMapMin(live(a), live(b));
+}
+
+/**
+ * Brief 24: je Moment-ID das Maximum von n und die spätere Sperre (Ereignis, kein Zähler je Gerät). Ausnahme: liegt das letzte Wegwischen der einen Seite
+ * nach der abgelaufenen Sperre der anderen, gewinnt die spätere Seite ganz (Neuanfang). Vertauschbar und wiederholbar. Ohne Einträge undefined.
+ */
+export function pickSwipe(p: Swipe, q: Swipe): Swipe {
+  if (p.until !== undefined && q.at > p.until) return q;
+  if (q.until !== undefined && p.at > q.until) return p;
+  const out: Swipe = { n: Math.max(p.n, q.n), at: Math.max(p.at, q.at) };
+  const u = Math.max(p.until ?? 0, q.until ?? 0);
+  if (u) out.until = u;
+  return out;
+}
+export function mergeSwipes(a: Record<string, Swipe> | undefined, b: Record<string, Swipe> | undefined): Record<string, Swipe> | undefined {
+  if (!a && !b) return undefined;
+  const out: Record<string, Swipe> = { ...(a ?? {}) };
+  for (const [k, v] of Object.entries(b ?? {})) out[k] = k in out ? pickSwipe(out[k], v) : v;
+  return Object.keys(out).length ? out : undefined;
 }
 
 function maxMapMin(a: Record<string, number>, b: Record<string, number>): Record<string, number> {
@@ -425,6 +450,7 @@ export function toDoc(s: AppState): SyncDoc {
   if (!signalsEmpty(s.signals)) doc.state.signals = s.signals;
   if (s.momentRejected && Object.keys(s.momentRejected).length) doc.state.momentRejected = s.momentRejected;
   if (s.momentUnseen && Object.keys(s.momentUnseen).length) doc.state.momentUnseen = s.momentUnseen;
+  if (s.momentSwipes && Object.keys(s.momentSwipes).length) doc.state.momentSwipes = s.momentSwipes;
   if (s.diag?.length) doc.state.diag = s.diag;
   // Vereinigung mit dem leeren Dokument bringt Reihenfolge und Kürzungen in die gemeinsame Form
   return mergeDocs(doc, emptyDoc());
@@ -459,6 +485,7 @@ export function applyDoc(s: AppState, d: SyncDoc): AppState {
   if (next.signals !== undefined && !eq(next.signals, cur.signals)) out.signals = next.signals;
   if (next.momentRejected !== undefined && !eq(next.momentRejected, cur.momentRejected)) out.momentRejected = next.momentRejected;
   if (next.momentUnseen !== undefined && !eq(next.momentUnseen, cur.momentUnseen)) out.momentUnseen = next.momentUnseen;
+  if (next.momentSwipes !== undefined && !eq(next.momentSwipes, cur.momentSwipes)) out.momentSwipes = next.momentSwipes;
   if (next.diag !== undefined && !diagEqual(next.diag, cur.diag)) out.diag = next.diag;
   if (!eq(cur.settings, next.settings)) {
     const settings = { ...s.settings };
@@ -537,6 +564,7 @@ export function syncedChanged(a: AppState, b: AppState): boolean {
     a.signals !== b.signals ||
     a.momentRejected !== b.momentRejected ||
     a.momentUnseen !== b.momentUnseen ||
+    a.momentSwipes !== b.momentSwipes ||
     a.momentLiked !== b.momentLiked ||
     a.momentAsked !== b.momentAsked ||
     a.mutedChannels !== b.mutedChannels ||

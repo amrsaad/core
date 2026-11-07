@@ -3,6 +3,8 @@
 // Prüft: erste Geste auf dem Reiter, kein Symbol "Ton aus"; fünf Momente in Folge im Hintergrund am selben Element;
 // Tempo 2x über zehn Momente ohne Warten und Pause; höchstens drei Medien-Elemente mit Quelle; Untertitel folgen der Elementzeit (10 s bei 2x).
 // Brief 02: Kaltstart aus dem Vorrat (echte mp3, Chromium), Sperrbildschirm (Media Session), Laden-Pille, Untertitel über den Tempowechsel.
+// Brief 22 (Entscheidung 57): der Platten-Vorrat lädt für Audio nichts mehr. Die Prüfungen zum Kaltstart aus dem Vorrat (Köpfe, erster Start lokal, kein
+// Netzstart, keine Pille) laufen nur noch mit AUDIO_STOCK=1 (übersprungen, nicht gelöscht). Sperrbildschirm und Pille werden weiter geprüft.
 // Aufruf: node tests/e2e/audiotab.mjs <url> <ausgabeordner>   (vorher npm run build, dann vite preview)
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
@@ -64,6 +66,8 @@ const poolRecall = await encPool(Array.from({ length: 16 }, (_, i) => ({ ...mk(`
 const poolCue = await encPool(Array.from({ length: 6 }, (_, i) => mk(`atcue${i}`, 40, dense(40))));
 
 const only = (process.env.ONLY ?? '').split(',').filter(Boolean);
+/** Brief 22: Prüfungen zum Audio-Platten-Vorrat nur auf Wunsch */
+const AUDIO_STOCK = process.env.AUDIO_STOCK === '1';
 const want = (n) => !only.length || only.includes(n);
 const startAudio = async (page) => {
   await page.waitForSelector('[data-testid=form-switch]');
@@ -332,12 +336,19 @@ window.onYouTubeIframeAPIReady&&window.onYouTubeIframeAPIReady();`;
     const s1 = await open(cx, 'now=2026-10-23&seed=3');
     await s1.pg.click('[data-testid=form-switch] button:has-text("Audio")');
     c.coldS1Plays = await waitFor(s1.pg, () => window.__core.state() === 1, null, 30000);
-    c.coldS1Filled = await waitFor(s1.pg, () => window.__core.preload().stats.n >= 6, null, 60000);
-    c.coldS1Heads = await waitFor(s1.pg, () => window.__core.heads().length === 6, null, 10000);
-    const heads1 = await s1.pg.evaluate(() => window.__core.heads().map((h) => h.id));
-    const held1 = await s1.pg.evaluate((ids) => ids.map((id) => window.__core.preload().ids.includes(id)), heads1);
-    c.coldHeadsInVault = held1.every(Boolean);
-    r.notes.heads = heads1;
+    if (AUDIO_STOCK) {
+      c.coldS1Filled = await waitFor(s1.pg, () => window.__core.preload().stats.n >= 6, null, 60000);
+      c.coldS1Heads = await waitFor(s1.pg, () => window.__core.heads().length === 6, null, 10000);
+      const heads1 = await s1.pg.evaluate(() => window.__core.heads().map((h) => h.id));
+      const held1 = await s1.pg.evaluate((ids) => ids.map((id) => window.__core.preload().ids.includes(id)), heads1);
+      c.coldHeadsInVault = held1.every(Boolean);
+      r.notes.heads = heads1;
+    } else {
+      // Brief 22: der Pool füllt sich beim Start aus dem Netz, nichts liegt im Platten-Vorrat, keine Zeile 'stock: ...'
+      c.coldS1PoolReady = await waitFor(s1.pg, () => window.__core.diag().some((x) => x === 'pool 5/5 ready'), null, 10000);
+      c.coldS1NothingHeld = (await s1.pg.evaluate(() => window.__core.preload().stats.n)) === 0;
+      c.coldS1NoStockLines = (await s1.pg.evaluate(() => window.__core.diag().filter((x) => x.startsWith('stock: ')).length)) === 0;
+    }
     await s1.pg.close();
 
     // Neustart an einem neuen Tag mit anderer Mischung (die Warteschlange der letzten Sitzung gilt nicht mehr), das Netz ist jetzt langsam
@@ -347,17 +358,23 @@ window.onYouTubeIframeAPIReady&&window.onYouTubeIframeAPIReady();`;
     await s2.pg.click('[data-testid=form-switch] button:has-text("Audio")');
     c.coldS2Plays = await waitFor(s2.pg, () => window.__core.state() === 1, null, 20000);
     r.notes.firstSoundMs = Date.now() - t0;
-    // Ein Netzstart hätte mindestens die Verzögerung des Hosts gedauert
-    c.coldFirstSoundBeforeNet = r.notes.firstSoundMs < net.delay;
     const d2 = await s2.pg.evaluate(() => window.__core.diag());
     const srcLines = d2.filter((x) => /^deck: src (local|net) /.test(x));
     r.notes.diag = d2.filter((x) => /^deck: (src|hold|start order)|^signals:/.test(x)).slice(0, 10);
-    c.coldFirstSrcLocal = /^deck: src local /.test(srcLines[0] ?? '');
-    c.coldNoNetStart = !srcLines.some((x) => /^deck: src net /.test(x));
-    c.coldCounterZero = (await s2.pg.evaluate(() => window.__core.lock().cold)) === 0;
-    c.coldSignalsZero = (await s2.pg.evaluate(() => window.__core.lock().cloud)) === 0;
+    if (AUDIO_STOCK) {
+      // Ein Netzstart hätte mindestens die Verzögerung des Hosts gedauert
+      c.coldFirstSoundBeforeNet = r.notes.firstSoundMs < net.delay;
+      c.coldFirstSrcLocal = /^deck: src local /.test(srcLines[0] ?? '');
+      c.coldNoNetStart = !srcLines.some((x) => /^deck: src net /.test(x));
+      c.coldCounterZero = (await s2.pg.evaluate(() => window.__core.lock().cold)) === 0;
+      c.coldSignalsZero = (await s2.pg.evaluate(() => window.__core.lock().cloud)) === 0;
+      c.coldNoPill = (await s2.pg.locator('[data-testid=loading-pill]').count()) === 0;
+    } else {
+      // Brief 22: der Start kommt vom Netz (akzeptierte Grenze, Entscheidung 57), das Deck wartet nie auf einen Audio-Ausschnitt aus dem Vorrat
+      c.coldFirstSrcNet = /^deck: src net /.test(srcLines[0] ?? '');
+      c.coldNoHold = !d2.some((x) => /^deck: hold /.test(x));
+    }
     c.coldNoSystemPause = !d2.some((x) => /pause event by=system/.test(x));
-    c.coldNoPill = (await s2.pg.locator('[data-testid=loading-pill]').count()) === 0;
 
     // Sperrbildschirm: Handler, Positionsstatus, Metadaten, Zurück = Save, zweiter Druck = More like this
     const hs = await s2.pg.evaluate(() => Object.keys(window.__ms).sort());

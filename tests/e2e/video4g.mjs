@@ -10,7 +10,7 @@
 // Umgebung: SWIPES=20  DWELLS=4500,1800 (Verweilzeit je Moment in ms)  E2E_INFO=1 (nur messen, kein Fehlercode, z.B. gegen einen älteren Stand)
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
-import { chromium, devices } from 'playwright';
+import { chromium, devices, webkit } from 'playwright';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-video4g'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -45,8 +45,11 @@ const PATCH = `
       refresh();
       ev.onStateChange({ data });
     };
+    // Ein Zustand nach PLAYING (Pause, Cue, Ende) macht ein noch ausstehendes PLAYING gegenstandslos, wie beim echten Player
+    let pend = 0;
     const wrapped = { ...opts, events: { ...ev, onStateChange: (e) => {
-      if (e.data === 1) { const d = isCold ? cold() : warm(); isCold = false; setTimeout(() => emit(1), d); } else emit(e.data);
+      clearTimeout(pend);
+      if (e.data === 1) { const d = isCold ? cold() : warm(); isCold = false; pend = setTimeout(() => emit(1), d); } else emit(e.data);
     } } };
     Orig.call(this, el, wrapped);
     const load = this.loadVideoById, cue = this.cueVideoById, seek = this.seekTo;
@@ -55,7 +58,8 @@ const PATCH = `
     const vidOf = (a) => (typeof a === 'string' ? a : a.videoId);
     // Brief 09: hängende Videos wie im schlechten Netz: der Player kommt nie auf PLAYING (Zustand bleibt bei CUED), window.__hang(videoId) entscheidet
     this.loadVideoById = (a) => { flush(); curVid = vidOf(a); isCold = true; acc = 0; state = -1; if (window.__hang && window.__hang(curVid)) { cue(a); return; } load(a); };
-    this.cueVideoById = (a) => { flush(); curVid = vidOf(a); acc = 0; state = -1; cue(a); };
+    // Brief 23: nach cue lädt der erste Start den Stream erst (kalt, 600 bis 1200 ms), im iOS-Fall kommt PLAYING also erst nach dem Ende der Feder
+    this.cueVideoById = (a) => { flush(); curVid = vidOf(a); isCold = !!window.__ytIos; acc = 0; state = -1; cue(a); };
     const playV = this.playVideo;
     this.playVideo = () => { if (curVid && window.__hang && window.__hang(curVid)) return; playV(); };
     // Einblendung als echte Elemente im Player-Rahmen, damit der Test prüfen kann, ob etwas Eigenes darüberliegt
@@ -378,6 +382,144 @@ const runSlow3G = async (browser) => {
   return r;
 };
 
+
+// Brief 23 (Issue 48): iOS-Regeln im Nachbau (window.__ytIos): unMute ohne Geste hält ein stumm gestartetes Video an, ein lauter Start ohne Geste
+// läuft an und hält sich nach 800 ms selbst an, danach bleibt jeder laute Start ohne Geste ohne Wirkung. Nach cue ist der erste Start kalt (600 bis 1200 ms),
+// PLAYING kommt also erst nach dem Ende der Feder.
+// Teil 1 (Variante a): fünf Wische auf YouTube-Momente, jeder spielt 10 s nach dem Wisch (state 1), kein state 2 ohne eigene Pause, kein watchdog,
+// kein soundGuard attempt > 0, kein stummer Warmlauf, der Start kommt aus dem Wisch-Handler.
+// Teil 2 (Variante c, Sicherheitsnetz): mit window.__ytGestureLost kommt die Geste nicht im Player an (so als trüge postMessage sie auf dem Gerät nicht).
+// Dann: Selbstpause erkannt, ein Weiterstart, Tippfläche "Tap to play", kein watchdog-Skip in 13 s, der Tipp startet in der Geste.
+// Läuft ohne Netzdrossel (auch in WebKit), die Zeit läuft echt (__ytSlow).
+const runIosSwipes = async (browser, name) => {
+  const r = { name, checks: {}, swipes: [] };
+  const c = r.checks;
+  const ctx = await browser.newContext({ ...devices['iPhone 15'], viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
+  await ctx.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
+  await ctx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await page.addInitScript(() => {
+    window.__ytSlow = true;
+    window.__ytIos = true;
+    Object.defineProperty(navigator, 'connection', { value: { effectiveType: '4g', downlink: 9, rtt: 85 }, configurable: true });
+  });
+  await page.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBody }));
+  await page.goto(`${url}?now=2026-10-23&seed=3#k=${k}`);
+  c.feedLoaded = await waitFor(page, () => !!window.__core?.moment());
+  // Kaltstart: der erste Moment läuft stumm an (erlaubt), der erste Tipp schaltet den Ton ein (Geste). pointerdown allein darf nicht laut schalten (hielte an).
+  c.coldStartPlays = await waitFor(page, () => window.__core.state() === 1);
+  c.iosModeLine = await page.evaluate(() => window.__core.diag().some((x) => x.startsWith('yt: ios mode')));
+  const vp = page.viewportSize();
+  await page.waitForTimeout(800);
+  await page.mouse.click(vp.width / 2, vp.height / 2);
+  c.firstTapSoundPlays = await waitFor(page, () => window.__core.state() === 1 && window.__core.sound() && window.__ytlog.some((x) => x.startsWith('ios play in gesture')));
+  await page.waitForTimeout(1500);
+  c.noPauseOnUnmuteAtFirstTap = await page.evaluate(() => !window.__ytlog.some((x) => x.startsWith('ios pause on unmute')) && !window.__core.diag().some((x) => x.startsWith('yt: self-pause')));
+  const swipe = async () => {
+    const y0 = vp.height * 0.75, y1 = vp.height * 0.25;
+    await page.mouse.move(vp.width / 2, y0);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i++) { await page.mouse.move(vp.width / 2, y0 + ((y1 - y0) * i) / 8); await page.waitForTimeout(12); }
+    await page.mouse.up();
+  };
+  const cur = () => page.evaluate(() => {
+    const cur = document.querySelector('.vslot[aria-hidden=false]');
+    const poster = cur?.querySelector('.vposter');
+    const vis = (e) => !!e && getComputedStyle(e).visibility !== 'hidden' && e.getBoundingClientRect().width > 0;
+    const tap = cur?.querySelector('[data-testid=tap-to-play]');
+    return { paused: !!cur?.hasAttribute('data-paused'), held: !!cur?.hasAttribute('data-hold'), tapAttr: !!cur?.hasAttribute('data-tap'), tapText: tap?.textContent ?? '', tapVisible: vis(tap), poster: vis(poster), play: !!cur?.querySelector('.vplay'), st: window.__core.state() };
+  });
+  for (let n = 0; n < 5; n++) {
+    const idx0 = await page.evaluate(() => window.__core.idx());
+    const diagLen = await page.evaluate(() => window.__core.diag().length);
+    const logLen = await page.evaluate(() => window.__ytlog.length);
+    await swipe();
+    const moved = await waitFor(page, (i0) => window.__core.idx() === i0 + 1, idx0, 5000);
+    const m = await page.evaluate(() => window.__core.moment());
+    // 10 s nach dem Wisch: der Moment spielt noch
+    await page.waitForTimeout(10_000);
+    const st = await page.evaluate(() => window.__core.state());
+    const lines = await page.evaluate((l) => window.__core.diag().slice(l), diagLen);
+    const ylog = await page.evaluate((l) => window.__ytlog.slice(l), logLen);
+    const mine = lines.filter((x) => x.includes(m.id) || /^soundGuard|^watchdog/.test(x));
+    const sw = {
+      n, id: m.id, moved, stateAt10s: st,
+      playInGesture: lines.some((x) => x === `yt: play in gesture ${m.id}`),
+      playingAfterGesture: lines.some((x) => x.startsWith(`yt: playing after gesture ${m.id}`)),
+      swipeMode: lines.find((x) => x.startsWith('video: swipe→ready'))?.split(', ').pop() ?? '',
+      // PLAYING darf erst nach dem Ende der Feder kommen (kalter Start nach cue), dann hat goTo keinen zweiten Startbefehl geschickt
+      playCommands: ylog.filter((x) => x.startsWith('ios play in gesture') || x.startsWith('ios play')).length,
+      state2: mine.filter((x) => / state 2$/.test(x)).length,
+      selfPause: lines.filter((x) => x.startsWith('yt: self-pause')).length,
+      guardRetry: lines.filter((x) => /^soundGuard .* attempt=[1-9]/.test(x)).length,
+      guardAny: lines.filter((x) => /^soundGuard/.test(x)).length,
+      watchdog: lines.filter((x) => x.startsWith('watchdog')).length,
+      iosRefused: ylog.filter((x) => /^ios (play refused|play then pause|pause on unmute)/.test(x)).length,
+      warmStart: lines.filter((x) => x.startsWith('video: warm start')).length,
+      warmCue: lines.filter((x) => x.startsWith('yt: warm cue')).length,
+    };
+    r.swipes.push(sw);
+  }
+  const sw = r.swipes;
+  c.fiveSwipesMoved = sw.length === 5 && sw.every((x) => x.moved);
+  c.playsAt10s = sw.every((x) => x.stateAt10s === 1);
+  c.startedInGesture = sw.every((x) => x.playInGesture && x.playingAfterGesture && x.swipeMode === 'gesture');
+  c.oneStartPerSwipe = sw.every((x) => x.playCommands === 1 && x.guardAny === 0);
+  c.noState2WithoutPause = sw.every((x) => x.state2 === 0 && x.selfPause === 0);
+  c.noGuardRetry = sw.every((x) => x.guardRetry === 0);
+  c.noWatchdog = sw.every((x) => x.watchdog === 0);
+  c.noIosRefusal = sw.every((x) => x.iosRefused === 0);
+  c.noMutedWarmStart = sw.every((x) => x.warmStart === 0);
+  c.nextCuedNotWarmed = sw.some((x) => x.warmCue > 0);
+  // Pause durch Tippen: Standbild und Pausensymbol, IFrame unsichtbar (data-hold), kein YouTube-Element
+  await page.mouse.click(vp.width / 2, vp.height / 2);
+  await page.waitForTimeout(600);
+  const pz = await cur();
+  r.pause = pz;
+  c.tapPauseOwnStill = pz.paused && pz.held && pz.poster && pz.play && pz.st === 2;
+  // Weiter durch Tippen (Geste): spielt wieder, kein Standbild
+  await page.mouse.click(vp.width / 2, vp.height / 2);
+  c.tapResumePlays = await waitFor(page, () => window.__core.state() === 1 && !document.querySelector('.vslot[aria-hidden=false]').hasAttribute('data-hold'), null, 5000);
+  await page.waitForTimeout(800);
+  // Teil 2 (Variante c): die Geste kommt nicht im Player an
+  {
+    const idx0 = await page.evaluate(() => window.__core.idx());
+    const diagLen = await page.evaluate(() => window.__core.diag().length);
+    await page.evaluate(() => { window.__ytGestureLost = true; });
+    await swipe();
+    const moved = await waitFor(page, (i0) => window.__core.idx() === i0 + 1, idx0, 5000);
+    const m = await page.evaluate(() => window.__core.moment());
+    const tapShown = await waitFor(page, () => !!document.querySelector('.vslot[aria-hidden=false][data-tap]'), null, 8000);
+    const atTap = await cur();
+    await page.screenshot({ path: `${out}/${name}-tap-to-play.png` });
+    // 13 s nach dem Wisch: kein watchdog, kein Skip, Tippfläche steht noch
+    await page.waitForTimeout(13_000);
+    const idxAfter = await page.evaluate(() => window.__core.idx());
+    const lines = await page.evaluate((l) => window.__core.diag().slice(l), diagLen);
+    const still = await cur();
+    // Der Tipp startet in der Geste
+    await page.evaluate(() => { window.__ytGestureLost = false; });
+    await page.mouse.click(vp.width / 2, vp.height / 2);
+    const playsAfterTap = await waitFor(page, () => window.__core.state() === 1 && !document.querySelector('.vslot[aria-hidden=false]').hasAttribute('data-tap'), null, 5000);
+    await page.waitForTimeout(1500);
+    const after = await page.evaluate((l) => window.__core.diag().slice(l), diagLen);
+    r.variantC = { id: m.id, moved, tapShown, atTap, idxAfter, still, playsAfterTap, lines: after.filter((x) => /^yt:|^soundGuard|^watchdog|state [12]$|^skipped/.test(x)) };
+    c.cSelfPauseDetected = lines.some((x) => x.startsWith(`yt: self-pause ${m.id} after`) && x.includes('started in gesture'));
+    c.cOneResumeAttempt = lines.filter((x) => x === `yt: resume after self-pause ${m.id}`).length === 1 && !lines.some((x) => x.startsWith('yt: resumed after self-pause'));
+    c.cTapSurface = tapShown && atTap.tapAttr && atTap.tapText === 'Tap to play' && atTap.tapVisible && atTap.poster && atTap.play && !atTap.paused;
+    c.cNoWatchdogSkip = idxAfter === idx0 + 1 && !lines.some((x) => x.startsWith('watchdog') || x.startsWith('skipped (not seen)')) && still.tapAttr;
+    c.cNoGuardRetry = !lines.some((x) => /^soundGuard/.test(x));
+    c.cTapPlaysInGesture = playsAfterTap && after.some((x) => x === `yt: play in gesture ${m.id} (tap)`) && after.some((x) => x.startsWith(`yt: playing after gesture ${m.id}`));
+  }
+  r.diagTail = await page.evaluate(() => window.__core.diag().filter((x) => /^yt:|^soundGuard|^watchdog|state 2$/.test(x)).slice(-40));
+  c.pageErrors = errors.length === 0;
+  r.errors = errors.slice(0, 3);
+  await ctx.close();
+  return r;
+};
+
 const scenarios = [];
 for (const dwell of DWELLS) {
   scenarios.push({ name: `mobile-390x844-dwell${dwell}`, desk: false, dwell });
@@ -403,6 +545,23 @@ if (!process.env.ONLY || 'slow3g-mobile-20swipes'.includes(process.env.ONLY)) tr
 } catch (e) {
   results.runs.push({ name: 'slow3g-mobile-20swipes', error: String(e), checks: { ran: false } });
   console.log(`slow3g: FEHLER ${String(e).slice(0, 300)}`);
+}
+// Brief 23: iOS-Fall in Chromium und, wenn E2E_BROWSERS webkit nennt, auch in WebKit (ohne Netzdrossel, darum ohne CDP)
+if (!process.env.ONLY || 'ios-youtube-swipes'.includes(process.env.ONLY)) {
+  const iosTargets = (process.env.E2E_BROWSERS ?? 'chromium').split(',');
+  for (const [bn, type] of [['chromium', chromium], ['webkit', webkit]].filter(([n]) => iosTargets.includes(n))) {
+    const name = `ios-youtube-swipes-${bn}`;
+    try {
+      const b = bn === 'chromium' ? browser : await type.launch();
+      const r = await runIosSwipes(b, name);
+      if (b !== browser) await b.close();
+      results.runs.push(r);
+      console.log(`${name}: ${JSON.stringify(r.swipes.map((x) => [x.id, x.stateAt10s, x.state2, x.guardRetry]))}`);
+    } catch (e) {
+      results.runs.push({ name, error: String(e), checks: { ran: false } });
+      console.log(`${name}: FEHLER ${String(e).slice(0, 300)}`);
+    }
+  }
 }
 await browser.close();
 let bad = 0;

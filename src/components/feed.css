@@ -43,7 +43,27 @@
    beim Pausebefehl und nimmt es beim nächsten Abspielen oder Laden wieder weg, data-paused kommt aus dem Zustand des Feeds. */
 .vframe iframe { pointer-events: none; }
 .vslot[data-hold] .vframe iframe,
-.vslot[data-paused] .vframe iframe { visibility: hidden !important; }
+.vslot[data-paused] .vframe iframe,
+.vslot[data-tap] .vframe iframe { visibility: hidden !important; }
+/* Brief 23 (Issue 48, Variante c): Der YouTube-Player hat sich auf dem iPhone selbst angehalten und der Weiterstart griff nicht. Wie bei unserer Pause liegt das Standbild
+   über der Karte, dazu das Play-Symbol und darunter "Tap to play". Der Tipp geht an die Gestenebene, der Startbefehl geht synchron im Handler ab. */
+.vslot[data-tap][aria-hidden='false'] .vposter,
+.vslot[data-tap][data-live][aria-hidden='false'] .vposter { visibility: visible; z-index: 2; }
+.vslot[data-tap] .vplay { z-index: 3; }
+.vtap {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: calc(var(--band-top) + var(--band-h) / 2 + var(--s-16) / 2 + var(--s-3));
+  transform: translateX(-50%);
+  font-size: var(--t-meta);
+  line-height: var(--t-meta-lh);
+  font-weight: var(--w-meta);
+  color: var(--on-media);
+  opacity: 0.85;
+  white-space: nowrap;
+  pointer-events: none;
+}
 
 /* Ambient: das Vorschaubild weich und dunkel hinter der Karte, nur Video.
    Kein filter: blur(48px). WebKit ohne GPU rechnet ihn bei jedem Frame neu (CI-Runner: 12 Hz im Leerlauf, 94 % verlorene Frames beim Wischen).

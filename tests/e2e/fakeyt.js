@@ -1,9 +1,26 @@
 // Nachbau der YouTube IFrame API für E2E-Tests. Zeitraffer: 10 Video-Sekunden pro 100 ms.
 window.__ytlog = [];
+// Brief 23 (Issue 48): iOS-Regeln, nur mit window.__ytIos (setzt der Test im iPhone-Profil, sonst verhält sich der Nachbau wie bisher).
+// WebKit auf dem iPhone erlaubt ohne Nutzergeste nur stumme Wiedergabe:
+//   unMute ohne Geste hält ein stumm gestartetes, laufendes Video an (state 2, Zeile "ios pause on unmute").
+//   Ein lauter Start ohne Geste läuft wie in Max' Diag (05.11. 19:58) erst an (state 1) und hält sich nach 1,5 s selbst an (state 2,
+//   Zeile "ios play then pause"); jeder weitere laute Start ohne Geste bleibt ohne Wirkung ("ios play refused", kein Zustandswechsel).
+// Eine Geste (pointerup, touchend, click, keydown, Loslassen der Maus) gilt nur synchron im Handler dieses Ereignisses (window.event), so wie
+// WebKit sie über postMessage an das IFrame weiterreicht. Ein Zeitgeber oder ein Effekt danach trägt sie nicht. Hat das Element eines Players
+// einmal in einer Geste gespielt oder wurde es in einer Geste laut geschaltet, ist es freigeschaltet und spielt danach auch ohne Geste laut
+// (wie das <video> im echten IFrame, WebKit hebt die Sperre bei play und setMuted in einer Geste auf).
+// window.__ytGestureLost (nur Tests, Variante c): die Geste kommt nicht im IFrame an, so als trüge postMessage sie auf dem Gerät nicht. Dann gilt auch
+// keine frühere Freischaltung (sie wäre auf demselben Weg verloren gegangen).
+window.__ytInGesture = () => { if (window.__ytGestureLost) return false; const e = window.event; return !!e && ['pointerup', 'touchend', 'click', 'keydown', 'mouseup'].includes(e.type); };
 window.YT = { PlayerState: { ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 }, Player: function (el, opts) {
   // Wie die echte API bei ungültiger ID: der Konstruktor wirft (IDs mit Anfang throwvid)
   if (/^throwvid/.test(opts.videoId || '')) throw new Error('Invalid video id. (nachgebaut)');
   const ev = opts.events; let vid = opts.videoId, t = 0, endAt = Infinity, st = -1, muted = true, timer = null;
+  // iOS-Regeln (siehe oben): freigeschaltet nach dem ersten Spielen oder Lautschalten in einer Geste, gesperrt nach dem ersten abgelehnten lauten Start
+  let unlocked = false, blocked = false;
+  const ios = () => !!window.__ytIos;
+  const gesture = () => window.__ytInGesture();
+  const free = () => unlocked && !window.__ytGestureLost;
   const f = document.createElement('div');
   f.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font:18px sans-serif;background:#123';
   el.replaceWith(f);
@@ -11,18 +28,44 @@ window.YT = { PlayerState: { ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED
   const paint = () => { f.textContent = `${vid} t=${t.toFixed(0)} state ${st}${muted ? ' stumm' : ' TON'}`; };
   const set = (s) => { st = s; paint(); ev.onStateChange && ev.onStateChange({ data: s }); };
   const arg = (a) => (typeof a === 'string' ? { videoId: a } : a);
+  const run = () => { clearInterval(timer); timer = setInterval(() => { t += window.__ytSlow ? 0.1 : 10; paint(); if (t >= endAt) { clearInterval(timer); t = endAt; set(0); } }, 100); set(1); };
   // Wie bei YouTube: Zustandswechsel kommt erst nach dem Start, ein pauseVideo im Callback stoppt den Lauf
-  const play = () => { clearInterval(timer); timer = setInterval(() => { t += window.__ytSlow ? 0.1 : 10; paint(); if (t >= endAt) { clearInterval(timer); t = endAt; set(0); } }, 100); set(1); };
+  const play = () => {
+    if (ios()) {
+      if (gesture()) { unlocked = true; blocked = false; window.__ytlog.push('ios play in gesture ' + vid); }
+      else if (!muted && !free()) {
+        if (blocked) { window.__ytlog.push('ios play refused ' + vid); clearInterval(timer); return; }
+        blocked = true;
+        window.__ytlog.push('ios play then pause ' + vid);
+        run();
+        const v0 = vid;
+        setTimeout(() => { if (blocked && vid === v0 && st === 1) { clearInterval(timer); set(2); } }, 1500);
+        return;
+      }
+    }
+    run();
+  };
   this.loadVideoById = (a) => {
     a = arg(a); vid = a.videoId; t = a.startSeconds ?? 0; endAt = a.endSeconds ?? 600; window.__ytlog.push('load ' + vid + ' ' + t + '-' + endAt);
     // Wie YouTube bei gesperrten oder gelöschten Videos: Fehler 150 statt Wiedergabe (IDs mit Anfang errorvid)
     if (/^errorvid/.test(vid)) { st = -1; paint(); setTimeout(() => ev.onError && ev.onError({ data: 150 }), 20); return; }
     play();
   };
-  this.cueVideoById = (a) => { a = arg(a); vid = a.videoId; t = a.startSeconds ?? 0; endAt = a.endSeconds ?? 600; clearInterval(timer); window.__ytlog.push('cue ' + vid); set(5); };
+  this.cueVideoById = (a) => {
+    a = arg(a); vid = a.videoId; t = a.startSeconds ?? 0; endAt = a.endSeconds ?? 600; clearInterval(timer); window.__ytlog.push('cue ' + vid);
+    // Wie YouTube: auch ein nur vorbereitetes (cue) gesperrtes Video meldet Fehler 150, nicht erst beim Start (Brief 23: auf iOS wird nur per cue vorbereitet)
+    if (/^errorvid/.test(vid)) { st = -1; paint(); setTimeout(() => ev.onError && ev.onError({ data: 150 }), 20); return; }
+    set(5);
+  };
   this.playVideo = () => play();
   this.pauseVideo = () => { clearInterval(timer); if (st === 1) set(2); };
-  this.mute = () => { muted = true; paint(); }; this.unMute = () => { muted = false; window.__ytlog.push('unmute'); paint(); }; this.isMuted = () => muted;
+  this.mute = () => { muted = true; paint(); };
+  this.unMute = () => {
+    if (ios() && gesture()) unlocked = true;
+    if (muted && ios() && !free() && !gesture() && st === 1) { muted = false; window.__ytlog.push('ios pause on unmute ' + vid); clearInterval(timer); set(2); return; }
+    muted = false; window.__ytlog.push('unmute'); paint();
+  };
+  this.isMuted = () => muted;
   this.getCurrentTime = () => t; this.getDuration = () => 600; this.getPlayerState = () => st; this.seekTo = (s) => { t = s; }; this.setPlaybackRate = (r) => { window.__ytlog.push('rate ' + r); };
   // Lautheit (Entscheidung 16): YouTube kann nur absenken, der Test liest die Lautstärke aus dem Protokoll
   this.setVolume = (v) => { window.__ytlog.push('volume ' + v); };

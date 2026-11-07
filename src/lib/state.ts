@@ -127,6 +127,9 @@ export interface AppState {
   /** Entscheidung 45 (Reparatur): Momente, deren Eintrag in momentSeen gelöscht wurde, weil sie nie gespielt haben. ID auf Zeitpunkt der Löschung.
    *  Ein Eintrag in momentSeen, der nicht jünger ist als dieser Zeitpunkt, gilt nicht. Per Sync, spätester Zeitpunkt (hält die Löschung gegen das andere Gerät). */
   momentUnseen?: Record<string, number>;
+  /** Brief 24 (Ergänzung 45): Wegwischer ohne Wiedergabe je Moment, siehe Swipe. Zweimal weggewischt sperrt 30 Tage. Per Sync (mergeSwipes).
+   *  Nicht zu verwechseln mit momentSkips (schnelle Skips nach Anspielen, nur an diesem Gerät). */
+  momentSwipes?: Record<string, Swipe>;
   /** Wenn-dann-Plan pro Woche (Montag als YYYY-MM-DD), Punkt 7 */
   plans?: Record<string, WeekPlan>;
   /** Desktop-Modus: die Übersicht der Tasten wurde beim ersten Start schon gezeigt */
@@ -175,6 +178,67 @@ export function adjustWeight(state: AppState, topic: string, factor: number): Ap
   const w = state.topicWeights[topic] ?? 1;
   const next = Math.min(WEIGHT_MAX, Math.max(WEIGHT_MIN, w * factor));
   return { ...state, topicWeights: { ...state.topicWeights, [topic]: Number(next.toFixed(4)) } };
+}
+
+// ---------- Brief 24: zweimal weggewischt sperrt 30 Tage (Ergänzung 45) ----------
+
+/** Ein Moment, der weggewischt wurde, ohne gespielt zu haben (watched 0) */
+export interface Swipe {
+  /** Anzahl Wegwischer ohne Wiedergabe */
+  n: number;
+  /** Zeitpunkt des letzten Wegwischens (ms). Der Sync erkennt daran einen Neuanfang nach abgelaufener Sperre. */
+  at: number;
+  /** Sperre bis (ms), gesetzt ab SWIPE_BLOCK_AFTER Wegwischern. Abgelaufen heißt: der Moment kommt wieder, n zählt von vorn. */
+  until?: number;
+}
+/** So viele Wegwischer ohne Wiedergabe, dann ist der Moment gesperrt. Das erste bleibt ohne Folge. */
+export const SWIPE_BLOCK_AFTER = 2;
+/** Dauer der Sperre: 30 Tage */
+export const SWIPE_BLOCK_DAYS = 30;
+export const SWIPE_BLOCK_MS = SWIPE_BLOCK_DAYS * 86_400_000;
+
+/** Gesperrt, solange until in der Zukunft liegt */
+export const swipeBlocked = (e: Swipe | undefined, now: number): boolean => !!e && !!e.until && e.until > now;
+/** Wirksamer Eintrag: eine abgelaufene Sperre zählt wie kein Eintrag (n = 0) */
+const liveSwipe = (e: Swipe | undefined, now: number): Swipe | undefined => (!e || (e.until !== undefined && e.until <= now) ? undefined : e);
+
+/**
+ * Wegwischen ohne Wiedergabe zählen. Beim zweiten Mal ist der Moment bis now + 30 Tage gesperrt (blocked true, Diag-Zeile beim Aufrufer).
+ * Abgelaufene Sperren fallen bei jedem Schreiben weg, damit der Stand nicht wächst und der Moment mit n = 0 neu beginnt.
+ */
+export function swipeAway(s: AppState, id: string, now: number): { state: AppState; blocked: boolean; n: number } {
+  const all = s.momentSwipes ?? {};
+  const prev = liveSwipe(all[id], now);
+  if (prev && swipeBlocked(prev, now)) return { state: s, blocked: false, n: prev.n };
+  const n = (prev?.n ?? 0) + 1;
+  const e: Swipe = { n, at: now };
+  if (n >= SWIPE_BLOCK_AFTER) e.until = now + SWIPE_BLOCK_MS;
+  const momentSwipes: Record<string, Swipe> = {};
+  for (const [k, v] of Object.entries(all)) if (k !== id && liveSwipe(v, now)) momentSwipes[k] = v;
+  momentSwipes[id] = e;
+  return { state: { ...s, momentSwipes }, blocked: !!e.until, n };
+}
+
+/** Der Moment hat gespielt (watched über 0): sein Zähler ist weg. Ohne Eintrag kommt derselbe Zustand zurück. */
+export function clearSwipe(s: AppState, id: string): AppState {
+  if (!s.momentSwipes?.[id]) return s;
+  const { [id]: _gone, ...rest } = s.momentSwipes;
+  return { ...s, momentSwipes: rest };
+}
+
+/** IDs der gerade gesperrten Momente, sortiert (stabil für Memos) */
+export function blockedIds(swipes: Record<string, Swipe> | undefined, now: number): string[] {
+  return Object.entries(swipes ?? {})
+    .filter(([, e]) => swipeBlocked(e, now))
+    .map(([id]) => id)
+    .sort();
+}
+
+/** Pool ohne gesperrte Momente: sie fehlen in Reihenfolge und Zählern (Endseite). Ohne Sperre kommt dasselbe Array zurück. */
+export function dropBlocked<T extends { id: string }>(pool: T[], swipes: Record<string, Swipe> | undefined, now: number): T[] {
+  if (!swipes) return pool;
+  const out = pool.filter((m) => !swipeBlocked(swipes[m.id], now));
+  return out.length === pool.length ? pool : out;
 }
 
 // ---------- Reparatur 45 ----------
