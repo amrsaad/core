@@ -1,5 +1,5 @@
 {
- "at": "2026-11-07T10:24:43.441Z",
+ "at": "2026-11-07T14:37:49.174Z",
  "runs": [
   {
    "browser": "webkit",
@@ -16,6 +16,9 @@
     "bgLogStartedEndedNext": true,
     "bgEndedOnce": true,
     "bgAutoNextEqualsSwipe": true,
+    "bgPoolFiveIn6s": true,
+    "bgPoolFillBeforeFirstPlay": true,
+    "bgPoolNoStockLines": true,
     "bgRowPoolFilled": true,
     "bgFiveInARow": true,
     "bgRowSameNode": true,
@@ -32,33 +35,25 @@
     "bgRejectStaysOnNext": true,
     "bgRejectResumesOnReturn": true,
     "bgLockNextHandler": true,
-    "bgLockNextStayLine": true,
+    "bgLockNextQueuedLine": true,
     "bgLockNextNoNetStart": true,
     "bgLockNextKeepsMoment": true,
     "bgLockNextCountsNothing": true,
-    "bgStockSixIn60s": true,
-    "bgStockSixOnce": true,
-    "bgStockPlusLines": true,
-    "bgStockAllSixHeld": true,
-    "bgStockPoolLocalGe3": true,
-    "bgStockHungSixIn60s": true,
-    "bgStockHungSixOnce": true,
-    "bgStockHungPlusLines": true,
-    "bgStockHungAllSixHeld": true,
-    "bgStockHungRequestsHung": true,
-    "bgStockHungPoolLocalGe3": true,
-    "bgNextStockFills": true,
-    "bgNextArranged": true,
+    "bgStockOffPoolFiveIn6s": true,
+    "bgStockOffNoStockLines": true,
+    "bgStockOffNothingHeld": true,
+    "bgStockOffNoRangeFetch": true,
+    "bgStockOffPoolFromNet": true,
     "bgNextPoolReady": true,
     "bgNextPoolFive": true,
     "bgNextPoolNearestStays": true,
     "bgNextPoolInWindow": true,
-    "bgNextPoolThreeLocal": true,
+    "bgNextPoolAllNet": true,
     "bgNextPoolFillLine": true,
     "bgNextFiveAdvance": true,
     "bgNextFivePlayOk": true,
     "bgNextFiveSwapLines": true,
-    "bgNextFiveLocalFirst": true,
+    "bgNextFiveInOrder": true,
     "bgNextFiveNoNewSource": true,
     "bgNextFiveNoLoad": true,
     "bgNextFiveNoVisible": true,
@@ -67,12 +62,16 @@
     "bgNextNoSkippedHidden": true,
     "bgNextNoGatedPlay": true,
     "bgNextColdUnder2": true,
-    "bgNextSixthStays": true,
+    "bgNextSixthQueued": true,
     "bgNextSixthKeeps": true,
+    "bgNextSixthNoLoad": true,
     "bgNextGateActive": true,
+    "bgNextQueuedSwaps": true,
+    "bgNextQueuedSwapLine": true,
+    "bgNextQueuedNoNetStart": true,
+    "bgNextQueuedOnce": true,
     "bgNextRefill": true,
     "bgNextAtMostPoolSrc": true,
-    "bgHungStockFills": true,
     "bgHungPoolReady": true,
     "bgHungSwapped": true,
     "bgHungNotPlaying": true,
@@ -122,6 +121,12 @@
     "bg: deck while hidden 7 s: timeupdate 70, ended 0, clip ends 2, play calls 2",
     "bg: back bgaudio5:0"
    ],
+   "bgPoolFiveMs": 140,
+   "bgPoolStart": {
+    "fill": 8,
+    "ok": 29,
+    "stock": []
+   },
    "bgRowLog": [
     "bg: mediasession none to playing (feed paused=false) hidden=false",
     "bg: deck page hidden: paused=false ended=false t=0.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -146,8 +151,8 @@
     "bg: ended bgaudio5:0",
     "bg: started bgaudio2:0",
     "bg: next bgaudio2:0",
-    "bg: deck page hidden +15 s: paused=true ended=false t=4.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: deck advance to bgaudio2: NOT playing after 3 s, rs=0 muted=false t=2.9 error none",
+    "bg: deck page hidden +15 s: paused=true ended=false t=4.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: deck clip end via timeupdate hidden=true pool=2 onAdvance=true advance=yes rs=0 muted=false t=4.0",
     "bg: deck advance bgaudio2 to bgaudio6: swap and play() in this handler, new element true, next from storage false, readyState 0",
     "bg: ended bgaudio2:0",
@@ -160,87 +165,55 @@
     "bg: started bgaudio3:0",
     "bg: next bgaudio3:0"
    ],
-   "bgStockSeconds": 0,
-   "bgStockStats": {
-    "plus": 11,
-    "fails": [],
-    "n": 11,
-    "next6": 6
-   },
-   "bgStockHungSeconds": 13,
-   "bgStockHungStats": {
-    "plus": 8,
-    "fails": [],
-    "n": 8,
-    "next6": 6
-   },
-   "bgNextArranged": {
-    "n": 15,
-    "order": [
-     "bgnet2:0",
-     "bgstock2:0",
-     "bgnet0:0",
-     "bgstock8:0",
-     "bgnet1:0",
-     "bgnet3:0"
-    ],
-    "nets": [
-     "bgnet2:0",
-     "bgnet0:0",
-     "bgnet1:0",
-     "bgnet3:0"
-    ],
-    "stock": [
-     "bgstock2:0",
-     "bgstock8:0"
-    ]
+   "bgStockOffStats": {
+    "stock": [],
+    "n": 0,
+    "fill": "deck: pool fill 5/5 (local 0, net 5)",
+    "fetches": []
    },
    "bgNextPool": {
     "pool": [
-     "bgnet2",
      "bgstock2",
-     "bgstock4",
      "bgstock8",
-     "bgnet1"
+     "bgstock4",
+     "bgstock10",
+     "bgstock1"
     ],
     "q": [
-     "bgnet2:0",
      "bgstock2:0",
-     "bgstock4:0",
      "bgstock8:0",
-     "bgnet1:0",
-     "bgnet3:0"
+     "bgstock4:0",
+     "bgstock10:0",
+     "bgstock1:0",
+     "bgstock9:0"
     ],
     "srcOf": {
-     "bgstock2": "local",
-     "bgstock8": "local",
-     "bgstock4": "local",
+     "bgstock2": "net",
+     "bgstock8": "net",
+     "bgstock4": "net",
      "bgstock10": "net",
-     "bgstock1": "net",
-     "bgnet2": "net",
-     "bgnet1": "net",
-     "bgnet3": "net"
+     "bgstock1": "net"
     },
-    "fill": "deck: pool fill 5/5 (local 3, net 2)"
+    "fill": "deck: pool fill 5/5 (local 0, net 5)"
    },
    "bgNextFirstLines": [
     "deck: swap bgstock2 ready=true pool=4",
-    "deck play#2 swap rs=0 muted=false t=0.1",
+    "deck play#2 swap rs=0 muted=false t=10.0",
     "deck play#2 ok"
    ],
    "bgNextExpected": [
     "bgstock2",
-    "bgstock4",
     "bgstock8",
-    "bgnet2",
-    "bgnet1"
+    "bgstock4",
+    "bgstock10",
+    "bgstock1"
    ],
    "bgNextFiveMs": [
-    23,
-    12,
-    12,
-    8,
-    9
+    36,
+    17,
+    14,
+    15,
+    13
    ],
    "bgNextSkipLines": [
     "go 0->1",
@@ -252,29 +225,51 @@
    "bgNextPlays": [
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/ba78eef3-1345",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.j < swapNext@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js < kl@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:36 < @http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:7130 < @"
+     "src": "https://stream.test/bgstock2.mp3#t=10",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-C4EBGagi.j < swapNext@http://127.0.0.1:4178/core/assets/index-C4EBGagi.js < Pl@http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:47:37 < @http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:47:7488 < @"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/f6436cf9-3d49",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.j < swapNext@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js < kl@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:36 < @http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:7130 < @"
+     "src": "https://stream.test/bgstock8.mp3#t=10",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-C4EBGagi.j < swapNext@http://127.0.0.1:4178/core/assets/index-C4EBGagi.js < Pl@http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:47:37 < @http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:47:7488 < @"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/32559345-76a8",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.j < swapNext@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js < kl@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:36 < @http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:7130 < @"
+     "src": "https://stream.test/bgstock4.mp3#t=10",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-C4EBGagi.j < swapNext@http://127.0.0.1:4178/core/assets/index-C4EBGagi.js < Pl@http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:47:37 < @http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:47:7488 < @"
     },
     {
      "sync": true,
-     "src": "https://stream.test/bgnet2.m3u8#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.j < swapNext@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js < kl@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:36 < @http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:7130 < @"
+     "src": "https://stream.test/bgstock10.mp3#t=10",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-C4EBGagi.j < swapNext@http://127.0.0.1:4178/core/assets/index-C4EBGagi.js < Pl@http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:47:37 < @http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:47:7488 < @"
     },
     {
      "sync": true,
-     "src": "https://stream.test/bgnet1.m3u8#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.j < swapNext@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js < kl@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:36 < @http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:7130 < @"
+     "src": "https://stream.test/bgstock1.mp3#t=10",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-C4EBGagi.j < swapNext@http://127.0.0.1:4178/core/assets/index-C4EBGagi.js < Pl@http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:47:37 < @http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:47:7488 < @"
     }
+   ],
+   "bgNextQueuedLines": [
+    "deck: pool fill 5/5 (local 0, net 5)",
+    "deck: pool ready bgstock9 after 30 ms",
+    "pool 1/5 ready",
+    "deck: swap bgstock9 ready=true pool=0",
+    "deck play#7 swap rs=0 muted=false t=10.0",
+    "lock next: queued swap bgstock9",
+    "go 5->6",
+    "deck: pool fill 5/5 (local 0, net 5)",
+    "deck: pool fill 5/5 (local 0, net 5)",
+    "deck play#7 ok",
+    "deck: pool ready bgnet2 after 34 ms",
+    "pool 1/5 ready",
+    "deck: pool ready bgstock3 after 34 ms",
+    "pool 2/5 ready",
+    "deck: pool ready bgstock5 after 20 ms",
+    "pool 3/5 ready",
+    "deck: pool ready bgstock7 after 20 ms",
+    "pool 4/5 ready",
+    "deck: pool ready bgnet0 after 30 ms",
+    "pool 5/5 ready"
    ],
    "bgHungLog": [
     "deck: swap bgstock2 ready=true pool=4",
@@ -306,6 +301,9 @@
     "bgLogStartedEndedNext": true,
     "bgEndedOnce": true,
     "bgAutoNextEqualsSwipe": true,
+    "bgPoolFiveIn6s": true,
+    "bgPoolFillBeforeFirstPlay": true,
+    "bgPoolNoStockLines": true,
     "bgRowPoolFilled": true,
     "bgFiveInARow": true,
     "bgRowSameNode": true,
@@ -322,33 +320,25 @@
     "bgRejectStaysOnNext": true,
     "bgRejectResumesOnReturn": true,
     "bgLockNextHandler": true,
-    "bgLockNextStayLine": true,
+    "bgLockNextQueuedLine": true,
     "bgLockNextNoNetStart": true,
     "bgLockNextKeepsMoment": true,
     "bgLockNextCountsNothing": true,
-    "bgStockSixIn60s": true,
-    "bgStockSixOnce": true,
-    "bgStockPlusLines": true,
-    "bgStockAllSixHeld": true,
-    "bgStockPoolLocalGe3": true,
-    "bgStockHungSixIn60s": true,
-    "bgStockHungSixOnce": true,
-    "bgStockHungPlusLines": true,
-    "bgStockHungAllSixHeld": true,
-    "bgStockHungRequestsHung": true,
-    "bgStockHungPoolLocalGe3": true,
-    "bgNextStockFills": true,
-    "bgNextArranged": true,
+    "bgStockOffPoolFiveIn6s": true,
+    "bgStockOffNoStockLines": true,
+    "bgStockOffNothingHeld": true,
+    "bgStockOffNoRangeFetch": true,
+    "bgStockOffPoolFromNet": true,
     "bgNextPoolReady": true,
     "bgNextPoolFive": true,
     "bgNextPoolNearestStays": true,
     "bgNextPoolInWindow": true,
-    "bgNextPoolThreeLocal": true,
+    "bgNextPoolAllNet": true,
     "bgNextPoolFillLine": true,
     "bgNextFiveAdvance": true,
     "bgNextFivePlayOk": true,
     "bgNextFiveSwapLines": true,
-    "bgNextFiveLocalFirst": true,
+    "bgNextFiveInOrder": true,
     "bgNextFiveNoNewSource": true,
     "bgNextFiveNoLoad": true,
     "bgNextFiveNoVisible": true,
@@ -357,12 +347,16 @@
     "bgNextNoSkippedHidden": true,
     "bgNextNoGatedPlay": true,
     "bgNextColdUnder2": true,
-    "bgNextSixthStays": true,
+    "bgNextSixthQueued": true,
     "bgNextSixthKeeps": true,
+    "bgNextSixthNoLoad": true,
     "bgNextGateActive": true,
+    "bgNextQueuedSwaps": true,
+    "bgNextQueuedSwapLine": true,
+    "bgNextQueuedNoNetStart": true,
+    "bgNextQueuedOnce": true,
     "bgNextRefill": true,
     "bgNextAtMostPoolSrc": true,
-    "bgHungStockFills": true,
     "bgHungPoolReady": true,
     "bgHungSwapped": true,
     "bgHungNotPlaying": true,
@@ -412,6 +406,12 @@
     "bg: deck while hidden 7 s: timeupdate 70, ended 0, clip ends 2, play calls 2",
     "bg: back bgaudio5:0"
    ],
+   "bgPoolFiveMs": 184,
+   "bgPoolStart": {
+    "fill": 8,
+    "ok": 29,
+    "stock": []
+   },
    "bgRowLog": [
     "bg: mediasession none to playing (feed paused=false) hidden=false",
     "bg: deck page hidden: paused=false ended=false t=0.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -450,87 +450,55 @@
     "bg: started bgaudio3:0",
     "bg: next bgaudio3:0"
    ],
-   "bgStockSeconds": 0,
-   "bgStockStats": {
-    "plus": 11,
-    "fails": [],
-    "n": 11,
-    "next6": 6
-   },
-   "bgStockHungSeconds": 13,
-   "bgStockHungStats": {
-    "plus": 8,
-    "fails": [],
-    "n": 8,
-    "next6": 6
-   },
-   "bgNextArranged": {
-    "n": 15,
-    "order": [
-     "bgnet2:0",
-     "bgstock2:0",
-     "bgnet0:0",
-     "bgstock8:0",
-     "bgnet1:0",
-     "bgnet3:0"
-    ],
-    "nets": [
-     "bgnet2:0",
-     "bgnet0:0",
-     "bgnet1:0",
-     "bgnet3:0"
-    ],
-    "stock": [
-     "bgstock2:0",
-     "bgstock8:0"
-    ]
+   "bgStockOffStats": {
+    "stock": [],
+    "n": 0,
+    "fill": "deck: pool fill 5/5 (local 0, net 5)",
+    "fetches": []
    },
    "bgNextPool": {
     "pool": [
-     "bgnet2",
      "bgstock2",
-     "bgstock4",
      "bgstock8",
-     "bgnet1"
+     "bgstock4",
+     "bgstock10",
+     "bgstock1"
     ],
     "q": [
-     "bgnet2:0",
      "bgstock2:0",
-     "bgstock4:0",
      "bgstock8:0",
-     "bgnet1:0",
-     "bgnet3:0"
+     "bgstock4:0",
+     "bgstock10:0",
+     "bgstock1:0",
+     "bgstock9:0"
     ],
     "srcOf": {
-     "bgstock2": "local",
-     "bgstock8": "local",
-     "bgstock4": "local",
-     "bgstock10": "local",
-     "bgstock1": "local",
-     "bgnet2": "net",
-     "bgnet1": "net",
-     "bgnet3": "net"
+     "bgstock2": "net",
+     "bgstock8": "net",
+     "bgstock4": "net",
+     "bgstock10": "net",
+     "bgstock1": "net"
     },
-    "fill": "deck: pool fill 5/5 (local 3, net 2)"
+    "fill": "deck: pool fill 5/5 (local 0, net 5)"
    },
    "bgNextFirstLines": [
     "deck: swap bgstock2 ready=true pool=4",
-    "deck play#2 swap rs=0 muted=false t=0.1",
+    "deck play#2 swap rs=0 muted=false t=10.0",
     "deck play#2 ok"
    ],
    "bgNextExpected": [
     "bgstock2",
-    "bgstock4",
     "bgstock8",
-    "bgnet2",
-    "bgnet1"
+    "bgstock4",
+    "bgstock10",
+    "bgstock1"
    ],
    "bgNextFiveMs": [
+    15,
+    13,
     11,
     9,
-    8,
-    6,
-    7
+    9
    ],
    "bgNextSkipLines": [
     "go 0->1",
@@ -542,29 +510,51 @@
    "bgNextPlays": [
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/64b6366a-ab5c",
-     "stack": "at P.play (<anonymous>:9:134) < at qy.kick (http://127.0.0.1:4178/core/assets/index-C9M3FvIe < at qy.swapEntry (http://127.0.0.1:4178/core/assets/index-C9M < at qy.swapNext (http://127.0.0.1:4178/core/assets/index-C9M3 < at Object.kl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:71"
+     "src": "https://stream.test/bgstock2.mp3#t=10",
+     "stack": "at P.play (<anonymous>:9:134) < at rv.kick (http://127.0.0.1:4178/core/assets/index-C4EBGagi < at rv.swapEntry (http://127.0.0.1:4178/core/assets/index-C4E < at rv.swapNext (http://127.0.0.1:4178/core/assets/index-C4EB < at Object.Pl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:47:75"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/5c621ab0-e981",
-     "stack": "at P.play (<anonymous>:9:134) < at qy.kick (http://127.0.0.1:4178/core/assets/index-C9M3FvIe < at qy.swapEntry (http://127.0.0.1:4178/core/assets/index-C9M < at qy.swapNext (http://127.0.0.1:4178/core/assets/index-C9M3 < at Object.kl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:71"
+     "src": "https://stream.test/bgstock8.mp3#t=10",
+     "stack": "at P.play (<anonymous>:9:134) < at rv.kick (http://127.0.0.1:4178/core/assets/index-C4EBGagi < at rv.swapEntry (http://127.0.0.1:4178/core/assets/index-C4E < at rv.swapNext (http://127.0.0.1:4178/core/assets/index-C4EB < at Object.Pl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:47:75"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/be6863d9-f808",
-     "stack": "at P.play (<anonymous>:9:134) < at qy.kick (http://127.0.0.1:4178/core/assets/index-C9M3FvIe < at qy.swapEntry (http://127.0.0.1:4178/core/assets/index-C9M < at qy.swapNext (http://127.0.0.1:4178/core/assets/index-C9M3 < at Object.kl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:71"
+     "src": "https://stream.test/bgstock4.mp3#t=10",
+     "stack": "at P.play (<anonymous>:9:134) < at rv.kick (http://127.0.0.1:4178/core/assets/index-C4EBGagi < at rv.swapEntry (http://127.0.0.1:4178/core/assets/index-C4E < at rv.swapNext (http://127.0.0.1:4178/core/assets/index-C4EB < at Object.Pl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:47:75"
     },
     {
      "sync": true,
-     "src": "https://stream.test/bgnet2.m3u8#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at qy.kick (http://127.0.0.1:4178/core/assets/index-C9M3FvIe < at qy.swapEntry (http://127.0.0.1:4178/core/assets/index-C9M < at qy.swapNext (http://127.0.0.1:4178/core/assets/index-C9M3 < at Object.kl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:71"
+     "src": "https://stream.test/bgstock10.mp3#t=10",
+     "stack": "at P.play (<anonymous>:9:134) < at rv.kick (http://127.0.0.1:4178/core/assets/index-C4EBGagi < at rv.swapEntry (http://127.0.0.1:4178/core/assets/index-C4E < at rv.swapNext (http://127.0.0.1:4178/core/assets/index-C4EB < at Object.Pl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:47:75"
     },
     {
      "sync": true,
-     "src": "https://stream.test/bgnet1.m3u8#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at qy.kick (http://127.0.0.1:4178/core/assets/index-C9M3FvIe < at qy.swapEntry (http://127.0.0.1:4178/core/assets/index-C9M < at qy.swapNext (http://127.0.0.1:4178/core/assets/index-C9M3 < at Object.kl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:71"
+     "src": "https://stream.test/bgstock1.mp3#t=10",
+     "stack": "at P.play (<anonymous>:9:134) < at rv.kick (http://127.0.0.1:4178/core/assets/index-C4EBGagi < at rv.swapEntry (http://127.0.0.1:4178/core/assets/index-C4E < at rv.swapNext (http://127.0.0.1:4178/core/assets/index-C4EB < at Object.Pl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-C4EBGagi.js:47:75"
     }
+   ],
+   "bgNextQueuedLines": [
+    "deck: pool fill 5/5 (local 0, net 5)",
+    "deck: pool ready bgstock9 after 30 ms",
+    "pool 1/5 ready",
+    "deck: swap bgstock9 ready=true pool=0",
+    "deck play#7 swap rs=0 muted=false t=10.0",
+    "lock next: queued swap bgstock9",
+    "go 5->6",
+    "deck: pool fill 5/5 (local 0, net 5)",
+    "deck: pool fill 5/5 (local 0, net 5)",
+    "deck play#7 ok",
+    "deck: pool ready bgnet2 after 32 ms",
+    "pool 1/5 ready",
+    "deck: pool ready bgstock3 after 35 ms",
+    "pool 2/5 ready",
+    "deck: pool ready bgstock5 after 20 ms",
+    "pool 3/5 ready",
+    "deck: pool ready bgstock7 after 20 ms",
+    "pool 4/5 ready",
+    "deck: pool ready bgnet0 after 30 ms",
+    "pool 5/5 ready"
    ],
    "bgHungLog": [
     "deck: swap bgstock2 ready=true pool=4",

@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-07T10:29:11.633Z",
+  "at": "2026-11-07T14:41:21.719Z",
   "runs": [
     {
       "variant": "webkit",
@@ -24,7 +24,29 @@
         "backToVideoEnd": true,
         "countDropsAfterSeen": true,
         "textOpens": true,
-        "noPageErrors": true
+        "noPageErrors": true,
+        "b24FeedLoaded": true,
+        "b24VideoEndFirst": true,
+        "b24FirstSkipLogged": true,
+        "b24FirstSkipNoBlock": true,
+        "b24OthersPlayed": true,
+        "b24UnseenAfterFirst": true,
+        "b24NotSeenAfterFirst": true,
+        "b24ReloadEnd": true,
+        "b24StartNoneBlocked": true,
+        "b24ComesBackOnce": true,
+        "b24BlockedLine": true,
+        "b24EndCountsNotBlocked": true,
+        "b24NotSeenAfterBlock": true,
+        "b24Reload2End": true,
+        "b24StartOneBlocked": true,
+        "b24Reload2Count": true,
+        "b24Reload2ButtonOff": true,
+        "b24AudioEndAtOnce": true,
+        "b24BlockedNeverShown": true,
+        "b24ExpiredShown": true,
+        "b24ExpiredStartLine": true,
+        "b24NoPageErrors": true
       },
       "shown": [
         "endp0000000:100",
@@ -57,7 +79,9 @@
         "Audio, 3 new",
         "Text, 2 new"
       ],
-      "seenAudio": 2
+      "seenAudio": 2,
+      "b24Blocked": "endp0000006:100",
+      "b24Rejected": false
     },
     {
       "variant": "chromium",
@@ -82,7 +106,29 @@
         "backToVideoEnd": true,
         "countDropsAfterSeen": true,
         "textOpens": true,
-        "noPageErrors": true
+        "noPageErrors": true,
+        "b24FeedLoaded": true,
+        "b24VideoEndFirst": true,
+        "b24FirstSkipLogged": true,
+        "b24FirstSkipNoBlock": true,
+        "b24OthersPlayed": true,
+        "b24UnseenAfterFirst": true,
+        "b24NotSeenAfterFirst": true,
+        "b24ReloadEnd": true,
+        "b24StartNoneBlocked": true,
+        "b24ComesBackOnce": true,
+        "b24BlockedLine": true,
+        "b24EndCountsNotBlocked": true,
+        "b24NotSeenAfterBlock": true,
+        "b24Reload2End": true,
+        "b24StartOneBlocked": true,
+        "b24Reload2Count": true,
+        "b24Reload2ButtonOff": true,
+        "b24AudioEndAtOnce": true,
+        "b24BlockedNeverShown": true,
+        "b24ExpiredShown": true,
+        "b24ExpiredStartLine": true,
+        "b24NoPageErrors": true
       },
       "shown": [
         "endp0000000:100",
@@ -115,7 +161,9 @@
         "Audio, 3 new",
         "Text, 2 new"
       ],
-      "seenAudio": 2
+      "seenAudio": 2,
+      "b24Blocked": "endp0000006:100",
+      "b24Rejected": false
     }
   ]
 }

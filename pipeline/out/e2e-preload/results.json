@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-07T10:28:10.056Z",
+  "at": "2026-11-07T14:40:56.893Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -8,40 +8,11 @@
         "audioFeedShown": true,
         "firstPlaysCold": true,
         "coldStartSlow": true,
+        "poolFiveIn6s": true,
+        "noAudioRangeFetch": true,
+        "nothingPreloaded": true,
+        "noStockLines": true,
         "queueIs32Deep": true,
-        "filled": true,
-        "only30": true,
-        "slicesOnly": true,
-        "underCap": true,
-        "allPreloadFetchesRanged": true,
-        "windowMatchesQueue": true,
-        "poorNetDetected": true,
-        "reordered": true,
-        "realSwipeMoves": true,
-        "tenSwipesMeasured": true,
-        "allBuffered": true,
-        "allUnder100": true,
-        "startedFromBlob": true,
-        "playbackTimeIsSourceTime": true,
-        "noMediaStreamRequests": true,
-        "settingsLine": true,
-        "settingsMatchesStore": true,
-        "offlineIcon": true,
-        "offlineSwipesFromCache": true,
-        "offlineNoRequests": true,
-        "poorWhenOffline": true,
-        "offlineIconGoes": true,
-        "offlineRestartFeed": true,
-        "noErrorPage": true,
-        "offlineRestartIcon": true,
-        "offlineRestartPlays": true,
-        "offlineRestartPoor": true,
-        "offlineRestartStoreKept": true,
-        "offlineFirstIsCached": true,
-        "offlineFirstFromBlob": true,
-        "offlineQueueCachedFirst": true,
-        "offlineRestartSwipes": true,
-        "offlineRestartNoRequests": true,
         "poorPushesYoutubeBack": true,
         "normalMixKeepsYoutube": true,
         "poorNoClump": true,
@@ -50,96 +21,10 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1617,
-        "preloadedMoments": 30,
-        "preloadedBytes": 6289238,
-        "bytesPerMoment": 209641,
-        "waitedForVault": 0,
-        "swipes": 10,
-        "cachedStartMs": [
-          5,
-          5,
-          5,
-          7,
-          4,
-          7,
-          6,
-          6,
-          6,
-          4
-        ],
-        "cachedStartMax": 7,
-        "cachedStartMedian": 6,
-        "firstFrames": [
-          "first-frame 6ms buffered local",
-          "first-frame 5ms buffered local",
-          "first-frame 5ms buffered local",
-          "first-frame 5ms buffered local",
-          "first-frame 7ms buffered local",
-          "first-frame 4ms buffered local",
-          "first-frame 7ms buffered local",
-          "first-frame 6ms buffered local",
-          "first-frame 6ms buffered local",
-          "first-frame 6ms buffered local",
-          "first-frame 4ms buffered local"
-        ],
-        "settingsText": "Preloaded: 36 moments, 7.2 MB",
-        "offlineTrail": [
-          {
-            "heldNext": true,
-            "ok": true
-          },
-          {
-            "heldNext": true,
-            "ok": true
-          },
-          {
-            "heldNext": true,
-            "ok": true
-          },
-          {
-            "heldNext": true,
-            "ok": true
-          }
-        ],
-        "offlineStartMs": [
-          6,
-          5,
-          13,
-          5
-        ],
-        "offlineCachedOfFirst15": 13,
-        "offlineSwipeTrail": [
-          {
-            "ok": true,
-            "idx": 1,
-            "id": "pod-0003:46",
-            "cached": true,
-            "st": 1,
-            "n": 15
-          },
-          {
-            "ok": true,
-            "idx": 2,
-            "id": "pod-0026:70",
-            "cached": true,
-            "st": 1,
-            "n": 16
-          },
-          {
-            "ok": true,
-            "idx": 3,
-            "id": "pod-0013:82",
-            "cached": true,
-            "st": 1,
-            "n": 17
-          }
-        ],
-        "offlineRestartStartMs": [
-          6,
-          5,
-          7
-        ],
+        "coldStartMs": 1783,
+        "rangeFetchesAfterStart": 0,
+        "requestsAfterStart": 7,
+        "stockLines": [],
         "poorYoutubeOf120": 58,
         "normalYoutubeOf120": 68,
         "poorFirst12Youtube": 9,
