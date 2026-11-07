@@ -7,7 +7,7 @@ import type { AppState } from '../lib/state';
 import { audioDeck, createPlayer, deckClipOf, HLS, isIOS, LOCAL, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
 import { POOL, POOL_WINDOW, type DeckClip } from '../video/audioDeck';
 import { canWarm, coverMs, onNonCurrentPlaying, roleOf, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx, type WarmState } from '../video/warmup';
-import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, onGesture, type Gesture } from './gesture';
+import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, isFlat, onGesture, tabAfterSwipe, tabSwipe, type Gesture } from './gesture';
 import { hintVisible, SOUND_NONE } from './soundHint';
 import { errorAction, recoverDelay, resumePos } from './netrecover';
 import { isYtId } from './contract';
@@ -46,7 +46,7 @@ import { makeRng } from './rng';
 import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
 import { addFrames, atRest, commitVelocity, dragY, frameSample, release, SPRING_BACK, SPRING_COMMIT, stepSpring, Velocity, type Spring, type SpringState } from './swipe';
 import { saveGate } from '../lib/useAppState';
-import { blockedCount, emptyFormLine, END_SUB, endButtonLabel, endLine, filterPool, formOf, FORM_LABEL, momentText, otherForms, textEndReached, unseenCount, waitingLine, type Form } from './form';
+import { blockedCount, emptyFormLine, END_SUB, endButtonLabel, endLine, filterPool, formOf, FORM_LABEL, FORMS, momentText, otherForms, textEndReached, unseenCount, waitingLine, type Form } from './form';
 import { atEnd, EndLedger, isBackground, onLeave } from './background';
 import { PlayTracker } from './played';
 import { setMood } from '../design/mood';
@@ -2405,9 +2405,10 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       gestureUsed.current = true;
       window.clearTimeout(r.long);
     }
-    // Achse wird nach 4 px festgelegt. Senkrecht folgt die Seite dem Finger ab dem ersten Pixel, waagerecht verschiebt sie den Feed nicht (Rückmeldung).
+    // Achse wird nach 4 px festgelegt. Senkrecht folgt die Seite dem Finger ab dem ersten Pixel, waagerecht verschiebt sie den Feed nicht (Reiterwechsel, Entscheidung 54).
+    // Waagerecht heißt flacher als 30 Grad, alles Steilere ist senkrecht.
     if (!r.axis && (Math.abs(r.dy) > 4 || Math.abs(r.dx) > 4)) {
-      r.axis = Math.abs(r.dy) >= Math.abs(r.dx) ? 'v' : 'h';
+      r.axis = isFlat(r.dx, r.dy) ? 'h' : 'v';
       if (r.axis === 'v' && !single && !textRef.current) {
         dragging.current = true;
         saveGate.busy = true;
@@ -2470,10 +2471,11 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     }
     if (r.moved) {
       stopMeter(false);
+      // Waagerecht (Entscheidung 54, Brief 16): links nächster Reiter, rechts voriger. Das Blatt More kommt über die Leiste, nicht mehr per Wisch.
+      if (swipeTab(r.dx, r.dy)) return;
       const sw = swipeOf(r.dx, r.dy);
       if (sw === 'next') goTo(idxRef.current + 1);
       else if (sw === 'prev') goTo(idxRef.current - 1);
-      else if (sw === 'note') openNote();
       return;
     }
     stopMeter(false);
@@ -2548,7 +2550,24 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     return () => window.removeEventListener('pointerup', fin, true);
   }, []);
 
-  /** Wisch nach links: Blatt für den aktuellen Moment, nicht über Abrufkarte oder For-you-Karte */
+  /**
+   * Waagerechter Wisch auf dem Moment wechselt den Reiter (Entscheidung 54, Brief 16): links der nächste, rechts der vorige, Reihenfolge wie die Kopfzeile.
+   * Ab 60 px und flacher als 30 Grad. Am Rand der Reihe passiert nichts. Der Wechsel läuft über setForm, also mit derselben Überblendung wie der Tipp oben.
+   * Gibt true zurück, wenn der Wisch waagerecht war (auch am Rand), damit kein senkrechter Wisch daraus wird.
+   */
+  const swipeTab = (dx: number, dy: number): boolean => {
+    const sw = tabSwipe(dx, dy);
+    if (!sw) return false;
+    if (forYouRef.current || recallRef.current) return true;
+    const f = tabAfterSwipe(FORMS, form, sw);
+    if (f) {
+      navigator.vibrate?.(10);
+      setForm(f);
+    }
+    return true;
+  };
+
+  /** Blatt More für den aktuellen Moment (Knopf in der Leiste, Tastatur, Tests), nicht über Abrufkarte oder For-you-Karte */
   const openNote = () => {
     const m = queue.current[idxRef.current];
     if (!m || forYouRef.current || recallRef.current || noteRef.current) return;
@@ -3285,9 +3304,9 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
           onTouchEnd={(e) => {
             const dx = e.changedTouches[0].clientX - tt.current.x;
             const dy = e.changedTouches[0].clientY - tt.current.y;
+            if (swipeTab(dx, dy)) return;
             const sw = swipeOf(dx, dy);
-            if (sw === 'note') openNote();
-            else if (sw === 'next' && tt.current.end) goTo(idxRef.current + 1);
+            if (sw === 'next' && tt.current.end) goTo(idxRef.current + 1);
             else if (sw === 'prev' && tt.current.top) goTo(idxRef.current - 1);
           }}
           onDoubleClick={(e) => {
@@ -3396,10 +3415,13 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
 
       {!forYou && (
         <div className="vactions">
-          <ActionButton testid="like" label="More" icon="heart" on={liked} onClick={(e) => { const t0 = e.timeStamp; like('button'); recordTap(t0); }} />
+          {/* Leiste (Entscheidung 50, 54): alle Knöpfe sind Pflicht-Tippziele (data-primary) und liegen in den unteren 65 Prozent. Das Blatt More öffnet der letzte Knopf,
+              der Wisch nach links gehört seit Brief 16 dem Reiterwechsel. Herz heißt Like, damit More eindeutig das Blatt meint. */}
+          <ActionButton testid="like" label="Like" icon="heart" on={liked} onClick={(e) => { const t0 = e.timeStamp; like('button'); recordTap(t0); }} />
           <ActionButton testid="save" label="Save" icon="bookmark-simple" on={saved} onClick={(e) => { const t0 = e.timeStamp; toggleSave(); recordTap(t0); }} />
           <ActionButton testid="share" label="Share" icon="export" disabled onClick={() => {}} />
           {m && fullVideoUrl(m) && <ActionButton testid="source" label="Source" icon="arrow-square-out" on={pulse === 'source'} fill={false} onClick={openFull} />}
+          <ActionButton testid="more" label="More" aria="More options" icon="dots-three-circle" fill={false} onClick={() => openNote()} />
         </div>
       )}
 
@@ -3483,6 +3505,7 @@ function ActionButton({ label, aria, testid, onClick, on, fill = true, icon, dis
       aria-pressed={on === undefined || !fill ? undefined : on}
       data-testid={testid}
       data-on={on ? '1' : undefined}
+      data-primary="true"
       disabled={disabled}
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}

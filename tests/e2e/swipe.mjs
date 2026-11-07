@@ -203,6 +203,36 @@ for (const v of variants) {
       const movingGone = await waitFor(page, () => !document.querySelector('.vfeed[data-moving]'), undefined, 3000);
       r.rubberEnd = { movingGone, idx: await page.evaluate(() => window.__core.idx()), y: await stageY() };
       c.rubberBandBackAtRest = movingGone && r.rubberEnd.idx === 0 && Math.abs(r.rubberEnd.y) < 1;
+
+      // Brief 16 (Entscheidung 54): waagerechter Wisch wechselt den Reiter, senkrecht nicht. Links heißt nächster Reiter (Video zu Audio), rechts voriger.
+      // Die Wische beginnen in der Mitte, die Leiste rechts (fünf Knöpfe ab 45 Prozent Höhe) nimmt Zeiger selbst an.
+      const formNow = () => page.evaluate(() => document.querySelector('[data-testid=form-switch] [aria-checked="true"] .head-name')?.textContent?.trim().toLowerCase());
+      const drag = async (x0, y0, x1, y1) => {
+        await page.mouse.move(x0, y0);
+        await page.mouse.down();
+        for (let i = 1; i <= 8; i++) { await page.mouse.move(x0 + ((x1 - x0) * i) / 8, y0 + ((y1 - y0) * i) / 8); await page.waitForTimeout(16); }
+        await page.mouse.up();
+        await page.waitForTimeout(500);
+      };
+      c.tabsStartOnVideo = (await formNow()) === 'video';
+      // nach rechts im ersten Reiter: kein voriger, nichts passiert
+      await drag(vp.width * 0.2, vp.height * 0.5, vp.width * 0.6, vp.height * 0.5 + 10);
+      c.swipeRightAtFirstTabStays = (await formNow()) === 'video';
+      // steil (45 Grad, über 30 Grad): kein Reiterwechsel, der Wisch gilt senkrecht (nach oben also nächster Moment)
+      await drag(vp.width * 0.6, vp.height * 0.7, vp.width * 0.6 - 150, vp.height * 0.7 - 150);
+      await waitFor(page, () => !document.querySelector('.vfeed[data-moving]'), undefined, 3000);
+      c.steepSwipeKeepsTab = (await formNow()) === 'video';
+      // flach nach links (150 px, unter 30 Grad): Reiter wechselt auf Audio
+      await drag(vp.width * 0.6, vp.height * 0.5, vp.width * 0.6 - 150, vp.height * 0.5 + 20);
+      c.swipeLeftSwitchesToAudio = await waitFor(page, () => document.querySelector('[data-testid=form-switch] [aria-checked="true"] .head-name')?.textContent?.trim().toLowerCase() === 'audio', undefined, 3000);
+      await page.screenshot({ path: `${out}/${v.name}-tab-swipe.png` });
+      // Reiternamen oben bleiben tippbar: zurück zu Video per Tipp
+      await page.locator('[data-testid=form-switch] button:has-text("Video")').first().click({ timeout: 2500 }).catch(() => {});
+      c.tabHeaderStillTappable = await waitFor(page, () => document.querySelector('[data-testid=form-switch] [aria-checked="true"] .head-name')?.textContent?.trim().toLowerCase() === 'video', undefined, 3000);
+      // kurzer Zug nach links (40 px, unter der Schwelle von 60 px): nichts
+      await drag(vp.width * 0.6, vp.height * 0.5, vp.width * 0.6 - 40, vp.height * 0.5);
+      c.shortSwipeKeepsTab = (await formNow()) === 'video';
+      c.tabSwipeNoPageErrors = errors.length === 0;
     }
     await page.screenshot({ path: `${out}/${v.name}-after.png` });
   } catch (e) {
