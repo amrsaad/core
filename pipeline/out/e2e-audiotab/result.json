@@ -1,5 +1,5 @@
 {
- "at": "2026-11-07T07:34:06.843Z",
+ "at": "2026-11-07T10:23:46.690Z",
  "runs": [
   {
    "browser": "webkit",
@@ -99,13 +99,13 @@
     "tempoWaiting": 0,
     "tempoPaused": 10,
     "cue": {
-     "worst": 1,
+     "worst": 0,
      "n": 622,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.37",
+       "3.38",
        34,
        34
       ],
@@ -125,7 +125,7 @@
        73
       ],
       [
-       "8.52",
+       "8.53",
        86,
        86
       ],
@@ -136,11 +136,11 @@
       ],
       [
        "11.10",
-       111,
-       111
+       112,
+       112
       ],
       [
-       "12.38",
+       "12.39",
        124,
        124
       ],
@@ -155,12 +155,12 @@
        150
       ],
       [
-       "16.24",
+       "16.25",
        163,
        163
       ],
       [
-       "17.53",
+       "17.54",
        176,
        176
       ]
@@ -168,8 +168,8 @@
      "rate": 2
     },
     "cueTempo": {
-     "worst": 1,
-     "n": 541,
+     "worst": 0,
+     "n": 539,
      "rates": [
       1,
       1.5,
@@ -181,7 +181,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805120
+       "dueAt": 1792756805124
       }
      ],
      "idx": 6,
@@ -404,7 +404,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804956
+       "dueAt": 1792756804957
       }
      ],
      "idx": 6,
@@ -503,7 +503,7 @@
      "pod-0008:22",
      "pod-0019:70"
     ],
-    "firstSoundMs": 245,
+    "firstSoundMs": 230,
     "diag": [
      "deck: start order head first=pod-0001:22 heads=6 usable=6 stock=6",
      "deck: src local pod-0001"
@@ -525,7 +525,7 @@
      "state": "playing",
      "pos": {
       "duration": 25,
-      "position": 0.0008227959183670919,
+      "position": 0.0008697959183656678,
       "playbackRate": 1
      },
      "cold": 0,
@@ -541,7 +541,7 @@
      "want": "https://i.ytimg.com/vi/pod-0014/hqdefault.jpg",
      "id": "pod-0014:10"
     },
-    "lockNextMs": 16,
+    "lockNextMs": 17,
     "lockNextLines": [
      "deck: swap pod-0014 ready=true pool=2",
      "deck play#3 swap rs=4 muted=false t=0.1",

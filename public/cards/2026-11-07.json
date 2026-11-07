@@ -221,6 +221,306 @@
     "excerpt": "AI has promising potential to improve differential diagnosis, multidomain phenotyping, and individualized management in males with CPPS. Current evidence is mainly translational and hypothesis-generating."
    },
    "createdAt": "2026-11-07T04:04:15.573Z"
+  },
+  {
+   "id": "arxiv:2611.08433",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "MedGraph: Maintaining Patient State with Graph Memory for Long-Term Medical Dialogue",
+   "source": {
+    "id": "arxiv:2611.08433",
+    "title": "MedGraph: Maintaining Patient State with Graph Memory for Long-Term Medical Dialogue",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.08433",
+    "excerpt": "On MedMemoryBench, MedGraph has the highest overall accuracy with both a GPT and a Qwen backbone, 10.5 and 10.4 points above the strongest of five baselines, with efficient memory construction and answering in the GPT setting."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z"
+  },
+  {
+   "id": "pmid:42652766",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "From Algorithms to Clinics: Recent Progress in AI for Scoliosis Diagnosis and Management",
+   "source": {
+    "id": "pmid:42652766",
+    "title": "From Algorithms to Clinics: Recent Progress in AI for Scoliosis Diagnosis and Management.",
+    "publisher": "Journal of clinical medicine",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42652766/",
+    "excerpt": "Overall, AI has the potential to improve the precision, efficiency, and personalization of scoliosis care; however, prospective multicentre studies, transparent reporting, explainable model design, and regulatory validation are essential before widespread clinical implementation."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z"
+  },
+  {
+   "id": "pmid:42131925",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Artificial Intelligence in Peripheral Artery Disease",
+   "source": {
+    "id": "pmid:42131925",
+    "title": "Artificial Intelligence in Peripheral Artery Disease: A Science Advisory From the American Heart Association.",
+    "publisher": "Circulation. Population health and outcomes",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42131925/",
+    "excerpt": "This science advisory serves as a guide for clinicians, researchers, and policymakers on the responsible deployment of artificial intelligence in the diagnosis and management of peripheral artery disease."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z"
+  },
+  {
+   "id": "arxiv:2611.08417",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Benchmarks as Software: Terminal-Bench and the Case for Continuous Benchmarks",
+   "source": {
+    "id": "arxiv:2611.08417",
+    "title": "Benchmarks as Software: Terminal-Bench and the Case for Continuous Benchmarks",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.08417",
+    "excerpt": "More broadly, benchmark maintenance debt is not just accumulated implementation bugs: our results show that as models improve, both evaluation assumptions and resource settings may need to be revalidated."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z"
+  },
+  {
+   "id": "pmid:42326961",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Attitudes of nursing students toward older adults: a systematic review and meta-analysis",
+   "source": {
+    "id": "pmid:42326961",
+    "title": "Attitudes of nursing students toward older adults: a systematic review and meta-analysis.",
+    "publisher": "Frontiers in public health",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42326961/",
+    "excerpt": "The attitude of nursing students toward older adults is generally positive."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z"
+  },
+  {
+   "id": "pmid:42492159",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "The application of artificial intelligence in healthcare practice",
+   "source": {
+    "id": "pmid:42492159",
+    "title": "The application of artificial intelligence in healthcare practice: A mapping review of systematic reviews.",
+    "publisher": "Artificial intelligence in medicine",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42492159/",
+    "excerpt": "The human-centered AI or augmented intelligence paradigm, integrating computational precision with clinical expertise, holds significant promise but will require parallel advances in governance, regulatory frameworks, and ethical oversight to ensure safe adoption."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z"
+  },
+  {
+   "id": "arxiv:2611.08403",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "StepBack: Step-Level Error-Localized Resampling for Efficient Test-Time Reasoning",
+   "source": {
+    "id": "arxiv:2611.08403",
+    "title": "StepBack: Step-Level Error-Localized Resampling for Efficient Test-Time Reasoning",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.08403",
+    "excerpt": "In addition, by nature, StepBack can be combined with adaptive inference methods such as Adaptive Consistency, further improving their inference-time efficiency."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z"
+  },
+  {
+   "id": "pmid:42923178",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Prognostic value of lymph node ratio in children with wilms tumor",
+   "source": {
+    "id": "pmid:42923178",
+    "title": "Prognostic value of lymph node ratio in children with wilms tumor: a systematic review and meta-analysis.",
+    "publisher": "Frontiers in oncology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42923178/",
+    "excerpt": "Higher LNR appears to be associated with poorer overall survival in children with WT and may serve as a useful prognostic indicator. By accounting for both nodal disease burden and surgical effort, LNR may provide additional prognostic information beyond conventional nodal status."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z"
+  },
+  {
+   "id": "pmid:42647527",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Two-dimensional to three-dimensional knee reconstruction from radiographs and fluoroscopy",
+   "source": {
+    "id": "pmid:42647527",
+    "title": "Two-dimensional to three-dimensional knee reconstruction from radiographs and fluoroscopy: A systematic review of methods and accuracy (1995-2025).",
+    "publisher": "PloS one",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42647527/",
+    "excerpt": "With these advances, radiograph-based reconstruction has strong potential to serve as a practical alternative to CT in defined orthopedic applications."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z"
+  },
+  {
+   "id": "arxiv:2611.08392",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Learning a patient world model for health system simulation in intensive care",
+   "source": {
+    "id": "arxiv:2611.08392",
+    "title": "Learning a patient world model for health system simulation in intensive care",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.08392",
+    "excerpt": "These results indicate that a learned world model of patient dynamics has the potential to replace question-specific state models, allowing new care policies to be evaluated by reconfiguring the scenario without model rebuilding."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z"
+  },
+  {
+   "id": "pmid:41698858",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Large language models for simplifying radiology reports",
+   "source": {
+    "id": "pmid:41698858",
+    "title": "Large language models for simplifying radiology reports: a systematic review and meta-analysis of patient, public, and clinician evaluations.",
+    "publisher": "The Lancet. Digital health",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/41698858/",
+    "excerpt": "LLM-simplified radiology reports improved patient-perceived understanding and readability and were rated by clinicians as largely accurate and complete, although a small proportion contained clinically significant errors."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z"
+  },
+  {
+   "id": "pmid:42827532",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Doomscrolling, mental health, and psychological well-being in adolescents and adults",
+   "source": {
+    "id": "pmid:42827532",
+    "title": "Doomscrolling, mental health, and psychological well-being in adolescents and adults: a systematic review and meta-analysis.",
+    "publisher": "Frontiers in psychology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42827532/",
+    "excerpt": "Doomscrolling is associated with poorer mental-health and well-being outcomes, but the evidence does not establish causality. Cross-sectional designs, high heterogeneity, residual confounding, and geographic concentration limit inference. Standardized measurement, longitudinal and ecological momentary assessment studies, experiments, and preregistered cross-cultural research are needed."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z"
+  },
+  {
+   "id": "arxiv:2611.08372",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "MOMASPLAT: Dynamic Novel-View Demonstration Augmentation for Mobile Manipulation",
+   "source": {
+    "id": "arxiv:2611.08372",
+    "title": "MOMASPLAT: Dynamic Novel-View Demonstration Augmentation for Mobile Manipulation",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.08372",
+    "excerpt": "MOMASPLAT substantially improves robustness to unseen base poses, more than doubling the average success rate of the strongest baseline and maintaining non-trivial success at large base displacements where all baselines fail, while reducing the need for largescale real-world data collection."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z"
+  },
+  {
+   "id": "pmid:41817640",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Artificial intelligence for diagnosis and triage in oral cancer",
+   "source": {
+    "id": "pmid:41817640",
+    "title": "Artificial intelligence for diagnosis and triage in oral cancer: a clinician‑centered narrative review.",
+    "publisher": "International journal of clinical oncology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/41817640/",
+    "excerpt": "AI systems for OSCC are maturing and clinically oriented. Before routine adoption, studies must demonstrate external validity, clinician-in-the-loop performance, calibration, and impact on time-to-diagnosis and patient outcomes. Pragmatic trials and transparent reporting are essential to move beyond proof-of-concept into equitable clinical benefit."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z"
+  },
+  {
+   "id": "quran:2:262",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Diejenigen, die ihren Besitz auf Allahs Weg ausgeben und hierauf dem …",
+   "source": {
+    "id": "quran:2:262",
+    "title": "Sure Al-Baqarah, 2:262",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/2/262",
+    "excerpt": "الذين يخرجون أموالهم في الجهاد وأنواع الخير، ثم لا يتبعون ما أنفقوا من الخيرات مَنّاً على مَن أعطَوه ولا أذى بقول أو فِعْلٍ يشعره بالتفضل عليه، لهم ثوابهم العظيم عند ربهم، ولا خوف عليهم فيما يستقبلونه من أمر الآخرة، ولا هم يحزنون على شيء فاتهم في هذه الدنيا."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z",
+   "arabic": "ٱلَّذِينَ يُنفِقُونَ أَمْوَٰلَهُمْ فِى سَبِيلِ ٱللَّهِ ثُمَّ لَا يُتْبِعُونَ مَآ أَنفَقُوا۟ مَنًّا وَلَآ أَذًى ۙ لَّهُمْ أَجْرُهُمْ عِندَ رَبِّهِمْ وَلَا خَوْفٌ عَلَيْهِمْ وَلَا هُمْ يَحْزَنُونَ",
+   "translation": "Diejenigen, die ihren Besitz auf Allahs Weg ausgeben und hierauf dem, was sie ausgegeben haben, weder Vorhaltungen noch Beleidigungen nachfolgen lassen, die haben ihren Lohn bei ihrem Herrn, und keine Furcht soll über sie kommen, noch sollen sie traurig sein.",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?",
+   "body": "To Remind About Charity Given is Forbidden: Allah praises those who spend from their money in His cause, and then refrain from reminding those who received the charity of that fact, whether these hints take the form of words or actions."
+  },
+  {
+   "id": "quran:2:263",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Freundliche Worte und Vergebung sind besser als ein Almosen, dem Beleidigungen nachfolgen.",
+   "source": {
+    "id": "quran:2:263",
+    "title": "Sure Al-Baqarah, 2:263",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/2/263",
+    "excerpt": "كلام طيب يرد به السائل، وعفو عما بدر مِنه مِن إلحاحٍ في السؤال، خير من صدقة يتبعها من المتصدق أذى وإساءة. والله غني عن صدقات العباد، حليم لا يعاجلهم بالعقوبة."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z",
+   "arabic": "۞ قَوْلٌ مَّعْرُوفٌ وَمَغْفِرَةٌ خَيْرٌ مِّن صَدَقَةٍ يَتْبَعُهَآ أَذًى ۗ وَٱللَّهُ غَنِىٌّ حَلِيمٌ",
+   "translation": "Freundliche Worte und Vergebung sind besser als ein Almosen, dem Beleidigungen nachfolgen. Allah ist Unbedürftig und Nachsichtig.",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?",
+   "body": "To Remind About Charity Given is Forbidden: Allah praises those who spend from their money in His cause, and then refrain from reminding those who received the charity of that fact, whether these hints take the form of words or actions."
+  },
+  {
+   "id": "quran:2:264",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "O die ihr glaubt, macht nicht eure Almosen durch Vorhaltungen und Beleidigungen zunichte …",
+   "source": {
+    "id": "quran:2:264",
+    "title": "Sure Al-Baqarah, 2:264",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/2/264",
+    "excerpt": "يا من آمنتم بالله واليوم الآخر لا تُذْهِبُوا ثواب ما تتصدقون به بالمنِّ والأذى، فهذا شبيه بالذي يخرج ماله ليراه الناس، فيُثنوا عليه، وهو لا يؤمن بالله ولا يوقن باليوم الآخر، فمثل ذلك مثل حجر أملس عليه تراب هطل عليه مطر غزير فأزاح عنه التراب، فتركه أملس لا شيء عليه، فكذلك هؤلاء المراؤون تضمحلُّ أعمالهم عند الله، ولا يجدون شيئًا من الثواب على ما أنفقوه."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z",
+   "arabic": "يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا۟ لَا تُبْطِلُوا۟ صَدَقَـٰتِكُم بِٱلْمَنِّ وَٱلْأَذَىٰ كَٱلَّذِى يُنفِقُ مَالَهُۥ رِئَآءَ ٱلنَّاسِ وَلَا يُؤْمِنُ بِٱللَّهِ وَٱلْيَوْمِ ٱلْـَٔاخِرِ ۖ فَمَثَلُهُۥ كَمَثَلِ صَفْوَانٍ عَلَيْهِ تُرَابٌ فَأَصَابَهُۥ وَابِلٌ فَتَرَكَهُۥ صَلْدًا ۖ لَّا يَقْدِرُونَ عَلَىٰ شَىْءٍ مِّمَّا كَسَبُوا۟ ۗ وَٱللَّهُ لَا يَهْدِى ٱلْقَوْمَ ٱلْكَـٰفِرِينَ",
+   "translation": "O die ihr glaubt, macht nicht eure Almosen durch Vorhaltungen und Beleidigungen zunichte, wie derjenige, der seinen Besitz aus Augendienerei vor den Menschen ausgibt und nicht an Allah und den Jüngsten Tag glaubt! So ist sein Gleichnis das eines glatten Steins mit Erdreich darüber: Ein heftiger Regenguß trifft ihn und läßt ihn nackt. Sie haben keine Macht über etwas von dem, was sie erworben haben. Allah leitet das ungläubige Volk nicht recht.",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?",
+   "body": "To Remind About Charity Given is Forbidden: Allah praises those who spend from their money in His cause, and then refrain from reminding those who received the charity of that fact, whether these hints take the form of words or actions."
+  },
+  {
+   "id": "quran:2:265",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Das Gleichnis jener aber, die ihren Besitz im Trachten nach Allahs Zufriedenheit und aus …",
+   "source": {
+    "id": "quran:2:265",
+    "title": "Sure Al-Baqarah, 2:265",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/2/265",
+    "excerpt": "ومثل الذين ينفقون أموالهم طلبًا لرضا الله واعتقادًا راسخًا بصدق وعده، كمثل بستان عظيم بأرض عالية طيبة هطلت عليه أمطار غزيرة، فتضاعفت ثمراته، وإن لم تسقط عليه الأمطار الغزيرة فيكفيه رذاذ المطر ليعطي الثمرة المضاعفة، وكذلك نفقات المخلصين تُقبل عند الله وتُضاعف، قلَّت أم كثُرت، فالله المُطَّلِع على السرائر، البصير بالظواهر والبواطن، يثيب كلا بحسب إخلاصه."
+   },
+   "createdAt": "2026-11-07T10:21:39.521Z",
+   "arabic": "وَمَثَلُ ٱلَّذِينَ يُنفِقُونَ أَمْوَٰلَهُمُ ٱبْتِغَآءَ مَرْضَاتِ ٱللَّهِ وَتَثْبِيتًا مِّنْ أَنفُسِهِمْ كَمَثَلِ جَنَّةٍۭ بِرَبْوَةٍ أَصَابَهَا وَابِلٌ فَـَٔاتَتْ أُكُلَهَا ضِعْفَيْنِ فَإِن لَّمْ يُصِبْهَا وَابِلٌ فَطَلٌّ ۗ وَٱللَّهُ بِمَا تَعْمَلُونَ بَصِيرٌ",
+   "translation": "Das Gleichnis jener aber, die ihren Besitz im Trachten nach Allahs Zufriedenheit und aus ihrer Gewißheit ausgeben, ist das eines Gartens auf einer Anhöhe, den ein heftiger Regenguß trifft, und da bringt er seinen Ernteertrag zweifach (hervor). Und wenn ihn kein heftiger Regenguß trifft, so doch Sprühregen. Und was ihr tut, sieht Allah wohl.",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?",
+   "body": "وَتَثْبِيتًا مِّنْ أَنفُسِهِمْ (while they in their own selves are sure and certain) meaning, they are certain that Allah shall reward them for these righteous acts with the best rewards."
   }
  ]
 }

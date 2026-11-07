@@ -1,5 +1,5 @@
 {
- "at": "2026-11-07T07:35:14.030Z",
+ "at": "2026-11-07T10:24:43.441Z",
  "runs": [
   {
    "browser": "webkit",
@@ -146,8 +146,8 @@
     "bg: ended bgaudio5:0",
     "bg: started bgaudio2:0",
     "bg: next bgaudio2:0",
-    "bg: deck advance to bgaudio2: NOT playing after 3 s, rs=0 muted=false t=2.9 error none",
     "bg: deck page hidden +15 s: paused=true ended=false t=4.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck advance to bgaudio2: NOT playing after 3 s, rs=0 muted=false t=2.9 error none",
     "bg: deck clip end via timeupdate hidden=true pool=2 onAdvance=true advance=yes rs=0 muted=false t=4.0",
     "bg: deck advance bgaudio2 to bgaudio6: swap and play() in this handler, new element true, next from storage false, readyState 0",
     "bg: ended bgaudio2:0",
@@ -236,11 +236,11 @@
     "bgnet1"
    ],
    "bgNextFiveMs": [
-    26,
-    15,
+    23,
     12,
-    9,
-    10
+    12,
+    8,
+    9
    ],
    "bgNextSkipLines": [
     "go 0->1",
@@ -252,28 +252,28 @@
    "bgNextPlays": [
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/e88b72c1-0792",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-BLbLySAF.j < swapNext@http://127.0.0.1:4178/core/assets/index-BLbLySAF.js < kl@http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:47:36 < @http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:47:7130 < @"
+     "src": "blob:http://127.0.0.1:4178/ba78eef3-1345",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.j < swapNext@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js < kl@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:36 < @http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:7130 < @"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/793d50b7-99cf",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-BLbLySAF.j < swapNext@http://127.0.0.1:4178/core/assets/index-BLbLySAF.js < kl@http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:47:36 < @http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:47:7130 < @"
+     "src": "blob:http://127.0.0.1:4178/f6436cf9-3d49",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.j < swapNext@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js < kl@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:36 < @http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:7130 < @"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/75cf840e-c937",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-BLbLySAF.j < swapNext@http://127.0.0.1:4178/core/assets/index-BLbLySAF.js < kl@http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:47:36 < @http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:47:7130 < @"
+     "src": "blob:http://127.0.0.1:4178/32559345-76a8",
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.j < swapNext@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js < kl@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:36 < @http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:7130 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgnet2.m3u8#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-BLbLySAF.j < swapNext@http://127.0.0.1:4178/core/assets/index-BLbLySAF.js < kl@http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:47:36 < @http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:47:7130 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.j < swapNext@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js < kl@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:36 < @http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:7130 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgnet1.m3u8#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-BLbLySAF.j < swapNext@http://127.0.0.1:4178/core/assets/index-BLbLySAF.js < kl@http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:47:36 < @http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:47:7130 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:40: < swapEntry@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.j < swapNext@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js < kl@http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:36 < @http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:7130 < @"
     }
    ],
    "bgHungLog": [
@@ -527,9 +527,9 @@
    ],
    "bgNextFiveMs": [
     11,
-    10,
-    10,
+    9,
     8,
+    6,
     7
    ],
    "bgNextSkipLines": [
@@ -542,28 +542,28 @@
    "bgNextPlays": [
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/29e81402-ba6c",
-     "stack": "at P.play (<anonymous>:9:134) < at qy.kick (http://127.0.0.1:4178/core/assets/index-BLbLySAF < at qy.swapEntry (http://127.0.0.1:4178/core/assets/index-BLb < at qy.swapNext (http://127.0.0.1:4178/core/assets/index-BLbL < at Object.kl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:47:71"
+     "src": "blob:http://127.0.0.1:4178/64b6366a-ab5c",
+     "stack": "at P.play (<anonymous>:9:134) < at qy.kick (http://127.0.0.1:4178/core/assets/index-C9M3FvIe < at qy.swapEntry (http://127.0.0.1:4178/core/assets/index-C9M < at qy.swapNext (http://127.0.0.1:4178/core/assets/index-C9M3 < at Object.kl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:71"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/621928c9-df48",
-     "stack": "at P.play (<anonymous>:9:134) < at qy.kick (http://127.0.0.1:4178/core/assets/index-BLbLySAF < at qy.swapEntry (http://127.0.0.1:4178/core/assets/index-BLb < at qy.swapNext (http://127.0.0.1:4178/core/assets/index-BLbL < at Object.kl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:47:71"
+     "src": "blob:http://127.0.0.1:4178/5c621ab0-e981",
+     "stack": "at P.play (<anonymous>:9:134) < at qy.kick (http://127.0.0.1:4178/core/assets/index-C9M3FvIe < at qy.swapEntry (http://127.0.0.1:4178/core/assets/index-C9M < at qy.swapNext (http://127.0.0.1:4178/core/assets/index-C9M3 < at Object.kl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:71"
     },
     {
      "sync": true,
-     "src": "blob:http://127.0.0.1:4178/04c5237b-0365",
-     "stack": "at P.play (<anonymous>:9:134) < at qy.kick (http://127.0.0.1:4178/core/assets/index-BLbLySAF < at qy.swapEntry (http://127.0.0.1:4178/core/assets/index-BLb < at qy.swapNext (http://127.0.0.1:4178/core/assets/index-BLbL < at Object.kl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:47:71"
+     "src": "blob:http://127.0.0.1:4178/be6863d9-f808",
+     "stack": "at P.play (<anonymous>:9:134) < at qy.kick (http://127.0.0.1:4178/core/assets/index-C9M3FvIe < at qy.swapEntry (http://127.0.0.1:4178/core/assets/index-C9M < at qy.swapNext (http://127.0.0.1:4178/core/assets/index-C9M3 < at Object.kl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:71"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgnet2.m3u8#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at qy.kick (http://127.0.0.1:4178/core/assets/index-BLbLySAF < at qy.swapEntry (http://127.0.0.1:4178/core/assets/index-BLb < at qy.swapNext (http://127.0.0.1:4178/core/assets/index-BLbL < at Object.kl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:47:71"
+     "stack": "at P.play (<anonymous>:9:134) < at qy.kick (http://127.0.0.1:4178/core/assets/index-C9M3FvIe < at qy.swapEntry (http://127.0.0.1:4178/core/assets/index-C9M < at qy.swapNext (http://127.0.0.1:4178/core/assets/index-C9M3 < at Object.kl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:71"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgnet1.m3u8#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at qy.kick (http://127.0.0.1:4178/core/assets/index-BLbLySAF < at qy.swapEntry (http://127.0.0.1:4178/core/assets/index-BLb < at qy.swapNext (http://127.0.0.1:4178/core/assets/index-BLbL < at Object.kl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-BLbLySAF.js:47:71"
+     "stack": "at P.play (<anonymous>:9:134) < at qy.kick (http://127.0.0.1:4178/core/assets/index-C9M3FvIe < at qy.swapEntry (http://127.0.0.1:4178/core/assets/index-C9M < at qy.swapNext (http://127.0.0.1:4178/core/assets/index-C9M3 < at Object.kl [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/index-C9M3FvIe.js:47:71"
     }
    ],
    "bgHungLog": [
