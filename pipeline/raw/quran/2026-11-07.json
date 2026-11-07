@@ -8,7 +8,7 @@
    "area": "beat",
    "topic": "koran",
    "url": "https://quran.com/2/262",
-   "urlStatus": 0,
+   "urlStatus": 200,
    "api": {
     "url": "https://api.quran.com/api/v4/verses/by_key/2:262?translations=27&fields=text_uthmani",
     "status": 200
@@ -29,7 +29,7 @@
    },
    "fetchedAt": "2026-11-07T04:04:09.167Z",
    "urlChecks": {
-    "https://quran.com/2/262": 0
+    "https://quran.com/2/262": 200
    }
   },
   {
@@ -38,7 +38,7 @@
    "area": "beat",
    "topic": "koran",
    "url": "https://quran.com/2/263",
-   "urlStatus": 0,
+   "urlStatus": 200,
    "api": {
     "url": "https://api.quran.com/api/v4/verses/by_key/2:263?translations=27&fields=text_uthmani",
     "status": 200
@@ -59,7 +59,67 @@
    },
    "fetchedAt": "2026-11-07T04:04:09.167Z",
    "urlChecks": {
-    "https://quran.com/2/263": 0
+    "https://quran.com/2/263": 200
+   }
+  },
+  {
+   "sourceId": "quran:2:264",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/264",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:264?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:264",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا۟ لَا تُبْطِلُوا۟ صَدَقَـٰتِكُم بِٱلْمَنِّ وَٱلْأَذَىٰ كَٱلَّذِى يُنفِقُ مَالَهُۥ رِئَآءَ ٱلنَّاسِ وَلَا يُؤْمِنُ بِٱللَّهِ وَٱلْيَوْمِ ٱلْـَٔاخِرِ ۖ فَمَثَلُهُۥ كَمَثَلِ صَفْوَانٍ عَلَيْهِ تُرَابٌ فَأَصَابَهُۥ وَابِلٌ فَتَرَكَهُۥ صَلْدًا ۖ لَّا يَقْدِرُونَ عَلَىٰ شَىْءٍ مِّمَّا كَسَبُوا۟ ۗ وَٱللَّهُ لَا يَهْدِى ٱلْقَوْمَ ٱلْكَـٰفِرِينَ",
+    "translation": "O die ihr glaubt, macht nicht eure Almosen durch Vorhaltungen und Beleidigungen zunichte, wie derjenige, der seinen Besitz aus Augendienerei vor den Menschen ausgibt und nicht an Allah und den Jüngsten Tag glaubt! So ist sein Gleichnis das eines glatten Steins mit Erdreich darüber: Ein heftiger Regenguß trifft ihn und läßt ihn nackt. Sie haben keine Macht über etwas von dem, was sie erworben haben. Allah leitet das ungläubige Volk nicht recht.",
+    "tafsir_muyassar": "يا من آمنتم بالله واليوم الآخر لا تُذْهِبُوا ثواب ما تتصدقون به بالمنِّ والأذى، فهذا شبيه بالذي يخرج ماله ليراه الناس، فيُثنوا عليه، وهو لا يؤمن بالله ولا يوقن باليوم الآخر، فمثل ذلك مثل حجر أملس عليه تراب هطل عليه مطر غزير فأزاح عنه التراب، فتركه أملس لا شيء عليه، فكذلك هؤلاء المراؤون تضمحلُّ أعمالهم عند الله، ولا يجدون شيئًا من الثواب على ما أنفقوه. والله لا يوفق الكافرين لإصابة الحق في نفقاتهم وغيرها.",
+    "tafsir_ibnkathir": "<h2>To Remind About Charity Given is Forbidden</h2><p>Allah praises those who spend from their money in His cause, and then refrain from reminding those who received the charity of that fact, whether these hints take the form of words or actions.</p><p>Allah's statement,</p><p>وَلاَ أَذًى</p><p>(or with injury), indicates that they do not cause harm to those whom they gave the charity to, for this harm will only annul the charity. Allah next promised them the best rewards for this good deed,</p><p>لَهُمْ أَجْرُهُمْ عِندَ رَبِّهِمْ</p><p>(their reward is with their Lord), indicating that Allah Himself will reward them for these righteous actions. Further,</p><p>وَلاَ خَوْفٌ عَلَيْهِمْ</p><p>(On them shall be no fear) regarding the horrors of the Day of Resurrection,</p><p>وَلاَ هُمْ يَحْزَنُونَ</p><p>(nor shall they grieve) regarding the offspring that they leave behind and the adornment and delights of this world. They will not feel sorry for this, because they will acquire what is far better for them.</p><p>Allah then said,</p><p>قَوْلٌ مَّعْرُوفٌ</p><p>(Kind words) meaning, compassionate words and a supplication for Muslims,</p><p>وَمَغْفِرَةٌ</p><p>(and forgiving) meaning, forgiving an injustice that took the form of actions or words,</p><p>خَيْرٌ مِّن صَدَقَةٍ يَتْبَعُهَآ أَذًى</p><p>(are better than Sadaqah (charity) followed by injury.)</p><p>وَاللَّهُ غَنِىٌّ</p><p>(And Allah is Rich) not needing His creation,</p><p>حَلِيمٌ</p><p>(Most Forbearing) forgives, releases and pardons them.</p><p>There are several Hadiths that prohibit reminding people of acts of charity. For instance, Muslim recorded that Abu Dharr said that the Messenger of Allah ﷺ said,</p><p>«ثَلَاثَةٌ لَا يُكَلِّمُهُمُ اللهُ يَوْمَ الْقِيَامَةِ، وَلَا يَنْظُرُ إِلَيْهِم، وَلَا يُزَكِّيهِمْ، وَلَهُمْ عَذَابٌ أَلِيمٌ: الْمَنَّانُ بِمَا أَعْطَى، وَالْمُسْبِلُ إِزَارَهُ، وَالْمُنَفِّقُ سِلْعَتَهُ بِالْحَلِفِ الْكَاذِب»</p><p>(Three persons whom Allah shall neither speak to on the Day of Resurrection nor look at nor purify, and they shall receive a painful torment: he who reminds (the people) of what he gives away, he who lengthens his clothes below the ankles and he who swears an oath while lying, to sell his merchandise.)</p><p>This is why Allah said,</p><p>يأَيُّهَا الَّذِينَ ءَامَنُواْ لاَ تُبْطِلُواْ صَدَقَـتِكُم بِالْمَنِّ وَالاٌّذَى</p><p>(O you who believe! Do not render in vain your Sadaqah (charity) by reminders of your generosity or by injury) stating that the charity will be rendered in vain if it is followed by harm or reminders. In this case, the reward of giving away charity is not sufficient enough to nullify the harm and reminders. Allah then said,</p><p>كَالَّذِى يُنفِقُ مَالَهُ رِئَآءَ النَّاسِ</p><p>(like him who spends his wealth to be seen of men) meaning, \"Do not nullify your acts of charity by following them with reminders and harm, just like the charity of those who give it to show off to people.\" The boasting person pretends to give away charity for Allah's sake, but in reality seeks to gain people's praise and the reputation of being kind or generous, or other material gains of this life. All the while, he does not think about Allah or gaining His pleasure and generous rewards, and this is why Allah said,</p><p>وَلاَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الاٌّخِرِ</p><p>(and he does not believe in Allah, nor in the Last Day.)</p><p>Allah next set the example of whoever gives charity to show off. Ad-Dahhak commented that the example fits one who follows his acts of charity with reminders or harm. Allah said,</p><p>فَمَثَلُهُ كَمَثَلِ صَفْوَانٍ</p><p>(His likeness is the likeness of Safwan) where Safwan, from is Safwanah, meaning `the smooth rocks,'</p><p>عَلَيْهِ تُرَابٌ فَأَصَابَهُ وَابِلٌ</p><p>(on which is little dust; on it falls a Wabil) meaning, heavy rain,</p><p>فَتَرَكَهُ صَلْدًا</p><p>(which leaves it bare.) This Ayah means that heavy rain left the Safwan completely barren of dust. Such is the case with Allah's action regarding the work of those who show off, as their deeds are bound to vanish and disappear, even though people think that these deeds are as plentiful as specks of dust. So Allah said,</p><p>لاَّ يَقْدِرُونَ عَلَى شَىْءٍ مِّمَّا كَسَبُواْ وَاللَّهُ لاَ يَهْدِي الْقَوْمَ الْكَـفِرِينَ</p><p>(They are not able to do anything with what they have earned. And Allah does not guide the disbelieving people.)</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:264"
+   },
+   "fetchedAt": "2026-11-07T10:21:33.220Z",
+   "urlChecks": {
+    "https://quran.com/2/264": 200
+   }
+  },
+  {
+   "sourceId": "quran:2:265",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/2/265",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/2:265?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Al-Baqarah 2:265",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "وَمَثَلُ ٱلَّذِينَ يُنفِقُونَ أَمْوَٰلَهُمُ ٱبْتِغَآءَ مَرْضَاتِ ٱللَّهِ وَتَثْبِيتًا مِّنْ أَنفُسِهِمْ كَمَثَلِ جَنَّةٍۭ بِرَبْوَةٍ أَصَابَهَا وَابِلٌ فَـَٔاتَتْ أُكُلَهَا ضِعْفَيْنِ فَإِن لَّمْ يُصِبْهَا وَابِلٌ فَطَلٌّ ۗ وَٱللَّهُ بِمَا تَعْمَلُونَ بَصِيرٌ",
+    "translation": "Das Gleichnis jener aber, die ihren Besitz im Trachten nach Allahs Zufriedenheit und aus ihrer Gewißheit ausgeben, ist das eines Gartens auf einer Anhöhe, den ein heftiger Regenguß trifft, und da bringt er seinen Ernteertrag zweifach (hervor). Und wenn ihn kein heftiger Regenguß trifft, so doch Sprühregen. Und was ihr tut, sieht Allah wohl.",
+    "tafsir_muyassar": "ومثل الذين ينفقون أموالهم طلبًا لرضا الله واعتقادًا راسخًا بصدق وعده، كمثل بستان عظيم بأرض عالية طيبة هطلت عليه أمطار غزيرة، فتضاعفت ثمراته، وإن لم تسقط عليه الأمطار الغزيرة فيكفيه رذاذ المطر ليعطي الثمرة المضاعفة، وكذلك نفقات المخلصين تُقبل عند الله وتُضاعف، قلَّت أم كثُرت، فالله المُطَّلِع على السرائر، البصير بالظواهر والبواطن، يثيب كلا بحسب إخلاصه.",
+    "tafsir_ibnkathir": "<p>وَتَثْبِيتًا مِّنْ أَنفُسِهِمْ</p><p>(while they in their own selves are sure and certain) meaning, they are certain that Allah shall reward them for these righteous acts with the best rewards. Similarly, in a Hadith collected by Al-Bukhari and Muslim, the Messenger of Allah ﷺ said,</p><p>«مَنْ صَامَ رَمَضَانَ إِيمَانًا وَاحْتِسَابًا»</p><p>(Whoever fasts Ramadan with faith and expectation...) meaning, believing that Allah commanded the fast, all the while awaiting His reward for fasting it.</p><p>Allah's statement,</p><p>كَمَثَلِ جَنَّةٍ بِرَبْوَةٍ</p><p>(is that of a garden on a Rabwah) means, the example of a garden on `a height above the ground', as the majority of scholars have stated. Ibn `Abbas and Ad-Dahhak added that it also has flowing rivers.</p><p>Allah's statement,</p><p>أَصَابَهَا وَابِلٌ</p><p>(Wabil falls on it) means, heavy rain as we stated, So it produces its,</p><p>أُكُلُهَا</p><p>(yield of harvest) meaning, fruits or produce,</p><p>ضِعْفَيْنِ</p><p>(doubles), as compared to other gardens.</p><p>فَإِن لَّمْ يُصِبْهَا وَابِلٌ فَطَلٌّ</p><p>(And if it does not receive Wabil, a Tall suffices it.)</p><p>Ad-Dahhak said that the `Tall' is light rain. The Ayah indicates that the garden on the Rabwah is always fertile, for if heavy rain does not fall on it, light rain will suffice for it. Such is the case regarding the believer's good deeds, for they never become barren. Rather, Allah accepts the believer's righteous deeds and increases them, each according to his deeds. This is why Allah said next,</p><p>وَاللَّهُ بِمَا تَعْمَلُونَ بَصِيرٌ</p><p>(And Allah is All-Seer of what you do) meaning, none of His servants' deeds ever escapes His perfect watch.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Al-Baqarah",
+    "surahNameDe": "The Cow",
+    "key": "2:265"
+   },
+   "fetchedAt": "2026-11-07T10:21:33.220Z",
+   "urlChecks": {
+    "https://quran.com/2/265": 200
    }
   }
  ]
