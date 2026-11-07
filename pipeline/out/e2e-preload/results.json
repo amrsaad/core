@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-06T14:29:32.579Z",
+  "at": "2026-11-07T04:11:39.258Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -50,38 +50,38 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1671,
+        "coldStartMs": 1667,
         "preloadedMoments": 30,
         "preloadedBytes": 6289238,
         "bytesPerMoment": 209641,
         "waitedForVault": 0,
         "swipes": 10,
         "cachedStartMs": [
-          8,
-          12,
           7,
-          14,
-          6,
+          7,
           8,
-          9,
+          19,
+          5,
           8,
           8,
-          6
+          8,
+          7,
+          5
         ],
-        "cachedStartMax": 14,
+        "cachedStartMax": 19,
         "cachedStartMedian": 8,
         "firstFrames": [
           "first-frame 8ms buffered local",
-          "first-frame 8ms buffered local",
-          "first-frame 12ms buffered local",
           "first-frame 7ms buffered local",
-          "first-frame 14ms buffered local",
-          "first-frame 6ms buffered local",
+          "first-frame 7ms buffered local",
           "first-frame 8ms buffered local",
-          "first-frame 9ms buffered local",
+          "first-frame 19ms buffered local",
+          "first-frame 5ms buffered local",
           "first-frame 8ms buffered local",
           "first-frame 8ms buffered local",
-          "first-frame 6ms buffered local"
+          "first-frame 8ms buffered local",
+          "first-frame 7ms buffered local",
+          "first-frame 5ms buffered local"
         ],
         "settingsText": "Preloaded: 36 moments, 7.2 MB",
         "offlineTrail": [
@@ -103,9 +103,9 @@
           }
         ],
         "offlineStartMs": [
-          12,
-          8,
           7,
+          7,
+          6,
           7
         ],
         "offlineCachedOfFirst15": 13,
@@ -137,7 +137,7 @@
         ],
         "offlineRestartStartMs": [
           8,
-          8,
+          7,
           10
         ],
         "poorYoutubeOf120": 58,
