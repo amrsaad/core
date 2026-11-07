@@ -1,5 +1,5 @@
 {
- "at": "2026-11-07T10:23:46.690Z",
+ "at": "2026-11-07T14:36:40.152Z",
  "runs": [
   {
    "browser": "webkit",
@@ -99,48 +99,48 @@
     "tempoWaiting": 0,
     "tempoPaused": 10,
     "cue": {
-     "worst": 0,
+     "worst": 1,
      "n": 622,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.38",
+       "3.36",
        34,
        34
       ],
       [
-       "4.66",
+       "4.65",
        47,
        47
       ],
       [
-       "5.95",
+       "5.94",
        60,
        60
       ],
       [
-       "7.24",
+       "7.23",
        73,
        73
       ],
       [
-       "8.53",
+       "8.51",
        86,
        86
       ],
       [
-       "9.81",
+       "9.80",
        99,
        99
       ],
       [
-       "11.10",
-       112,
-       112
+       "11.09",
+       111,
+       111
       ],
       [
-       "12.39",
+       "12.38",
        124,
        124
       ],
@@ -150,17 +150,17 @@
        137
       ],
       [
-       "14.96",
+       "14.95",
        150,
        150
       ],
       [
-       "16.25",
+       "16.24",
        163,
        163
       ],
       [
-       "17.54",
+       "17.53",
        176,
        176
       ]
@@ -168,7 +168,7 @@
      "rate": 2
     },
     "cueTempo": {
-     "worst": 0,
+     "worst": 1,
      "n": 539,
      "rates": [
       1,
@@ -181,7 +181,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805124
+       "dueAt": 1792756805117
       }
      ],
      "idx": 6,
@@ -404,7 +404,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804957
+       "dueAt": 1792756804956
       }
      ],
      "idx": 6,
@@ -451,17 +451,13 @@
    "browser": "chromium-cold",
    "checks": {
     "coldS1Plays": true,
-    "coldS1Filled": true,
-    "coldS1Heads": true,
-    "coldHeadsInVault": true,
+    "coldS1PoolReady": true,
+    "coldS1NothingHeld": true,
+    "coldS1NoStockLines": true,
     "coldS2Plays": true,
-    "coldFirstSoundBeforeNet": true,
-    "coldFirstSrcLocal": true,
-    "coldNoNetStart": true,
-    "coldCounterZero": true,
-    "coldSignalsZero": true,
+    "coldFirstSrcNet": true,
+    "coldNoHold": true,
     "coldNoSystemPause": true,
-    "coldNoPill": true,
     "lockHandlers": true,
     "lockNoSeekHandlers": true,
     "lockPositionIsMomentLength": true,
@@ -495,18 +491,11 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "heads": [
-     "pod-0001:22",
-     "pod-0014:10",
-     "pod-0002:34",
-     "pod-0022:22",
-     "pod-0008:22",
-     "pod-0019:70"
-    ],
-    "firstSoundMs": 230,
+    "firstSoundMs": 2849,
     "diag": [
-     "deck: start order head first=pod-0001:22 heads=6 usable=6 stock=6",
-     "deck: src local pod-0001"
+     "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
+     "deck: src net pod-0006",
+     "signals: coldNetStarts 1 today (net start pod-0006)"
     ],
     "handlers": [
      "nexttrack",
@@ -515,37 +504,37 @@
      "previoustrack"
     ],
     "lock": {
-     "title": "Cold audio moment 1",
-     "artist": "Show 1",
-     "album": "Episode 1",
+     "title": "Cold audio moment 6",
+     "artist": "Show 6",
+     "album": "Episode 6",
      "artwork": [
-      "512x512 http://127.0.0.1:4187/core/tab-brain-512.png",
-      "1024x1024 http://127.0.0.1:4187/core/tab-brain-1024.png"
+      "512x512 http://127.0.0.1:4187/core/tab-beat-512.png",
+      "1024x1024 http://127.0.0.1:4187/core/tab-beat-1024.png"
      ],
      "state": "playing",
      "pos": {
       "duration": 25,
-      "position": 0.0008697959183656678,
+      "position": 0,
       "playbackRate": 1
      },
-     "cold": 0,
-     "cloud": 0
+     "cold": 1,
+     "cloud": 1
     },
-    "stockBehind": 4,
+    "stockBehind": 0,
     "lockHiddenUi": {
      "moved": true,
      "hookOk": true,
      "artOk": true,
-     "hook": "Cold audio moment 14",
-     "art": "https://i.ytimg.com/vi/pod-0014/hqdefault.jpg",
-     "want": "https://i.ytimg.com/vi/pod-0014/hqdefault.jpg",
-     "id": "pod-0014:10"
+     "hook": "Cold audio moment 13",
+     "art": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
+     "want": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
+     "id": "pod-0013:82"
     },
-    "lockNextMs": 17,
+    "lockNextMs": 30,
     "lockNextLines": [
-     "deck: swap pod-0014 ready=true pool=2",
-     "deck play#3 swap rs=4 muted=false t=0.1",
-     "deck play#3 ok"
+     "deck: swap pod-0013 ready=true pool=3",
+     "deck play#4 swap rs=4 muted=false t=82.0",
+     "deck play#4 ok"
     ],
     "coldNetLines": [
      "signals: coldNetStarts 1 today (net start pod-0035)"
