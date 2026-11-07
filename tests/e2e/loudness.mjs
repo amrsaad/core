@@ -9,6 +9,10 @@ import { chromium, devices, webkit } from 'playwright';
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-loudness'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
 const FAKE = readFileSync(new URL('./fakeyt.js', import.meta.url), 'utf8');
+// Nachbau der Medienelemente schon beim Laden der Seite (wie background.mjs): seit Entscheidung 57 füllt sich der Vorrat des Decks sofort mit dem Audio-Reiter,
+// vor der ersten Geste und bevor die YouTube-API (und mit ihr der Nachbau) über die Route angekommen ist. Echte Elemente würden die Antworten der
+// Routen ("x") nativ laden und mit Dekodierfehlern quittieren, und ein Fehler in der geregelten Spur markiert den Host als ohne CORS.
+const FAKE_MEDIA = FAKE.slice(FAKE.indexOf('// Eigene Streams'));
 const EX = Array.from({ length: 6 }, (_, i) => `Sentence ${i + 1} of the checked excerpt.`).join('\n');
 
 const base = { start: 100, end: 160, videoTitle: 'Testvideo', topic: 'augen', kind: 'regel', createdAt: '2026-10-20T00:00:00Z', excerpt: EX };
@@ -85,12 +89,18 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       // Nachbau der CORS-Absage von Anfang an (seit Issue 11 entsteht der AudioContext schon mit dem Tipp auf den Reiter, der erste Moment läuft sofort geregelt):
       // ein Element mit crossOrigin bekommt für nocors.test und trial.test einen Fehler statt loadedmetadata. Die Nachbauten der Elemente (fakeyt.js)
       // setzen P.load erst später, darum hängt der Wächter an der Zuweisung.
+      // Wie im Browser gilt der Fehler nur für diese Ladung: ein späteres load() (Quelle freigegeben oder neuer Eintrag des Vorrats im selben Element)
+      // verwirft ihn. Seit Entscheidung 57 kommen alle Einträge des Vorrats vom Netz, und ein verirrter Fehler auf einem wiederverwendeten Element
+      // würde den Host der neuen Quelle (stream.test) als ohne CORS markieren (der Nachbau behält __src auch nach removeAttribute('src')).
       await pg.addInitScript(() => {
         const P = HTMLMediaElement.prototype;
         let wrapped = P.load;
         const wrap = (f) => function () {
+          this.__loadN = (this.__loadN ?? 0) + 1;
           if (this.crossOrigin === 'anonymous' && /(nocors|trial)\.test/.test(this.src)) {
+            const n = this.__loadN;
             setTimeout(() => {
+              if (this.__loadN !== n) return;
               Object.defineProperty(this, 'error', { configurable: true, get: () => ({ code: 4 }) });
               this.dispatchEvent(new Event('error'));
             }, 20);
@@ -101,6 +111,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         wrapped = wrap(wrapped);
         Object.defineProperty(P, 'load', { configurable: true, get: () => wrapped, set: (f) => { wrapped = wrap(f); } });
       });
+      await pg.addInitScript(FAKE_MEDIA);
       const body = await encPool(list);
       await pg.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body }));
       await pg.goto(`${url}${query}#k=${k}`);
@@ -261,12 +272,13 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await y.pg.waitForTimeout(250);
     }
     const log = await y.pg.evaluate(() => window.__ytlog.slice());
-    // je load der letzte volume-Eintrag davor
+    // je load oder cue der letzte volume-Eintrag davor. Im iPhone-Profil (Brief 23, Issue 48) bereitet der Feed YouTube-Momente nur mit cueVideoById vor
+    // und startet sie erst im Wisch-Handler, die Lautstärke setzt ytApi (route) in beiden Fällen vor dem Befehl.
     const vols = new Map();
     let last = null;
     for (const l of log) {
       if (l.startsWith('volume ')) last = Number(l.slice(7));
-      else if (l.startsWith('load ytloud')) {
+      else if (/^(load|cue) ytloud/.test(l)) {
         const id = l.split(' ')[1];
         if (!vols.has(id)) vols.set(id, last);
       }
