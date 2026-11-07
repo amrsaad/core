@@ -24,7 +24,7 @@ import { addMissed, bumpCell, bumpColdNetStart, bumpPair, hourKey } from './sign
 import { clearFocus, focusActive, focusFilter, inFocus, readFocus, subscribeFocus, type Focus } from './focus';
 import { bumpStart, dropOverStarted, isQuickSkip, markRejected, quickSkip, resumeSaved, setTabCursor, START_MAX } from './tabs';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
-import { clampRate, DEFAULT_RATE, nextRate, rateOf, type Rate } from '../lib/state';
+import { blockedIds, clampRate, clearSwipe, DEFAULT_RATE, dropBlocked, nextRate, rateOf, swipeAway, swipeBlocked, SWIPE_BLOCK_DAYS, type Rate } from '../lib/state';
 import { addSample } from './latency';
 import { captionLines, captionsShown } from './captions';
 import { CueClock, cueIndexAt } from './cueClock';
@@ -157,7 +157,7 @@ const load = (m: Moment) => ({ videoId: m.videoId, startSeconds: m.start, endSec
 /** Anzahl der Medien-Elemente mit gesetzter Quelle (Vorgabe: höchstens 3 gleichzeitig) */
 const mediaWithSrc = (): number => (typeof document === 'undefined' ? 0 : [...document.querySelectorAll('audio,video')].filter((e) => !!e.getAttribute('src')).length);
 
-export function MomentFeed({ pool: allPool, state, update, active, onPausedChange, syncError = null, desk }: Props) {
+export function MomentFeed({ pool: rawPool, state, update, active, onPausedChange, syncError = null, desk }: Props) {
   const single = state.settings.playerMode === 'single';
   const SLOTS = single ? 1 : 3;
   const stateRef = useRef(state);
@@ -181,6 +181,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
   const [focus, setFocus] = useState<Focus | null>(() => readFocus(clockNow().getTime()));
   const focusRef = useRef(focus);
   focusRef.current = focus;
+  // Brief 24 (Ergänzung 45): zweimal ohne Wiedergabe weggewischte Momente sind 30 Tage gesperrt und fehlen in Reihenfolge und Zählern (Endseite)
+  const blockedKey = blockedIds(state.momentSwipes, clockNow().getTime()).join(' ');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const allPool = useMemo(() => dropBlocked(rawPool, state.momentSwipes, clockNow().getTime()), [rawPool, blockedKey]);
   const formPool = useMemo(() => filterPool(allPool, form), [allPool, form]);
   const pool = useMemo(() => focusFilter(formPool, focus, clockNow().getTime()), [formPool, focus]);
   useEffect(() => subscribeFocus(() => setFocus(readFocus(clockNow().getTime()))), []);
@@ -438,6 +442,7 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
         }
         cursor.current = saved.length ? cursorFor(saved, false, clockNow().getTime()) : newMomentCursor(s.momentDay !== today);
         seedHist.current = recentFromLog(s.momentLog, pool);
+        diag.current.push(`skip: ${rawPool.length - allPool.length} blocked`);
         queue.current.push(...saved);
         poorRef.current = pre?.poor() ?? false;
       }
@@ -808,7 +813,11 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
 
   const markSeen = (m: Moment | undefined) => {
     if (!m) return;
-    update((s) => (s.momentSeen[m.id] ? { ...s, momentDay: today } : bumpCell({ ...s, momentDay: today, momentSeen: { ...s.momentSeen, [m.id]: Date.now() }, dayCount: countSeen(s.dayCount, today) }, today, hourKey(clockNow()), m, 'seen')));
+    // Gespielt: der Zähler der Wegwischer ohne Wiedergabe ist weg (Brief 24)
+    update((s0) => {
+      const s = clearSwipe(s0, m.id);
+      return s.momentSeen[m.id] ? { ...s, momentDay: today } : bumpCell({ ...s, momentDay: today, momentSeen: { ...s.momentSeen, [m.id]: Date.now() }, dayCount: countSeen(s.dayCount, today) }, today, hourKey(clockNow()), m, 'seen');
+    });
   };
 
   const markSeenRef = useRef(markSeen);
@@ -818,6 +827,12 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     if (played.current.enough(m.id) || stateRef.current.momentSeen[m.id] || unplayedNoted.current.has(m.id)) return;
     unplayedNoted.current.add(m.id);
     diag.current.push(`skipped (not seen) ${m.id}`);
+    // Brief 24: nur ein Wegwischen durch den Nutzer zählt, kein Moment, den die App selbst übersprungen hat (Hänge-Überwachung, Fehler, Sitzungs-Sperre)
+    if (bad.current.has(m.videoId)) return;
+    const nowMs = clockNow().getTime();
+    const r = swipeAway(stateRef.current, m.id, nowMs);
+    if (r.blocked) diag.current.push(`skip: ${m.id} blocked ${SWIPE_BLOCK_DAYS} d (${r.n} skips)`);
+    update((s) => swipeAway(s, m.id, nowMs).state);
   };
 
   // Erkennt, ob der Browser die Wiedergabe mit Ton verweigert hat. Puffern (langsames Netz, Podcast-Stream) ist keine
@@ -1014,7 +1029,10 @@ export function MomentFeed({ pool: allPool, state, update, active, onPausedChang
     const from = idxRef.current + 1;
     // Entscheidung 45: fehlt ein Nachbar an idx+1 oder idx+2, füllt der nächste Moment mit anderem Bereich die Lücke (pruneAndHeal)
     const prune = form === 'audio' && isBackground(document.visibilityState) ? pruneOnly : pruneAndHeal;
-    const next = prune(queue.current, idxRef.current, (x) => bad.current.has(x.videoId));
+    const nowMs = clockNow().getTime();
+    const sw = stateRef.current.momentSwipes;
+    // Gesperrte Momente (Brief 24) verlassen den Rest der Warteschlange wie gescheiterte
+    const next = prune(queue.current, idxRef.current, (x) => bad.current.has(x.videoId) || swipeBlocked(sw?.[x.id], nowMs));
     if (next.length !== queue.current.length) {
       queue.current = next;
       for (const sl of slots.current) if (sl.index >= from) sl.index = -1;

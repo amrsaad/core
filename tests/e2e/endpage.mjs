@@ -22,10 +22,21 @@ for (let i = NV; i < NV + NA; i++) moments.push(base(i, { audio: true, form: 'au
 for (let i = NV + NA; i < NV + NA + NT; i++) moments.push(base(i, { form: 'text' }));
 const raw = crypto.getRandomValues(new Uint8Array(32));
 const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt']);
-const iv = crypto.getRandomValues(new Uint8Array(12));
-const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify({ updatedAt: '2026-10-23T00:00:00Z', lastRun: '2026-10-23T00:00:00Z', moments })));
-const poolBody = JSON.stringify({ v: 1, iv: Buffer.from(iv).toString('base64url'), ct: Buffer.from(ct).toString('base64url') });
+const encPool = async (list) => {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify({ updatedAt: '2026-10-23T00:00:00Z', lastRun: '2026-10-23T00:00:00Z', moments: list })));
+  return JSON.stringify({ v: 1, iv: Buffer.from(iv).toString('base64url'), ct: Buffer.from(ct).toString('base64url') });
+};
+const poolBody = await encPool(moments);
 const k = Buffer.from(raw).toString('base64url');
+// Brief 24: eigener Pool mit mehr Audio-Momenten. Ein weggewischter Moment kommt erst wieder, wenn er nicht mehr unter den letzten 10 des Protokolls ist (mix.ts),
+// darum braucht die zweite Sitzung mindestens 10 andere Audio-Momente.
+const NA2 = 16;
+const moments2 = [];
+for (let i = 0; i < NV; i++) moments2.push(base(i, {}));
+for (let i = NV; i < NV + NA2; i++) moments2.push(base(i, { audio: true, form: 'audio', hls: `https://stream.test/endp${String(i).padStart(7, '0')}.m3u8` }));
+for (let i = NV + NA2; i < NV + NA2 + NT; i++) moments2.push(base(i, { form: 'text' }));
+const poolBody2 = await encPool(moments2);
 
 const waitFor = async (page, fn, arg, timeout = 15000) => { try { await page.waitForFunction(fn, arg, { timeout }); return true; } catch { return false; } };
 const results = { at: new Date().toISOString(), runs: [] };
@@ -116,6 +127,98 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     c.noPageErrors = errors.length === 0;
     if (errors.length) r.errors = errors.slice(0, 5);
     await page.screenshot({ path: `${out}/${name}-4-text.png` });
+    await ctx.close();
+
+    // Brief 24 (Ergänzung 45): zweimal weggewischt ohne Wiedergabe sperrt 30 Tage. Der Moment kommt nach dem ersten Mal einmal wieder,
+    // nach dem zweiten Mal nicht mehr, und die Endseite zählt ihn nicht ("Audio, 0 new"). Nach 30 Tagen kommt er wieder. Frischer Zustand.
+    const ctx2 = await browser.newContext({ ...devices['iPhone 15'], serviceWorkers: 'block' });
+    await ctx2.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
+    await ctx2.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
+    const p2 = await ctx2.newPage();
+    const errors2 = [];
+    p2.on('pageerror', (e) => errors2.push(String(e)));
+    await p2.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBody2 }));
+    const endPage = () => !!document.querySelector('[data-testid=end-page]') && !document.querySelector('[data-testid=recall-card]');
+    /** Alle Momente des Reiters laufen im Zeitraffer durch, Abrufkarten werden beantwortet, bis die Endseite steht. Liefert die gezeigten IDs. */
+    const playThrough = async (pg) => {
+      const ids = [];
+      for (let guard = 0; guard < 300; guard++) {
+        const st = await pg.evaluate(() => ({ id: window.__core?.moment()?.id, card: !!document.querySelector('[data-testid=recall-card]'), end: !!document.querySelector('[data-testid=end-page]') }));
+        if (st.id && !ids.includes(st.id)) ids.push(st.id);
+        if (st.card) {
+          await pg.click('[data-testid=recall-option][data-correct="1"]');
+          await pg.click('[data-testid=recall-next]');
+          continue;
+        }
+        if (st.end && !st.card) return ids;
+        await pg.waitForTimeout(100);
+      }
+      return ids;
+    };
+    /** Text des Knopfs "Audio, N new" auf der Video-Endseite */
+    const audioButton = (pg) => pg.evaluate(() => document.querySelector('[data-testid=end-audio]')?.textContent ?? null);
+    /** Sobald der nächste Audio-Moment da ist, sofort weiter (ohne Wiedergabe). Liefert die ID. */
+    const swipeAtOnce = async (pg) => {
+      await pg.waitForFunction(() => {
+        const m = window.__core?.moment();
+        if (!m?.audio) return false;
+        window.__swiped = m.id;
+        window.__core.next();
+        return true;
+      }, undefined, { timeout: 15000 });
+      return pg.evaluate(() => window.__swiped);
+    };
+    const diagHas = (pg, line) => pg.evaluate((l) => window.__core.diag().some((x) => x === l), line);
+    await p2.goto(`${url}?now=2026-10-23&seed=3#k=${k}`);
+    c.b24FeedLoaded = await waitFor(p2, () => !!window.__core?.moment());
+    await playThrough(p2);
+    c.b24VideoEndFirst = (await audioButton(p2)) === `Audio, ${NA2} new`;
+    // Erstes Wegwischen: zählt, keine Sperre, der Moment bleibt ungesehen
+    await p2.click('[data-testid=end-audio]');
+    const a1 = await swipeAtOnce(p2);
+    r.b24Blocked = a1;
+    await p2.waitForTimeout(300);
+    c.b24FirstSkipLogged = await diagHas(p2, `skipped (not seen) ${a1}`);
+    c.b24FirstSkipNoBlock = !(await p2.evaluate(() => window.__core.diag().some((x) => /^skip: \S+ blocked 30 d/.test(x))));
+    const shown1 = await playThrough(p2);
+    c.b24OthersPlayed = shown1.filter((x) => x !== a1).length === NA2 - 1;
+    await p2.click('.head-tabs button:has-text("Video")', { timeout: 4000 });
+    c.b24UnseenAfterFirst = await waitFor(p2, () => document.querySelector('[data-testid=end-audio]')?.textContent === 'Audio, 1 new', undefined, 5000);
+    c.b24NotSeenAfterFirst = await p2.evaluate((id) => !window.__core.seen(id), a1);
+    await p2.waitForTimeout(1500); // Zustand wird verzögert gespeichert
+    // Zweite Sitzung: der Moment kommt einmal wieder, zweites Wegwischen sperrt 30 Tage
+    await p2.reload();
+    c.b24ReloadEnd = await waitFor(p2, endPage);
+    c.b24StartNoneBlocked = await diagHas(p2, 'skip: 0 blocked');
+    await p2.click('[data-testid=end-audio]');
+    const a1again = await swipeAtOnce(p2);
+    c.b24ComesBackOnce = a1again === a1;
+    c.b24BlockedLine = await waitFor(p2, (l) => window.__core.diag().some((x) => x === l), `skip: ${a1} blocked 30 d (2 skips)`, 3000);
+    r.b24Rejected = await p2.evaluate((id) => window.__core.rejected(id), a1);
+    await playThrough(p2);
+    await p2.click('.head-tabs button:has-text("Video")', { timeout: 4000 });
+    c.b24EndCountsNotBlocked = await waitFor(p2, () => document.querySelector('[data-testid=end-audio]')?.textContent === 'Audio, 0 new', undefined, 5000);
+    c.b24NotSeenAfterBlock = await p2.evaluate((id) => !window.__core.seen(id), a1);
+    await p2.screenshot({ path: `${out}/${name}-5-gesperrt.png` });
+    await p2.waitForTimeout(1500);
+    // Dritte Sitzung: der gesperrte Moment erscheint nicht mehr, Start meldet die Sperre
+    await p2.reload();
+    c.b24Reload2End = await waitFor(p2, endPage);
+    c.b24StartOneBlocked = await diagHas(p2, 'skip: 1 blocked');
+    c.b24Reload2Count = (await audioButton(p2)) === 'Audio, 0 new';
+    c.b24Reload2ButtonOff = await p2.evaluate(() => document.querySelector('[data-testid=end-audio]')?.disabled === true);
+    await p2.click('.head-tabs button:has-text("Audio")', { timeout: 4000 });
+    c.b24AudioEndAtOnce = await waitFor(p2, endPage, undefined, 5000);
+    c.b24BlockedNeverShown = await p2.evaluate((id) => window.__core.moment()?.id !== id && !window.__core.queue().includes(id), a1);
+    await p2.waitForTimeout(1500);
+    // 31 Tage später: die Sperre ist abgelaufen, der Moment kommt wieder und zählt wieder
+    await p2.goto(`${url}?now=2026-11-23&seed=3#k=${k}`);
+    c.b24ExpiredShown = await waitFor(p2, (id) => window.__core?.moment()?.id === id, a1);
+    c.b24ExpiredStartLine = await diagHas(p2, 'skip: 0 blocked');
+    c.b24NoPageErrors = errors2.length === 0;
+    if (errors2.length) r.errors2 = errors2.slice(0, 5);
+    await p2.screenshot({ path: `${out}/${name}-6-nach-30-tagen.png` });
+    await ctx2.close();
   } catch (e) {
     r.fatal = String(e);
     c.noFatal = false;
