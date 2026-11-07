@@ -1,5 +1,5 @@
 {
- "at": "2026-11-07T14:40:26.549Z",
+ "at": "2026-11-07T15:43:58.495Z",
  "url": "http://127.0.0.1:4188/core/",
  "model": "Nachbau der IFrame-API mit Latenzmodell, kein echtes YouTube",
  "swipes": 20,
@@ -7,1110 +7,6 @@
   {
    "name": "mobile-390x844-dwell4500",
    "dwellMs": 4500,
-   "checks": {
-    "feedLoaded": true,
-    "coldStartPlays": true,
-    "coldStartCurrentLoadsFirst": true,
-    "coldStartNoOverlay": true,
-    "secondSwipeUnder1s": true,
-    "secondSwipeNoReload": true,
-    "allSwipesPlayed": true,
-    "medianUnder1s": true,
-    "noReloadOnSwipe": true,
-    "noOverlayFirst3s": true,
-    "overlayWasMeasured": true,
-    "iframeIgnoresPointer": true,
-    "iframeVisiblePlaying": true,
-    "iframeHiddenWhilePaused": true,
-    "tapGoesToOurSurface": true,
-    "pauseOwnStill": true,
-    "pauseHookShown": true,
-    "pausePlayIcon": true,
-    "pauseNoYoutubeView": true,
-    "pauseOverlayMeasured": true,
-    "band16by9": true,
-    "noOverlayWhenPaused": true,
-    "iframeVisibleAfterResume": true,
-    "pageErrors": true
-   },
-   "ms": [
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0
-   ],
-   "appMs": [
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0
-   ],
-   "exposed": [
-    {
-     "n": 0,
-     "idx0": 0,
-     "idx1": 1,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 10,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 1,
-     "idx0": 1,
-     "idx1": 2,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 8,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 2,
-     "idx0": 2,
-     "idx1": 3,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 8,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 3,
-     "idx0": 3,
-     "idx1": 4,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 10,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 4,
-     "idx0": 4,
-     "idx1": 5,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 8,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 5,
-     "idx0": 5,
-     "idx1": 6,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 8,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 6,
-     "idx0": 6,
-     "idx1": 7,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 8,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 7,
-     "idx0": 7,
-     "idx1": 8,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 8,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 8,
-     "idx0": 8,
-     "idx1": 9,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 8,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 9,
-     "idx0": 9,
-     "idx1": 10,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 8,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 10,
-     "idx0": 10,
-     "idx1": 11,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 8,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 11,
-     "idx0": 11,
-     "idx1": 12,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 8,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 12,
-     "idx0": 12,
-     "idx1": 13,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 10,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 13,
-     "idx0": 13,
-     "idx1": 14,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 8,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 14,
-     "idx0": 14,
-     "idx1": 15,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 8,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 15,
-     "idx0": 15,
-     "idx1": 16,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 8,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 16,
-     "idx0": 16,
-     "idx1": 17,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 10,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 17,
-     "idx0": 17,
-     "idx1": 18,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 8,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 18,
-     "idx0": 18,
-     "idx1": 19,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 10,
-     "reloaded": false,
-     "ms": 0
-    },
-    {
-     "n": 19,
-     "idx0": 19,
-     "idx1": 20,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 8,
-     "reloaded": false,
-     "ms": 0
-    }
-   ],
-   "reloads": 0,
-   "log": {
-    "videoLines": [
-     "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
-     "video: cover on test0000027:100 3300 ms",
-     "first-frame 0ms buffered",
-     "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
-     "video: cover on test0000040:100 3300 ms",
-     "first-frame 0ms buffered",
-     "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
-     "video: cover on test0000053:100 3300 ms",
-     "first-frame 0ms buffered",
-     "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
-     "video: cover on test0000039:100 3300 ms",
-     "first-frame 0ms buffered",
-     "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
-     "video: median 0ms, p90 0ms over last 20 swipes"
-    ]
-   },
-   "firstLoads": [
-    "load test0000000 100-160"
-   ],
-   "coldStartProbes": [
-    {
-     "n": 0,
-     "checked": 2,
-     "by": []
-    },
-    {
-     "n": 0,
-     "checked": 2,
-     "by": []
-    },
-    {
-     "n": 0,
-     "checked": 2,
-     "by": []
-    },
-    {
-     "n": 0,
-     "checked": 2,
-     "by": []
-    },
-    {
-     "n": 0,
-     "checked": 2,
-     "by": []
-    }
-   ],
-   "video": {
-    "frames": [
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0,
-     0
-    ],
-    "gate": true,
-    "slots": [
-     {
-      "index": 21,
-      "mid": "test0000022:100",
-      "warm": "idle",
-      "st": 5,
-      "cover": "hidden"
-     },
-     {
-      "index": 22,
-      "mid": "test0000041:100",
-      "warm": "idle",
-      "st": 5,
-      "cover": "hidden"
-     },
-     {
-      "index": 20,
-      "mid": "test0000039:100",
-      "warm": "done",
-      "st": 1,
-      "cover": "visible"
-     }
-    ]
-   },
-   "median": 0,
-   "p90": 0,
-   "n": 20,
-   "appMedian": 0,
-   "appP90": 0,
-   "exposedSwipes": 0,
-   "probesChecked": 170,
-   "iframePaused": {
-    "vis": "hidden",
-    "tapTarget": "vgesture no-callout",
-    "held": true,
-    "paused": true
-   },
-   "pause": {
-    "poster": true,
-    "live": false,
-    "hook": true,
-    "play": true,
-    "exposed": 0,
-    "checked": 2,
-    "band": [
-     358,
-     201
-    ],
-    "left": 16,
-    "vw": 390
-   },
-   "noOverlay": {
-    "paused": true,
-    "poster": true,
-    "covers": true,
-    "exposed": 0,
-    "checked": 2,
-    "playAbove": true,
-    "w": 358,
-    "h": 201,
-    "x": 16,
-    "vw": 390
-   },
-   "iframeResumed": {
-    "vis": "visible",
-    "held": false,
-    "paused": false
-   },
-   "errors": []
-  },
-  {
-   "name": "desktop-1440x900-dwell4500",
-   "dwellMs": 4500,
-   "checks": {
-    "feedLoaded": true,
-    "coldStartPlays": true,
-    "coldStartCurrentLoadsFirst": true,
-    "coldStartNoOverlay": true,
-    "secondSwipeUnder1s": true,
-    "secondSwipeNoReload": true,
-    "allSwipesPlayed": true,
-    "medianUnder1s": true,
-    "noReloadOnSwipe": true,
-    "noOverlayFirst3s": true,
-    "overlayWasMeasured": true,
-    "iframeIgnoresPointer": true,
-    "iframeVisiblePlaying": true,
-    "iframeHiddenWhilePaused": true,
-    "tapGoesToOurSurface": true,
-    "pauseOwnStill": true,
-    "pauseHookShown": true,
-    "pausePlayIcon": true,
-    "pauseNoYoutubeView": true,
-    "pauseOverlayMeasured": true,
-    "band16by9": true,
-    "iframeVisibleAfterResume": true,
-    "pageErrors": true
-   },
-   "ms": [
-    44,
-    38,
-    54,
-    84,
-    86,
-    85,
-    71,
-    53,
-    69,
-    84,
-    56,
-    67,
-    97,
-    86,
-    48,
-    71,
-    69,
-    74,
-    72,
-    78
-   ],
-   "appMs": [
-    52,
-    49,
-    74,
-    87,
-    91,
-    99,
-    76,
-    59,
-    88,
-    87,
-    72,
-    75,
-    104,
-    95,
-    60,
-    75,
-    75,
-    91,
-    76,
-    88
-   ],
-   "exposed": [
-    {
-     "n": 0,
-     "idx0": 0,
-     "idx1": 1,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 0,
-     "reloaded": false,
-     "ms": 44
-    },
-    {
-     "n": 1,
-     "idx0": 1,
-     "idx1": 2,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 0,
-     "reloaded": false,
-     "ms": 38
-    },
-    {
-     "n": 2,
-     "idx0": 2,
-     "idx1": 3,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 2,
-     "reloaded": false,
-     "ms": 54
-    },
-    {
-     "n": 3,
-     "idx0": 3,
-     "idx1": 4,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 2,
-     "reloaded": false,
-     "ms": 84
-    },
-    {
-     "n": 4,
-     "idx0": 4,
-     "idx1": 5,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 2,
-     "reloaded": false,
-     "ms": 86
-    },
-    {
-     "n": 5,
-     "idx0": 5,
-     "idx1": 6,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 2,
-     "reloaded": false,
-     "ms": 85
-    },
-    {
-     "n": 6,
-     "idx0": 6,
-     "idx1": 7,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 2,
-     "reloaded": false,
-     "ms": 71
-    },
-    {
-     "n": 7,
-     "idx0": 7,
-     "idx1": 8,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 0,
-     "reloaded": false,
-     "ms": 53
-    },
-    {
-     "n": 8,
-     "idx0": 8,
-     "idx1": 9,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 2,
-     "reloaded": false,
-     "ms": 69
-    },
-    {
-     "n": 9,
-     "idx0": 9,
-     "idx1": 10,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 2,
-     "reloaded": false,
-     "ms": 84
-    },
-    {
-     "n": 10,
-     "idx0": 10,
-     "idx1": 11,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 2,
-     "reloaded": false,
-     "ms": 56
-    },
-    {
-     "n": 11,
-     "idx0": 11,
-     "idx1": 12,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 2,
-     "reloaded": false,
-     "ms": 67
-    },
-    {
-     "n": 12,
-     "idx0": 12,
-     "idx1": 13,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 2,
-     "reloaded": false,
-     "ms": 97
-    },
-    {
-     "n": 13,
-     "idx0": 13,
-     "idx1": 14,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 2,
-     "reloaded": false,
-     "ms": 86
-    },
-    {
-     "n": 14,
-     "idx0": 14,
-     "idx1": 15,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 0,
-     "reloaded": false,
-     "ms": 48
-    },
-    {
-     "n": 15,
-     "idx0": 15,
-     "idx1": 16,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 2,
-     "reloaded": false,
-     "ms": 71
-    },
-    {
-     "n": 16,
-     "idx0": 16,
-     "idx1": 17,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 2,
-     "reloaded": false,
-     "ms": 69
-    },
-    {
-     "n": 17,
-     "idx0": 17,
-     "idx1": 18,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 2,
-     "reloaded": false,
-     "ms": 74
-    },
-    {
-     "n": 18,
-     "idx0": 18,
-     "idx1": 19,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 2,
-     "reloaded": false,
-     "ms": 72
-    },
-    {
-     "n": 19,
-     "idx0": 19,
-     "idx1": 20,
-     "by": [],
-     "probes": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "checked": 2,
-     "reloaded": false,
-     "ms": 78
-    }
-   ],
-   "reloads": 0,
-   "log": {
-    "videoLines": [
-     "video: swipe→ready 0ms, →playing 75ms, net 4g, warm",
-     "video: warm done slot0 test0000040:100 played 3.6s net 4g",
-     "video: warm start slot1 test0000053:100 st=2",
-     "first-frame 91ms buffered",
-     "video: swipe→ready 0ms, →playing 91ms, net 4g, warm",
-     "video: warm done slot1 test0000053:100 played 3.8s net 4g",
-     "video: warm start slot2 test0000039:100 st=2",
-     "first-frame 76ms buffered",
-     "video: swipe→ready 0ms, →playing 76ms, net 4g, warm",
-     "video: warm done slot2 test0000039:100 played 4.1s net 4g",
-     "video: warm start slot0 test0000022:100 st=2",
-     "first-frame 88ms buffered",
-     "video: swipe→ready 0ms, →playing 88ms, net 4g, warm",
-     "video: median 76ms, p90 95ms over last 20 swipes"
-    ]
-   },
-   "firstLoads": [
-    "load test0000000 100-160",
-    "load test0000004 100-180"
-   ],
-   "coldStartProbes": [
-    {
-     "n": 0,
-     "checked": 2,
-     "by": []
-    },
-    {
-     "n": 0,
-     "checked": 2,
-     "by": []
-    },
-    {
-     "n": 0,
-     "checked": 2,
-     "by": []
-    },
-    {
-     "n": 0,
-     "checked": 2,
-     "by": []
-    },
-    {
-     "n": 0,
-     "checked": 2,
-     "by": []
-    }
-   ],
-   "video": {
-    "frames": [
-     52,
-     49,
-     74,
-     87,
-     91,
-     99,
-     76,
-     59,
-     88,
-     87,
-     72,
-     75,
-     104,
-     95,
-     60,
-     75,
-     75,
-     91,
-     76,
-     88
-    ],
-    "gate": true,
-    "slots": [
-     {
-      "index": 21,
-      "mid": "test0000022:100",
-      "warm": "running",
-      "st": 1,
-      "cover": "hidden"
-     },
-     {
-      "index": 22,
-      "mid": "test0000041:100",
-      "warm": "idle",
-      "st": 2,
-      "cover": "hidden"
-     },
-     {
-      "index": 20,
-      "mid": "test0000039:100",
-      "warm": "done",
-      "st": 1,
-      "cover": "hidden"
-     }
-    ]
-   },
-   "median": 71,
-   "p90": 86,
-   "n": 20,
-   "appMedian": 76,
-   "appP90": 95,
-   "exposedSwipes": 0,
-   "probesChecked": 32,
-   "iframePaused": {
-    "vis": "hidden",
-    "tapTarget": "vgesture no-callout",
-    "held": true,
-    "paused": false
-   },
-   "pause": {
-    "poster": true,
-    "live": false,
-    "hook": true,
-    "play": true,
-    "exposed": 0,
-    "checked": 2,
-    "band": [
-     1040,
-     585
-    ],
-    "left": 0,
-    "vw": 1440
-   },
-   "iframeResumed": {
-    "vis": "visible",
-    "held": false,
-    "paused": false
-   },
-   "errors": []
-  },
-  {
-   "name": "mobile-390x844-dwell1800",
-   "dwellMs": 1800,
    "checks": {
     "feedLoaded": true,
     "coldStartPlays": true,
@@ -1191,9 +87,1113 @@
       0,
       0,
       0,
+      0,
+      0,
       0
      ],
-     "checked": 4,
+     "checked": 10,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 1,
+     "idx0": 1,
+     "idx1": 2,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 8,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 2,
+     "idx0": 2,
+     "idx1": 3,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 8,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 3,
+     "idx0": 3,
+     "idx1": 4,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 10,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 4,
+     "idx0": 4,
+     "idx1": 5,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 8,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 5,
+     "idx0": 5,
+     "idx1": 6,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 8,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 6,
+     "idx0": 6,
+     "idx1": 7,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 10,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 7,
+     "idx0": 7,
+     "idx1": 8,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 10,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 8,
+     "idx0": 8,
+     "idx1": 9,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 8,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 9,
+     "idx0": 9,
+     "idx1": 10,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 10,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 10,
+     "idx0": 10,
+     "idx1": 11,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 8,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 11,
+     "idx0": 11,
+     "idx1": 12,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 8,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 12,
+     "idx0": 12,
+     "idx1": 13,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 8,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 13,
+     "idx0": 13,
+     "idx1": 14,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 10,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 14,
+     "idx0": 14,
+     "idx1": 15,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 10,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 15,
+     "idx0": 15,
+     "idx1": 16,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 10,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 16,
+     "idx0": 16,
+     "idx1": 17,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 10,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 17,
+     "idx0": 17,
+     "idx1": 18,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 10,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 18,
+     "idx0": 18,
+     "idx1": 19,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 8,
+     "reloaded": false,
+     "ms": 0
+    },
+    {
+     "n": 19,
+     "idx0": 19,
+     "idx1": 20,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 8,
+     "reloaded": false,
+     "ms": 0
+    }
+   ],
+   "reloads": 0,
+   "log": {
+    "videoLines": [
+     "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
+     "video: cover on test0000027:100 3300 ms",
+     "first-frame 0ms buffered",
+     "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
+     "video: cover on test0000040:100 3300 ms",
+     "first-frame 0ms buffered",
+     "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
+     "video: cover on test0000053:100 3300 ms",
+     "first-frame 0ms buffered",
+     "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
+     "video: cover on test0000039:100 3300 ms",
+     "first-frame 0ms buffered",
+     "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
+     "video: median 0ms, p90 0ms over last 20 swipes"
+    ]
+   },
+   "firstLoads": [
+    "load test0000000 100-160"
+   ],
+   "coldStartProbes": [
+    {
+     "n": 0,
+     "checked": 2,
+     "by": []
+    },
+    {
+     "n": 0,
+     "checked": 2,
+     "by": []
+    },
+    {
+     "n": 0,
+     "checked": 2,
+     "by": []
+    },
+    {
+     "n": 0,
+     "checked": 2,
+     "by": []
+    },
+    {
+     "n": 0,
+     "checked": 2,
+     "by": []
+    }
+   ],
+   "video": {
+    "frames": [
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "gate": true,
+    "slots": [
+     {
+      "index": 21,
+      "mid": "test0000022:100",
+      "warm": "idle",
+      "st": 5,
+      "cover": "hidden"
+     },
+     {
+      "index": 22,
+      "mid": "test0000041:100",
+      "warm": "idle",
+      "st": 5,
+      "cover": "hidden"
+     },
+     {
+      "index": 20,
+      "mid": "test0000039:100",
+      "warm": "done",
+      "st": 1,
+      "cover": "visible"
+     }
+    ]
+   },
+   "median": 0,
+   "p90": 0,
+   "n": 20,
+   "appMedian": 0,
+   "appP90": 0,
+   "exposedSwipes": 0,
+   "probesChecked": 180,
+   "iframePaused": {
+    "vis": "hidden",
+    "tapTarget": "vgesture no-callout",
+    "held": true,
+    "paused": true
+   },
+   "pause": {
+    "poster": true,
+    "live": false,
+    "hook": true,
+    "play": true,
+    "exposed": 0,
+    "checked": 2,
+    "band": [
+     358,
+     201
+    ],
+    "left": 16,
+    "vw": 390
+   },
+   "noOverlay": {
+    "paused": true,
+    "poster": true,
+    "covers": true,
+    "exposed": 0,
+    "checked": 2,
+    "playAbove": true,
+    "w": 358,
+    "h": 201,
+    "x": 16,
+    "vw": 390
+   },
+   "iframeResumed": {
+    "vis": "visible",
+    "held": false,
+    "paused": false
+   },
+   "errors": []
+  },
+  {
+   "name": "desktop-1440x900-dwell4500",
+   "dwellMs": 4500,
+   "checks": {
+    "feedLoaded": true,
+    "coldStartPlays": true,
+    "coldStartCurrentLoadsFirst": true,
+    "coldStartNoOverlay": true,
+    "secondSwipeUnder1s": true,
+    "secondSwipeNoReload": true,
+    "allSwipesPlayed": true,
+    "medianUnder1s": true,
+    "noReloadOnSwipe": true,
+    "noOverlayFirst3s": true,
+    "overlayWasMeasured": true,
+    "iframeIgnoresPointer": true,
+    "iframeVisiblePlaying": true,
+    "iframeHiddenWhilePaused": true,
+    "tapGoesToOurSurface": true,
+    "pauseOwnStill": true,
+    "pauseHookShown": true,
+    "pausePlayIcon": true,
+    "pauseNoYoutubeView": true,
+    "pauseOverlayMeasured": true,
+    "band16by9": true,
+    "iframeVisibleAfterResume": true,
+    "pageErrors": true
+   },
+   "ms": [
+    36,
+    37,
+    56,
+    84,
+    88,
+    87,
+    66,
+    66,
+    89,
+    76,
+    45,
+    64,
+    89,
+    73,
+    44,
+    71,
+    61,
+    77,
+    75,
+    78
+   ],
+   "appMs": [
+    50,
+    47,
+    76,
+    87,
+    97,
+    102,
+    83,
+    67,
+    96,
+    87,
+    63,
+    67,
+    100,
+    91,
+    65,
+    78,
+    73,
+    95,
+    80,
+    89
+   ],
+   "exposed": [
+    {
+     "n": 0,
+     "idx0": 0,
+     "idx1": 1,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 0,
+     "reloaded": false,
+     "ms": 36
+    },
+    {
+     "n": 1,
+     "idx0": 1,
+     "idx1": 2,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 0,
+     "reloaded": false,
+     "ms": 37
+    },
+    {
+     "n": 2,
+     "idx0": 2,
+     "idx1": 3,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 2,
+     "reloaded": false,
+     "ms": 56
+    },
+    {
+     "n": 3,
+     "idx0": 3,
+     "idx1": 4,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 2,
+     "reloaded": false,
+     "ms": 84
+    },
+    {
+     "n": 4,
+     "idx0": 4,
+     "idx1": 5,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 2,
+     "reloaded": false,
+     "ms": 88
+    },
+    {
+     "n": 5,
+     "idx0": 5,
+     "idx1": 6,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 2,
+     "reloaded": false,
+     "ms": 87
+    },
+    {
+     "n": 6,
+     "idx0": 6,
+     "idx1": 7,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 2,
+     "reloaded": false,
+     "ms": 66
+    },
+    {
+     "n": 7,
+     "idx0": 7,
+     "idx1": 8,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 0,
+     "reloaded": false,
+     "ms": 66
+    },
+    {
+     "n": 8,
+     "idx0": 8,
+     "idx1": 9,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 2,
+     "reloaded": false,
+     "ms": 89
+    },
+    {
+     "n": 9,
+     "idx0": 9,
+     "idx1": 10,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 2,
+     "reloaded": false,
+     "ms": 76
+    },
+    {
+     "n": 10,
+     "idx0": 10,
+     "idx1": 11,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 0,
+     "reloaded": false,
+     "ms": 45
+    },
+    {
+     "n": 11,
+     "idx0": 11,
+     "idx1": 12,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 0,
+     "reloaded": false,
+     "ms": 64
+    },
+    {
+     "n": 12,
+     "idx0": 12,
+     "idx1": 13,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 2,
+     "reloaded": false,
+     "ms": 89
+    },
+    {
+     "n": 13,
+     "idx0": 13,
+     "idx1": 14,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 2,
+     "reloaded": false,
+     "ms": 73
+    },
+    {
+     "n": 14,
+     "idx0": 14,
+     "idx1": 15,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 0,
+     "reloaded": false,
+     "ms": 44
+    },
+    {
+     "n": 15,
+     "idx0": 15,
+     "idx1": 16,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 2,
+     "reloaded": false,
+     "ms": 71
+    },
+    {
+     "n": 16,
+     "idx0": 16,
+     "idx1": 17,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 2,
+     "reloaded": false,
+     "ms": 61
+    },
+    {
+     "n": 17,
+     "idx0": 17,
+     "idx1": 18,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 2,
+     "reloaded": false,
+     "ms": 77
+    },
+    {
+     "n": 18,
+     "idx0": 18,
+     "idx1": 19,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 2,
+     "reloaded": false,
+     "ms": 75
+    },
+    {
+     "n": 19,
+     "idx0": 19,
+     "idx1": 20,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 2,
+     "reloaded": false,
+     "ms": 78
+    }
+   ],
+   "reloads": 0,
+   "log": {
+    "videoLines": [
+     "video: swipe→ready 0ms, →playing 73ms, net 4g, warm",
+     "video: warm done slot0 test0000040:100 played 3.6s net 4g",
+     "video: warm start slot1 test0000053:100 st=2",
+     "first-frame 95ms buffered",
+     "video: swipe→ready 0ms, →playing 95ms, net 4g, warm",
+     "video: warm done slot1 test0000053:100 played 3.8s net 4g",
+     "video: warm start slot2 test0000039:100 st=2",
+     "first-frame 79ms buffered",
+     "video: swipe→ready 0ms, →playing 80ms, net 4g, warm",
+     "video: warm done slot2 test0000039:100 played 4.1s net 4g",
+     "video: warm start slot0 test0000022:100 st=2",
+     "first-frame 89ms buffered",
+     "video: swipe→ready 0ms, →playing 89ms, net 4g, warm",
+     "video: median 80ms, p90 97ms over last 20 swipes"
+    ]
+   },
+   "firstLoads": [
+    "load test0000000 100-160",
+    "load test0000004 100-180"
+   ],
+   "coldStartProbes": [
+    {
+     "n": 0,
+     "checked": 2,
+     "by": []
+    },
+    {
+     "n": 0,
+     "checked": 2,
+     "by": []
+    },
+    {
+     "n": 0,
+     "checked": 2,
+     "by": []
+    },
+    {
+     "n": 0,
+     "checked": 2,
+     "by": []
+    },
+    {
+     "n": 0,
+     "checked": 2,
+     "by": []
+    }
+   ],
+   "video": {
+    "frames": [
+     50,
+     47,
+     76,
+     87,
+     97,
+     102,
+     83,
+     67,
+     96,
+     87,
+     63,
+     67,
+     100,
+     91,
+     65,
+     78,
+     73,
+     95,
+     80,
+     89
+    ],
+    "gate": true,
+    "slots": [
+     {
+      "index": 21,
+      "mid": "test0000022:100",
+      "warm": "running",
+      "st": 1,
+      "cover": "hidden"
+     },
+     {
+      "index": 22,
+      "mid": "test0000041:100",
+      "warm": "idle",
+      "st": 2,
+      "cover": "hidden"
+     },
+     {
+      "index": 20,
+      "mid": "test0000039:100",
+      "warm": "done",
+      "st": 1,
+      "cover": "hidden"
+     }
+    ]
+   },
+   "median": 71,
+   "p90": 88,
+   "n": 20,
+   "appMedian": 80,
+   "appP90": 97,
+   "exposedSwipes": 0,
+   "probesChecked": 28,
+   "iframePaused": {
+    "vis": "hidden",
+    "tapTarget": "vgesture no-callout",
+    "held": true,
+    "paused": false
+   },
+   "pause": {
+    "poster": true,
+    "live": false,
+    "hook": true,
+    "play": true,
+    "exposed": 0,
+    "checked": 2,
+    "band": [
+     1040,
+     585
+    ],
+    "left": 0,
+    "vw": 1440
+   },
+   "iframeResumed": {
+    "vis": "visible",
+    "held": false,
+    "paused": false
+   },
+   "errors": []
+  },
+  {
+   "name": "mobile-390x844-dwell1800",
+   "dwellMs": 1800,
+   "checks": {
+    "feedLoaded": true,
+    "coldStartPlays": true,
+    "coldStartCurrentLoadsFirst": true,
+    "coldStartNoOverlay": true,
+    "secondSwipeUnder1s": true,
+    "secondSwipeNoReload": true,
+    "allSwipesPlayed": true,
+    "medianUnder1s": true,
+    "noReloadOnSwipe": true,
+    "noOverlayFirst3s": true,
+    "overlayWasMeasured": true,
+    "iframeIgnoresPointer": true,
+    "iframeVisiblePlaying": true,
+    "iframeHiddenWhilePaused": true,
+    "tapGoesToOurSurface": true,
+    "pauseOwnStill": true,
+    "pauseHookShown": true,
+    "pausePlayIcon": true,
+    "pauseNoYoutubeView": true,
+    "pauseOverlayMeasured": true,
+    "band16by9": true,
+    "noOverlayWhenPaused": true,
+    "iframeVisibleAfterResume": true,
+    "pageErrors": true
+   },
+   "ms": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "appMs": [
+    0,
+    0,
+    1,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "exposed": [
+    {
+     "n": 0,
+     "idx0": 0,
+     "idx1": 1,
+     "by": [],
+     "probes": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "checked": 6,
      "reloaded": false,
      "ms": 0
     },
@@ -1208,7 +1208,7 @@
       0,
       0
      ],
-     "checked": 4,
+     "checked": 6,
      "reloaded": false,
      "ms": 0
     },
@@ -1223,7 +1223,7 @@
       0,
       0
      ],
-     "checked": 4,
+     "checked": 6,
      "reloaded": false,
      "ms": 0
     },
@@ -1238,7 +1238,7 @@
       0,
       0
      ],
-     "checked": 4,
+     "checked": 6,
      "reloaded": false,
      "ms": 0
     },
@@ -1253,7 +1253,7 @@
       0,
       0
      ],
-     "checked": 4,
+     "checked": 6,
      "reloaded": false,
      "ms": 0
     },
@@ -1298,7 +1298,7 @@
       0,
       0
      ],
-     "checked": 4,
+     "checked": 6,
      "reloaded": false,
      "ms": 0
     },
@@ -1313,7 +1313,7 @@
       0,
       0
      ],
-     "checked": 4,
+     "checked": 6,
      "reloaded": false,
      "ms": 0
     },
@@ -1328,7 +1328,7 @@
       0,
       0
      ],
-     "checked": 4,
+     "checked": 6,
      "reloaded": false,
      "ms": 0
     },
@@ -1418,7 +1418,7 @@
       0,
       0
      ],
-     "checked": 4,
+     "checked": 6,
      "reloaded": false,
      "ms": 0
     },
@@ -1534,11 +1534,11 @@
    ],
    "video": {
     "frames": [
+     0,
+     0,
      1,
      0,
-     0,
-     0,
-     0,
+     1,
      0,
      0,
      0,
@@ -1586,7 +1586,7 @@
    "appMedian": 0,
    "appP90": 0,
    "exposedSwipes": 0,
-   "probesChecked": 82,
+   "probesChecked": 100,
    "iframePaused": {
     "vis": "hidden",
     "tapTarget": "vgesture no-callout",
@@ -1655,48 +1655,48 @@
     "pageErrors": true
    },
    "ms": [
-    42,
-    40,
-    75,
-    91,
-    54,
-    38,
-    82,
-    44,
+    30,
     36,
+    59,
+    85,
+    52,
+    43,
+    74,
+    34,
+    33,
     92,
-    75,
-    73,
+    81,
+    69,
+    54,
+    84,
+    68,
     70,
-    97,
-    55,
-    83,
-    65,
-    70,
-    67,
-    40
+    66,
+    69,
+    64,
+    42
    ],
    "appMs": [
-    52,
-    51,
-    79,
-    99,
-    67,
-    55,
-    88,
-    52,
     47,
+    56,
+    79,
+    95,
+    59,
+    55,
+    91,
+    51,
+    52,
     99,
-    80,
-    85,
-    76,
-    104,
-    74,
     87,
+    80,
+    71,
+    106,
+    73,
+    83,
+    79,
     76,
-    76,
-    75,
-    52
+    73,
+    55
    ],
    "exposed": [
     {
@@ -1712,7 +1712,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 42
+     "ms": 30
     },
     {
      "n": 1,
@@ -1727,7 +1727,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 40
+     "ms": 36
     },
     {
      "n": 2,
@@ -1742,7 +1742,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 75
+     "ms": 59
     },
     {
      "n": 3,
@@ -1757,7 +1757,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 91
+     "ms": 85
     },
     {
      "n": 4,
@@ -1772,7 +1772,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 54
+     "ms": 52
     },
     {
      "n": 5,
@@ -1787,7 +1787,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 38
+     "ms": 43
     },
     {
      "n": 6,
@@ -1802,7 +1802,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 82
+     "ms": 74
     },
     {
      "n": 7,
@@ -1817,7 +1817,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 44
+     "ms": 34
     },
     {
      "n": 8,
@@ -1832,7 +1832,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 36
+     "ms": 33
     },
     {
      "n": 9,
@@ -1862,7 +1862,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 75
+     "ms": 81
     },
     {
      "n": 11,
@@ -1877,7 +1877,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 73
+     "ms": 69
     },
     {
      "n": 12,
@@ -1892,7 +1892,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 70
+     "ms": 54
     },
     {
      "n": 13,
@@ -1907,7 +1907,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 97
+     "ms": 84
     },
     {
      "n": 14,
@@ -1922,7 +1922,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 55
+     "ms": 68
     },
     {
      "n": 15,
@@ -1937,7 +1937,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 83
+     "ms": 70
     },
     {
      "n": 16,
@@ -1952,7 +1952,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 65
+     "ms": 66
     },
     {
      "n": 17,
@@ -1967,7 +1967,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 70
+     "ms": 69
     },
     {
      "n": 18,
@@ -1982,7 +1982,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 67
+     "ms": 64
     },
     {
      "n": 19,
@@ -1997,26 +1997,26 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 40
+     "ms": 42
     }
    ],
    "reloads": 0,
    "log": {
     "videoLines": [
-     "video: swipe→ready 0ms, →playing 76ms, net 4g, warming",
+     "video: swipe→ready 0ms, →playing 79ms, net 4g, warming",
      "video: warm start slot1 test0000029:100 st=2",
-     "video: cover on test0000043:100 1542 ms",
+     "video: cover on test0000043:100 1543 ms",
      "first-frame 76ms cold",
      "video: swipe→ready 0ms, →playing 76ms, net 4g, warming",
      "video: warm start slot2 test0000042:100 st=2",
-     "video: cover on test0000029:100 1555 ms",
-     "first-frame 75ms cold",
-     "video: swipe→ready 0ms, →playing 75ms, net 4g, warming",
+     "video: cover on test0000029:100 1551 ms",
+     "first-frame 73ms cold",
+     "video: swipe→ready 0ms, →playing 73ms, net 4g, warming",
      "video: warm start slot0 test0000016:100 st=2",
-     "video: cover on test0000042:100 1564 ms",
-     "first-frame 52ms cold",
-     "video: swipe→ready 0ms, →playing 52ms, net 4g, warming",
-     "video: median 76ms, p90 99ms over last 20 swipes"
+     "video: cover on test0000042:100 1560 ms",
+     "first-frame 55ms cold",
+     "video: swipe→ready 0ms, →playing 55ms, net 4g, warming",
+     "video: median 73ms, p90 95ms over last 20 swipes"
     ]
    },
    "firstLoads": [
@@ -2052,26 +2052,26 @@
    ],
    "video": {
     "frames": [
-     52,
-     51,
-     79,
-     99,
-     67,
-     55,
-     88,
-     52,
      47,
+     56,
+     79,
+     95,
+     59,
+     55,
+     91,
+     51,
+     52,
      99,
-     80,
-     85,
-     76,
-     104,
-     74,
      87,
+     80,
+     71,
+     106,
+     73,
+     83,
+     79,
      76,
-     76,
-     75,
-     52
+     73,
+     55
     ],
     "gate": true,
     "slots": [
@@ -2098,11 +2098,11 @@
      }
     ]
    },
-   "median": 67,
-   "p90": 91,
+   "median": 64,
+   "p90": 84,
    "n": 20,
-   "appMedian": 76,
-   "appP90": 99,
+   "appMedian": 73,
+   "appP90": 95,
    "exposedSwipes": 0,
    "probesChecked": 114,
    "iframePaused": {
@@ -2320,7 +2320,7 @@
      "slot0 test0000025:100 state 1",
      "yt: playing after gesture test0000025:100 734 ms",
      "slot0 test0000025:100 state 2",
-     "yt: self-pause test0000025:100 after 1507 ms (started in gesture)",
+     "yt: self-pause test0000025:100 after 1508 ms (started in gesture)",
      "yt: resume after self-pause test0000025:100",
      "yt: tap to play test0000025:100",
      "yt: play in gesture test0000025:100 (tap)",
@@ -2335,11 +2335,11 @@
     "slot0 test0000000:100 state 2",
     "yt: play in gesture test0000004:100",
     "yt: warm cue slot0 test0000013:100",
-    "yt: playing after gesture test0000004:100 990 ms",
+    "yt: playing after gesture test0000004:100 996 ms",
     "slot1 test0000004:100 state 2",
     "yt: play in gesture test0000026:100",
     "yt: warm cue slot1 test0000032:100",
-    "yt: playing after gesture test0000026:100 645 ms",
+    "yt: playing after gesture test0000026:100 642 ms",
     "slot2 test0000026:100 state 2",
     "yt: play in gesture test0000013:100",
     "yt: warm cue slot2 test0000009:100",
@@ -2347,7 +2347,7 @@
     "slot0 test0000013:100 state 2",
     "yt: play in gesture test0000032:100",
     "yt: warm cue slot0 test0000025:100",
-    "yt: playing after gesture test0000032:100 911 ms",
+    "yt: playing after gesture test0000032:100 908 ms",
     "slot1 test0000032:100 state 2",
     "yt: play in gesture test0000009:100",
     "yt: warm cue slot1 test0000056:100",
@@ -2358,7 +2358,7 @@
     "yt: warm cue slot2 test0000042:100",
     "yt: playing after gesture test0000025:100 734 ms",
     "slot0 test0000025:100 state 2",
-    "yt: self-pause test0000025:100 after 1507 ms (started in gesture)",
+    "yt: self-pause test0000025:100 after 1508 ms (started in gesture)",
     "yt: resume after self-pause test0000025:100",
     "yt: tap to play test0000025:100",
     "yt: play in gesture test0000025:100 (tap)",
