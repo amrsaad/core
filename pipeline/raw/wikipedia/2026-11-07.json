@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-07",
+ "records": [
+  {
+   "sourceId": "wiki:de:Georg Wernher",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Georg_Wernher",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/07",
+    "status": 200
+   },
+   "title": "Georg Wernher",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Georg Wernher, auch Georg Werner war ein ungarischer Renaissance-Humanist, Schulrektor, Ratsherr, Burgpräfekt, Statthalter, Finanzbeamter, Diplomat, lateinisch-altgriechischer Dichter und Wasser- und Heilwasserbeschreiber schlesischer Herkunft."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-07T04:04:11.839Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Georg_Wernher": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Leonard Cohen",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Leonard_Cohen",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/07",
+    "status": 200
+   },
+   "title": "Leonard Cohen",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Leonard Norman Cohen [lɛnərd ˈnɔː(r)mən ˈkoʊən] CC, GOQ war ein kanadischer Singer-Songwriter, Schriftsteller, Dichter und Maler."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-07T04:04:11.839Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Leonard_Cohen": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Air-France-Flug 4590",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Air-France-Flug_4590",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/07",
+    "status": 200
+   },
+   "title": "Air-France-Flug 4590",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Auf dem Flug 4590 der Air France verunglückte am 25. Juli 2000 bei Gonesse eine vollbesetzte Concorde kurz nach dem Start vom Flughafen Paris-Charles de Gaulle. Alle 109 Insassen sowie vier Personen am Boden kamen ums Leben, eine weitere Person am Boden wurde schwer verletzt. Es war der einzige Absturz einer Concorde."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-07T04:04:11.839Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Air-France-Flug_4590": 200
+   }
+  }
+ ]
+}
