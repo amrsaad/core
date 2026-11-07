@@ -66,6 +66,18 @@ declare global {
 
 export const STATE = { UNSTARTED: -1, ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 } as const;
 
+/**
+ * iPhone und iPad (iPadOS meldet sich als Mac mit Touch). Brief 23 (Issue 48): WebKit auf iOS hält ein stumm gestartetes Video an, sobald
+ * es ohne Nutzergeste laut geschaltet wird, und spielt ein lautes Video ohne Geste gar nicht. Die Geste kommt über postMessage nur mit,
+ * wenn der Befehl synchron im Handler der Berührung abgeht. Der Feed wärmt YouTube-Momente darum auf iOS nicht stumm vor (nur cue) und
+ * startet sie im Wisch-Handler. Playwright-Profile mit iPhone-Kennung zählen mit, damit die E2E-Läufe diesen Weg prüfen.
+ */
+let iosCached: boolean | null = null;
+export const isIOS = (): boolean => {
+  if (iosCached === null) iosCached = typeof navigator !== 'undefined' && (/iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+  return iosCached;
+};
+
 /** Vorgaben aus dem Auftrag, unverändert */
 export const PLAYER_VARS = { playsinline: 1, controls: 0, rel: 0, modestbranding: 1, iv_load_policy: 3, fs: 0, disablekb: 1, mute: 1, autoplay: 0, cc_load_policy: 0 };
 

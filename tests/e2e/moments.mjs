@@ -717,15 +717,22 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // vorgeladenen Nachbarn. Das Vorschaubild muss sichtbar sein, ohne Zoom (16:9 in Bildschirmbreite) und über dem ganzen Bildbereich des IFrames.
     // Nur bei PLAYING des aktuellen Moments ist der IFrame sichtbar.
     await skipRecall(page, name, out);
+    // Echtzeit statt Zeitraffer: im Zeitraffer endet der aktuelle Moment während der erzwungenen Zustände, der Feed blättert weiter und eine Abrufkarte
+    // hält jedes PLAYING an (Brief 23: so gesehen in WebKit, cur:poster bei PLAYING). Ein frischer Moment, damit keiner kurz vor seinem Ende steht.
+    await page.evaluate(() => { window.__ytSlow = true; window.__core.next(); });
+    await page.waitForTimeout(600);
+    await skipRecall(page, name, out);
     // Nur YouTube-Momente haben einen IFrame unter dem Vorschaubild: zu einer Stelle blättern, an der der aktuelle Moment und beide Nachbarn YouTube sind
     for (let k = 0; k < 40; k++) {
-      const ok = await page.evaluate(() => { const sl = [...document.querySelectorAll('.vslot')].filter((x) => x.querySelector('.vframe')); return !window.__core.forYou() && sl.length >= 3 && sl.every((x) => !!x.querySelector('.vposter') && !x.querySelector('.vaudio')); });
+      // Keine Abrufkarte und keine For-you-Karte: über einer Karte hält der Feed jedes PLAYING an, die erzwungenen Zustände unten wären dann nicht aussagekräftig
+      const ok = await page.evaluate(() => { const sl = [...document.querySelectorAll('.vslot')].filter((x) => x.querySelector('.vframe')); return !window.__core.forYou() && !document.querySelector('[data-testid=recall-card]') && sl.length >= 3 && sl.every((x) => !!x.querySelector('.vposter') && !x.querySelector('.vaudio')); });
       if (ok) break;
       await page.evaluate(() => window.__core.next());
-      await page.waitForTimeout(250);
+      await page.waitForTimeout(500);
       await skipRecall(page, name, out);
     }
     await page.waitForTimeout(400);
+    await skipRecall(page, name, out);
     const poster = (st) => page.evaluate(() => [...document.querySelectorAll('.vslot')].map((sl) => {
       const p = sl.querySelector('.vposter'); const host = sl.querySelector('.vframe > div'); const pr = p?.getBoundingClientRect(); const hr = host?.getBoundingClientRect();
       const vis = !!p && getComputedStyle(p).visibility !== 'hidden' && getComputedStyle(p).display !== 'none' && +getComputedStyle(p).opacity > 0;
@@ -780,6 +787,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     });
     c.posterDropsSynchronously = !!sync && Object.values(sync).every((x) => x.vorher === true && x.nachherSofort === false);
     r.posterSync = sync;
+    await page.evaluate(() => { window.__ytSlow = false; });
     await page.waitForTimeout(300);
     await page.screenshot({ path: `${out}/${name}-3-nach-ende.png` });
 
