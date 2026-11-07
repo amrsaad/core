@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 import { execSync } from 'node:child_process';
+import { existsSync, mkdirSync, renameSync } from 'node:fs';
 import pkg from './package.json';
 
 // Kurzer Commit für die Rückmeldung (GITHUB_SHA in der CI, sonst git, sonst dev)
@@ -19,7 +20,8 @@ const ICON_DIR = PREVIEW ? 'preview/' : '';
 
 export default defineConfig({
   base: BASE,
-  build: { outDir: PREVIEW ? 'dist/preview' : 'dist' },
+  // Zweiter Eingang (Brief 05): clip.html wird zu <outDir>/clip/index.html, damit <BASE>clip/ auf GitHub Pages wie in vite preview ohne Weiterleitung läuft
+  build: { outDir: PREVIEW ? 'dist/preview' : 'dist', rollupOptions: { input: { main: 'index.html', clip: 'clip.html' } } },
   define: { __APP_VERSION__: JSON.stringify(`${pkg.version}`), __APP_COMMIT__: JSON.stringify(commit) },
   plugins: [
     react(),
@@ -32,6 +34,17 @@ export default defineConfig({
           .replace(/(rel="apple-touch-icon" href="[^"]*?)apple-touch-icon\.png"/, `$1${ICON_DIR}apple-touch-icon.png"`)
           .replace('content="core" />', 'content="preview" />')
           .replace('<title>core</title>', '<title>core preview</title>');
+      },
+    },
+    {
+      // Die Clip-Seite liegt als Ordner mit index.html, so braucht der Link keine Endung und der Precache kennt den Pfad.
+      // Läuft vor dem Service-Worker-Schritt von VitePWA (closeBundle in Reihenfolge der Plugins), damit der Precache den Ordner sieht.
+      name: 'core-clip-dir',
+      closeBundle() {
+        const dir = PREVIEW ? 'dist/preview' : 'dist';
+        if (!existsSync(`${dir}/clip.html`)) return;
+        mkdirSync(`${dir}/clip`, { recursive: true });
+        renameSync(`${dir}/clip.html`, `${dir}/clip/index.html`);
       },
     },
     VitePWA({
@@ -60,7 +73,8 @@ export default defineConfig({
         globIgnores: PREVIEW ? [] : ['preview/**'],
         navigateFallback: `${BASE}index.html`,
         // Hauptkanal: der Service-Worker unter /core/ sieht auch Aufrufe von /core/preview/. Ohne Ausnahme lieferte er dort die echte App aus.
-        navigateFallbackDenylist: PREVIEW ? [] : [/^\/core\/preview\//],
+        // Die Clip-Seite ist eine eigene Seite, die App darf sie nicht ersetzen
+        navigateFallbackDenylist: [...(PREVIEW ? [] : [/^\/core\/preview\//]), new RegExp(`^${BASE.replace(/\//g, '\\/')}clip\\/`)],
         runtimeCaching: [
           {
             // index.json zuerst aus dem Netz, damit neue Karten erscheinen

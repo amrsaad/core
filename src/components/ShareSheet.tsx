@@ -1,5 +1,6 @@
 import { Icon } from './Icon';
 import { Sheet } from './Sheet';
+import { shortLink } from '../share/link';
 
 export interface ShareInfo {
   hook: string;
@@ -20,8 +21,9 @@ export function ShareSheet({ info, onShare, onCopy, onClose }: { info: ShareInfo
           <small>{info.channel}</small>
         </h2>
         <p className="share-hook">{info.hook}</p>
-        <p className="share-url" data-testid="share-url">
-          {info.url ?? 'The link appears here once sharing is on.'}
+        {/* Der Hash trägt den ganzen Moment, darum steht hier nur der Anfang, der volle Link in data-url (Brief 05) */}
+        <p className="share-url" data-testid="share-url" data-url={info.url} title={info.url}>
+          {info.url ? shortLink(info.url) : 'The link appears here once sharing is on.'}
         </p>
         <div className="note-chips">
           <button type="button" className="note-chip" disabled={!onShare} onClick={onShare} data-testid="share-system">

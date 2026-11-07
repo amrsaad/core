@@ -60,6 +60,8 @@ import { focusTabText } from '../components/head';
 import { statusOf } from '../components/status';
 import { Ambient } from './Ambient';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
+import { ShareSheet } from '../components/ShareSheet';
+import { shareOf } from '../share/link';
 
 /** Desktop-Modus ab 1181 px: Panel rechts, Übersicht, Seitenblatt. Fehlt das Feld, gilt das mobile Verhalten unverändert. */
 export interface DeskProps {
@@ -349,6 +351,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const promptChecked = useRef(false);
   const noteRef = useRef<Moment | null>(null);
   noteRef.current = note;
+  /** Share-Blatt (Brief 05): der Moment, dessen Text und Link gerade geteilt werden */
+  const [share, setShare] = useState<Moment | null>(null);
   /** Bestätigungszeile am Blatt nach einem Chip, solange sie steht */
   const [confirmText, setConfirm] = useState<string | null>(null);
   /** Sprecher, dessen Mute rückgängig gemacht werden kann, solange die Bestätigungszeile steht */
@@ -2285,6 +2289,40 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     confirmTimer.current = window.setTimeout(done, CONFIRM_SHEET_MS);
   };
 
+  /**
+   * Share (Brief 05, Entscheidung 27): ein Tipp öffnet das Blatt mit Hook, Kanal und Link, der zweite ruft das Teilen des Systems.
+   * Text in der Sprache des Tracks, Link zur öffentlichen Clip-Seite unter dem Basis-Pfad dieser App (Vorschau bleibt Vorschau). Ohne navigator.share: Zwischenablage mit Toast "Copied".
+   */
+  const openShare = () => {
+    const m = queue.current[idxRef.current];
+    if (!m || forYouRef.current || recallRef.current || noteRef.current) return;
+    if (!shareOf(m, location.origin, import.meta.env.BASE_URL)) return show('Nothing to share');
+    navigator.vibrate?.(10);
+    setShare(m);
+  };
+  const shareBundle = share ? shareOf(share, location.origin, import.meta.env.BASE_URL) : null;
+  const copyShare = async () => {
+    if (!shareBundle) return;
+    try {
+      await navigator.clipboard.writeText(`${shareBundle.text}\n\n${shareBundle.url}`);
+      show('Copied');
+      setShare(null);
+    } catch {
+      show('Copy failed');
+    }
+  };
+  const systemShare = async () => {
+    if (!shareBundle) return;
+    if (typeof navigator.share !== 'function') return copyShare();
+    try {
+      await navigator.share({ title: shareBundle.title, text: shareBundle.text, url: shareBundle.url });
+      setShare(null);
+    } catch (e) {
+      // Abbruch durch den Nutzer ist kein Fehler, alles andere fällt auf die Zwischenablage zurück
+      if ((e as { name?: string })?.name !== 'AbortError') await copyShare();
+    }
+  };
+
   /** Blatt schließen (Tipp daneben, Esc): während die Bestätigung steht, geht der Feed trotzdem weiter */
   const cancelNote = () => {
     if (confirmRef.current) confirmDone.current();
@@ -3419,7 +3457,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
               der Wisch nach links gehört seit Brief 16 dem Reiterwechsel. Herz heißt Like, damit More eindeutig das Blatt meint. */}
           <ActionButton testid="like" label="Like" icon="heart" on={liked} onClick={(e) => { const t0 = e.timeStamp; like('button'); recordTap(t0); }} />
           <ActionButton testid="save" label="Save" icon="bookmark-simple" on={saved} onClick={(e) => { const t0 = e.timeStamp; toggleSave(); recordTap(t0); }} />
-          <ActionButton testid="share" label="Share" icon="export" disabled onClick={() => {}} />
+          <ActionButton testid="share" label="Share" icon="export" on={!!share} fill={false} onClick={(e) => { const t0 = e.timeStamp; openShare(); recordTap(t0); }} />
           {m && fullVideoUrl(m) && <ActionButton testid="source" label="Source" icon="arrow-square-out" on={pulse === 'source'} fill={false} onClick={openFull} />}
           <ActionButton testid="more" label="More" aria="More options" icon="dots-three-circle" fill={false} onClick={() => openNote()} />
         </div>
@@ -3489,6 +3527,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         </button>
       )}
 
+      {share && shareBundle && <ShareSheet info={{ hook: share.hook, channel: share.channel, url: shareBundle.url }} onShare={() => void systemShare()} onCopy={() => void copyShare()} onClose={() => setShare(null)} />}
       {focusSheet && <FocusSheet current={focus} now={clockNow().getTime()} onClose={() => setFocusSheet(false)} />}
       {note && <NoteSheet key={note.id} m={note} speaker={speakerLine(note.channel)} onChip={(c, t) => saveNote(note, c, t)} onInput={(c, v) => saveInput(note, c, v)} onDone={(t) => saveNote(note, null, t)} onAsk={() => ask(note)} onCancel={cancelNote} confirm={confirmText} onUndo={undoChannel ? undoMute : null} keys={!!desk} ctl={noteCtl} />}
     </div>
