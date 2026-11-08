@@ -1,5 +1,5 @@
 {
- "at": "2026-11-07T16:44:12.117Z",
+ "at": "2026-11-08T04:07:17.155Z",
  "runs": [
   {
    "browser": "webkit",
@@ -99,7 +99,7 @@
     "tempoWaiting": 0,
     "tempoPaused": 10,
     "cue": {
-     "worst": 1,
+     "worst": 0,
      "n": 623,
      "shownLate": 0,
      "shownNow": 0,
@@ -110,22 +110,22 @@
        34
       ],
       [
-       "4.64",
+       "4.63",
        47,
        47
       ],
       [
-       "5.93",
+       "5.92",
        60,
        60
       ],
       [
-       "7.21",
+       "7.20",
        73,
        73
       ],
       [
-       "8.50",
+       "8.49",
        85,
        85
       ],
@@ -135,12 +135,12 @@
        98
       ],
       [
-       "11.07",
+       "11.06",
        111,
        111
       ],
       [
-       "12.36",
+       "12.35",
        124,
        124
       ],
@@ -150,26 +150,26 @@
        137
       ],
       [
-       "14.93",
+       "14.92",
        150,
        150
       ],
       [
-       "16.22",
+       "16.21",
        163,
        163
       ],
       [
-       "17.50",
-       176,
-       176
+       "17.49",
+       175,
+       175
       ]
      ],
      "rate": 2
     },
     "cueTempo": {
      "worst": 0,
-     "n": 549,
+     "n": 548,
      "rates": [
       1,
       1.5,
@@ -181,7 +181,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805066
+       "dueAt": 1792756805043
       }
      ],
      "idx": 6,
@@ -391,7 +391,7 @@
      "rate": 2
     },
     "cueTempo": {
-     "worst": 1,
+     "worst": 0,
      "n": 541,
      "rates": [
       1,
@@ -404,7 +404,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804926
+       "dueAt": 1792756804924
       }
      ],
      "idx": 6,
@@ -491,7 +491,7 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "firstSoundMs": 2798,
+    "firstSoundMs": 2796,
     "diag": [
      "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
      "deck: src net pod-0006",
@@ -530,7 +530,7 @@
      "want": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
      "id": "pod-0013:82"
     },
-    "lockNextMs": 16,
+    "lockNextMs": 26,
     "lockNextLines": [
      "deck: swap pod-0013 ready=true pool=3",
      "deck play#4 swap rs=4 muted=false t=82.0",
