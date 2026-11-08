@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-08",
+ "records": [
+  {
+   "sourceId": "wiki:de:Ernie Irvan",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Ernie_Irvan",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/08",
+    "status": 200
+   },
+   "title": "Ernie Irvan",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Virgil Earnest Irvan ist ein ehemaliger US-amerikanischer Automobilrennfahrer, der bei NASCAR-Rennen aktiv war. Er ging im NASCAR Winston Cup in über 300 Rennen an den Start und gehörte in den 1990er Jahren zu den Titelfavoriten. Im Jahre 1994 erlitt er jedoch beim Training auf dem Michigan International Speedway eine schwere Kopfverletzung, welche ihm nur eine geringe Überlebenschance ließ, woraufhin er über ein Jahr lang pausieren musste. Dennoch gelang ihm sein Comeback und er fuhr noch bis 1999 Rennen."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-08T04:05:22.363Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Ernie_Irvan": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Led Zeppelin IV",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Led_Zeppelin_IV",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/08",
+    "status": 200
+   },
+   "title": "Led Zeppelin IV",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Led Zeppelin IV ist das vierte Studioalbum der britischen Rockband Led Zeppelin aus dem Jahr 1971. Das Album wird oft einfach als Led Zeppelin IV bezeichnet, hat offiziell jedoch keinen Namen. Wegen der vier Symbole auf der Innenseite des Plattencovers wird es gelegentlich auch Four Symbols, Untitled oder ZoSo. Led Zeppelin IV avancierte nicht nur zum Nummer-eins-Album, sondern zählt mit seinen 37 Millionen verkauften Einheiten zu den weltweit meistverkauften Musikalben."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-08T04:05:22.363Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Led_Zeppelin_IV": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Eisenbahnunfall von Walpertskirchen",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Eisenbahnunfall_von_Walpertskirchen",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/08",
+    "status": 200
+   },
+   "title": "Eisenbahnunfall von Walpertskirchen",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Bei dem Eisenbahnunfall von Walpertskirchen fuhr am frühen Morgen des 8. November 1951 ein Personenzug frontal auf einen Nahgüterzug auf. 16 Menschen starben, 41 weitere wurden verletzt."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-08T04:05:22.363Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Eisenbahnunfall_von_Walpertskirchen": 200
+   }
+  }
+ ]
+}
