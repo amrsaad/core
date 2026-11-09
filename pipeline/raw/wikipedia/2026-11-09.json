@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-09",
+ "records": [
+  {
+   "sourceId": "wiki:de:Blindmaulwurf",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Blindmaulwurf",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/09",
+    "status": 200
+   },
+   "title": "Blindmaulwurf",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Der Blindmaulwurf ist eine Säugetierart aus der Familie der Maulwürfe (Talpidae) innerhalb der Ordnung der Insektenfresser (Eulipotyphla). Er kommt im südlichen Europa vor, wo er in zwei räumlich nicht zusammenhängenden (disjunkten) Gebieten auftritt: einerseits im südwestlichen Teil der Alpen und im Apennin, andererseits auf der westlichen Balkanhalbinsel. Äußerlich ähnelt der Blindmaulwurf dem Europäischen Maulwurf. Allerdings ist er deutlich kleiner als sein bekannterer Verwandter, zudem bleiben seine Augen als markantes Unterscheidungsmerkmal unter der Haut verborgen. Die Tiere leben vorwiegend in Gebirgsregionen. Dort nutzen sie verschiedene Wälder und Wiesenlandschaften als Habitate, die auf sandigen oder lehmigen Böden wachsen. Sie graben Gänge und Tunnel und ernähren sich zumeist von Regenwürmern. Die Art wurde bereits 1822 wissenschaftlich eingeführt. Teilweise schloss sie im weiteren Verlauf der Forschungsgeschichte auch andere Maulwurfsvertreter des westlichen Eurasiens ein. Ihr Bestand gilt als nicht gefährdet."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-09T04:05:09.713Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Blindmaulwurf": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Novemberpogrome 1938",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Novemberpogrome_1938",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/09",
+    "status": 200
+   },
+   "title": "Novemberpogrome 1938",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Der Begriff Novemberpogrome 1938 bezieht sich hauptsächlich auf die Nacht vom 9. auf den 10. November 1938, die ursprünglich Reichskristallnacht oder Kristallnacht genannt wurde. Jahrzehnte später wird vorwiegend der Ausdruck Reichspogromnacht verwendet. Diese Pogrome waren vom nationalsozialistischen Regime organisierte und gelenkte Gewaltmaßnahmen gegen Juden im Deutschen Reich."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-09T04:05:09.713Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Novemberpogrome_1938": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Rosina Lhévinne",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Rosina_Lh%C3%A9vinne",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/09",
+    "status": 200
+   },
+   "title": "Rosina Lhévinne",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Rosina Lhévinne war eine russisch-US-amerikanische Pianistin und Musikpädagogin sowie die Ehefrau des Pianisten Josef Lhévinne. Lhévinne gilt als eine der herausragenden Klavierpädagogen des 20. Jahrhunderts."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-09T04:05:09.713Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Rosina_Lh%C3%A9vinne": 200
+   }
+  }
+ ]
+}
