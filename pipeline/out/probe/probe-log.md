@@ -10,3 +10,4 @@ Eine Zeile pro Lauf (täglich 04:00 UTC, .github/workflows/probe.yml). Erstes Bi
 | 2026-11-06 | 11:44:57 | 295 | ok | 40 | FEHLER errors 40: console Error: <svg> attribute width: Expected length, "var(--rail-icon)". | actions |
 | 2026-11-07 | 10:51:53 | 659 | ok | 40 | FEHLER errors 40: console Error: <svg> attribute width: Expected length, "var(--rail-icon)". | actions |
 | 2026-11-08 | 11:00:22 | 342 | ok | 40 | FEHLER errors 40: console Error: <svg> attribute width: Expected length, "var(--rail-icon)". | actions |
+| 2026-11-09 | 12:28:30 | 325 | ok | 40 | FEHLER errors 40: console Error: <svg> attribute width: Expected length, "var(--rail-icon)". | actions |
