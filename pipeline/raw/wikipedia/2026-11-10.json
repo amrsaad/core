@@ -1,0 +1,75 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-10",
+ "records": [
+  {
+   "sourceId": "wiki:de:U-Bahn-Strecke B (Frankfurt am Main)",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/U-Bahn-Strecke_B_(Frankfurt_am_Main)",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/10",
+    "status": 200
+   },
+   "title": "U-Bahn-Strecke B (Frankfurt am Main)",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die U-Bahn-Strecke B oder B-Strecke ist die zweite Strecke im Netz der U-Bahn Frankfurt. Sie führt in Ost-West-Richtung vom Hauptbahnhof über die Altstadt zur Konstablerwache, wo sie sich in zwei Äste nach Bornheim und Preungesheim aufspaltet. Die ursprünglich als eigenständige Grundstrecke geplante D-Strecke stellt ab dem Hauptbahnhof eine Verlängerung der U4 zur Bockenheimer Warte dar."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-10T04:09:21.375Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/U-Bahn-Strecke_B_(Frankfurt_am_Main)": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Filipina Brzezińska",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Filipina_Brzezi%C5%84ska",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/10",
+    "status": 200
+   },
+   "title": "Filipina Brzezińska",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Filipina Brzezińska war eine polnische Komponistin und Pianistin."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-10T04:09:21.375Z"
+  },
+  {
+   "sourceId": "wiki:de:Henry Morton Stanley",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Henry_Morton_Stanley",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/10",
+    "status": 200
+   },
+   "title": "Henry Morton Stanley",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Sir Henry Morton Stanley, auch Bula Matari, war ein britisch-amerikanischer Journalist, Afrikaforscher und Buchautor. Er wurde bekannt durch die Suche nach David Livingstone und die Kolonialisierung des Kongo im Auftrag des belgischen Königs Leopold II. Stanleys Literaturagent war G. W. Appleton."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-10T04:09:21.375Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Henry_Morton_Stanley": 200
+   }
+  }
+ ]
+}
