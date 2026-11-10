@@ -36,6 +36,7 @@ const SUITES = [
   { id: 'recallqueue', port: 4185, script: 'recallqueue', min: 8, browsers: ['WebKit', 'Chromium'], title: 'Abrufkarten-Warteschlange' },
   { id: 'audiotab', port: 4187, script: 'audiotab', min: 12, browsers: ['WebKit', 'Chromium'], title: 'Audio-Reiter' },
   { id: 'video4g', port: 4188, script: 'video4g', min: 15, browsers: ['Chromium'], env: { E2E_BROWSERS: 'chromium' }, title: 'Video-Start unter 4G' },
+  { id: 'share', port: 4190, script: 'share', min: 10, browsers: ['WebKit', 'Chromium'], title: 'Share und Clip-Seite' },
   { id: 'layout', port: 4189, script: 'layout', min: 45, browsers: ['Chromium', 'WebKit'], extra: ['run'], title: 'Layout-Gate' },
 ];
 

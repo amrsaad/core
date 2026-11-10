@@ -159,10 +159,10 @@ jobs:
           - group: 3
             dirs: pipeline/out/e2e-loudness pipeline/out/e2e-offline pipeline/out/e2e-tempo pipeline/out/e2e-tempoperf
           - group: 4
-            dirs: pipeline/out/e2e-recallqueue pipeline/out/e2e-audiotab pipeline/out/e2e-video4g pipeline/out/e2e-layout/run/results.json
+            dirs: pipeline/out/e2e-recallqueue pipeline/out/e2e-audiotab pipeline/out/e2e-video4g pipeline/out/e2e-share pipeline/out/e2e-layout/run/results.json
     runs-on: ubuntu-latest
     # Je Gruppe die Summe ihrer Schritt-Zeitlimits (Gruppe 4 mit dem Layout-Gate ist die längste)
-    timeout-minutes: 90
+    timeout-minutes: 100
     # Offizielles Image: Browser und Systempakete sind vorinstalliert (apt-Installation hing im Runner)
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
@@ -285,6 +285,13 @@ jobs:
           npx vite preview --host 127.0.0.1 --port 4188 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4188/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           E2E_BROWSERS=chromium node tests/e2e/video4g.mjs http://127.0.0.1:4188/core/ pipeline/out/e2e-video4g
+      - name: Share und Clip-Seite testen (Brief 05, Entscheidung 27, Issue 21; Share-Blatt, Link, Copied, Clip-Seite mit Audio, YouTube, Text, Arabisch rechtsläufig, kaputter Hash; WebKit und Chromium)
+        if: always() && matrix.group == 4
+        timeout-minutes: 10
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4190 --strictPort &
+          node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4190/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
+          node tests/e2e/share.mjs http://127.0.0.1:4190/core/ pipeline/out/e2e-share
       - name: Layout-Gate (Entscheidung 43, Brief 06 und 17; Chromium mit vier Breiten und WebKit mit iPhone-Profilen 390x844 und 430x932 mit Sicherheitsrand 59/34; Überlauf, Kontrast AA, 44 px, keine überlagerten Textblöcke, kein Seitenscroll, Leiste im Fenster, Blätter schließen; ein roter Befund bricht den Deploy)
         if: always() && matrix.group == 4
         timeout-minutes: 45
