@@ -2,19 +2,21 @@ import { useEffect, useRef, useState } from 'react';
 import { ClipView } from '../components/ClipView';
 import { Icon } from '../components/Icon';
 import { atTime } from '../moments/hook';
-import { episodeUrlOf, isYtId, type ClipPayload } from '../share/link';
+import { episodeUrlOf, isYtId, sourceLabel, type ClipPayload } from '../share/link';
 
 /**
  * Clip-Seite (Brief 05, Entscheidung 27): öffentlich, ohne Login, ohne Pool. Alles kommt aus dem Hash des Links.
  * Das Medium bleibt beim Original-Host: Audio und eigene Streams über <audio> oder <video> ab start, Stopp bei end;
  * YouTube über das IFrame mit start und end; Text als Passage. Spielt ein Host im Browser nicht, steht der Link zur Folge mit Zeitstempel.
+ * Issue 52: Neue Links tragen nur noch Hook, Quelle, Zeiten, Sprache. Kanal, Folge und Caption fehlen dann, die Kopfzeile zeigt den Host der Quelle,
+ * "Open the original" führt zur Quelle ab Start. Alte Links mit allen Feldern werden weiter voll gezeigt.
  */
 export function ClipPage({ clip }: { clip: ClipPayload | null }) {
   useEffect(() => {
     const html = document.documentElement;
     html.dir = clip?.dir ?? 'ltr';
     html.lang = clip?.lang ?? 'en';
-    document.title = clip ? `${clip.hook} · ${clip.channel}` : 'Clip';
+    document.title = clip ? `${clip.hook} · ${sourceLabel(clip)}` : 'Clip';
   }, [clip]);
 
   if (!clip) {
@@ -30,7 +32,7 @@ export function ClipPage({ clip }: { clip: ClipPayload | null }) {
   }
 
   const episodeUrl = episodeUrlOf(clip);
-  const view = { form: clip.form, hook: clip.hook, channel: clip.channel, episode: clip.episode, context: clip.context, dir: clip.dir, episodeUrl };
+  const view = { form: clip.form, hook: clip.hook, channel: sourceLabel(clip), episode: clip.episode, context: clip.context, dir: clip.dir, episodeUrl };
   if (clip.form === 'text') return <ClipView clip={view} />;
   if (clip.form === 'video' && isYtId(clip.src)) return <ClipView clip={view} media={<YouTubeClip id={clip.src} start={clip.start} end={clip.end} />} />;
   return <ClipView clip={view} media={<MediaClip kind={clip.form} src={clip.src} start={clip.start} end={clip.end} episodeUrl={episodeUrl} />} />;

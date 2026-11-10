@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { clipUrl, decodePayload, encodePayload, episodeUrlOf, payloadOf, shareOf, shareText } from '../src/share/link';
+import { b64urlEncode, clipUrl, decodePayload, encodePayload, encodePayloadPlain, episodeUrlOf, linkPayload, packLink, payloadOf, shareOf, shareText, sourceLabel } from '../src/share/link';
 import type { Moment } from '../src/moments/types';
 
-// Brief 05 (Entscheidung 27, Issue 21): Text in der Sprache des Tracks, Link mit base64url-JSON, nichts aus dem Pool im Link.
+// Brief 05 (Entscheidung 27, Issue 21, Issue 52): Text in der Sprache des Tracks, Link mit komprimiertem base64url-JSON (acht Felder, kurze Schlüssel), nichts aus dem Pool im Link.
 const base: Moment = {
   id: 'pod-abc:120',
   videoId: 'pod-abc',
@@ -53,22 +53,63 @@ describe('share: Text und Link', () => {
     expect(t).toBe('العين لا تنام\n\nالجملة الأولى. الجملة الثانية.\n\nقناة الطب · الحلقة ٣ · 2:00');
     expect(t).not.toMatch(/channel|episode|at /i);
   });
-  it('Link unter dem Basis-Pfad, Hash ist base64url und lässt sich zurücklesen', () => {
+  it('Link unter dem Basis-Pfad, Hash komprimiert ("z") und base64url, trägt nur die acht Felder und lässt sich zurücklesen', async () => {
     const p = payloadOf(base)!;
-    const url = clipUrl(p, 'https://amrsaad.github.io', '/core/preview/');
-    expect(url.startsWith('https://amrsaad.github.io/core/preview/clip/#')).toBe(true);
+    const url = await clipUrl(p, 'https://amrsaad.github.io', '/core/preview/');
+    expect(url.startsWith('https://amrsaad.github.io/core/preview/clip/#z')).toBe(true);
     const hash = url.split('#')[1];
     expect(hash).toMatch(/^[A-Za-z0-9_-]+$/);
-    expect(decodePayload(`#${hash}`)).toEqual(p);
-    const b = shareOf(base, 'https://amrsaad.github.io', '/core/')!;
-    expect(b.url).toBe(`https://amrsaad.github.io/core/clip/#${encodePayload(p)}`);
+    expect(await decodePayload(`#${hash}`)).toEqual(linkPayload(p));
+    // Kontext, Kanal, Folge und Folgenseite stehen im Text, nicht im Link
+    expect(Object.keys(JSON.parse(packLink(p))).sort()).toEqual(['a', 'b', 'd', 'f', 'h', 'l', 's', 'v']);
+    const b = (await shareOf(base, 'https://amrsaad.github.io', '/core/'))!;
+    expect(b.url).toBe(`https://amrsaad.github.io/core/clip/#${await encodePayload(p)}`);
     expect(b.title).toBe(p.hook);
+    expect(b.text).toContain('قناة الطب');
   });
-  it('fremde oder kaputte Hashes ergeben null', () => {
-    expect(decodePayload('')).toBeNull();
-    expect(decodePayload('#nicht-base64!')).toBeNull();
-    expect(decodePayload(`#${encodePayload({ ...payloadOf(base)!, src: 'javascript:alert(1)' })}`)).toBeNull();
-    expect(decodePayload(`#${encodePayload({ ...payloadOf(base)!, v: 2 as 1 })}`)).toBeNull();
+  it('Issue 52: der Link bleibt kurz, unter 250 Zeichen, mit langer Host-URL unter 350', async () => {
+    const short = await clipUrl(payloadOf(base)!, 'https://amrsaad.github.io', '/core/');
+    expect(short.length).toBeLessThan(250);
+    const longHost = payloadOf({
+      ...base,
+      // Podcast-CDN mit langer Datei-ID, wie beim ersten echten Share (Audio, Issue 52)
+      hls: 'https://audio.podigee-cdn.net/1234567-m-abcdef0123456789abcdef.mp3?source=feed',
+      hook: 'Warum die Netzhaut bei Diabetes zuerst in der Peripherie leidet',
+      lang: 'de',
+    })!;
+    const url = await clipUrl(longHost, 'https://amrsaad.github.io', '/core/');
+    expect(url.length).toBeLessThan(350);
+    // zum Vergleich das alte Format mit allen Feldern: deutlich länger
+    const old = `https://amrsaad.github.io/core/clip/#${b64urlEncode(JSON.stringify(longHost))}`;
+    expect(old.length).toBeGreaterThan(url.length + 150);
+  });
+  it('unkomprimierter Fallback ("j") und altes Format (base64url-JSON mit langen Schlüsseln) werden weiter gelesen', async () => {
+    const p = payloadOf(base)!;
+    const plain = encodePayloadPlain(p);
+    expect(plain.startsWith('j')).toBe(true);
+    expect(await decodePayload(`#${plain}`)).toEqual(linkPayload(p));
+    const legacy = b64urlEncode(JSON.stringify(p));
+    expect(legacy.startsWith('ey')).toBe(true);
+    // Alte Links tragen Kanal, Folge, Kontext und Folgenseite, die Seite zeigt sie weiter
+    expect(await decodePayload(`#${legacy}`)).toEqual(p);
+  });
+  it('fremde oder kaputte Hashes ergeben null', async () => {
+    const p = payloadOf(base)!;
+    expect(await decodePayload('')).toBeNull();
+    expect(await decodePayload('#nicht-base64!')).toBeNull();
+    expect(await decodePayload('#zkaputt')).toBeNull();
+    expect(await decodePayload('#jkaputt')).toBeNull();
+    expect(await decodePayload(`#${await encodePayload({ ...p, src: 'javascript:alert(1)' })}`)).toBeNull();
+    expect(await decodePayload(`#${b64urlEncode(JSON.stringify({ ...p, v: 2 }))}`)).toBeNull();
+    expect(await decodePayload(`#j${b64urlEncode(JSON.stringify({ v: 2, f: 'audio', s: p.src, a: 1, b: 2, l: 'de', d: 'ltr', h: 'x' }))}`)).toBeNull();
+    expect(await decodePayload(`#${'z'.repeat(9000)}`)).toBeNull();
+  });
+  it('Kopfzeile der Clip-Seite: Kanal aus alten Links, sonst Host der Quelle oder YouTube', () => {
+    const p = payloadOf(base)!;
+    expect(sourceLabel(p)).toBe('قناة الطب');
+    expect(sourceLabel(linkPayload(p))).toBe('cdn.example.org');
+    expect(sourceLabel(linkPayload({ ...p, form: 'video', src: 'dQw4w9WgXcQ' }))).toBe('YouTube');
+    expect(episodeUrlOf(linkPayload(p))).toBe('https://cdn.example.org/ep3.mp3#t=120');
   });
 });
 

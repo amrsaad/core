@@ -1,9 +1,12 @@
 // E2E Share (Brief 05, Entscheidung 27, Issue 21): der Share-Knopf öffnet das Blatt mit Link zur Clip-Seite, Text in der Sprache des Tracks,
 // Kopieren zeigt "Copied". Die Clip-Seite (clip/) rendert Hook, Kanal, Folge und Caption aus dem Hash, das Audio springt auf start und hält bei end,
 // YouTube bekommt start und end im IFrame, Text ist eine Passage, Arabisch ist rechtsläufig, ein kaputter Hash zeigt die Hinweiszeile.
+// Issue 52: der Link aus der App ist komprimiert ("z" plus deflate-raw, kurze Schlüssel v f s a b l d h) und kurz (unter 250 Zeichen), die Clip-Seite liest
+// das komprimierte, das unkomprimierte ("j") und das alte Format (base64url-JSON mit langen Schlüsseln).
 // Aufruf: node tests/e2e/share.mjs <url> <ausgabeordner>   (vorher npm run build, dann vite preview)
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
+import { deflateRawSync, inflateRawSync } from 'node:zlib';
 import { chromium, devices, webkit } from 'playwright';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-share'] = process.argv.slice(2);
@@ -44,7 +47,17 @@ mkdirSync('dist/e2e', { recursive: true });
 writeFileSync('dist/e2e/clip.wav', wav);
 
 const b64url = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
-const decode = (hash) => JSON.parse(Buffer.from(hash.replace(/^#/, ''), 'base64url').toString('utf8'));
+// Neue Formate (Issue 52): kurze Schlüssel, "z" komprimiert, "j" unkomprimiert
+const shortOf = (o) => ({ v: 1, f: o.form, s: o.src, a: o.start, b: o.end, l: o.lang, d: o.dir, h: o.hook });
+const zHash = (o) => 'z' + deflateRawSync(Buffer.from(JSON.stringify(shortOf(o)))).toString('base64url');
+const jHash = (o) => 'j' + Buffer.from(JSON.stringify(shortOf(o))).toString('base64url');
+/** Liest jeden der drei Hash-Formen und gibt die Rohfelder zurück (kurze Schlüssel bleiben kurz, damit der Test die Feldliste prüfen kann) */
+const decode = (hash) => {
+  const h = hash.replace(/^#/, '');
+  if (h[0] === 'z') return JSON.parse(inflateRawSync(Buffer.from(h.slice(1), 'base64url')).toString('utf8'));
+  if (h[0] === 'j') return JSON.parse(Buffer.from(h.slice(1), 'base64url').toString('utf8'));
+  return JSON.parse(Buffer.from(h, 'base64url').toString('utf8'));
+};
 const clipAudio = { v: 1, form: 'audio', src: `${url}e2e/clip.wav`, start: 3, end: 5, hook: 'Clip hook from the hash', context: 'Caption line one.\nCaption line two.', channel: 'Clip channel', episode: 'Episode 7', lang: 'en', dir: 'ltr', url: 'https://podcast.test/ep7' };
 const clipAr = { ...clipAudio, hook: 'العين لا تنام', context: 'الجملة الأولى.\nالجملة الثانية.', channel: 'قناة الطب', episode: 'الحلقة ٣', lang: 'ar', dir: 'rtl' };
 const clipYt = { v: 1, form: 'video', src: 'dQw4w9WgXcQ', start: 61, end: 95, hook: 'Video hook', channel: 'Video channel', episode: 'Talk 3', lang: 'en', dir: 'ltr' };
@@ -98,10 +111,15 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     let payload = null;
     try { payload = decode(sheet.url.split('#')[1]); } catch {}
     r.payload = payload;
-    c.linkHasPayload = !!payload && payload.v === 1 && payload.form === 'video' && payload.src === m0.videoId && payload.start === m0.start && payload.end === m0.end && payload.hook === m0.hook && payload.channel === m0.channel && payload.episode === m0.videoTitle && payload.context === m0.context;
+    // Issue 52: nur noch acht Felder mit kurzen Schlüsseln im Link, Kanal, Folge und Kontext stehen im Text
+    c.linkHasPayload = !!payload && payload.v === 1 && payload.f === 'video' && payload.s === m0.videoId && payload.a === m0.start && payload.b === m0.end && payload.h === m0.hook && payload.l === 'en' && payload.d === 'ltr';
     // Nichts aus dem Pool, kein Schlüssel: keine Moment-ID, kein k=, keine Felder außer den vereinbarten
-    const allowed = ['v', 'form', 'src', 'start', 'end', 'hook', 'context', 'channel', 'episode', 'lang', 'dir', 'url'];
+    const allowed = ['v', 'f', 's', 'a', 'b', 'l', 'd', 'h'];
     c.linkNoSecrets = !!payload && !JSON.stringify(payload).includes(m0.id) && !sheet.url.includes(k) && !sheet.url.includes('k=') && Object.keys(payload).every((x) => allowed.includes(x));
+    // Issue 52: komprimiert und kurz. Max' erster echter Link hatte rund 1000 Zeichen.
+    r.linkLength = sheet.url.length;
+    c.linkCompressed = sheet.url.split('#')[1]?.[0] === 'z';
+    c.linkShort = sheet.url.length < 250;
     c.sheetRowsActive = sheet.rows.length === 2 && sheet.rows.every((d) => d === false) && sheet.hook === m0.hook;
     await page.click('[data-testid=share-copy]');
     c.copiedToast = await waitFor(page, () => document.querySelector('[data-testid=toast]')?.textContent === 'Copied', undefined, 3000);
@@ -134,8 +152,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     let pa = null;
     try { pa = decode(urlA.split('#')[1]); } catch {}
     r.payloadAudio = pa;
-    c.audioPayload = !!pa && pa.form === 'audio' && pa.src === ma.hls && pa.url === ma.url && pa.hook === ma.hook;
-    c.arabicRtl = !!pa && ma.lang === 'ar' ? pa.lang === 'ar' && pa.dir === 'rtl' && /[؀-ۿ]/.test(pa.hook) : true;
+    c.audioPayload = !!pa && pa.f === 'audio' && pa.s === ma.hls && pa.h === ma.hook && !('url' in pa) && !('u' in pa);
+    c.arabicRtl = !!pa && ma.lang === 'ar' ? pa.l === 'ar' && pa.d === 'rtl' && /[؀-ۿ]/.test(pa.h) : true;
+    r.linkLengthAudio = urlA.length;
+    c.audioLinkShort = urlA.length < 250 && urlA.split('#')[1]?.[0] === 'z';
     await page.screenshot({ path: `${out}/${name}-2-share-audio.png` });
     await page.click('[data-testid=share-copy]');
     const copiedA = await page.evaluate(() => window.__copied);
@@ -213,6 +233,20 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     // Kaputter Hash
     await clip.goto(`${url}clip/#kaputt!`);
     c.clipBadHash = await waitFor(clip, () => !!document.querySelector('[data-testid=clip-empty]'), undefined, 5000);
+
+    // Issue 52: neues komprimiertes Format ("z") ohne Kanal, Folge, Caption. Kopfzeile zeigt den Host der Quelle, der Link führt zur Quelle ab Start.
+    await clip.goto(`${url}clip/#${zHash(clipAudio)}`);
+    c.clipZRenders = await waitFor(clip, () => !!document.querySelector('[data-testid=clip-view]'), undefined, 10000);
+    const zv = await clip.evaluate(() => ({ hook: document.querySelector('.clip-hook')?.textContent, kicker: document.querySelector('.clip-kicker')?.textContent, caption: document.querySelectorAll('.clip-caption p').length, link: document.querySelector('.clip-link')?.getAttribute('href'), start: document.querySelector('[data-testid=clip-audio]')?.dataset.start, title: document.title }));
+    r.clipZ = zv;
+    c.clipZContent = zv.hook === clipAudio.hook && zv.kicker === new URL(url).hostname && zv.caption === 0 && zv.link === `${clipAudio.src}#t=3` && zv.start === '3' && zv.title.startsWith(clipAudio.hook);
+    await clip.screenshot({ path: `${out}/${name}-8-clip-kurzlink.png` });
+    // Unkomprimierter Fallback ("j", Browser ohne CompressionStream)
+    await clip.goto(`${url}clip/#${jHash(clipAr)}`);
+    c.clipJRenders = await waitFor(clip, (h) => document.querySelector('.clip-hook')?.textContent === h && document.documentElement.dir === 'rtl', clipAr.hook, 10000);
+    // Kaputte Kompression
+    await clip.goto(`${url}clip/#zAAAA`);
+    c.clipBadZ = await waitFor(clip, () => !!document.querySelector('[data-testid=clip-empty]'), undefined, 5000);
 
     // Der Link aus der App selbst öffnet die Seite mit dem Moment
     await clip.goto(clipFromApp);

@@ -4,6 +4,9 @@
 // Browser: E2E_CHROME=/pfad/zu/chrome nutzt ein vorhandenes Chrome statt Playwright-Chromium.
 // Zwei Läufe (Brief 17): Chromium mit den vier Breiten wie bisher, danach WebKit mit den iPhone-Profilen 390x844 und 430x932
 // (Skalierung 3, isMobile, hasTouch, Sicherheitsrand 59/34 über --safe-top und --safe-bottom). LAYOUT_ENGINES=chromium oder webkit wählt einen davon.
+// Issue 51: Untertitel und Quellenzeile ("This cut") im Video-Reiter berühren die Leiste rechts nicht (Handy und Tablet, geprüft mit zweizeiligem arabischem Untertitel).
+// Issue 53: Text-Reiter wählt die größte passende Stufe. Ein arabischer Moment mit etwa 60 Prozent Füllung bleibt in Stufe 0, und kein Moment steht in einer
+// kleineren Stufe mit mehr als 20 Prozent Leerraum unter dem Text (dann hätte die größere gepasst).
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, webkit, devices } from 'playwright';
@@ -45,6 +48,10 @@ const MOODS = ['beat', 'body', 'brain'];
 const SCHEMES = ['dark', 'light'];
 
 const EX_SHORT = 'Short passage that fits the first step. Two sentences are enough.';
+// Issue 53: arabischer Erklärtext, der in Stufe 0 etwa 60 Prozent der Lesefläche füllt (390x844), darf nicht in eine kleinere Stufe fallen
+const AREX60 = 'قال الشيخ السعدي في تفسير قوله تعالى {فَإِنَّ مَعَ الْعُسْرِ يُسْرًا}: أي إن العسر لا يخلو من يسر يصاحبه، وهذه قاعدة عظيمة في حياة المؤمن. ومن قواعد الفقه أن المشقة تجلب التيسير، فكلما ضاق الأمر اتسع. ثم قال تعالى {فَإِذَا فَرَغْتَ فَانصَبْ} أي إذا فرغت من أشغالك فاجتهد في العبادة والدعاء. وهذا يدل على أن المؤمن لا يكون فارغا أبدا، بل ينتقل من طاعة إلى طاعة.';
+// Issue 51: zweizeiliger arabischer Untertitel im Video-Reiter, läuft ohne rechten Freiraum unter die Leiste
+const ARCAP = 'لا تقصص رؤياك على إخوتك فيكيدوا لك كيدا إن الشيطان عدو مبين';
 const AREX = 'قال الشيخ السعدي في تفسير قوله تعالى {فَإِنَّ مَعَ الْعُسْرِ يُسْرًا * إِنَّ مَعَ الْعُسْرِ يُسْرًا}: أي إن العسر لا يخلو من يسر يصاحبه، ولهذا قال النبي صلى الله عليه وسلم \\" لن يغلب عسر يسرين \\" وهذه قاعدة عظيمة. ومن قواعد الفقه \\" المشقة تجلب التيسير \\" فكلما ضاق الأمر اتسع. ثم قال تعالى {فَإِذَا فَرَغْتَ فَانصَبْ} أي إذا فرغت من أشغالك فاجتهد في العبادة والدعاء. وهذا يدل على أن المؤمن لا يكون فارغا أبدا، بل ينتقل من طاعة إلى طاعة.';
 const EX = Array.from({ length: 30 }, (_, i) => `Sentence ${i + 1} of the checked excerpt, long enough to wrap over several lines in the reading column.`).join('\n');
 const mk = (i, area, extra = {}) => ({
@@ -56,10 +63,12 @@ const mk = (i, area, extra = {}) => ({
 });
 async function pool(area) {
   const moments = [
-    ...Array.from({ length: 14 }, (_, i) => mk(i, area)),
+    // Video: ungerade Nummern mit langem arabischem Untertitel (Issue 51, Untertitel erscheinen im Video-Reiter von selbst nur bei Arabisch)
+    ...Array.from({ length: 14 }, (_, i) => mk(i, area, i % 2 ? { cues: [[0, ARCAP], [20, 'two']] } : {})),
     ...Array.from({ length: 6 }, (_, i) => mk(40 + i, area, { form: 'audio', audio: true, hls: `https://stream.test/${40 + i}.m3u8`, cues: [[0, area === 'beat' ? 'لَا تَقْصُصْ رُؤْيَاكَ عَلَىٰ إِخْوَتِكَ فَيَكِيدُوا لَكَ كَيْدًا' : area === 'brain' ? 'Audio caption one, a marketing message that is quite a bit longer than one line to test wrapping' : 'Audio caption one, a marketing message that is quite a bit longer than one line, so that the subtitle line wraps over a second and a third line on a phone'], [2, 'two']] })),
     // Text (Brief 18): 0 und 1 lang (Schnitt am Satzende), 2 arabisch mit Vers in { } und Backslash-Anführungszeichen aus der Pipeline (Issue 43), 3 bis 5 kurz (passen in Stufe 0, gelten als gesehen, bringen die Abrufkarte)
-    ...Array.from({ length: 6 }, (_, i) => mk(60 + i, area, { form: 'text', videoId: `texto${String(60 + i).padStart(5, '0')}`, author: `Author ${i}`, ref: `Ref ${i}`, sourceUrl: `https://example.org/s/${i}`, license: 'CC BY 4.0', hook: i === 1 ? 'A very long hook that keeps going over several lines to test wrapping in the page, with many words and a clause or two' : i === 2 ? 'تفسير السعدي: مع العسر يسرا' : `Check lens status before the next injection ${i}`, ...(i === 2 ? { topic: 'islam', excerpt: AREX } : i >= 3 ? { excerpt: EX_SHORT } : {}) })),
+    // 6 (Issue 53): arabisch mit etwa 60 Prozent Füllung, muss in Stufe 0 bleiben
+    ...Array.from({ length: 7 }, (_, i) => mk(60 + i, area, { form: 'text', videoId: `texto${String(60 + i).padStart(5, '0')}`, author: `Author ${i}`, ref: `Ref ${i}`, sourceUrl: `https://example.org/s/${i}`, license: 'CC BY 4.0', hook: i === 1 ? 'A very long hook that keeps going over several lines to test wrapping in the page, with many words and a clause or two' : i === 2 ? 'تفسير السعدي: مع العسر يسرا' : i === 6 ? 'تفسير السعدي: فإذا فرغت فانصب' : `Check lens status before the next injection ${i}`, ...(i === 2 ? { topic: 'islam', excerpt: AREX } : i === 6 ? { topic: 'islam', excerpt: AREX60 } : i >= 3 ? { excerpt: EX_SHORT } : {}) })),
   ];
   const raw = crypto.getRandomValues(new Uint8Array(32));
   const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt']);
@@ -108,6 +117,22 @@ const probe = () => {
   res.innerH = H;
   const bar = document.querySelector('.vactions');
   if (bar) { const r = bar.getBoundingClientRect(); res.bar = { top: Math.round(r.top), bottom: Math.round(r.bottom), left: Math.round(r.left), right: Math.round(r.right), h: Math.round(r.height) }; }
+  // Issue 51: Untertitel (.vcaption) und Quellenzeile (.vsource) liegen nie unter der Leiste, auch nicht mit ihrem Kasten
+  res.railHits = [];
+  res.captionShown = false;
+  if (bar) {
+    const q = bar.getBoundingClientRect();
+    for (const sel of ['.vcaption', '.vsource']) for (const el of document.querySelectorAll(sel)) {
+      if (el.closest('[aria-hidden="true"]') || !(el.textContent ?? '').trim()) continue;
+      const cs = getComputedStyle(el);
+      if (cs.visibility === 'hidden' || cs.display === 'none') continue;
+      const b = el.getBoundingClientRect();
+      if (!b.width || !b.height) continue;
+      if (sel === '.vcaption') res.captionShown = true;
+      const w = Math.min(b.right, q.right) - Math.max(b.left, q.left), h = Math.min(b.bottom, q.bottom) - Math.max(b.top, q.top);
+      if (w > 1 && h > 1) res.railHits.push(`${sel} ${Math.round(w)}x${Math.round(h)} (Kasten bis x ${Math.round(b.right)}, Leiste ab x ${Math.round(q.left)}, y ${Math.round(b.top)}-${Math.round(b.bottom)} vs ${Math.round(q.top)})`);
+    }
+  }
   const blocks = [];
   for (const el of document.querySelectorAll('body *')) {
     if (el.closest('.vslot') || el.closest('[aria-hidden="true"]') || el.closest('nav')) continue;
@@ -194,6 +219,8 @@ async function check(pg, label, { skipSmall = false, flow = false } = {}) {
     if (r.overlaps.length && r.innerW < 1181) fail(`${label} keine überlagerten Textblöcke`, r.overlaps.slice(0, 4).join(' | ')); else ok(`${label} keine überlagerten Textblöcke`);
     if (r.scrollH > r.innerH + 1) fail(`${label} Seite scrollt nicht`, `scrollHeight ${r.scrollH} > innerHeight ${r.innerH}`); else ok(`${label} Seite scrollt nicht`);
     if (r.bar && (r.bar.top < 0 || r.bar.bottom > r.innerH + 0.5)) fail(`${label} Leiste im Fenster`, JSON.stringify(r.bar)); else ok(`${label} Leiste im Fenster`);
+    // Issue 51 (Handy und Tablet, der Desktop hat eine eigene Spalte)
+    if (r.innerW < 1181) { if (r.railHits.length) fail(`${label} nichts unter der Leiste`, r.railHits.join(' | ')); else ok(`${label} nichts unter der Leiste`); }
   }
   // Daumenzone nur auf dem Handy (390x844 und 430x932, Entscheidung 54); Tablet und Desktop werden mit zwei Händen bedient
   if (r.innerW <= 430) { if (r.thumb.length) fail(`${label} Daumenzone`, r.thumb.slice(0, 4).join(' | ')); else ok(`${label} Daumenzone`); }
@@ -227,8 +254,8 @@ const gone = (pg, sel) => pg.waitForSelector(sel, { state: 'detached', timeout: 
  */
 async function textChecks(pg, tag, vp, dir, { area, scheme }) {
   const suffix = scheme === 'light' ? '-hell' : '';
-  const seen = { cut: null, ar: null, recall: null, readMore: false, overflow: [], bar: [] };
-  for (let i = 0; i < 9; i++) {
+  const seen = { cut: null, ar: null, ar60: null, recall: null, readMore: false, overflow: [], bar: [], fills: [] };
+  for (let i = 0; i < 12; i++) {
     const r = await pg.evaluate(() => {
       const b = document.querySelector('[data-testid=text-body]');
       const col = document.querySelector('.vtext-col');
@@ -251,6 +278,16 @@ async function textChecks(pg, tag, vp, dir, { area, scheme }) {
       const cs = getComputedStyle(b);
       const v = document.querySelector('[data-testid=verse]');
       out.text = { cut: b.hasAttribute('data-cut'), clamp: b.hasAttribute('data-clamp'), step: col?.dataset.step, overflow: b.scrollHeight > b.clientHeight + 1, sentenceEnd: /[.!?؟…]["'”’»)\]}]*$/.test(t), ar: b.getAttribute('dir') === 'rtl', font: cs.fontFamily, size: cs.fontSize, lh: cs.lineHeight, backslash: t.includes('\\'), verse: v ? { font: getComputedStyle(v).fontFamily, size: getComputedStyle(v).fontSize } : null, hookSize: getComputedStyle(document.querySelector('.vtext-hook')).fontSize, colBottom: Math.round(col.getBoundingClientRect().bottom) };
+      // Issue 53: Leerraum unter dem sichtbaren Text als Anteil der Lesefläche (.vtext-read)
+      const read = document.querySelector('.vtext-read');
+      if (read) {
+        const rr = read.getBoundingClientRect();
+        let low = rr.top;
+        const walker = document.createTreeWalker(b, NodeFilter.SHOW_TEXT);
+        for (let n = walker.nextNode(); n; n = walker.nextNode()) { const g = document.createRange(); g.selectNodeContents(n); for (const q of g.getClientRects()) if (q.width > 0 && q.height > 0) low = Math.max(low, Math.min(q.bottom, rr.bottom)); }
+        out.text.empty = rr.height > 0 ? (rr.bottom - low) / rr.height : 0;
+        out.text.readH = Math.round(rr.height);
+      }
       return out;
     });
     if (r.readMore) seen.readMore = true;
@@ -264,6 +301,8 @@ async function textChecks(pg, tag, vp, dir, { area, scheme }) {
       if (r.text.overflow) seen.overflow.push(r.id);
       if (r.text.cut && !seen.cut) { seen.cut = r.text; await pg.screenshot({ path: `${dir}/text-schnitt-${area}-${vp.name}${suffix}.png` }); }
       if (r.text.ar && !seen.ar) { seen.ar = r.text; await pg.screenshot({ path: `${dir}/text-arabisch-${area}-${vp.name}${suffix}.png` }); }
+      if (/^test0000066:/.test(r.id) && !seen.ar60) { seen.ar60 = r.text; await pg.screenshot({ path: `${dir}/text-arabisch-60-${area}-${vp.name}${suffix}.png` }); }
+      if (typeof r.text.empty === 'number') seen.fills.push({ id: r.id, step: r.text.step, cut: r.text.cut, clamp: r.text.clamp, empty: Math.round(r.text.empty * 100) });
     }
     await pg.evaluate(() => window.__core.next()); await pg.waitForTimeout(500);
   }
@@ -281,7 +320,38 @@ async function textChecks(pg, tag, vp, dir, { area, scheme }) {
     if (a.backslash) fail(`text arabisch ohne Backslash ${tag}`, 'Backslash im Text'); else ok(`text arabisch ohne Backslash ${tag}`);
     if (a.overflow) fail(`text arabisch ohne Überlauf ${tag}`, `Stufe ${a.step}`); else ok(`text arabisch ohne Überlauf ${tag}`);
   }
-  if (!seen.recall) fail(`text Abrufseite ${tag}`, 'keine Abrufkarte im Text-Reiter nach 9 Momenten');
+  // Issue 53: den Moment mit 60 Prozent Füllung gezielt holen, wenn die Reihenfolge ihn in 12 Wischen nicht gebracht hat
+  if (!seen.ar60) {
+    try {
+      const id = await pg.evaluate(() => (window.__core.queue?.() ?? []).find((x) => x.startsWith('test0000066:')));
+      if (id) {
+        await pg.evaluate((i) => window.__core.arrange([i]), id);
+        await pg.evaluate(() => window.__core.next());
+        await pg.waitForFunction((i) => window.__core.moment()?.id === i, id, { timeout: 5000 });
+        await pg.waitForTimeout(600);
+        const r = await pg.evaluate(() => {
+          const b = document.querySelector('[data-testid=text-body]');
+          const col = document.querySelector('.vtext-col');
+          const read = document.querySelector('.vtext-read');
+          if (!b || !col || !read) return null;
+          const rr = read.getBoundingClientRect();
+          let low = rr.top;
+          const walker = document.createTreeWalker(b, NodeFilter.SHOW_TEXT);
+          for (let n = walker.nextNode(); n; n = walker.nextNode()) { const g = document.createRange(); g.selectNodeContents(n); for (const q of g.getClientRects()) if (q.width > 0 && q.height > 0) low = Math.max(low, Math.min(q.bottom, rr.bottom)); }
+          return { cut: b.hasAttribute('data-cut'), clamp: b.hasAttribute('data-clamp'), step: col.dataset.step, overflow: b.scrollHeight > b.clientHeight + 1, empty: rr.height > 0 ? (rr.bottom - low) / rr.height : 0 };
+        });
+        if (r) { seen.ar60 = r; seen.fills.push({ id, step: r.step, cut: r.cut, clamp: r.clamp, empty: Math.round(r.empty * 100) }); await pg.screenshot({ path: `${dir}/text-arabisch-60-${area}-${vp.name}${suffix}.png` }); }
+      }
+    } catch {}
+  }
+  // Issue 53: kein Moment in einer kleineren Stufe mit mehr als 20 Prozent Leerraum (eine Stufe größer ist höchstens 9 Prozent höher, sie hätte gepasst)
+  const small = seen.fills.filter((f) => f.step !== '0' && f.empty > 20);
+  if (!seen.fills.length) fail(`text größte passende Stufe ${tag}`, 'kein Text-Moment gemessen');
+  else if (small.length) fail(`text größte passende Stufe ${tag}`, small.map((f) => `${f.id} Stufe ${f.step}${f.cut ? ' geschnitten' : ''} ${f.empty} % leer`).join(' | ')); else ok(`text größte passende Stufe ${tag}`);
+  // Issue 53: der arabische Moment mit etwa 60 Prozent Füllung bleibt in Stufe 0 und passt ganz
+  if (!seen.ar60) fail(`text arabisch 60 Prozent in Stufe 0 ${tag}`, 'Moment test0000066 (60 Prozent Füllung) nicht gesehen');
+  else if (seen.ar60.step !== '0' || seen.ar60.cut || seen.ar60.clamp || seen.ar60.overflow) fail(`text arabisch 60 Prozent in Stufe 0 ${tag}`, JSON.stringify({ step: seen.ar60.step, cut: seen.ar60.cut, clamp: seen.ar60.clamp, overflow: seen.ar60.overflow, empty: Math.round((seen.ar60.empty ?? 0) * 100) })); else ok(`text arabisch 60 Prozent in Stufe 0 ${tag}`);
+  if (!seen.recall) fail(`text Abrufseite ${tag}`, 'keine Abrufkarte im Text-Reiter nach 12 Momenten');
   else {
     const q = seen.recall;
     if (!q.card || !q.covers) fail(`text Abrufseite kein Overlay ${tag}`, JSON.stringify(q)); else ok(`text Abrufseite kein Overlay ${tag}`);
@@ -316,6 +386,27 @@ for (const area of MOODS) {
       if (r.mood !== area) fail(`stimmung ${tag}`, `data-mood ist ${r.mood}`); else ok(`stimmung ${tag}`);
       await pg.screenshot({ path: `${dir}/feed-${area}-${vp.name}${scheme === 'light' ? '-hell' : ''}.png` });
       if (area === 'body' && vp.width <= 430) await thumbShot(pg, `${dir}/thumb-feed-${vp.name}.png`);
+      if (vp.width < 1181) {
+        // Issue 51: ein Video-Moment mit zweizeiligem arabischem Untertitel (ungerade Nummer), dann Untertitel und Quellenzeile gegen die Leiste prüfen
+        try {
+          const id = await pg.evaluate(() => (window.__core.queue?.() ?? []).find((x) => /^test\d{7}:/.test(x) && Number(x.slice(4, 11)) % 2 === 1 && Number(x.slice(4, 11)) < 14));
+          if (id && (await pg.evaluate(() => window.__core.moment()?.id)) !== id) {
+            await pg.evaluate((i) => window.__core.arrange([i]), id);
+            await pg.evaluate(() => window.__core.next());
+            await pg.waitForFunction((i) => window.__core.moment()?.id === i, id, { timeout: 5000 });
+          }
+          const shown = await pg.waitForFunction(() => /[؀-ۿ]/.test(document.querySelector('[data-testid=caption]')?.textContent ?? ''), null, { timeout: 8000 }).then(() => true, () => false);
+          await pg.waitForTimeout(300);
+          if (!shown) fail(`untertitel ${tag}`, 'kein arabischer Untertitel im Video-Reiter zu sehen'); else ok(`untertitel ${tag}`);
+          const rc = await check(pg, `untertitel ${tag}`, { skipSmall: !strict, flow: true });
+          if (rc.bar && rc.innerW <= 430) {
+            // Die Leiste beginnt unter dem Platz der Untertitel (Karte, Quellenzeile, zwei Zeilen), nicht mehr direkt unter der Karte
+            const cap = await pg.evaluate(() => { const c = document.querySelector('[data-testid=caption]'); const r = c?.getBoundingClientRect(); return r ? { top: Math.round(r.top), bottom: Math.round(r.bottom), right: Math.round(r.right) } : null; });
+            if (!cap || cap.right > rc.bar.left - 4) fail(`untertitel endet vor der Leiste ${tag}`, JSON.stringify({ cap, bar: rc.bar })); else ok(`untertitel endet vor der Leiste ${tag}`);
+          }
+          await pg.screenshot({ path: `${dir}/untertitel-${area}-${vp.name}${scheme === 'light' ? '-hell' : ''}.png` });
+        } catch (e) { fail(`untertitel ${tag}`, String(e).slice(0, 100)); }
+      }
       if (area === 'body') {
         // Zustände der Leiste und der Status-Zeile (Entscheidung 50 und 22E): Stumm kommt vom Start, Offline per Netz aus
         const st = await pg.evaluate(() => { const e = document.querySelector('[data-status]'); return e ? { kind: e.getAttribute('data-status'), text: e.textContent.trim() } : null; });

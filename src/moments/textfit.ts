@@ -60,6 +60,35 @@ export function fitCut(ends: number[], fits: (end: number) => boolean): number |
 /** Gekürzter Text bis zur Grenze, ohne Leerraum am Ende */
 export const cutText = (t: string, cut: number | null): string => (cut === null ? t : t.slice(0, cut).trimEnd());
 
+/**
+ * Issue 53: Die Stufen werden von groß nach klein geprüft, die größte, in die der ganze Text passt, gewinnt. fits[i] gilt für Stufe i (0 ist die größte).
+ * Passt keine, kommt null, dann entscheidet pickCutStep über den Schnitt.
+ */
+export function pickStep(fits: boolean[]): number | null {
+  const i = fits.indexOf(true);
+  return i < 0 ? null : i;
+}
+
+/** Anteil der Lesefläche, der unter einem geschnittenen Text höchstens leer bleiben soll (Issue 53: 40 Prozent Leerraum waren der Befund) */
+export const MAX_EMPTY = 0.2;
+
+/**
+ * Stufe für den Schnitt am Satzende, wenn keine Stufe den ganzen Text fasst. empty[i] ist der Leerraum (px) unter dem letzten sichtbaren Satzende in Stufe i,
+ * Infinity, wenn dort kein Satzende sichtbar ist. room ist die Höhe der Lesefläche.
+ * Die kleinste Stufe zeigt am meisten Text und gewinnt, solange ihr Leerraum höchstens MAX_EMPTY der Fläche ist. Sonst die größte Stufe innerhalb der Grenze
+ * (ein langer Satz ohne Punkt frisst in kleiner Schrift sonst die halbe Fläche). Hält keine die Grenze, die mit dem kleinsten Leerraum, bei Gleichstand die kleinste.
+ */
+export function pickCutStep(empty: number[], room: number): number {
+  const last = empty.length - 1;
+  if (last < 0) return 0;
+  const within = (i: number) => empty[i] <= room * MAX_EMPTY;
+  if (within(last)) return last;
+  for (let i = 0; i < last; i++) if (within(i)) return i;
+  let best = last;
+  for (let i = last - 1; i >= 0; i--) if (empty[i] < empty[best]) best = i;
+  return best;
+}
+
 /** Ergebnis der Messung: Stufe, Schnitt am Satzende, und ob als Notnagel per Zeilenzahl gekürzt wird (kein Satzende sichtbar) */
 export interface TextFit {
   step: number;
