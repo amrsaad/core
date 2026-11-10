@@ -487,11 +487,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.likeButtonFills = await page.evaluate((id) => window.__core.liked(id), op.id);
     await page.click('[data-testid=save]');
     c.saveFills = await page.evaluate((id) => window.__core.saved(id) && document.querySelector('[data-testid=save]').getAttribute('aria-pressed') === 'true', op.id);
-    // Spalte: fünf Knöpfe (Brief 16: More öffnet das Blatt, der Wisch nach links gehört dem Reiterwechsel), Ziele mindestens 48 pt, Abstände, Beschriftung
+    // Spalte: fünf Knöpfe (Brief 16: More öffnet das Blatt, der Wisch nach links gehört dem Reiterwechsel), Ziele mindestens 48 pt, Abstände, Beschriftung.
+    // Issue 51: Abstand --s-2 (8 px) statt 16, damit die fünf Knöpfe nicht bis unter die Videokarte reichen
     const col = await page.evaluate(() => [...document.querySelectorAll('.vactions button')].map((b) => { const r = b.getBoundingClientRect(); return { id: b.dataset.testid, w: r.width, h: r.height, top: r.top, bottom: r.bottom, text: b.textContent, primary: b.dataset.primary }; }));
     c.columnOrder = col.map((x) => x.id).join() === 'like,save,share,source,more';
     c.columnTargets48 = col.every((x) => x.w >= 48 && x.h >= 48);
-    c.columnSpacing = col.slice(1).every((x, i) => x.top - col[i].bottom >= 16);
+    c.columnSpacing = col.slice(1).every((x, i) => x.top - col[i].bottom >= 8);
     c.columnLabels = col.map((x) => x.text).join('|') === 'Like|Save|Share|Source|More';
     // Entscheidung 54: jeder Knopf der Leiste ist ein Pflicht-Tippziel (data-primary). Die Daumenzone selbst prüft das Layout-Gate bei 390x844 und 430x932,
     // hier ist das Fenster nur 659 px hoch (Safari-Profil mit Leiste)

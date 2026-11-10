@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cleanText, cutText, fitCut, isTruncated, sentenceEnds, TEXT_STEPS, versePieces } from '../src/moments/textfit';
+import { cleanText, cutText, fitCut, isTruncated, MAX_EMPTY, pickCutStep, pickStep, sentenceEnds, TEXT_STEPS, versePieces } from '../src/moments/textfit';
 
 // Brief 18 (Issues 41 und 43): Regeln für Text auf einem Bildschirm und arabische Verse, ohne DOM.
 describe('textfit: Escapes aus der Pipeline', () => {
@@ -62,5 +62,31 @@ describe('textfit: Schnitt am Satzende', () => {
     expect(isTruncated({ step: 2, cut: 40, clamp: false })).toBe(true);
     expect(isTruncated({ step: 2, cut: null, clamp: true })).toBe(true);
     expect(isTruncated({ step: 1, cut: null, clamp: false })).toBe(false);
+  });
+});
+
+// Issue 53: die größte Stufe, die passt, nie eine kleinere mit Leerraum darunter
+describe('textfit: Wahl der Stufe (Issue 53)', () => {
+  it('größte passende Stufe von groß nach klein, keine passt heißt null', () => {
+    expect(pickStep([true, true, true])).toBe(0);
+    expect(pickStep([false, true, true])).toBe(1);
+    expect(pickStep([false, false, true])).toBe(2);
+    expect(pickStep([false, false, false])).toBeNull();
+  });
+  it('Schnitt: kleinste Stufe zeigt am meisten Text und gewinnt, solange höchstens 20 Prozent leer bleiben', () => {
+    expect(MAX_EMPTY).toBe(0.2);
+    expect(pickCutStep([10, 12, 15], 400)).toBe(2);
+    expect(pickCutStep([90, 70, 80], 400)).toBe(2);
+  });
+  it('Schnitt: lässt die kleinste Stufe zu viel leer, die größte Stufe innerhalb der Grenze', () => {
+    // 40 Prozent Leerraum in der kleinsten Stufe (der Befund), Stufe 0 bleibt innerhalb der 20 Prozent
+    expect(pickCutStep([60, 100, 160], 400)).toBe(0);
+    expect(pickCutStep([120, 70, 160], 400)).toBe(1);
+  });
+  it('Schnitt: hält keine die Grenze, die mit dem kleinsten Leerraum, ohne Satzende (Infinity) zählt nicht', () => {
+    expect(pickCutStep([200, 120, 160], 400)).toBe(1);
+    expect(pickCutStep([Infinity, Infinity, Infinity], 400)).toBe(2);
+    expect(pickCutStep([Infinity, 30, Infinity], 400)).toBe(1);
+    expect(pickCutStep([], 400)).toBe(0);
   });
 });

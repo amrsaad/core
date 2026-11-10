@@ -19,8 +19,13 @@ html {
   --band-left: calc((100vw - var(--band-w)) / 2);
   --rail-w: 64px;
   --text-right: calc(var(--safe-r) + var(--rail-w) + var(--s-3));
+  /* Issue 51: Beschriftung der Leiste eine Stufe unter --t-nav, damit fünf Knöpfe (Like, Save, Share, Source, More) unter die Videokarte passen. Nur hier. */
+  --rail-label: 10px;
+  --rail-label-lh: 12px;
   /* Leiste unten: Kreis, Abstand, Beschriftung. Oberkante der Leiste über dem unteren Rand. Text und Audio enden darunter, nichts liegt auf ihr. */
-  --actions-h: calc(var(--rail-btn) + var(--s-1) + var(--t-nav-lh));
+  --actions-h: calc(var(--rail-btn) + var(--s-1) + var(--rail-label-lh));
+  /* Rechter Freiraum im Video-Reiter (Issue 51): Untertitel und Quellenzeile enden vor der Leiste, kein Element liegt unter ihr */
+  --rail-gap: calc(var(--safe-r) + var(--s-2) + var(--rail-w) + var(--s-2));
   --actions-top: calc(var(--safe-b) + var(--nav-h, 0px) + var(--s-6) + var(--actions-h));
 }
 
@@ -185,7 +190,9 @@ html {
 }
 .vtitle[data-step='1'] { font-size: var(--t-row); line-height: var(--t-row-lh); }
 
-/* Leiste auf der Daumenseite (--hand): inset-inline-end folgt der Schreibrichtung des Elements, ltr heißt rechts. Die Beschriftungen bleiben zentriert. */
+/* Leiste auf der Daumenseite (--hand): inset-inline-end folgt der Schreibrichtung des Elements, ltr heißt rechts. Die Beschriftungen bleiben zentriert.
+   Issue 51: fünf Knöpfe mit Abstand --s-2 statt --s-4, Ring 48 (--rail-btn), Beschriftung 10/12. So beginnt die Leiste im Video-Reiter unter den Untertiteln
+   und nicht mehr direkt unter der Karte (bei 390x844 war die Oberkante bei 46 Prozent). */
 .vactions {
   position: absolute;
   z-index: var(--z-ui);
@@ -196,7 +203,7 @@ html {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--s-4);
+  gap: var(--s-2);
   transition: bottom var(--dur-ui) var(--ease);
 }
 .vbtn { color: var(--text); gap: var(--s-1); }
@@ -215,7 +222,17 @@ html {
 .vbtn:disabled { opacity: 0.4; }
 .vbtn[data-on] .icon { animation: vpop var(--dur-cut) var(--ease); }
 @keyframes vpop { 0% { transform: scale(0.8); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
-.vlabel { font-size: var(--t-nav); line-height: var(--t-nav-lh); color: var(--muted); font-weight: var(--w-meta); }
+.vlabel { font-size: var(--rail-label); line-height: var(--rail-label-lh); color: var(--muted); font-weight: var(--w-meta); }
+
+/* Issue 51, Video-Reiter (Handy und Tablet, der Desktop hat eigene Maße in desk.css): Quellenzeile ("This cut m:ss") und Untertitel enden vor der Leiste.
+   Breite aus dem Freiraum statt aus der Karte, nichts liegt unter der Leiste. */
+.vfeed[data-form='video'] .vsource:not(.desk *),
+.vfeed[data-form='video'] .vcaption:not(.desk *) {
+  width: auto;
+  right: var(--rail-gap);
+}
+.vfeed[data-form='video'] .vcaption:not(.desk *) { left: calc(var(--band-left) + var(--s-1)); }
+.vfeed[data-form='video'] .vsource:not(.desk *) { left: var(--band-left); }
 
 /* Desktop: Bild, Poster und Abdeckung füllen die Spalte (Maße setzt .desk in index.css) */
 .desk .vframe > div, .desk .vposter, .desk .vcover { border-radius: 0; box-shadow: none; }
@@ -380,7 +397,10 @@ html {
 .vtext-read { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
 .vtext-read .vtext-body { position: absolute; inset: 0; }
 .vtext-body { flex: 1 1 auto; min-height: 0; overflow: hidden; margin: 0; white-space: pre-line; font-size: var(--read, var(--t-reading)); line-height: var(--read-lh, var(--t-reading-lh)); color: var(--body); }
-.vtext-measure { visibility: hidden; pointer-events: none; }
+/* Messkopie (Issue 53): exakt so breit wie die Lesefläche, gleiche Richtung (dir am Element), gleiche Stufe. Der innere Block meldet seine Höhe an den ResizeObserver,
+   damit nach dem Nachladen einer Schrift neu gemessen wird. */
+.vtext-measure { visibility: hidden; pointer-events: none; width: 100%; }
+.vtext-measure-in { display: block; }
 /* Notnagel: kein Satzende sichtbar (ein einziger langer Satz), Zeilenzahl aus dem freien Platz (--lines) */
 .vtext-body[data-clamp] { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--lines, 6); line-clamp: var(--lines, 6); }
 /* Arabisch (Entscheidung 22): Erklärtext Noto Sans Arabic, Verse in { } in Amiri, eine Stufe größer, gleiche Zeilenhöhe */
@@ -415,10 +435,10 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 /* Bereich und Sprecher stehen schon im Kopf der Seite, das Vorschaubild hat ein Text-Moment nicht */
 .vrecall-page .recall-source { display: none; }
 
-/* Notiz-Blase "N notes, send?" (Issue 49): im Video-Reiter nie über dem Bild. Sie steht als Zeile unter der Karte und unter dem Platz der Untertitel,
-   links an der Karte, damit sie als Tippziel in den unteren 65 Prozent liegt (Daumenzone, Entscheidung 54). */
+/* Notiz-Blase "N notes, send?" (Issue 49): im Video-Reiter nie über dem Bild. Sie steht als Zeile unter der Karte und unter dem Platz der Untertitel
+   (zwei Zeilen, arabische Zeilenhöhe 24 ist die höhere), links an der Karte, damit sie als Tippziel in den unteren 65 Prozent liegt (Daumenzone, Entscheidung 54). */
 .vfeed[data-form='video'] .vnotes {
-  top: calc(var(--band-top) + var(--band-h) + var(--s-10) + 2 * var(--t-body-lh) + var(--s-3));
+  top: calc(var(--band-top) + var(--band-h) + var(--s-10) + 2 * var(--t-ar-lh) + var(--s-3));
   right: auto;
   left: var(--band-left);
 }

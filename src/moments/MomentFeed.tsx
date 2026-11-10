@@ -41,7 +41,7 @@ import { DeskPanel } from './DeskShell';
 import { speakerLine } from './speaker';
 import { chipEffect, CONFIRM_SHEET_MS, MUTE_UNDO_MS, firstOpenOfDay, inputConfirm, makeEntry, makeInputEntry, markSent, nextIssue, promptLine, unsent, type Chip, type InputChip } from './note';
 import { HOOK_LINE_PT, hookStep } from './hook';
-import { cleanText, cutText, FIT_FULL, fitCut, isTruncated, sameFit, sentenceEnds, TEXT_STEPS, versePieces, type TextFit } from './textfit';
+import { cleanText, cutText, FIT_FULL, fitCut, isTruncated, pickCutStep, pickStep, sameFit, sentenceEnds, TEXT_STEPS, versePieces, type TextFit } from './textfit';
 import { makeRng } from './rng';
 import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
 import { addFrames, atRest, commitVelocity, dragY, frameSample, release, SPRING_BACK, SPRING_COMMIT, stepSpring, Velocity, type Spring, type SpringState } from './swipe';
@@ -61,7 +61,7 @@ import { statusOf } from '../components/status';
 import { Ambient } from './Ambient';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 import { ShareSheet } from '../components/ShareSheet';
-import { shareOf } from '../share/link';
+import { payloadOf, shareOf, type ShareBundle } from '../share/link';
 
 /** Desktop-Modus ab 1181 px: Panel rechts, Übersicht, Seitenblatt. Fehlt das Feld, gilt das mobile Verhalten unverändert. */
 export interface DeskProps {
@@ -2446,11 +2446,25 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const openShare = () => {
     const m = queue.current[idxRef.current];
     if (!m || forYouRef.current || recallRef.current || noteRef.current) return;
-    if (!shareOf(m, location.origin, import.meta.env.BASE_URL)) return show('Nothing to share');
+    if (!payloadOf(m)) return show('Nothing to share');
     navigator.vibrate?.(10);
     setShare(m);
   };
-  const shareBundle = share ? shareOf(share, location.origin, import.meta.env.BASE_URL) : null;
+  // Issue 52: der Link wird komprimiert (CompressionStream, asynchron), darum entsteht das Bündel im Effekt. Das Blatt erscheint, sobald der Link da ist.
+  const [shareBundle, setShareBundle] = useState<ShareBundle | null>(null);
+  useEffect(() => {
+    let on = true;
+    if (!share) {
+      setShareBundle(null);
+      return;
+    }
+    void shareOf(share, location.origin, import.meta.env.BASE_URL).then((b) => {
+      if (on) setShareBundle(b);
+    });
+    return () => {
+      on = false;
+    };
+  }, [share]);
   const copyShare = async () => {
     if (!shareBundle) return;
     try {
@@ -3264,31 +3278,50 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       }
       return null;
     };
+    /** Unterkante der Zeile, in der das Zeichen vor end steht (Fensterkoordinaten), 0 wenn es nicht gerendert ist */
+    const lineBottom = (end: number, lh: number): number => {
+      const p = nodeAt(end - 1);
+      if (!p) return 0;
+      const r = document.createRange();
+      r.setStart(p.node, p.at);
+      r.setEnd(p.node, p.at + 1);
+      const rr = r.getBoundingClientRect();
+      // Das Zeichen misst nur seinen Schriftkasten, die Zeile ist höher: die ganze Zeile muss in die Fläche passen
+      return rr.height > 0 ? rr.bottom + Math.max(0, (lh - rr.height) / 2) : 0;
+    };
     const fit = () => {
       if (dead) return;
-      let step = 0;
-      for (; step < TEXT_STEPS; step++) {
+      // Issue 53: alle Stufen von groß nach klein messen, die größte passende nehmen
+      const fits: boolean[] = [];
+      for (let step = 0; step < TEXT_STEPS; step++) {
         col.dataset.step = String(step);
-        if (meas.scrollHeight <= meas.clientHeight + 1) return put({ step, cut: null, clamp: false });
+        fits.push(meas.scrollHeight <= meas.clientHeight + 1);
       }
-      step = TEXT_STEPS - 1;
-      col.dataset.step = String(step);
-      const box = meas.getBoundingClientRect();
+      const whole = pickStep(fits);
+      if (whole !== null) return put({ step: whole, cut: null, clamp: false });
+      // Keine Stufe fasst den Text: Schnitt am letzten sichtbaren Satzende, je Stufe gemessen, Wahl nach Leerraum unter dem Schnitt (Issue 53)
       const full = meas.textContent ?? '';
-      const lh = parseFloat(getComputedStyle(meas).lineHeight) || 23;
-      const visible = (end: number) => {
-        const p = nodeAt(end - 1);
-        if (!p) return false;
-        const r = document.createRange();
-        r.setStart(p.node, p.at);
-        r.setEnd(p.node, p.at + 1);
-        const rr = r.getBoundingClientRect();
-        // Das Zeichen misst nur seinen Schriftkasten, die Zeile ist höher: die ganze Zeile muss in die Fläche passen
-        return rr.height > 0 && rr.bottom + Math.max(0, (lh - rr.height) / 2) <= box.bottom + 1;
-      };
-      const cut = fitCut(sentenceEnds(full), visible);
+      const ends = sentenceEnds(full);
+      const cuts: (number | null)[] = [];
+      const empty: number[] = [];
+      const lhs: number[] = [];
+      for (let step = 0; step < TEXT_STEPS; step++) {
+        col.dataset.step = String(step);
+        const box = meas.getBoundingClientRect();
+        const lh = parseFloat(getComputedStyle(meas).lineHeight) || 23;
+        lhs.push(lh);
+        const cut = fitCut(ends, (end) => {
+          const b = lineBottom(end, lh);
+          return b > 0 && b <= box.bottom + 1;
+        });
+        cuts.push(cut);
+        empty.push(cut === null ? Infinity : Math.max(0, box.bottom - lineBottom(cut, lh)));
+      }
+      const step = pickCutStep(empty, meas.clientHeight);
+      col.dataset.step = String(step);
+      const cut = cuts[step];
       if (cut !== null) return put({ step, cut, clamp: false });
-      col.style.setProperty('--lines', String(Math.max(1, Math.floor(meas.clientHeight / lh))));
+      col.style.setProperty('--lines', String(Math.max(1, Math.floor(meas.clientHeight / lhs[step]))));
       put({ step, cut: null, clamp: true });
     };
     fit();
@@ -3297,11 +3330,17 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     ro?.observe(col);
     const read = col.querySelector<HTMLElement>('.vtext-read');
     if (read) ro?.observe(read);
-    // Schriften kommen nachgeladen (Noto Sans Arabic, Amiri): danach noch einmal messen
-    document.fonts?.ready.then(fit).catch(() => {});
+    // Issue 53: der Block in der Messkopie ändert seine Höhe, sobald eine Schrift nachkommt (Noto Sans Arabic, Amiri) oder das Layout sich sonst bewegt. Dann noch einmal messen.
+    const inner = meas.querySelector<HTMLElement>('.vtext-measure-in');
+    if (inner) ro?.observe(inner);
+    // Schriften kommen nachgeladen: nach document.fonts.ready und nach jeder weiteren Ladung noch einmal messen
+    const fonts = document.fonts;
+    fonts?.ready.then(fit).catch(() => {});
+    fonts?.addEventListener?.('loadingdone', fit);
     return () => {
       dead = true;
       ro?.disconnect();
+      fonts?.removeEventListener?.('loadingdone', fit);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queue.current[idx]?.id, form, forYou]);
@@ -3543,7 +3582,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                     {body}
                     {t && (
                       <p className={`${bodyCls} vtext-measure`} dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'} aria-hidden="true">
-                        {pieces(t)}
+                        <span className="vtext-measure-in">{pieces(t)}</span>
                       </p>
                     )}
                   </div>
