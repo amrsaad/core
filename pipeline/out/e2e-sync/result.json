@@ -1,5 +1,5 @@
 {
- "at": "2026-11-10T15:42:00.970Z",
+ "at": "2026-11-10T16:42:22.762Z",
  "runs": [
   {
    "browser": "webkit",
@@ -49,12 +49,12 @@
    },
    "diagLines": 13,
    "diagSample": [
-    "pasf slot2 sy0:1 state 5",
-    "pasf yt: warm cue slot2 sy0:1",
-    "pasf slot0 sy7:1 state 2",
-    "pasf app: hidden"
+    "7jhq yt: warm cue slot1 sy1:1",
+    "7jhq yt: warm cue slot2 sy4:1",
+    "7jhq slot0 sy5:1 state 2",
+    "7jhq app: hidden"
    ],
-   "writeDelayMs": 10024,
+   "writeDelayMs": 10038,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -84,8 +84,8 @@
     "writeAfter10s": true,
     "writeDelayAbout10s": true,
     "captionInFile": true,
-    "debounceOneWrite": false,
-    "debounceFromLast": false,
+    "debounceOneWrite": true,
+    "debounceFromLast": true,
     "bUnlocked": true,
     "bHasTokenFromQr": true,
     "bGotCaptionsFromA": true,
@@ -111,12 +111,12 @@
    },
    "diagLines": 13,
    "diagSample": [
-    "6js2 yt: warm cue slot1 sy6:1",
-    "6js2 yt: warm cue slot2 sy4:1",
-    "6js2 slot0 sy3:1 state 2",
-    "6js2 app: hidden"
+    "025b yt: warm cue slot1 sy5:1",
+    "025b yt: warm cue slot2 sy2:1",
+    "025b slot0 sy7:1 state 2",
+    "025b app: hidden"
    ],
-   "writeDelayMs": 10019,
+   "writeDelayMs": 10022,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -126,9 +126,6 @@
    "errors": []
   }
  ],
- "failed": [
-  "chromium.debounceOneWrite",
-  "chromium.debounceFromLast"
- ],
+ "failed": [],
  "exceptions": []
 }
