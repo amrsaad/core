@@ -1,5 +1,5 @@
 {
- "at": "2026-11-10T15:52:23.621Z",
+ "at": "2026-11-10T16:52:32.644Z",
  "runs": [
   {
    "variant": "webkit",
@@ -26,11 +26,11 @@
     "audioLinkShort": true,
     "arabicTextNotEnglish": true,
     "clipRenders": true,
-    "clipHook": false,
+    "clipHook": true,
     "clipChannelEpisode": true,
     "clipCaption": true,
     "clipEpisodeLink": true,
-    "clipAudioElement": false,
+    "clipAudioElement": true,
     "clipLightDiffers": true,
     "audioJumpsToStart": true,
     "audioStopsAtEnd": true,
@@ -78,8 +78,8 @@
    "linkLengthAudio": 182,
    "clip": {
     "form": "audio",
-    "dir": "",
-    "title": "Clip",
+    "dir": "ltr",
+    "title": "Clip hook from the hash · Clip channel",
     "kicker": "Clip channel · Episode 7",
     "hook": "Clip hook from the hash",
     "caption": [
@@ -94,8 +94,8 @@
     "fg": "rgb(255, 255, 255)",
     "nothingLocked": true
    },
-   "audioT0": 3.01825725,
-   "audioT1": 5.005169456,
+   "audioT0": 3.019395331,
+   "audioT1": 5.008393433,
    "ar": {
     "dir": "rtl",
     "html": "rtl",
@@ -116,7 +116,7 @@
     "title": "Clip hook from the hash · 127.0.0.1"
    },
    "errors": [],
-   "ok": false
+   "ok": true
   },
   {
    "variant": "chromium",
@@ -212,7 +212,7 @@
     "nothingLocked": true
    },
    "audioT0": 3,
-   "audioT1": 5.021896,
+   "audioT1": 5.007928,
    "ar": {
     "dir": "rtl",
     "html": "rtl",
