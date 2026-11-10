@@ -1,5 +1,5 @@
 {
- "at": "2026-11-10T12:20:39.108Z",
+ "at": "2026-11-10T15:22:45.523Z",
  "runs": [
   {
    "variant": "webkit",
@@ -12,6 +12,8 @@
     "linkShownShort": true,
     "linkHasPayload": true,
     "linkNoSecrets": true,
+    "linkCompressed": true,
+    "linkShort": true,
     "sheetRowsActive": true,
     "copiedToast": true,
     "sheetClosesAfterCopy": true,
@@ -21,6 +23,7 @@
     "arabicReached": true,
     "audioPayload": true,
     "arabicRtl": true,
+    "audioLinkShort": true,
     "arabicTextNotEnglish": true,
     "clipRenders": true,
     "clipHook": true,
@@ -38,42 +41,41 @@
     "clipText": true,
     "clipFailShowsLink": true,
     "clipBadHash": true,
+    "clipZRenders": true,
+    "clipZContent": true,
+    "clipJRenders": true,
+    "clipBadZ": true,
     "appLinkOpens": true,
     "pageErrors": 0
    },
    "sheet": {
-    "url": "http://127.0.0.1:4191/core/clip/#eyJ2IjoxLCJmb3JtIjoidmlkZW8iLCJzcmMiOiJzaGFyMDA",
+    "url": "http://127.0.0.1:4191/core/clip/#zq1YqU7Iy1FFKU7JSKstMSc1X0lEqBrKLMxKLDCAAKJIIVG",
     "hook": "Share hook 0"
    },
    "payload": {
     "v": 1,
-    "form": "video",
-    "src": "shar0000000",
-    "start": 100,
-    "end": 160,
-    "hook": "Share hook 0",
-    "channel": "Kanal 0",
-    "lang": "en",
-    "dir": "ltr",
-    "context": "Context one 0.\nContext two 0.",
-    "episode": "Folge 0"
+    "f": "video",
+    "s": "shar0000000",
+    "a": 100,
+    "b": 160,
+    "l": "en",
+    "d": "ltr",
+    "h": "Share hook 0"
    },
-   "copied": "Share hook 0\n\nContext one 0. Context two 0.\n\nKanal 0 · Folge 0 · 1:40\n\nhttp://127.0.0.1:4191/core/clip/#eyJ2IjoxLCJmb3JtIjoidmlkZW8iLCJzcmMiOiJzaGFyMDAwMDAwMCIsInN0YXJ0IjoxMDAsImVuZCI6MTYwLCJob29rIjoiU2hhcmUgaG9vayAwIiwiY2hhbm5lbCI6IkthbmFsIDAiLCJsYW5nIjoiZW4iLCJkaXIiOiJsdHIiLCJjb250ZXh0IjoiQ29udGV4dCBvbmUgMC5cbkNvbnRleHQgdHdvIDAuIiwiZXBpc29kZSI6IkZvbGdlIDAifQ",
+   "linkLength": 134,
+   "copied": "Share hook 0\n\nContext one 0. Context two 0.\n\nKanal 0 · Folge 0 · 1:40\n\nhttp://127.0.0.1:4191/core/clip/#zq1YqU7Iy1FFKU7JSKstMSc1X0lEqBrKLMxKLDCAAKJIIVGNgoKOUBKTNgHQOUEVqHlAiBcjIKSkCsjKArGCgplSFjPz8bAUDpVoA",
    "arId": "shar0000012:100",
    "payloadAudio": {
     "v": 1,
-    "form": "audio",
-    "src": "https://stream.test/ep12.mp3",
-    "start": 100,
-    "end": 160,
-    "hook": "العين لا تنام 12",
-    "channel": "قناة 12",
-    "lang": "ar",
-    "dir": "rtl",
-    "context": "الجملة الأولى 12.\nالجملة الثانية 12.",
-    "episode": "الحلقة 12",
-    "url": "https://podcast.test/ep12"
+    "f": "audio",
+    "s": "https://stream.test/ep12.mp3",
+    "a": 100,
+    "b": 160,
+    "l": "ar",
+    "d": "rtl",
+    "h": "العين لا تنام 12"
    },
+   "linkLengthAudio": 182,
    "clip": {
     "form": "audio",
     "dir": "ltr",
@@ -92,8 +94,8 @@
     "fg": "rgb(255, 255, 255)",
     "nothingLocked": true
    },
-   "audioT0": 3.017907305,
-   "audioT1": 5.007143549,
+   "audioT0": 3.021391213,
+   "audioT1": 5.004757866,
    "ar": {
     "dir": "rtl",
     "html": "rtl",
@@ -104,6 +106,14 @@
    "yt": {
     "src": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?start=61&end=95&rel=0&playsinline=1&modestbranding=1",
     "link": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=61"
+   },
+   "clipZ": {
+    "hook": "Clip hook from the hash",
+    "kicker": "127.0.0.1",
+    "caption": 0,
+    "link": "http://127.0.0.1:4191/core/e2e/clip.wav#t=3",
+    "start": "3",
+    "title": "Clip hook from the hash · 127.0.0.1"
    },
    "errors": [],
    "ok": true
@@ -119,6 +129,8 @@
     "linkShownShort": true,
     "linkHasPayload": true,
     "linkNoSecrets": true,
+    "linkCompressed": true,
+    "linkShort": true,
     "sheetRowsActive": true,
     "copiedToast": true,
     "sheetClosesAfterCopy": true,
@@ -128,6 +140,7 @@
     "arabicReached": true,
     "audioPayload": true,
     "arabicRtl": true,
+    "audioLinkShort": true,
     "arabicTextNotEnglish": true,
     "clipRenders": true,
     "clipHook": true,
@@ -145,42 +158,41 @@
     "clipText": true,
     "clipFailShowsLink": true,
     "clipBadHash": true,
+    "clipZRenders": true,
+    "clipZContent": true,
+    "clipJRenders": true,
+    "clipBadZ": true,
     "appLinkOpens": true,
     "pageErrors": 0
    },
    "sheet": {
-    "url": "http://127.0.0.1:4191/core/clip/#eyJ2IjoxLCJmb3JtIjoidmlkZW8iLCJzcmMiOiJzaGFyMDA",
+    "url": "http://127.0.0.1:4191/core/clip/#zJcExDoAgDEDRq5A_dyiLQ6_hCTBgaiSSgGEx3t3B9x4mFo",
     "hook": "Share hook 0"
    },
    "payload": {
     "v": 1,
-    "form": "video",
-    "src": "shar0000000",
-    "start": 100,
-    "end": 160,
-    "hook": "Share hook 0",
-    "channel": "Kanal 0",
-    "lang": "en",
-    "dir": "ltr",
-    "context": "Context one 0.\nContext two 0.",
-    "episode": "Folge 0"
+    "f": "video",
+    "s": "shar0000000",
+    "a": 100,
+    "b": 160,
+    "l": "en",
+    "d": "ltr",
+    "h": "Share hook 0"
    },
-   "copied": "Share hook 0\n\nContext one 0. Context two 0.\n\nKanal 0 · Folge 0 · 1:40\n\nhttp://127.0.0.1:4191/core/clip/#eyJ2IjoxLCJmb3JtIjoidmlkZW8iLCJzcmMiOiJzaGFyMDAwMDAwMCIsInN0YXJ0IjoxMDAsImVuZCI6MTYwLCJob29rIjoiU2hhcmUgaG9vayAwIiwiY2hhbm5lbCI6IkthbmFsIDAiLCJsYW5nIjoiZW4iLCJkaXIiOiJsdHIiLCJjb250ZXh0IjoiQ29udGV4dCBvbmUgMC5cbkNvbnRleHQgdHdvIDAuIiwiZXBpc29kZSI6IkZvbGdlIDAifQ",
-   "arId": "shar0000014:100",
+   "linkLength": 134,
+   "copied": "Share hook 0\n\nContext one 0. Context two 0.\n\nKanal 0 · Folge 0 · 1:40\n\nhttp://127.0.0.1:4191/core/clip/#zJcExDoAgDEDRq5A_dyiLQ6_hCTBgaiSSgGEx3t3B9x4mFoUdYx65NISBMTx1_SEkLKoKGxYXFSpGuRAyRr07gmOsnnoJ3toZlPcD",
+   "arId": "shar0000013:100",
    "payloadAudio": {
     "v": 1,
-    "form": "audio",
-    "src": "https://stream.test/ep14.mp3",
-    "start": 100,
-    "end": 160,
-    "hook": "العين لا تنام 14",
-    "channel": "قناة 14",
-    "lang": "ar",
-    "dir": "rtl",
-    "context": "الجملة الأولى 14.\nالجملة الثانية 14.",
-    "episode": "الحلقة 14",
-    "url": "https://podcast.test/ep14"
+    "f": "audio",
+    "s": "https://stream.test/ep13.mp3",
+    "a": 100,
+    "b": 160,
+    "l": "ar",
+    "d": "rtl",
+    "h": "العين لا تنام 13"
    },
+   "linkLengthAudio": 185,
    "clip": {
     "form": "audio",
     "dir": "ltr",
@@ -200,7 +212,7 @@
     "nothingLocked": true
    },
    "audioT0": 3,
-   "audioT1": 5.00698,
+   "audioT1": 5.020526,
    "ar": {
     "dir": "rtl",
     "html": "rtl",
@@ -211,6 +223,14 @@
    "yt": {
     "src": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?start=61&end=95&rel=0&playsinline=1&modestbranding=1",
     "link": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=61"
+   },
+   "clipZ": {
+    "hook": "Clip hook from the hash",
+    "kicker": "127.0.0.1",
+    "caption": 0,
+    "link": "http://127.0.0.1:4191/core/e2e/clip.wav#t=3",
+    "start": "3",
+    "title": "Clip hook from the hash · 127.0.0.1"
    },
    "errors": [],
    "ok": true
