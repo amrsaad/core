@@ -289,9 +289,9 @@ jobs:
         if: always() && matrix.group == 4
         timeout-minutes: 10
         run: |
-          npx vite preview --host 127.0.0.1 --port 4190 --strictPort &
-          node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4190/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
-          node tests/e2e/share.mjs http://127.0.0.1:4190/core/ pipeline/out/e2e-share
+          npx vite preview --host 127.0.0.1 --port 4191 --strictPort &
+          node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4191/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
+          node tests/e2e/share.mjs http://127.0.0.1:4191/core/ pipeline/out/e2e-share
       - name: Layout-Gate (Entscheidung 43, Brief 06 und 17; Chromium mit vier Breiten und WebKit mit iPhone-Profilen 390x844 und 430x932 mit Sicherheitsrand 59/34; Überlauf, Kontrast AA, 44 px, keine überlagerten Textblöcke, kein Seitenscroll, Leiste im Fenster, Blätter schließen; ein roter Befund bricht den Deploy)
         if: always() && matrix.group == 4
         timeout-minutes: 45

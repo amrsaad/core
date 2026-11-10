@@ -78,8 +78,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     page.on('pageerror', (e) => errors.push(String(e)));
 
     // ---- App: Share-Knopf, Blatt, Link, Kopieren ----
+    // Wie moments.mjs: erst ohne Schlüssel laden, dann mit #k=, sonst kommt WebKit beim Kaltstart nicht bis zum Feed
+    await page.goto(url + '?now=2026-10-23');
+    await page.goto('about:blank');
     await page.goto(`${url}?now=2026-10-23&seed=3#k=${k}`);
-    c.feedLoaded = await waitFor(page, () => !!window.__core?.moment());
+    c.feedLoaded = await waitFor(page, () => !!window.__core?.moment(), undefined, 30000);
     const col = await page.evaluate(() => [...document.querySelectorAll('.vactions button')].map((b) => ({ id: b.dataset.testid, dis: b.disabled, primary: b.dataset.primary, w: b.getBoundingClientRect().width, h: b.getBoundingClientRect().height })));
     c.columnUnchanged = col.map((x) => x.id).join() === 'like,save,share,source,more' && col.every((x) => x.primary === 'true' && x.w >= 48 && x.h >= 48);
     c.shareEnabled = col.find((x) => x.id === 'share')?.dis === false;
