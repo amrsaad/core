@@ -168,7 +168,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     clip.on('pageerror', (e) => clipErrors.push(String(e)));
     await clip.emulateMedia({ colorScheme: 'dark' });
     await clip.goto(`${url}clip/#${b64url(clipAudio)}`);
-    c.clipRenders = await waitFor(clip, () => !!document.querySelector('[data-testid=clip-view]'), undefined, 10000);
+    // Issue 55: der Inhalt kommt asynchron aus dem Hash (Issue 52). Gewartet wird, bis Hook und Titel da sind, nicht nur bis das Element steht.
+    c.clipRenders = await waitFor(clip, (h) => document.querySelector('[data-testid=clip-view] .clip-hook')?.textContent === h && document.title.startsWith(h), clipAudio.hook, 10000);
     const cv = await clip.evaluate(() => ({
       form: document.querySelector('[data-testid=clip-view]')?.dataset.form, dir: document.documentElement.dir, title: document.title,
       kicker: document.querySelector('.clip-kicker')?.textContent, hook: document.querySelector('.clip-hook')?.textContent,
@@ -236,7 +237,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
 
     // Issue 52: neues komprimiertes Format ("z") ohne Kanal, Folge, Caption. Kopfzeile zeigt den Host der Quelle, der Link führt zur Quelle ab Start.
     await clip.goto(`${url}clip/#${zHash(clipAudio)}`);
-    c.clipZRenders = await waitFor(clip, () => !!document.querySelector('[data-testid=clip-view]'), undefined, 10000);
+    c.clipZRenders = await waitFor(clip, (h) => document.querySelector('[data-testid=clip-view] .clip-hook')?.textContent === h && document.title.startsWith(h), clipAudio.hook, 10000);
     const zv = await clip.evaluate(() => ({ hook: document.querySelector('.clip-hook')?.textContent, kicker: document.querySelector('.clip-kicker')?.textContent, caption: document.querySelectorAll('.clip-caption p').length, link: document.querySelector('.clip-link')?.getAttribute('href'), start: document.querySelector('[data-testid=clip-audio]')?.dataset.start, title: document.title }));
     r.clipZ = zv;
     c.clipZContent = zv.hook === clipAudio.hook && zv.kicker === new URL(url).hostname && zv.caption === 0 && zv.link === `${clipAudio.src}#t=3` && zv.start === '3' && zv.title.startsWith(clipAudio.hook);

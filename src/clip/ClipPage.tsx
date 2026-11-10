@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ClipView } from '../components/ClipView';
 import { Icon } from '../components/Icon';
 import { atTime } from '../moments/hook';
@@ -12,7 +12,9 @@ import { episodeUrlOf, isYtId, sourceLabel, type ClipPayload } from '../share/li
  * "Open the original" führt zur Quelle ab Start. Alte Links mit allen Feldern werden weiter voll gezeigt.
  */
 export function ClipPage({ clip }: { clip: ClipPayload | null }) {
-  useEffect(() => {
+  // Issue 55: Schreibrichtung, Sprache und Titel stehen, bevor die Seite gezeichnet wird (Layout-Effekt). Seit Issue 52 kommt der Inhalt asynchron,
+  // ein Effekt nach dem Zeichnen ließ ein Bild lang die Vorgaben (dir leer, Titel "Clip") stehen, und Tests lasen genau dieses Bild.
+  useLayoutEffect(() => {
     const html = document.documentElement;
     html.dir = clip?.dir ?? 'ltr';
     html.lang = clip?.lang ?? 'en';

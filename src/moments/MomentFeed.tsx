@@ -1940,7 +1940,9 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       // Laden sichtbar machen, hängende Momente überspringen. Brief 23 (iOS, Variante c): ein YouTube-Moment, der sich selbst angehalten hat,
       // wartet auf den Weiterstart oder auf den Tipp, er zählt nicht als hängend und wird nie übersprungen (gesehen erst nach Max' Wischen).
       // Issue 54: dasselbe für einen YouTube-Moment, der nach dem Start in der Geste nie auf PLAYING kam und die Tippfläche zeigt.
-      if (sl.st === STATE.PLAYING || userPaused.current || (IOS && sl.selfPauses > 0) || tapRef.current === sl.mid) {
+      // Issue 55: in einem anderen Reiter (Settings, Audio) ist der Moment angehalten, nicht hängend. Die Überwachung wartet auf die Rückkehr,
+      // sonst sprang sie nach WATCHDOG_MS weiter und spielte den Pool ohne Max durch (jeder Moment ein Sync-Anstoß).
+      if (sl.st === STATE.PLAYING || userPaused.current || !activeRef.current || (IOS && sl.selfPauses > 0) || tapRef.current === sl.mid) {
         waitSince.current = 0;
         setLoading(false);
         setNextReady(false);
