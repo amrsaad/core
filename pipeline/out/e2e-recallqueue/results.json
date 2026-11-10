@@ -1,5 +1,5 @@
 {
- "at": "2026-11-10T04:11:00.997Z",
+ "at": "2026-11-10T11:29:21.334Z",
  "runs": [
   {
    "browser": "webkit",
@@ -24,7 +24,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402941
+      "dueAt": 1792670402985
      }
     ]
    }
@@ -52,7 +52,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402494
+      "dueAt": 1792670402532
      }
     ]
    }
@@ -60,6 +60,34 @@
   {
    "browser": "webkit",
    "scenario": "note",
+   "checks": {
+    "feedUp": true,
+    "threeSeenNoCard": true,
+    "noCardWhileAway": true,
+    "queuedOne": true,
+    "diagQueued": true,
+    "soundAndFeedContinue": true,
+    "cardOnReturn": true,
+    "cardBeforeNextSwipe": true,
+    "cardIsTheQueuedMoment": true,
+    "queueEmptyAfterShow": true,
+    "diagShown": true,
+    "noSecondCard": true,
+    "noErrors": true
+   },
+   "notes": {
+    "queued": [
+     {
+      "id": "rq000000005:100",
+      "review": false,
+      "dueAt": 1792670402410
+     }
+    ]
+   }
+  },
+  {
+   "browser": "webkit",
+   "scenario": "background",
    "checks": {
     "feedUp": true,
     "threeSeenNoCard": true,
@@ -86,34 +114,6 @@
    }
   },
   {
-   "browser": "webkit",
-   "scenario": "background",
-   "checks": {
-    "feedUp": true,
-    "threeSeenNoCard": true,
-    "noCardWhileAway": true,
-    "queuedOne": true,
-    "diagQueued": true,
-    "soundAndFeedContinue": true,
-    "cardOnReturn": true,
-    "cardBeforeNextSwipe": true,
-    "cardIsTheQueuedMoment": true,
-    "queueEmptyAfterShow": true,
-    "diagShown": true,
-    "noSecondCard": true,
-    "noErrors": true
-   },
-   "notes": {
-    "queued": [
-     {
-      "id": "rq000000005:100",
-      "review": false,
-      "dueAt": 1792670402399
-     }
-    ]
-   }
-  },
-  {
    "browser": "chromium",
    "scenario": "settings",
    "checks": {
@@ -136,7 +136,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402348
+      "dueAt": 1792670402340
      }
     ]
    }
@@ -164,7 +164,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402317
+      "dueAt": 1792670402333
      }
     ]
    }
@@ -192,7 +192,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402261
+      "dueAt": 1792670402264
      }
     ]
    }
@@ -220,7 +220,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402259
+      "dueAt": 1792670402257
      }
     ]
    }
