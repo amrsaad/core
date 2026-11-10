@@ -1,0 +1,768 @@
+{
+ "source": "arxiv",
+ "date": "2026-11-10",
+ "records": [
+  {
+   "sourceId": "arxiv:2611.11497",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11497",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "TID System for Speech-COSER Challenge 2026: ASR Track",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "TID System for Speech-COSER Challenge 2026: ASR Track",
+    "abstract": "We describe the system submitted by Telefónica Innovación Digital to the Speech-COSER Challenge 2026, which features spontaneous speech from elderly speakers recorded in rural Spain. For ASR, we perform CTC-based pseudo-forced alignment scores audio-text match quality to guide a two-stage LoRA curriculum, followed by post-hoc magnitude pruning of the LoRA matrices to enhance generalization. An ensemble of seven systems combined via ROVER achieves 36.25\\% unnormalized and 22.17\\% normalized WER."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T16:50:34Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z"
+  },
+  {
+   "sourceId": "arxiv:2611.11487",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11487",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "THEATRON: A Benchmark for Evaluating Persona Persistence in Long-Horizon LLM Decision-Making",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "THEATRON: A Benchmark for Evaluating Persona Persistence in Long-Horizon LLM Decision-Making",
+    "abstract": "Existing evaluations often test persona expression rather than whether persona information persists in extended decision-making. We introduce THEATRON, a controlled benchmark that uses financial replay to evaluate persona persistence in long-horizon sequential decision-making. In these environments, models conditioned on fixed behavioral-finance personas observe shared daily market evidence and trajectory-specific account-state feedback and make sequential decisions over multi-month trajectories. We evaluate Zero-Shot, One-Shot, and Chain-of-Thought persona injection across four LLMs, using cumulative-return and action trajectories to diagnose within-persona stability, cross-persona separability, and action collapse. Persona conditioning produces systematic behavioral shifts beyond a no-persona baseline, and persona-level separation generally exceeds the variation induced by semantically equivalent descriptions. Nevertheless, these shifts do not reliably form coherent persona-specific policies: apparently stable separation can arise from stereotyped action collapse, while diverse policies can exhibit noisy trajectory switching. These findings expose a gap between observable persona-induced behavior and persistent, context-sensitive persona-conditioned decision policies. Code and benchmark data are publicly available at: https://github.com/yuyan12138/theatron"
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T16:29:09Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z"
+  },
+  {
+   "sourceId": "arxiv:2611.11477",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11477",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Robust and Private Swarm Learning via Zero-Knowledge Validator Admission and Consensus Aggregation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Robust and Private Swarm Learning via Zero-Knowledge Validator Admission and Consensus Aggregation",
+    "abstract": "Swarm Learning improves resilience and removes the need for a single trusted coordinator by distributing model aggregation and validation across participating nodes. However, it also delegates the validation of model updates to peers whose private data may be biased, unrepresentative, or adversarial, and existing Swarm Learning protocols generally do not attest that data, leaving decentralized validation as an attack surface. We present a robust, privacy-preserving Swarm Learning framework that makes verifiable data quality the condition for admission to the learning task. A validator joins only after a zero-knowledge attestation proves, without revealing any raw sample, that a reference model ran correctly on its private data. The attested outputs also yield a label-free class profile, so the network assembles a collectively IID validator pool from individually skewed validators as accurately as an oracle with the true labels (total-variation distance to uniform 0.025, against 0.021 for the oracle and 0.21 for random selection). Admitted validators score client updates and, through a Tendermint-style Byzantine Fault Tolerant consensus, agree on a gradient mask and a quality-derived aggregation weight for each submission, replacing dataset-size weighting with a quality-aware signal. Adapting the cut-layer idea of Split Learning, a challenge-based audit lets peers re-verify that a mask was computed on the attested data without an expensive end-to-end zero-knowledge proof. Across four benchmarks under non-IID partitions the framework matches FedAvg on clean data; under a gradient-scaling attack that collapses FedAvg to random chance, it retains 94% of clean accuracy on CIFAR-100 and over 99% on FashionMNIST, where FedAvg achieves only 2.1% and 11%. The result is a private, robust, and auditable foundation for decentralized learning."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T16:15:20Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z"
+  },
+  {
+   "sourceId": "arxiv:2611.11471",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11471",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Saidzoda-CA-EmbeddingGemma-300M: One Small Embedder for Tajik, Kazakh, Uzbek and Kyrgyz",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Saidzoda-CA-EmbeddingGemma-300M: One Small Embedder for Tajik, Kazakh, Uzbek and Kyrgyz",
+    "abstract": "The small open embedder EmbeddingGemma-300M, used as released, finds the right passage first for only 51.7% to 60.8% of Belebele questions in Tajik, Kazakh, Uzbek and Kyrgyz. We present Saidzoda-CA-EmbeddingGemma-300M, one model for all four languages. It is our Tajik fine-tune of EmbeddingGemma-300M, trained for one more epoch on 279,904 pairs: questions in Kazakh, Uzbek and Kyrgyz that our own language model wrote about source passages, a Tajik refresher, and English and Russian replay. On Belebele, recall@1 rises by 14.4 to 26.0 points in each language, to between 75.2% and 77.7%. Against single-language models trained with the same settings, the one model stays within 2.8 points at recall@1 in Kazakh, Uzbek and Tajik, with overlapping recall@10 intervals, though it also had more training. It keeps the Tajik law recall@10 of its starting point (92.2 against 92.4) but loses 4.4 points of law recall@1. A model trained on one of these languages also improves the others on Belebele, but less than training on them. The model still trails the 560M XLM-RoBERTa embedders on Kazakh, Uzbek and Kyrgyz Belebele: the better of multilingual-e5-large-instruct and BGE-M3, used as released, is 9.4 to 10.2 points ahead at recall@1. Our scores of those released models agree with the published MTEB results within 2.4 points. Russian and English recall@1 fall by 3.0 and 4.2 points."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T16:08:23Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z"
+  },
+  {
+   "sourceId": "arxiv:2611.11470",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11470",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "GOPR-CAD: Graph-of-Operations Progressive Reasoning for CAD Generation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "GOPR-CAD: Graph-of-Operations Progressive Reasoning for CAD Generation",
+    "abstract": "Generating accurate CAD models requires substantial engineering expertise and careful control of geometry, topology, and mechanical constraints. Text-to-CAD aims to simplify this process, but current LLM-based methods often generate CAD programs directly. Language models remain unreliable when producing long code while coordinating coupled geometric, topological, and dimensional constraints. Consequently, executable programs may still produce structurally incorrect models, which execution rate and rendered appearance may fail to reveal. To address these limitations, we propose GOPR-CAD, an agentic Text-to-CAD pipeline based on Graph-of-Operations Progressive Reasoning. A language model acts as a decision agent over encapsulated CAD operations and progressively constructs an executable operation graph, which a deterministic compiler converts into the final CAD model. This separation requires no additional training and supports different language models. To evaluate structural fidelity, we construct MHCAD, a benchmark of 300 standard mechanical part requirements derived from Machinery's Handbook. Their explicit structures enable reference-free STEP/B-rep evaluation. GOPR-CAD achieves 82.7% Structural Yield on MHCAD, and 87.2% Structural Yield on an external CADPrompt subset."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T16:07:56Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.11470": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.11469",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11469",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "RealEmbedBench: Benchmarking LLMs on Real-World Application-Layer Embedded Software Tasks",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "RealEmbedBench: Benchmarking LLMs on Real-World Application-Layer Embedded Software Tasks",
+    "abstract": "Large language models (LLMs) perform well on general coding tasks, but their capabilities in application-layer embedded software development remain underexplored. Existing embedded benchmarks primarily focus on hardware-in-the-loop validation in simulated environments. We introduce RealEmbedBench, a benchmark of 5,142 samples covering three application-layer tasks: code generation and completion, state machine modeling and implementation, and cross-OS code translation. We evaluate six representative LLMs and find substantial performance differences across tasks and models. Project context, especially the local code window, significantly affects code generation and completion. Models perform reasonably well at state machine modeling but struggle to translate these models into executable code. Cross-OS translation performance varies substantially by direction. Translation from Harmony to RT-Thread is particularly challenging, with an average pass rate of 0.1667. These findings suggest that developers should consider local code context when using LLMs for code generation and completion and select models according to the translation direction. They also motivate the use of more real-world state machine implementation data in LLM training to narrow the gap between modeling and executable code."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T16:05:31Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.11469": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.11460",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11460",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Identifiable alignment of unpaired representations",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Identifiable alignment of unpaired representations",
+    "abstract": "Aligning two models without paired data requires a distance that both share, yet existing methods use Euclidean or spherical geometry. This is either an arbitrary choice or imposed by their loss function. We show that, under a precise form of the manifold hypothesis, the pullback of the data metric gives such a distance for any two models of one data-generating process. This holds whether the models are encoders, decoders or both, and whatever their architecture, loss, prior or training data. The alignment map preserves this distance and the distribution of representations, and is identifiable if and only if the data distribution breaks every symmetry of the data manifold. We show that this symmetry breaking holds generically. Identifiability makes the alignment coupling the unique optimum of Gromov--Wasserstein and of its weighted combinations with a linear program. The linear program alone has the same optimum if almost every data point has a distinct distribution of distances. The coupling, and with it the alignment map, is recovered exactly from permuted samples, even without identifiability, and consistently from independent ones. Our method, Neural Gromov--Monge Alignment (NGMA), uses no pairs or labels and outperforms every unpaired and label-informed baseline. It relies on pullback distances to align image models with different priors and single-cell models trained on disjoint cells, where Euclidean distances fail."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T15:49:02Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.11460": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.11457",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11457",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "MOMENT-DP: Momentum Aware Evaluation of Correlated Noise for Differentially Private Training",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "MOMENT-DP: Momentum Aware Evaluation of Correlated Noise for Differentially Private Training",
+    "abstract": "Temporally correlated noise can substantially improve the utility of differentially private optimization, yet candidate mechanisms are commonly designed or evaluated using only partial information about the optimization process, such as workload structure, learning-rate schedules, or local curvature. We study whether persistent optimizer state provides additional information that can change the relative utility of privacy-valid correlated-noise mechanisms. We introduce MOMENT-DP, an optimizer-state-aware framework that models how temporally correlated privacy noise propagates through momentum-based optimization. For locally quadratic objectives, MOMENT-DP expresses privacy-induced final loss through an optimizer transfer operator that jointly captures curvature, learning-rate scheduling, momentum, and temporal noise covariance. NoiseCurve's curvature-aware quadratic criterion is recovered exactly as the zero-momentum, constant-learning-rate special case. Changing only momentum while holding curvature, schedule, privacy calibration, and candidate mechanisms fixed induces genuine mechanism-ranking reversals. The effect persists outside exact quadratic dynamics in per-example-clipped private logistic regression, while remaining unresolved in the neural regime we study. These results establish optimizer state as an under-modeled, decision-relevant axis in evaluating temporally correlated privacy noise."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T15:38:51Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z"
+  },
+  {
+   "sourceId": "arxiv:2611.11450",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11450",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "How Much Training-Inference Mismatch Can On-Policy Distillation Tolerate?",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "How Much Training-Inference Mismatch Can On-Policy Distillation Tolerate?",
+    "abstract": "On-policy distillation (OPD) trains a student language model on its own responses, guided by a fixed teacher. Generating these responses is expensive, so systems use quantized inference and asynchronous rollouts to reduce the cost. Both, however, introduce training-inference mismatch between the rollout engine and the model being trained. Such mismatch can destabilize reinforcement learning (RL), but its effects on OPD remain unclear. This paper investigates how much mismatch OPD tolerates, where its effects arise, and how training systems can use this tolerance. Measuring all mismatch sources on one scale, we examine quantization across three student-teacher pairs, with additional tests of weight staleness and injected noise on one pair. OPD tolerates substantial mismatch without meaningful loss of training quality but degrades at higher levels, revealing an empirical mismatch budget. Both the quality cost of mismatch and the mismatch introduced by quantization depend on the model, with some layers particularly sensitive to reduced precision. In controlled comparisons, OPD remains stable under rollout configurations that destabilize RL methods. Under weight noise, mismatch also shifts the prefixes reached during generation, introducing errors that per-token corrections cannot address. To put these findings into practice, we introduce a lightweight admission check that screens rollout configurations against a calibrated budget without requiring a full training run for each candidate. Model-specific FP8 recipes preserve training quality while providing capacity for at least $1.93\\times$ as many KV-cache tokens as BF16. Combining FP8 with asynchronous rollouts reaches the same training quality $1.62\\times$ sooner than synchronous BF16 training. Code is available at https://github.com/benyucong/train-inference-mismatch-opd"
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T15:22:47Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.11450": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.11447",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11447",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Learning to Rank Propagators in Constraint Programming",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Learning to Rank Propagators in Constraint Programming",
+    "abstract": "The order in which propagators are executed can substantially affect the performance of constraint programming solvers, yet propagator priorities are typically determined by fixed, manually designed heuristics. In this work, we explore learning instance-dependent propagator priorities from static problem features. We formulate the task as a learning-to-rank problem, addressing the challenge that the quality of a priority assignment can be measured through solver runtime, while the desired priorities of individual propagators are not directly observable. A self-attention-based model jointly scores the propagators present in an instance and is trained using pairwise preferences derived from solver runtimes measured under randomized propagator priority assignments, with a Plackett-Luce-based ranking objective. Predicted rankings are mapped to the discrete priority levels of the Choco solver before search begins, without modifying its propagation or search procedures. We evaluate the approach on XCSP3 instances and demonstrate that propagator ordering can have a substantial impact on solving time. On a test set of 698 instances, picked out as most difficult by problem class, the learned priorities increase the number of solved instances from 634 to 654, reduce median solver runtime by 27.93%, and reduce aggregate penalized runtime (PAR1) by 12.65% compared with Choco's default priorities. We further observe that improvements vary across problem classes and show that a simple policy selecting between learned and default priorities further increases the number of solved instances. These results demonstrate the potential of learning instance-dependent propagator priorities to improve constraint programming performance, particularly on difficult instances."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T15:18:52Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.11447": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.11437",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11437",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "How to \"train\" a surgeon? Benchmarking generalist agents in surgical scene understanding",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "How to \"train\" a surgeon? Benchmarking generalist agents in surgical scene understanding",
+    "abstract": "Evaluating general-purpose multimodal large language models (MLLMs) for surgical scene understanding remains limited due to scarce surgical data and fragmented evaluation protocols. We address these challenges through a two-stage evaluation framework for surgical scene understanding. In Stage I, we introduce SurgKnowBench, a diagnostic benchmark that harmonizes public surgical datasets across procedures and tasks and evaluates proprietary and open-source MLLMs to map the boundary of pretrained surgical competence. SurgKnowBench reveals that current models retain partial visual priors but remain weak on relational and procedural understanding and workflow assessment. Building on this failure frontier and motivated by the scaffolded nature of surgical training, we introduce SurgAgentGym, an agentic environment where general-purpose MLLM agents can use bounded knowledge search over SurgWiki and general-purpose visual grounding for surgical tasks. SurgAgentGym evaluates whether generalist agents can improve surgical understanding at inference time through tool-mediated evidence use, without additional surgical training. Our results show that agentic inference narrows the gap mainly for perception-heavy tasks, while fine-grained localization and expert-style assessment remain persistent bottlenecks. This opens a path toward future studies of agentic surgical understanding."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T15:00:44Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.11437": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.11426",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11426",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Vietnamese Legal Ontology: Every legal answer, traced to the article that grounds it",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Vietnamese Legal Ontology: Every legal answer, traced to the article that grounds it",
+    "abstract": "A legal answer is only as good as the article it rests on. Vietnam's largest open legal corpus pairs 109,543 published questions and answers with 573,851 legal documents, yet its citations are free text: \"Khoan 3 Dieu 101 cua Bo luat nay\" (\"Clause 3, Article 101 of this Code\") names neither the code nor its version. Following the five stages of NVIDIA Auto Ontology, Discover, Ground, Validate, Expose and Learn, we turn four open datasets into a knowledge graph of 11.5 M nodes and 16.0 M edges in which every node and edge carries its source record and method, with no duplicate keys, dangling edges or schema violations. Of 67,868 cited provisions, 61,487 resolve to a dated law version, 51,694 to a parsed article, clause or point, and 19,012 are confirmed word for word. The ontology then shows what flat records hide. 36% of the 78,361 answers whose citations resolve now cite a law that is no longer in force; 2,525 verified citations point to an article number that says something else in the current law; 2,520 citations were re-versioned because their words match a different version than their date suggests; and 5,575 document numbers are shared by several local authorities, one of them by 72. Every number in this paper is computed from the graph."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T14:39:10Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z"
+  },
+  {
+   "sourceId": "arxiv:2611.11416",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11416",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Modeling individual and item differences in atypicality inferences with ACT-R",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Modeling individual and item differences in atypicality inferences with ACT-R",
+    "abstract": "Humans engage in pragmatic reasoning when encountering mentions of highly predictable events. Such mentions may appear redundant, leading comprehenders to infer that the event is atypical, and accommodate this inference with an explanation for why it is atypical. However, these inferences are not drawn uniformly across individuals, and experimental items vary in inference rates due to differences in event typicality. We show that these patterns can be predicted with a resource-rational cognitive model in which comprehenders select interpretation strategies based on individual exploration tendencies and item-level predispositions. These parameters are estimated independently from participants' Raven's Matrices score, event typicality rating and language model based accommodation likelihood. Taken together with recent findings from reference games, our results motivate a new perspective on the mechanisms that support pragmatic inferences."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T14:30:24Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.11416": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.11396",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11396",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Search-by-Answer Bias in Retrieval Models",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Search-by-Answer Bias in Retrieval Models",
+    "abstract": "Dense retrievers are meant to select passages that match a query's semantic specification. We show they suffer from search-by-answer bias: they favor passages that mention answer objects the model knows (scores as likely), over passages that support valid alternative answers. We test this with controlled factual contrasts from LAMA/TREx. For each retriever, we measure how strongly the model scores the canonical object over an alternative object using a token-prediction head, and ask whether this score predicts passage rankings. Across eight retrievers, including DPR, Spider variants, Contriever, E5, and Qwen3-Embedding, larger token-prediction scores consistently predict higher retrieval scores for passages containing the corresponding object. This holds when passages differ only in the answer object, and even when the passage that mentions the high-scoring object expresses a wrong relation. Dense retrieval thus exhibits search-by-answer bias during passage selection, shaping which evidence is retrieved."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T14:05:03Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.11396": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.11386",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11386",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "What Travels Across Languages? Reading, Transfer and Erasure of Cross-Lingual Concept Subspaces in Bangla Idioms",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "What Travels Across Languages? Reading, Transfer and Erasure of Cross-Lingual Concept Subspaces in Bangla Idioms",
+    "abstract": "Cross-lingual concept analysis requires distinguishing the information that a subspace retains from the classifiers and erasers that transfer through it. We study these operations in six frozen encoders using 10,359 Bangla (Bengali) idiom senses, eight input conditions, and figurative-class and sentiment labels. Class-mean directions provide the most consistent evidence of shared coarse meaning: in post hoc analyses, they outperform random-subspace, permuted-label and covariance-matched nulls in all 12 model-label tests under balanced accuracy. A prospective internal re-split supports idiom-alone sharing in 10 of 12 tests, spanning five encoders. The original confirmatory logistic-regression family rejects both planned nulls in 4 of 12 tests, where English directions gain only a few accuracy points above the majority-class floor (3.0-7.3). Classifier transfer depends on the input map and regularization: English-trained class-mean readouts beat both zero-shot nulls in 8 of 12 discovery tests, and stronger source-selected penalties improve transfer through logistic and LEACE directions. These readouts use Bangla-validation-selected layers and unlabeled target preprocessing. Input controls show greater coarse-class sharing for explicit glosses than for idiom counterparts. Reading, however, does not imply effective erasure: English-fitted LEACE removes less than one percentage point of Bangla figurative-class accuracy, compared with 4-11 points for Bangla-fitted LEACE; INLP shows a similar asymmetry. Pattern-filter analysis, covariance-weighted input maps and a binary Gaussian overlap bound explain how these operations can diverge. The analogous multiclass ordering is an empirical diagnostic, observed in 11 of 12 cells. The results support an estimator-sensitive account of cross-lingual concept sharing and motivate evaluating reading, classifier transfer, erasure and overlap separately."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T13:54:11Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z"
+  },
+  {
+   "sourceId": "arxiv:2611.11382",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11382",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "The comparison of density estimation for transfer learning in Banach, Hilbert, Euclidean spaces",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "The comparison of density estimation for transfer learning in Banach, Hilbert, Euclidean spaces",
+    "abstract": "Domain adaptation or DA methods are indispensable when target labels or computational resources are scarce, yet the domain kernel density and subspace alignment approaches completely assume a Hilbertian geometry. They measure distributional discrepancy with symmetric L2 divergences over Euclidean feature spaces or reproducing kernel Hilbert spaces (RKHS). This preprint summarizes the manuscript Non-Hilbertian Domain Adaptation. Total Variation Alignment via L1 Density Regularization on Feature Manifolds, which proposes Banach Manifold Transfer Learning or BMTL. BMTL makes two coupled design decisions. The first one is that features are embedded on a geodesic manifold rather than treated as points of a flat Euclidean space, and the second one is that the density matching regularizer is formulated in an L1 Banach norm, whose minimization is equivalent, by Scheffe's theorem, to contracting the Total Variation or TV distance between domain densities, a bounded metric that weights all regions of the sample space uniformly. The L2 formulation, by contrast, squares deviations and therefore amplifies errors in the tails, over emphasizing density outliers that do not reflect meaningful distributional shift. Experiments on MNIST-USPS, COIL20, and Office+Caltech10 show consistent gains; the L1 variant beats an otherwise identical L2 ablation on every task, for example 92.44% vs. 89.80% on USPS->MNIST and surpasses the strongest baseline DMDA by +3.68% on average over twelve Office+Caltech transfers. This document situates the contribution with an explicit comparison of Euclidean, Hilbert, and Banach geometries."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T13:44:04Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z"
+  },
+  {
+   "sourceId": "arxiv:2611.11381",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11381",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Does Predictive Performance Translate to Causal Performance? Evaluating tabular foundation models as nuisance learners for causal effect estimation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Does Predictive Performance Translate to Causal Performance? Evaluating tabular foundation models as nuisance learners for causal effect estimation",
+    "abstract": "Tabular foundation models based on prior-data fitted networks (PFNs) achieve strong predictive performance, but their value for causal inference is unclear. We evaluated whether PFNs, which predict through in-context learning, could match or outperform conventional nuisance learners in supporting accurate causal estimation and reliable uncertainty quantification (inference). Learners modeled propensity scores and outcome regressions within doubly robust estimators of average causal effects, with and without cross-fitting, across synthetic and semi-synthetic settings with varying confounding complexity and effect heterogeneity. Under simple parametric data-generating processes, the PFNs were competitive with correctly specified parametric regressions and ensembles containing them. In more complex settings, they outperformed all conventional learners evaluated, including richly specified Super Learner ensembles, for both accuracy and uncertainty quantification. As sample size increased, only the two PFN models (TabPFN and Mitra) consistently approached nominal confidence interval coverage, whereas under-coverage persisted for conventional learners. In some settings, PFNs achieved near-nominal coverage and well-calibrated standard errors even without cross-fitting. At the smallest sample size (n=200) and in the higher-dimensional semi-synthetic settings, PFNs and other flexible learners exhibited poor coverage without cross-fitting. For PFNs, this appeared to be driven by propensity score overfitting consistent with in-sample memorization of treatment labels. These findings highlight the promise of prior-data fitted networks as in-context nuisance learners for causal estimation, while underscoring the need for further evaluation in challenging settings."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T13:41:41Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z"
+  },
+  {
+   "sourceId": "arxiv:2611.11372",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11372",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "LLM-based Multi-Criteria Deep Reinforcement Learning for Dynamic Efficient 5G UPF Selection",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "LLM-based Multi-Criteria Deep Reinforcement Learning for Dynamic Efficient 5G UPF Selection",
+    "abstract": "User plane function (UPF) selection in 5G networks is an active area of research, with various limited approaches proposed to enhance network efficiency and manage resources effectively. In this paper, we address this gap in the related literature by proposing a Deep Reinforcement Learning (DRL) UPF selection method that utilizes a dynamic, multi-objective reward function and validating it on a real-world 5G emulation platform. The proposed method is based on the large language models' (LLMs) translation of network operator intents and the network data analytics function (NWDAF) abnormality alerts. The experimental results validated in the real-world experimental setup demonstrate that our dynamic DRL solution achieves an effective balance between latency, power consumption, and traffic distribution, outperforming the heuristic baselines and fixed DRL by 16.89%. These findings highlight the real-world applicability of our approach for dynamic, intent-driven UPF selection."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T13:30:20Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z"
+  },
+  {
+   "sourceId": "arxiv:2611.11371",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11371",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "D3Tree: Learning to Prune Block-Diffusion Draft Trees for Efficient Verification",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "D3Tree: Learning to Prune Block-Diffusion Draft Trees for Efficient Verification",
+    "abstract": "Block-diffusion drafters propose a whole block of tokens in one forward pass, and draft trees built from their position-wise marginals increase the expected accepted length of speculative decoding. Every tree node occupies a query row in target verification, so under concurrent serving low-yield branches compete with other requests for verification capacity. Existing tree methods select verified nodes by draft probability under a fixed or cost-selected per-request budget, and thus always retain a prefix of the drafter's ranking. We present D3Tree, which learns which nodes of a block-diffusion draft tree are worth verifying. A tree-size head with 2H+2 parameters predicts each candidate's conditional survival from the draft state, the candidate embedding, and its draft log-probability. Thresholding the product of these scores along parent chains yields an ancestor-closed subtree whose size adapts to each request and decoding round. The head is trained on a frozen drafter with conditional labels on the full candidate tree; an optional joint mode also steers the drafter toward the retained reference path. At serving time, D3Tree verifies whole trees under light load and, under heavy load, allocates one batch-wide node budget by predicted survival, sized to the target's matrix-multiplication tiles. Retained trees share one ancestor-masked target pass, while construction, pruning, and scheduling run on the GPU and overlap with the host. Across six vision-language verifiers and 17 text and multimodal benchmarks, D3Tree is fastest in 70 of 72 load settings, with 3.2-4.0x speedup over autoregressive decoding for one request and 1.3-1.8x at 64 concurrent requests, where fixed-budget trees fall below autoregressive speed. Under a time-varying arrival trace, it has the lowest mean end-to-end latency in every arrival phase."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T13:29:14Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z"
+  },
+  {
+   "sourceId": "arxiv:2611.11368",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11368",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "BiVerify: Closing the Loop Between Backward and Forward Verification for Mathematical Self-Correction",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "BiVerify: Closing the Loop Between Backward and Forward Verification for Mathematical Self-Correction",
+    "abstract": "Large language models (LLMs) have made substantial progress in mathematical reasoning but still produce incorrect solutions to complex problems, indicating the need for more reliable self-correction mechanisms. Mathematical self-correction typically identifies errors through verification, which can proceed backward or forward. The two directions provide complementary verification capabilities. Backward verification checks a candidate answer against the original constraints, bypassing complex intermediate reasoning, but cannot ensure correct reasoning or objective completeness. Forward verification follows the problem conditions and current solution, enabling it to locate reasoning errors and assess objective completeness, but may overlook key constraints in complex solution chains. We propose BiVerify, a dynamically scheduled framework for bidirectional mathematical verification. BiVerify begins with backward verification to screen the answer against the original constraints, followed by forward verification of the reasoning process; subsequent direction switching, state resetting, and re-verification are governed by verification outcomes. Upon failure, the system revises the candidate or verification flow until the same candidate passes both directions. We also introduce shared mathematical tools that separate logical reasoning from precise computation. We systematically evaluate BiVerify on five challenging mathematical reasoning benchmarks using multiple mainstream DeepSeek, GPT, and Gemini models. BiVerify exceeds the strongest representative public baseline evaluated in this work by 13.5 percentage points in average accuracy, with the margin reaching 31.2 percentage points on GPT. Further analysis shows that BiVerify's overall performance exceeds that of either verification direction alone."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T13:20:00Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z"
+  },
+  {
+   "sourceId": "arxiv:2611.11349",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11349",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "AOP-Smart-Finder: A High-Throughput Human-AI Hybrid Framework for AOP Discovery and Evidence Mapping from Large-Scale Literature",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "AOP-Smart-Finder: A High-Throughput Human-AI Hybrid Framework for AOP Discovery and Evidence Mapping from Large-Scale Literature",
+    "abstract": "The rapid growth of scientific literature and the high heterogeneity of biological terminology and mechanistic descriptions make it difficult for researchers to integrate scattered research evidence, identify connections among biological events, and construct mechanistic networks. Here, we developed a high-throughput human-AI hybrid framework, AOP-Smart-Finder, for biological event discovery, relationship mining, and Adverse Outcome Pathway (AOP) construction and evidence mapping from large-scale literature. This framework integrates Large Language Models (LLMs), AOP-Smart retrieval-augmented generation (RAG) technology, and Python-based automation, supporting two analysis modes: one based on a single compound and the other based on a predefined set of biological events. In the di(2-ethylhexyl) phthalate (DEHP) case, the system processed 12,983 articles within 30 min and included 1,093 of them, from which it extracted 1,589 biological events (including 458 official key events [KEs] and 1,131 candidate KEs) and 2,519 key event relationships (KERs). In the amyotrophic lateral sclerosis (ALS) case, the system identified 55 stressors from 437 articles and extracted 278 biological events and 548 event relationships. Following manual curation and Weight of Evidence (WoE) evaluation, a mechanistic network comprising 16 KEs and 23 KERs was ultimately constructed. This framework can either use existing AOPs as knowledge guidance for mechanistic expansion and evidence supplementation, or discover novel event connections and construct mechanistic networks around user-specified research topics. It provides a high-throughput, traceable, human-AI hybrid methodology for complex biological mechanism elucidation and AOP discovery driven by large-scale literature."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T12:50:55Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z"
+  },
+  {
+   "sourceId": "arxiv:2611.11348",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11348",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Separation of Skilling Context for Standard Operating Procedure-based Agents",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Separation of Skilling Context for Standard Operating Procedure-based Agents",
+    "abstract": "Standard Operating Procedures (SOPs) are kept concise for human readability, so LLM agents that generate executable skills from them lack the tacit knowledge and implementation details needed for automation. Human intervention fills these gaps, but must be repeated as SOPs evolve---a problem we call \\textit{SOP-skill drift}. We propose managing SOPs and Contextual Knowledge (CK) separately, together with a \\textit{contract-aware} evaluation that distinguishes genuine violations from CK-resolved differences. On eight Indeed-derived workflows (single LLM), it raises the functional-equivalence rate from 12\\% to 58\\%. Under three SOP-revision perturbations, previously extracted CK already covers 79.5\\% of newly introduced automation gaps."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T12:49:31Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.11348": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.11342",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11342",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Agent Self-Improvement with Frozen Weights: The Added Value and Limits of Failure Traces",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Agent Self-Improvement with Frozen Weights: The Added Value and Limits of Failure Traces",
+    "abstract": "We evaluate whether an AI agent's harness, the notes around its model, can learn from the agent's failure traces beyond a matched search that never sees them. It can, but less than it looks. We tested an open 9-billion-parameter model with fixed weights; a larger teacher model wrote its notes. On generated customer-service decisions, where both note writers were told the target rules, notes based on the agent's mistakes improved accuracy by 4.0 percentage points over notes from the same process with the mistakes withheld. That process alone, trying and keeping better-scoring notes, reached about 60% of the total improvement. In full customer-service conversations the same notes showed no demonstrated improvement. Separately, a strict screen of single lessons admitted two customer-service lessons, still awaiting tests on new data, and one tool-use lesson, written without seeing the agent's mistakes, which showed no demonstrated gain on new tool-use tasks. A neutral note with no procedure scored higher than the learned lessons (exploratory). A blind audit judged 146 of 240 tool-use test items defective."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T12:39:45Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.11342": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.11340",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11340",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Agentic Attribution of Cloud Resource Ownership",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Agentic Attribution of Cloud Resource Ownership",
+    "abstract": "Security tools raise findings across cloud environments, and AI agents now investigate and prioritize them. A finding is still resolved by people: it has to reach the people responsible for fixing it and accountable for the resource it concerns. Ownership is the organizational context that decides who that is. Where recorded, it is declared by hand in configuration management databases or owner tags and goes stale unless kept current; accounts are shared, and automation creates much of the infrastructure. The knowledge sits in work records, code history, audit logs and identity directories, encoded in each organization's own conventions. Recovering it poses four challenges: the signal is scattered across sources, none of them authoritative; the conventions that carry it differ between organizations; reaching an owner takes multi-hop links; and those related to a resource differ in the strength of their relation. We define ownership as a set of entities, people or teams, each related to the resource by one of five patterns ordered by strength. We present a reference architecture for agentic ownership attribution that derives ownership from these records instead of declaring it: it profiles an organization offline into tested signal procedures and an ownership playbook, then attributes each resource with a coordinator agent and parallel investigators, with confidence computed by rules. On 100 resources of 50 Amazon Web Services (AWS) resource types in one organization, we pool the architecture's candidates with those of an unprimed general-purpose agent and verify every evidence piece against the records. The architecture reaches 92.1% weighted recall and 86.6% weighted precision, against 54.8% and 77.4%, at 0.55 times the agent's cost per unit of coverage. The difference lies in people who build and change resources without an explicit owner, found through work records and code history."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T12:37:23Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.11340": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.11336",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11336",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Where Should a Gate Look? Input vs. State Gating in Diagonal State Space Models",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Where Should a Gate Look? Input vs. State Gating in Diagonal State Space Models",
+    "abstract": "Modern state-space models owe much of their computational efficiency to their linear, often diagonal, dynamics. Classical recurrent neural networks instead allow nonlinear state-to-state interactions, which can be beneficial when memory updates need to depend on the past context. In this paper, we ask whether state feedback through a simple gate regulating memory updates can enhance the expressivity of diagonal state-space models. To investigate this question, we compare gates that depend on the current input, the recurrent state, or both. We establish a strict expressivity separation: for scalar models, state gating solves induction-head tasks for arbitrary vocabulary size and sequence length, whereas input gating fails on a finite instance under standard stability assumptions on the state transition matrix. Experiments show that state gating retains its advantage on induction-head tasks in higher-dimensional models, whereas input gating performs better on selective copying tasks. Together, our results show that even a simple, diagonal form of state-feedback gating can unlock capabilities unavailable to input-controlled models, while input and state gating offer complementary strengths and achieve the strongest overall performance when combined."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T12:27:41Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.11336": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.11334",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11334",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "MoT3DVG: A Benchmark for Outdoor 3D Visual Grounding with Motion-Aware Descriptions and Temporal Cues",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "MoT3DVG: A Benchmark for Outdoor 3D Visual Grounding with Motion-Aware Descriptions and Temporal Cues",
+    "abstract": "3D visual grounding (3DVG) localizes language-referred objects in 3D scenes, with broad applicability in both indoor and outdoor environments. However, existing 3DVG research focuses on static indoor objects, limiting its use in dynamic outdoor autonomous driving. Motion descriptions, which capture the temporal dynamics of moving objects, offer a promising way to address this challenge. We therefore introduce MoT3DVG, a large-scale dataset for dynamic-aware outdoor 3DVG with temporally evolving motion descriptions. It contains 850 scenarios with 31,128 frames from nuScenes dataset, and provides 144,568 language prompts with motion-aware descriptions for dynamic objects across time. We further propose DynaVG, a novel framework that effectively leverages temporal cues for outdoor 3DVG. In addition to the standard modality-specific encoders, DynaVG introduces a Short-Long Integrated Dynamic Encoding (SLIDE) module before the language-point cloud alignment. SLIDE models both local motion cues and global temporal context via short-term window encoding and long-term window shifting. Extensive experiments demonstrate its state-of-the-art performance on MoT3DVG, validating the effectiveness of motion-aware encoding. Our work reveals open challenges and promising directions for future research in outdoor 3DVG."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T12:18:55Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z"
+  },
+  {
+   "sourceId": "arxiv:2611.11319",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11319",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Verify Before You Fetch: Reliable KV Cache Compression for LLM Inference",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Verify Before You Fetch: Reliable KV Cache Compression for LLM Inference",
+    "abstract": "Long-context applications, long-lived agents, and multi-agent systems require large language models (LLMs) to process and retain extensive information. In these settings, the KV cache can exceed GPU high-bandwidth memory (HBM) capacity, necessitating offloading to host memory, where CPU-to-GPU transfers can dominate inference latency. While KV cache compression can reduce data movement, query-agnostic compression that guarantees accurate attention for arbitrary queries is extremely challenging, if not impossible. We introduce VerKV, a hybrid approach that provides $(ε, δ)$ guarantees for approximating attention on any given query. VerKV maintains a compact set of query-agnostic pivotal tokens on the GPU, together with a token-level sketch of the full KV cache, while retaining the complete cache in CPU memory. We introduce a novel stochastic sampling procedure, PoissonComp, to select the pivotal tokens. At inference time, our proposed KVFetch algorithm uses the pivotal tokens and the sketch to estimate the relative error of the resulting attention computation. If the estimate satisfies a user-specified $(ε, δ)$ tolerance, inference proceeds without accessing host memory. Otherwise, VerKV performs query-aware retrieval to fetch additional tokens from the CPU, refining the attention computation to meet the required tolerance. Thus, VerKV enables attention with bounded approximation error while minimizing CPU-to-GPU transfers. We show that PoissonComp outperforms state-of-the-art approaches to KV cache compression. Combined with KVFetch, it achieves near-dense performance (90-100% of dense quality at 32K context length, averaged over RULER and LOFT), using Qwen3-4B, Qwen3.5-9B and Ministral-3-8B, while reducing the GPU memory footprint by 8-32x and keeping CPU-to-GPU memory fetches within 2-23% of the cache per generated token, depending on the model."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T11:43:34Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.11319": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.11318",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11318",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "PROLA: Principal-Orthogonal Low-rank Adaptation for Predictive Spatiotemporal Weather Downscaling",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "PROLA: Principal-Orthogonal Low-rank Adaptation for Predictive Spatiotemporal Weather Downscaling",
+    "abstract": "High-resolution weather prediction is important for resolving local atmospheric patterns missed by coarse global forecasts. Large pretrained weather backbones have improved global forecasting, but adapting them to produce future high-resolution fields from recent coarse states remains challenging and costly. We formulate this setting as Predictive Spatiotemporal Weather Downscaling (PSWD), a task that jointly refines spatial and temporal resolution while predicting future high-resolution trajectories. To this end, we propose a framework that decomposes prediction into spatial and temporal stages using a shared pretrained backbone, fixed numerical scaffolds, and lightweight residual heads. For backbone adaptation, we introduce PROLA (PRincipal-Orthogonal Low-rank Adaptation), which allocates a fixed low-rank budget between pretrained weights' principal directions and their orthogonal complement. PROLA further rescales rank-1 optimizer updates using gradient signals, improving adaptation without increasing trainable rank. Experiments in the PSWD setting show that PROLA outperforms representative low-rank adaptation baselines. Further experiments across diverse datasets and tasks support the broader applicability of PROLA, showing that its benefits extend beyond the primary weather downscaling setting."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T11:42:31Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z"
+  },
+  {
+   "sourceId": "arxiv:2611.11316",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11316",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "ReGKG-2025: A GKG-Compatible Reconstruction of the GDELT Global Knowledge Graph for the Missing Period of 14 June to 2 July 2025",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "ReGKG-2025: A GKG-Compatible Reconstruction of the GDELT Global Knowledge Graph for the Missing Period of 14 June to 2 July 2025",
+    "abstract": "The June 2025 outage in the Global Database of Events, Language, and Tone (GDELT) collection pipeline left a gap in the Global Knowledge Graph (GKG), interrupting article-level news metadata used in downstream research. ReGKG-2025 is an archive-derived sample of 281,620 reconstructed article records covering all 1,665 missing 15-minute batches. Articles were recovered from Common Crawl and the Wayback Machine using source quotas estimated from surrounding native GKG data. Text was screened and normalized, non-English bodies were translated, and flagged records were manually reviewed. Eligible articles were converted to the 27-column GKG 2.1 layout. The versioned package includes record-level provenance, archive replay and WARC locators, source summaries, source-by-day calibration weights, and the complete manual decision journal. The sample reaches about 14% of modeled native volume and represents sources accounting for 84% of selected reference record mass. In an intact-week test, 41% of recovered articles matched native GKG records; field agreement on matched pairs is close to the processor baseline (tone MAE 1.69). The dataset supports retrospective content analysis and source-level aggregates; its tone and theme distributions differ from native GKG, and it does not support exhaustive counts. Data: https://doi.org/10.5281/zenodo.23964265."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T11:41:21Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z"
+  },
+  {
+   "sourceId": "arxiv:2611.11306",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.11306",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "ScrapeBench: Evaluating Legal Compliance of AI Agents in Website Scraping",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "ScrapeBench: Evaluating Legal Compliance of AI Agents in Website Scraping",
+    "abstract": "AI agents deployed on the open web are becoming more capable of performing actions that may breach contractual provisions and violate computer security laws. In this paper, we introduce ScrapeBench, the first agentic benchmark for empirically evaluating the legal compliance of AI agents with website scraping policies, namely terms of service (ToS) and robots.txt directives. Across widely used closed-weight and open-weight AI agents, we find that most agents exhibit low compliance rates (< 5%) when instructed to scrape websites in our sample of 1,626 popular websites that explicitly prohibit scraping. In addition, we observe that even where AI agents actively check the applicable ToS and robots.txt, they continue to exhibit low compliance rates. Conversely, in our sample of 269 websites that do not prohibit scraping, we observe that agents sometimes refuse to scrape despite it being lawful, such as Claude Opus 4.6 exhibiting an over-refusal rate of 98.5%. Our human baseline experiments (n = 180 participants) suggest that humans exhibit compliance rates comparable to AI agents but over-refuse at much higher rates."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-08T11:19:18Z"
+   },
+   "fetchedAt": "2026-11-10T04:09:15.968Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.11306": 200
+   }
+  }
+ ]
+}
