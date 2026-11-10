@@ -39,6 +39,11 @@ export interface YTPlayer {
   isBuffered?(): boolean;
   /** Nur Stream-Player: Der Moment kommt aus dem Offline-Vorrat (Blob-URL) */
   isLocal?(): boolean;
+  /**
+   * Brief 12: Zähler für angekommene Daten des geladenen Moments. Er wächst, solange Bytes ankommen (Stream: progress-Ereignisse und Pufferende,
+   * YouTube: geladener Anteil). Der Feed vergleicht nur, ob sich der Wert ändert, nie die Höhe. 0 heißt: noch kein Byte.
+   */
+  bytes?(): number;
   /** Nur Stream-Player: Läuft der Moment unverändert, weil es noch keinen Web-Audio-Kontext gab, jetzt an die geregelte Spur hängen (erste Berührung) */
   relevel?(): void;
   /** YouTube-Player: an eine Stelle springen */
@@ -322,6 +327,8 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   let trialFailed: string | null = null;
   /** Ton und Wiedergabe des laufenden Stream-Elements (volumechange, playing, pause), YouTube liest den Hinweis aus dem Player */
   let hlsSnd: SoundObs = SOUND_NONE;
+  /** Brief 12: progress-Ereignisse des laufenden Stream-Elements seit dem letzten Laden (Daten kommen an) */
+  let hlsProgress = 0;
   const soundChanged = () => events.onSound?.();
   const setHlsState = (st: number) => {
     hlsState = st;
@@ -406,6 +413,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     });
     el.addEventListener('waiting', () => mine() && setHlsState(STATE.BUFFERING));
     el.addEventListener('ended', () => mine() && setHlsState(STATE.ENDED));
+    el.addEventListener('progress', () => { if (mine()) hlsProgress++; });
     el.addEventListener('timeupdate', () => {
       if (mine() && mode === 'hls' && el.currentTime >= endAt && !el.paused) {
         el.pause();
@@ -616,6 +624,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     pending.delete(el);
     if (el.dataset.src !== src) {
       el.dataset.src = src;
+      hlsProgress = 0;
       el.addEventListener('loadedmetadata', onMeta, { once: true });
       el.addEventListener('canplay', onCanPlay, { once: true });
       pending.set(el, () => {
@@ -767,6 +776,19 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     getDuration: () => (mode === 'hls' ? (deckMode ? audioDeck.duration(sink) ?? 0 : (media.duration || 0) + offset) : yt.getDuration()),
     isBuffered: () => mode === 'hls' && hlsState === STATE.CUED && (deckMode ? !!deckClip && LOCAL.has(deckClip.key) : media.readyState >= 3),
     isLocal: () => mode === 'hls' && (deckMode ? audioDeck.local(sink) : media.dataset.local === '1'),
+    bytes: () => {
+      if (mode === 'hls') {
+        if (deckMode) return 0;
+        // Pufferende in Zehntelsekunden plus Zahl der progress-Ereignisse: beides wächst nur, wenn Daten ankommen
+        let end = 0;
+        try { for (let i = 0; i < media.buffered.length; i++) end = Math.max(end, media.buffered.end(i)); } catch { /* kein Medium */ }
+        return hlsProgress + Math.round(end * 10) + (media.readyState >= 2 ? 1 : 0);
+      }
+      try {
+        const f = (yt as unknown as { getVideoLoadedFraction?: () => number }).getVideoLoadedFraction?.() ?? 0;
+        return Math.round(f * 10_000);
+      } catch { return 0; }
+    },
     relevel: () => {
       if (mode !== 'hls') return;
       if (deckMode) {

@@ -1071,6 +1071,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     p8.on('pageerror', (e) => errors8.push(String(e)));
     c.badFeedStarts = await waitFor(p8, () => !!window.__core?.moment());
     c.badFirstPlays = await waitFor(p8, () => window.__core.state() === 1 && !/^errorvid/.test(window.__core.moment().videoId));
+    if (!c.badFirstPlays) r.badStartDiag = await p8.evaluate(() => ({ idx: window.__core.idx(), id: window.__core.moment()?.videoId, st: window.__core.state(), diag: window.__core.diag().slice(-40) }));
     const badWalk = [];
     for (let n = 0; n < 12; n++) {
       await p8.evaluate(() => window.__core.next());

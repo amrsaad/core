@@ -31,6 +31,16 @@ window.YT = { PlayerState: { ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED
   const run = () => { clearInterval(timer); timer = setInterval(() => { t += window.__ytSlow ? 0.1 : 10; paint(); if (t >= endAt) { clearInterval(timer); t = endAt; set(0); } }, 100); set(1); };
   // Wie bei YouTube: Zustandswechsel kommt erst nach dem Start, ein pauseVideo im Callback stoppt den Lauf
   const play = () => {
+    // Issue 54 (nur Tests, window.__ytStartHang): der Start kommt nie auf PLAYING, wie in Max' Diag 10.11. (state 3, dann -1, 35 s lang). Gilt für jeden
+    // Start, mit und ohne Geste, bis der Test den Schalter löscht.
+    if (window.__ytStartHang) {
+      window.__ytlog.push('ios start hang ' + vid);
+      clearInterval(timer);
+      set(3);
+      const v0 = vid;
+      setTimeout(() => { if (window.__ytStartHang && vid === v0 && st === 3) set(-1); }, 300);
+      return;
+    }
     if (ios()) {
       if (gesture()) { unlocked = true; blocked = false; window.__ytlog.push('ios play in gesture ' + vid); }
       else if (!muted && !free()) {

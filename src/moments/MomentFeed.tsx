@@ -126,8 +126,19 @@ interface Slot {
   selfPauses: number;
   resumeAt: number;
   resumeTimer: number;
+  /** Brief 12: letzter Stand des Datenzählers des Players (bytes) und Zeitpunkt der letzten Änderung (0: noch kein Byte seit dem Laden) */
+  bytesSeen: number;
+  bytesAt: number;
+  /** Brief 12: Zeitpunkt des Vorladebefehls (cue oder stummes Laden) als Nachbar, für die Zeile "video: preload ... canplay after N ms" */
+  cueAt: number;
+  /** Brief 12: die Zeilen "preload ... canplay" und "slow net, showing still" stehen je Moment nur einmal in der Diag */
+  preloadLogged: boolean;
+  stillLogged: boolean;
+  /** Issue 54 (iOS): Zeitgeber der Startüberwachung nach einem Start in der Geste (0: keine), und ob der eine Wiederholungsstart schon ging */
+  startTimer: number;
+  startRetried: boolean;
 }
-const newSlot = (): Slot => ({ host: null, el: null, player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, cover: null, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0 });
+const newSlot = (): Slot => ({ host: null, el: null, player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, cover: null, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0, bytesSeen: 0, bytesAt: 0, cueAt: 0, preloadLogged: false, stillLogged: false, startTimer: 0, startRetried: false });
 /**
  * Brief 23 (Issue 48): Auf iOS laufen YouTube-Momente nicht stumm vorgewärmt (WebKit hält sie beim Lautschalten ohne Geste an). Sie werden nur
  * per cue vorbereitet und beim Wisch direkt im Handler der Berührung laut gestartet (Variante a des Briefs). Eigene Streams sind nicht betroffen.
@@ -141,8 +152,33 @@ const GESTURE_MS = 3000;
 const SELF_PAUSE_MS = 2500;
 /** So lange darf der eine Weiterstart nach der Selbstpause brauchen, bis die Tippfläche kommt */
 const RESUME_MS = 1500;
+/**
+ * Issue 54 (iOS): das Sicherheitsnetz aus Brief 23 greift nur bei einer Fremdpause (state 2). Bleibt der Player nach "play in gesture" bei -1, 3 oder 5
+ * stehen (Max' Diag 10.11.: 35 s ohne PLAYING), kommt nach START_RETRY_MS ein einziger zweiter playVideo ("yt: retry start"), nach weiteren
+ * START_GIVEUP_MS ohne PLAYING die Tippfläche "Tap to play". Solange die Überwachung läuft oder die Tippfläche steht: kein soundGuard, kein Watchdog-Skip.
+ */
+const START_RETRY_MS = 3000;
+const START_GIVEUP_MS = 3000;
 /** Zeit, die der Start der Vorlade-Player nach dem Kaltstart höchstens hinter dem aktuellen Moment wartet (Issue 22) */
 const GATE_MS = 3500;
+/**
+ * Brief 12 (Issues 22, 33): Hänge-Überwachung im sichtbaren Feed erst nach 25 s, und nur, wenn in dieser Zeit kein einziges Byte kam (bytes des Players unverändert).
+ * Kommen Bytes an, wartet der Moment weiter mit Standbild und "Loading", er wird nie übersprungen. Verdeckt (Audio im Hintergrund) bleibt die alte Grenze von 12 s,
+ * dort wird getauscht, nicht übersprungen (Brief 14b).
+ */
+const WATCHDOG_MS = 25_000;
+const WATCHDOG_HIDDEN_MS = 12_000;
+/** Brief 12: ohne erstes Bild nach dieser Zeit gilt das Netz als schlecht, der Moment zeigt sein Standbild (Zeile "video: slow net, showing still") */
+const STILL_MS = 6_000;
+/** Brief 12: Datensparmodus oder 2g: nur ein Nachbar wird vorgeladen, nicht zwei */
+const lowNet = (): boolean => {
+  try {
+    const c = (navigator as unknown as { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+    return !!c && (!!c.saveData || c.effectiveType === '2g' || c.effectiveType === 'slow-2g');
+  } catch {
+    return false;
+  }
+};
 /** Zwei Zeilen Abdeckfläche über dem YouTube-Titelbereich (60 px) und dem Logo-Bereich (48 px) des 16:9-Bildes */
 const COVER_TOP = 60;
 const COVER_BOTTOM = 48;
@@ -374,6 +410,9 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const clock = useRef(new CueClock());
   const shownCue = useRef(-2);
   const [loading, setLoading] = useState(false);
+  /** Brief 12: der aktuelle Moment hängt und der nächste ist spielbereit (Statuszeile "Next is ready", Tipp geht weiter) */
+  const [nextReady, setNextReady] = useState(false);
+  const nextReadyRef = useRef(false);
   /** Audio-Reiter: ein Netzstart wartet auf Daten (Pille "Loading, keep screen on") */
   const [deckWait, setDeckWait] = useState(false);
   const [focusSheet, setFocusSheet] = useState(false);
@@ -552,6 +591,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       if (sl === keep || !sl.gestureAt || sl.index === idxRef.current) continue;
       sl.gestureAt = 0;
       sl.gestureLogged = false;
+      clearStartWatch(sl);
       undone = true;
       try {
         sl.player?.pauseVideo();
@@ -592,9 +632,45 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       // Tempo gleich mit, der Zustandswechsel PLAYING kommt hier vor goTo und setzt es nicht mehr (ytApi prüft es nach)
       sl.player.setPlaybackRate(clampRate(rateRef.current));
       diag.current.push(`yt: play in gesture ${m!.id}${soundOn.current ? '' : ' (muted)'}`);
+      watchStart(sl);
     } catch {
       /* Player nicht bereit, goTo startet wie bisher */
     }
+  };
+  /** Issue 54: Startüberwachung dieses Slots beenden (neuer Moment, PLAYING angekommen, Wisch zurückgefedert) */
+  const clearStartWatch = (sl: Slot) => {
+    window.clearTimeout(sl.startTimer);
+    sl.startTimer = 0;
+    sl.startRetried = false;
+  };
+  /**
+   * Issue 54 (iOS): nach einem Start in der Geste muss PLAYING kommen. Bleibt der Player bei -1, 3 oder 5, geht nach START_RETRY_MS genau ein zweiter
+   * playVideo ab (ohne Tonänderung), nach weiteren START_GIVEUP_MS ohne PLAYING steht die Tippfläche "Tap to play" (Weg aus Brief 23).
+   * Ein Nachbar, der nie aktuell wurde (Feder zurück), wird von undoGesturePlay abgeräumt, die Überwachung endet dort mit.
+   */
+  const watchStart = (sl: Slot) => {
+    clearStartWatch(sl);
+    const mid = sl.mid;
+    const t0 = performance.now();
+    const stuck = () => sl.mid === mid && sl.index === idxRef.current && sl.st !== STATE.PLAYING && sl.st !== STATE.PAUSED && sl.st !== STATE.ENDED && !userPaused.current && !sl.broken && !textRef.current && !forYouRef.current && !recallRef.current;
+    const giveUp = () => {
+      sl.startTimer = 0;
+      if (!stuck()) return;
+      diag.current.push(`yt: no start ${mid} st=${sl.st} after ${Math.round(performance.now() - t0)} ms`);
+      showTapPlay(sl);
+    };
+    sl.startTimer = window.setTimeout(() => {
+      sl.startTimer = 0;
+      if (!stuck()) return;
+      sl.startRetried = true;
+      diag.current.push(`yt: retry start ${mid} st=${sl.st}`);
+      try {
+        sl.player?.playVideo();
+      } catch {
+        /* Player nicht bereit */
+      }
+      sl.startTimer = window.setTimeout(giveUp, START_GIVEUP_MS);
+    }, START_RETRY_MS);
   };
   /** Brief 23 (Variante c): Tippfläche "Tap to play" für den aktuellen YouTube-Moment, der sich zweimal selbst angehalten hat. Leer: keine. */
   const [tapPlay, setTapPlay] = useState('');
@@ -732,7 +808,9 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     const waiting = [...gateWait.current];
     gateWait.current.clear();
     diag.current.push(`video: preload gate open (${why}), ${waiting.length} waiting`);
-    for (const sl of waiting) if (sl.index >= 0 && sl.player && sl.ready) assign(sl, sl.index, false);
+    // Brief 12: ein wartender Slot, der inzwischen der aktuelle ist (Fehler-Skip vor dem ersten Bild), spielt schon. Ihn hier ohne play neu zuzuweisen hieße pauseVideo
+    // auf den laufenden Moment, danach stand er bis zur Hänge-Überwachung still.
+    for (const sl of waiting) if (sl.index >= 0 && sl.index !== idxRef.current && sl.player && sl.ready) assign(sl, sl.index, false);
   };
 
   const openGateRef = useRef(openGate);
@@ -743,6 +821,12 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     slot.index = j;
     // Text-Momente haben keinen Player
     if (!m || m.form === 'text' || !slot.player || !slot.ready) return;
+    // Brief 12: im Datensparmodus oder bei 2g lädt nur der nächste Moment vor. Der übernächste bleibt frei (index -1), der Wisch holt ihn dann als nächsten nach.
+    if (!play && j - idxRef.current >= 2 && lowNet()) {
+      if (slot.mid !== m.id) diag.current.push(`video: preload ${m.id} deferred (save data or 2g)`);
+      slot.index = -1;
+      return;
+    }
     // Ohne YouTube-API (offline) tut ein YouTube-Moment nichts: merken und überspringen, nie hängen bleiben
     if (ytStub.current && streamKind(m) === 'youtube') {
       bad.current.add(m.videoId);
@@ -773,6 +857,13 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         slot.resumeAt = 0;
         window.clearTimeout(slot.resumeTimer);
         slot.resumeTimer = 0;
+        clearStartWatch(slot);
+        // Brief 12: Datenzähler, Vorlade-Zeitpunkt und Diag-Marken gehören zum Moment
+        slot.bytesSeen = 0;
+        slot.bytesAt = 0;
+        slot.cueAt = play ? 0 : performance.now();
+        slot.preloadLogged = false;
+        slot.stillLogged = false;
         resetWarm(slot);
         // Der nächste Moment läuft nach dem Laden stumm warm, der übernächste hält am ersten Bild. Ein aktueller Moment ohne Warmlauf bekommt die Abdeckfläche.
         // iOS (Brief 23): YouTube-Momente laufen nie warm, sie werden nur per cue vorbereitet.
@@ -853,6 +944,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       if (sl.st === STATE.PLAYING || !soundOn.current) return;
       // Brief 23 (iOS, Variante c): nach einer Selbstpause des Players kein Nachstoßen mehr, es gibt einen Weiterstart und dann die Tippfläche
       if (IOS && sl.selfPauses > 0) return;
+      // Issue 54 (iOS): ein Start in der Geste hat seine eigene Überwachung (ein Wiederholungsstart, dann die Tippfläche), soundGuard stößt nicht dazwischen
+      if (IOS && (sl.startTimer || tapRef.current === sl.mid)) return;
       diag.current.push(`soundGuard slot${sl.index} st=${sl.st} attempt=${attempt}`);
       try { sl.player.playVideo(); } catch { /* Player noch nicht bereit */ }
       if (attempt < 3) soundGuard(j, attempt + 1);
@@ -1208,7 +1301,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       const t0 = performance.now();
       // iOS (Brief 23): "gesture" heißt im Wisch-Handler gestartet, der Slot gilt wie nach einem Warmlauf als gepuffert
       const gesture = !!target.gestureAt && t0 - target.gestureAt < GESTURE_MS;
-      const ready = !single && !!nm && target.ready && holds && (gesture || target.warm === 'done' || target.st === STATE.PAUSED || (target.st === STATE.CUED && !!target.player?.isBuffered?.()));
+      // Brief 12: ein Nachbar, der gerade stumm warm läuft (PLAYING), hat sein erstes Bild schon, er zählt als gepuffert
+      const ready = !single && !!nm && target.ready && holds && (gesture || target.warm === 'done' || (target.warm === 'running' && target.st === STATE.PLAYING) || target.st === STATE.PAUSED || (target.st === STATE.CUED && !!target.player?.isBuffered?.()));
       clearTapPlay();
       swipe.current = { j: next, t0, buffered: ready };
       // Warmlauf, Abdeckfläche und Nachrücken (warmup.ts), bevor assign den Slot anfasst
@@ -1515,7 +1609,14 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
             const target = document.createElement('div');
             slot.host!.replaceChildren(target);
             const pl = createPlayer(YT, target, id, {
-              onDiag: (line) => diag.current.push(`slot${s} ${line}`),
+              onDiag: (line) => {
+                diag.current.push(`slot${s} ${line}`);
+                // Brief 12: erstes Bild eines vorgeladenen Stream-Nachbarn ist da (canplay), einmal je Moment
+                if (line.startsWith('hls canplay') && slot.index !== idxRef.current && slot.cueAt && !slot.preloadLogged) {
+                  slot.preloadLogged = true;
+                  diag.current.push(`video: preload ${slot.mid} canplay after ${Math.round(performance.now() - slot.cueAt)} ms`);
+                }
+              },
               getRate: () => clampRate(rateRef.current),
               onTime: (t, rate, playing) => {
                 if (slot.index === idxRef.current) clock.current.sample(t, performance.now(), rate, playing);
@@ -1559,11 +1660,18 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                   everPlayed.current = true;
                   slot.broken = false;
                   slot.tries = 0;
+                  // Brief 12: erstes Bild eines vorgeladenen YouTube-Nachbarn (stummer Warmlauf), einmal je Moment
+                  if (slot.index !== idxRef.current && slot.cueAt && !slot.preloadLogged) {
+                    slot.preloadLogged = true;
+                    diag.current.push(`video: preload ${slot.mid} canplay after ${Math.round(performance.now() - slot.cueAt)} ms`);
+                  }
                   if (slot.gestureAt && !slot.gestureLogged) {
                     // Brief 23: der Start aus dem Wisch-Handler ist angekommen (einmal je Moment)
                     slot.gestureLogged = true;
-                    diag.current.push(`yt: playing after gesture ${slot.mid} ${Math.round(performance.now() - slot.gestureAt)} ms`);
+                    diag.current.push(`yt: playing after gesture ${slot.mid} ${Math.round(performance.now() - slot.gestureAt)} ms${slot.startRetried ? ' (after retry)' : ''}`);
                   }
+                  // Issue 54: der Start ist da, die Startüberwachung endet
+                  if (slot.startTimer || slot.startRetried) clearStartWatch(slot);
                   if (slot.resumeAt) {
                     // Brief 23 (Variante c): der eine Weiterstart nach der Selbstpause hat gegriffen
                     diag.current.push(`yt: resumed after self-pause ${slot.mid} ${Math.round(performance.now() - slot.resumeAt)} ms`);
@@ -1762,7 +1870,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         s.player?.destroy();
         s.el?.removeAttribute('data-live');
         s.el?.removeAttribute('data-hold');
-        Object.assign(s, { player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0 });
+        window.clearTimeout(s.startTimer);
+        Object.assign(s, { player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0, bytesSeen: 0, bytesAt: 0, cueAt: 0, preloadLogged: false, stillLogged: false, startTimer: 0, startRetried: false });
         if (s.cover) s.cover.style.visibility = 'hidden';
       }
     };
@@ -1830,31 +1939,67 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       }
       // Laden sichtbar machen, hängende Momente überspringen. Brief 23 (iOS, Variante c): ein YouTube-Moment, der sich selbst angehalten hat,
       // wartet auf den Weiterstart oder auf den Tipp, er zählt nicht als hängend und wird nie übersprungen (gesehen erst nach Max' Wischen).
-      if (sl.st === STATE.PLAYING || userPaused.current || (IOS && sl.selfPauses > 0)) {
+      // Issue 54: dasselbe für einen YouTube-Moment, der nach dem Start in der Geste nie auf PLAYING kam und die Tippfläche zeigt.
+      if (sl.st === STATE.PLAYING || userPaused.current || (IOS && sl.selfPauses > 0) || tapRef.current === sl.mid) {
         waitSince.current = 0;
         setLoading(false);
+        setNextReady(false);
       } else {
         waitSince.current ||= Date.now();
         // Ohne Netz, mit Netzfehler im Slot oder kurz nach einem Netzwechsel läuft die Hänge-Überwachung nicht: der Moment wartet, er wird nie übersprungen (Issue 9)
         if (!navigator.onLine || sl.broken || Date.now() - netAt.current < 20_000) waitSince.current = Date.now() - 1000;
         const waited = Date.now() - waitSince.current;
         setLoading(waited > 400);
+        // Brief 12: Daten kommen an? Der Zähler des Players ändert sich nur, wenn Bytes ankommen (progress, Pufferende, geladener Anteil).
+        const bytes = p.bytes?.() ?? 0;
+        if (bytes !== sl.bytesSeen) {
+          sl.bytesSeen = bytes;
+          sl.bytesAt = Date.now();
+        }
+        const hidden = isBackground(document.visibilityState);
+        // Brief 12: nach 6 s ohne erstes Bild zeigt der Moment sein Standbild mit Hook, darunter die Zeile "Loading" (22E). Der IFrame ist dabei unsichtbar (data-hold).
+        if (!hidden && waited > STILL_MS && !sl.stillLogged) {
+          sl.stillLogged = true;
+          sl.el?.setAttribute('data-hold', '');
+          diag.current.push(`video: slow net, showing still ${m.id}, net ${netType()}, ${sl.bytesAt ? 'bytes arriving' : 'no bytes yet'}`);
+        }
+        // Brief 12: hängt der aktuelle Moment und der nächste hat sein erstes Bild schon, bietet die Statuszeile "Next is ready" an (Tipp oder Wisch), kein Wechsel von selbst
+        if (!hidden && waited > STILL_MS && !single) {
+          const ns = slotFor(idxRef.current + 1);
+          const nm = queue.current[idxRef.current + 1];
+          const ready = !!nm && nm.form !== 'text' && ns.mid === nm.id && ns.ready && (ns.warm === 'done' || ns.st === STATE.PAUSED || (ns.st === STATE.CUED && !!ns.player?.isBuffered?.()));
+          if (ready !== nextReadyRef.current) {
+            nextReadyRef.current = ready;
+            setNextReady(ready);
+            if (ready) diag.current.push(`video: next ready ${nm.id} while ${m.id} loads`);
+          }
+        } else if (nextReadyRef.current) {
+          nextReadyRef.current = false;
+          setNextReady(false);
+        }
         // Nur wenn in dieser Sitzung schon etwas lief (sonst blockiert z.B. der Stromsparmodus Autoplay und alles würde übersprungen)
-        if (everPlayed.current && waited > 12_000 && c < m.start + 1) {
+        if (everPlayed.current && c < m.start + 1) {
           // Verdeckt nie überspringen (Brief 14b): tauschen auf ein bereites Element oder stehen bleiben, nächste Prüfung in 12 s
-          if (isBackground(document.visibilityState)) {
-            diag.current.push(`watchdog ${m.id} (hidden)`);
-            waitSince.current = Date.now();
-            hungHiddenRef.current(m);
+          if (hidden) {
+            if (waited > WATCHDOG_HIDDEN_MS) {
+              diag.current.push(`watchdog ${m.id} (hidden)`);
+              waitSince.current = Date.now();
+              hungHiddenRef.current(m);
+            }
             return;
           }
-          diag.current.push(`watchdog ${m.id}`);
-          bad.current.add(m.videoId);
-          // Nie als gesehen: der Moment bekommt nur die Sitzungs-Sperre und kommt wieder, sobald er lädt (Entscheidung 45)
-          noteUnplayed(m);
-          waitSince.current = 0;
-          goTo(idxRef.current + 1);
-          return;
+          // Brief 12: sichtbar erst nach 25 s, und nur ohne ein einziges Byte in den letzten 25 s. Solange Bytes ankommen: Standbild, "Loading", kein Skip.
+          const sinceBytes = sl.bytesAt ? Date.now() - sl.bytesAt : waited;
+          if (waited > WATCHDOG_MS && sinceBytes > WATCHDOG_MS) {
+            diag.current.push(`video: gave up ${m.id} after ${Math.round(waited / 1000)} s, ${sl.bytesAt ? 'no new bytes' : 'no bytes'}`);
+            diag.current.push(`watchdog ${m.id}`);
+            bad.current.add(m.videoId);
+            // Nie als gesehen: der Moment bekommt nur die Sitzungs-Sperre und kommt wieder, sobald er lädt (Entscheidung 45)
+            noteUnplayed(m);
+            waitSince.current = 0;
+            goTo(idxRef.current + 1);
+            return;
+          }
         }
       }
       // Eine Stelle vor dem Start des Moments ist eine Quelle, die gerade neu lädt: Untertitel und Fortschritt bleiben, wie sie waren
@@ -2104,6 +2249,11 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       p.pauseVideo();
       userPaused.current = true;
       setPaused(true);
+    } else if (nextReadyRef.current && form === 'video' && !userPaused.current) {
+      // Brief 12: der Moment hängt, der nächste ist bereit, der Tipp geht weiter (der hängende bleibt ungesehen, Entscheidung 45)
+      const cm = queue.current[idxRef.current];
+      diag.current.push(`video: tap on next ready, leaving ${cm?.id ?? '?'}`);
+      goTo(idxRef.current + 1);
     } else {
       p.playVideo();
       userPaused.current = false;
@@ -2552,6 +2702,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       }
       diag.current.push(`yt: play in gesture ${sl.mid} (tap)`);
       clearTapPlay();
+      // Issue 54: auch dieser Start wird überwacht (ein Wiederholungsstart, dann wieder die Tippfläche), nie ein Watchdog-Skip
+      watchStart(sl);
       userPaused.current = false;
       setPaused(false);
       infoDown.current = false;
@@ -3199,7 +3351,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       </div>
     );
 
-  const statusKind = statusOf({ offline: !online, syncError, loading: loading || (deckWait && form === 'audio'), background: bgShown && form === 'audio', muted: hint && form !== 'text' });
+  const statusKind = statusOf({ offline: !online, syncError, loading: loading || (deckWait && form === 'audio'), nextReady: nextReady && form === 'video', background: bgShown && form === 'audio', muted: hint && form !== 'text' });
   const m = queue.current[idx];
   shownId.current = m?.id ?? '';
   const recallEl = recall ? <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} rng={rng.current!} onAnswer={answerRecall} onClose={closeRecall} keys={!!desk} ctl={recallCtl} /> : null;
