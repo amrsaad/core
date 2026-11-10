@@ -1,5 +1,5 @@
 {
- "at": "2026-11-09T11:52:43.535Z",
+ "at": "2026-11-10T04:14:47.217Z",
  "runs": [
   {
    "browser": "webkit",
@@ -49,10 +49,10 @@
    },
    "diagLines": 13,
    "diagSample": [
-    "e8pe yt: warm cue slot1 sy0:1",
-    "e8pe yt: warm cue slot2 sy2:1",
-    "e8pe slot0 sy1:1 state 2",
-    "e8pe app: hidden"
+    "ud3u yt: warm cue slot1 sy7:1",
+    "ud3u yt: warm cue slot2 sy6:1",
+    "ud3u slot0 sy0:1 state 2",
+    "ud3u app: hidden"
    ],
    "writeDelayMs": 10024,
    "hosts": [
@@ -111,10 +111,10 @@
    },
    "diagLines": 13,
    "diagSample": [
-    "3zw8 yt: warm cue slot1 sy1:1",
-    "3zw8 yt: warm cue slot2 sy5:1",
-    "3zw8 slot0 sy4:1 state 2",
-    "3zw8 app: hidden"
+    "hd5v slot2 sy2:1 state 5",
+    "hd5v yt: warm cue slot1 sy4:1",
+    "hd5v yt: warm cue slot2 sy2:1",
+    "hd5v app: hidden"
    ],
    "writeDelayMs": 10017,
    "hosts": [
