@@ -1,5 +1,5 @@
 {
- "at": "2026-11-10T11:30:03.601Z",
+ "at": "2026-11-10T12:09:20.270Z",
  "runs": [
   {
    "browser": "webkit",
@@ -100,67 +100,67 @@
     "tempoPaused": 10,
     "cue": {
      "worst": 0,
-     "n": 621,
+     "n": 623,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.39",
+       "3.34",
        34,
        34
       ],
       [
-       "4.68",
+       "4.63",
        47,
        47
       ],
       [
-       "5.97",
+       "5.92",
        60,
        60
       ],
       [
-       "7.26",
+       "7.20",
        73,
        73
       ],
       [
-       "8.55",
-       86,
-       86
+       "8.49",
+       85,
+       85
       ],
       [
-       "9.85",
-       99,
-       99
+       "9.78",
+       98,
+       98
       ],
       [
-       "11.13",
-       112,
-       112
+       "11.07",
+       111,
+       111
       ],
       [
-       "12.42",
-       125,
-       125
+       "12.36",
+       124,
+       124
       ],
       [
-       "13.71",
-       138,
-       138
+       "13.65",
+       137,
+       137
       ],
       [
-       "14.99",
+       "14.93",
        150,
        150
       ],
       [
-       "16.28",
+       "16.22",
        163,
        163
       ],
       [
-       "17.57",
+       "17.51",
        176,
        176
       ]
@@ -168,8 +168,8 @@
      "rate": 2
     },
     "cueTempo": {
-     "worst": 0,
-     "n": 529,
+     "worst": 1,
+     "n": 541,
      "rates": [
       1,
       1.5,
@@ -181,7 +181,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805103
+       "dueAt": 1792756805121
       }
      ],
      "idx": 6,
@@ -404,7 +404,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804975
+       "dueAt": 1792756804957
       }
      ],
      "idx": 6,
@@ -491,7 +491,7 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "firstSoundMs": 2855,
+    "firstSoundMs": 2834,
     "diag": [
      "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
      "deck: src net pod-0006",
@@ -530,7 +530,7 @@
      "want": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
      "id": "pod-0013:82"
     },
-    "lockNextMs": 25,
+    "lockNextMs": 21,
     "lockNextLines": [
      "deck: swap pod-0013 ready=true pool=3",
      "deck play#4 swap rs=4 muted=false t=82.0",

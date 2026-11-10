@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-10T11:41:54.536Z",
+  "at": "2026-11-10T12:20:56.407Z",
   "block": "run",
   "checks": {
     "feed beat 390 dark keine überlagerten Textblöcke": true,
@@ -38,7 +38,7 @@
     "text arabisch ohne Überlauf beat 390 dark": true,
     "text Abrufseite kein Overlay beat 390 dark": true,
     "text Abrufseite Hook und Quelle beat 390 dark": true,
-    "text Abrufseite Vollbild und Daumenzone beat 390 dark": false,
+    "text Abrufseite Vollbild und Daumenzone beat 390 dark": true,
     "js-fehler beat 390 dark": true,
     "feed beat 834 dark keine überlagerten Textblöcke": true,
     "feed beat 834 dark Seite scrollt nicht": true,
@@ -225,7 +225,7 @@
     "text arabisch ohne Überlauf body 390 dark": true,
     "text Abrufseite kein Overlay body 390 dark": true,
     "text Abrufseite Hook und Quelle body 390 dark": true,
-    "text Abrufseite Vollbild und Daumenzone body 390 dark": false,
+    "text Abrufseite Vollbild und Daumenzone body 390 dark": true,
     "saved body 390 dark Daumenzone": true,
     "saved body 390 dark kein Seitwärtsscrollen": true,
     "saved body 390 dark nichts außerhalb": true,
@@ -1460,8 +1460,5 @@
     "clip-rtl iphone430 light Kontrast AA": true,
     "clip-rtl iphone430 light Berührfläche 44 px": true
   },
-  "failures": [
-    "text Abrufseite Vollbild und Daumenzone beat 390 dark: {\"card\":true,\"covers\":true,\"origin\":\"Beat · augenCheck lens status before the next injection 3Author 3, Channel beat (Dr. Test 3), Ref 3, CC BY 4.0\",\"pageTop\":52,\"pageBottom\":844,\"H\":844,\"opts\":[292,348,404]}",
-    "text Abrufseite Vollbild und Daumenzone body 390 dark: {\"card\":true,\"covers\":true,\"origin\":\"Body · augenCheck lens status before the next injection 3Author 3, Channel body (Dr. Test 3), Ref 3, CC BY 4.0\",\"pageTop\":52,\"pageBottom\":844,\"H\":844,\"opts\":[292,348,404]}"
-  ]
+  "failures": []
 }
