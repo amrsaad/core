@@ -4,7 +4,7 @@ import type { SyncAccess } from '../useAppState';
 import { loadSyncMeta, saveSyncMeta } from '../db';
 import { clearToken, loadToken, saveToken, syncKey } from '../vault';
 import { createSync, type Sync, type SyncStatus } from './controller';
-import { canon, syncedChanged, type SyncDoc } from './merge';
+import { canon, onlyFeedTimeChanged, syncedChanged, type SyncDoc } from './merge';
 import type { DigestLatest } from '../../moments/digest';
 import { diagLog } from '../diag';
 
@@ -63,7 +63,7 @@ export function useSync(state: AppState | null, access: SyncAccess, enabled: boo
   // Jede Änderung an Synchronisiertem startet die 10 Sekunden von vorn
   useEffect(() => {
     if (!state) return;
-    if (prev.current && syncedChanged(prev.current, state)) sync.current?.poke();
+    if (prev.current && syncedChanged(prev.current, state)) sync.current?.poke(onlyFeedTimeChanged(prev.current, state));
     prev.current = state;
   }, [state]);
 

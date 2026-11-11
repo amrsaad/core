@@ -575,3 +575,8 @@ export function syncedChanged(a: AppState, b: AppState): boolean {
     SYNC_SETTINGS.some((k) => a.settings[k] !== b.settings[k])
   );
 }
+
+/** Nur die Nutzungszeit hat sich geändert (tickt alle 10 s beim Abspielen): sie darf eine wartende Schreibfrist nie nach hinten schieben */
+export function onlyFeedTimeChanged(a: AppState, b: AppState): boolean {
+  return a.feedTime !== b.feedTime && !syncedChanged({ ...a, feedTime: b.feedTime }, b);
+}

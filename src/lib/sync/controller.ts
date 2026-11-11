@@ -56,7 +56,7 @@ export interface SyncDeps {
 
 export interface Sync {
   /** Etwas Synchronisiertes hat sich geändert */
-  poke(): void;
+  poke(soft?: boolean): void;
   /** sofort laden, zusammenführen, schreiben */
   syncNow(): Promise<void>;
   /** App kommt in den Vordergrund (true) oder geht (false) */
@@ -242,10 +242,12 @@ export function createSync(deps: SyncDeps): Sync {
   }
 
   return {
-    poke() {
+    poke(soft = false) {
       if (stopped) return;
       rev++;
       pending = true;
+      // Weiche Änderung (Nutzungszeit-Tick): startet die Frist nur, wenn keine läuft, schiebt eine laufende nie weiter
+      if (soft && timer) return;
       clearTimeout(timer);
       timer = setTimeout(() => void run(), WRITE_DELAY_MS);
     },

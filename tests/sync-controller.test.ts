@@ -445,3 +445,41 @@ describe('Sync-Fehler sind lesbar, ein fehlendes online-Ereignis sperrt nie (Iss
     expect(s.status().error).toBeNull();
   });
 });
+
+describe('Nutzungszeit-Tick schiebt die 10-Sekunden-Frist nicht weiter (Issue 55)', () => {
+  it('weiche Änderungen im Abstand von 6 s lassen die Frist der echten Änderung unberührt', async () => {
+    const api = fakeApi();
+    const a = device(api);
+    await a.sync.start();
+    await advance(10);
+    const before = api.puts;
+    a.change(saveMoment('x:1'));
+    await advance(6000);
+    a.sync.poke(true);
+    await advance(3900);
+    expect(api.puts).toBe(before);
+    await advance(300);
+    expect(api.puts).toBe(before + 1);
+  });
+  it('eine harte Änderung nach einem weichen Tick startet die Frist neu', async () => {
+    const api = fakeApi();
+    const a = device(api);
+    await a.sync.start();
+    await advance(10);
+    const before = api.puts;
+    a.sync.poke(true);
+    await advance(6000);
+    a.change(saveMoment('x:2'));
+    await advance(6000);
+    expect(api.puts).toBe(before);
+    await advance(4100);
+    expect(api.puts).toBe(before + 1);
+  });
+  it('onlyFeedTimeChanged erkennt reine Zeit-Ticks', async () => {
+    const { onlyFeedTimeChanged } = await import('../src/lib/sync/merge');
+    const s = emptyState();
+    expect(onlyFeedTimeChanged(s, { ...s, feedTime: { d: 10 } })).toBe(true);
+    expect(onlyFeedTimeChanged(s, { ...s, feedTime: { d: 10 }, momentSeen: { a: 1 } })).toBe(false);
+    expect(onlyFeedTimeChanged(s, s)).toBe(false);
+  });
+});
