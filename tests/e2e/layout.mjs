@@ -489,9 +489,11 @@ for (const area of MOODS) {
               await check(pg, `notiz-zeile ${tag}`, { skipSmall: !strict, flow: true });
               await pg.screenshot({ path: `${dir}/state-notiz-zeile-${vp.name}.png` });
               // Nachtrag Issue 49: im Audio- und Text-Reiter dieselbe Regel, die Blase liegt nie über Cover, Kicker, Untertitel oder Text und ihr Tippziel in den unteren 65 Prozent
-              for (const [form2, label2] of [['audio', 'Audio'], ['text', 'Text']]) {
+              // Der Reiterwechsel baut den Feed neu und die Zeile erscheint nur beim ersten Öffnen am Tag: Reiter wählen (bleibt gespeichert), dann an einem frischen Tag neu laden
+              for (const [form2, label2, day2] of [['audio', 'Audio', '2026-10-25'], ['text', 'Text', '2026-10-26']]) {
                 try {
-                  await pg.locator(`[data-testid=form-switch] button:has-text("${label2}")`).first().click({ timeout: 2500 }); await pg.waitForTimeout(900);
+                  await pg.locator(`[data-testid=form-switch] button:has-text("${label2}")`).first().click({ timeout: 2500 }); await pg.waitForTimeout(1200);
+                  await pg.goto(`${url}?now=${day2}&seed=3#k=${p.k}`); await pg.waitForFunction(() => !!window.__core?.moment() || !!document.querySelector('.vfeed'), null, { timeout: 8000 }); await pg.waitForTimeout(900);
                   const nf = await pg.evaluate(() => {
                     const n = document.querySelector('[data-testid=notes-prompt]');
                     if (!n) return null;
@@ -507,7 +509,7 @@ for (const area of MOODS) {
                   }
                 } catch (e) { fail(`notiz-zeile ${form2} ${tag}`, String(e).slice(0, 80)); }
               }
-              try { await pg.locator('[data-testid=form-switch] button:has-text("Video")').first().click({ timeout: 2500 }); await pg.waitForTimeout(600); } catch { /* Reiter bleibt */ }
+              try { await pg.locator('[data-testid=form-switch] button:has-text("Video")').first().click({ timeout: 2500 }); await pg.waitForTimeout(1200); } catch { /* Reiter bleibt */ }
             }
             await pg.goto(`${url}?now=2026-10-23&seed=3#k=${p.k}`); await pg.waitForFunction(() => !!window.__core?.moment(), null, { timeout: 8000 }); await pg.waitForTimeout(500);
           } catch (e) { fail(`notiz-zeile ${tag}`, String(e).slice(0, 80)); }

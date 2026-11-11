@@ -3164,6 +3164,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     (window as unknown as { __core?: unknown }).__core = {
       idx: () => idxRef.current,
       moment: () => queue.current[idxRef.current],
+      /** Nur Tests (Issue 57): der Moment war spielbereit (PLAYING oder erstes Bild erreicht) */
+      ready: (id: string) => played.current.ready(id),
       state: () => current().st,
       time: () => current().player?.getCurrentTime?.() ?? 0,
       forYou: () => forYouRef.current,

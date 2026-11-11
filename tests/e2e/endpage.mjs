@@ -157,15 +157,16 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     };
     /** Text des Knopfs "Audio, N new" auf der Video-Endseite */
     const audioButton = (pg) => pg.evaluate(() => document.querySelector('[data-testid=end-audio]')?.textContent ?? null);
-    /** Sobald der nächste Audio-Moment da ist, sofort weiter (ohne Wiedergabe). Liefert die ID. */
-    const swipeAtOnce = async (pg) => {
-      await pg.waitForFunction(() => {
+    /** Sobald der nächste Audio-Moment da ist, sofort weiter. ready true: erst wenn er spielbereit ist (PLAYING erreicht, noch unter einer Sekunde Spielzeit), sonst ohne jede Wiedergabe. Liefert die ID. */
+    const swipeAtOnce = async (pg, ready = true) => {
+      await pg.waitForFunction((rd) => {
         const m = window.__core?.moment();
         if (!m?.audio) return false;
+        if (rd && !window.__core.ready(m.id)) return false;
         window.__swiped = m.id;
         window.__core.next();
         return true;
-      }, undefined, { timeout: 15000 });
+      }, ready, { timeout: 15000 });
       return pg.evaluate(() => window.__swiped);
     };
     const diagHas = (pg, line) => pg.evaluate((l) => window.__core.diag().some((x) => x === l), line);
@@ -219,6 +220,22 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     if (errors2.length) r.errors2 = errors2.slice(0, 5);
     await p2.screenshot({ path: `${out}/${name}-6-nach-30-tagen.png` });
     await ctx2.close();
+
+    // Issue 57: ein Wegwischen ohne je spielbereit zu sein zählt nicht, Diag nennt es, es gibt keine Sperre (frischer Zustand)
+    const ctx3 = await browser.newContext({ ...devices['iPhone 15'], serviceWorkers: 'block' });
+    await ctx3.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
+    await ctx3.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
+    const p3 = await ctx3.newPage();
+    await p3.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBody2 }));
+    await p3.goto(`${url}?now=2026-10-23&seed=3#k=${k}`);
+    c.b57FeedLoaded = await waitFor(p3, () => !!window.__core?.moment());
+    await playThrough(p3);
+    await p3.click('[data-testid=end-audio]');
+    const n1 = await swipeAtOnce(p3, false);
+    await p3.waitForTimeout(300);
+    c.b57NotCountedLine = await diagHas(p3, `skip: ${n1} not counted (never ready)`);
+    c.b57NoBlockLine = !(await p3.evaluate(() => window.__core.diag().some((x) => /^skip: \S+ blocked 30 d/.test(x))));
+    await ctx3.close();
   } catch (e) {
     r.fatal = String(e);
     c.noFatal = false;
