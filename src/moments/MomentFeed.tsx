@@ -1,3 +1,4 @@
+import { needsLoad } from './slotplan';
 import { diagLog, netType } from '../lib/diag';
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal, flushSync } from 'react-dom';
@@ -93,6 +94,8 @@ interface Slot {
   st: number;
   /** Moment-ID, die gerade im Player steckt */
   mid: string;
+  /** Startzeit, mit der der Slot geladen wurde (siehe needsLoad) */
+  loadStart: number;
   /** Netzfehler im Player: der Slot bleibt stehen und wird bei der Rückkehr an derselben Stelle wieder aufgenommen (Issue 9) */
   broken: boolean;
   /** Wiederaufnahmen seit dem letzten Spielen, danach gilt der Moment als nicht abspielbar */
@@ -138,7 +141,7 @@ interface Slot {
   startTimer: number;
   startRetried: boolean;
 }
-const newSlot = (): Slot => ({ host: null, el: null, player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, cover: null, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0, bytesSeen: 0, bytesAt: 0, cueAt: 0, preloadLogged: false, stillLogged: false, startTimer: 0, startRetried: false });
+const newSlot = (): Slot => ({ host: null, el: null, player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', loadStart: -1, broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, cover: null, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0, bytesSeen: 0, bytesAt: 0, cueAt: 0, preloadLogged: false, stillLogged: false, startTimer: 0, startRetried: false });
 /**
  * Brief 23 (Issue 48): Auf iOS laufen YouTube-Momente nicht stumm vorgewärmt (WebKit hält sie beim Lautschalten ohne Geste an). Sie werden nur
  * per cue vorbereitet und beim Wisch direkt im Handler der Berührung laut gestartet (Variante a des Briefs). Eigene Streams sind nicht betroffen.
@@ -846,8 +849,9 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       // Vorladen ohne Ton, der aktuelle Moment bekommt den gewählten Ton
       if (play) applySound(slot.player);
       else slot.player.mute();
-      if (slot.mid !== m.id) {
+      if (needsLoad(slot, m)) {
         slot.mid = m.id;
+        slot.loadStart = m.start;
         slot.st = STATE.UNSTARTED;
         slot.broken = false;
         slot.tries = 0;
@@ -1871,7 +1875,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         s.el?.removeAttribute('data-live');
         s.el?.removeAttribute('data-hold');
         window.clearTimeout(s.startTimer);
-        Object.assign(s, { player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0, bytesSeen: 0, bytesAt: 0, cueAt: 0, preloadLogged: false, stillLogged: false, startTimer: 0, startRetried: false });
+        Object.assign(s, { player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', loadStart: -1, broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0, bytesSeen: 0, bytesAt: 0, cueAt: 0, preloadLogged: false, stillLogged: false, startTimer: 0, startRetried: false });
         if (s.cover) s.cover.style.visibility = 'hidden';
       }
     };

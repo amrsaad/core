@@ -1,4 +1,5 @@
 // YouTube IFrame Player API, Einbettung über youtube-nocookie.com. Kein API-Key.
+import { skipPlay } from './playguard';
 import { isYtId } from '../moments/contract';
 import { formOf } from '../moments/form';
 import { localKey } from '../moments/localKey';
@@ -491,20 +492,28 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   const vstate = () => `rs=${media.readyState} ns=${media.networkState} muted=${media.muted} t=${media.currentTime.toFixed(1)}${media.error ? ` err=${media.error.code}` : ''}`;
   let attemptNo = 0;
   // Ein Startversuch mit Ergebnis im Protokoll. Verweigert der Browser den Ton (NotAllowedError), läuft das Bild stumm weiter, statt zu stehen.
+  let playInflightAt = 0;
   const tryPlay = (why: string) => {
+    if (skipPlay({ paused: media.paused, inflightAt: playInflightAt }, performance.now(), why)) return;
+    playInflightAt = performance.now();
     const n = ++attemptNo;
     diag(`hls play#${n} ${why} ${vstate()}`);
     let p: Promise<void> | undefined;
     try {
       p = media.play();
     } catch (e) {
+      playInflightAt = 0;
       diag(`hls play#${n} threw ${e instanceof Error ? e.name : String(e)}`);
       setHlsState(STATE.PAUSED);
       return;
     }
     p?.then(
-      () => diag(`hls play#${n} ok ${vstate()}`),
+      () => {
+        playInflightAt = 0;
+        diag(`hls play#${n} ok ${vstate()}`);
+      },
       (e: unknown) => {
+        playInflightAt = 0;
         const name = e instanceof Error ? e.name : String(e);
         diag(`hls play#${n} refused ${name} ${vstate()}`);
         if (name === 'NotAllowedError') {
