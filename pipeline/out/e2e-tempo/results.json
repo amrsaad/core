@@ -1,5 +1,5 @@
 {
- "at": "2026-11-10T16:46:11.336Z",
+ "at": "2026-11-11T04:16:45.635Z",
  "runs": [
   {
    "browser": "webkit",
@@ -52,7 +52,7 @@
      "h": 44,
      "onScreen": true
     },
-    "feedbackMs": 11
+    "feedbackMs": 7
    }
   },
   {
@@ -106,7 +106,7 @@
      "h": 44,
      "onScreen": true
     },
-    "feedbackMs": 7
+    "feedbackMs": 5
    }
   },
   {
@@ -214,7 +214,7 @@
      "h": 44,
      "onScreen": true
     },
-    "feedbackMs": 4
+    "feedbackMs": 3
    }
   }
  ]
