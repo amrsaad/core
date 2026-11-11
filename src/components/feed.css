@@ -443,6 +443,19 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
   left: var(--band-left);
 }
 
+/* Audio und Text (Issue 49): die Blase hat eine eigene Reihe unten über der Leiste. Cover, Untertitel, Bedienung und Textspalte rücken um diese Reihe nach oben, nichts liegt darunter oder darüber.
+   Unten links, damit sie als Tippziel in der Daumenzone liegt. */
+.vfeed[data-notes][data-form='audio'], .vfeed[data-notes][data-form='text'] { --notes-row: calc(var(--hit) + var(--s-2)); }
+.vfeed[data-notes][data-form='audio'] .vnotes, .vfeed[data-notes][data-form='text'] .vnotes {
+  top: auto;
+  right: auto;
+  left: calc(var(--safe-l) + var(--margin));
+  bottom: calc(var(--actions-top) + var(--s-3));
+}
+.vfeed[data-notes][data-form='audio'] { --art-room: calc(100dvh - var(--art-top) - var(--actions-top) - var(--s-3) - var(--stack-h) - var(--s-4) - var(--notes-row)); }
+.vfeed[data-notes][data-form='audio'] .vaudio-stack, .vfeed[data-notes][data-form='audio'] .vctrl { bottom: calc(var(--actions-top) + var(--s-3) + var(--notes-row)); }
+.vfeed[data-notes][data-form='text'] .vtext-col { bottom: calc(var(--actions-top) + var(--s-3) + var(--notes-row)); }
+
 /* Text und Papier: Tinte der Kopfzeile folgt der Stimmung */
 .desk .vctrl { display: none; }
 

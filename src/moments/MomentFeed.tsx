@@ -1,4 +1,5 @@
 import { needsLoad } from './slotplan';
+import { notesRow } from './notesrow';
 import { diagLog, netType } from '../lib/diag';
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal, flushSync } from 'react-dom';
@@ -3468,7 +3469,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   ) : null;
 
   return (
-    <div className="vfeed" ref={dragEl} data-form={form} data-rtl={audioRtl ? '' : undefined} data-surface={form === 'text' ? 'page' : 'media'} style={{ ['--area' as string]: m ? AREA_COLOR[m.area] : 'var(--on-media)' }}>
+    <div className="vfeed" ref={dragEl} data-form={form} data-rtl={audioRtl ? '' : undefined} data-notes={notesRow(prompt, form, !forYou, unsent(state.feedbackNotes).length) ? '' : undefined} data-surface={form === 'text' ? 'page' : 'media'} style={{ ['--area' as string]: m ? AREA_COLOR[m.area] : 'var(--on-media)' }}>
       <div className="vstage" ref={stageEl}>
       {slots.current.slice(0, SLOTS).map((slot, s) => {
         const j = slot.index;

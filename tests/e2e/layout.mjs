@@ -488,6 +488,26 @@ for (const area of MOODS) {
               if (np.top < np.H * 0.35) fail(`notiz-zeile Daumenzone ${tag}`, `oben bei ${np.top} von ${np.H}`); else ok(`notiz-zeile Daumenzone ${tag}`);
               await check(pg, `notiz-zeile ${tag}`, { skipSmall: !strict, flow: true });
               await pg.screenshot({ path: `${dir}/state-notiz-zeile-${vp.name}.png` });
+              // Nachtrag Issue 49: im Audio- und Text-Reiter dieselbe Regel, die Blase liegt nie über Cover, Kicker, Untertitel oder Text und ihr Tippziel in den unteren 65 Prozent
+              for (const [form2, label2] of [['audio', 'Audio'], ['text', 'Text']]) {
+                try {
+                  await pg.locator(`[data-testid=form-switch] button:has-text("${label2}")`).first().click({ timeout: 2500 }); await pg.waitForTimeout(900);
+                  const nf = await pg.evaluate(() => {
+                    const n = document.querySelector('[data-testid=notes-prompt]');
+                    if (!n) return null;
+                    const a = n.getBoundingClientRect();
+                    const hit = (b) => Math.min(a.right, b.right) > Math.max(a.left, b.left) + 1 && Math.min(a.bottom, b.bottom) > Math.max(a.top, b.top) + 1;
+                    const over = [...document.querySelectorAll('.vaudio-art, .vaudio-stack > *, .vtext-col > *, .vkicker')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && hit(r); }).map((e) => e.className);
+                    return { form: document.querySelector('.vfeed')?.dataset.form, top: Math.round(a.top), H: innerHeight, over };
+                  });
+                  if (!nf) fail(`notiz-zeile ${form2} ${tag}`, 'keine Zeile im Reiter');
+                  else {
+                    if (nf.form !== form2 || nf.over.length) fail(`notiz-zeile ${form2} nicht über Inhalt ${tag}`, JSON.stringify(nf)); else ok(`notiz-zeile ${form2} nicht über Inhalt ${tag}`);
+                    if (nf.top < nf.H * 0.35) fail(`notiz-zeile ${form2} Daumenzone ${tag}`, `oben bei ${nf.top} von ${nf.H}`); else ok(`notiz-zeile ${form2} Daumenzone ${tag}`);
+                  }
+                } catch (e) { fail(`notiz-zeile ${form2} ${tag}`, String(e).slice(0, 80)); }
+              }
+              try { await pg.locator('[data-testid=form-switch] button:has-text("Video")').first().click({ timeout: 2500 }); await pg.waitForTimeout(600); } catch { /* Reiter bleibt */ }
             }
             await pg.goto(`${url}?now=2026-10-23&seed=3#k=${p.k}`); await pg.waitForFunction(() => !!window.__core?.moment(), null, { timeout: 8000 }); await pg.waitForTimeout(500);
           } catch (e) { fail(`notiz-zeile ${tag}`, String(e).slice(0, 80)); }
