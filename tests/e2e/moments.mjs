@@ -1245,10 +1245,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         };
         c.tabsToAudio = await sw('Audio', 'audio', 'audio');
         c.tabsToText = await sw('Text', 'text', 'text');
+        // Die Diag überlebt den Reiterwechsel: nur Zeilen nach der Rückkehr zählen, sonst zählt das Laden vor dem Wechsel mit (erster CI-Lauf 93b44a7: 2 je Slot)
+        const diagBefore = await pT.evaluate(() => window.__core.diag().length);
         c.tabsToVideo = await sw('Video', 'video', 'video2');
         // Zu Ziel 2: nach der Rückkehr steht der Nachbar (idx+1) vor dem ersten Wisch vorgeladen (hls cue, state 5), und kein Slot lud denselben Moment zweimal
         c.tabsNeighborReadyBeforeSwipe = await waitFor(pT, () => { const i = window.__core.idx(); const s = window.__core.slotInfo(); return s.some((x) => x.index === i + 1 && x.st === 5); }, null, 4000);
-        const loads = await pT.evaluate(() => window.__core.diag().filter((x) => /^slot\d hls load /.test(x)));
+        const loads = await pT.evaluate((n) => window.__core.diag().slice(n).filter((x) => /^slot\d hls load /.test(x)), diagBefore);
         const perSlot = {};
         for (const l of loads) { const n = l.slice(0, 5); perSlot[n] = (perSlot[n] ?? 0) + 1; }
         r.tabsLoadsAfterReturn = perSlot;
