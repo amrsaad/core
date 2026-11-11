@@ -3,6 +3,13 @@ import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import { Icon } from '../components/Icon';
 import { shuffleOrder } from './recall';
 import { isArabic, thumbOf, type Moment } from './types';
+import { sourceLine } from './source';
+
+/** Bezug oben auf der Abrufkarte (Issue 42): Hook und Quelle des Ursprungs-Moments, Sprache und Richtung folgen dem Moment */
+export function originOf(m: Moment): { hook: string; dir: 'rtl' | 'ltr'; source: string } {
+  const src = sourceLine(m);
+  return { hook: m.hook, dir: isArabic(m.hook) ? 'rtl' : 'ltr', source: src ? `${src.prefix}${src.text}` : '' };
+}
 
 /** Steuerung von außen, nur im Desktop-Modus: Antwort nach angezeigter Stelle (0 bis 2) wählen */
 export interface RecallCtl {
@@ -14,7 +21,7 @@ export interface RecallCtl {
  * Erst nach dem Tipp: richtige Antwort grün, falsch gewählte rot, dann recall.why und "Next".
  * Die Wertung zählt beim Tipp. Wischen nach oben schließt, vor der Wahl ohne Wertung. Arabisch läuft rechtsläufig.
  */
-export function RecallCard({ m, review, rng, onAnswer, onClose, keys, ctl }: { m: Moment; review: boolean; rng: () => number; onAnswer: (got: boolean) => void; onClose: () => void; keys?: boolean; ctl?: MutableRefObject<RecallCtl | null> }) {
+export function RecallCard({ m, review, rng, onAnswer, onClose, keys, ctl, origin = true }: { m: Moment; review: boolean; origin?: boolean; rng: () => number; onAnswer: (got: boolean) => void; onClose: () => void; keys?: boolean; ctl?: MutableRefObject<RecallCtl | null> }) {
   const r = m.recall!;
   const order = useMemo(() => shuffleOrder(r.options.length, rng), [m.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const [chosen, setChosen] = useState<number | null>(null);
@@ -56,6 +63,12 @@ export function RecallCard({ m, review, rng, onAnswer, onClose, keys, ctl }: { m
           <div className="recall-speaker">{speaker}{review ? ' · again' : ''}</div>
         </div>
       </div>
+      {origin && (
+        <div className="recall-origin" data-testid="recall-hook">
+          <p className="recall-hook" dir={originOf(m).dir}>{originOf(m).hook}</p>
+          {originOf(m).source && <p className="recall-hooksrc" dir="auto">{originOf(m).source}</p>}
+        </div>
+      )}
       <h2 className="recall-q" data-testid="recall-question">{r.question}</h2>
       <div className="recall-options">
         {order.map((i, shown) => {
