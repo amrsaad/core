@@ -139,4 +139,14 @@ window.onYouTubeIframeAPIReady && window.onYouTubeIframeAPIReady();
     return Promise.resolve();
   };
   P.pause = function () { clearInterval(timers.get(this)); if (this.__p === false) { if (window.__cont) this.__t = this.currentTime; this.__p = true; emit(this, 'pause'); } };
+  // Nur mit window.__srcTrack (Reiterwechsel-Test, Issue 59): removeAttribute('src') leert die nachgebaute Quelle wie im Browser, und window.__fakeMedia()
+  // liefert alle Elemente mit Quelle samt Besitzer (slotN am Attribut data-slot, deck am Audio-Deck). Das echte src-Attribut bleibt unberührt, sonst lüde der Runner den Stream.
+  if (window.__srcTrack) {
+    const ra = Element.prototype.removeAttribute;
+    P.removeAttribute = function (n) { if (n === 'src') this.__src = ''; return ra.call(this, n); };
+    window.__fakeMedia = () => [...document.querySelectorAll('audio,video')].filter((e) => e.__src).map((e) => {
+      const sl = e.closest('[data-slot]');
+      return { tag: e.tagName.toLowerCase(), owner: sl ? 'slot' + sl.getAttribute('data-slot') : e.dataset.core === 'audio-deck' ? 'deck' : 'unknown', src: String(e.__src).slice(0, 60) };
+    });
+  }
 })();

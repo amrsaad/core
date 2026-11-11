@@ -91,6 +91,13 @@ const poolBad = await encPool([...badMoments.slice(0, 1), ...errMoments.slice(0,
 // Alle Beat-Momente werfen beim Anlegen des Players (Konstruktor wirft). Der Tag beginnt mit Beat, also trifft es die ersten drei Slots.
 const throwMoments = Array.from({ length: 3 }, (_, i) => ({ ...badBase, id: `throwvid00${i}:100`, videoId: `throwvid00${i}`, area: 'beat', hook: `Konstruktor wirft Nr. ${i}`, form: 'video' }));
 const poolThrow = await encPool([...throwMoments, ...goodVideo.filter((m) => m.area !== 'beat')]);
+// Pool für den Reiterwechsel-Test (Issue 59, 56): Video-Momente mit eigenem Stream (das <video> je Slot), Podcasts und Text
+const tabMoments = [
+  ...Array.from({ length: 16 }, (_, i) => ({ ...mk(300 + i, ['beat', 'brain', 'body'][i % 3], 'augen'), hls: `https://stream.test/v${i}.m3u8`, form: 'video', excerpt: EX })),
+  ...Array.from({ length: 6 }, (_, i) => ({ ...mk(330 + i, 'brain', 'retina'), videoId: `pod-tab${i}xx`, id: `pod-tab${i}xx:100`, audio: true, form: 'audio', hls: `https://stream.test/p${i}.mp3`, excerpt: EX })),
+  ...Array.from({ length: 6 }, (_, i) => ({ ...mk(340 + i, 'body', 'kraft'), videoId: `txt-tab${i}xxx`, id: `txt-tab${i}xxx:100`, form: 'text', excerpt: EX, author: 'A', ref: 'R', sourceUrl: 'https://example.org/s', license: 'CC BY 4.0' })),
+].map(({ recall, ...m }) => m);
+const poolTabs = await encPool(tabMoments);
 const k = Buffer.from(raw).toString('base64url');
 
 const results = { at: new Date().toISOString(), runs: [] };
@@ -153,12 +160,13 @@ const waitFor = async (page, fn, arg, timeout = 20000) => {
 
 // Frischer Kontext (eigener Speicher, kein Gesehen, keine gemerkten Momente, keine Abrufstände aus den Abschnitten davor).
 // Die Fehlerabschnitte nutzen dieselben Moment-IDs wie der Hauptpool. Im geteilten Kontext wären sie schon gesehen und der Feed am Poolende.
-const freshPage = async (browser, url, k, poolBody, query) => {
+const freshPage = async (browser, url, k, poolBody, query, init) => {
   const cx = await browser.newContext({ ...devices['iPhone 15'], serviceWorkers: 'block' });
   await cx.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
   await cx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
   const pg = await cx.newPage();
   await pg.addInitScript(() => { window.__ytSlow = true; });
+  if (init) await pg.addInitScript(init);
   await pg.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBody }));
   await pg.goto(`${url}${query}#k=${k}`);
   return { cx, pg };
@@ -1210,6 +1218,58 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.recallEnglishLtr = hitState.cards.length > 0 && hitState.cards.filter((x) => !x.ar).every((x) => x.dir === 'ltr');
     r.hit = hitState.out;
     r.skip = hitState.skipped;
+    // ---- Issue 59 und 56: Reiterwechsel Video, Audio, Text, Video und zehn Wischer. Höchstens 6 Medien-Elemente mit Quelle im Video-Reiter, kein Deck-Element dort,
+    // und nach der Rückkehr lädt kein Slot denselben Moment ein zweites Mal, die Vorladung des Nachbarn steht vor dem ersten Wisch. Bei Rot steht ein Dump in r.tabsDump.
+    {
+      const { cx: cxT, pg: pT } = await freshPage(browser, url, k, poolTabs, '?now=2026-10-23&seed=7', () => { window.__srcTrack = true; });
+      const dump = async (why) => ({ why, stage: await pT.evaluate(() => window.__stage), max: await pT.evaluate(() => window.__mx), rowsAtMax: await pT.evaluate(() => window.__mxRows), nowRows: await pT.evaluate(() => window.__fakeMedia?.() ?? null), slots: await pT.evaluate(() => window.__core.slotInfo()), form: await pT.evaluate(() => document.querySelector('.vfeed')?.dataset.form), idx: await pT.evaluate(() => window.__core.idx()), diag: await pT.evaluate(() => window.__core.diag().slice(-60)) });
+      try {
+        const formIs = (f) => waitFor(pT, (x) => document.querySelector('.vfeed')?.dataset.form === x && !!window.__core?.moment(), f, 15000);
+        c.tabsStart = await formIs('video');
+        await pT.evaluate(() => {
+          window.__stage = 'video1';
+          window.__mx = {};
+          window.__mxRows = {};
+          setInterval(() => { const rows = window.__fakeMedia(); const s = window.__stage; if (rows.length > (window.__mx[s] ?? -1)) { window.__mx[s] = rows.length; window.__mxRows[s] = rows; } }, 40);
+        });
+        const stage = (n) => pT.evaluate((x) => { window.__stage = x; }, n);
+        const vp2 = pT.viewportSize();
+        await pT.mouse.click(vp2.width / 2, vp2.height / 2);
+        await pT.waitForTimeout(800);
+        const sw = async (label, f, stg) => {
+          await stage(stg);
+          await pT.click(`[data-testid=form-switch] >> text=${label}`);
+          const ok = await formIs(f);
+          await pT.waitForTimeout(800);
+          return ok;
+        };
+        c.tabsToAudio = await sw('Audio', 'audio', 'audio');
+        c.tabsToText = await sw('Text', 'text', 'text');
+        c.tabsToVideo = await sw('Video', 'video', 'video2');
+        // Zu Ziel 2: nach der Rückkehr steht der Nachbar (idx+1) vor dem ersten Wisch vorgeladen (hls cue, state 5), und kein Slot lud denselben Moment zweimal
+        c.tabsNeighborReadyBeforeSwipe = await waitFor(pT, () => { const i = window.__core.idx(); const s = window.__core.slotInfo(); return s.some((x) => x.index === i + 1 && x.st === 5); }, null, 4000);
+        const loads = await pT.evaluate(() => window.__core.diag().filter((x) => /^slot\d hls load /.test(x)));
+        const perSlot = {};
+        for (const l of loads) { const n = l.slice(0, 5); perSlot[n] = (perSlot[n] ?? 0) + 1; }
+        r.tabsLoadsAfterReturn = perSlot;
+        c.tabsNoDoubleLoad = Object.values(perSlot).every((n) => n <= 1);
+        for (let i = 0; i < 10; i++) {
+          await skipRecall(pT, name, out);
+          await pT.evaluate(() => window.__core.next());
+          await pT.waitForTimeout(250);
+        }
+        r.tabsMax = await pT.evaluate(() => window.__mx);
+        c.tabsVideoMax6 = ['video1', 'video2'].every((s) => (r.tabsMax[s] ?? 0) <= 6);
+        const rowsV = await pT.evaluate(() => Object.entries(window.__mxRows).filter(([s]) => s.startsWith('video')).flatMap(([, v]) => v));
+        c.tabsNoDeckInVideo = rowsV.every((x) => x.owner !== 'deck' && x.owner !== 'pool');
+        c.tabsNoMediaWarn = !(await pT.evaluate(() => window.__core.diag().some((x) => x.startsWith('media: '))));
+        if (!c.tabsVideoMax6 || !c.tabsNoDeckInVideo || !c.tabsNeighborReadyBeforeSwipe || !c.tabsNoDoubleLoad) r.tabsDump = await dump('check red');
+      } catch (e) {
+        c.tabsBlockError = false;
+        r.tabsDump = await dump(String(e)).catch(() => String(e));
+      }
+      await cxT.close();
+    }
     c.pageErrors = errors.length;
     r.errors = errors.slice(0, 3);
   } catch (e) {

@@ -10,6 +10,7 @@ import { isSilent, reduceSound, SOUND_NONE, type SoundObs } from '../moments/sou
 import { installGestures, onGesture } from '../moments/gesture';
 import { netType } from '../lib/diag';
 import { QUALITY_UP_MS, startQuality } from './warmup';
+import { abortAction } from '../moments/slotplan';
 
 /** gainDb: Anpassung der Lautheit des Moments in dB (Entscheidung 16), fehlt sie, bleibt der Moment unverändert */
 export type YTLoad = string | { videoId: string; startSeconds?: number; endSeconds?: number; gainDb?: number; suggestedQuality?: string };
@@ -171,11 +172,26 @@ export function setMediaState(st: 'playing' | 'paused', why: string): void {
     /* Media Session nicht verfügbar */
   }
 }
+/**
+ * Issue 59: das Audio-Deck wird nur im Audio-Reiter freigeschaltet. Vorher legte jede Geste in jedem Reiter bis zu zwölf Elemente an und setzte auf
+ * jedes eine Stille als Quelle (unlock, prime). Im Video-Reiter kamen so zu den drei Slots noch Deck-Elemente mit Quelle dazu (Warnzeile "media: 8 elements").
+ * Der Tipp auf den Audio-Reiter ruft unlock() selbst (MomentFeed setForm), der Audio-Feed bei jeder Berührung ebenfalls. Gesetzt vom Feed (null: kein Feed).
+ */
+let deckForm: string | null = null;
+export const setDeckForm = (f: string | null): void => {
+  deckForm = f;
+};
+export const deckGesture = (): void => {
+  if (deckForm === 'audio') audioDeck.unlock();
+};
+export const deckPrime = (): void => {
+  if (deckForm === 'audio' && levelWanted()) audioDeck.prime();
+};
 if (typeof window !== 'undefined') {
-  // Jede erste Geste im Dokument (auch auf den Reitern) schaltet das Deck-Element frei, nicht nur ein Tipp im Feed
+  // Jede erste Geste im Dokument schaltet das Deck-Element frei, aber nur, wenn der Audio-Reiter offen ist (deckGesture)
   installGestures();
-  onGesture(() => audioDeck.unlock());
-  onUnlock(() => levelWanted() && audioDeck.prime());
+  onGesture(deckGesture);
+  onUnlock(deckPrime);
   // iOS unterbricht den Kontext (Sperrbildschirm, Anruf): läuft er nicht mehr, spielt der Audio-Reiter unverändert weiter
   onContextState((s) => audioDeck.contextChanged(s));
   // Issue 13: jeder Seitenwechsel mit Zustand des Audio-Elements und der Media Session im Protokoll (Zeilen "bg: deck page ...")
@@ -417,6 +433,8 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     el.addEventListener('progress', () => { if (mine()) hlsProgress++; });
     el.addEventListener('timeupdate', () => {
       if (mine() && mode === 'hls' && el.currentTime >= endAt && !el.paused) {
+        wantPlay = false;
+        killedBy = 'clip end';
         el.pause();
         setHlsState(STATE.ENDED);
       }
@@ -493,6 +511,11 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   let attemptNo = 0;
   // Ein Startversuch mit Ergebnis im Protokoll. Verweigert der Browser den Ton (NotAllowedError), läuft das Bild stumm weiter, statt zu stehen.
   let playInflightAt = 0;
+  /** Issue 59: der Feed will, dass dieser Moment spielt (playVideo oder Laden mit play), bis pauseVideo, Cue oder das Ende kommt. Das Laden des Cues kennt es nur beim Laden, nicht danach. */
+  let wantPlay = false;
+  /** Wiederholungsstarts nach AbortError seit dem letzten Laden (höchstens einer) und wer das Element zuletzt angehalten oder neu geladen hat (Ursache des AbortError in der Diag) */
+  let abortRetries = 0;
+  let killedBy = '';
   const tryPlay = (why: string) => {
     if (skipPlay({ paused: media.paused, inflightAt: playInflightAt }, performance.now(), why)) return;
     playInflightAt = performance.now();
@@ -525,7 +548,17 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
         else if (name === 'NotAllowedError' && !media.muted) {
           media.muted = true;
           tryPlay('muted-retry');
-        } else if (name !== 'AbortError') setHlsState(STATE.PAUSED);
+        } else if (name === 'AbortError') {
+          // Issue 59: ein Abbruch durch load, src-Wechsel oder pause() auf demselben Element. Wollte der Feed weiter spielen, kommt ein einziger neuer Start.
+          const el = media;
+          if (abortAction({ wantPlay, current: el === media && !deckMode && mode === 'hls', paused: el.paused, retries: abortRetries }) === 'retry') {
+            abortRetries++;
+            diag(`hls play#${n} aborted by ${killedBy || 'unknown'}, retry once`);
+            window.setTimeout(() => {
+              if (wantPlay && media === el && el.paused && !deckMode) tryPlay('abort-retry');
+            }, 250);
+          } else diag(`hls play#${n} aborted by ${killedBy || 'unknown'}`);
+        } else setHlsState(STATE.PAUSED);
       },
     );
   };
@@ -544,6 +577,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   /** Quelle freigeben und load(), damit der Speicher frei wird. Nie src = '' (löst einen Fehler aus). */
   const releaseEl = (e: HTMLMediaElement) => {
     if (!e.getAttribute('src')) return;
+    killedBy = 'release';
     e.pause();
     e.removeAttribute('src');
     delete e.dataset.src;
@@ -581,6 +615,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       // Elementwechsel (Reiterwechsel oder Spurwechsel): das alte Element anhalten, Ton und Tempo übernehmen
       const old = media;
       media = next;
+      killedBy = 'lane switch';
       old.pause();
       media.muted = old.muted;
       media.defaultPlaybackRate = old.defaultPlaybackRate;
@@ -595,6 +630,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     }
     show('hls');
     lastArgs = { id, start, end, play, gain, from: seekTo };
+    wantPlay = play;
     offset = loc?.offset ?? 0;
     media.dataset.local = loc ? '1' : '0';
     endAt = (end ?? Infinity) - offset;
@@ -618,7 +654,8 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       }
       trialFailed = null;
       seek();
-      if (play) tryPlay('loadedmetadata');
+      // Issue 59: wantPlay statt nur play beim Laden. Ein Cue-Nachbar, dem der Wisch danach playVideo gab, wartete sonst auf einen Start, der nie kam (CUED statt Spielen).
+      if (play || wantPlay) tryPlay('loadedmetadata');
       else setHlsState(STATE.CUED);
     };
     // Zweiter Anstoß, wenn Daten da sind und das erste play() nichts bewirkt hat (iOS verwirft play() vor den Metadaten manchmal still)
@@ -626,7 +663,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       if (el !== media) return;
       diag(`hls canplay ${vstate()}`);
       seek();
-      if (play && el.paused && hlsState !== STATE.PAUSED) tryPlay('canplay');
+      if ((play || wantPlay) && el.paused && hlsState !== STATE.PAUSED) tryPlay('canplay');
     };
     // Listener eines früheren, nie abgeschlossenen Ladens (Fehler, Rückfall) entfernen, sonst feuern sie beim nächsten Laden mit alten Argumenten
     pending.get(el)?.();
@@ -634,6 +671,8 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     if (el.dataset.src !== src) {
       el.dataset.src = src;
       hlsProgress = 0;
+      abortRetries = 0;
+      killedBy = 'load';
       el.addEventListener('loadedmetadata', onMeta, { once: true });
       el.addEventListener('canplay', onCanPlay, { once: true });
       pending.set(el, () => {
@@ -651,6 +690,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   const prepareDeck = (id: string, start: number, end: number | undefined, play: boolean, gain: number) => {
     try { yt.pauseVideo(); } catch { /* noch nicht bereit */ }
     for (const e of all) releaseEl(e);
+    wantPlay = false;
     deckMode = true;
     show('hls');
     lastArgs = { id, start, end, play, gain, from: start };
@@ -686,11 +726,13 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       else prepareHls(id, o.startSeconds ?? 0, o.endSeconds, play, gain);
     } else if (!isYtId(id)) {
       // Kein Stream und keine YouTube-ID (Text-Moment oder Podcast ohne hls): nichts laden, nichts werfen
+      wantPlay = false;
       for (const e of all) releaseEl(e);
       leaveDeck();
       try { yt.pauseVideo(); } catch { /* noch nicht bereit */ }
       show('yt');
     } else {
+      wantPlay = false;
       for (const e of all) releaseEl(e);
       leaveDeck();
       show('yt');
@@ -718,10 +760,13 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
         e.src = silentWav();
         const p = e.play();
         const done = () => {
-          if (e === media || e.dataset.src) return;
+          window.clearTimeout(t);
+          if (e === media || e.dataset.src || e.src !== silentWav()) return;
           e.pause();
           e.removeAttribute('src');
         };
+        // Issue 59: ein play(), das nie erfüllt oder abgelehnt wird, ließe die Stille als Quelle stehen und zählte als Element mit Quelle: nach 1,5 s weg
+        const t = window.setTimeout(done, 1500);
         p?.then(done, done);
       } catch { /* kein Entsperren nötig oder möglich */ }
     }
@@ -746,12 +791,21 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     playVideo: () => {
       if (mode !== 'hls') yt.playVideo();
       else if (deckMode) deckPlay();
-      else tryPlay('playVideo');
+      // Issue 59: ein Slot ohne Quelle spielt nichts (noch nicht zugewiesen). Der Aufruf gäbe nur "play#1 playVideo rs=0 ns=0" und state 3 ohne Moment in die Diag.
+      else if (!media.src) return;
+      else {
+        wantPlay = true;
+        tryPlay('playVideo');
+      }
     },
     pauseVideo: () => {
       if (mode !== 'hls') yt.pauseVideo();
       else if (deckMode) audioDeck.pause(sink);
-      else media.pause();
+      else {
+        wantPlay = false;
+        killedBy = 'pauseVideo';
+        media.pause();
+      }
     },
     // Nur YouTube (Warmlauf, Issue 22): zurück auf den Start des Ausschnitts. Eigene Streams laufen nicht warm und brauchen es nicht.
     seekTo: (seconds, allowSeekAhead) => {
@@ -860,6 +914,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       verifyYtRate();
     },
     destroy: () => {
+      wantPlay = false;
       rateTimers.forEach(clearTimeout);
       window.clearTimeout(qualityTimer);
       offUnlock();

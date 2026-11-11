@@ -1,4 +1,4 @@
-import { needsLoad } from './slotplan';
+import { describeMedia, holdsNeighbor, needsLoad, type MediaItem } from './slotplan';
 import { notesRow } from './notesrow';
 import { diagLog, netType } from '../lib/diag';
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -6,7 +6,7 @@ import { createPortal, flushSync } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL, topicLabel } from '../lib/labels';
 import type { AppState } from '../lib/state';
-import { audioDeck, createPlayer, deckClipOf, HLS, isIOS, LOCAL, loadYT, offlineYT, STATE, type YTPlayer } from '../video/ytApi';
+import { audioDeck, createPlayer, deckClipOf, HLS, isIOS, LOCAL, loadYT, offlineYT, setDeckForm, STATE, type YTPlayer } from '../video/ytApi';
 import { POOL, POOL_WINDOW, type DeckClip } from '../video/audioDeck';
 import { canWarm, coverMs, onNonCurrentPlaying, roleOf, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx, type WarmState } from '../video/warmup';
 import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, isFlat, onGesture, tabAfterSwipe, tabSwipe, type Gesture } from './gesture';
@@ -197,8 +197,23 @@ const LOG_MAX = 3000;
 
 const load = (m: Moment) => ({ videoId: m.videoId, startSeconds: m.start, endSeconds: m.end, gainDb: m.gainDb });
 
-/** Anzahl der Medien-Elemente mit gesetzter Quelle (Vorgabe: höchstens 3 gleichzeitig) */
-const mediaWithSrc = (): number => (typeof document === 'undefined' ? 0 : [...document.querySelectorAll('audio,video')].filter((e) => !!e.getAttribute('src')).length);
+/**
+ * Alle Medien-Elemente mit gesetzter Quelle samt Besitzer (Issue 59): slotN (Element eines Players), deck (Audio-Deck), clip (Teilen-Ausschnitt), sonst unknown.
+ * Die Vorgabe ist höchstens POOL_AHEAD + 1 gleichzeitig, die Diag-Zeile "media: ..." nennt bei Überschreitung jedes Element.
+ */
+const mediaItems = (roleOf?: (el: Element) => string | null): MediaItem[] => {
+  if (typeof document === 'undefined') return [];
+  const out: MediaItem[] = [];
+  for (const e of document.querySelectorAll('audio,video')) {
+    const src = e.getAttribute('src');
+    if (!src) continue;
+    const slot = e.closest('[data-slot]')?.getAttribute('data-slot');
+    const owner = slot !== null && slot !== undefined ? `slot${slot}` : (e as HTMLElement).dataset?.core === 'audio-deck' ? (roleOf?.(e) ?? 'deck') : e.closest('.clip-media') ? 'clip' : 'unknown';
+    out.push({ tag: e.tagName, owner, src });
+  }
+  return out;
+};
+const mediaWithSrc = (): number => mediaItems().length;
 
 export function MomentFeed({ pool: rawPool, state, update, active, onPausedChange, syncError = null, desk }: Props) {
   const single = state.settings.playerMode === 'single';
@@ -244,6 +259,11 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   }, [focus]);
   const textRef = useRef(form === 'text');
   textRef.current = form === 'text';
+  // Issue 59: das Audio-Deck wird nur im Audio-Reiter durch Gesten freigeschaltet (ytApi deckGesture), sonst hält es im Video-Reiter Elemente mit Quelle
+  useEffect(() => {
+    setDeckForm(form);
+    return () => setDeckForm(null);
+  }, [form]);
   /** Im Textmodus: Textende des aktuellen Moments war sichtbar */
   const textSeen = useRef(-1);
   const textBox = useRef<HTMLDivElement>(null);
@@ -842,7 +862,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     // Kaltstart (Issue 22): der aktuelle YouTube-Moment bekommt die Leitung zuerst, die Vorlade-Player warten bis er spielt
     if (!play && !gateOpen.current) {
       const cm = queue.current[idxRef.current];
-      if (cm && cm.form !== 'text' && streamKind(cm) === 'youtube' && streamKind(m) === 'youtube') {
+      if (cm && cm.form !== 'text' && holdsNeighbor({ yt: streamKind(cm) === 'youtube' }, { yt: streamKind(m) === 'youtube' }, iosYt(m))) {
         gateWait.current.add(slot);
         return;
       }
@@ -1368,8 +1388,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       syncHint();
       // Gedämpfter Kanal oder gedämpftes Thema: der Rest hinter den zwei vorgeladenen Momenten wird neu gewählt
       if (dampened || attentionStarted) replanRef.current(next + 3);
-      const nSrc = mediaWithSrc();
-      if (nSrc > POOL_AHEAD + 1) diag.current.push(`media: ${nSrc} elements with src (limit ${POOL_AHEAD + 1})`);
+      const items = mediaItems();
+      if (items.length > POOL_AHEAD + 1) diag.current.push(describeMedia(items, POOL_AHEAD + 1));
       // Issue 44: verdeckt (Sperrbildschirm, Weiter, Ende des Ausschnitts) wartet die Oberfläche nicht auf das Rendern im Hintergrund, das iOS drosselt:
       // Index, Artwork, Hook und Quelle werden sofort gezeichnet, damit nach dem Entsperren kein alter Moment steht. Geladen wird dabei nichts.
       if (form === 'audio' && isBackground(document.visibilityState)) {
@@ -1629,7 +1649,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
             slot.host!.replaceChildren(target);
             const pl = createPlayer(YT, target, id, {
               onDiag: (line) => {
-                diag.current.push(`slot${s} ${line}`);
+                // Issue 59: ein Slot ohne zugewiesenen Moment spielt nichts, seine Zeilen (leere Moment-ID) gehören nicht in die Diag
+                if (slot.mid || /failed/.test(line)) diag.current.push(`slot${s} ${line}`);
                 // Brief 12: erstes Bild eines vorgeladenen Stream-Nachbarn ist da (canplay), einmal je Moment
                 if (line.startsWith('hls canplay') && slot.index !== idxRef.current && slot.cueAt && !slot.preloadLogged) {
                   slot.preloadLogged = true;
@@ -1652,7 +1673,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                 rerender();
               },
               onState: (st) => {
-                diag.current.push(`slot${s} ${slot.mid} state ${st}`);
+                if (slot.mid) diag.current.push(`slot${s} ${slot.mid} state ${st}`);
                 slot.st = st;
                 // Spielzeit des aktuellen Moments (Entscheidung 45)
                 const pm = queue.current[slot.index];
@@ -3212,6 +3233,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       heads: () => pre?.startHeads() ?? [],
       /** Medien-Elemente mit gesetzter Quelle (Vorgabe höchstens 3) und der Hinweis "Ton aus" aus dem Zustand des Elements */
       media: () => mediaWithSrc(),
+      /** Nur Tests (Issue 59): jedes Medien-Element mit Quelle, Besitzer und Host (für den Dump bei rotem Lauf) */
+      mediaRows: () => mediaItems().map((i) => ({ tag: i.tag.toLowerCase(), owner: i.owner, src: i.src.slice(0, 80) })),
       /** Untertitel (Issue 15): Index der gezeigten Cue, Index laut Elementzeit, Elementzeit und Tempo */
       cue: () => {
         const m = queue.current[idxRef.current];
@@ -3493,6 +3516,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
             key={s}
             ref={(el) => (slot.el = el)}
             className="vslot"
+            data-slot={s}
             style={{ ['--off' as string]: offset }}
             aria-hidden={!isCur}
             // Issue 46: Pausiert der YouTube-Player, zeigt iOS darüber Logo, Titel, Avatar und die nächste Folge. Das Standbild deckt die Karte dann ab, der Player pausiert darunter.
