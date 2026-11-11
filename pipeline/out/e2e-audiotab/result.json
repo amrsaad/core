@@ -1,5 +1,5 @@
 {
- "at": "2026-11-11T11:29:32.806Z",
+ "at": "2026-11-11T12:26:03.766Z",
  "runs": [
   {
    "browser": "webkit",
@@ -99,77 +99,77 @@
     "tempoWaiting": 0,
     "tempoPaused": 10,
     "cue": {
-     "worst": 1,
-     "n": 622,
+     "worst": 0,
+     "n": 623,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.37",
+       "3.33",
        34,
        34
       ],
       [
-       "4.66",
+       "4.62",
        47,
        47
       ],
       [
-       "5.95",
+       "5.90",
        60,
        60
       ],
       [
-       "7.23",
-       73,
-       73
+       "7.19",
+       72,
+       72
       ],
       [
-       "8.52",
-       86,
-       86
+       "8.47",
+       85,
+       85
       ],
       [
-       "9.81",
-       99,
-       99
+       "9.76",
+       98,
+       98
       ],
       [
-       "11.09",
+       "11.04",
        111,
        111
       ],
       [
-       "12.38",
+       "12.33",
        124,
        124
       ],
       [
-       "13.67",
+       "13.62",
        137,
        137
       ],
       [
-       "14.95",
+       "14.90",
        150,
        150
       ],
       [
-       "16.24",
-       163,
-       163
+       "16.19",
+       162,
+       162
       ],
       [
-       "17.52",
-       176,
-       176
+       "17.48",
+       175,
+       175
       ]
      ],
      "rate": 2
     },
     "cueTempo": {
      "worst": 1,
-     "n": 546,
+     "n": 551,
      "rates": [
       1,
       1.5,
@@ -181,7 +181,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805072
+       "dueAt": 1792756805006
       }
      ],
      "idx": 6,
@@ -328,7 +328,7 @@
      "shownNow": 0,
      "gaps": [
       [
-       "3.38",
+       "3.39",
        34,
        34
       ],
@@ -343,7 +343,7 @@
        61
       ],
       [
-       "7.38",
+       "7.39",
        74,
        74
       ],
@@ -358,7 +358,7 @@
        101
       ],
       [
-       "11.38",
+       "11.39",
        114,
        114
       ],
@@ -373,7 +373,7 @@
        141
       ],
       [
-       "15.38",
+       "15.39",
        154,
        154
       ],
@@ -404,7 +404,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804932
+       "dueAt": 1792756804914
       }
      ],
      "idx": 6,
@@ -491,7 +491,7 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "firstSoundMs": 2794,
+    "firstSoundMs": 2771,
     "diag": [
      "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
      "deck: src net pod-0006",
@@ -530,11 +530,11 @@
      "want": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
      "id": "pod-0013:82"
     },
-    "lockNextMs": 14,
+    "lockNextMs": 12,
     "lockNextLines": [
      "deck: swap pod-0013 ready=true pool=3",
-     "deck play#4 swap rs=4 muted=false t=82.0",
-     "deck play#4 ok"
+     "deck play#3 swap rs=4 muted=false t=82.0",
+     "deck play#3 ok"
     ],
     "coldNetLines": [
      "signals: coldNetStarts 1 today (net start pod-0035)"
