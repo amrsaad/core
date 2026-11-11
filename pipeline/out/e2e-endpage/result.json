@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-11T09:14:38.245Z",
+  "at": "2026-11-11T09:43:09.033Z",
   "runs": [
     {
       "variant": "webkit",
@@ -35,18 +35,21 @@
         "b24ReloadEnd": true,
         "b24StartNoneBlocked": true,
         "b24ComesBackOnce": true,
-        "b24BlockedLine": false,
-        "b24EndCountsNotBlocked": false,
-        "b24NotSeenAfterBlock": true,
+        "b24BlockedLine": true,
+        "b24EndCountsNotBlocked": true,
+        "b24NotSeenAfterBlock": false,
         "b24Reload2End": true,
-        "b24StartOneBlocked": false,
-        "b24Reload2Count": false,
-        "b24Reload2ButtonOff": false,
+        "b24StartOneBlocked": true,
+        "b24Reload2Count": true,
+        "b24Reload2ButtonOff": true,
         "b24AudioEndAtOnce": true,
-        "b24BlockedNeverShown": false,
+        "b24BlockedNeverShown": true,
         "b24ExpiredShown": false,
         "b24ExpiredStartLine": true,
-        "b24NoPageErrors": true
+        "b24NoPageErrors": true,
+        "b57FeedLoaded": true,
+        "b57NotCountedLine": true,
+        "b57NoBlockLine": true
       },
       "shown": [
         "endp0000000:100",
@@ -81,7 +84,7 @@
       ],
       "seenAudio": 2,
       "b24Blocked": "endp0000006:100",
-      "b24Rejected": false
+      "b24Rejected": true
     },
     {
       "variant": "chromium",
@@ -117,18 +120,21 @@
         "b24ReloadEnd": true,
         "b24StartNoneBlocked": true,
         "b24ComesBackOnce": true,
-        "b24BlockedLine": false,
-        "b24EndCountsNotBlocked": false,
-        "b24NotSeenAfterBlock": true,
+        "b24BlockedLine": true,
+        "b24EndCountsNotBlocked": true,
+        "b24NotSeenAfterBlock": false,
         "b24Reload2End": true,
-        "b24StartOneBlocked": false,
-        "b24Reload2Count": false,
-        "b24Reload2ButtonOff": false,
+        "b24StartOneBlocked": true,
+        "b24Reload2Count": true,
+        "b24Reload2ButtonOff": true,
         "b24AudioEndAtOnce": true,
-        "b24BlockedNeverShown": false,
+        "b24BlockedNeverShown": true,
         "b24ExpiredShown": false,
         "b24ExpiredStartLine": true,
-        "b24NoPageErrors": true
+        "b24NoPageErrors": true,
+        "b57FeedLoaded": true,
+        "b57NotCountedLine": true,
+        "b57NoBlockLine": true
       },
       "shown": [
         "endp0000000:100",
@@ -163,7 +169,7 @@
       ],
       "seenAudio": 2,
       "b24Blocked": "endp0000006:100",
-      "b24Rejected": false
+      "b24Rejected": true
     }
   ]
 }
