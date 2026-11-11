@@ -129,3 +129,45 @@ describe('Schritt 3: Sync, Wegwischer sind Ereignisse, keine Z채hler zweier Ger�
     expect(syncedChanged(s, s)).toBe(false);
   });
 });
+
+describe('Wegwischen z채hlt nur bei spielbereitem Moment (Issue 57)', () => {
+  it('nie bereit (YouTube iOS state -1/3, HLS ohne first-frame): kein Z채hler, keine Sperre', async () => {
+    const { swipeIfReady } = await import('../src/lib/state');
+    let s = emptyState();
+    for (let i = 0; i < 3; i++) {
+      const r = swipeIfReady(s, 'pPtkbZAB3Ag:1542.11', T0 + i, false);
+      expect(r.counted).toBe(false);
+      expect(r.blocked).toBe(false);
+      s = r.state;
+    }
+    expect(s.momentSwipes?.['pPtkbZAB3Ag:1542.11']).toBeUndefined();
+  });
+  it('bereit und weggewischt z채hlt, zweimal bereit sperrt 30 Tage', async () => {
+    const { swipeIfReady } = await import('../src/lib/state');
+    const a = swipeIfReady(emptyState(), 'x:1', T0, true);
+    expect(a.counted).toBe(true);
+    expect(a.n).toBe(1);
+    expect(a.blocked).toBe(false);
+    const b = swipeIfReady(a.state, 'x:1', T0 + 1000, true);
+    expect(b.blocked).toBe(true);
+    expect(swipeBlocked(b.state.momentSwipes!['x:1'], T0 + 29 * DAY)).toBe(true);
+    expect(swipeBlocked(b.state.momentSwipes!['x:1'], T0 + 31 * DAY)).toBe(false);
+  });
+  it('einmal bereit, einmal nie bereit: nur ein Z채hler, keine Sperre', async () => {
+    const { swipeIfReady } = await import('../src/lib/state');
+    const a = swipeIfReady(emptyState(), 'x:2', T0, true);
+    const b = swipeIfReady(a.state, 'x:2', T0 + 1, false);
+    expect(b.blocked).toBe(false);
+    expect(b.n).toBe(1);
+  });
+  it('PlayTracker: ready erst nach PLAYING oder erstem Bild', async () => {
+    const { PlayTracker } = await import('../src/moments/played');
+    const p = new PlayTracker(() => 0);
+    expect(p.ready('a')).toBe(false);
+    p.markReady('a');
+    expect(p.ready('a')).toBe(true);
+    p.set('b', true);
+    p.set('b', false);
+    expect(p.ready('b')).toBe(true);
+  });
+});

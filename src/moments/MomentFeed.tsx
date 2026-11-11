@@ -25,7 +25,7 @@ import { addMissed, bumpCell, bumpColdNetStart, bumpPair, hourKey } from './sign
 import { clearFocus, focusActive, focusFilter, inFocus, readFocus, subscribeFocus, type Focus } from './focus';
 import { bumpStart, dropOverStarted, isQuickSkip, markRejected, quickSkip, resumeSaved, setTabCursor, START_MAX } from './tabs';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
-import { blockedIds, clampRate, clearSwipe, DEFAULT_RATE, dropBlocked, nextRate, rateOf, swipeAway, swipeBlocked, SWIPE_BLOCK_DAYS, type Rate } from '../lib/state';
+import { blockedIds, clampRate, clearSwipe, DEFAULT_RATE, dropBlocked, nextRate, rateOf, swipeBlocked, swipeIfReady, SWIPE_BLOCK_DAYS, type Rate } from '../lib/state';
 import { addSample } from './latency';
 import { captionLines, captionsShown } from './captions';
 import { CueClock, cueIndexAt } from './cueClock';
@@ -781,6 +781,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
    * dazu die Zeile "video: swipe→ready .., →playing .., net .." (Issue 22) und alle fünf Messungen Median und p90 der letzten 20.
    */
   const frameDone = (slot: Slot) => {
+    const fm = queue.current[slot.index];
+    if (fm && slot.index === idxRef.current) played.current.markReady(fm.id);
     const sw = swipe.current;
     if (sw && slot.index === sw.j && sw.j === idxRef.current) {
       swipe.current = null;
@@ -932,9 +934,15 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     // Brief 24: nur ein Wegwischen durch den Nutzer zählt, kein Moment, den die App selbst übersprungen hat (Hänge-Überwachung, Fehler, Sitzungs-Sperre)
     if (bad.current.has(m.videoId)) return;
     const nowMs = clockNow().getTime();
-    const r = swipeAway(stateRef.current, m.id, nowMs);
+    // Issue 57: nie spielbereit gewesen (kein erstes Bild, nie PLAYING): das Wegwischen zählt nicht
+    const ready = played.current.ready(m.id);
+    if (!ready) {
+      diag.current.push(`skip: ${m.id} not counted (never ready)`);
+      return;
+    }
+    const r = swipeIfReady(stateRef.current, m.id, nowMs, ready);
     if (r.blocked) diag.current.push(`skip: ${m.id} blocked ${SWIPE_BLOCK_DAYS} d (${r.n} skips)`);
-    update((s) => swipeAway(s, m.id, nowMs).state);
+    update((s) => swipeIfReady(s, m.id, nowMs, ready).state);
   };
 
   // Erkennt, ob der Browser die Wiedergabe mit Ton verweigert hat. Puffern (langsames Netz, Podcast-Stream) ist keine

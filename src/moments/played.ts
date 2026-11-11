@@ -13,8 +13,18 @@ export class PlayTracker {
   private runs = new Map<string, Run>();
   constructor(private now: () => number = () => performance.now()) {}
 
+  /** Moment war spielbereit: PLAYING erreicht oder erstes Bild da (Issue 57), auch wenn es keine messbare Spielzeit gab */
+  private readySet = new Set<string>();
+  markReady(id: string) {
+    this.readySet.add(id);
+  }
+  ready(id: string): boolean {
+    return this.readySet.has(id) || this.any(id);
+  }
+
   /** Der Player des aktuellen Moments meldet PLAYING (true) oder einen anderen Zustand (false) */
   set(id: string, playing: boolean) {
+    if (playing) this.readySet.add(id);
     const r = this.runs.get(id) ?? { acc: 0, since: null };
     const t = this.now();
     if (playing && r.since === null) r.since = t;

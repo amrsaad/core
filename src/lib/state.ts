@@ -219,6 +219,15 @@ export function swipeAway(s: AppState, id: string, now: number): { state: AppSta
   return { state: { ...s, momentSwipes }, blocked: !!e.until, n };
 }
 
+/**
+ * Issue 57: ein Wegwischen zählt nur, wenn der Moment spielbereit war (erstes Bild oder PLAYING erreicht). Ein Moment, der nie ein Bild hatte
+ * (YouTube auf iOS ohne Geste: state -1/3/5, HLS ohne first-frame), bleibt ohne Zähler.
+ */
+export function swipeIfReady(s: AppState, id: string, now: number, ready: boolean): { state: AppState; blocked: boolean; n: number; counted: boolean } {
+  if (!ready) return { state: s, blocked: false, n: liveSwipe(s.momentSwipes?.[id], now)?.n ?? 0, counted: false };
+  return { ...swipeAway(s, id, now), counted: true };
+}
+
 /** Der Moment hat gespielt (watched über 0): sein Zähler ist weg. Ohne Eintrag kommt derselbe Zustand zurück. */
 export function clearSwipe(s: AppState, id: string): AppState {
   if (!s.momentSwipes?.[id]) return s;
