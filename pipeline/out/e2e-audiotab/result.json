@@ -1,5 +1,5 @@
 {
- "at": "2026-11-11T04:10:08.186Z",
+ "at": "2026-11-11T09:09:16.536Z",
  "runs": [
   {
    "browser": "webkit",
@@ -105,22 +105,22 @@
      "shownNow": 0,
      "gaps": [
       [
-       "3.36",
+       "3.37",
        34,
        34
       ],
       [
-       "4.65",
+       "4.66",
        47,
        47
       ],
       [
-       "5.94",
+       "5.95",
        60,
        60
       ],
       [
-       "7.23",
+       "7.24",
        73,
        73
       ],
@@ -155,7 +155,7 @@
        150
       ],
       [
-       "16.25",
+       "16.24",
        163,
        163
       ],
@@ -168,8 +168,8 @@
      "rate": 2
     },
     "cueTempo": {
-     "worst": 0,
-     "n": 540,
+     "worst": 1,
+     "n": 534,
      "rates": [
       1,
       1.5,
@@ -181,7 +181,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805112
+       "dueAt": 1792756805128
       }
      ],
      "idx": 6,
@@ -404,7 +404,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804956
+       "dueAt": 1792756804954
       }
      ],
      "idx": 6,
@@ -491,7 +491,7 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "firstSoundMs": 2850,
+    "firstSoundMs": 2834,
     "diag": [
      "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
      "deck: src net pod-0006",
@@ -530,7 +530,7 @@
      "want": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
      "id": "pod-0013:82"
     },
-    "lockNextMs": 17,
+    "lockNextMs": 27,
     "lockNextLines": [
      "deck: swap pod-0013 ready=true pool=3",
      "deck play#4 swap rs=4 muted=false t=82.0",
