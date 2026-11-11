@@ -1388,7 +1388,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       syncHint();
       // Gedämpfter Kanal oder gedämpftes Thema: der Rest hinter den zwei vorgeladenen Momenten wird neu gewählt
       if (dampened || attentionStarted) replanRef.current(next + 3);
-      const items = mediaItems();
+      const items = mediaItems((e) => audioDeck.roleOf(e));
       if (items.length > POOL_AHEAD + 1) diag.current.push(describeMedia(items, POOL_AHEAD + 1));
       // Issue 44: verdeckt (Sperrbildschirm, Weiter, Ende des Ausschnitts) wartet die Oberfläche nicht auf das Rendern im Hintergrund, das iOS drosselt:
       // Index, Artwork, Hook und Quelle werden sofort gezeichnet, damit nach dem Entsperren kein alter Moment steht. Geladen wird dabei nichts.
@@ -2003,7 +2003,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         if (!hidden && waited > STILL_MS && !sl.stillLogged) {
           sl.stillLogged = true;
           sl.el?.setAttribute('data-hold', '');
-          diag.current.push(`video: slow net, showing still ${m.id}, net ${netType()}, ${sl.bytesAt ? 'bytes arriving' : 'no bytes yet'}`);
+          diag.current.push(`${m.audio || m.form === 'audio' ? 'audio' : 'video'}: slow net, showing still ${m.id}, net ${netType()}, ${sl.bytesAt ? 'bytes arriving' : 'no bytes yet'}`);
         }
         // Brief 12: hängt der aktuelle Moment und der nächste hat sein erstes Bild schon, bietet die Statuszeile "Next is ready" an (Tipp oder Wisch), kein Wechsel von selbst
         if (!hidden && waited > STILL_MS && !single) {
@@ -3234,7 +3234,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       /** Medien-Elemente mit gesetzter Quelle (Vorgabe höchstens 3) und der Hinweis "Ton aus" aus dem Zustand des Elements */
       media: () => mediaWithSrc(),
       /** Nur Tests (Issue 59): jedes Medien-Element mit Quelle, Besitzer und Host (für den Dump bei rotem Lauf) */
-      mediaRows: () => mediaItems().map((i) => ({ tag: i.tag.toLowerCase(), owner: i.owner, src: i.src.slice(0, 80) })),
+      mediaRows: () => mediaItems((e) => audioDeck.roleOf(e)).map((i) => ({ tag: i.tag.toLowerCase(), owner: i.owner, src: i.src.slice(0, 80) })),
       /** Untertitel (Issue 15): Index der gezeigten Cue, Index laut Elementzeit, Elementzeit und Tempo */
       cue: () => {
         const m = queue.current[idxRef.current];

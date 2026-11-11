@@ -31,6 +31,20 @@ const CONTEXT_GRACE_MS = 1500;
 /** Wie lange der erste Start auf die Blob-URL aus dem Vorrat wartet, bevor er vom Netz kommt (ms, Kaltstart, Brief 02) */
 const HOLD_MS = 1200;
 
+/** So lange nach einem play() ohne Ergebnis hält der Deck weitere Anstöße (soundGuard, play des Feeds, canplay) vom selben Ausschnitt zurück, auch ohne Metadaten */
+const KICK_INFLIGHT_MS = 1500;
+
+/**
+ * Issue 58: ein Ausschnitt bekommt genau einen Startversuch je Quelle. Solange das play() des Ausschnitts aussteht und noch keine Metadaten da sind (kalter Start,
+ * Host liefert den späten Startpunkt langsam), oder es jünger als KICK_INFLIGHT_MS ist, tut jeder weitere Anstoß nichts. Max' Diag 11.11. zeigte play#4 bis #6
+ * binnen 2 s auf demselben Ausschnitt. Ein neuer Ausschnitt (start, swap) ist nie betroffen.
+ */
+export function skipKick(s: { inflightAt: number; readyState: number }, now: number, why: string): boolean {
+  if (why === 'start' || why === 'swap') return false;
+  if (s.inflightAt <= 0) return false;
+  return s.readyState < 1 || now - s.inflightAt < KICK_INFLIGHT_MS;
+}
+
 /** Null Sekunden Stille: schaltet das Element durch eine Geste frei, bevor der erste echte Moment kommt */
 const SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
 
@@ -210,6 +224,10 @@ export class AudioDeck {
   /** Seit dem Laden dieses Ausschnitts kam mindestens ein playing */
   private played = false;
   private plays = 0;
+  /** Zeitpunkt des Startversuchs, dessen play() noch aussteht (0: keiner), und seine Marke, damit ein altes Ergebnis einen neuen Ausschnitt nicht freigibt */
+  private inflightAt = 0;
+  private kickTok = 0;
+  private skipNoted = false;
   /** Wer ein Element zuletzt angehalten hat (Diagnose, Issue 13): "app: wo". Fehlt der Eintrag beim pause-Ereignis, kam die Pause vom System. */
   private pauseBy = new WeakMap<DeckEl, string>();
   /** Ereignisse, die kamen, während die Seite im Hintergrund stand (Diagnose: laufen die Handler dort überhaupt) */
@@ -516,6 +534,9 @@ export class AudioDeck {
     this.live = false;
     this.played = false;
     this.want = play;
+    this.inflightAt = 0;
+    this.kickTok++;
+    this.skipNoted = false;
     this.offset = loc?.offset ?? 0;
     this.isLocal = !!loc;
     this.resumeFrom = from;
@@ -527,7 +548,8 @@ export class AudioDeck {
     this.sink?.time?.(from, el.playbackRate || 1, false);
     // Eine Zeile je Start: kam die Quelle aus dem Offline-Vorrat (Blob) oder aus dem Netz (Issue 14)
     this.diag(`deck: src ${loc ? 'local' : 'net'} ${clip.id}`);
-    el.src = loc?.url ?? withStart(clip.url, from);
+    const srcUrl = loc?.url ?? withStart(clip.url, from);
+    el.src = srcUrl;
     el.load();
     // Netzstart ohne Daten (readyState < 3 nach load() immer): die App zeigt "Loading" bis canplay, nie ein stiller Ausfall
     this.loading(!loc && el.readyState < 3);
@@ -538,7 +560,9 @@ export class AudioDeck {
     }
     // load() setzt das Tempo auf den Standard zurück: Standard und aktuelles Tempo gemeinsam setzen
     this.applyRate(el);
-    this.seek(false);
+    // Issue 58: ein Netzstart mit Startpunkt trägt ihn schon im Fragment (#t=). Ein Sprung vor den Metadaten ließe den Host zweimal an die späte Stelle suchen,
+    // der Sprung nach loadedmetadata (seek(true)) greift nur, wenn das Element die Stelle nicht angenommen hat.
+    if (!(this.target > 0 && !loc && srcUrl.includes('#t='))) this.seek(false);
     if (play) this.kick('start');
   }
 
@@ -572,6 +596,15 @@ export class AudioDeck {
 
   private kick(why: string) {
     const el = this.element;
+    if (skipKick({ inflightAt: this.inflightAt, readyState: el.readyState }, Date.now(), why)) {
+      if (!this.skipNoted) {
+        this.skipNoted = true;
+        this.diag(`deck play skipped (${why}): one in flight ${this.stateText(el)}`);
+      }
+      return;
+    }
+    const tok = ++this.kickTok;
+    this.inflightAt = Date.now();
     const n = ++this.plays;
     if (this.hidden()) this.hiddenStats.plays++;
     this.diag(`deck play#${n} ${why} ${this.stateText(el)}`);
@@ -579,19 +612,26 @@ export class AudioDeck {
     try {
       p = el.play();
     } catch (e) {
+      if (tok === this.kickTok) this.inflightAt = 0;
       this.rejected(e, why);
       return;
     }
     p?.then?.(
       () => {
+        if (tok === this.kickTok) this.inflightAt = 0;
         this.unlocked = true;
         this.diag(`deck play#${n} ok`);
         // Nach jedem erfüllten play() füllt der Host den Vorrat auf (Brief 14, Schritt 2)
         if (el === this.el) this.onPlayed?.();
       },
       // Ein Ergebnis des früheren Elements (Spurwechsel) zählt nicht
-      (e: unknown) => el === this.el && this.rejected(e, why),
+      (e: unknown) => {
+        if (tok === this.kickTok) this.inflightAt = 0;
+        if (el === this.el) this.rejected(e, why);
+      },
     );
+    // Ein Element, das nach play() nicht mehr spielt (iOS hat das play() vor den Metadaten still verworfen), gibt den Anstoß wieder frei
+    if (p === undefined || el.paused) this.inflightAt = 0;
   }
 
   // ---- Vorrat (Entscheidung 52, Brief 14): fünf Elemente halten die nächsten fünf Momente fertig geladen, gesperrt tauscht Weiter nur noch die Rollen ----
@@ -606,6 +646,13 @@ export class AudioDeck {
   }
 
   /** Wie viele Elemente des Vorrats sind bereit (Diagnose, Statuszeile) */
+  /** Rolle eines Deck-Elements für die Diag-Zeile "media: ...": pool (hält einen der nächsten Momente) oder deck (aktiv oder frei). null: nicht von diesem Deck. */
+  roleOf(el: unknown): 'pool' | 'deck' | null {
+    const e = el as DeckEl;
+    if (!this.laneOf.has(e)) return null;
+    return this.entryOf(e) ? 'pool' : 'deck';
+  }
+
   readyCount(): number {
     return this.entries.filter((e) => this.usable(e)).length;
   }
@@ -846,6 +893,9 @@ export class AudioDeck {
     this.live = false;
     this.played = false;
     this.want = true;
+    this.inflightAt = 0;
+    this.kickTok++;
+    this.skipNoted = false;
     this.offset = s.offset;
     this.isLocal = s.local;
     this.resumeFrom = clip.start;
