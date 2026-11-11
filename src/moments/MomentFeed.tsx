@@ -26,7 +26,7 @@ import { addMissed, bumpCell, bumpColdNetStart, bumpPair, hourKey } from './sign
 import { clearFocus, focusActive, focusFilter, inFocus, readFocus, subscribeFocus, type Focus } from './focus';
 import { bumpStart, dropOverStarted, isQuickSkip, markRejected, quickSkip, resumeSaved, setTabCursor, START_MAX } from './tabs';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
-import { blockedIds, clampRate, clearSwipe, DEFAULT_RATE, dropBlocked, nextRate, rateOf, swipeBlocked, swipeIfReady, SWIPE_BLOCK_DAYS, type Rate } from '../lib/state';
+import { blockedIds, canMarkSeen, clampRate, clearSwipe, DEFAULT_RATE, dropBlocked, nextRate, rateOf, swipeBlocked, swipeIfReady, SWIPE_BLOCK_DAYS, type Rate } from '../lib/state';
 import { addSample } from './latency';
 import { captionLines, captionsShown } from './captions';
 import { CueClock, cueIndexAt } from './cueClock';
@@ -502,7 +502,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       for (let guard = 0; queue.current.length < upTo && guard < upTo + pool.length; guard++) {
         const m = nextMoment(pool, { areaShares: s.settings.areaShares, weights: s.momentWeights, seen: s.momentSeen, mutedChannels: s.mutedChannels, now: clockNow().getTime(), rank, ctx }, cursor.current, historyBefore(queue.current, queue.current.length, seedHist.current), rng.current);
         if (!m) break;
-        if (!bad.current.has(m.videoId)) queue.current.push(m);
+        // Frisch gesperrte Momente (Zustand noch nicht neu gerendert, pool noch alt) kommen nie in die Schlange
+        if (!bad.current.has(m.videoId) && !swipeBlocked(s.momentSwipes?.[m.id], clockNow().getTime())) queue.current.push(m);
       }
       // Audio-Reiter, Start (Brief 02): der erste Moment kommt aus dem Vorrat. Innerhalb der nächsten 3 der Mischung wird ein lokaler vorgezogen,
       // sonst kommt ein gehaltener Kopf der letzten Sitzung an die erste Stelle.
@@ -920,6 +921,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     if (!m) return;
     // Gespielt: der Zähler der Wegwischer ohne Wiedergabe ist weg (Brief 24)
     update((s0) => {
+      // Gesperrt und gesehen schließen sich aus (Issue 57): ein im selben Zug gesperrter Moment bleibt ungesehen
+      if (!canMarkSeen(s0, m.id, clockNow().getTime())) return s0;
       const s = clearSwipe(s0, m.id);
       return s.momentSeen[m.id] ? { ...s, momentDay: today } : bumpCell({ ...s, momentDay: today, momentSeen: { ...s.momentSeen, [m.id]: Date.now() }, dayCount: countSeen(s.dayCount, today) }, today, hourKey(clockNow()), m, 'seen');
     });

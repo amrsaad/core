@@ -171,3 +171,14 @@ describe('Wegwischen zählt nur bei spielbereitem Moment (Issue 57)', () => {
     expect(p.ready('b')).toBe(true);
   });
 });
+
+describe('gesperrt und gesehen schließen sich aus (Issue 57)', () => {
+  it('canMarkSeen ist false, solange die Sperre läuft, danach wieder true', async () => {
+    const { swipeIfReady, canMarkSeen } = await import('../src/lib/state');
+    const a = swipeIfReady(emptyState(), 'x:9', T0, true);
+    const b = swipeIfReady(a.state, 'x:9', T0 + 1, true);
+    expect(canMarkSeen(a.state, 'x:9', T0 + 2)).toBe(true);
+    expect(canMarkSeen(b.state, 'x:9', T0 + 2)).toBe(false);
+    expect(canMarkSeen(b.state, 'x:9', T0 + 31 * DAY)).toBe(true);
+  });
+});

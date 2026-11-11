@@ -228,6 +228,11 @@ export function swipeIfReady(s: AppState, id: string, now: number, ready: boolea
   return { ...swipeAway(s, id, now), counted: true };
 }
 
+/** Issue 57: gesperrt und gesehen schließen sich aus. Ein Moment, der gerade gesperrt ist, wird nie als gesehen markiert. */
+export function canMarkSeen(s: AppState, id: string, now: number): boolean {
+  return !swipeBlocked(s.momentSwipes?.[id], now);
+}
+
 /** Der Moment hat gespielt (watched über 0): sein Zähler ist weg. Ohne Eintrag kommt derselbe Zustand zurück. */
 export function clearSwipe(s: AppState, id: string): AppState {
   if (!s.momentSwipes?.[id]) return s;
