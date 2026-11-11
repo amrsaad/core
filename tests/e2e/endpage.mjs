@@ -162,12 +162,18 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
       await pg.waitForFunction((rd) => {
         const m = window.__core?.moment();
         if (!m?.audio) return false;
-        if (rd && !window.__core.ready(m.id)) return false;
+        // Erstes Bild gemeldet, noch ohne Spielzeit: so bleibt der Wisch kein schneller Skip nach Spielzeit (Entscheidung 36, abgelehnt und gesehen), sondern zählt für die Sperre (Entscheidung 45)
+        if (rd) window.__core.markReady(m.id);
         window.__swiped = m.id;
         window.__core.next();
         return true;
       }, ready, { timeout: 15000 });
       return pg.evaluate(() => window.__swiped);
+    };
+    /** Dump bei Fehlern (Befund 24.11.): letzte Diag-Zeilen und Zustand des Moments */
+    const dump = async (pg, label, id) => {
+      const d = await pg.evaluate((i) => ({ diag: window.__core.diag().slice(-60), probe: window.__core.probe(i) }), id);
+      console.log(`DUMP ${name} ${label} ${JSON.stringify(d.probe)}\n${d.diag.join('\n')}`.split('\n').slice(0, 80).join('\n'));
     };
     const diagHas = (pg, line) => pg.evaluate((l) => window.__core.diag().some((x) => x === l), line);
     await p2.goto(`${url}?now=2026-10-23&seed=3#k=${k}`);
@@ -195,11 +201,13 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     const a1again = await swipeAtOnce(p2);
     c.b24ComesBackOnce = a1again === a1;
     c.b24BlockedLine = await waitFor(p2, (l) => window.__core.diag().some((x) => x === l), `skip: ${a1} blocked 30 d (2 skips)`, 3000);
+    await dump(p2, 'nach BlockedLine', a1);
     r.b24Rejected = await p2.evaluate((id) => window.__core.rejected(id), a1);
     await playThrough(p2);
     await p2.click('.head-tabs button:has-text("Video")', { timeout: 4000 });
     c.b24EndCountsNotBlocked = await waitFor(p2, () => document.querySelector('[data-testid=end-audio]')?.textContent === 'Audio, 0 new', undefined, 5000);
     c.b24NotSeenAfterBlock = await p2.evaluate((id) => !window.__core.seen(id), a1);
+    if (!c.b24NotSeenAfterBlock) await dump(p2, 'nach NotSeenAfterBlock', a1);
     await p2.screenshot({ path: `${out}/${name}-5-gesperrt.png` });
     await p2.waitForTimeout(1500);
     // Dritte Sitzung: der gesperrte Moment erscheint nicht mehr, Start meldet die Sperre

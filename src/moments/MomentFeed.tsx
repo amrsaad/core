@@ -502,8 +502,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       for (let guard = 0; queue.current.length < upTo && guard < upTo + pool.length; guard++) {
         const m = nextMoment(pool, { areaShares: s.settings.areaShares, weights: s.momentWeights, seen: s.momentSeen, mutedChannels: s.mutedChannels, now: clockNow().getTime(), rank, ctx }, cursor.current, historyBefore(queue.current, queue.current.length, seedHist.current), rng.current);
         if (!m) break;
-        // Frisch gesperrte Momente (Zustand noch nicht neu gerendert, pool noch alt) kommen nie in die Schlange
-        if (!bad.current.has(m.videoId) && !swipeBlocked(s.momentSwipes?.[m.id], clockNow().getTime())) queue.current.push(m);
+        if (!bad.current.has(m.videoId)) queue.current.push(m);
       }
       // Audio-Reiter, Start (Brief 02): der erste Moment kommt aus dem Vorrat. Innerhalb der nächsten 3 der Mischung wird ein lokaler vorgezogen,
       // sonst kommt ein gehaltener Kopf der letzten Sitzung an die erste Stelle.
@@ -917,12 +916,16 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       return { ...s, momentLog: entries.slice(-LOG_MAX) };
     });
 
-  const markSeen = (m: Moment | undefined) => {
+  const markSeen = (m: Moment | undefined, via = 'poll') => {
     if (!m) return;
     // Gespielt: der Zähler der Wegwischer ohne Wiedergabe ist weg (Brief 24)
     update((s0) => {
       // Gesperrt und gesehen schließen sich aus (Issue 57): ein im selben Zug gesperrter Moment bleibt ungesehen
-      if (!canMarkSeen(s0, m.id, clockNow().getTime())) return s0;
+      if (!canMarkSeen(s0, m.id, clockNow().getTime())) {
+        diag.current.push(`seen: ${m.id} refused (blocked)`);
+        return s0;
+      }
+      if (!s0.momentSeen[m.id]) diag.current.push(`seen: ${m.id} via ${via}`);
       const s = clearSwipe(s0, m.id);
       return s.momentSeen[m.id] ? { ...s, momentDay: today } : bumpCell({ ...s, momentDay: today, momentSeen: { ...s.momentSeen, [m.id]: Date.now() }, dayCount: countSeen(s.dayCount, today) }, today, hourKey(clockNow()), m, 'seen');
     });
@@ -1233,7 +1236,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       // Entscheidung 45: der verlassene Moment ist gesehen, wenn er mindestens eine Sekunde gespielt hat, sonst bleibt er ungesehen im Pool
       if (prevM && !textRef.current) {
         played.current.set(prevM.id, false);
-        if (played.current.enough(prevM.id)) markSeen(prevM);
+        if (played.current.enough(prevM.id)) markSeen(prevM, 'goTo');
         else noteUnplayed(prevM);
       }
       // Weitergewischt: Wertung nach geschautem Anteil (learn.ts). Unter 3 s ist ein Skip (Kanal und Thema mal 0,97), zwei Skips derselben
@@ -1397,7 +1400,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     // Gesehen zählt beim Ende, höchstens einmal je Moment (auch nach der Rückkehr)
     if (ledger.current.first(m.id)) {
       if (bg) diag.current.push(`bg: ended ${m.id}`);
-      markSeen(m);
+      markSeen(m, 'finish');
     }
     if (atEnd(formOf(m), bg) === 'stop') {
       // Video-Reiter im Hintergrund: der Moment lief zu Ende, kein Auto-Weiter
@@ -1951,7 +1954,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       // Gesehen: mindestens eine Sekunde gespielt (Entscheidung 45). Im Hintergrund zählt das Ende (finish) oder die Rückkehr.
       if (!isBackground(document.visibilityState) && !seenMarked.current.has(m.id) && played.current.enough(m.id)) {
         seenMarked.current.add(m.id);
-        markSeenRef.current(m);
+        markSeenRef.current(m, 'poll');
       }
       // Laden sichtbar machen, hängende Momente überspringen. Brief 23 (iOS, Variante c): ein YouTube-Moment, der sich selbst angehalten hat,
       // wartet auf den Weiterstart oder auf den Tipp, er zählt nicht als hängend und wird nie übersprungen (gesehen erst nach Max' Wischen).
@@ -2093,7 +2096,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const markTextSeen = () => {
     if (textSeen.current === idxRef.current) return;
     textSeen.current = idxRef.current;
-    markSeen(queue.current[idxRef.current]);
+    markSeen(queue.current[idxRef.current], 'text');
   };
   const checkTextEnd = () => {
     const el = textBox.current;
@@ -3022,7 +3025,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       return;
     }
     // Der laufende Moment ist jetzt zu sehen: gesehen (einmal), dann Karte oder Ton wieder aufnehmen
-    if (!textRef.current && played.current.enough(m.id)) markSeen(m);
+    if (!textRef.current && played.current.enough(m.id)) markSeen(m, 'return');
     if (!recallRef.current && (stateRef.current.recallQueue?.length ?? 0) > 0) {
       showFromQueue();
       if (recallRef.current) {
@@ -3169,6 +3172,10 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       moment: () => queue.current[idxRef.current],
       /** Nur Tests (Issue 57): der Moment war spielbereit (PLAYING oder erstes Bild erreicht) */
       ready: (id: string) => played.current.ready(id),
+      /** Nur Tests: erstes Bild gemeldet, ohne Spielzeit (Issue 57) */
+      markReady: (id: string) => played.current.markReady(id),
+      /** Nur Tests (lesend): Zustand eines Moments */
+      probe: (id: string) => { const st = stateRef.current; return { seen: st.momentSeen[id] ?? null, swipes: st.momentSwipes?.[id] ?? null, rejected: st.momentRejected?.[id] ?? null, skips: st.momentSkips?.[id] ?? null, log: st.momentLog.filter((e) => e.id === id), cur: queue.current[idxRef.current]?.id ?? null, queue: queue.current.map((x) => x.id), end: !!document.querySelector('[data-testid=end-page]'), card: !!document.querySelector('[data-testid=recall-card]') }; },
       state: () => current().st,
       time: () => current().player?.getCurrentTime?.() ?? 0,
       forYou: () => forYouRef.current,
