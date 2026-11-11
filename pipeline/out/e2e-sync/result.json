@@ -1,5 +1,5 @@
 {
- "at": "2026-11-11T04:12:46.472Z",
+ "at": "2026-11-11T09:12:43.217Z",
  "runs": [
   {
    "browser": "webkit",
@@ -49,12 +49,12 @@
    },
    "diagLines": 13,
    "diagSample": [
-    "bsnd yt: warm cue slot1 sy5:1",
-    "bsnd yt: warm cue slot2 sy3:1",
-    "bsnd slot0 sy1:1 state 2",
-    "bsnd app: hidden"
+    "6gdv yt: warm cue slot1 sy0:1",
+    "6gdv yt: warm cue slot2 sy4:1",
+    "6gdv slot0 sy2:1 state 2",
+    "6gdv app: hidden"
    ],
-   "writeDelayMs": 10019,
+   "writeDelayMs": 10026,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -81,9 +81,9 @@
     "diagOneDevice": true,
     "diagNoSecrets": true,
     "noWriteBefore10s": true,
-    "writeAfter10s": false,
-    "writeDelayAbout10s": false,
-    "captionInFile": false,
+    "writeAfter10s": true,
+    "writeDelayAbout10s": true,
+    "captionInFile": true,
     "debounceOneWrite": true,
     "debounceFromLast": true,
     "bUnlocked": true,
@@ -109,14 +109,14 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "diagLines": 14,
+   "diagLines": 13,
    "diagSample": [
-    "46ri slot2 sy4:1 state 5",
-    "46ri yt: warm cue slot1 sy3:1",
-    "46ri yt: warm cue slot2 sy4:1",
-    "46ri app: hidden"
+    "qffw yt: warm cue slot1 sy3:1",
+    "qffw yt: warm cue slot2 sy6:1",
+    "qffw slot0 sy2:1 state 2",
+    "qffw app: hidden"
    ],
-   "writeDelayMs": -792,
+   "writeDelayMs": 10018,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -126,10 +126,6 @@
    "errors": []
   }
  ],
- "failed": [
-  "chromium.writeAfter10s",
-  "chromium.writeDelayAbout10s",
-  "chromium.captionInFile"
- ],
+ "failed": [],
  "exceptions": []
 }
