@@ -17,7 +17,7 @@ import { beep, contextForTest, levelEnabled, probeHost, setTempo, unlockAudio } 
 import { loudLine, recordLoud } from './loudness';
 import { browserPreloader } from './preloader';
 import { isPreloadable, keyOf, netRank, queueAhead, streamKind } from './preload';
-import { coldToday, countColdStart, pickHeads, startOrder } from './startHead';
+import { coldToday, countColdStart, pickHeads, readyFirstPlan, startOrder } from './startHead';
 import { lockMeta, lockNextPlan, LOCK_UNREGISTERED, previousPress, savedTitle, SAVED_TITLE_MS } from './lockScreen';
 import { cursorFor, historyBefore, parseSaved, POOL_AHEAD, pruneAndHeal, pruneOnly, queueKey, recentFromLog, releaseTail, remixTail, replanStart, restoreQueue } from './queue';
 import { leaveOf, newMomentCursor, nextMoment, sessionSkip, SIGNAL, type MomentCursor } from './mix';
@@ -174,6 +174,8 @@ const WATCHDOG_MS = 25_000;
 const WATCHDOG_HIDDEN_MS = 12_000;
 /** Brief 12: ohne erstes Bild nach dieser Zeit gilt das Netz als schlecht, der Moment zeigt sein Standbild (Zeile "video: slow net, showing still") */
 const STILL_MS = 6_000;
+/** Runde 8: spielt ein Audio-Moment nach dieser Zeit nicht und steht ein anderer bereit im Vorrat, wechselt die App von selbst auf den bereiten (Zeile "ready first ... (rescue)") */
+const RESCUE_MS = 6_000;
 /** Brief 12: Datensparmodus oder 2g: nur ein Nachbar wird vorgeladen, nicht zwei */
 const lowNet = (): boolean => {
   try {
@@ -1090,6 +1092,54 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const fillPoolRef = useRef(fillPool);
   fillPoolRef.current = fillPool;
 
+  /** Runde 8: Momente, von denen die App schon einmal von selbst auf einen bereiten gewechselt ist (je Moment höchstens ein Wechsel, nichts pendelt) */
+  const rescued = useRef(new Set<string>());
+  /**
+   * Runde 8, fertig zuerst (Audio-Reiter): der Moment an der Stelle `at` soll jetzt spielen. Ist er nicht im Vorrat bereit, ein späterer aber schon, rückt der bereite
+   * an die Stelle `at`, der übergangene steht direkt dahinter und lädt im Vorrat weiter (sein Eintrag bleibt, nichts wird gezählt, gesehen oder gesperrt).
+   * go: Wechsel auf idx+1 (vor goTo). start: Tipp auf "Tap to play", der Kopf ist noch nicht da (at = idx, im Tipp-Handler, also in der Geste).
+   * rescue: der aktuelle Moment spielt nach RESCUE_MS nicht (at = idx), auf iOS nur mit einem Element, das schon freigeschaltet ist, höchstens einmal je Moment.
+   * Gibt true zurück, wenn die Warteschlange umgestellt wurde. Verdeckt tut das nichts (dort tauscht das Deck selbst das erste bereite Element).
+   */
+  const readyFirst = (at: number, why: 'go' | 'start' | 'rescue'): boolean => {
+    if (form !== 'audio' || !pre || textRef.current || forYouRef.current || recallRef.current || isBackground(document.visibilityState)) return false;
+    const cur = queue.current[idxRef.current];
+    const m = queue.current[at];
+    if (!m || formOf(m) !== 'audio') return false;
+    // Ein Moment, den das Deck schon spielt (verdeckter Tausch, lockNext), ist gesetzt
+    if (why === 'go' && audioDeck.holds(keyOf(m))) return false;
+    if (why === 'rescue' && (!cur || rescued.current.has(cur.id))) return false;
+    // start und rescue: der Kopf hat in seinem Element schon Daten (abgelehnter Start, nur der Tipp fehlt), dann startet er selbst
+    if (why !== 'go' && audioDeck.holds(keyOf(m)) && audioDeck.readyState() >= 3) return false;
+    const unlockedOnly = why === 'rescue' && IOS;
+    const ready = (x: Moment) => formOf(x) === 'audio' && (LOCAL.has(keyOf(x)) || audioDeck.poolReady(keyOf(x), unlockedOnly));
+    const eligible = (x: Moment) => !bad.current.has(x.videoId) && !(why === 'rescue' && rescued.current.has(x.id));
+    const r = readyFirstPlan(queue.current, at, ready, eligible);
+    if (r.how !== 'pulled') return false;
+    diag.current.push(`deck: ready first ${r.id} over ${r.over} (${why})`);
+    applyQueue(r.queue);
+    if (why === 'go') return true;
+    // start und rescue: der aktuelle Moment wird ersetzt. Der Kopf ist nie weggewischt worden, er zählt weder als gesehen noch als übersprungen.
+    if (why === 'rescue' && cur) rescued.current.add(cur.id);
+    const nm = queue.current[at];
+    const sl = current();
+    clearTapPlay();
+    sl.mid = '';
+    since.current = Date.now();
+    waitSince.current = 0;
+    swipe.current = { j: at, t0: performance.now(), buffered: true };
+    setCaption('');
+    shownCue.current = -2;
+    clock.current.reset();
+    setProgress(0);
+    assign(sl, at, !textRef.current);
+    if (msOnRef.current) setMeta(nm);
+    update((s) => setTabCursor(s, form, nm.id, today));
+    fillPoolRef.current();
+    rerender();
+    return true;
+  };
+
   /** Der Moment, auf den das Deck getauscht hat (Schlüssel), rückt an idx+1, falls er dort noch nicht steht: danach liest goTo dieselbe Stelle */
   const placeNext = (key: string) => {
     const at = idxRef.current + 1;
@@ -1262,6 +1312,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       ensureQueue(next + queueAhead(rateRef.current));
       // Genau hinter dem letzten Moment liegt die Endseite (idx = Länge). Weiter geht es nicht.
       if (next > queue.current.length) return;
+      // Runde 8: fertig zuerst. Ist der geplante Nachfolger nicht im Vorrat bereit, ein späterer aber schon, spielt der bereite.
+      if (next === idxRef.current + 1) readyFirst(next, 'go');
       syncPre(next);
       const prev = idxRef.current;
       diag.current.push(`go ${prev}->${next}`);
@@ -2015,6 +2067,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
           sl.bytesAt = Date.now();
         }
         const hidden = isBackground(document.visibilityState);
+        // Runde 8: Rettung nach kaltem Start. Spielt der Moment nach 6 s nicht und steht ein anderer bereit im Vorrat, wechselt die App auf den bereiten.
+        if (!hidden && waited > RESCUE_MS && readyFirst(idxRef.current, 'rescue')) return;
         // Brief 12: nach 6 s ohne erstes Bild zeigt der Moment sein Standbild mit Hook, darunter die Zeile "Loading" (22E). Der IFrame ist dabei unsichtbar (data-hold).
         if (!hidden && waited > STILL_MS && !sl.stillLogged) {
           sl.stillLogged = true;
@@ -2769,8 +2823,10 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     // Brief 23 (iOS, Variante c): Tipp auf "Tap to play". Der Startbefehl geht synchron hier ab, damit die Geste über postMessage im IFrame ankommt
     // (ein Zeitgeber wie beim Pausentipp trüge sie nicht). Kein Pausentipp, kein Doppeltipp.
     if (tapRef.current && current().mid === tapRef.current) {
-      const sl = current();
       const au = form === 'audio';
+      // Runde 8: der Kopf ist beim Tipp noch nicht da, ein anderer Moment liegt bereit im Vorrat: der bereite startet, im Tipp (Geste), der Kopf bleibt direkt dahinter
+      if (au) readyFirst(idxRef.current, 'start');
+      const sl = current();
       try {
         if (soundOn.current) sl.player?.unMute();
         sl.player?.playVideo();

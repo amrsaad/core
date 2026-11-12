@@ -176,6 +176,88 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await fi.cx.close();
     }
 
+    if (want('readyfirst')) {
+    // Runde 8: fertig zuerst. Der planmäßig nächste Moment (zweiter in der Warteschlange) lädt künstlich langsam (sein load() hängt, bis window.__release() läuft),
+    // die Momente dahinter sind in 30 ms bereit. Der Wisch muss den bereiten spielen (unter 1,5 s, Zeile "deck: ready first ... (go)"), der langsame steht danach
+    // direkt dahinter, sein Eintrag im Vorrat lebt weiter, er zählt nicht als übersprungen. Nach der Freigabe kommt er dran, ohne Umstellung.
+    const SLOW_NEXT = () => {
+      const P = HTMLMediaElement.prototype;
+      const orig = P.load;
+      const held = [];
+      let slowId = '';
+      window.__slowId = '';
+      window.__slowHeld = [];
+      window.__slowOff = false;
+      const idOf = (src) => (/\/([^/.]+)\.m3u8/.exec(src) ?? [])[1] ?? '';
+      const run = (el, src) => { if (el.__src === src) orig.call(el); };
+      // Sobald der Test-Hook steht, ist die Warteschlange bekannt: der zweite Moment ist der langsame. Bis dahin wartet jedes load().
+      setInterval(() => {
+        if (slowId || !window.__core) return;
+        slowId = (window.__core.queue()[window.__core.idx() + 1] ?? '').split(':')[0];
+        window.__slowId = slowId;
+        for (const [el, src] of held.splice(0)) { if (idOf(src) === slowId) window.__slowHeld.push([el, src]); else run(el, src); }
+      }, 10);
+      window.__release = () => { window.__slowOff = true; for (const [el, src] of window.__slowHeld.splice(0)) run(el, src); };
+      P.load = function () {
+        const src = String(this.__src || '');
+        if (window.__slowOff || !src) return orig.call(this);
+        if (!slowId) { held.push([this, src]); return undefined; }
+        if (idOf(src) === slowId) { window.__slowHeld.push([this, src]); return undefined; }
+        return orig.call(this);
+      };
+    };
+    const poolReadyFirst = await encPool(Array.from({ length: 14 }, (_, i) => mk(`atrdy${i}`, 40)));
+    const swipeUp = async (pg) => {
+      const vp = pg.viewportSize();
+      const y0 = vp.height * 0.75; const y1 = vp.height * 0.25;
+      await pg.mouse.move(vp.width / 2, y0);
+      await pg.mouse.down();
+      for (let i = 1; i <= 8; i++) { await pg.mouse.move(vp.width / 2, y0 + ((y1 - y0) * i) / 8); await pg.waitForTimeout(16); }
+      await pg.mouse.up();
+    };
+    const fr = await freshPage(browser, poolReadyFirst, SLOW_NEXT);
+    const pr = fr.pg;
+    await startAudio(pr);
+    c.rfSlowChosen = await waitFor(pr, () => !!window.__slowId, undefined, 6000);
+    c.rfFastReady = await waitFor(pr, () => window.__core.deck().pool.filter((x) => x.ready).length >= 3, undefined, 8000);
+    const b4 = await pr.evaluate(() => {
+      const i = window.__core.idx(); const q = window.__core.queue();
+      return { i, planned: q[i + 1], later: q[i + 2], slow: window.__slowId, ready: window.__core.deck().pool.filter((x) => x.ready).map((x) => x.id), n: window.__core.diag().length };
+    });
+    r.notes.rfBefore = b4;
+    c.rfPlannedIsSlow = !!b4.planned && b4.planned.split(':')[0] === b4.slow && !b4.ready.includes(b4.slow);
+    c.rfLaterIsReady = !!b4.later && b4.ready.includes(b4.later.split(':')[0]);
+    await swipeUp(pr);
+    const t0 = Date.now();
+    const played = await waitFor(pr, (i) => window.__core.idx() === i + 1 && window.__core.state() === 1, b4.i, 4000);
+    r.notes.rfSwipeMs = Date.now() - t0;
+    c.rfSwipePlaysUnder1500 = played && r.notes.rfSwipeMs < 1500;
+    const a1 = await pr.evaluate((n) => {
+      const i = window.__core.idx();
+      return { cur: window.__core.moment().id, q: window.__core.queue().slice(i, i + 4), pool: window.__core.deck().pool, lines: window.__core.diag().slice(n) };
+    }, b4.n);
+    c.rfPlaysReadyOne = a1.cur !== b4.planned && a1.cur === b4.later;
+    c.rfReadyFirstLine = a1.lines.includes(`deck: ready first ${b4.later} over ${b4.planned} (go)`);
+    c.rfSlowDirectlyBehind = a1.q[1] === b4.planned;
+    c.rfSlowEntryAlive = a1.pool.some((p) => p.id === b4.slow) && !a1.lines.some((x) => x.startsWith(`deck: pool dropped ${b4.slow} `));
+    c.rfNoColdStart = !a1.lines.some((x) => /^deck: src net /.test(x));
+    c.rfNotSkipped = !a1.lines.some((x) => x.includes(`skipped (not seen) ${b4.planned}`)) && !(await pr.evaluate((id) => window.__core.seen(id), b4.planned));
+    // Der langsame Moment wird bereit: der nächste Wisch spielt ihn, ohne Umstellung
+    await pr.evaluate(() => window.__release());
+    c.rfSlowBecomesReady = await waitFor(pr, (s) => window.__core.deck().pool.some((p) => p.id === s && p.ready), b4.slow, 5000);
+    const n2 = await pr.evaluate(() => window.__core.diag().length);
+    await swipeUp(pr);
+    c.rfSlowPlaysNext = await waitFor(pr, (id) => window.__core.moment().id === id && window.__core.state() === 1, b4.planned, 4000);
+    const l2 = await pr.evaluate((n) => window.__core.diag().slice(n), n2);
+    c.rfSlowSwapped = l2.some((x) => new RegExp(`^deck: swap ${b4.slow} ready=true`).test(x));
+    c.rfNoSecondPull = !l2.some((x) => x.startsWith('deck: ready first '));
+    c.rfNoPageErrors = fr.errors.length === 0;
+    if (!Object.entries(c).filter(([n]) => n.startsWith('rf')).every(([, v]) => v === true)) {
+      r.notes.rfDump = await pr.evaluate(() => { const i = window.__core.idx(); return { idx: i, state: window.__core.state(), queue: window.__core.queue().slice(Math.max(0, i - 1), i + 7), pool: window.__core.deck().pool, slow: window.__slowId, diag: window.__core.diag().slice(-80) }; });
+    }
+    await fr.cx.close();
+    }
+
     if (want('bg')) {
     // 2. Fünf Momente in Folge im Hintergrund, dasselbe Element, kein Stopp, kein Symbol danach
     const f2 = await freshPage(browser, poolShort);

@@ -779,7 +779,7 @@ describe('Vorrat: fünf Elemente (Brief 14, Entscheidung 52)', () => {
     sb.emit('canplaythrough');
     expect(t.deck.poolReady(sbB.key)).toBe(true);
     expect(t.deck.readyCount()).toBe(1);
-    expect(t.lines.some((l) => /^deck: pool ready b after \d+ ms$/.test(l))).toBe(true);
+    expect(t.lines.some((l) => /^deck: pool ready b after \d+ ms host=\S+$/.test(l))).toBe(true);
   });
 
   it('aus dem Vorrat genügt readyState 3, übers Netz braucht es canplaythrough oder readyState 4', async () => {

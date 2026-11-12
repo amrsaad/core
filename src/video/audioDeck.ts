@@ -185,6 +185,15 @@ const defaultMake = (level: boolean): DeckEl => {
 const defaultHidden = () => typeof document !== 'undefined' && document.visibilityState === 'hidden';
 
 /** Netzquellen springen mit dem Medienfragment direkt an den Start, damit vor dem Sprung kein Ton vom Anfang der Datei läuft */
+/** Hostname einer Quelle für die Diagnose, "unknown" wenn die URL nicht zu lesen ist */
+const hostOf = (url: string): string => {
+  try {
+    return new URL(url).hostname || 'unknown';
+  } catch {
+    return 'unknown';
+  }
+};
+
 export const withStart = (url: string, start: number): string => (start > 0 && !url.includes('#') ? `${url}#t=${start}` : url);
 
 export class AudioDeck {
@@ -696,9 +705,13 @@ export class AudioDeck {
     return this.entries.map((e) => ({ key: e.clip.key, id: e.clip.id, ready: this.usable(e) }));
   }
 
-  /** Hält der Vorrat diesen Ausschnitt bereit? Ohne key: ist überhaupt ein Element bereit? */
-  poolReady(key?: string): boolean {
-    return key === undefined ? this.readyCount() > 0 : this.entries.some((e) => e.clip.key === key && this.usable(e));
+  /**
+   * Hält der Vorrat diesen Ausschnitt bereit? Ohne key: ist überhaupt ein Element bereit?
+   * unlockedOnly (iOS, Runde 8): nur ein Element zählt, das schon durch ein angenommenes play() freigeschaltet ist, denn nur das startet ohne Geste.
+   */
+  poolReady(key?: string, unlockedOnly = false): boolean {
+    const ok = (e: PoolEntry) => this.usable(e) && (!unlockedOnly || this.unlockedEls.has(e.el));
+    return key === undefined ? this.entries.some(ok) : this.entries.some((e) => e.clip.key === key && ok(e));
   }
 
   /**
@@ -815,7 +828,8 @@ export class AudioDeck {
     if (!(s.cpt || rs >= 4 || (s.local && rs >= 3))) return;
     s.ready = true;
     s.rsAtReady = rs;
-    this.diag(`deck: pool ready ${s.clip.id} after ${Date.now() - s.t0} ms`);
+    // Der Host steht dabei: Max' Diag zeigt so, welche Quelle langsam lädt (Runde 8, Barbell 2 bis 5 s bis zum ersten Byte, Iron Culture 0,6 s)
+    this.diag(`deck: pool ready ${s.clip.id} after ${Date.now() - s.t0} ms host=${s.local ? 'local' : hostOf(s.clip.url)}`);
     // Nach einem Tausch oder Verwerfen ist der Vorrat wieder voll
     if (this.depleted && this.entries.every((x) => this.usable(x))) {
       this.depleted = false;

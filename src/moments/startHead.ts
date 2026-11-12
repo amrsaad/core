@@ -63,6 +63,27 @@ export function startOrder(queue: readonly Moment[], held: (m: Moment) => boolea
   return { queue: [...queue], how: 'none' };
 }
 
+/**
+ * Fertig zuerst (Runde 8): Der Moment an der Stelle `at` soll jetzt spielen. Ist er nicht bereit (Vorrat), aber ein späterer ist es, rückt der erste bereite
+ * an die Stelle `at`. Der übergangene Moment steht danach direkt dahinter, die übrigen behalten ihre Reihenfolge. Nichts wird gezählt oder verworfen,
+ * das ist reine Umordnung. `eligible` schließt Kandidaten aus (gescheitert, schon einmal gerettet).
+ * how: planned (die Stelle ist bereit, nichts ändert sich), pulled (ein bereiter rückte vor), none (kein bereiter Moment, oder keiner an der Stelle).
+ * id: der Moment, der jetzt an der Stelle steht. over: der übergangene Moment (nur bei pulled).
+ */
+export function readyFirstPlan<T extends { id: string }>(queue: readonly T[], at: number, ready: (m: T) => boolean, eligible: (m: T) => boolean = () => true): { queue: T[]; how: 'planned' | 'pulled' | 'none'; id?: string; over?: string } {
+  const planned = queue[at];
+  if (!planned) return { queue: [...queue], how: 'none' };
+  if (ready(planned)) return { queue: [...queue], how: 'planned', id: planned.id };
+  for (let j = at + 1; j < queue.length; j++) {
+    if (!ready(queue[j]) || !eligible(queue[j])) continue;
+    const q = [...queue];
+    const [m] = q.splice(j, 1);
+    q.splice(at, 0, m);
+    return { queue: q, how: 'pulled', id: m.id, over: planned.id };
+  }
+  return { queue: [...queue], how: 'none', id: planned.id };
+}
+
 // ---- Zähler coldNetStarts (pro Tag) ----
 
 export const COLD_KEY = lsKey('coldnet.v1');
