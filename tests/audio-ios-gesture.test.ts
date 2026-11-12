@@ -67,7 +67,9 @@ const flush = async () => {
   for (let i = 0; i < 12; i++) await Promise.resolve();
 };
 
+let hiddenNow = false;
 function setup() {
+  hiddenNow = false;
   const els: IosEl[] = [];
   const deck = new AudioDeck({
     standby: true,
@@ -78,7 +80,7 @@ function setup() {
       els.push(e);
       return e;
     },
-    hidden: () => false,
+    hidden: () => hiddenNow,
     lane: (c) => (c.id === 'lv' ? { lane: 'level', why: 'test' } : { lane: 'plain', why: 'no value' }),
     chain: () => ({ linear: () => 1 }),
   });
@@ -218,6 +220,16 @@ describe('Abgelehnter Start oder Tausch (Ziel B)', () => {
     await flush();
     expect(t.refused).toEqual(['a:start']);
     expect(t.lines).toContain('audio: needs tap a (start)');
+  });
+
+  it('verdeckt abgelehnter Start verlangt keinen Tipp, die Rückkehr darf von selbst starten (CI rot 1937fa7: bgRejectResumesOnReturn)', async () => {
+    const t = setup();
+    hiddenNow = true;
+    t.deck.load(clip('a'), t.sink, { play: true, muted: false });
+    await flush();
+    expect(t.refused).toEqual([]);
+    expect(t.lines.some((l) => l.startsWith('audio: needs tap'))).toBe(false);
+    expect(t.lines).toContain('bg: play rejected NotAllowedError');
   });
 
   it('(d) abgelehnter Tausch meldet needs tap, weitere Anstöße ohne Geste rufen kein play(), der Tipp startet den Moment', async () => {

@@ -974,7 +974,8 @@ export class AudioDeck {
     if (name === 'NotAllowedError') {
       if (this.el) this.unlockedEls.delete(this.el);
       const soft = why === 'unlock' && this.lastGesture === 'pointerdown';
-      if (c && !soft) {
+      // Verdeckt abgelehnt (iOS im Hintergrund) ist kein Fall für die Tippfläche: bei der Rückkehr startet die App von selbst, erst eine Ablehnung im Sichtbaren verlangt den Tipp
+      if (c && !soft && !this.hidden()) {
         this.needTapKey = c.key;
         this.needTapNoted = false;
         this.diag(`audio: needs tap ${c.id} (${why})`);
