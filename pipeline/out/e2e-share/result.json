@@ -1,5 +1,5 @@
 {
- "at": "2026-11-12T15:13:13.269Z",
+ "at": "2026-11-12T16:22:09.883Z",
  "runs": [
   {
    "variant": "webkit",
@@ -64,16 +64,16 @@
    },
    "linkLength": 134,
    "copied": "Share hook 0\n\nContext one 0. Context two 0.\n\nKanal 0 · Folge 0 · 1:40\n\nhttp://127.0.0.1:4191/core/clip/#zq1YqU7Iy1FFKU7JSKstMSc1X0lEqBrKLMxKLDCAAKJIIVGNgoKOUBKTNgHQOUEVqHlAiBcjIKSkCsjKArGCgplSFjPz8bAUDpVoA",
-   "arId": "shar0000013:100",
+   "arId": "shar0000012:100",
    "payloadAudio": {
     "v": 1,
     "f": "audio",
-    "s": "https://stream.test/ep13.mp3",
+    "s": "https://stream.test/ep12.mp3",
     "a": 100,
     "b": 160,
     "l": "ar",
     "d": "rtl",
-    "h": "العين لا تنام 13"
+    "h": "العين لا تنام 12"
    },
    "linkLengthAudio": 182,
    "clip": {
@@ -94,8 +94,8 @@
     "fg": "rgb(255, 255, 255)",
     "nothingLocked": true
    },
-   "audioT0": 3.020320224,
-   "audioT1": 5.007898137,
+   "audioT0": 3.016452635,
+   "audioT1": 5.006076396,
    "ar": {
     "dir": "rtl",
     "html": "rtl",
@@ -181,16 +181,16 @@
    },
    "linkLength": 134,
    "copied": "Share hook 0\n\nContext one 0. Context two 0.\n\nKanal 0 · Folge 0 · 1:40\n\nhttp://127.0.0.1:4191/core/clip/#zJcExDoAgDEDRq5A_dyiLQ6_hCTBgaiSSgGEx3t3B9x4mFoUdYx65NISBMTx1_SEkLKoKGxYXFSpGuRAyRr07gmOsnnoJ3toZlPcD",
-   "arId": "shar0000013:100",
+   "arId": "shar0000014:100",
    "payloadAudio": {
     "v": 1,
     "f": "audio",
-    "s": "https://stream.test/ep13.mp3",
+    "s": "https://stream.test/ep14.mp3",
     "a": 100,
     "b": 160,
     "l": "ar",
     "d": "rtl",
-    "h": "العين لا تنام 13"
+    "h": "العين لا تنام 14"
    },
    "linkLengthAudio": 185,
    "clip": {
@@ -212,7 +212,7 @@
     "nothingLocked": true
    },
    "audioT0": 3,
-   "audioT1": 5.000355,
+   "audioT1": 5.004039,
    "ar": {
     "dir": "rtl",
     "html": "rtl",

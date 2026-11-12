@@ -1,5 +1,5 @@
 {
- "at": "2026-11-12T14:59:51.073Z",
+ "at": "2026-11-12T16:08:48.664Z",
  "runs": [
   {
    "browser": "webkit",
@@ -71,7 +71,7 @@
     "openCardBackOnReturn": true
    },
    "notes": {
-    "iosTapMs": 28,
+    "iosTapMs": 4,
     "iosGestureLines": [
      "deck: gesture pointerdown unlocked 6/6"
     ],
@@ -116,77 +116,77 @@
     "tempoWaiting": 0,
     "tempoPaused": 10,
     "cue": {
-     "worst": 1,
-     "n": 620,
+     "worst": 0,
+     "n": 619,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.42",
+       "3.44",
        35,
        35
       ],
       [
-       "4.71",
+       "4.73",
        48,
        48
       ],
       [
-       "5.99",
-       60,
-       60
+       "6.02",
+       61,
+       61
       ],
       [
-       "7.28",
-       73,
-       73
+       "7.31",
+       74,
+       74
       ],
       [
-       "8.57",
+       "8.59",
        86,
        86
       ],
       [
-       "9.86",
+       "9.88",
        99,
        99
       ],
       [
-       "11.15",
+       "11.17",
        112,
        112
       ],
       [
-       "12.44",
+       "12.46",
        125,
        125
       ],
       [
-       "13.72",
+       "13.74",
        138,
        138
       ],
       [
-       "15.02",
+       "15.03",
        151,
        151
       ],
       [
-       "16.30",
+       "16.32",
        164,
        164
       ],
       [
-       "17.60",
-       176,
-       176
+       "17.61",
+       177,
+       177
       ]
      ],
      "rate": 2
     },
     "cueTempo": {
-     "worst": 1,
-     "n": 538,
+     "worst": 0,
+     "n": 534,
      "rates": [
       1,
       1.5,
@@ -198,7 +198,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805141
+       "dueAt": 1792756805122
       }
      ],
      "idx": 6,
@@ -372,7 +372,7 @@
        48
       ],
       [
-       "6.06",
+       "6.05",
        61,
        61
       ],
@@ -387,7 +387,7 @@
        88
       ],
       [
-       "10.06",
+       "10.05",
        101,
        101
       ],
@@ -402,7 +402,7 @@
        128
       ],
       [
-       "14.06",
+       "14.05",
        141,
        141
       ],
@@ -417,7 +417,7 @@
        168
       ],
       [
-       "18.06",
+       "18.05",
        181,
        181
       ]
@@ -438,7 +438,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804955
+       "dueAt": 1792756804971
       }
      ],
      "idx": 6,
@@ -525,7 +525,7 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "firstSoundMs": 2851,
+    "firstSoundMs": 2861,
     "diag": [
      "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
      "deck: src net pod-0006",
@@ -564,7 +564,7 @@
      "want": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
      "id": "pod-0013:82"
     },
-    "lockNextMs": 25,
+    "lockNextMs": 28,
     "lockNextLines": [
      "deck: swap pod-0013 ready=true pool=3",
      "deck play#3 swap rs=4 muted=false t=82.0",
