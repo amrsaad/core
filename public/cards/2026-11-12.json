@@ -795,6 +795,282 @@
    "arabic": "الٓمٓ",
    "translation": "Alif-Lam-Mim.",
    "reflection": "Was nimmst du heute aus diesem Vers mit?"
+  },
+  {
+   "id": "arxiv:2611.14328",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Forward-Value Discretization",
+   "source": {
+    "id": "arxiv:2611.14328",
+    "title": "Forward-Value Discretization: Faster Stochastic Diffusion Sampling Without High-Order Approximation",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.14328",
+    "excerpt": "With 1.5 times as many NFEs as deterministic baselines, it achieves competitive sample quality, narrowing the practical efficiency gap between stochastic and deterministic sampling. Code is available at https://github.com/Na-Li66/F-DDPM."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z"
+  },
+  {
+   "id": "pmid:42866165",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Artificial intelligence and radiomics in small cell lung cancer",
+   "source": {
+    "id": "pmid:42866165",
+    "title": "Artificial intelligence and radiomics in small cell lung cancer: a narrative review of imaging and multisource data integration.",
+    "publisher": "Journal of thoracic disease",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42866165/",
+    "excerpt": "AI and radiomics show potential in SCLC, particularly for CT-based prognosis and segmentation. However, treatment-response prediction, non-invasive subtype classification, and clinical decision support remain investigational and require prospective multicenter validation and patient-level external evaluation before clinical implementation."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z"
+  },
+  {
+   "id": "pmid:41822479",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Complement response to burn injury",
+   "source": {
+    "id": "pmid:41822479",
+    "title": "Complement response to burn injury: systematic review and meta-analysis of patient and animal studies.",
+    "publisher": "Frontiers in immunology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/41822479/",
+    "excerpt": "Burn injury is associated with a time-dependent alteration of complement activity characterized by early consumption followed by sustained activation that likely contributes to prolonged inflammation and impaired healing. Our findings provide guidance for complement involvement in burn pathology and support further investigation of time-specific complement-targeted therapeutic strategies."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z"
+  },
+  {
+   "id": "pmid:43014503",
+   "area": "brain",
+   "topic": "retina",
+   "type": "fresh",
+   "headline": "Acute Zonal Occult Outer Retinopathy",
+   "source": {
+    "id": "pmid:43014503",
+    "title": "Acute Zonal Occult Outer Retinopathy: Reappraising a Historical Clinical Concept in the Era of Multimodal Imaging.",
+    "publisher": "Progress in retinal and eye research",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/43014503/",
+    "excerpt": "This approach allows patients presenting within the broad clinical spectrum historically associated with AZOOR to be characterized at the most specific level supported by contemporary imaging, while recognizing that the biological relationships among these retinal entities remain incompletely understood."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z"
+  },
+  {
+   "id": "arxiv:2611.14326",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "When Should Agents Remember? Falsification-Gated Self-Evolution for LLM Agents",
+   "source": {
+    "id": "arxiv:2611.14326",
+    "title": "When Should Agents Remember? Falsification-Gated Self-Evolution for LLM Agents",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.14326",
+    "excerpt": "These results suggest that testing memory updates as hypotheses supports more reliable long-term adaptation."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z"
+  },
+  {
+   "id": "pmid:42675298",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Objective technical skills assessment in laparoscopic cholecystectomy",
+   "source": {
+    "id": "pmid:42675298",
+    "title": "Objective technical skills assessment in laparoscopic cholecystectomy: a systematic review of manual, kinematic, and AI-based tools.",
+    "publisher": "Surgical endoscopy",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42675298/",
+    "excerpt": "No tool demonstrated sufficient validity to represent a gold standard. Manual tools are most mature but lack scalability, while AI systems show promise but require robust validation and evidence of clinical impact."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z"
+  },
+  {
+   "id": "pmid:42755727",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Artificial intelligence in obesity management",
+   "source": {
+    "id": "pmid:42755727",
+    "title": "Artificial intelligence in obesity management: clinical evidence, translational gaps, and implementation priorities-a structured narrative review.",
+    "publisher": "Frontiers in endocrinology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42755727/",
+    "excerpt": "Translation will require independent external validation, prospective workflow evaluation, patient-centred outcomes, safety, fairness, data governance, and cost-effectiveness."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z"
+  },
+  {
+   "id": "arxiv:2611.14325",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Point-in-Time Encoders for Earnings Calls",
+   "source": {
+    "id": "arxiv:2611.14325",
+    "title": "Point-in-Time Encoders for Earnings Calls",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.14325",
+    "excerpt": "It forecasts returns no better, so point-in-time vintages matter most for retrieval and little for forecasts of returns."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z"
+  },
+  {
+   "id": "pmid:41057766",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Effect of AI-assisted diagnosis on adenomas of different sizes",
+   "source": {
+    "id": "pmid:41057766",
+    "title": "Effect of AI-assisted diagnosis on adenomas of different sizes: a meta-analysis with evidence from RCTs and trial sequential analysis.",
+    "publisher": "BMC gastroenterology",
+    "year": 2025,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/41057766/",
+    "excerpt": "AI-assisted techniques demonstrate higher diagnostic rates for adenomas of ≤ 5 mm, 6–9 mm, and ≥ 10 mm, with a notable reduction in AMR for lesions ≤ 5 mm. While AI can enhance diagnostic quality during colonoscopy, the overall evidence quality remains low, and potential publication bias warrants caution. Further large-scale RCTs are needed to confirm its clinical significance."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z"
+  },
+  {
+   "id": "pmid:42451312",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "AI and IoT in Sugar Beet Systems",
+   "source": {
+    "id": "pmid:42451312",
+    "title": "AI and IoT in Sugar Beet Systems: A Review of Monitoring, VOC Sensing, and Post-Harvest Applications.",
+    "publisher": "Sensors (Basel, Switzerland)",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42451312/",
+    "excerpt": "Such intelligent monitoring systems have the potential to reduce losses and enhance overall efficiency in the sugar production chain."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z"
+  },
+  {
+   "id": "pmid:41932550",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Deep learning and statistical methods identify novel asthma risk variants in Europeans",
+   "source": {
+    "id": "pmid:41932550",
+    "title": "Deep learning and statistical methods identify novel asthma risk variants in Europeans.",
+    "publisher": "The Journal of allergy and clinical immunology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/41932550/",
+    "excerpt": "Our study yields a comprehensive map of asthma-associated loci in European ancestry populations, improves genetic risk prediction, and informs future mechanistic studies."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z"
+  },
+  {
+   "id": "pmid:42458456",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Contrastive explainable AI in healthcare",
+   "source": {
+    "id": "pmid:42458456",
+    "title": "Contrastive explainable AI in healthcare: a systematic review of trends, benefits, research gaps, and future directions.",
+    "publisher": "BMC medical informatics and decision making",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42458456/",
+    "excerpt": "cXAI offers a clinically aligned and cognitively coherent approach to explainability in healthcare by explicitly framing decisions in relation to meaningful alternatives. Despite its strong conceptual suitability, its adoption in real-world medical settings remains limited, with underexplored modalities and scarce user-centered validation."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z"
+  },
+  {
+   "id": "pmid:42392850",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Artificial intelligence in anal fistula: mapping evidence to IDEAL stages",
+   "source": {
+    "id": "pmid:42392850",
+    "title": "Artificial intelligence in anal fistula: mapping evidence to IDEAL stages.",
+    "publisher": "Annals of coloproctology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42392850/",
+    "excerpt": "However, most studies remain within early IDEAL stages (1-2b), highlighting the need for multicenter validation, cost-effectiveness analyses, and robust ethical frameworks before widespread clinical implementation."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z"
+  },
+  {
+   "id": "pmid:42529232",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Drug interventions for acute treatment of pediatric migraine",
+   "source": {
+    "id": "pmid:42529232",
+    "title": "Drug interventions for acute treatment of pediatric migraine: a systematic review and network meta-analysis.",
+    "publisher": "Frontiers in pharmacology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42529232/",
+    "excerpt": "Ibuprofen can effectively relieve symptoms, characterized by a favorable benefit-risk profile. Sumatriptan and zolmitriptan nasal sprays also exhibited robust efficacy, specifically among populations with prominent nausea and vomiting. Sumatriptan/naproxen sodium merits consideration, especially in patients exhibiting an inadequate response to monotherapy."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z"
+  },
+  {
+   "id": "pmid:43016208",
+   "area": "body",
+   "topic": "ernaehrung",
+   "type": "fresh",
+   "headline": "Total energy expenditure of elite female cheerleaders assessed by doubly labeled water",
+   "source": {
+    "id": "pmid:43016208",
+    "title": "Total energy expenditure of elite female cheerleaders assessed by doubly labeled water.",
+    "publisher": "Journal of the International Society of Sports Nutrition",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/43016208/",
+    "excerpt": "These findings contribute essential reference data for understanding the energy expenditure characteristics of competitive cheerleaders and may support the development of evidence-based training and health management strategies for this population."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z"
+  },
+  {
+   "id": "quran:3:2",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Allah - es gibt keinen Gott außer Ihm, dem Lebendigen und Beständigen.",
+   "source": {
+    "id": "quran:3:2",
+    "title": "Sure Ali 'Imran, 3:2",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/3/2",
+    "excerpt": "هو الله، لا معبود بحق إلا هو، المتصف بالحياة الكاملة كما يليق بجلاله، القائم على كل شيء."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z",
+   "arabic": "ٱللَّهُ لَآ إِلَـٰهَ إِلَّا هُوَ ٱلْحَىُّ ٱلْقَيُّومُ",
+   "translation": "Allah - es gibt keinen Gott außer Ihm, dem Lebendigen und Beständigen.",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?"
+  },
+  {
+   "id": "quran:3:3",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Er hat dir das Buch mit der Wahrheit offenbart, das zu bestätigen …",
+   "source": {
+    "id": "quran:3:3",
+    "title": "Sure Ali 'Imran, 3:3",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/3/3",
+    "excerpt": "نَزَّل عليك -أيها الرسول- القرآن بالحق الذي لا ريب فيه، مصدِّقًا لما قبله من كتب ورسل، وأنزل التوراة على موسى عليه السلام، والإنجيل على عيسى عليه السلام من قبل نزول القرآن; لإرشاد المتقين إلى الإيمان، وصلاح دينهم ودنياهم، وأنزل ما يفرق بين الحق والباطل. والذين كفروا بآيات الله المنزلة، لهم عذاب عظيم. والله عزيز لا يُغَالَب، ذو انتقام بمن جحد حججه وأدلته، وتفرُّده بالألوهية."
+   },
+   "createdAt": "2026-11-12T12:46:22.733Z",
+   "arabic": "نَزَّلَ عَلَيْكَ ٱلْكِتَـٰبَ بِٱلْحَقِّ مُصَدِّقًا لِّمَا بَيْنَ يَدَيْهِ وَأَنزَلَ ٱلتَّوْرَىٰةَ وَٱلْإِنجِيلَ",
+   "translation": "Er hat dir das Buch mit der Wahrheit offenbart, das zu bestätigen, was vor ihm (offenbart) war. Und Er hat (auch) die Tora und das Evangelium (als Offenbarung) herabgesandt,",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?"
   }
  ]
 }
