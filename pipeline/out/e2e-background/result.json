@@ -1,5 +1,5 @@
 {
- "at": "2026-11-12T16:10:05.220Z",
+ "at": "2026-11-12T17:54:49.816Z",
  "runs": [
   {
    "browser": "webkit",
@@ -101,7 +101,7 @@
    },
    "bgAudioLog": [
     "bg: mediasession none to playing (feed paused=false) hidden=false",
-    "bg: deck page hidden: paused=false ended=false t=1.2 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck page hidden: paused=false ended=false t=1.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: left bgaudio0:0",
     "bg: deck page hidden +1 s: paused=false ended=false t=2.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: deck clip end via timeupdate hidden=true pool=5 onAdvance=true advance=yes rs=0 muted=false t=4.0",
@@ -118,10 +118,10 @@
     "bg: started bgaudio5:0",
     "bg: next bgaudio5:0",
     "bg: deck page visible: paused=false ended=false t=0.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
-    "bg: deck while hidden 7 s: timeupdate 68, ended 0, clip ends 2, play calls 2",
+    "bg: deck while hidden 7 s: timeupdate 69, ended 0, clip ends 2, play calls 2",
     "bg: back bgaudio5:0"
    ],
-   "bgPoolFiveMs": 138,
+   "bgPoolFiveMs": 163,
    "bgPoolStart": {
     "fill": 8,
     "ok": 30,
@@ -209,11 +209,11 @@
     "bgstock1"
    ],
    "bgNextFiveMs": [
-    31,
-    13,
-    12,
-    12,
-    11
+    36,
+    16,
+    18,
+    15,
+    13
    ],
    "bgNextSkipLines": [
     "go 0->1",
@@ -226,32 +226,32 @@
     {
      "sync": true,
      "src": "https://stream.test/bgstock2.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:1:22 < swapEntry@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js < swapNext@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js: < tc@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:9:2898 < @http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:11:10883 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:1:22 < swapEntry@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js < swapNext@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js: < sc@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:9:2991 < @http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:11:10902 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock8.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:1:22 < swapEntry@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js < swapNext@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js: < tc@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:9:2898 < @http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:11:10883 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:1:22 < swapEntry@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js < swapNext@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js: < sc@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:9:2991 < @http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:11:10902 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock4.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:1:22 < swapEntry@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js < swapNext@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js: < tc@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:9:2898 < @http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:11:10883 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:1:22 < swapEntry@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js < swapNext@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js: < sc@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:9:2991 < @http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:11:10902 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock10.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:1:22 < swapEntry@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js < swapNext@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js: < tc@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:9:2898 < @http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:11:10883 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:1:22 < swapEntry@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js < swapNext@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js: < sc@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:9:2991 < @http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:11:10902 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock1.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:1:22 < swapEntry@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js < swapNext@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js: < tc@http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:9:2898 < @http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:11:10883 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:1:22 < swapEntry@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js < swapNext@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js: < sc@http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:9:2991 < @http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:11:10902 < @"
     }
    ],
    "bgNextQueuedLines": [
     "deck: pool fill 5/5 (local 0, net 5)",
-    "deck: pool ready bgstock9 after 30 ms",
+    "deck: pool ready bgstock9 after 31 ms host=stream.test",
     "pool 1/5 ready",
     "deck: swap bgstock9 ready=true pool=0",
     "deck play#7 swap rs=0 muted=false t=10.0",
@@ -260,15 +260,15 @@
     "deck: pool fill 5/5 (local 0, net 5)",
     "deck: pool fill 5/5 (local 0, net 5)",
     "deck play#7 ok",
-    "deck: pool ready bgnet2 after 33 ms",
+    "deck: pool ready bgnet2 after 35 ms host=stream.test",
     "pool 1/5 ready",
-    "deck: pool ready bgstock3 after 33 ms",
+    "deck: pool ready bgstock3 after 35 ms host=stream.test",
     "pool 2/5 ready",
-    "deck: pool ready bgstock5 after 20 ms",
+    "deck: pool ready bgstock5 after 20 ms host=stream.test",
     "pool 3/5 ready",
-    "deck: pool ready bgstock7 after 20 ms",
+    "deck: pool ready bgstock7 after 20 ms host=stream.test",
     "pool 4/5 ready",
-    "deck: pool ready bgnet0 after 30 ms",
+    "deck: pool ready bgnet0 after 30 ms host=stream.test",
     "pool 5/5 ready"
    ],
    "bgHungLog": [
@@ -406,10 +406,10 @@
     "bg: deck while hidden 7 s: timeupdate 70, ended 0, clip ends 2, play calls 2",
     "bg: back bgaudio5:0"
    ],
-   "bgPoolFiveMs": 178,
+   "bgPoolFiveMs": 186,
    "bgPoolStart": {
     "fill": 8,
-    "ok": 29,
+    "ok": 30,
     "stock": []
    },
    "bgRowLog": [
@@ -494,11 +494,11 @@
     "bgstock1"
    ],
    "bgNextFiveMs": [
-    13,
-    8,
+    15,
+    11,
+    10,
     9,
-    7,
-    8
+    9
    ],
    "bgNextSkipLines": [
     "go 0->1",
@@ -511,32 +511,32 @@
     {
      "sync": true,
      "src": "https://stream.test/bgstock2.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at Ip.kick (http://127.0.0.1:4178/core/assets/main-CBtIpyLS. < at Ip.swapEntry (http://127.0.0.1:4178/core/assets/main-CBtI < at Ip.swapNext (http://127.0.0.1:4178/core/assets/main-CBtIp < at Object.tc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:11:110"
+     "stack": "at P.play (<anonymous>:9:134) < at Up.kick (http://127.0.0.1:4178/core/assets/main-DWfDNDDO. < at Up.swapEntry (http://127.0.0.1:4178/core/assets/main-DWfD < at Up.swapNext (http://127.0.0.1:4178/core/assets/main-DWfDN < at Object.sc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:11:110"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock8.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at Ip.kick (http://127.0.0.1:4178/core/assets/main-CBtIpyLS. < at Ip.swapEntry (http://127.0.0.1:4178/core/assets/main-CBtI < at Ip.swapNext (http://127.0.0.1:4178/core/assets/main-CBtIp < at Object.tc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:11:110"
+     "stack": "at P.play (<anonymous>:9:134) < at Up.kick (http://127.0.0.1:4178/core/assets/main-DWfDNDDO. < at Up.swapEntry (http://127.0.0.1:4178/core/assets/main-DWfD < at Up.swapNext (http://127.0.0.1:4178/core/assets/main-DWfDN < at Object.sc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:11:110"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock4.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at Ip.kick (http://127.0.0.1:4178/core/assets/main-CBtIpyLS. < at Ip.swapEntry (http://127.0.0.1:4178/core/assets/main-CBtI < at Ip.swapNext (http://127.0.0.1:4178/core/assets/main-CBtIp < at Object.tc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:11:110"
+     "stack": "at P.play (<anonymous>:9:134) < at Up.kick (http://127.0.0.1:4178/core/assets/main-DWfDNDDO. < at Up.swapEntry (http://127.0.0.1:4178/core/assets/main-DWfD < at Up.swapNext (http://127.0.0.1:4178/core/assets/main-DWfDN < at Object.sc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:11:110"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock10.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at Ip.kick (http://127.0.0.1:4178/core/assets/main-CBtIpyLS. < at Ip.swapEntry (http://127.0.0.1:4178/core/assets/main-CBtI < at Ip.swapNext (http://127.0.0.1:4178/core/assets/main-CBtIp < at Object.tc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:11:110"
+     "stack": "at P.play (<anonymous>:9:134) < at Up.kick (http://127.0.0.1:4178/core/assets/main-DWfDNDDO. < at Up.swapEntry (http://127.0.0.1:4178/core/assets/main-DWfD < at Up.swapNext (http://127.0.0.1:4178/core/assets/main-DWfDN < at Object.sc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:11:110"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock1.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at Ip.kick (http://127.0.0.1:4178/core/assets/main-CBtIpyLS. < at Ip.swapEntry (http://127.0.0.1:4178/core/assets/main-CBtI < at Ip.swapNext (http://127.0.0.1:4178/core/assets/main-CBtIp < at Object.tc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-CBtIpyLS.js:11:110"
+     "stack": "at P.play (<anonymous>:9:134) < at Up.kick (http://127.0.0.1:4178/core/assets/main-DWfDNDDO. < at Up.swapEntry (http://127.0.0.1:4178/core/assets/main-DWfD < at Up.swapNext (http://127.0.0.1:4178/core/assets/main-DWfDN < at Object.sc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-DWfDNDDO.js:11:110"
     }
    ],
    "bgNextQueuedLines": [
     "deck: pool fill 5/5 (local 0, net 5)",
-    "deck: pool ready bgstock9 after 30 ms",
+    "deck: pool ready bgstock9 after 31 ms host=stream.test",
     "pool 1/5 ready",
     "deck: swap bgstock9 ready=true pool=0",
     "deck play#7 swap rs=0 muted=false t=10.0",
@@ -545,15 +545,15 @@
     "deck: pool fill 5/5 (local 0, net 5)",
     "deck: pool fill 5/5 (local 0, net 5)",
     "deck play#7 ok",
-    "deck: pool ready bgnet2 after 32 ms",
+    "deck: pool ready bgnet2 after 32 ms host=stream.test",
     "pool 1/5 ready",
-    "deck: pool ready bgstock3 after 32 ms",
+    "deck: pool ready bgstock3 after 34 ms host=stream.test",
     "pool 2/5 ready",
-    "deck: pool ready bgstock5 after 21 ms",
+    "deck: pool ready bgstock5 after 20 ms host=stream.test",
     "pool 3/5 ready",
-    "deck: pool ready bgstock7 after 21 ms",
+    "deck: pool ready bgstock7 after 21 ms host=stream.test",
     "pool 4/5 ready",
-    "deck: pool ready bgnet0 after 30 ms",
+    "deck: pool ready bgnet0 after 30 ms host=stream.test",
     "pool 5/5 ready"
    ],
    "bgHungLog": [
