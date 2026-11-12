@@ -1,901 +1,361 @@
 [
  {
-  "id": "jc580ce2b8a",
-  "audio": "https://audio.podigee-cdn.net/2643642-m-15d055a40627f2c333d43f55aba21c38.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j6fa9562577",
-  "audio": "https://audio.podigee-cdn.net/2635853-m-cc1f6a4269bd2abcebb4f7aa737ea3e0.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "jfd4e7c6c59",
-  "audio": "https://audio.podigee-cdn.net/2602150-m-59c3a9b5710bea6fdbd5fd01a50c035c.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "jc77117b02c",
-  "audio": "https://audio.podigee-cdn.net/2516079-m-f79f380b9b11ccbeefb9251629d9fa68.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "jcefd638011",
-  "audio": "https://audio.podigee-cdn.net/2512041-m-6b307816fa7f1fa941b7b43b6935bb80.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j2d2b640b29",
-  "audio": "https://audio.podigee-cdn.net/2507830-m-5dc0baaebae51f0a75b2fdb420ca379f.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "jf76ee816e2",
-  "audio": "https://audio.podigee-cdn.net/2489243-m-284685f7c1ce47ed1a94bec506e41be9.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j5d0e16503f",
-  "audio": "https://audio.podigee-cdn.net/2293157-m-b84719f54a0d20911d6068c319413395.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "jf74c44f6d4",
-  "audio": "https://audio.podigee-cdn.net/2293147-m-9343b42885564f12b48abfbf9fcddafd.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j8ebd7373a4",
-  "audio": "https://audio.podigee-cdn.net/2293122-m-9f3d39ab424598b649bcee3b01a06833.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j92fe2286f4",
-  "audio": "https://audio.podigee-cdn.net/2258412-m-5e312fdaa9fc6af714701519205dfb7d.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j1f490156fc",
-  "audio": "https://audio.podigee-cdn.net/2238246-m-79b122ce1ce966c09b2f2be97f0c09d7.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "jfc4cc16a82",
-  "audio": "https://audio.podigee-cdn.net/2186142-m-29f6eeeffdd35186f51702b99c5f9d4f.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j0711756f32",
-  "audio": "https://audio.podigee-cdn.net/2186126-m-8f8a3b45c3b865b59cb92ace9c3e5fce.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "jbfca41dc55",
-  "audio": "https://audio.podigee-cdn.net/2186112-m-23be67509e103c0b857e6f99c732ac20.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j19ef3ab160",
-  "audio": "https://audio.podigee-cdn.net/2146168-m-53e9a3a940cbc2e1bba412470aa5065b.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j6de1c9df44",
-  "audio": "https://audio.podigee-cdn.net/2132505-m-f023ab179609b0aa78c7ae09f0773bfa.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j0cb3eca54e",
-  "audio": "https://audio.podigee-cdn.net/2130370-m-39d9c2669e38a3bbdb81965816c64ee6.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j7567d8f0e2",
-  "audio": "https://audio.podigee-cdn.net/2130347-m-a3b3243242d2a97682163bed9e6c627c.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "jc75d3e9d50",
-  "audio": "https://audio.podigee-cdn.net/2058025-m-e3cf1843cb0cfd15c31b4e7d51bfb998.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "jf1305b936c",
-  "audio": "https://audio.podigee-cdn.net/1926646-m-c6285dcb8d8c87d7b0262e6d5c5f1f0e.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j0df3adfae9",
-  "audio": "https://audio.podigee-cdn.net/1924843-m-b06ae61dc08b44d649b57637f5497d85.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j31480f8ac4",
-  "audio": "https://audio.podigee-cdn.net/1899025-m-dfa4779bf9d12033cfda9331aae110a4.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j18073e0bb8",
-  "audio": "https://audio.podigee-cdn.net/1858009-m-001f04f78546f17a13e9402f0b4aeb62.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "jd8d970db86",
-  "audio": "https://audio.podigee-cdn.net/1851164-m-f58fae61c477a3c4963c2eb2b07c0bd2.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "jaae7637692",
-  "audio": "https://audio.podigee-cdn.net/1768716-m-6b4ebf64fbe4d9d6ecc55d7f5eea1227.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j40ed16c03f",
-  "audio": "https://audio.podigee-cdn.net/1768699-m-0468cfb499cc11a420a9a5f043b08bac.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "jf34f0f3fa9",
-  "audio": "https://audio.podigee-cdn.net/1753156-m-258c98acc3fddc46e62d02a6a3dbaf9b.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j4ec224d055",
-  "audio": "https://audio.podigee-cdn.net/1733652-m-aeae2af8dd87cf034b6ebe1858b323f4.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j2671bdadbb",
-  "audio": "https://audio.podigee-cdn.net/1688418-m-ceb8b0071fc74789442f3d5767bd3ce9.mp3?source=feed",
-  "lang": "de",
-  "transcript": ""
- },
- {
-  "id": "j0b3e210575",
-  "audio": "https://mcdn.podbean.com/mf/web/jy8x2d/DuaneSyndrome-002.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jfd83a783a1",
-  "audio": "https://mcdn.podbean.com/mf/web/qq7hxb/The_Rings_of_Traumabd9ml.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jd057c204d4",
-  "audio": "https://mcdn.podbean.com/mf/web/wfkyng/Entropion.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jed4934abd7",
-  "audio": "https://mcdn.podbean.com/mf/web/v8imef/Pseudostrabismus.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jd21dcde5a3",
-  "audio": "https://mcdn.podbean.com/mf/web/nq9tmz/Bilateral_Disc_Edema73fmx.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jf8cb43fdab",
-  "audio": "https://mcdn.podbean.com/mf/web/3gupfc/Unilateral_Disc_Edema9yje6.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jaba55a199f",
-  "audio": "https://mcdn.podbean.com/mf/web/3bfwtn/Peds_Exotropia_Oral_Boards8qfl7.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j1f23c63674",
-  "audio": "https://mcdn.podbean.com/mf/web/3kg2ja/Peds_Exotropia_Oral_Boards8kt20.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jab1ebe47a7",
-  "audio": "https://mcdn.podbean.com/mf/web/u7jyc3/Smartphone_Blindnessbnaqq.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jea9061e9a3",
-  "audio": "https://mcdn.podbean.com/mf/web/yvahcj/Acquired_Astigmatismbasbq.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j588664a160",
-  "audio": "https://mcdn.podbean.com/mf/web/kevppt/Hyperopic_Shifts5zd61.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j4f1bd4fce9",
-  "audio": "https://mcdn.podbean.com/mf/web/xsvyjk/Myopic_Shifts6mqbi.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jf7106e6242",
-  "audio": "https://mcdn.podbean.com/mf/web/vsatmu/Corneal_Graft_Selection_Criteria7bwa9.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j9718ee00e1",
-  "audio": "https://mcdn.podbean.com/mf/web/rrse2n/NeuroTroublewithTrobe.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j62e258c581",
-  "audio": "https://mcdn.podbean.com/mf/web/gnucqp/Vitreous_Fundamentalsa6yxc.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jfa3f3239d4",
-  "audio": "https://mcdn.podbean.com/mf/web/57k44g/LCHistiocytosis.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j3ef5c2db05",
-  "audio": "https://mcdn.podbean.com/mf/web/v42g3t/JXG_AXG6ddyh.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j1224c443e1",
-  "audio": "https://mcdn.podbean.com/mf/web/hqny7t/PPS_Maculopathy7v6du.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j1483bf89b1",
-  "audio": "https://mcdn.podbean.com/mf/web/juxisu/Acute_Angle_Closure_Managementaav85.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j6c99dba676",
-  "audio": "https://mcdn.podbean.com/mf/web/me2u2j/Angle_Closure_Fundamentalsbetjd.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j4c6ea88e85",
-  "audio": "https://mcdn.podbean.com/mf/web/qhy5az/AREDS.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "je24e48aaa0",
-  "audio": "https://mcdn.podbean.com/mf/web/n2d97z/Telemedicine.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "je701d4dc1c",
-  "audio": "https://mcdn.podbean.com/mf/web/ac4nj5/MinorityOphthalmologyMentorship.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j41d28bcaec",
-  "audio": "https://mcdn.podbean.com/mf/web/si9cgb/Lymphangiomas.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j364ebf8288",
-  "audio": "https://mcdn.podbean.com/mf/web/ikyfg6/Toxoplasmosis.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j41b1afe76f",
-  "audio": "https://mcdn.podbean.com/mf/web/5y9kar/Open_Globes_Part_26mnj9.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jdd912709f6",
-  "audio": "https://mcdn.podbean.com/mf/web/8vj5bc/Open_Globesa2n97.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j67a6b99e6b",
-  "audio": "https://mcdn.podbean.com/mf/web/4xmp2z/Capillary_Hemangiomas7zk01.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j5376cbf035",
-  "audio": "https://mcdn.podbean.com/mf/web/7k857b/Scleral_Buckles940xr.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jd3cd075b29",
-  "audio": "https://mcdn.podbean.com/mf/web/ewj8cr/Enlarged_Corneal_Nerves8vsn9.mp3",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j3b413140d5",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/EffectsofaDigitalMindfulnessIntervention_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j59f0cf9c7e",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/FuchsEndothelialCornealDystrophy_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j0cf96ec34c",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/Stroke_RisafterIschemicOcularEvents_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j94e242e8ed",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/OphthalmicDrugShortagesintheUS_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jc9efed27bb",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/AIinOphthalmology_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j7a3099b22b",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/GoniotomyOutcomesintheIRISRegistry_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j89071ff19a",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/SystemicWorkupinIsolatedPAMM_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "je10a073a2a",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/HydrusMicrostentClinicalOutcomes_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jbcc5a2d1d3",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/ChatGPTResponsestoPatientQuestions_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j576f1fd729",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/AutofluorescenceinRetinalDetachments_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jdc9dd22712",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/ADVISETrial_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j12fac82add",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/ElevatedIOPafterCataractSurgery_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jfc4d4c25c0",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/OutpatientOralDoxycycline_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j8ea6c05bdd",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/EpiretinalMembraneinDiabeticPatients_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j1abd1f6119",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/GlaucomaProgressionFearandRiskofFalling_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jae5d5174ff",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/CommonMedicationsandDiabeticMacularEdema_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jc0c34fbf0d",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/OutcomesofUveoscleralOutflowEnhancement_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j96228a6baf",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/HybridRemoteMonitoringofCornealGrafts_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jeb56b24d4d",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/SleepApneaandAMD_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jc72c1c7c87",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/GlaucomaSurgerySOS_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jceb41e3b65",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/AGSAAOStatementonNicotinamide_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jf43789c131",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/ShouldWeUseDisposableTonometers_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j732b4ce943",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/AntiVEGFvsPRPforPDR_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "je9902c2124",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/GlaucomaMedicationsandRiskofUveitis_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jc979e1ed7f",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/TherapeuticInterventionsforAutoimmuneRetinopathy_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "ja05213f026",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/OREVS_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jc4ad546626",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/NegativePressureGogglesReduceIOP_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j5870d072a7",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/Type2DiabetesMedicationsandGlaucomaRisk_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "jb39c07647e",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/BloodPressureandGlaucomaProgression_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j55cb8e44e5",
-  "audio": "https://traffic.libsyn.com/secure/6a7fa584-8e27-455c-a3ce-7b22f388b3a0/RiskofRecurrenceinAcuteAnteriorUveitis_final.mp3?dest-id=3294002",
-  "lang": "en",
-  "transcript": ""
- },
- {
-  "id": "j7d0d7a6703",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/JAMA_AI_A_New_JAMA_Network_Journal_1.mp3?dest-id=4538173",
+  "id": "j331ef1b4db",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/127370438/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-9-13%2F486c6978-ce99-2395-ee56-360d16c4fef2.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j6af61706d1",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Beyond_the_AI_Alarm_How_ARPA-H_Is_Rethinking_Innovation_in_Health_Care_1.mp3?dest-id=4538173",
+  "id": "ja976e3b795",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/125853740/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-8-17%2F63bee31f-7ed5-6d73-9b50-e390d49f4653.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jf61968dc53",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Enriching_Clinical_Trials_With_Machine_Learning_1.mp3?dest-id=4538173",
+  "id": "ja66e9ed6ef",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/125127540/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-8-3%2Ff8634b6e-ffac-2816-e9c4-d9df9cba3cb9.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j92741e99aa",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/The_Wizard_of_Oz_in_Medical_AI_1.mp3?dest-id=4538173",
+  "id": "j322ade7dab",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/123830118/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-7-5%2F6b39f6cb-0e11-fa14-6ba1-62ece1ef0681.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j3d5ea869a9",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Designing_Trustworthy_Clinical_AI_1.mp3?dest-id=4538173",
+  "id": "ja3e70a44d9",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/123193626/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-6-22%2F5d77eac0-1db0-7cfa-e8d1-ce63d97e5084.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j42078086ea",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/AI_Drug_Safety_in_Pregnancy_1.mp3?dest-id=4538173",
+  "id": "j885dec7b6c",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/121954523/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-5-24%2F2d821750-848d-2116-acf5-50883f6f8a6b.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j224bb842f9",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Stumbling_Toward_AI_in_the_Clinic_1.mp3?dest-id=4538173",
+  "id": "jc396d9c8f5",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/118511958/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-3-15%2F0860c01b-e8e8-dade-3b3c-4c3f6e203648.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j2a4265413d",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Chatting_With_a_Chatbot_The_History_of_the_First_Clinical_Chatbots_Straight_From_an_LLM.mp3?dest-id=4538173",
+  "id": "j77a5ac9589",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/117830129/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-3-2%2Fd0320002-f0f7-15c8-b9fd-f76f58b6269d.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j51748bf030",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Multiple_Reasoning_Models_and_the_Future_of_AI_Chatbots.mp3?dest-id=4538173",
+  "id": "j61969fa0e4",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/117140904/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-2-18%2F52848fd0-8efb-6513-d722-a35f162b9fad.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jf61c4641d8",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Discussing_the_Latest_Research_in_AI_and_Health.mp3?dest-id=4538173",
+  "id": "ja08a9061d3",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/116405790/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-2-4%2Ffa53c507-e880-6958-029c-58c17a4896e3.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j833223a0f5",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/AI_for_Drug_Discovery.mp3?dest-id=4538173",
+  "id": "j2724120464",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/115706567/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-1-19%2F82b3c3a2-8c18-bfdb-1528-a0c8fb1d635c.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jad82e85ca8",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Maintaining_Safety_and_Trust_When_Patients_Engage_Google_A_Conversation_With_Dr_Michael_Howell.mp3?dest-id=4538173",
+  "id": "j485c394622",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/113661612/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-0-7%2F50ba11fd-44e6-78a5-0d58-5a94f6c03d06.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j95421304fc",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Navigating_Transparency_and_Trust_With_AI_in_Health_Care.mp3?dest-id=4538173",
+  "id": "jf7a901d34d",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/113050229/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2025-11-23%2Fc75f9166-93f6-a258-851c-0bcc4ebb9d1b.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j0792daed00",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Can_AI_Improve_Cost-Effectiveness_of_3D_Total-Body_Photography.mp3?dest-id=4538173",
+  "id": "j1339334ee9",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/112456531/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2025-11-10%2F29f707ee-3025-94a3-bda5-b6f0dd21577b.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j24041af037",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Checking_in_Between_Checkups_An_AI_App_to_Track_Asthma_Symptoms.mp3?dest-id=4538173",
+  "id": "je5214f6da9",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/111748536/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2025-10-26%2F2f76d32f-7dfe-a820-2a48-7965954159ac.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jdab63fa0a0",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Harnessing_AI_and_Genomics_in_Clinical_Trial_Enrollment.mp3?dest-id=4538173",
+  "id": "j3556317bba",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/109733777/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2025-9-15%2Fea24a1f5-e881-9384-ab5b-20471798f3b8.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j66da02cfb4",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/AI-Based_Analysis_for_Parkinsonism.mp3?dest-id=4538173",
+  "id": "j5505ea311e",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/107139668/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2025-7-21%2F2b859e14-a3c5-a4b7-dfc1-056289ea619c.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j4c9ed711d0",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Real-World_Performance_of_AI_in_Screening_for_Diabetic_Retinopathy.mp3?dest-id=4538173",
+  "id": "jaeafa5e7ab",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/105291718/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2025-6-9%2Ff5ca00ee-00df-c29b-f6bd-f20b34954641.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "je6c1e8383d",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Can_Open-Source_LLMs_Compete_With_Proprietary_Ones_for_Complex_Diagnoses.mp3?dest-id=4538173",
+  "id": "jef4a08a449",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/103289253/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2025-4-27%2Fe323108b-4769-012d-9248-180ff0fcae72.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jedf1aa3b24",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Rethinking_Race_in_Prenatal_Screening_for_Open_Neural_Tube_Defects.mp3?dest-id=4538173",
+  "id": "jedc1872ee0",
+  "audio": "https://anchor.fm/s/f2ddbc2c/podcast/play/105909049/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2025-6-24%2F400d89e0-b940-122b-0831-ce9ba2663aba.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jbb8f40885a",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/AIs_Role_in_Advancing_Equity_for_Individuals_With_Developmental_Disabilities.mp3?dest-id=4538173",
+  "id": "j59bb339bb7",
+  "audio": "https://episodes.captivate.fm/episode/b49eafaf-2a85-4e7f-bb01-8d3079c7f13b.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jda563dd1b1",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Prescreening_for_Clinical_Trial_Eligibility_Using_Large_Language_Models.mp3?dest-id=4538173",
+  "id": "jf26ea9115a",
+  "audio": "https://episodes.captivate.fm/episode/4c2757a5-1cae-4b39-9ea9-a89af7f52694.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jb57cf17966",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Machine_Learning_for_Earlier_Diagnosis_of_Schizophrenia.mp3?dest-id=4538173",
+  "id": "j22742d4ef3",
+  "audio": "https://episodes.captivate.fm/episode/85f82b61-de1f-46ad-8802-3c58d23de24b.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jcdbb720358",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Language_Equity_in_Health_Technology.mp3?dest-id=4538173",
+  "id": "j28cb51ebc5",
+  "audio": "https://episodes.captivate.fm/episode/72c5ce61-1251-4986-9980-737a2b84c11a.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j8272dd5412",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/AI_Guided_Diagnostic-Quality_Lung_Ultrasound.mp3?dest-id=4538173",
+  "id": "j3f9995d4d1",
+  "audio": "https://episodes.captivate.fm/episode/2c071e57-e660-4601-82e1-cb95869d810d.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jb1b56a5e8d",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Diagnosis_and_Treatment_of_Infectious_Disease_Using_AI.mp3?dest-id=4538173",
+  "id": "jebdcd5caca",
+  "audio": "https://episodes.captivate.fm/episode/d3c0a96f-f03a-4502-a703-b8c03795bc96.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j2b94c1b9d8",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Older_Adults_Use_of_Digital_Health_Technology.mp3?dest-id=4538173",
+  "id": "j473e1e8213",
+  "audio": "https://episodes.captivate.fm/episode/0f3af397-8d7b-4e6d-9244-5b3982e7b001.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jfb78caf516",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Patient_Satisfaction_With_AI-Generated_Responses.mp3?dest-id=4538173",
+  "id": "j3d5e83747e",
+  "audio": "https://episodes.captivate.fm/episode/afff6f68-06f8-4ec4-87d9-0551b2bfcbf7.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "ja7a2b872af",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/Bioethics_and_AI.mp3?dest-id=4538173",
+  "id": "j57a7d064c8",
+  "audio": "https://episodes.captivate.fm/episode/0e6c00d0-e952-4463-9d4e-1a79bf654e2d.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j98ad8ea9da",
-  "audio": "https://traffic.libsyn.com/secure/2a28681d-7aa0-4c5d-b950-20beccee9b96/AI-Based_Suicide_Screening_for_American_Indian_Patients.mp3?dest-id=4538173",
+  "id": "jaa2aa886bd",
+  "audio": "https://episodes.captivate.fm/episode/13bcf8e3-bda6-4206-b26b-9ff64135d8ed.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jc8de72126d",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/129017982/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-10-7%2F52a2da45-bb36-1a64-bb70-2d0927729f33.mp3",
+  "id": "j33566495e1",
+  "audio": "https://episodes.captivate.fm/episode/46736a0c-9958-4d98-805c-65cdda7cb811.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j5a154038b8",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/128533903/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-10-1%2F71a15994-8d90-eaea-b6e8-4fde357fac4a.mp3",
+  "id": "j5d9e6686b6",
+  "audio": "https://episodes.captivate.fm/episode/d95a95c8-ccdf-4299-9e38-238989e5b212.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j367eeaa2a9",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/121770591/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-5-21%2F61f1827f-2991-7b60-1b6a-0e9b7131adf2.mp3",
+  "id": "je2a0eb5dba",
+  "audio": "https://episodes.captivate.fm/episode/3d39cbf9-bbe1-4cc0-8bf4-1f5f7d7dd6f7.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j151e7885fc",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/121364631/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-5-12%2F8e59545a-62a7-e607-d27f-2c88054a81ad.mp3",
+  "id": "j9a30e50917",
+  "audio": "https://episodes.captivate.fm/episode/6a2061d8-d0a1-4404-9bfb-9325383cccb1.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j16b6cbc785",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/121098352/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-5-6%2F09e2bef7-6964-7d38-d0dd-1131b6cad3a2.mp3",
+  "id": "jc6bb4ff3e2",
+  "audio": "https://episodes.captivate.fm/episode/b9f5b329-9a83-4a43-9b88-22949bc6ea98.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j8dbaa8632a",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/120770462/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-4-31%2F097e6193-8d08-5990-356c-ecbda6b783dc.mp3",
+  "id": "j13b50505cc",
+  "audio": "https://episodes.captivate.fm/episode/29f9cdbf-5de5-4f46-b21c-a3288d4409be.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jea0b15240a",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/120470891/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-4-24%2F270f9463-8bb2-5e50-0779-1ef81cdd1320.mp3",
+  "id": "j76a378a6e9",
+  "audio": "https://episodes.captivate.fm/episode/f8146f7b-3d62-4970-b41a-2536e9b1d46b.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jc804aca3cd",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/120084568/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-4-16%2F0e460a59-be15-8f3c-79b5-471ecc26c80d.mp3",
+  "id": "jec9d655e66",
+  "audio": "https://episodes.captivate.fm/episode/6d718bda-e972-4634-9953-e1f0bf2a0e6d.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j74288973f7",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/119740661/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-4-9%2Fccf94cea-d826-0442-84cf-cc372a307c7b.mp3",
+  "id": "j6120514066",
+  "audio": "https://episodes.captivate.fm/episode/c7d64b63-4693-4f02-b2bb-a65ccf367a25.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jba6c322ac5",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/119386616/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-4-2%2F00556802-6580-86f1-f771-d4cb379ca238.mp3",
+  "id": "j5daf0af221",
+  "audio": "https://episodes.captivate.fm/episode/de6d444f-8889-437e-baed-3efe8279c36a.mp3",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j65f3f35ca1",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/119037855/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-3-25%2F3e0c8c60-1cc4-bb4a-0904-2620d83d5c10.mp3",
+  "id": "je3c223c98f",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/54b5c73d-8f57-4566-82fb-5860df34bcb8/audio/977d7b31-cbe0-4625-9fbe-15b7264e7fc2/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j8cd7151f13",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/118671939/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-3-21%2Fb677dab9-8301-63aa-d0f0-6a564f02e1c9.mp3",
+  "id": "j3862f3fc57",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/16d56f42-b118-48c9-93a6-f13bcf007a87/audio/cce47272-4a10-4f9e-b6e4-b0c7d606647e/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j6e481f1ed9",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/118305667/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-3-11%2Fd9f181f2-6e00-633e-c998-39d39002e51e.mp3",
+  "id": "j2d134202ce",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/55a5f9f8-f1eb-4d6a-bb7e-1ca15f96e737/audio/1cbc603f-dc4e-4a1b-82c8-e43f1dd9f158/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j19bbee54b0",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/117960651/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-3-28%2Fb357494a-c9e8-0ae5-ee57-3099297f0d5e.mp3",
+  "id": "ja435794c0f",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/69383f06-0323-4fd7-9a39-bcb8264bbab0/audio/ec034ef9-ee24-498a-ab6c-c4a578bddb05/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "ja34c978a60",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/117614078/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-2-28%2Fb90fe719-cd74-8aba-96b5-1d307fcdef7f.mp3",
+  "id": "j1b3e1f17ed",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/5f71d8ad-c35c-40ef-9e76-ea5461357b48/audio/90a91df9-9a66-46e8-b87e-cfa427087023/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "je2f17ff5f3",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/117287464/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-2-22%2Fde80efff-98e2-8f44-ac58-95dca00efb55.mp3",
+  "id": "j4d651ced21",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/0f680d19-f768-4d90-b5d3-b3f12a28fa58/audio/149e9f1f-3cf1-45a2-ad48-72b64156128f/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "ja542bd1366",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/116914379/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-2-14%2F6c4f8852-23b4-8790-c49d-2e4462e70e32.mp3",
+  "id": "jcf7435bc11",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/10e25879-e90f-4e10-9f8f-441267213f58/audio/2bbb1698-26e6-4924-b737-6c4ec4714b2a/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j840f6980cd",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/116545990/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-2-7%2F4fd83bae-dfcc-afab-e57e-8d6c98b1c54c.mp3",
+  "id": "jfc42414555",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/82b7a50c-2ab5-4b3e-bde1-183239ac4d13/audio/b944d6e4-fc1e-40b8-b403-71cd95817b67/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j35fe6a4fd2",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/116093864/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-1-26%2F5cd45e8c-6d41-2783-1f03-230b77e4d18d.mp3",
+  "id": "j1ad784aa4a",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/5a1e2cfe-fc37-45fe-8709-5749cb499ed3/audio/ecaddb76-42f9-4fd5-b102-c670587683ce/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jce82092b80",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/115853978/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-1-22%2F65672f79-37f6-331e-2af3-87e9a4ed17d3.mp3",
+  "id": "j82f8463fe6",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/799a9283-a583-4bc2-839c-d5f7ca754bfd/audio/92c376d1-ae87-4977-9045-3db221d47951/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jab1e4dc065",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/115465110/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-1-13%2Fa21137f1-cc23-60d7-0a52-9b54365104ec.mp3",
+  "id": "j72818dc3ee",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/7d9b61a1-8037-4bff-bc0a-7351977ff264/audio/556b1791-a983-45db-9fc7-8818e0fcc867/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j368d9e344a",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/115142712/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-1-6%2F24a8e2f3-16e2-d89d-8260-238ee427eaaa.mp3",
+  "id": "jd411b92666",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/3f8efc75-3978-468e-be97-51a1530a65a8/audio/dddec4f9-3eb0-4f1d-8aaf-109404ec1319/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j5db043b544",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/114836595/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2026-0-31%2F9e6ef1ac-bf45-5e3e-cef7-d29622f2feae.mp3",
+  "id": "j2edda9c311",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/18f419cc-7037-42cf-9bf3-b529db6af2a3/audio/dd0e59a7-c7ba-4325-b8c1-0b7311b0448d/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j592ad17e0e",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/113058330/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2025-11-23%2Fb85899f1-cb44-e969-5eee-dacd3612959a.mp3",
+  "id": "jc39e07ecab",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/e381ec6a-7bdd-4192-8162-58e4c5c5b649/audio/7cb5f912-ab54-483a-ace6-760bec1df97d/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j52d48ff0fc",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/113057940/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2025-11-23%2F0cf56742-3aa7-e157-60e1-c6a8ddb7875e.mp3",
+  "id": "j4e0eb21a58",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/9bcfcd07-72cf-4ed3-b27d-4b989effe8a8/audio/649b8667-0891-4c25-9481-326438f73d2a/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j9d366c5bd8",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/113056889/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2025-11-23%2F8236266d-eb7b-6d23-82ec-345cdffd7d39.mp3",
+  "id": "jc5b4a7a762",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/d9e029c3-0f02-4e00-817f-efd7a9969d27/audio/b9a517ef-15b2-4d45-8428-82e5b4c21ee7/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jaaf58a660f",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/113056387/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2025-11-23%2Ffa36b929-3275-ff7f-113c-4420f42dfab1.mp3",
+  "id": "jb0d7a19d34",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/aed83b64-42bd-4790-b2f0-02274414607d/audio/8b8de03c-af6a-4418-997b-a3bf562aebcc/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "jf7f43edca5",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/111658971/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2025-11-6%2F36e8e57c-1df1-5873-3c2f-de0f8007a43f.mp3",
+  "id": "jc5f5962b29",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c3e-9483-4edc-a51b-812e6b1f78b6/episodes/595cb810-5b1e-4516-967c-7e631d8b7683/audio/16c68df4-8d07-4b6b-a69f-c266e2383f09/default_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "je71d0b71d5",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/112161153/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2025-11-5%2F862fba53-0394-2c96-eb28-f9ef7ed61aea.mp3",
+  "id": "j1dd5bb4180",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c/04677c3e-9483-4edc-a51b-812e6b1f78b6/4e31733c-1fc2-4d1c-b982-5965b774b8aa/episode-42_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  },
  {
-  "id": "j3a21e8dc4d",
-  "audio": "https://anchor.fm/s/1062c2d68/podcast/play/111657498/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2025-10-24%2Fadf580df-8376-0470-7d9c-5d0af2192790.mp3",
+  "id": "jdf0246c06d",
+  "audio": "https://chrt.fm/track/1GFE32/cdn.simplecast.com/audio/04677c/04677c3e-9483-4edc-a51b-812e6b1f78b6/f9e3e011-5f96-4421-ab73-7477444a4c4f/episode-40_tc.mp3?aid=rss_feed&feed=Fxu1mrhe",
   "lang": "en",
   "transcript": ""
  }
