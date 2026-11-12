@@ -241,6 +241,66 @@
    "urlChecks": {
     "https://quran.com/3/3": 200
    }
+  },
+  {
+   "sourceId": "quran:3:4",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/3/4",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/3:4?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Ali 'Imran 3:4",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "مِن قَبْلُ هُدًى لِّلنَّاسِ وَأَنزَلَ ٱلْفُرْقَانَ ۗ إِنَّ ٱلَّذِينَ كَفَرُوا۟ بِـَٔايَـٰتِ ٱللَّهِ لَهُمْ عَذَابٌ شَدِيدٌ ۗ وَٱللَّهُ عَزِيزٌ ذُو ٱنتِقَامٍ",
+    "translation": "zuvor, als Rechtleitung für die Menschen. Und Er hat die Unterscheidung herabgesandt. Gewiß, diejenigen, die Allahs Zeichen verleugnen, für sie wird es strenge Strafe geben. Allah ist Allmächtig und Besitzer von Vergeltungsgewalt.",
+    "tafsir_muyassar": "نَزَّل عليك القرآن بالحق الذي لا ريب فيه، مصدِّقًا لما قبله من كتب ورسل، وأنزل التوراة على موسى علبه السلام، والإنجيل على عيسى عليه السلام من قبل نزول القرآن؛ لإرشاد المتقين إلى الإيمان، وصلاح دينهم ودنياهم، وأنزل ما يفرق بين الحق والباطل. والذين كفروا بآيات الله المنزلة، لهم عذاب عظيم. والله عزيز لا يُغَالَب، ذو انتقام بمن جحد حججه وأدلته، وتفرُّده بالألوهية.",
+    "tafsir_ibnkathir": "<h2>Which was revealed in Al-Madina</h2><p>Surah Al `Imran was revealed in Al-Madinah, as evident by the fact that the first eighty-three Ayat in it relate to the delegation from Najran that arrived in Al-Madinah on the ninth year of Hijrah (632 CE). We will elaborate on this subject when we explain the Ayah about the Mubahalah 3:61 in this Surah, Allah willing. We should also state that we mentioned the virtues of Surah Al `Imran along with the virtues of Surat Al-Baqarah in the beginning of the Tafsir of Surat Al-Baqarah.</p><p>بِسْمِ اللَّهِ الرَّحْمَـنِ الرَّحِيمِ</p><p>In the Name of Allah, the Most Gracious, the Most Merciful</p><p>We mentioned the Hadith in the Tafsir of Ayat Al-Kursi 2:255 that mentions that Allah's Greatest Name is contained in these two Ayat,</p><p>اللَّهُ لاَ إِلَـهَ إِلاَّ هُوَ الْحَىُّ الْقَيُّومُ</p><p>(Allah! None has the right to be worshipped but He, the Ever Living, the One Who sustains and protects all that exists) and,</p><p>الم١اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ</p><p>(Alif-Lam-Mim. Allah! None has the right to be worshipped but He, the Ever Living, the One Who sustains and protects all that exists.)</p><p>We also explained the Tafsir of,</p><p>الم</p><p>(Alif-Lam-Mim) in the beginning of Surat Al-Baqarah, and the meaning of,</p><p>اللَّهُ لاَ إِلَـهَ إِلاَّ هُوَ الْحَىُّ الْقَيُّومُ</p><p>(Allah! La ilaha illa Huwa, Al-Hayyul-Qayyum) in the Tafsir of Ayat Al-Kursi. Allah's statement,</p><p>نَزَّلَ عَلَيْكَ الْكِتَـبَ بِالْحَقِّ</p><p>(It is He Who has sent down the Book to you with truth, ) means, revealed the Qur'an to you, O Muhammad, in truth, meaning there is no doubt or suspicion that it is revealed from Allah. Verily, Allah revealed the Qur'an with His knowledge, and the angels testify to this fact, Allah is sufficient as a Witness. Allah's statement,</p><p>مُصَدِّقاً لِّمَا بَيْنَ يَدَيْهِ</p><p>(Confirming what came before it) means, from the previous divinely revealed Books, sent to the servants and Prophets of Allah. These Books testify to the truth of the Qur'an, and the Qur'an also testifies to the truth these Books contained, including the news and glad tidings of Muhammad's ﷺ prophethood and the revelation of the Glorious Qur'an.</p><p>Allah said,</p><p>وَأَنزَلَ التَّوْرَاةَ</p><p>(And He sent down the Tawrah) to Musa (Musa) son of `Imran,</p><p>وَالإِنجِيلَ</p><p>(And the Injil), to `Isa, son of Mary,</p><p>مِن قَبْلُ</p><p>(Aforetime) meaning, before the Qur'an was revealed,</p><p>هُدًى لِّلنَّاسِ</p><p>(As a guidance to mankind) in their time.</p><p>وَأَنزَلَ الْفُرْقَانَ</p><p>(And He sent down the criterion) which is the distinction between misguidance, falsehood and deviation on one hand, and guidance, truth and piety on the other hand. This is because of the indications, signs, plain evidences and clear proofs that it contains, and because of its explanations, clarifications, etc.</p><p>Allah's statement,</p><p>إِنَّ الَّذِينَ كَفَرُواْ بِأيَـتِ اللَّهِ</p><p>(Truly, those who disbelieve in the Ayat of Allah) means they denied, refused and unjustly rejected them,</p><p>لَهُمْ عَذَابٌ شَدِيدٌ</p><p>(For them there is a severe torment) on the Day of Resurrection,</p><p>وَاللَّهُ عَزِيزٌ</p><p>(And Allah is All-Mighty) meaning, His grandeur is invincible and His sovereignty is infinite,</p><p>ذُو انتِقَامٍ</p><p>(All-Able of Retribution.) from those who reject His Ayat and defy His honorable Messengers and great Prophets.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Ali 'Imran",
+    "surahNameDe": "Family of Imran",
+    "key": "3:4"
+   },
+   "fetchedAt": "2026-11-12T16:06:39.089Z",
+   "urlChecks": {
+    "https://quran.com/3/4": 200
+   }
+  },
+  {
+   "sourceId": "quran:3:5",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/3/5",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/3:5?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Ali 'Imran 3:5",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "إِنَّ ٱللَّهَ لَا يَخْفَىٰ عَلَيْهِ شَىْءٌ فِى ٱلْأَرْضِ وَلَا فِى ٱلسَّمَآءِ",
+    "translation": "Vor Allah ist nichts verborgen, weder auf der Erde noch im Himmel.",
+    "tafsir_muyassar": "إن الله محيط علمه بالخلائق، لا يخفى عليه شيء في الأرض ولا في السماء، قلَّ أو كثر.",
+    "tafsir_ibnkathir": "<p>Allah states that He has perfect knowledge in the heavens and earth and that nothing in them is hidden from His watch.</p><div class=\"arabic uthmani\">هُوَ الَّذِي يُصَوِّرُكُمْ فِي الاٌّرْحَامِ كَيْفَ يَشَآءُ</div><p>(He it is Who shapes you in the wombs as He wills.) meaning, He creates you in the wombs as He wills, whether male or female, handsome or otherwise, happy or miserable.</p><div class=\"arabic uthmani\">لاَ إِلَـهَ إِلاَّ هُوَ الْعَزِيزُ الْحَكِيمُ</div><p>(La ilaha illa Huwa (none has the right to be worshipped but He), the Almighty, the All-Wise.) meaning, He is the Creator and thus is the only deity worthy of worship, without partners, and His is the perfect might, wisdom and decision. This Ayah refers to the fact that `Isa, son of Mary, is a created servant, just as Allah created the rest of mankind. Allah created `Isa in the womb (of his mother) and shaped him as He willed. Therefore, how could `Isa be divine, as the Christians, may Allah's curses descend on them, claim `Isa was created in the womb and his creation changed from stage to stage, just as Allah said,</p><div class=\"arabic uthmani\">يَخْلُقُكُمْ فِى بُطُونِ أُمَّهَـتِكُـمْ خَلْقاً مِّن بَعْدِ خَلْقٍ فِى ظُلُمَـتٍ ثَلَـثٍ</div><p>(He creates you in the wombs of your mothers, creation after creation in three veils of darkness.) 39:6.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Ali 'Imran",
+    "surahNameDe": "Family of Imran",
+    "key": "3:5"
+   },
+   "fetchedAt": "2026-11-12T16:06:39.089Z",
+   "urlChecks": {
+    "https://quran.com/3/5": 200
+   }
   }
  ]
 }
