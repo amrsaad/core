@@ -45,6 +45,13 @@ export function skipKick(s: { inflightAt: number; readyState: number }, now: num
   return s.readyState < 1 || now - s.inflightAt < KICK_INFLIGHT_MS;
 }
 
+/** Ereignisse, in denen iOS ein play() annimmt (ein Tipp ohne Bewegung). pointerdown und das Ende eines Wischs gehören nicht dazu. */
+const ACTIVATING = new Set(['pointerup', 'touchend', 'click', 'keydown']);
+/** So lange nach einer solchen Geste (ms) darf ein Anstoß auch dann spielen, wenn die Tippfläche steht */
+const GESTURE_WINDOW_MS = 120;
+/** So lange wartet die Diag-Zeile "deck: gesture ... unlocked" auf die Ergebnisse der Freischaltung, bevor sie mit dem Stand schreibt (ms) */
+const UNLOCK_LINE_MS = 800;
+
 /** Null Sekunden Stille: schaltet das Element durch eine Geste frei, bevor der erste echte Moment kommt */
 const SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
 
@@ -190,8 +197,23 @@ export class AudioDeck {
   private entries: PoolEntry[] = [];
   /** Der Vorrat wurde verbraucht oder verworfen: sobald er wieder voll ist, meldet das Deck "pool refill" */
   private depleted = false;
-  /** Elemente, die eine Geste schon einmal mit Stille gestartet hat (iOS erlaubt nur ihnen später play() im Hintergrund) */
+  /** Elemente, auf denen ein play() in einer Geste wirklich angenommen wurde (Promise erfüllt). iOS erlaubt nur ihnen später play() ohne Geste. Ein Versuch allein zählt nicht. */
   private unlockedEls = new WeakSet<DeckEl>();
+  /** Laufende Freischaltversuche je Element: Zahl, und die Stummschaltung vor dem ersten Versuch (sie kommt zurück, sobald der letzte Versuch endet) */
+  private probes = new WeakMap<DeckEl, { n: number; muted: boolean }>();
+  /** Die Geste, die gerade freischaltet (Zähler und Ereignisname), und je Geste die Zahl der offenen Versuche, damit die Diag-Zeile erst nach den Ergebnissen kommt */
+  private gid = 0;
+  private lastGesture = '';
+  private gestureOpen = new Map<number, number>();
+  private lineDone = new Set<number>();
+  private lastLoggedA = 0;
+  /** Zeitpunkt der letzten Geste, in der iOS ein play() annimmt */
+  private actAt = 0;
+  /** Schlüssel des Ausschnitts, dessen Start oder Tausch abgelehnt wurde (NotAllowedError): bis zur nächsten Geste kein play() von selbst */
+  private needTapKey = '';
+  private needTapNoted = false;
+  /** Start oder Tausch wurde ohne Geste abgelehnt: der Host zeigt die Tippfläche (id des Ausschnitts, Anlass) */
+  onRefused: ((id: string, why: string) => void) | null = null;
   /** play() des aktiven Elements wurde erfüllt (nach jedem "deck play#N ok"): der Host füllt danach den Vorrat auf */
   onPlayed: (() => void) | null = null;
   /** Ein Eintrag fiel sichtbar aus (Fehler), der Host soll den Vorrat neu füllen */
@@ -537,6 +559,7 @@ export class AudioDeck {
     this.inflightAt = 0;
     this.kickTok++;
     this.skipNoted = false;
+    this.needTapKey = '';
     this.offset = loc?.offset ?? 0;
     this.isLocal = !!loc;
     this.resumeFrom = from;
@@ -596,6 +619,14 @@ export class AudioDeck {
 
   private kick(why: string) {
     const el = this.element;
+    // Start oder Tausch wurde abgelehnt: sichtbar kein play() von selbst (soundGuard, canplay, resume). Nur ein Tipp (Geste in den letzten Millisekunden) startet wieder. Verdeckt bleibt die Rückkehr-Logik wie bisher.
+    if (this.needTapKey && this.clip?.key === this.needTapKey && why !== 'start' && why !== 'swap' && !this.hidden() && Date.now() - this.actAt > GESTURE_WINDOW_MS) {
+      if (!this.needTapNoted) {
+        this.needTapNoted = true;
+        this.diag(`deck play skipped (${why}): waiting for a tap ${this.stateText(el)}`);
+      }
+      return;
+    }
     if (skipKick({ inflightAt: this.inflightAt, readyState: el.readyState }, Date.now(), why)) {
       if (!this.skipNoted) {
         this.skipNoted = true;
@@ -620,6 +651,9 @@ export class AudioDeck {
       () => {
         if (tok === this.kickTok) this.inflightAt = 0;
         this.unlocked = true;
+        // Ein angenommenes play() schaltet dieses Element frei, und der Ausschnitt braucht keinen Tipp mehr
+        this.unlockedEls.add(el);
+        if (el === this.el) this.needTapKey = '';
         this.diag(`deck play#${n} ok`);
         // Nach jedem erfüllten play() füllt der Host den Vorrat auf (Brief 14, Schritt 2)
         if (el === this.el) this.onPlayed?.();
@@ -896,6 +930,7 @@ export class AudioDeck {
     this.inflightAt = 0;
     this.kickTok++;
     this.skipNoted = false;
+    this.needTapKey = '';
     this.offset = s.offset;
     this.isLocal = s.local;
     this.resumeFrom = clip.start;
@@ -935,6 +970,21 @@ export class AudioDeck {
       this.diag(`bg: play rejected ${name}`);
     }
     this.diag(`deck play refused ${name} (${why}) ${c?.id ?? ''}`);
+    // Abgelehnt heißt: dieses Element hat keine Freigabe. Ein Anstoß im Ereignis pointerdown (unlock) ist kein Anlass für die Tippfläche, der Tipp folgt gleich mit pointerup.
+    if (name === 'NotAllowedError') {
+      if (this.el) this.unlockedEls.delete(this.el);
+      const soft = why === 'unlock' && this.lastGesture === 'pointerdown';
+      if (c && !soft) {
+        this.needTapKey = c.key;
+        this.needTapNoted = false;
+        this.diag(`audio: needs tap ${c.id} (${why})`);
+        try {
+          this.onRefused?.(c.id, why);
+        } catch (err) {
+          this.diag(`deck onRefused failed ${err instanceof Error ? err.message : String(err)}`);
+        }
+      }
+    }
     // Kein Stopp-Zeitgeber: der Zustand ist Pause, bei der Rückkehr startet die App den Ton sofort wieder
     this.sink?.state(PAUSED);
   }
@@ -1036,6 +1086,8 @@ export class AudioDeck {
     this.onPlayed = null;
     this.onNeedFill = null;
     this.onReady = null;
+    this.onRefused = null;
+    this.needTapKey = '';
     this.diag = () => {};
     this.entries = [];
     this.depleted = false;
@@ -1159,54 +1211,92 @@ export class AudioDeck {
     for (const el of this.pool.level) this.silentPlay(el);
   }
 
-  /** Element mit Stille starten, solange eine Geste läuft. Aktive und Vorrats-Elemente bleiben unberührt, ein schon freigeschaltetes ebenso. */
-  private silentPlay(el: DeckEl) {
-    if (el === this.el || this.entryOf(el) || this.unlockedEls.has(el)) return;
-    this.unlockedEls.add(el);
+  /**
+   * Freischaltversuch auf einem Element, solange eine Geste läuft. Stumm gestartet, erst nach erfülltem play() angehalten (ein sofort abgebrochenes play() schaltet auf iOS
+   * vermutlich nichts frei). Ein Element gilt erst als freigeschaltet, wenn das play() wirklich angenommen wurde. Bis dahin versucht es jede weitere Geste erneut.
+   * Danach: Stummschaltung zurück, Element anhalten (nie das aktive), ein Eintrag des Vorrats behält Quelle und Position, ein freies Element gibt die Quelle frei.
+   */
+  private probe(el: DeckEl) {
+    if (el === this.el || this.unlockedEls.has(el)) return;
+    // Ein Versuch ist unterwegs: kein zweiter (ein abgelehnter ist nach Millisekunden entschieden, der Tipp bringt pointerup, touchend und click kurz nacheinander)
+    if (this.probes.has(el)) return;
+    const r = { n: 1, muted: el.muted };
+    this.probes.set(el, r);
+    const gid = this.gid;
+    const type = this.lastGesture;
+    this.gestureOpen.set(gid, (this.gestureOpen.get(gid) ?? 0) + 1);
+    const settle = (ok: boolean) => {
+      if (ok) this.unlockedEls.add(el);
+      r.n--;
+      if (r.n <= 0 && this.probes.get(el) === r) {
+        this.probes.delete(el);
+        if (el !== this.el) {
+          const e = this.entryOf(el);
+          try {
+            if (!el.paused) this.halt(el, 'app: gesture unlock');
+            el.muted = r.muted;
+            if (e) {
+              // Die Position bleibt am Start des Ausschnitts (checkEntry zieht bei größerer Abweichung nach)
+              if (e.ready && Math.abs(el.currentTime - e.target) > SEEK_TOL / 2) el.currentTime = e.target;
+            } else this.clearSrc(el);
+          } catch {
+            /* Element schon weg */
+          }
+        }
+      }
+      const open = (this.gestureOpen.get(gid) ?? 1) - 1;
+      this.gestureOpen.set(gid, open);
+      // Kurz warten: das play() des aktiven Elements (unlock) endet im selben Atemzug und soll in der Zahl stehen
+      if (open <= 0) setTimeout(() => this.unlockLine(gid, type), 50);
+    };
+    setTimeout(() => this.unlockLine(gid, type), UNLOCK_LINE_MS);
     try {
-      if (!el.src) el.src = SILENT;
+      el.muted = true;
+      if (!this.entryOf(el) && !el.src) el.src = SILENT;
       const p = el.play();
-      const done = () => {
-        if (el !== this.el && !this.entryOf(el)) this.clearSrc(el);
-      };
-      p?.then?.(done, done);
+      if (p === undefined) settle(true);
+      else
+        p.then(
+          () => settle(true),
+          () => settle(false),
+        );
     } catch {
-      /* kein Entsperren nötig oder möglich */
+      settle(false);
     }
+  }
+
+  /** Eine Zeile je Geste, und nur wenn sich die Zahl der freigeschalteten Elemente geändert hat: zeigt Max' Diag, welches Ereignis freischaltet */
+  private unlockLine(gid: number, type: string) {
+    if (this.lineDone.has(gid)) return;
+    this.lineDone.add(gid);
+    if (this.lineDone.size > 50) this.lineDone.delete(this.lineDone.values().next().value as number);
+    const all = this.all();
+    const a = all.filter((e) => this.unlockedEls.has(e)).length;
+    if (a === this.lastLoggedA) return;
+    this.lastLoggedA = a;
+    this.diag(`deck: gesture ${type} unlocked ${a}/${all.length}`);
+  }
+
+  /** Element mit Stille starten, solange eine Geste läuft. Aktive und Vorrats-Elemente bleiben unberührt (der Vorrat hat gesturePool), ein schon freigeschaltetes ebenso. */
+  private silentPlay(el: DeckEl) {
+    if (this.entryOf(el)) return;
+    this.probe(el);
   }
 
   /** Mit Vorrat gibt es POOL + 1 Elemente der unveränderten Spur: alle per Geste freischalten (iOS erlaubt play() ohne Geste nur Elementen, die schon durch eine gespielt haben) */
   private unlockSpares() {
     this.ensureCount('plain', POOL + 1);
-    for (const el of this.pool.plain) this.silentPlay(el);
+    for (const el of this.all()) this.silentPlay(el);
     this.gesturePool();
   }
 
   /**
    * Brief 22: der Vorrat füllt sich schon vor der ersten Geste. Ein Element, das dabei seine Quelle bekam, hat die Geste nie gesehen und dürfte verdeckt
-   * nicht starten. Darum spielt die Geste jedes solche Element stumm an und hält es sofort wieder an: play() in der Geste hebt die Sperre des Elements auf,
-   * die Quelle bleibt, die Position bleibt (checkEntry zieht sie nach), kein Ton. Einmal je Element.
+   * nicht starten. Darum spielt die Geste jedes solche Element stumm an (probe): die Quelle bleibt, die Position bleibt, kein Ton. Jede Geste versucht es erneut,
+   * bis ein play() angenommen wurde.
    */
   private gesturePool() {
-    for (const e of this.entries) {
-      const el = e.el;
-      if (el === this.el || this.unlockedEls.has(el)) continue;
-      this.unlockedEls.add(el);
-      const wasMuted = el.muted;
-      try {
-        el.muted = true;
-        const p = el.play();
-        this.halt(el, 'app: gesture unlock');
-        el.muted = wasMuted;
-        // Das sofort unterbrochene play() lehnt mit AbortError ab, das ist kein Fehler
-        p?.then?.(
-          () => {},
-          () => {},
-        );
-      } catch {
-        el.muted = wasMuted;
-      }
-    }
+    for (const e of this.entries) this.probe(e.el);
   }
 
   time(sink: DeckSink): number | null {
@@ -1260,8 +1350,11 @@ export class AudioDeck {
   }
 
   /** Aus einer Geste heraus aufrufen: schaltet das Element für späteres play() ohne Geste frei. Wirkt nur einmal je Seite. */
-  unlock() {
+  unlock(type = 'click') {
     this.session();
+    this.gid++;
+    this.lastGesture = type;
+    if (ACTIVATING.has(type)) this.actAt = Date.now();
     if (this.deps.standby) this.unlockSpares();
     if (this.unlocked) return;
     const el = this.ensure('plain');
@@ -1277,11 +1370,17 @@ export class AudioDeck {
       p?.then?.(
         () => {
           this.unlocked = true;
+          this.unlockedEls.add(el);
         },
         () => {},
       );
     } catch {
       /* ohne Geste nichts zu tun */
     }
+  }
+
+  /** readyState des aktiven Elements (der Feed gibt einen Moment mit Daten nie als hängend auf) */
+  readyState(): number {
+    return this.el?.readyState ?? 0;
   }
 }

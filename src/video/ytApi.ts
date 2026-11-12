@@ -181,8 +181,9 @@ let deckForm: string | null = null;
 export const setDeckForm = (f: string | null): void => {
   deckForm = f;
 };
-export const deckGesture = (): void => {
-  if (deckForm === 'audio') audioDeck.unlock();
+/** type: das Ereignis der Geste (pointerdown, pointerup, touchend, click, keydown). Das Deck braucht es für die Freischaltung: pointerdown und ein Wisch sind auf iOS keine Aktivierung. */
+export const deckGesture = (type?: string): void => {
+  if (deckForm === 'audio') audioDeck.unlock(type);
 };
 export const deckPrime = (): void => {
   if (deckForm === 'audio' && levelWanted()) audioDeck.prime();
@@ -190,7 +191,7 @@ export const deckPrime = (): void => {
 if (typeof window !== 'undefined') {
   // Jede erste Geste im Dokument schaltet das Deck-Element frei, aber nur, wenn der Audio-Reiter offen ist (deckGesture)
   installGestures();
-  onGesture(deckGesture);
+  onGesture((g) => deckGesture(g.type));
   onUnlock(deckPrime);
   // iOS unterbricht den Kontext (Sperrbildschirm, Anruf): läuft er nicht mehr, spielt der Audio-Reiter unverändert weiter
   onContextState((s) => audioDeck.contextChanged(s));

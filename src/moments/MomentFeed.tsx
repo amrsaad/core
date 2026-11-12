@@ -699,12 +699,25 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   /** Brief 23 (Variante c): Tippfläche "Tap to play" für den aktuellen YouTube-Moment, der sich zweimal selbst angehalten hat. Leer: keine. */
   const [tapPlay, setTapPlay] = useState('');
   const tapRef = useRef('');
-  const showTapPlay = (sl: Slot) => {
-    if (tapRef.current === sl.mid) return;
-    tapRef.current = sl.mid;
-    setTapPlay(sl.mid);
+  /** line: Diag-Zeile dazu (null: der Aufrufer hat sie schon geschrieben) */
+  const showTapMoment = (mid: string, line: string | null) => {
+    if (!mid || tapRef.current === mid) return;
+    tapRef.current = mid;
+    setTapPlay(mid);
     setLoading(false);
-    diag.current.push(`yt: tap to play ${sl.mid}`);
+    setDeckWait(false);
+    if (line) diag.current.push(line);
+  };
+  const showTapPlay = (sl: Slot) => showTapMoment(sl.mid, `yt: tap to play ${sl.mid}`);
+  /**
+   * Runde 7 (Issue 60): das Audio-Deck meldet einen abgelehnten Start oder Tausch (NotAllowedError, auf iOS ohne Geste erwartet). Sofort steht dieselbe Tippfläche wie
+   * beim YouTube-Weg, der Tipp startet den Moment synchron im Handler. Solange sie steht, stößt soundGuard nicht nach, kein "slow net", kein Watchdog-Skip.
+   */
+  const refusedRef = useRef<(id: string, why: string) => void>(() => {});
+  refusedRef.current = (id) => {
+    const m = queue.current[idxRef.current];
+    if (!m || m.videoId !== id || textRef.current || forYouRef.current || recallRef.current || !activeRef.current) return;
+    showTapMoment(current().mid || m.id, null);
   };
   const clearTapPlay = () => {
     if (!tapRef.current) return;
@@ -984,7 +997,9 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       // Brief 23 (iOS, Variante c): nach einer Selbstpause des Players kein Nachstoßen mehr, es gibt einen Weiterstart und dann die Tippfläche
       if (IOS && sl.selfPauses > 0) return;
       // Issue 54 (iOS): ein Start in der Geste hat seine eigene Überwachung (ein Wiederholungsstart, dann die Tippfläche), soundGuard stößt nicht dazwischen
-      if (IOS && (sl.startTimer || tapRef.current === sl.mid)) return;
+      if (IOS && sl.startTimer) return;
+      // Runde 7: steht die Tippfläche (YouTube oder Audio), startet nur der Tipp, nie ein Anstoß ohne Geste
+      if (tapRef.current === sl.mid) return;
       diag.current.push(`soundGuard slot${sl.index} st=${sl.st} attempt=${attempt}`);
       try { sl.player.playVideo(); } catch { /* Player noch nicht bereit */ }
       if (attempt < 3) soundGuard(j, attempt + 1);
@@ -1468,6 +1483,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     };
     // Nach jedem erfüllten play() den Vorrat auffüllen (Brief 14, Schritt 2). Verdeckt tut das nichts.
     audioDeck.onPlayed = () => fillPoolRef.current();
+    audioDeck.onRefused = (id, why) => refusedRef.current(id, why);
     audioDeck.onNeedFill = () => fillPoolRef.current();
     // Brief 22: jede neue Bereitschaft steht im Protokoll ("pool n/5 ready"). Ein vorgemerktes Weiter vom Sperrbildschirm wird eingelöst, sobald die App
     // sichtbar ist und ein Element bereit steht. Verdeckt bleibt es vorgemerkt (nie ein Netzstart verdeckt, Entscheidung 45).
@@ -2033,7 +2049,13 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
           // Brief 12: sichtbar erst nach 25 s, und nur ohne ein einziges Byte in den letzten 25 s. Solange Bytes ankommen: Standbild, "Loading", kein Skip.
           const sinceBytes = sl.bytesAt ? Date.now() - sl.bytesAt : waited;
           if (waited > WATCHDOG_MS && sinceBytes > WATCHDOG_MS) {
-            diag.current.push(`video: gave up ${m.id} after ${Math.round(waited / 1000)} s, ${sl.bytesAt ? 'no new bytes' : 'no bytes'}`);
+            // Runde 7: ein Audio-Moment, dessen Element Daten hat, hängt nicht am Netz, ihm fehlt nur der Start. Tippfläche statt Überspringen.
+            if (form === 'audio' && audioDeck.readyState() >= 2) {
+              diag.current.push(`audio: needs tap ${m.id} (no start, rs ${audioDeck.readyState()})`);
+              showTapMoment(sl.mid || m.id, null);
+              return;
+            }
+            diag.current.push(`${m.audio || form === 'audio' ? 'audio' : 'video'}: gave up ${m.id} after ${Math.round(waited / 1000)} s, ${sl.bytesAt ? 'no new bytes' : 'no bytes'}`);
             diag.current.push(`watchdog ${m.id}`);
             bad.current.add(m.videoId);
             // Nie als gesehen: der Moment bekommt nur die Sitzungs-Sperre und kommt wieder, sobald er lädt (Entscheidung 45)
@@ -2689,7 +2711,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     // Die erste Geste irgendwo im Dokument hat den Ton schon freigeschaltet (gesture.ts). Dieselbe Berührung ist hier trotzdem kein Pausentipp.
     const firstTouch = !textRef.current && (!soundOn.current || e.pointerId === firstGesturePointer());
     if (e.pointerId === firstGesturePointer()) clearFirstGesturePointer();
-    if (form === 'audio') audioDeck.unlock();
+    if (form === 'audio') audioDeck.unlock('pointerup');
     if (firstTouch) {
       soundOn.current = true;
       unlockLevel();
@@ -2748,6 +2770,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     // (ein Zeitgeber wie beim Pausentipp trüge sie nicht). Kein Pausentipp, kein Doppeltipp.
     if (tapRef.current && current().mid === tapRef.current) {
       const sl = current();
+      const au = form === 'audio';
       try {
         if (soundOn.current) sl.player?.unMute();
         sl.player?.playVideo();
@@ -2756,10 +2779,11 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       } catch {
         /* Player nicht bereit */
       }
-      diag.current.push(`yt: play in gesture ${sl.mid} (tap)`);
+      diag.current.push(au ? `audio: play in gesture ${sl.mid} (tap)` : `yt: play in gesture ${sl.mid} (tap)`);
       clearTapPlay();
-      // Issue 54: auch dieser Start wird überwacht (ein Wiederholungsstart, dann wieder die Tippfläche), nie ein Watchdog-Skip
-      watchStart(sl);
+      // Issue 54: auch dieser Start wird überwacht (ein Wiederholungsstart, dann wieder die Tippfläche), nie ein Watchdog-Skip.
+      // Audio: lehnt das Element den Start ab, meldet das Deck es sofort wieder und die Tippfläche steht erneut.
+      if (!au) watchStart(sl);
       userPaused.current = false;
       setPaused(false);
       infoDown.current = false;

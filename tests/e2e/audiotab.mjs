@@ -27,7 +27,7 @@ const waitFor = async (page, fn, arg, timeout = 8000) => {
   try { await page.waitForFunction(fn, arg, { timeout, polling: 100 }); return true; } catch { return false; }
 };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const freshPage = async (browser, poolBody) => {
+const freshPage = async (browser, poolBody, extraInit) => {
   const cx = await browser.newContext({ ...devices['iPhone 15'], serviceWorkers: 'block' });
   await cx.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
   await cx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
@@ -36,6 +36,7 @@ const freshPage = async (browser, poolBody) => {
   pg.on('pageerror', (e) => errors.push(String(e)));
   await pg.addInitScript(() => { window.__ytSlow = true; window.__cont = true; window.__tuMs = 250; });
   await pg.addInitScript(FAKE_MEDIA);
+  if (extraInit) await pg.addInitScript(extraInit);
   await pg.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBody }));
   await pg.goto(`${url}?now=2026-10-23&seed=3#k=${k}`);
   return { cx, pg, errors };
@@ -101,6 +102,78 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.poolHoldsNext = await waitFor(p1, () => window.__core.deck().ready >= 1, undefined, 8000);
     c.atMostPoolMedia = (await p1.evaluate(() => window.__core.media())) <= 6;
     await f1.cx.close();
+    }
+
+    if (want('iosrule')) {
+    // Runde 7 (Issue 60): play() der Audio-Elemente nach der iOS-Regel. Angenommen nur in pointerup, touchend, click oder keydown ohne Bewegung des Fingers,
+    // oder auf einem Element, das früher ein angenommenes play() hatte (erst nach erfüllter Zusage, ein sofort angehaltenes play() zählt nicht).
+    // Sonst NotAllowedError. App-Start im Audio-Reiter (Neuladen, keine Geste): die Tippfläche steht, der Tipp startet, danach spielen drei Wische ohne Tipp.
+    const IOS_RULE = () => {
+      const ALLOWED = ['pointerup', 'touchend', 'click', 'keydown'];
+      window.__ev = 'none'; window.__moved = false; window.__refused = 0;
+      const types = ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'mousedown', 'mouseup', 'click', 'keydown'];
+      for (const t of types) {
+        window.addEventListener(t, (e) => { if (e.type === 'pointerdown') window.__moved = false; window.__ev = e.type; setTimeout(() => { window.__ev = 'none'; }, 0); }, { capture: true, passive: true });
+        window.addEventListener(t, () => { window.__ev = 'none'; }, { passive: true });
+      }
+      window.addEventListener('pointermove', (e) => { if (e.buttons) window.__moved = true; }, { capture: true, passive: true });
+      const P = HTMLMediaElement.prototype;
+      const orig = P.play;
+      P.play = function () {
+        const ok = this.__played || (ALLOWED.includes(window.__ev) && !window.__moved);
+        if (!ok) { window.__refused++; return Promise.reject(new DOMException('play() needs a user gesture', 'NotAllowedError')); }
+        const tok = (this.__ptok = (this.__ptok || 0) + 1);
+        return orig.call(this).then(() => {
+          if (this.__p !== false || this.__ptok !== tok) throw new DOMException('aborted by pause', 'AbortError');
+          this.__played = true;
+        });
+      };
+    };
+    const dump = (pg) => pg.evaluate(() => ({
+      diag: window.__core.diag().slice(-70), state: window.__core.state(), idx: window.__core.idx(), refused: window.__refused, tap: !!document.querySelector('[data-testid=tap-to-play]'),
+      els: [...document.querySelectorAll('audio')].map((e) => ({ paused: e.paused, played: !!e.__played, rs: e.readyState, src: String(e.__src || '').slice(-28) })),
+    }));
+    const fi = await freshPage(browser, poolShort, IOS_RULE);
+    const pi = fi.pg;
+    await startAudio(pi);
+    // Der Zustand (Reiter Audio) wird verzögert gespeichert
+    await pi.waitForTimeout(2000);
+    await pi.reload();
+    await waitFor(pi, () => !!window.__core?.moment()?.audio, undefined, 10000);
+    const tStart = Date.now();
+    c.iosTapAtStart = await waitFor(pi, () => !!document.querySelector('[data-testid=tap-to-play]'), undefined, 3000);
+    r.notes.iosTapMs = Date.now() - tStart;
+    const d0 = await pi.evaluate(() => window.__core.diag());
+    c.iosNeedsTapLine = d0.some((x) => /^audio: needs tap \S+ \(start\)$/.test(x));
+    c.iosPoolFilled = await waitFor(pi, () => window.__core.deck().ready >= 5, undefined, 8000);
+    // Länger als STILL_MS (6 s): keine Zeile "slow net", kein soundGuard, kein Watchdog, die Tippfläche bleibt
+    await pi.waitForTimeout(7500);
+    const d1 = await pi.evaluate(() => window.__core.diag());
+    c.iosNoSlowNetWhileTap = !d1.some((x) => /slow net|gave up|^watchdog|soundGuard/.test(x));
+    c.iosTapStays = await pi.evaluate(() => !!document.querySelector('[data-testid=tap-to-play]'));
+    const vp = pi.viewportSize();
+    await pi.mouse.click(vp.width / 2, vp.height / 2);
+    c.iosTapPlays = await waitFor(pi, () => window.__core.state() === 1, undefined, 4000);
+    c.iosTapGone = await waitFor(pi, () => !document.querySelector('[data-testid=tap-to-play]'), undefined, 2000);
+    const needsBefore = (await pi.evaluate(() => window.__core.diag())).filter((x) => /needs tap|deck play refused/.test(x)).length;
+    for (let n = 1; n <= 3; n++) {
+      const before = await pi.evaluate(() => window.__core.idx());
+      const y0 = vp.height * 0.75; const y1 = vp.height * 0.25;
+      await pi.mouse.move(vp.width / 2, y0);
+      await pi.mouse.down();
+      for (let i = 1; i <= 8; i++) { await pi.mouse.move(vp.width / 2, y0 + ((y1 - y0) * i) / 8); await pi.waitForTimeout(16); }
+      await pi.mouse.up();
+      const moved = await waitFor(pi, (b) => window.__core.idx() !== b, before, 4000);
+      c[`iosSwipe${n}Plays`] = moved && await waitFor(pi, () => window.__core.state() === 1, undefined, 4000);
+      await waitFor(pi, () => window.__core.deck().ready >= 3, undefined, 4000);
+    }
+    const dEnd = await pi.evaluate(() => window.__core.diag());
+    c.iosSwipesNoNeedsTap = dEnd.filter((x) => /needs tap|deck play refused/.test(x)).length === needsBefore;
+    c.iosGestureLine = dEnd.some((x) => /^deck: gesture \S+ unlocked \d+\/\d+$/.test(x));
+    r.notes.iosGestureLines = dEnd.filter((x) => /^deck: gesture/.test(x));
+    c.iosNoPageErrors = fi.errors.length === 0;
+    if (!Object.entries(c).filter(([n]) => n.startsWith('ios')).every(([, v]) => v === true)) r.notes.iosDump = await dump(pi);
+    await fi.cx.close();
     }
 
     if (want('bg')) {
