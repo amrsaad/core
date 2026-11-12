@@ -258,6 +258,267 @@
    "arabic": "۞ وَإِن كُنتُمْ عَلَىٰ سَفَرٍ وَلَمْ تَجِدُوا۟ كَاتِبًا فَرِهَـٰنٌ مَّقْبُوضَةٌ ۖ فَإِنْ أَمِنَ بَعْضُكُم بَعْضًا فَلْيُؤَدِّ ٱلَّذِى ٱؤْتُمِنَ أَمَـٰنَتَهُۥ وَلْيَتَّقِ ٱللَّهَ رَبَّهُۥ ۗ وَلَا تَكْتُمُوا۟ ٱلشَّهَـٰدَةَ ۚ وَمَن يَكْتُمْهَا فَإِنَّهُۥٓ ءَاثِمٌ قَلْبُهُۥ ۗ وَٱللَّهُ بِمَا تَعْمَلُونَ عَلِيمٌ",
    "translation": "Und wenn ihr auf einer Reise seid und keinen Schreiber findet, dann sollen Pfänder in Empfang genommen werden. Und wenn dann einer von euch dem anderen (etwas) anvertraut, so soll derjenige, dem (es) anvertraut wurde, das ihm anvertraute Pfand (wieder) aushändigen, und er soll Allah, seinen Herrn, fürchten. Und verheimlicht kein Zeugnis. Wer es aber verheimlicht, dessen Herz ist gewiß sündhaft. Und Allah weiß über das, was ihr tut, Bescheid.",
    "reflection": "Was nimmst du heute aus diesem Vers mit?"
+  },
+  {
+   "id": "arxiv:2611.14459",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "When does text encoding matter for language modeling?",
+   "source": {
+    "id": "arxiv:2611.14459",
+    "title": "When does text encoding matter for language modeling?",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.14459",
+    "excerpt": "In light of these findings, we argue that text encoding should be a language-specific design decision, rather than a universal default."
+   },
+   "createdAt": "2026-11-12T05:35:09.677Z"
+  },
+  {
+   "id": "pmid:42973931",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "A Scoping Review of Deep Learning Methods for Photoplethysmography Data",
+   "source": {
+    "id": "pmid:42973931",
+    "title": "A Scoping Review of Deep Learning Methods for Photoplethysmography Data.",
+    "publisher": "Health data science",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42973931/",
+    "excerpt": "Deep learning has substantially advanced PPG signal analysis by enabling more effective extraction of physiological information. Compared with traditional machine learning approaches reliant on handcrafted features, deep learning methods generally achieve improved performance and offer greater flexibility in model development."
+   },
+   "createdAt": "2026-11-12T05:35:09.677Z"
+  },
+  {
+   "id": "pmid:42774354",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Prediction models for post-induction hypotension in patients undergoing general anesthesia",
+   "source": {
+    "id": "pmid:42774354",
+    "title": "Prediction models for post-induction hypotension in patients undergoing general anesthesia: a systematic review and meta-analysis.",
+    "publisher": "Frontiers in medicine",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42774354/",
+    "excerpt": "Current PIH prediction models show good discriminative ability, but most have a high risk of bias and lack external validation."
+   },
+   "createdAt": "2026-11-12T05:35:09.677Z"
+  },
+  {
+   "id": "arxiv:2611.14426",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Two Communities, One Problem",
+   "source": {
+    "id": "arxiv:2611.14426",
+    "title": "Two Communities, One Problem: Branch-and-Bound vs. A* for Resource-Constrained Project Scheduling",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.14426",
+    "excerpt": "These insights can help researchers select an appropriate method and identify opportunities to incorporate effective mechanisms from one approach into the other."
+   },
+   "createdAt": "2026-11-12T05:35:09.677Z"
+  },
+  {
+   "id": "pmid:42540394",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Artificial intelligence in dermatology",
+   "source": {
+    "id": "pmid:42540394",
+    "title": "Artificial intelligence in dermatology: A literature review of current evidence and clinical implementation.",
+    "publisher": "JID innovations : skin science from molecules to population health",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42540394/",
+    "excerpt": "Clinical implementation should require careful attention to validation rigor, dataset diversity, implementation strategies, ethical considerations, and evidence of real-world impact."
+   },
+   "createdAt": "2026-11-12T05:35:09.677Z"
+  },
+  {
+   "id": "pmid:42935768",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Application of large language models in early screening of Alzheimer's disease",
+   "source": {
+    "id": "pmid:42935768",
+    "title": "Application of large language models in early screening of Alzheimer's disease: a scoping review.",
+    "publisher": "Frontiers in aging neuroscience",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42935768/",
+    "excerpt": "Large language models provide a novel technological approach for early AD screening and demonstrate potential for supporting cognitive assessment and risk identification."
+   },
+   "createdAt": "2026-11-12T05:35:09.677Z"
+  },
+  {
+   "id": "arxiv:2611.14419",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Evaluating LLM-Generated World Models for Neuro-Symbolic Reasoning",
+   "source": {
+    "id": "arxiv:2611.14419",
+    "title": "Evaluating LLM-Generated World Models for Neuro-Symbolic Reasoning",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.14419",
+    "excerpt": "These results show that executability is a necessary but insufficient criterion for LLM-generated world models: models that are mechanically valid can still differ substantially in the structure used by downstream neuro-symbolic reasoning and planning."
+   },
+   "createdAt": "2026-11-12T05:35:09.677Z"
+  },
+  {
+   "id": "pmid:42643768",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Artificial intelligence in thyroid ultrasound: clinical applications and perspectives",
+   "source": {
+    "id": "pmid:42643768",
+    "title": "Artificial intelligence in thyroid ultrasound: clinical applications and perspectives.",
+    "publisher": "Frontiers in endocrinology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42643768/",
+    "excerpt": "Future directions involving multi-modal fusion, explainable AI, real-time clinical systems and rigorous, multi-center standardized validation are proposed to facilitate clinical translation and improve patient care."
+   },
+   "createdAt": "2026-11-12T05:35:09.677Z"
+  },
+  {
+   "id": "pmid:41810291",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Effectiveness of outdoor fitness equipment intervention on health outcomes",
+   "source": {
+    "id": "pmid:41810291",
+    "title": "Effectiveness of outdoor fitness equipment intervention on health outcomes: a systematic review and meta-analysis.",
+    "publisher": "Frontiers in public health",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/41810291/",
+    "excerpt": "The findings provide a comprehensive overview of the effectiveness of OFE intervention on health outcomes. The evidence indicates that OFE intervention effectively improves physical activity, physical fitness, psychological health, and health-related issues. High-quality RCTs are required to determine effective OFE intervention protocols and facilitate translation into practice."
+   },
+   "createdAt": "2026-11-12T05:35:09.677Z"
+  },
+  {
+   "id": "arxiv:2611.14407",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Causal Concept Explanations for Deep Neural Models",
+   "source": {
+    "id": "arxiv:2611.14407",
+    "title": "Causal Concept Explanations for Deep Neural Models",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.14407",
+    "excerpt": "CCW-Net provides a step toward concept-based explanations that are not merely interpretable, but quantifiably causal, supporting safer evaluation, certification, and deployment of transparent and trustworthy neural models."
+   },
+   "createdAt": "2026-11-12T05:35:09.677Z"
+  },
+  {
+   "id": "pmid:41948581",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Toric Versus non-toric intraocular lenses for pre-existing corneal astigmatism",
+   "source": {
+    "id": "pmid:41948581",
+    "title": "Toric Versus non-toric intraocular lenses for pre-existing corneal astigmatism: a systematic review and meta-analysis.",
+    "publisher": "Frontiers in medicine",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/41948581/",
+    "excerpt": "In patients with corneal astigmatism, toric IOLs provide more precise astigmatic correction and better uncorrected distance vision. These pooled effect sizes refine the current consensus and may assist refractive planning in cataract surgery."
+   },
+   "createdAt": "2026-11-12T05:35:09.677Z"
+  },
+  {
+   "id": "pmid:42796160",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Integration of Artificial Intelligence and Microfluidics for Drug Delivery Applications",
+   "source": {
+    "id": "pmid:42796160",
+    "title": "Integration of Artificial Intelligence and Microfluidics for Drug Delivery Applications.",
+    "publisher": "Micromachines",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42796160/",
+    "excerpt": "We discuss the technical foundations of AI-enabled microfluidics, applications in nanocarrier synthesis and phenotypic screening, and the evolving regulatory landscape for AI-assisted pharmaceutical development."
+   },
+   "createdAt": "2026-11-12T05:35:09.677Z"
+  },
+  {
+   "id": "arxiv:2611.14399",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "REAL Loss: Optimizing Real Expected Acceptance Length for Speculative Decoding",
+   "source": {
+    "id": "arxiv:2611.14399",
+    "title": "REAL Loss: Optimizing Real Expected Acceptance Length for Speculative Decoding",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.14399",
+    "excerpt": "A reference implementation of the REAL loss is available at https://github.com/King-ty/speculators/tree/real-loss."
+   },
+   "createdAt": "2026-11-12T05:35:09.677Z"
+  },
+  {
+   "id": "pmid:42643192",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Living alone and mortality risk in cancer patients: a systematic review and meta-analysis",
+   "source": {
+    "id": "pmid:42643192",
+    "title": "Living alone and mortality risk in cancer patients: a systematic review and meta-analysis.",
+    "publisher": "Frontiers in oncology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42643192/",
+    "excerpt": "Living alone is associated with increased all-cause mortality in cancer patients, with no apparent sex difference."
+   },
+   "createdAt": "2026-11-12T05:35:09.677Z"
+  },
+  {
+   "id": "quran:2:284",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Allah gehört (alles), was in den Himmeln und was auf der Erde ist.",
+   "source": {
+    "id": "quran:2:284",
+    "title": "Sure Al-Baqarah, 2:284",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/2/284",
+    "excerpt": "لله ملك السماوات والأرض وما فيهما ملكًا وتدبيرًا وإحاطة، لا يخفى عليه شيء. وما تظهروه مما في أنفسكم أو تخفوه فإن الله يعلمه، وسيحاسبكم به، فيعفو عمن يشاء، ويؤاخذ من يشاء. والله قادر على كل شيء. وقد أكرم الله المسلمين بعد ذلك فعفا عن حديث النفس وخطرات القلب ما لم يتبعها كلام أو عمل، كما ثبت ذلك عن رسول الله صلى الله عليه وسلم."
+   },
+   "createdAt": "2026-11-12T05:35:09.677Z",
+   "arabic": "لِّلَّهِ مَا فِى ٱلسَّمَـٰوَٰتِ وَمَا فِى ٱلْأَرْضِ ۗ وَإِن تُبْدُوا۟ مَا فِىٓ أَنفُسِكُمْ أَوْ تُخْفُوهُ يُحَاسِبْكُم بِهِ ٱللَّهُ ۖ فَيَغْفِرُ لِمَن يَشَآءُ وَيُعَذِّبُ مَن يَشَآءُ ۗ وَٱللَّهُ عَلَىٰ كُلِّ شَىْءٍ قَدِيرٌ",
+   "translation": "Allah gehört (alles), was in den Himmeln und was auf der Erde ist. Und ob ihr offenlegt, was in euch selbst ist, oder es verbergt, Allah wird euch dafür zur Rechenschaft ziehen. Dann vergibt Er, wem Er will, und straft, wen Er will. Und Allah hat zu allem die Macht.",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?",
+   "body": "Would the Servants be Accountable for What They Conceal in Their Hearts: Allah states that His is the kingship of the heavens and earth and of what and whoever is on or between them, that He has perfect watch over them."
+  },
+  {
+   "id": "quran:2:285",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Der Gesandte (Allahs) glaubt an das, was zu ihm von seinem Herrn (als Offenbarung) …",
+   "source": {
+    "id": "quran:2:285",
+    "title": "Sure Al-Baqarah, 2:285",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/2/285",
+    "excerpt": "صدَّق وأيقن رسول الله محمد صلى الله عليه وسلم بما أوحي إليه من ربه وحُقَّ له أن يُوقن، والمؤمنون كذلك صدقوا وعملوا بالقرآن العظيم، كل منهم صدَّق بالله رباً وإلهًا متصفًا بصفات الجلال والكمال، وأن لله ملائكة كرامًا، وأنه أنزل كتبًا، وأرسل إلى خلقه رسلا لا نؤمن -نحن المؤمنين- ببعضهم وننكر بعضهم، بل نؤمن بهم جميعًا."
+   },
+   "createdAt": "2026-11-12T05:35:09.677Z",
+   "arabic": "ءَامَنَ ٱلرَّسُولُ بِمَآ أُنزِلَ إِلَيْهِ مِن رَّبِّهِۦ وَٱلْمُؤْمِنُونَ ۚ كُلٌّ ءَامَنَ بِٱللَّهِ وَمَلَـٰٓئِكَتِهِۦ وَكُتُبِهِۦ وَرُسُلِهِۦ لَا نُفَرِّقُ بَيْنَ أَحَدٍ مِّن رُّسُلِهِۦ ۚ وَقَالُوا۟ سَمِعْنَا وَأَطَعْنَا ۖ غُفْرَانَكَ رَبَّنَا وَإِلَيْكَ ٱلْمَصِيرُ",
+   "translation": "Der Gesandte (Allahs) glaubt an das, was zu ihm von seinem Herrn (als Offenbarung) herabgesandt worden ist, und ebenso die Gläubigen; alle glauben an Allah, Seine Engel, Seine Bücher und Seine Gesandten - Wir machen keinen Unterschied bei jemandem von Seinen Gesandten. Und sie sagen: „Wir hören und gehorchen. (Gewähre uns) Deine Vergebung, unser Herr! Und zu Dir ist der Ausgang.",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?"
   }
  ]
 }
