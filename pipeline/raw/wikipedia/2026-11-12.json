@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-12",
+ "records": [
+  {
+   "sourceId": "wiki:de:Der Lottogewinner",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Der_Lottogewinner",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/12",
+    "status": 200
+   },
+   "title": "Der Lottogewinner",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Der Lottogewinner ist ein Sketch des deutschen Humoristen Loriot. Er zeigt ein Fernsehinterview mit einem Rentner, der im Lotto gewonnen hat. Der Sketch ist Teil der ersten Folge der Sendereihe Loriot, die im März 1976 im Deutschen Fernsehen ausgestrahlt wurde. 1981 erschien der Text des Sketches in gedruckter Form."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-12T04:03:04.299Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Der_Lottogewinner": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:ABBA",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/ABBA",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/12",
+    "status": 200
+   },
+   "title": "ABBA",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "ABBA ist eine schwedische Popgruppe, die aus den ehemaligen Paaren Agnetha Fältskog und Björn Ulvaeus sowie Benny Andersson und Anni-Frid Lyngstad besteht und sich 1972 in Stockholm formierte. Sie gehört mit rund 400 Millionen verkauften Tonträgern zu den erfolgreichsten Bands der Musikgeschichte."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-12T04:03:04.299Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/ABBA": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Richard Nixon",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Richard_Nixon",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/12",
+    "status": 200
+   },
+   "title": "Richard Nixon",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Richard Milhous Nixon war ein US-amerikanischer Politiker der Republikanischen Partei und von 1969 bis 1974 der 37. Präsident der Vereinigten Staaten. Infolge der Watergate-Affäre trat Nixon als bisher einziger US-Präsident der Geschichte von seinem Amt zurück."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-12T04:03:04.299Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Richard_Nixon": 200
+   }
+  }
+ ]
+}
