@@ -1,19 +1,22 @@
 {
  "quran": {
-  "surah": 2,
-  "ayah": 286
+  "surah": 3,
+  "ayah": 2
  },
  "cursors": {
-  "fact:ki-medizin": "AoIIQM5tGyg1NTEwOTg5Mg==",
-  "fact:ki-regulierung": "AoIIQL55eyg1NDQ2MDk0MA==",
-  "fact:allgemein": "AoIIP/LR5yg0Nzk4MjU2Nw==",
-  "fact:retina": "AoIIQCZlFSg1MDczNDcxMg==",
-  "fact:kraft": "AoIIP6C8zyg0NjA2MjI3Mw==",
-  "fact:glaukom": "AoIIQGQeyyg0NzU5MzkzNg==",
-  "fact:cornea": "AoIIQI5D8Sg1NjAyMzE3Nw==",
-  "fact:ausdauer": "AoIIQJiK+Sg0OTc1MzgyOQ==",
-  "fact:ernaehrung": "AoIIQJtvMSg1MzY3NjExMw==",
-  "fact:schlaf": "AoIIP6lDQyg0NjA2MjI3Mw=="
+  "fact:ki-medizin": "AoIIQM2PPig1NTc3NTY0NQ==",
+  "fact:ki-regulierung": "AoIIQL3Qpyg1NDgxOTU1OQ==",
+  "fact:allgemein": "AoIIP9lV5Cg1MTk1NzQ3Mg==",
+  "fact:retina": "AoIIQAXFZyg1MTgwMTQyOA==",
+  "fact:kraft": "AoIIP6CgGyg0NjA2MjI3Mw==",
+  "fact:glaukom": "AoIIQC5H1ig0NTk0Mzk2MA==",
+  "fact:cornea": "AoIIQD884yg0NTA2NTc4Ng==",
+  "fact:ausdauer": "AoIIQFqnByg0NzMyODQ5OA==",
+  "fact:ernaehrung": "AoIIQDbyPig1MjcxNDAwMg==",
+  "fact:schlaf": "AoIIP6kUbyg0NjA2MjI3Mw==",
+  "fact:katarakt": "AoIIQMY0kyg1MTk0OTAyNA==",
+  "fact:refraktiv": "AoIIQLDl2Sg1Mzg4MzM0OQ==",
+  "fact:recovery": "AoIIQJREQyg1MTQ5NzQxOQ=="
  },
- "lastRun": "2026-11-12T05:35:09.191Z"
+ "lastRun": "2026-11-12T11:27:32.309Z"
 }
