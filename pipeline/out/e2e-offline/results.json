@@ -1,5 +1,5 @@
 {
- "at": "2026-11-12T12:48:17.610Z",
+ "at": "2026-11-12T14:35:28.430Z",
  "runs": [
   {
    "browser": "webkit",
@@ -65,7 +65,7 @@
       "sound": true,
       "mid": "of000000000:100",
       "muted": false,
-      "t": 100.29999999999998,
+      "t": 100.49999999999997,
       "neighbors": "1:of000000001:100,2:of000000007:100",
       "next2": "of000000001:100,of000000007:100"
      },
@@ -80,7 +80,7 @@
       "sound": true,
       "mid": "of000000000:100",
       "muted": false,
-      "t": 100.29999999999998,
+      "t": 100.59999999999997,
       "neighbors": "1:of000000001:100,2:of000000007:100",
       "next2": "of000000001:100,of000000007:100"
      },
@@ -101,13 +101,13 @@
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1794487699637,
+      "lastSync": 1794494130965,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1794487704871,
+      "lastSync": 1794494136193,
       "error": null,
       "running": false
      }
@@ -154,19 +154,19 @@
       "sound": true,
       "mid": "of000000000:100",
       "muted": false,
-      "t": 111.99999999999932,
+      "t": 112.09999999999931,
       "neighbors": "1:of000000001:100,2:of000000007:100",
       "next2": "of000000001:100,of000000007:100"
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1794487704871,
+      "lastSync": 1794494136193,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1794487730935,
+      "lastSync": 1794494162309,
       "error": null,
       "running": false
      }
@@ -183,7 +183,7 @@
       "sound": true,
       "mid": "of000000000:100",
       "muted": false,
-      "t": 112.09999999999931,
+      "t": 112.1999999999993,
       "neighbors": "1:of000000001:100,2:of000000007:100",
       "next2": "of000000001:100,of000000007:100"
      },
@@ -198,7 +198,7 @@
       "sound": true,
       "mid": "of000000000:100",
       "muted": false,
-      "t": 112.09999999999931,
+      "t": 112.1999999999993,
       "neighbors": "1:of000000001:100,2:of000000007:100",
       "next2": "of000000001:100,of000000007:100"
      },
@@ -213,19 +213,19 @@
       "sound": true,
       "mid": "of000000000:100",
       "muted": false,
-      "t": 117.89999999999898,
+      "t": 117.99999999999898,
       "neighbors": "1:of000000001:100,2:of000000007:100",
       "next2": "of000000001:100,of000000007:100"
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1794487730935,
+      "lastSync": 1794494162309,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1794487797017,
+      "lastSync": 1794494228382,
       "error": null,
       "running": false
      }
@@ -235,6 +235,470 @@
   },
   {
    "browser": "webkit",
+   "pool": "youtube",
+   "checks": {
+    "feedUp": true,
+    "playing": true,
+    "soundOn": true,
+    "tokenSaved": true,
+    "firstSync": true,
+    "backInFeed": true,
+    "off5_sameMoment": true,
+    "off5_sameCover": true,
+    "off5_sameHook": true,
+    "off5_sameSource": true,
+    "off5_playingAgain": true,
+    "off5_positionKept": true,
+    "off5_soundKept": true,
+    "off5_captionMatchesMoment": true,
+    "off5_tokenKept": true,
+    "off5_lastSyncKept": true,
+    "off5_syncResumes": true,
+    "off5_gitHubReachedAgain": true,
+    "off20_sameMoment": true,
+    "off20_sameCover": true,
+    "off20_sameHook": true,
+    "off20_sameSource": true,
+    "off20_playingAgain": true,
+    "off20_positionKept": true,
+    "off20_soundKept": true,
+    "off20_captionMatchesMoment": true,
+    "off20_tokenKept": true,
+    "off20_lastSyncKept": true,
+    "off20_syncResumes": true,
+    "off20_gitHubReachedAgain": true,
+    "off60_sameMoment": true,
+    "off60_sameCover": true,
+    "off60_sameHook": true,
+    "off60_sameSource": true,
+    "off60_playingAgain": true,
+    "off60_positionKept": true,
+    "off60_soundKept": true,
+    "off60_captionMatchesMoment": true,
+    "off60_tokenKept": true,
+    "off60_lastSyncKept": true,
+    "off60_syncResumes": true,
+    "off60_gitHubReachedAgain": true,
+    "settingsTokenField": true,
+    "settingsLastSync": true,
+    "diagLines": true,
+    "noPageErrors": true
+   },
+   "notes": {
+    "off5": {
+     "before": {
+      "id": "of000000100:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
+      "coverOk": true,
+      "caption": "Erste Zeile 100",
+      "hook": "Offline 100",
+      "st": 1,
+      "sound": true,
+      "mid": "of000000100:100",
+      "muted": false,
+      "t": 100.1,
+      "neighbors": "1:of000000101:100,2:of000000107:100",
+      "next2": "of000000101:100,of000000107:100"
+     },
+     "during": {
+      "id": "of000000100:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
+      "coverOk": true,
+      "caption": "Erste Zeile 100",
+      "hook": "Offline 100",
+      "st": 3,
+      "sound": true,
+      "mid": "of000000100:100",
+      "muted": false,
+      "t": 100.19999999999999,
+      "neighbors": "1:of000000101:100,2:of000000107:100",
+      "next2": "of000000101:100,of000000107:100"
+     },
+     "after": {
+      "id": "of000000100:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
+      "coverOk": true,
+      "caption": "Erste Zeile 100",
+      "hook": "Offline 100",
+      "st": 1,
+      "sound": true,
+      "mid": "of000000100:100",
+      "muted": false,
+      "t": 106.09999999999965,
+      "neighbors": "1:of000000101:100,2:of000000107:100",
+      "next2": "of000000101:100,of000000107:100"
+     },
+     "syncBefore": {
+      "hasToken": true,
+      "lastSync": 1794494236356,
+      "error": null,
+      "running": false
+     },
+     "syncAfter": {
+      "hasToken": true,
+      "lastSync": 1794494241608,
+      "error": null,
+      "running": false
+     }
+    },
+    "off20": {
+     "before": {
+      "id": "of000000100:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
+      "coverOk": true,
+      "caption": "Erste Zeile 100",
+      "hook": "Offline 100",
+      "st": 1,
+      "sound": true,
+      "mid": "of000000100:100",
+      "muted": false,
+      "t": 106.19999999999965,
+      "neighbors": "1:of000000101:100,2:of000000107:100",
+      "next2": "of000000101:100,of000000107:100"
+     },
+     "during": {
+      "id": "of000000100:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
+      "coverOk": true,
+      "caption": "Erste Zeile 100",
+      "hook": "Offline 100",
+      "st": 3,
+      "sound": true,
+      "mid": "of000000100:100",
+      "muted": false,
+      "t": 106.19999999999965,
+      "neighbors": "1:of000000101:100,2:of000000107:100",
+      "next2": "of000000101:100,of000000107:100"
+     },
+     "after": {
+      "id": "of000000100:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
+      "coverOk": true,
+      "caption": "Erste Zeile 100",
+      "hook": "Offline 100",
+      "st": 1,
+      "sound": true,
+      "mid": "of000000100:100",
+      "muted": false,
+      "t": 112.09999999999931,
+      "neighbors": "1:of000000101:100,2:of000000107:100",
+      "next2": "of000000101:100,of000000107:100"
+     },
+     "syncBefore": {
+      "hasToken": true,
+      "lastSync": 1794494241608,
+      "error": null,
+      "running": false
+     },
+     "syncAfter": {
+      "hasToken": true,
+      "lastSync": 1794494267722,
+      "error": null,
+      "running": false
+     }
+    },
+    "off60": {
+     "before": {
+      "id": "of000000100:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
+      "coverOk": true,
+      "caption": "Erste Zeile 100",
+      "hook": "Offline 100",
+      "st": 1,
+      "sound": true,
+      "mid": "of000000100:100",
+      "muted": false,
+      "t": 112.1999999999993,
+      "neighbors": "1:of000000101:100,2:of000000107:100",
+      "next2": "of000000101:100,of000000107:100"
+     },
+     "during": {
+      "id": "of000000100:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
+      "coverOk": true,
+      "caption": "Erste Zeile 100",
+      "hook": "Offline 100",
+      "st": 3,
+      "sound": true,
+      "mid": "of000000100:100",
+      "muted": false,
+      "t": 112.1999999999993,
+      "neighbors": "1:of000000101:100,2:of000000107:100",
+      "next2": "of000000101:100,of000000107:100"
+     },
+     "after": {
+      "id": "of000000100:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
+      "coverOk": true,
+      "caption": "Erste Zeile 100",
+      "hook": "Offline 100",
+      "st": 1,
+      "sound": true,
+      "mid": "of000000100:100",
+      "muted": false,
+      "t": 118.09999999999897,
+      "neighbors": "1:of000000101:100,2:of000000107:100",
+      "next2": "of000000101:100,of000000107:100"
+     },
+     "syncBefore": {
+      "hasToken": true,
+      "lastSync": 1794494267722,
+      "error": null,
+      "running": false
+     },
+     "syncAfter": {
+      "hasToken": true,
+      "lastSync": 1794494333820,
+      "error": null,
+      "running": false
+     }
+    },
+    "errors": []
+   }
+  },
+  {
+   "browser": "chromium",
+   "pool": "stream",
+   "checks": {
+    "feedUp": true,
+    "playing": true,
+    "soundOn": true,
+    "tokenSaved": true,
+    "firstSync": true,
+    "backInFeed": true,
+    "off5_sameMoment": true,
+    "off5_sameCover": true,
+    "off5_sameHook": true,
+    "off5_sameSource": true,
+    "off5_playingAgain": true,
+    "off5_positionKept": true,
+    "off5_soundKept": true,
+    "off5_captionMatchesMoment": true,
+    "off5_tokenKept": true,
+    "off5_lastSyncKept": true,
+    "off5_syncResumes": true,
+    "off5_gitHubReachedAgain": true,
+    "off20_sameMoment": true,
+    "off20_sameCover": true,
+    "off20_sameHook": true,
+    "off20_sameSource": true,
+    "off20_playingAgain": true,
+    "off20_positionKept": true,
+    "off20_soundKept": true,
+    "off20_captionMatchesMoment": true,
+    "off20_tokenKept": true,
+    "off20_lastSyncKept": true,
+    "off20_syncResumes": true,
+    "off20_gitHubReachedAgain": true,
+    "off60_sameMoment": true,
+    "off60_sameCover": true,
+    "off60_sameHook": true,
+    "off60_sameSource": true,
+    "off60_playingAgain": true,
+    "off60_positionKept": true,
+    "off60_soundKept": true,
+    "off60_captionMatchesMoment": true,
+    "off60_tokenKept": true,
+    "off60_lastSyncKept": true,
+    "off60_syncResumes": true,
+    "off60_gitHubReachedAgain": true,
+    "settingsTokenField": true,
+    "settingsLastSync": true,
+    "diagLines": true,
+    "noPageErrors": true
+   },
+   "notes": {
+    "off5": {
+     "before": {
+      "id": "of000000000:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
+      "coverOk": true,
+      "caption": "Erste Zeile 0",
+      "hook": "Offline 0",
+      "st": 1,
+      "sound": true,
+      "mid": "of000000000:100",
+      "muted": false,
+      "t": 100,
+      "neighbors": "1:of000000001:100,2:of000000007:100",
+      "next2": "of000000001:100,of000000007:100"
+     },
+     "during": {
+      "id": "of000000000:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
+      "coverOk": true,
+      "caption": "Erste Zeile 0",
+      "hook": "Offline 0",
+      "st": 3,
+      "sound": true,
+      "mid": "of000000000:100",
+      "muted": false,
+      "t": 100,
+      "neighbors": "1:of000000001:100,2:of000000007:100",
+      "next2": "of000000001:100,of000000007:100"
+     },
+     "after": {
+      "id": "of000000000:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
+      "coverOk": true,
+      "caption": "Erste Zeile 0",
+      "hook": "Offline 0",
+      "st": 1,
+      "sound": true,
+      "mid": "of000000000:100",
+      "muted": false,
+      "t": 105.99999999999966,
+      "neighbors": "1:of000000001:100,2:of000000007:100",
+      "next2": "of000000001:100,of000000007:100"
+     },
+     "syncBefore": {
+      "hasToken": true,
+      "lastSync": 1794494341136,
+      "error": null,
+      "running": false
+     },
+     "syncAfter": {
+      "hasToken": true,
+      "lastSync": 1794494346250,
+      "error": null,
+      "running": false
+     }
+    },
+    "off20": {
+     "before": {
+      "id": "of000000000:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
+      "coverOk": true,
+      "caption": "Erste Zeile 0",
+      "hook": "Offline 0",
+      "st": 1,
+      "sound": true,
+      "mid": "of000000000:100",
+      "muted": false,
+      "t": 105.99999999999966,
+      "neighbors": "1:of000000001:100,2:of000000007:100",
+      "next2": "of000000001:100,of000000007:100"
+     },
+     "during": {
+      "id": "of000000000:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
+      "coverOk": true,
+      "caption": "Erste Zeile 0",
+      "hook": "Offline 0",
+      "st": 3,
+      "sound": true,
+      "mid": "of000000000:100",
+      "muted": false,
+      "t": 105.99999999999966,
+      "neighbors": "1:of000000001:100,2:of000000007:100",
+      "next2": "of000000001:100,of000000007:100"
+     },
+     "after": {
+      "id": "of000000000:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
+      "coverOk": true,
+      "caption": "Erste Zeile 0",
+      "hook": "Offline 0",
+      "st": 1,
+      "sound": true,
+      "mid": "of000000000:100",
+      "muted": false,
+      "t": 111.79999999999933,
+      "neighbors": "1:of000000001:100,2:of000000007:100",
+      "next2": "of000000001:100,of000000007:100"
+     },
+     "syncBefore": {
+      "hasToken": true,
+      "lastSync": 1794494346250,
+      "error": null,
+      "running": false
+     },
+     "syncAfter": {
+      "hasToken": true,
+      "lastSync": 1794494372333,
+      "error": null,
+      "running": false
+     }
+    },
+    "off60": {
+     "before": {
+      "id": "of000000000:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
+      "coverOk": true,
+      "caption": "Erste Zeile 0",
+      "hook": "Offline 0",
+      "st": 1,
+      "sound": true,
+      "mid": "of000000000:100",
+      "muted": false,
+      "t": 111.89999999999932,
+      "neighbors": "1:of000000001:100,2:of000000007:100",
+      "next2": "of000000001:100,of000000007:100"
+     },
+     "during": {
+      "id": "of000000000:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
+      "coverOk": true,
+      "caption": "Erste Zeile 0",
+      "hook": "Offline 0",
+      "st": 3,
+      "sound": true,
+      "mid": "of000000000:100",
+      "muted": false,
+      "t": 111.89999999999932,
+      "neighbors": "1:of000000001:100,2:of000000007:100",
+      "next2": "of000000001:100,of000000007:100"
+     },
+     "after": {
+      "id": "of000000000:100",
+      "idx": 0,
+      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
+      "coverOk": true,
+      "caption": "Erste Zeile 0",
+      "hook": "Offline 0",
+      "st": 1,
+      "sound": true,
+      "mid": "of000000000:100",
+      "muted": false,
+      "t": 117.699999999999,
+      "neighbors": "1:of000000001:100,2:of000000007:100",
+      "next2": "of000000001:100,of000000007:100"
+     },
+     "syncBefore": {
+      "hasToken": true,
+      "lastSync": 1794494372333,
+      "error": null,
+      "running": false
+     },
+     "syncAfter": {
+      "hasToken": true,
+      "lastSync": 1794494438398,
+      "error": null,
+      "running": false
+     }
+    },
+    "errors": []
+   }
+  },
+  {
+   "browser": "chromium",
    "pool": "youtube",
    "checks": {
     "feedUp": true,
@@ -333,13 +797,13 @@
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1794487804698,
+      "lastSync": 1794494445632,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1794487809893,
+      "lastSync": 1794494450745,
       "error": null,
       "running": false
      }
@@ -386,19 +850,19 @@
       "sound": true,
       "mid": "of000000100:100",
       "muted": false,
-      "t": 111.89999999999932,
+      "t": 111.99999999999932,
       "neighbors": "1:of000000101:100,2:of000000107:100",
       "next2": "of000000101:100,of000000107:100"
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1794487809893,
+      "lastSync": 1794494450745,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1794487835980,
+      "lastSync": 1794494476827,
       "error": null,
       "running": false
      }
@@ -451,477 +915,13 @@
      },
      "syncBefore": {
       "hasToken": true,
-      "lastSync": 1794487835980,
+      "lastSync": 1794494476827,
       "error": null,
       "running": false
      },
      "syncAfter": {
       "hasToken": true,
-      "lastSync": 1794487902042,
-      "error": null,
-      "running": false
-     }
-    },
-    "errors": []
-   }
-  },
-  {
-   "browser": "chromium",
-   "pool": "stream",
-   "checks": {
-    "feedUp": true,
-    "playing": true,
-    "soundOn": true,
-    "tokenSaved": true,
-    "firstSync": true,
-    "backInFeed": true,
-    "off5_sameMoment": true,
-    "off5_sameCover": true,
-    "off5_sameHook": true,
-    "off5_sameSource": true,
-    "off5_playingAgain": true,
-    "off5_positionKept": true,
-    "off5_soundKept": true,
-    "off5_captionMatchesMoment": true,
-    "off5_tokenKept": true,
-    "off5_lastSyncKept": true,
-    "off5_syncResumes": true,
-    "off5_gitHubReachedAgain": true,
-    "off20_sameMoment": true,
-    "off20_sameCover": true,
-    "off20_sameHook": true,
-    "off20_sameSource": true,
-    "off20_playingAgain": true,
-    "off20_positionKept": true,
-    "off20_soundKept": true,
-    "off20_captionMatchesMoment": true,
-    "off20_tokenKept": true,
-    "off20_lastSyncKept": true,
-    "off20_syncResumes": true,
-    "off20_gitHubReachedAgain": true,
-    "off60_sameMoment": true,
-    "off60_sameCover": true,
-    "off60_sameHook": true,
-    "off60_sameSource": true,
-    "off60_playingAgain": true,
-    "off60_positionKept": true,
-    "off60_soundKept": true,
-    "off60_captionMatchesMoment": true,
-    "off60_tokenKept": true,
-    "off60_lastSyncKept": true,
-    "off60_syncResumes": true,
-    "off60_gitHubReachedAgain": true,
-    "settingsTokenField": true,
-    "settingsLastSync": true,
-    "diagLines": true,
-    "noPageErrors": true
-   },
-   "notes": {
-    "off5": {
-     "before": {
-      "id": "of000000000:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
-      "coverOk": true,
-      "caption": "Erste Zeile 0",
-      "hook": "Offline 0",
-      "st": 1,
-      "sound": true,
-      "mid": "of000000000:100",
-      "muted": false,
-      "t": 100,
-      "neighbors": "1:of000000001:100,2:of000000007:100",
-      "next2": "of000000001:100,of000000007:100"
-     },
-     "during": {
-      "id": "of000000000:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
-      "coverOk": true,
-      "caption": "Erste Zeile 0",
-      "hook": "Offline 0",
-      "st": 3,
-      "sound": true,
-      "mid": "of000000000:100",
-      "muted": false,
-      "t": 100,
-      "neighbors": "1:of000000001:100,2:of000000007:100",
-      "next2": "of000000001:100,of000000007:100"
-     },
-     "after": {
-      "id": "of000000000:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
-      "coverOk": true,
-      "caption": "Erste Zeile 0",
-      "hook": "Offline 0",
-      "st": 1,
-      "sound": true,
-      "mid": "of000000000:100",
-      "muted": false,
-      "t": 105.99999999999966,
-      "neighbors": "1:of000000001:100,2:of000000007:100",
-      "next2": "of000000001:100,of000000007:100"
-     },
-     "syncBefore": {
-      "hasToken": true,
-      "lastSync": 1794487909277,
-      "error": null,
-      "running": false
-     },
-     "syncAfter": {
-      "hasToken": true,
-      "lastSync": 1794487914392,
-      "error": null,
-      "running": false
-     }
-    },
-    "off20": {
-     "before": {
-      "id": "of000000000:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
-      "coverOk": true,
-      "caption": "Erste Zeile 0",
-      "hook": "Offline 0",
-      "st": 1,
-      "sound": true,
-      "mid": "of000000000:100",
-      "muted": false,
-      "t": 105.99999999999966,
-      "neighbors": "1:of000000001:100,2:of000000007:100",
-      "next2": "of000000001:100,of000000007:100"
-     },
-     "during": {
-      "id": "of000000000:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
-      "coverOk": true,
-      "caption": "Erste Zeile 0",
-      "hook": "Offline 0",
-      "st": 3,
-      "sound": true,
-      "mid": "of000000000:100",
-      "muted": false,
-      "t": 105.99999999999966,
-      "neighbors": "1:of000000001:100,2:of000000007:100",
-      "next2": "of000000001:100,of000000007:100"
-     },
-     "after": {
-      "id": "of000000000:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
-      "coverOk": true,
-      "caption": "Erste Zeile 0",
-      "hook": "Offline 0",
-      "st": 1,
-      "sound": true,
-      "mid": "of000000000:100",
-      "muted": false,
-      "t": 111.89999999999932,
-      "neighbors": "1:of000000001:100,2:of000000007:100",
-      "next2": "of000000001:100,of000000007:100"
-     },
-     "syncBefore": {
-      "hasToken": true,
-      "lastSync": 1794487914392,
-      "error": null,
-      "running": false
-     },
-     "syncAfter": {
-      "hasToken": true,
-      "lastSync": 1794487940476,
-      "error": null,
-      "running": false
-     }
-    },
-    "off60": {
-     "before": {
-      "id": "of000000000:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
-      "coverOk": true,
-      "caption": "Erste Zeile 0",
-      "hook": "Offline 0",
-      "st": 1,
-      "sound": true,
-      "mid": "of000000000:100",
-      "muted": false,
-      "t": 111.89999999999932,
-      "neighbors": "1:of000000001:100,2:of000000007:100",
-      "next2": "of000000001:100,of000000007:100"
-     },
-     "during": {
-      "id": "of000000000:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
-      "coverOk": true,
-      "caption": "Erste Zeile 0",
-      "hook": "Offline 0",
-      "st": 3,
-      "sound": true,
-      "mid": "of000000000:100",
-      "muted": false,
-      "t": 111.89999999999932,
-      "neighbors": "1:of000000001:100,2:of000000007:100",
-      "next2": "of000000001:100,of000000007:100"
-     },
-     "after": {
-      "id": "of000000000:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=0",
-      "coverOk": true,
-      "caption": "Erste Zeile 0",
-      "hook": "Offline 0",
-      "st": 1,
-      "sound": true,
-      "mid": "of000000000:100",
-      "muted": false,
-      "t": 117.79999999999899,
-      "neighbors": "1:of000000001:100,2:of000000007:100",
-      "next2": "of000000001:100,of000000007:100"
-     },
-     "syncBefore": {
-      "hasToken": true,
-      "lastSync": 1794487940476,
-      "error": null,
-      "running": false
-     },
-     "syncAfter": {
-      "hasToken": true,
-      "lastSync": 1794488006541,
-      "error": null,
-      "running": false
-     }
-    },
-    "errors": []
-   }
-  },
-  {
-   "browser": "chromium",
-   "pool": "youtube",
-   "checks": {
-    "feedUp": true,
-    "playing": true,
-    "soundOn": true,
-    "tokenSaved": true,
-    "firstSync": true,
-    "backInFeed": true,
-    "off5_sameMoment": true,
-    "off5_sameCover": true,
-    "off5_sameHook": true,
-    "off5_sameSource": true,
-    "off5_playingAgain": true,
-    "off5_positionKept": true,
-    "off5_soundKept": true,
-    "off5_captionMatchesMoment": true,
-    "off5_tokenKept": true,
-    "off5_lastSyncKept": true,
-    "off5_syncResumes": true,
-    "off5_gitHubReachedAgain": true,
-    "off20_sameMoment": true,
-    "off20_sameCover": true,
-    "off20_sameHook": true,
-    "off20_sameSource": true,
-    "off20_playingAgain": true,
-    "off20_positionKept": true,
-    "off20_soundKept": true,
-    "off20_captionMatchesMoment": true,
-    "off20_tokenKept": true,
-    "off20_lastSyncKept": true,
-    "off20_syncResumes": true,
-    "off20_gitHubReachedAgain": true,
-    "off60_sameMoment": true,
-    "off60_sameCover": true,
-    "off60_sameHook": true,
-    "off60_sameSource": true,
-    "off60_playingAgain": true,
-    "off60_positionKept": true,
-    "off60_soundKept": true,
-    "off60_captionMatchesMoment": true,
-    "off60_tokenKept": true,
-    "off60_lastSyncKept": true,
-    "off60_syncResumes": true,
-    "off60_gitHubReachedAgain": true,
-    "settingsTokenField": true,
-    "settingsLastSync": true,
-    "diagLines": true,
-    "noPageErrors": true
-   },
-   "notes": {
-    "off5": {
-     "before": {
-      "id": "of000000100:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
-      "coverOk": true,
-      "caption": "Erste Zeile 100",
-      "hook": "Offline 100",
-      "st": 1,
-      "sound": true,
-      "mid": "of000000100:100",
-      "muted": false,
-      "t": 100,
-      "neighbors": "1:of000000101:100,2:of000000107:100",
-      "next2": "of000000101:100,of000000107:100"
-     },
-     "during": {
-      "id": "of000000100:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
-      "coverOk": true,
-      "caption": "Erste Zeile 100",
-      "hook": "Offline 100",
-      "st": 3,
-      "sound": true,
-      "mid": "of000000100:100",
-      "muted": false,
-      "t": 100,
-      "neighbors": "1:of000000101:100,2:of000000107:100",
-      "next2": "of000000101:100,of000000107:100"
-     },
-     "after": {
-      "id": "of000000100:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
-      "coverOk": true,
-      "caption": "Erste Zeile 100",
-      "hook": "Offline 100",
-      "st": 1,
-      "sound": true,
-      "mid": "of000000100:100",
-      "muted": false,
-      "t": 105.99999999999966,
-      "neighbors": "1:of000000101:100,2:of000000107:100",
-      "next2": "of000000101:100,of000000107:100"
-     },
-     "syncBefore": {
-      "hasToken": true,
-      "lastSync": 1794488013621,
-      "error": null,
-      "running": false
-     },
-     "syncAfter": {
-      "hasToken": true,
-      "lastSync": 1794488018717,
-      "error": null,
-      "running": false
-     }
-    },
-    "off20": {
-     "before": {
-      "id": "of000000100:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
-      "coverOk": true,
-      "caption": "Erste Zeile 100",
-      "hook": "Offline 100",
-      "st": 1,
-      "sound": true,
-      "mid": "of000000100:100",
-      "muted": false,
-      "t": 105.99999999999966,
-      "neighbors": "1:of000000101:100,2:of000000107:100",
-      "next2": "of000000101:100,of000000107:100"
-     },
-     "during": {
-      "id": "of000000100:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
-      "coverOk": true,
-      "caption": "Erste Zeile 100",
-      "hook": "Offline 100",
-      "st": 3,
-      "sound": true,
-      "mid": "of000000100:100",
-      "muted": false,
-      "t": 105.99999999999966,
-      "neighbors": "1:of000000101:100,2:of000000107:100",
-      "next2": "of000000101:100,of000000107:100"
-     },
-     "after": {
-      "id": "of000000100:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
-      "coverOk": true,
-      "caption": "Erste Zeile 100",
-      "hook": "Offline 100",
-      "st": 1,
-      "sound": true,
-      "mid": "of000000100:100",
-      "muted": false,
-      "t": 111.89999999999932,
-      "neighbors": "1:of000000101:100,2:of000000107:100",
-      "next2": "of000000101:100,of000000107:100"
-     },
-     "syncBefore": {
-      "hasToken": true,
-      "lastSync": 1794488018717,
-      "error": null,
-      "running": false
-     },
-     "syncAfter": {
-      "hasToken": true,
-      "lastSync": 1794488044784,
-      "error": null,
-      "running": false
-     }
-    },
-    "off60": {
-     "before": {
-      "id": "of000000100:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
-      "coverOk": true,
-      "caption": "Erste Zeile 100",
-      "hook": "Offline 100",
-      "st": 1,
-      "sound": true,
-      "mid": "of000000100:100",
-      "muted": false,
-      "t": 111.99999999999932,
-      "neighbors": "1:of000000101:100,2:of000000107:100",
-      "next2": "of000000101:100,of000000107:100"
-     },
-     "during": {
-      "id": "of000000100:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
-      "coverOk": true,
-      "caption": "Erste Zeile 100",
-      "hook": "Offline 100",
-      "st": 3,
-      "sound": true,
-      "mid": "of000000100:100",
-      "muted": false,
-      "t": 111.99999999999932,
-      "neighbors": "1:of000000101:100,2:of000000107:100",
-      "next2": "of000000101:100,of000000107:100"
-     },
-     "after": {
-      "id": "of000000100:100",
-      "idx": 0,
-      "cover": "http://127.0.0.1:4183/core/apple-touch-icon.png?m=100",
-      "coverOk": true,
-      "caption": "Erste Zeile 100",
-      "hook": "Offline 100",
-      "st": 1,
-      "sound": true,
-      "mid": "of000000100:100",
-      "muted": false,
-      "t": 117.99999999999898,
-      "neighbors": "1:of000000101:100,2:of000000107:100",
-      "next2": "of000000101:100,of000000107:100"
-     },
-     "syncBefore": {
-      "hasToken": true,
-      "lastSync": 1794488044784,
-      "error": null,
-      "running": false
-     },
-     "syncAfter": {
-      "hasToken": true,
-      "lastSync": 1794488110851,
+      "lastSync": 1794494542890,
       "error": null,
       "running": false
      }
