@@ -1,5 +1,5 @@
 {
- "at": "2026-11-12T04:08:56.780Z",
+ "at": "2026-11-12T05:40:50.875Z",
  "url": "http://127.0.0.1:4188/core/",
  "model": "Nachbau der IFrame-API mit Latenzmodell, kein echtes YouTube",
  "swipes": 20,
@@ -58,7 +58,7 @@
     0
    ],
    "appMs": [
-    1,
+    0,
     0,
     0,
     0,
@@ -110,7 +110,7 @@
       0,
       0
      ],
-     "checked": 10,
+     "checked": 8,
      "reloaded": false,
      "ms": 0
     },
@@ -127,7 +127,7 @@
       0,
       0
      ],
-     "checked": 10,
+     "checked": 8,
      "reloaded": false,
      "ms": 0
     },
@@ -144,7 +144,7 @@
       0,
       0
      ],
-     "checked": 10,
+     "checked": 8,
      "reloaded": false,
      "ms": 0
     },
@@ -161,7 +161,7 @@
       0,
       0
      ],
-     "checked": 8,
+     "checked": 10,
      "reloaded": false,
      "ms": 0
     },
@@ -178,7 +178,7 @@
       0,
       0
      ],
-     "checked": 10,
+     "checked": 8,
      "reloaded": false,
      "ms": 0
     },
@@ -195,7 +195,7 @@
       0,
       0
      ],
-     "checked": 10,
+     "checked": 8,
      "reloaded": false,
      "ms": 0
     },
@@ -246,7 +246,7 @@
       0,
       0
      ],
-     "checked": 10,
+     "checked": 8,
      "reloaded": false,
      "ms": 0
     },
@@ -263,7 +263,7 @@
       0,
       0
      ],
-     "checked": 10,
+     "checked": 8,
      "reloaded": false,
      "ms": 0
     },
@@ -297,7 +297,7 @@
       0,
       0
      ],
-     "checked": 10,
+     "checked": 8,
      "reloaded": false,
      "ms": 0
     },
@@ -314,7 +314,7 @@
       0,
       0
      ],
-     "checked": 10,
+     "checked": 8,
      "reloaded": false,
      "ms": 0
     },
@@ -382,7 +382,7 @@
       0,
       0
      ],
-     "checked": 10,
+     "checked": 8,
      "reloaded": false,
      "ms": 0
     },
@@ -399,7 +399,7 @@
       0,
       0
      ],
-     "checked": 10,
+     "checked": 8,
      "reloaded": false,
      "ms": 0
     },
@@ -425,15 +425,15 @@
    "log": {
     "videoLines": [
      "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
-     "video: preload test0000040:100 canplay after 9006 ms",
+     "video: preload test0000040:100 canplay after 8999 ms",
      "video: cover on test0000040:100 3300 ms",
      "first-frame 0ms buffered",
      "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
-     "video: preload test0000053:100 canplay after 8976 ms",
+     "video: preload test0000053:100 canplay after 8975 ms",
      "video: cover on test0000053:100 3300 ms",
      "first-frame 0ms buffered",
      "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
-     "video: preload test0000039:100 canplay after 9029 ms",
+     "video: preload test0000039:100 canplay after 8973 ms",
      "video: cover on test0000039:100 3300 ms",
      "first-frame 0ms buffered",
      "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
@@ -472,7 +472,7 @@
    ],
    "video": {
     "frames": [
-     1,
+     0,
      0,
      0,
      0,
@@ -529,7 +529,7 @@
    "appMedian": 0,
    "appP90": 0,
    "exposedSwipes": 0,
-   "probesChecked": 186,
+   "probesChecked": 166,
    "iframePaused": {
     "vis": "hidden",
     "tapTarget": "vgesture no-callout",
@@ -600,48 +600,48 @@
     "pageErrors": true
    },
    "ms": [
-    40,
+    46,
     36,
-    57,
-    74,
-    95,
-    87,
-    66,
-    44,
-    86,
-    78,
-    50,
-    71,
-    86,
-    84,
-    42,
-    75,
     69,
-    75,
+    79,
+    94,
+    86,
+    77,
+    60,
     71,
-    75
+    81,
+    62,
+    68,
+    104,
+    89,
+    59,
+    68,
+    68,
+    79,
+    75,
+    68
    ],
    "appMs": [
-    47,
-    46,
-    67,
-    91,
-    99,
-    98,
-    79,
-    63,
-    93,
+    51,
+    50,
+    72,
     87,
+    95,
+    96,
+    79,
     67,
-    76,
-    99,
-    91,
-    59,
-    82,
+    87,
+    90,
+    63,
     75,
-    91,
+    100,
+    96,
+    60,
     76,
-    84
+    72,
+    95,
+    83,
+    86
    ],
    "exposed": [
     {
@@ -659,7 +659,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 40
+     "ms": 46
     },
     {
      "n": 1,
@@ -691,9 +691,9 @@
       0,
       0
      ],
-     "checked": 0,
+     "checked": 2,
      "reloaded": false,
-     "ms": 57
+     "ms": 69
     },
     {
      "n": 3,
@@ -710,7 +710,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 74
+     "ms": 79
     },
     {
      "n": 4,
@@ -727,7 +727,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 95
+     "ms": 94
     },
     {
      "n": 5,
@@ -744,7 +744,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 87
+     "ms": 86
     },
     {
      "n": 6,
@@ -761,7 +761,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 66
+     "ms": 77
     },
     {
      "n": 7,
@@ -778,7 +778,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 44
+     "ms": 60
     },
     {
      "n": 8,
@@ -795,7 +795,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 86
+     "ms": 71
     },
     {
      "n": 9,
@@ -812,7 +812,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 78
+     "ms": 81
     },
     {
      "n": 10,
@@ -829,7 +829,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 50
+     "ms": 62
     },
     {
      "n": 11,
@@ -846,7 +846,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 71
+     "ms": 68
     },
     {
      "n": 12,
@@ -863,7 +863,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 86
+     "ms": 104
     },
     {
      "n": 13,
@@ -880,7 +880,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 84
+     "ms": 89
     },
     {
      "n": 14,
@@ -897,7 +897,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 42
+     "ms": 59
     },
     {
      "n": 15,
@@ -914,7 +914,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 75
+     "ms": 68
     },
     {
      "n": 16,
@@ -931,7 +931,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 69
+     "ms": 68
     },
     {
      "n": 17,
@@ -948,7 +948,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 75
+     "ms": 79
     },
     {
      "n": 18,
@@ -965,7 +965,7 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 71
+     "ms": 75
     },
     {
      "n": 19,
@@ -982,25 +982,25 @@
      ],
      "checked": 2,
      "reloaded": false,
-     "ms": 75
+     "ms": 68
     }
    ],
    "reloads": 0,
    "log": {
     "videoLines": [
-     "first-frame 91ms buffered",
-     "video: swipe→ready 0ms, →playing 91ms, net 4g, warm",
-     "video: preload test0000039:100 canplay after 1183 ms",
+     "first-frame 95ms buffered",
+     "video: swipe→ready 0ms, →playing 95ms, net 4g, warm",
+     "video: preload test0000039:100 canplay after 1175 ms",
      "video: warm done slot1 test0000053:100 played 3.8s net 4g",
      "video: warm start slot2 test0000039:100 st=2",
-     "first-frame 76ms buffered",
-     "video: swipe→ready 0ms, →playing 76ms, net 4g, warm",
-     "video: preload test0000022:100 canplay after 622 ms",
+     "first-frame 83ms buffered",
+     "video: swipe→ready 0ms, →playing 83ms, net 4g, warm",
+     "video: preload test0000022:100 canplay after 623 ms",
      "video: warm done slot2 test0000039:100 played 4.1s net 4g",
      "video: warm start slot0 test0000022:100 st=2",
-     "first-frame 83ms buffered",
-     "video: swipe→ready 0ms, →playing 84ms, net 4g, warm",
-     "video: median 79ms, p90 98ms over last 20 swipes",
+     "first-frame 86ms buffered",
+     "video: swipe→ready 0ms, →playing 86ms, net 4g, warm",
+     "video: median 79ms, p90 96ms over last 20 swipes",
      "video: preload test0000041:100 canplay after 1162 ms"
     ]
    },
@@ -1037,26 +1037,26 @@
    ],
    "video": {
     "frames": [
-     47,
-     46,
-     67,
-     91,
-     99,
-     98,
-     79,
-     63,
-     93,
+     51,
+     50,
+     72,
      87,
+     95,
+     96,
+     79,
      67,
-     76,
-     99,
-     91,
-     59,
-     82,
+     87,
+     90,
+     63,
      75,
-     91,
+     100,
+     96,
+     60,
      76,
-     84
+     72,
+     95,
+     83,
+     86
     ],
     "gate": true,
     "slots": [
@@ -1086,15 +1086,15 @@
    "firstFrames": {
     "n": 19,
     "buffered": 19,
-    "medianBuffered": 82
+    "medianBuffered": 83
    },
-   "median": 71,
-   "p90": 86,
+   "median": 69,
+   "p90": 89,
    "n": 20,
    "appMedian": 79,
-   "appP90": 98,
+   "appP90": 96,
    "exposedSwipes": 0,
-   "probesChecked": 28,
+   "probesChecked": 30,
    "iframePaused": {
     "vis": "hidden",
     "tapTarget": "vgesture no-callout",
@@ -1224,7 +1224,7 @@
       0,
       0
      ],
-     "checked": 6,
+     "checked": 4,
      "reloaded": false,
      "ms": 0
     },
@@ -1269,7 +1269,7 @@
       0,
       0
      ],
-     "checked": 6,
+     "checked": 4,
      "reloaded": false,
      "ms": 0
     },
@@ -1284,7 +1284,7 @@
       0,
       0
      ],
-     "checked": 6,
+     "checked": 4,
      "reloaded": false,
      "ms": 0
     },
@@ -1314,7 +1314,7 @@
       0,
       0
      ],
-     "checked": 6,
+     "checked": 4,
      "reloaded": false,
      "ms": 0
     },
@@ -1344,7 +1344,7 @@
       0,
       0
      ],
-     "checked": 6,
+     "checked": 4,
      "reloaded": false,
      "ms": 0
     },
@@ -1374,7 +1374,7 @@
       0,
       0
      ],
-     "checked": 6,
+     "checked": 4,
      "reloaded": false,
      "ms": 0
     },
@@ -1404,7 +1404,7 @@
       0,
       0
      ],
-     "checked": 6,
+     "checked": 4,
      "reloaded": false,
      "ms": 0
     },
@@ -1419,7 +1419,7 @@
       0,
       0
      ],
-     "checked": 6,
+     "checked": 4,
      "reloaded": false,
      "ms": 0
     },
@@ -1449,7 +1449,7 @@
       0,
       0
      ],
-     "checked": 6,
+     "checked": 4,
      "reloaded": false,
      "ms": 0
     },
@@ -1464,7 +1464,7 @@
       0,
       0
      ],
-     "checked": 6,
+     "checked": 4,
      "reloaded": false,
      "ms": 0
     },
@@ -1503,15 +1503,15 @@
    "log": {
     "videoLines": [
      "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
-     "video: preload test0000043:100 canplay after 3587 ms",
+     "video: preload test0000043:100 canplay after 3560 ms",
      "video: cover on test0000043:100 3300 ms",
      "first-frame 0ms buffered",
      "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
-     "video: preload test0000029:100 canplay after 3576 ms",
+     "video: preload test0000029:100 canplay after 3561 ms",
      "video: cover on test0000029:100 3300 ms",
      "first-frame 0ms buffered",
      "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
-     "video: preload test0000042:100 canplay after 3627 ms",
+     "video: preload test0000042:100 canplay after 3588 ms",
      "video: cover on test0000042:100 3300 ms",
      "first-frame 0ms buffered",
      "video: swipe→ready 0ms, →playing 0ms, net 4g, gesture",
@@ -1607,7 +1607,7 @@
    "appMedian": 0,
    "appP90": 0,
    "exposedSwipes": 0,
-   "probesChecked": 100,
+   "probesChecked": 80,
    "iframePaused": {
     "vis": "hidden",
     "tapTarget": "vgesture no-callout",
@@ -1678,48 +1678,48 @@
     "pageErrors": true
    },
    "ms": [
-    44,
-    47,
-    71,
-    75,
-    58,
-    42,
-    79,
-    33,
+    38,
     45,
-    91,
-    70,
-    59,
-    70,
-    86,
+    66,
+    87,
     53,
-    84,
+    53,
+    79,
+    53,
+    43,
+    99,
     71,
-    53,
+    82,
+    68,
+    99,
+    55,
+    77,
+    75,
+    56,
     69,
-    44
+    55
    ],
    "appMs": [
+    47,
     51,
-    57,
-    85,
-    95,
-    63,
-    51,
-    95,
-    51,
-    51,
-    99,
-    87,
-    79,
-    77,
-    99,
-    67,
-    87,
-    82,
-    67,
+    83,
+    93,
+    64,
+    56,
+    88,
+    55,
+    52,
+    100,
+    81,
+    84,
     75,
-    51
+    100,
+    69,
+    84,
+    76,
+    68,
+    79,
+    56
    ],
    "exposed": [
     {
@@ -1735,7 +1735,7 @@
      ],
      "checked": 0,
      "reloaded": false,
-     "ms": 44
+     "ms": 38
     },
     {
      "n": 1,
@@ -1750,7 +1750,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 47
+     "ms": 45
     },
     {
      "n": 2,
@@ -1765,7 +1765,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 71
+     "ms": 66
     },
     {
      "n": 3,
@@ -1780,7 +1780,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 75
+     "ms": 87
     },
     {
      "n": 4,
@@ -1795,7 +1795,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 58
+     "ms": 53
     },
     {
      "n": 5,
@@ -1810,7 +1810,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 42
+     "ms": 53
     },
     {
      "n": 6,
@@ -1840,7 +1840,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 33
+     "ms": 53
     },
     {
      "n": 8,
@@ -1855,7 +1855,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 45
+     "ms": 43
     },
     {
      "n": 9,
@@ -1870,7 +1870,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 91
+     "ms": 99
     },
     {
      "n": 10,
@@ -1885,7 +1885,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 70
+     "ms": 71
     },
     {
      "n": 11,
@@ -1900,7 +1900,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 59
+     "ms": 82
     },
     {
      "n": 12,
@@ -1915,7 +1915,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 70
+     "ms": 68
     },
     {
      "n": 13,
@@ -1930,7 +1930,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 86
+     "ms": 99
     },
     {
      "n": 14,
@@ -1945,7 +1945,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 53
+     "ms": 55
     },
     {
      "n": 15,
@@ -1960,7 +1960,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 84
+     "ms": 77
     },
     {
      "n": 16,
@@ -1975,7 +1975,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 71
+     "ms": 75
     },
     {
      "n": 17,
@@ -1990,7 +1990,7 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 53
+     "ms": 56
     },
     {
      "n": 18,
@@ -2020,26 +2020,26 @@
      ],
      "checked": 6,
      "reloaded": false,
-     "ms": 44
+     "ms": 55
     }
    ],
    "reloads": 0,
    "log": {
     "videoLines": [
-     "first-frame 67ms buffered",
-     "video: swipe→ready 0ms, →playing 67ms, net 4g, warming",
-     "video: preload test0000042:100 canplay after 946 ms",
+     "first-frame 68ms buffered",
+     "video: swipe→ready 0ms, →playing 68ms, net 4g, warming",
+     "video: preload test0000042:100 canplay after 944 ms",
      "video: warm start slot2 test0000042:100 st=2",
-     "video: cover on test0000029:100 1555 ms",
-     "first-frame 75ms buffered",
-     "video: swipe→ready 0ms, →playing 75ms, net 4g, warming",
-     "video: preload test0000016:100 canplay after 1014 ms",
+     "video: cover on test0000029:100 1562 ms",
+     "first-frame 79ms buffered",
+     "video: swipe→ready 0ms, →playing 79ms, net 4g, warming",
+     "video: preload test0000016:100 canplay after 1019 ms",
      "video: warm start slot0 test0000016:100 st=2",
-     "video: cover on test0000042:100 1563 ms",
-     "first-frame 51ms buffered",
-     "video: swipe→ready 0ms, →playing 51ms, net 4g, warming",
-     "video: median 75ms, p90 95ms over last 20 swipes",
-     "video: preload test0000038:100 canplay after 921 ms"
+     "video: cover on test0000042:100 1561 ms",
+     "first-frame 56ms buffered",
+     "video: swipe→ready 0ms, →playing 56ms, net 4g, warming",
+     "video: median 75ms, p90 93ms over last 20 swipes",
+     "video: preload test0000038:100 canplay after 914 ms"
     ]
    },
    "firstLoads": [
@@ -2075,26 +2075,26 @@
    ],
    "video": {
     "frames": [
+     47,
      51,
-     57,
-     85,
-     95,
-     63,
-     51,
-     95,
-     51,
-     51,
-     99,
-     87,
-     79,
-     77,
-     99,
-     67,
-     87,
-     82,
-     67,
+     83,
+     93,
+     64,
+     56,
+     88,
+     55,
+     52,
+     100,
+     81,
+     84,
      75,
-     51
+     100,
+     69,
+     84,
+     76,
+     68,
+     79,
+     56
     ],
     "gate": true,
     "slots": [
@@ -2126,11 +2126,11 @@
     "buffered": 19,
     "medianBuffered": 76
    },
-   "median": 59,
-   "p90": 84,
+   "median": 66,
+   "p90": 87,
    "n": 20,
    "appMedian": 75,
-   "appP90": 95,
+   "appP90": 93,
    "exposedSwipes": 0,
    "probesChecked": 114,
    "iframePaused": {
@@ -2185,7 +2185,7 @@
     "visited": 20,
     "hungVisited": 9,
     "played1s": 12,
-    "watchdogAfterMs": 24862
+    "watchdogAfterMs": 24908
    },
    "errors": []
   },
@@ -2247,8 +2247,8 @@
    },
    "diagTail": [
     "skipped (not seen) test0000003:100",
-    "first-frame 917ms cold",
-    "first-frame 85ms cold",
+    "first-frame 919ms cold",
+    "first-frame 79ms cold",
     "video: slow net, showing still test0000040:100, net 3g, bytes arriving"
    ],
    "errors": []
@@ -2316,15 +2316,15 @@
    "diagTail": [
     "skipped (not seen) test0000003:100",
     "video: preload gate open (first playing), 2 waiting",
-    "first-frame 933ms cold",
+    "first-frame 913ms cold",
     "video: preload test0000059:100 canplay after 964 ms",
-    "first-frame 86ms buffered",
+    "first-frame 85ms buffered",
     "video: preload test0000017:100 canplay after 908 ms",
     "video: slow net, showing still test0000040:100, net 3g, bytes arriving",
     "video: next ready test0000017:100 while test0000040:100 loads",
     "video: tap on next ready, leaving test0000040:100",
     "skipped (not seen) test0000040:100",
-    "first-frame 50ms buffered"
+    "first-frame 53ms buffered"
    ],
    "errors": []
   },
@@ -2507,12 +2507,12 @@
      "slot0 test0000025:100 state 1",
      "yt: playing after gesture test0000025:100 741 ms",
      "slot0 test0000025:100 state 2",
-     "yt: self-pause test0000025:100 after 1501 ms (started in gesture)",
+     "yt: self-pause test0000025:100 after 1502 ms (started in gesture)",
      "yt: resume after self-pause test0000025:100",
      "yt: tap to play test0000025:100",
      "yt: play in gesture test0000025:100 (tap)",
      "slot0 test0000025:100 state 1",
-     "yt: playing after gesture test0000025:100 66 ms"
+     "yt: playing after gesture test0000025:100 65 ms"
     ]
    },
    "startHang": {
@@ -2520,9 +2520,9 @@
     "cuedBefore": 5,
     "moved": true,
     "retried": true,
-    "retryAfterMs": 3162,
+    "retryAfterMs": 3161,
     "tapShown": true,
-    "tapAfterMs": 6161,
+    "tapAfterMs": 6160,
     "atTap": {
      "paused": false,
      "held": false,
@@ -2560,7 +2560,7 @@
      "yt: tap to play test0000056:100",
      "yt: play in gesture test0000056:100 (tap)",
      "slot1 test0000056:100 state 1",
-     "yt: playing after gesture test0000056:100 1136 ms"
+     "yt: playing after gesture test0000056:100 1137 ms"
     ]
    },
    "diagTail": [
@@ -2568,34 +2568,34 @@
     "slot0 test0000000:100 state 2",
     "yt: play in gesture test0000004:100",
     "yt: warm cue slot0 test0000013:100",
-    "yt: playing after gesture test0000004:100 990 ms",
+    "yt: playing after gesture test0000004:100 994 ms",
     "slot1 test0000004:100 state 2",
     "yt: play in gesture test0000026:100",
     "yt: warm cue slot1 test0000032:100",
-    "yt: playing after gesture test0000026:100 642 ms",
+    "yt: playing after gesture test0000026:100 650 ms",
     "slot2 test0000026:100 state 2",
     "yt: play in gesture test0000013:100",
     "yt: warm cue slot2 test0000009:100",
-    "yt: playing after gesture test0000013:100 1131 ms",
+    "yt: playing after gesture test0000013:100 1134 ms",
     "slot0 test0000013:100 state 2",
     "yt: play in gesture test0000032:100",
     "yt: warm cue slot0 test0000025:100",
-    "yt: playing after gesture test0000032:100 908 ms",
+    "yt: playing after gesture test0000032:100 910 ms",
     "slot1 test0000032:100 state 2",
     "yt: play in gesture test0000009:100",
     "yt: warm cue slot1 test0000056:100",
-    "yt: playing after gesture test0000009:100 630 ms",
+    "yt: playing after gesture test0000009:100 631 ms",
     "slot2 test0000009:100 state 2",
     "slot2 test0000009:100 state 2",
     "yt: play in gesture test0000025:100",
     "yt: warm cue slot2 test0000042:100",
     "yt: playing after gesture test0000025:100 741 ms",
     "slot0 test0000025:100 state 2",
-    "yt: self-pause test0000025:100 after 1501 ms (started in gesture)",
+    "yt: self-pause test0000025:100 after 1502 ms (started in gesture)",
     "yt: resume after self-pause test0000025:100",
     "yt: tap to play test0000025:100",
     "yt: play in gesture test0000025:100 (tap)",
-    "yt: playing after gesture test0000025:100 66 ms",
+    "yt: playing after gesture test0000025:100 65 ms",
     "slot0 test0000025:100 state 2",
     "yt: play in gesture test0000056:100",
     "yt: warm cue slot0 test0000049:100",
@@ -2603,7 +2603,7 @@
     "yt: no start test0000056:100 st=-1 after 6001 ms",
     "yt: tap to play test0000056:100",
     "yt: play in gesture test0000056:100 (tap)",
-    "yt: playing after gesture test0000056:100 1136 ms"
+    "yt: playing after gesture test0000056:100 1137 ms"
    ],
    "errors": []
   }
