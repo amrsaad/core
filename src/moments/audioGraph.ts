@@ -48,27 +48,6 @@ export function breakLevel(reason: string): void {
 }
 
 export const audioRunning = (): boolean => !!ctx && ctx.state === 'running';
-/**
- * Der Kontext wurde in einer Geste angelegt, resume() ist aber noch nicht zurück (Zustand suspended). Gibt dann ein Versprechen zurück, das sich
- * löst, sobald er läuft (true) oder nach maxMs (false). Läuft er schon oder gibt es keinen, null. Runde 9: ein Audio-Moment startet ohne Wartezeit auf
- * den IFrame, im selben Zug wie die Geste, und wählte seine Spur vor dem ersten Lauf des Kontexts (ungeregelt, später nie nachgeholt).
- */
-export function contextSettling(maxMs: number): Promise<boolean> | null {
-  if (!ctx || ctx.state === 'running' || ctx.state === 'closed') return null;
-  return new Promise<boolean>((resolve) => {
-    let t = 0;
-    const done = (ok: boolean) => {
-      window.clearTimeout(t);
-      stateListeners.delete(on);
-      resolve(ok);
-    };
-    const on = (s: AudioContextState | 'interrupted') => {
-      if (s === 'running') done(true);
-    };
-    stateListeners.add(on);
-    t = window.setTimeout(() => done(false), maxMs);
-  });
-}
 /** Zustand des Kontexts für Diagnose: none (noch nicht angelegt), running, suspended oder interrupted (iOS) */
 export const contextState = (): string => (ctx ? ctx.state : 'none');
 /** Nur für Tests: der Kontext, um ihn anzuhalten */

@@ -157,8 +157,6 @@ export interface DeckDeps {
   host?: (url: string, state: 'ok' | 'bad') => void;
   /** Läuft Web Audio gerade? */
   running?: () => boolean;
-  /** Ist der Kontext angelegt, läuft aber noch nicht (resume() steht aus), und würde der Ausschnitt dann geregelt laufen: Versprechen, das sich beim Lauf löst (true) oder nach Frist (false). Sonst null. */
-  settle?: (clip: DeckClip, forcePlain: boolean) => Promise<boolean> | null;
   /** Web Audio versagt in dieser Sitzung */
   broken?: (why: string) => void;
   /** Steht die Seite im Hintergrund (Standard: visibilityState hidden) */
@@ -524,13 +522,9 @@ export class AudioDeck {
         this.want = play;
         return;
       }
-      const idle = !this.clip || this.done;
-      // Runde 9: der Start kommt ohne Wartezeit auf den IFrame, also noch vor dem Lauf des Kontexts aus der Geste. Die Spur wird erst danach gewählt.
-      const ctxWait = idle ? this.deps.settle?.(clip, forcePlain) ?? null : null;
-      const store = !this.deps.local(clip.key) && idle ? this.pending?.(clip.id, clip.key) ?? null : null;
-      if (ctxWait || store) {
-        const wait = ctxWait && store ? Promise.all([ctxWait, store]).then((r) => r[1]) : (store ?? ctxWait)!;
-        this.hold(clip, play, forcePlain, from, forceWhy, wait, ctxWait ? (store ? 'audio context and storage' : 'audio context') : 'storage');
+      const wait = !this.deps.local(clip.key) && (!this.clip || this.done) ? this.pending?.(clip.id, clip.key) : null;
+      if (wait) {
+        this.hold(clip, play, forcePlain, from, forceWhy, wait);
         return;
       }
     }
@@ -604,7 +598,7 @@ export class AudioDeck {
     if (play) this.kick('start');
   }
 
-  private hold(clip: DeckClip, play: boolean, forcePlain: boolean, from: number, forceWhy: string | undefined, wait: Promise<boolean>, what = 'storage') {
+  private hold(clip: DeckClip, play: boolean, forcePlain: boolean, from: number, forceWhy: string | undefined, wait: Promise<boolean>) {
     const token = ++this.holdToken;
     this.holding = clip;
     this.clip = clip;
@@ -612,12 +606,12 @@ export class AudioDeck {
     this.want = play;
     this.live = false;
     this.played = false;
-    this.diag(`deck: hold ${clip.id} for ${what}`);
+    this.diag(`deck: hold ${clip.id} for storage`);
     const t0 = Date.now();
     const timeout = new Promise<boolean>((r) => setTimeout(() => r(false), HOLD_MS));
     void Promise.race([wait, timeout]).then((ok) => {
       if (token !== this.holdToken || this.holding !== clip) return;
-      this.diag(`deck: hold ${clip.id} ${ok ? `released, ${what} ready` : what === 'audio context' ? 'timeout, unchanged' : 'timeout, from net'} after ${Date.now() - t0} ms`);
+      this.diag(`deck: hold ${clip.id} ${ok ? 'released, storage ready' : 'timeout, from net'} after ${Date.now() - t0} ms`);
       this.start(clip, this.want, forcePlain, from, forceWhy, true);
     });
   }
