@@ -464,12 +464,22 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   }
 
   // Nur echte YouTube-IDs an den IFrame-Player. Text- und Podcast-IDs ohne Stream werfen sonst "Invalid video id".
+  /** Der YouTube-IFrame hat onReady gemeldet (erst dann hat er Methoden). Ein Laden, das davor kam, wartet in ytLater. */
+  let ytReady = false;
+  let ytLater: (() => void) | null = null;
+  const fireReady = () => {
+    if (!readyFired) {
+      readyFired = true;
+      events.onReady?.();
+    }
+  };
   const yt = ytPlayer(YT, el, mode === 'yt' && isYtId(videoId) ? videoId : undefined, {
     onReady: () => {
-      if (!readyFired) {
-        readyFired = true;
-        events.onReady?.();
-      }
+      ytReady = true;
+      const later = ytLater;
+      ytLater = null;
+      fireReady();
+      later?.();
     },
     onState: (st) => {
       if (mode === 'yt') events.onState?.(st);
@@ -500,6 +510,9 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       if (mode === 'yt') events.onError?.(code);
     },
   });
+  // Ein Audio-Moment läuft im Audio-Deck und braucht den IFrame nicht. Wird die App während des Starts verdeckt, kommt sein onReady oft nie
+  // (iOS lädt den IFrame nicht): der Slot bliebe ohne Start und ohne Zeile in der Diag. Darum gilt der Player sofort als bereit.
+  if (mode === 'hls' && AUDIO_ONLY.has(videoId)) setTimeout(fireReady, 0);
   const iframe = () => host.querySelector('iframe') as HTMLElement | null;
   const show = (m: 'yt' | 'hls') => {
     mode = m;
@@ -733,6 +746,11 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       try { yt.pauseVideo(); } catch { /* noch nicht bereit */ }
       show('yt');
     } else {
+      // Ein Slot, der früher als Audio-Slot bereit gemeldet hat, bekommt den YouTube-Moment erst, wenn der IFrame Methoden hat
+      if (!ytReady) {
+        ytLater = () => route(arg, play);
+        return;
+      }
       wantPlay = false;
       for (const e of all) releaseEl(e);
       leaveDeck();
@@ -816,14 +834,14 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       for (const e of all) if (!e.muted) e.muted = true;
       wantMuted = true;
       audioDeck.setMuted(sink, true);
-      yt.mute();
+      try { yt.mute(); } catch { /* IFrame noch nicht bereit */ }
       soundChanged();
     },
     unMute: () => {
       for (const e of all) if (e.muted) e.muted = false;
       wantMuted = false;
       audioDeck.setMuted(sink, false);
-      yt.unMute();
+      try { yt.unMute(); } catch { /* IFrame noch nicht bereit */ }
       soundChanged();
     },
     sound: () => {
@@ -927,7 +945,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
         e.load();
         e.remove();
       }
-      yt.destroy();
+      try { yt.destroy(); } catch { /* IFrame noch nicht bereit */ }
     },
   };
 }
