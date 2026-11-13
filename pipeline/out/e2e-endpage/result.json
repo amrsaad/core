@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-13T11:28:01.069Z",
+  "at": "2026-11-13T12:26:20.756Z",
   "runs": [
     {
       "variant": "webkit",
@@ -48,7 +48,7 @@
         "b24ExpiredStartLine": true,
         "b24NoPageErrors": true,
         "b57FeedLoaded": true,
-        "b57NotCountedLine": false,
+        "b57NotCountedLine": true,
         "b57NoBlockLine": true
       },
       "shown": [
@@ -133,7 +133,7 @@
         "b24ExpiredStartLine": true,
         "b24NoPageErrors": true,
         "b57FeedLoaded": true,
-        "b57NotCountedLine": false,
+        "b57NotCountedLine": true,
         "b57NoBlockLine": true
       },
       "shown": [
