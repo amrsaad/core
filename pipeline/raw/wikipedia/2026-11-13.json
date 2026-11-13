@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-13",
+ "records": [
+  {
+   "sourceId": "wiki:de:Völkerschau der „Amazonen von Dahomey“ 1888–1903",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/V%C3%B6lkerschau_der_%E2%80%9EAmazonen_von_Dahomey%E2%80%9C_1888%E2%80%931903",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/13",
+    "status": 200
+   },
+   "title": "Völkerschau der „Amazonen von Dahomey“ 1888–1903",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Völkerschau der „Amazonen von Dahomey“ 1888–1903 war eine 15 Jahre andauernde Völkerschau-Tournee, bei der zwischen 1888 und 1903 eine Gruppe von wechselnd 20 bis 80 meist aus der damaligen deutschen Kolonie Togo stammenden Personen in über siebzig europäische Städten zur Schau gestellt wurde. Die Völkerschau wurde von einer Reihe verschiedener Impresarios durchgeführt. Im Jahr 1893 fanden drei zusätzliche und parallel stattfindende Dahomey-Völkerschauen in Paris, London und Chicago mit insgesamt über 300 zur Schau gestellten Menschen statt."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-13T04:21:42.154Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/V%C3%B6lkerschau_der_%E2%80%9EAmazonen_von_Dahomey%E2%80%9C_1888%E2%80%931903": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Entstalinisierung",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Entstalinisierung",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/13",
+    "status": 200
+   },
+   "title": "Entstalinisierung",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Entstalinisierung war eine Reihe von politischen, wirtschaftlichen und gesellschaftlichen Reformen seitens der Staats- und Parteiführung der Sowjetunion, die sich gegen den bisherigen Stalinismus richteten. Dabei sollte der Personenkult um den 1953 verstorbenen Josef Stalin beendet, die staatlich ausgeübte Gewalt eingeschränkt, die Konsumwirtschaft gefördert und Raum für Ambivalenzen in Partei und Kultur geschaffen werden. Nach zögerlichen Anfängen wurde die Entstalinisierung mit Chruschtschows Rede auf dem XX. Parteitag der KPdSU 1956 offizielle Parteilinie. In anderen Ländern des Ostblocks wurde sie mit unterschiedlicher Intensität nachvollzogen."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-13T04:21:42.154Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Entstalinisierung": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Interparlamentarische Union",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Interparlamentarische_Union",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/13",
+    "status": 200
+   },
+   "title": "Interparlamentarische Union",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Interparlamentarische Union ist eine 1889 gegründete internationale Vereinigung von Parlamenten, mit dem Ziel der Sicherung des Friedens, der Förderung des Demokratieverständnisses in allen Teilen der Welt und der Wahrung der Menschenrechte. Sie wurde von William Randal Cremer aus Großbritannien und Frédéric Passy aus Frankreich ins Leben gerufen. Im Jahr 2023 hat die IPU 180 Mitgliedsstaaten und 15 assoziierte Mitglieder. Der Sitz des Sekretariats ist seit 1921 in Genf. Finanziert wird die Union ausschließlich durch die Beiträge der Mitgliedsparlamente."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-13T04:21:42.154Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Interparlamentarische_Union": 200
+   }
+  }
+ ]
+}
