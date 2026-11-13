@@ -1,5 +1,5 @@
 {
- "at": "2026-11-13T06:22:24.165Z",
+ "at": "2026-11-13T09:55:38.847Z",
  "runs": [
   {
    "browser": "webkit",
@@ -87,7 +87,7 @@
     "openCardBackOnReturn": true
    },
    "notes": {
-    "iosTapMs": 4,
+    "iosTapMs": 3,
     "iosGestureLines": [
      "deck: gesture pointerdown unlocked 6/6"
     ],
@@ -102,9 +102,9 @@
       "atrdy9",
       "atrdy2"
      ],
-     "n": 33
+     "n": 35
     },
-    "rfSwipeMs": 428,
+    "rfSwipeMs": 505,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -147,76 +147,76 @@
     "tempoPaused": 10,
     "cue": {
      "worst": 0,
-     "n": 623,
+     "n": 622,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.34",
+       "3.37",
        34,
        34
       ],
       [
-       "4.63",
+       "4.66",
        47,
        47
       ],
       [
-       "5.91",
+       "5.94",
        60,
        60
       ],
       [
-       "7.20",
-       72,
-       72
+       "7.23",
+       73,
+       73
       ],
       [
-       "8.48",
-       85,
-       85
+       "8.52",
+       86,
+       86
       ],
       [
-       "9.77",
-       98,
-       98
+       "9.80",
+       99,
+       99
       ],
       [
-       "11.06",
+       "11.09",
        111,
        111
       ],
       [
-       "12.35",
+       "12.38",
        124,
        124
       ],
       [
-       "13.63",
+       "13.66",
        137,
        137
       ],
       [
-       "14.92",
+       "14.95",
        150,
        150
       ],
       [
-       "16.21",
+       "16.24",
        163,
        163
       ],
       [
-       "17.50",
-       175,
-       175
+       "17.52",
+       176,
+       176
       ]
      ],
      "rate": 2
     },
     "cueTempo": {
-     "worst": 0,
-     "n": 534,
+     "worst": 1,
+     "n": 544,
      "rates": [
       1,
       1.5,
@@ -228,7 +228,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805091
+       "dueAt": 1792756805082
       }
      ],
      "idx": 6,
@@ -357,7 +357,7 @@
     "openCardBackOnReturn": true
    },
    "notes": {
-    "iosTapMs": 10,
+    "iosTapMs": 2,
     "iosGestureLines": [
      "deck: gesture pointerdown unlocked 6/6"
     ],
@@ -372,9 +372,9 @@
       "atrdy9",
       "atrdy2"
      ],
-     "n": 33
+     "n": 35
     },
-    "rfSwipeMs": 509,
+    "rfSwipeMs": 502,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -422,62 +422,62 @@
      "shownNow": 0,
      "gaps": [
       [
-       "3.38",
-       34,
-       34
+       "3.41",
+       35,
+       35
       ],
       [
-       "4.71",
+       "4.75",
        48,
        48
       ],
       [
-       "6.05",
+       "6.08",
        61,
        61
       ],
       [
-       "7.38",
-       74,
-       74
+       "7.41",
+       75,
+       75
       ],
       [
-       "8.71",
+       "8.75",
        88,
        88
       ],
       [
-       "10.05",
+       "10.08",
        101,
        101
       ],
       [
-       "11.38",
-       114,
-       114
+       "11.41",
+       115,
+       115
       ],
       [
-       "12.71",
+       "12.74",
        128,
        128
       ],
       [
-       "14.05",
+       "14.08",
        141,
        141
       ],
       [
-       "15.38",
-       154,
-       154
+       "15.41",
+       155,
+       155
       ],
       [
-       "16.71",
+       "16.74",
        168,
        168
       ],
       [
-       "18.04",
+       "18.08",
        181,
        181
       ]
@@ -498,7 +498,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804931
+       "dueAt": 1792756804925
       }
      ],
      "idx": 6,
@@ -585,7 +585,7 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "firstSoundMs": 2785,
+    "firstSoundMs": 2810,
     "diag": [
      "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
      "deck: src net pod-0006",

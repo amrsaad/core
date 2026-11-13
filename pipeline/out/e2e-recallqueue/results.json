@@ -1,5 +1,5 @@
 {
- "at": "2026-11-13T06:21:43.854Z",
+ "at": "2026-11-13T09:54:58.113Z",
  "runs": [
   {
    "browser": "webkit",
@@ -24,7 +24,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402731
+      "dueAt": 1792670402795
      }
     ]
    }
@@ -52,7 +52,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402414
+      "dueAt": 1792670402433
      }
     ]
    }
@@ -80,7 +80,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402336
+      "dueAt": 1792670402350
      }
     ]
    }
@@ -108,7 +108,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402348
+      "dueAt": 1792670402355
      }
     ]
    }
@@ -116,6 +116,34 @@
   {
    "browser": "chromium",
    "scenario": "settings",
+   "checks": {
+    "feedUp": true,
+    "threeSeenNoCard": true,
+    "noCardWhileAway": true,
+    "queuedOne": true,
+    "diagQueued": true,
+    "soundAndFeedContinue": true,
+    "cardOnReturn": true,
+    "cardBeforeNextSwipe": true,
+    "cardIsTheQueuedMoment": true,
+    "queueEmptyAfterShow": true,
+    "diagShown": true,
+    "noSecondCard": true,
+    "noErrors": true
+   },
+   "notes": {
+    "queued": [
+     {
+      "id": "rq000000005:100",
+      "review": false,
+      "dueAt": 1792670402329
+     }
+    ]
+   }
+  },
+  {
+   "browser": "chromium",
+   "scenario": "saved",
    "checks": {
     "feedUp": true,
     "threeSeenNoCard": true,
@@ -143,34 +171,6 @@
   },
   {
    "browser": "chromium",
-   "scenario": "saved",
-   "checks": {
-    "feedUp": true,
-    "threeSeenNoCard": true,
-    "noCardWhileAway": true,
-    "queuedOne": true,
-    "diagQueued": true,
-    "soundAndFeedContinue": true,
-    "cardOnReturn": true,
-    "cardBeforeNextSwipe": true,
-    "cardIsTheQueuedMoment": true,
-    "queueEmptyAfterShow": true,
-    "diagShown": true,
-    "noSecondCard": true,
-    "noErrors": true
-   },
-   "notes": {
-    "queued": [
-     {
-      "id": "rq000000005:100",
-      "review": false,
-      "dueAt": 1792670402296
-     }
-    ]
-   }
-  },
-  {
-   "browser": "chromium",
    "scenario": "note",
    "checks": {
     "feedUp": true,
@@ -192,7 +192,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402238
+      "dueAt": 1792670402248
      }
     ]
    }
@@ -220,7 +220,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402240
+      "dueAt": 1792670402230
      }
     ]
    }
