@@ -121,6 +121,66 @@
    "urlChecks": {
     "https://quran.com/3/11": 200
    }
+  },
+  {
+   "sourceId": "quran:3:12",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/3/12",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/3:12?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Ali 'Imran 3:12",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "قُل لِّلَّذِينَ كَفَرُوا۟ سَتُغْلَبُونَ وَتُحْشَرُونَ إِلَىٰ جَهَنَّمَ ۚ وَبِئْسَ ٱلْمِهَادُ",
+    "translation": "Sag zu denjenigen, die ungläubig sind: Ihr werdet besiegt und zur Hölle zusammengetrieben werden - eine schlimme Lagerstatt!",
+    "tafsir_muyassar": "قل -أيها الرسول-، للذين كفروا من اليهود وغيرهم والذين استهانوا بنصرك في <span class=\"brown\">«بَدْر»</span> : إنكم ستُهْزَمون في الدنيا وستموتون على الكفر، وتحشرون إلى نار جهنم; لتكون فراشًا دائمًا لكم، وبئس الفراش.",
+    "tafsir_ibnkathir": "<h2>Threatening the Jews With Defeat and Encouraging Them to Learn a Lesson From the Battle of Badr</h2><p>Allah commanded the Prophet Muhammad ﷺ to proclaim to the disbelievers,</p><p>سَتُغْلَبُونَ</p><p>(You will be defeated) in this life,</p><p>وَتُحْشَرُونَ</p><p>(And gathered together) on the Day of Resurrection,</p><p>إِلَى جَهَنَّمَ وَبِئْسَ الْمِهَادُ</p><p>(to Hell, and worst indeed is that place of rest)</p><p>Muhammad bin Ishaq bin Yasar recorded that `Asim bin `Umar bin Qatadah said that when the Messenger of Allah ﷺ gained victory in the battle of Badr and went back to Al-Madinah, he gathered the Jews in the marketplace of Bani Qaynuqa`.</p><p>Therefore, Allah said,</p><p>قَدْ كَانَ لَكُمْ ءَايَةٌ</p><p>(There has already been a sign for you) meaning, O Jews, who said what you said! You have an Ayah, meaning proof, that Allah will make His religion prevail, award victory to His Messenger, make His Word apparent and His religion the highest.</p><p>فِي فِئَتَيْنِ</p><p>(In the two armies) meaning, two camps,</p><p>الْتَقَتَا</p><p>(that met) in combat (in Badr),</p><p>فِئَةٌ تُقَـتِلُ فِى سَبِيلِ اللَّهِ</p><p>(One was fighting in the Cause of Allah) the Muslims,</p><p>وَأُخْرَى كَافِرَةٌ</p><p>(And as for the other, in disbelief) meaning, the idolators of Quraysh at Badr. Allah's statement,</p><p>يَرَوْنَهُمْ مِّثْلَيْهِمْ رَأْىَ الْعَيْنِ</p><p>(They saw them with their own eyes twice their number) means, the idolators thought that the Muslims were twice as many as they were, for Allah made this illusion a factor in the victory that Islam had over them.</p><p>It was said that the meaning of Allah's statement,</p><p>يَرَوْنَهُمْ مِّثْلَيْهِمْ رَأْىَ الْعَيْنِ</p><p>(They saw them with their own eyes twice their number) is that the Muslims saw twice as many idolators as they were, yet Allah gave them victory over the disbelievers. `Abdullah bin Mas`ud said, \"When we looked at the disbelievers' forces, we found that they were twice as many as we were. When we looked at them again, we thought they did not have one man more than we had. So Allah's statement,</p><p>وَإِذْ يُرِيكُمُوهُمْ إِذِ الْتَقَيْتُمْ فِى أَعْيُنِكُمْ قَلِيلاً وَيُقَلِّلُكُمْ فِى أَعْيُنِهِمْ</p><p>(And (remember) when you met, He showed them to you as few in your eyes and He made you appear as few in their eyes.) 8:44\".</p><p>When the two camps saw each other, the Muslims thought that the idolators were twice as many as they were, so that they would trust in Allah and seek His help. The idolators thought that the believers were twice as many as they were, so that they would feel fear, horror, fright and despair. When the two camps stood in lines and met in battle, Allah made each camp look smaller in the eyes of the other camp, so that they would be encouraged to fight each other,</p><p>لِّيَقْضِيَ اللَّهُ أَمْراً كَانَ مَفْعُولاً</p><p>(so that Allah might accomplish a matter already ordained.) 8:42 meaning, so that the truth and falsehood are distinguishable, and thus the word of faith prevails over disbelief and deviation, so that the believers prevail and the disbelievers are humiliated. In a similar statement, Allah said;</p><p>وَلَقَدْ نَصَرَكُمُ اللَّهُ بِبَدْرٍ وَأَنتُمْ أَذِلَّةٌ</p><p>(And Allah has already made you victorious at Badr, when you were a weak little force) 3:123. In this Ayah 3:13 Allah said,</p><p>وَاللَّهُ يُؤَيِّدُ بِنَصْرِهِ مَن يَشَآءُ إِنَّ فِى ذَلِكَ لَعِبْرَةً لاوْلِى الاٌّبْصَـرِ</p><p>(And Allah supports with His victory whom He wills. Verily, in this is a lesson for those who understand.) meaning, this should be an example for those who have intelligence and sound comprehension. They should contemplate about Allah's wisdom, decisions and decree, that He gives victory to His believing servants in this life and on the Day the witnesses stand up to testify.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Ali 'Imran",
+    "surahNameDe": "Family of Imran",
+    "key": "3:12"
+   },
+   "fetchedAt": "2026-11-13T06:20:06.900Z",
+   "urlChecks": {
+    "https://quran.com/3/12": 200
+   }
+  },
+  {
+   "sourceId": "quran:3:13",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/3/13",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/3:13?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Ali 'Imran 3:13",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "قَدْ كَانَ لَكُمْ ءَايَةٌ فِى فِئَتَيْنِ ٱلْتَقَتَا ۖ فِئَةٌ تُقَـٰتِلُ فِى سَبِيلِ ٱللَّهِ وَأُخْرَىٰ كَافِرَةٌ يَرَوْنَهُم مِّثْلَيْهِمْ رَأْىَ ٱلْعَيْنِ ۚ وَٱللَّهُ يُؤَيِّدُ بِنَصْرِهِۦ مَن يَشَآءُ ۗ إِنَّ فِى ذَٰلِكَ لَعِبْرَةً لِّأُو۟لِى ٱلْأَبْصَـٰرِ",
+    "translation": "Ihr hattet ja ein Zeichen in zwei Scharen, die aufeinandertrafen: Die eine kämpfte auf Allahs Weg und eine andere, ungläubige. Sie sahen sie dem Augenschein nach zweimal so viel, wie sie (selbst waren). Und Allah stärkt mit Seiner Hilfe, wen Er will. Darin ist wahrlich eine Lehre für diejenigen, die Einsicht besitzen.",
+    "tafsir_muyassar": "قد كان لكم -أيها اليهود المتكبرون المعاندون- دلالة عظيمة في جماعتين تقابلتا في معركة <span class=\"brown\">«بَدْر»</span> : جماعة تقاتل من أجل دين الله، وهم محمد صلى الله عليه وسلم وأصحابه، وجماعة أخرى كافرة بالله، تقاتل من أجل الباطل، ترى المؤمنين في العدد مثليهم رأي العين، وقد جعل الله ذلك سببًا لنصر المسلمين عليهم. والله يؤيِّد بنصره من يشاء من عباده. إن في هذا الذي حدث لَعِظة عظيمة لأصحاب البصائر الذين يهتدون إلى حكم الله وأفعاله.",
+    "tafsir_ibnkathir": "<h2>Threatening the Jews With Defeat and Encouraging Them to Learn a Lesson From the Battle of Badr</h2><p>Allah commanded the Prophet Muhammad ﷺ to proclaim to the disbelievers,</p><p>سَتُغْلَبُونَ</p><p>(You will be defeated) in this life,</p><p>وَتُحْشَرُونَ</p><p>(And gathered together) on the Day of Resurrection,</p><p>إِلَى جَهَنَّمَ وَبِئْسَ الْمِهَادُ</p><p>(to Hell, and worst indeed is that place of rest)</p><p>Muhammad bin Ishaq bin Yasar recorded that `Asim bin `Umar bin Qatadah said that when the Messenger of Allah ﷺ gained victory in the battle of Badr and went back to Al-Madinah, he gathered the Jews in the marketplace of Bani Qaynuqa`.</p><p>Therefore, Allah said,</p><p>قَدْ كَانَ لَكُمْ ءَايَةٌ</p><p>(There has already been a sign for you) meaning, O Jews, who said what you said! You have an Ayah, meaning proof, that Allah will make His religion prevail, award victory to His Messenger, make His Word apparent and His religion the highest.</p><p>فِي فِئَتَيْنِ</p><p>(In the two armies) meaning, two camps,</p><p>الْتَقَتَا</p><p>(that met) in combat (in Badr),</p><p>فِئَةٌ تُقَـتِلُ فِى سَبِيلِ اللَّهِ</p><p>(One was fighting in the Cause of Allah) the Muslims,</p><p>وَأُخْرَى كَافِرَةٌ</p><p>(And as for the other, in disbelief) meaning, the idolators of Quraysh at Badr. Allah's statement,</p><p>يَرَوْنَهُمْ مِّثْلَيْهِمْ رَأْىَ الْعَيْنِ</p><p>(They saw them with their own eyes twice their number) means, the idolators thought that the Muslims were twice as many as they were, for Allah made this illusion a factor in the victory that Islam had over them.</p><p>It was said that the meaning of Allah's statement,</p><p>يَرَوْنَهُمْ مِّثْلَيْهِمْ رَأْىَ الْعَيْنِ</p><p>(They saw them with their own eyes twice their number) is that the Muslims saw twice as many idolators as they were, yet Allah gave them victory over the disbelievers. `Abdullah bin Mas`ud said, \"When we looked at the disbelievers' forces, we found that they were twice as many as we were. When we looked at them again, we thought they did not have one man more than we had. So Allah's statement,</p><p>وَإِذْ يُرِيكُمُوهُمْ إِذِ الْتَقَيْتُمْ فِى أَعْيُنِكُمْ قَلِيلاً وَيُقَلِّلُكُمْ فِى أَعْيُنِهِمْ</p><p>(And (remember) when you met, He showed them to you as few in your eyes and He made you appear as few in their eyes.) 8:44\".</p><p>When the two camps saw each other, the Muslims thought that the idolators were twice as many as they were, so that they would trust in Allah and seek His help. The idolators thought that the believers were twice as many as they were, so that they would feel fear, horror, fright and despair. When the two camps stood in lines and met in battle, Allah made each camp look smaller in the eyes of the other camp, so that they would be encouraged to fight each other,</p><p>لِّيَقْضِيَ اللَّهُ أَمْراً كَانَ مَفْعُولاً</p><p>(so that Allah might accomplish a matter already ordained.) 8:42 meaning, so that the truth and falsehood are distinguishable, and thus the word of faith prevails over disbelief and deviation, so that the believers prevail and the disbelievers are humiliated. In a similar statement, Allah said;</p><p>وَلَقَدْ نَصَرَكُمُ اللَّهُ بِبَدْرٍ وَأَنتُمْ أَذِلَّةٌ</p><p>(And Allah has already made you victorious at Badr, when you were a weak little force) 3:123. In this Ayah 3:13 Allah said,</p><p>وَاللَّهُ يُؤَيِّدُ بِنَصْرِهِ مَن يَشَآءُ إِنَّ فِى ذَلِكَ لَعِبْرَةً لاوْلِى الاٌّبْصَـرِ</p><p>(And Allah supports with His victory whom He wills. Verily, in this is a lesson for those who understand.) meaning, this should be an example for those who have intelligence and sound comprehension. They should contemplate about Allah's wisdom, decisions and decree, that He gives victory to His believing servants in this life and on the Day the witnesses stand up to testify.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Ali 'Imran",
+    "surahNameDe": "Family of Imran",
+    "key": "3:13"
+   },
+   "fetchedAt": "2026-11-13T06:20:06.900Z",
+   "urlChecks": {
+    "https://quran.com/3/13": 200
+   }
   }
  ]
 }
