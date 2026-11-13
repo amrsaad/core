@@ -238,14 +238,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     await p3.goto(`${url}?now=2026-10-23&seed=3#k=${k}`);
     c.b57FeedLoaded = await waitFor(p3, () => !!window.__core?.moment());
     await playThrough(p3);
-    // Seit Runde 9 ist ein Audio-Slot sofort startbereit und das nachgebaute Element spielt ohne Netz sofort (PLAYING), der Wisch käme dann nicht mehr
-    // vor dem Start. Darum startet das Element hier nie, so wie ein Stream, der keine Daten liefert.
-    await p3.evaluate(() => { window.__mediaNoStart = true; });
     await p3.click('[data-testid=end-audio]');
     const n1 = await swipeAtOnce(p3, false);
     await p3.waitForTimeout(300);
     c.b57NotCountedLine = await diagHas(p3, `skip: ${n1} not counted (never ready)`);
-    if (!c.b57NotCountedLine) await dump(p3, 'nach NotCountedLine', n1);
     c.b57NoBlockLine = !(await p3.evaluate(() => window.__core.diag().some((x) => /^skip: \S+ blocked 30 d/.test(x))));
     await ctx3.close();
   } catch (e) {
