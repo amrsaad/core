@@ -861,7 +861,11 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     const m = queue.current[j];
     slot.index = j;
     // Text-Momente haben keinen Player
-    if (!m || m.form === 'text' || !slot.player || !slot.ready) return;
+    if (!m || m.form === 'text' || !slot.player || !slot.ready) {
+      // Runde 9: ein Wechsel, der keinen Abspielversuch auslöst, sagt es in der Diag (vorher still)
+      if (m && m.form !== 'text' && play) diag.current.push(`go: no play attempt ${m.id} (${!slot.player ? 'slot has no player' : 'slot not ready'})`);
+      return;
+    }
     // Brief 12: im Datensparmodus oder bei 2g lädt nur der nächste Moment vor. Der übernächste bleibt frei (index -1), der Wisch holt ihn dann als nächsten nach.
     if (!play && j - idxRef.current >= 2 && lowNet()) {
       if (slot.mid !== m.id) diag.current.push(`video: preload ${m.id} deferred (save data or 2g)`);
@@ -3146,6 +3150,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     }
     if (!playable || userPaused.current || endedAt.current === idxRef.current) return;
     // Angehalten beim Verlassen, vom Betriebssystem pausiert oder im Hintergrund nicht gestartet: weiter am Stand
+    // Runde 9: ein Start, der verdeckt ausblieb (nie gespielt), wird jetzt nachgeholt und steht in der Diag
+    if (!wasLeft && form === 'audio' && current().st !== STATE.PLAYING) diag.current.push(`deck: start resumed after hidden ${m.id}`);
     if (wasLeft || current().st !== STATE.PLAYING) current().player?.playVideo();
     // Tempo nach Rückkehr erneut setzen, YouTube fällt nach App-Wechsel auf 1x zurück (Max 31.10.)
     applyRate();

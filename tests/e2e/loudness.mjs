@@ -160,6 +160,18 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       return { id: m.id, loud: g?.loud ?? null };
     });
     c.tabTapStartsLevelled = laneOk(byId.get(first.id), first.loud);
+    if (!c.tabTapStartsLevelled) {
+      // Ursache bei rotem Lauf sichtbar machen: Moment, Spur laut App, erwartete Werte und die letzten Diag-Zeilen
+      const m = byId.get(first.id);
+      r.tabTapFailure = {
+        id: first.id,
+        loud: first.loud,
+        gainDb: m?.gainDb ?? null,
+        hls: m?.hls ?? null,
+        contextState: await page.evaluate(() => window.__core.ctx()?.state ?? 'none'),
+        diagTail: (await page.evaluate(() => window.__core.diag())).slice(-40),
+      };
+    }
     // Die Spur hängt vom ersten Moment ab (zufällig): geregelt ('web audio') spielt das Element der geregelten Spur, sonst das der einfachen.
     // Geprüft wird die Spur, die laut Diag gilt (CI 41772174744: Check war rot, wenn der erste Moment ungeregelt war, auch auf f0a3629 in 4 von 8 Läufen).
     const wantLane = first.loud?.how === 'web audio' ? 'level' : 'plain';
