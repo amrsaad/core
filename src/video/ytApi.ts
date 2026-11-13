@@ -3,7 +3,7 @@ import { skipPlay } from './playguard';
 import { isYtId } from '../moments/contract';
 import { formOf } from '../moments/form';
 import { localKey } from '../moments/localKey';
-import { audioRunning, breakLevel, chainFor, hostState, levelWanted, markHost, onContextState, onUnlock, tempoNow, type Chain } from '../moments/audioGraph';
+import { audioRunning, breakLevel, chainFor, hostState, levelWanted, markHost, onContextState, onUnlock, settleStart, tempoNow, type Chain } from '../moments/audioGraph';
 import { clampGain, laneFor, youtubeVolume, type LoudInfo } from '../moments/loudness';
 import { AudioDeck, type DeckClip, type DeckSink } from './audioDeck';
 import { isSilent, reduceSound, SOUND_NONE, type SoundObs } from '../moments/soundHint';
@@ -132,6 +132,17 @@ export interface LocalSrc { url: string; offset: number }
 export const LOCAL = new Map<string, LocalSrc>();
 
 /**
+ * So lange wartet der erste Start auf den Lauf des Kontexts, den die Geste gerade angelegt hat (danach unverändert).
+ * Läuft er in 400 ms nicht, kommt er in der Regel nicht mehr.
+ */
+const CONTEXT_SETTLE_MS = 400;
+/**
+ * Gemeinsame Frist des ersten Starts für Kontext und CORS-Probe des Hosts. Die Probe braucht bei einem Host ohne Freigabe zwei Abrufe nacheinander
+ * (cors, dann no-cors) auf einer neuen Verbindung, im Mobilnetz rund 0,5 bis 0,7 s. 800 ms deckt das ab, bleibt unter HOLD_MS des Decks (1200 ms),
+ * und ein Start hängt höchstens einmal je Host so lange (danach ist das Urteil gemerkt). Ohne Urteil gilt der Versuch mit Rückfall wie bisher.
+ */
+const SETTLE_MS = 800;
+/**
  * Das Audio-Element des Audio-Reiters (Issue 11, Entscheidung 13). Es überlebt Reiterwechsel und wird nie ersetzt.
  * Mit Lautheit (Entscheidung 16) gibt es dazu höchstens ein zweites, fest stehendes für die geregelte Spur. Beide werden per Geste
  * freigeschaltet, der Wechsel zwischen ihnen geschieht wie jeder Quellwechsel synchron im Ereignis-Handler.
@@ -151,6 +162,11 @@ export const audioDeck: AudioDeck = new AudioDeck({
   },
   host: (url, state) => markHost(url, state),
   running: audioRunning,
+  settle: (clip, forcePlain) => {
+    if (forcePlain || !levelWanted() || tempoNow() !== 1 || !clampGain(clip.gain)) return null;
+    if (LOCAL.has(clip.key)) return settleStart(undefined, CONTEXT_SETTLE_MS, SETTLE_MS);
+    return hostState(clip.url) === 'bad' ? null : settleStart(clip.url, CONTEXT_SETTLE_MS, SETTLE_MS);
+  },
   broken: breakLevel,
   playbackState: (st, why) => setMediaState(st, why),
   // Zweites Element hält den nächsten Moment fertig, Weiter tauscht nur (Entscheidung 47)
@@ -464,12 +480,22 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   }
 
   // Nur echte YouTube-IDs an den IFrame-Player. Text- und Podcast-IDs ohne Stream werfen sonst "Invalid video id".
+  /** Der YouTube-IFrame hat onReady gemeldet (erst dann hat er Methoden). Ein Laden, das davor kam, wartet in ytLater. */
+  let ytReady = false;
+  let ytLater: (() => void) | null = null;
+  const fireReady = () => {
+    if (!readyFired) {
+      readyFired = true;
+      events.onReady?.();
+    }
+  };
   const yt = ytPlayer(YT, el, mode === 'yt' && isYtId(videoId) ? videoId : undefined, {
     onReady: () => {
-      if (!readyFired) {
-        readyFired = true;
-        events.onReady?.();
-      }
+      ytReady = true;
+      const later = ytLater;
+      ytLater = null;
+      fireReady();
+      later?.();
     },
     onState: (st) => {
       if (mode === 'yt') events.onState?.(st);
@@ -500,6 +526,9 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       if (mode === 'yt') events.onError?.(code);
     },
   });
+  // Ein Audio-Moment läuft im Audio-Deck und braucht den IFrame nicht. Wird die App während des Starts verdeckt, kommt sein onReady oft nie
+  // (iOS lädt den IFrame nicht): der Slot bliebe ohne Start und ohne Zeile in der Diag. Darum gilt der Player sofort als bereit.
+  if (mode === 'hls' && AUDIO_ONLY.has(videoId)) setTimeout(fireReady, 0);
   const iframe = () => host.querySelector('iframe') as HTMLElement | null;
   const show = (m: 'yt' | 'hls') => {
     mode = m;
@@ -733,6 +762,11 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       try { yt.pauseVideo(); } catch { /* noch nicht bereit */ }
       show('yt');
     } else {
+      // Ein Slot, der früher als Audio-Slot bereit gemeldet hat, bekommt den YouTube-Moment erst, wenn der IFrame Methoden hat
+      if (!ytReady) {
+        ytLater = () => route(arg, play);
+        return;
+      }
       wantPlay = false;
       for (const e of all) releaseEl(e);
       leaveDeck();
@@ -816,14 +850,14 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       for (const e of all) if (!e.muted) e.muted = true;
       wantMuted = true;
       audioDeck.setMuted(sink, true);
-      yt.mute();
+      try { yt.mute(); } catch { /* IFrame noch nicht bereit */ }
       soundChanged();
     },
     unMute: () => {
       for (const e of all) if (e.muted) e.muted = false;
       wantMuted = false;
       audioDeck.setMuted(sink, false);
-      yt.unMute();
+      try { yt.unMute(); } catch { /* IFrame noch nicht bereit */ }
       soundChanged();
     },
     sound: () => {
@@ -927,7 +961,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
         e.load();
         e.remove();
       }
-      yt.destroy();
+      try { yt.destroy(); } catch { /* IFrame noch nicht bereit */ }
     },
   };
 }

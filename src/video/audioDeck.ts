@@ -157,6 +157,8 @@ export interface DeckDeps {
   host?: (url: string, state: 'ok' | 'bad') => void;
   /** Läuft Web Audio gerade? */
   running?: () => boolean;
+  /** Würde der Ausschnitt geregelt laufen, aber der Kontext läuft noch nicht (resume() steht aus) oder das Urteil der CORS-Probe für seinen Host fehlt noch: Versprechen, das sich löst, sobald beides da ist (true), oder nach der Frist (false). Sonst null. */
+  settle?: (clip: DeckClip, forcePlain: boolean) => Promise<boolean> | null;
   /** Web Audio versagt in dieser Sitzung */
   broken?: (why: string) => void;
   /** Steht die Seite im Hintergrund (Standard: visibilityState hidden) */
@@ -233,6 +235,8 @@ export class AudioDeck {
   private loudLinear: (() => number) | null = null;
   /** Quelle, die in der geregelten Spur nicht lud. Lädt sie danach unverändert, gilt der Host als ohne CORS. */
   private trialFailed: string | null = null;
+  /** relevel() wartet gerade auf das Urteil der Probe */
+  private relevelWait = false;
   private levelPrimed = false;
   /** Stelle (Tonzeit der Quelle), ab der der Ausschnitt zuletzt gestartet wurde: Rückfälle springen dorthin zurück, nie an den Anfang */
   private resumeFrom = 0;
@@ -522,9 +526,13 @@ export class AudioDeck {
         this.want = play;
         return;
       }
-      const wait = !this.deps.local(clip.key) && (!this.clip || this.done) ? this.pending?.(clip.id, clip.key) : null;
-      if (wait) {
-        this.hold(clip, play, forcePlain, from, forceWhy, wait);
+      const idle = !this.clip || this.done;
+      // Runde 9: der Start kommt ohne Wartezeit auf den IFrame, also noch vor dem Lauf des Kontexts aus der Geste. Die Spur wird erst danach gewählt.
+      const ctxWait = idle ? this.deps.settle?.(clip, forcePlain) ?? null : null;
+      const store = !this.deps.local(clip.key) && idle ? this.pending?.(clip.id, clip.key) ?? null : null;
+      if (ctxWait || store) {
+        const wait = ctxWait && store ? Promise.all([ctxWait, store]).then((r) => r[1]) : (store ?? ctxWait)!;
+        this.hold(clip, play, forcePlain, from, forceWhy, wait, ctxWait ? (store ? 'audio context or host check, and storage' : 'audio context or host check') : 'storage');
         return;
       }
     }
@@ -598,7 +606,7 @@ export class AudioDeck {
     if (play) this.kick('start');
   }
 
-  private hold(clip: DeckClip, play: boolean, forcePlain: boolean, from: number, forceWhy: string | undefined, wait: Promise<boolean>) {
+  private hold(clip: DeckClip, play: boolean, forcePlain: boolean, from: number, forceWhy: string | undefined, wait: Promise<boolean>, what = 'storage') {
     const token = ++this.holdToken;
     this.holding = clip;
     this.clip = clip;
@@ -606,12 +614,12 @@ export class AudioDeck {
     this.want = play;
     this.live = false;
     this.played = false;
-    this.diag(`deck: hold ${clip.id} for storage`);
+    this.diag(`deck: hold ${clip.id} for ${what}`);
     const t0 = Date.now();
     const timeout = new Promise<boolean>((r) => setTimeout(() => r(false), HOLD_MS));
     void Promise.race([wait, timeout]).then((ok) => {
       if (token !== this.holdToken || this.holding !== clip) return;
-      this.diag(`deck: hold ${clip.id} ${ok ? 'released, storage ready' : 'timeout, from net'} after ${Date.now() - t0} ms`);
+      this.diag(`deck: hold ${clip.id} ${ok ? `released, ${what} ready` : what === 'audio context or host check' ? 'timeout, unchanged' : 'timeout, from net'} after ${Date.now() - t0} ms`);
       this.start(clip, this.want, forcePlain, from, forceWhy, true);
     });
   }
@@ -1019,12 +1027,24 @@ export class AudioDeck {
    * gehängt, an der aktuellen Stelle. Ein Element lässt sich nicht nachträglich an Web Audio hängen (es braucht CORS von Anfang an), darum ein
    * Quellwechsel mit kurzer Lücke. Das geschieht vor dem Ton (die Berührung schaltet ihn erst frei) und nur, wenn die Spur sicher ist.
    */
-  relevel(): boolean {
+  relevel(skipWait = false): boolean {
     const c = this.clip;
     const el = this.el;
     if (!c || !el || this.done || this.lane !== 'plain' || this.loudInfo.how !== 'unchanged: no audio context') return false;
     const pick = this.deps.lane?.(c, this.isLocal, false);
     if (!pick || pick.lane !== 'level') return false;
+    // Runde 9: steht das Urteil der Probe für den Host noch aus, kein Versuch mit Rückfall: kurz warten, dann neu entscheiden (nie ein zweites Mal warten)
+    const wait = skipWait ? null : this.deps.settle?.(c, false) ?? null;
+    if (wait) {
+      if (this.relevelWait) return false;
+      this.relevelWait = true;
+      this.diag(`loud: relevel ${c.id} waits for host check`);
+      void wait.then(() => {
+        this.relevelWait = false;
+        if (this.clip === c && !this.done && this.lane === 'plain' && this.loudInfo.how === 'unchanged: no audio context') this.relevel(true);
+      });
+      return false;
+    }
     const at = el.currentTime + this.offset;
     if (c.end !== undefined && c.end - at < RELEVEL_MIN_LEFT) return false;
     this.diag(`loud: attaching running clip at ${at.toFixed(1)} s (${pick.why})`);

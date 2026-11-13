@@ -48,6 +48,52 @@ export function breakLevel(reason: string): void {
 }
 
 export const audioRunning = (): boolean => !!ctx && ctx.state === 'running';
+/**
+ * Der Kontext wurde in einer Geste angelegt, resume() ist aber noch nicht zurück (Zustand suspended). Gibt dann ein Versprechen zurück, das sich
+ * löst, sobald er läuft (true) oder nach maxMs (false). Läuft er schon oder gibt es keinen, null. Runde 9: ein Audio-Moment startet ohne Wartezeit auf
+ * den IFrame, im selben Zug wie die Geste, und wählte seine Spur vor dem ersten Lauf des Kontexts (ungeregelt, später nie nachgeholt).
+ */
+export function contextSettling(maxMs: number): Promise<boolean> | null {
+  if (!ctx || ctx.state === 'running' || ctx.state === 'closed') return null;
+  return new Promise<boolean>((resolve) => {
+    let t = 0;
+    const done = (ok: boolean) => {
+      window.clearTimeout(t);
+      stateListeners.delete(on);
+      resolve(ok);
+    };
+    const on = (s: AudioContextState | 'interrupted') => {
+      if (s === 'running') done(true);
+    };
+    stateListeners.add(on);
+    t = window.setTimeout(() => done(false), maxMs);
+  });
+}
+/**
+ * Runde 9 (vierte Fassung): Steht das Urteil der CORS-Probe für diesen Host noch aus, solange es einen Kontext gibt (sonst wählt die Spurwahl ohnehin
+ * unverändert)? Dann würde die Spurwahl den Host als unbekannt behandeln und einen Fehlversuch in der geregelten Spur starten.
+ */
+export function verdictPending(url: string): boolean {
+  if (!ctx || ctx.state === 'closed' || !hostOf(url) || isStreamUrl(url) || readHosts()[hostOf(url)]) return false;
+  return !(typeof navigator !== 'undefined' && navigator.onLine === false);
+}
+/**
+ * Erster Start eines Moments mit Messwert: wartet auf den Lauf des Kontexts (höchstens ctxMs) und auf das Urteil der Probe seines Hosts, beides
+ * zusammen höchstens maxMs. Gibt false zurück, wenn der Kontext in der Frist nicht lief oder das Urteil ausblieb (die Probe läuft im Hintergrund weiter
+ * und merkt den Host später). Gibt es nichts abzuwarten, null (der Start bleibt synchron).
+ */
+export function settleStart(url: string | undefined, ctxMs: number, maxMs: number): Promise<boolean> | null {
+  const c = contextSettling(ctxMs);
+  const p = url && verdictPending(url) ? probeHost(url) : null;
+  if (!c && !p) return null;
+  return new Promise<boolean>((resolve) => {
+    const t = window.setTimeout(() => resolve(false), maxMs);
+    void Promise.all([c, p]).then(([ctxOk]) => {
+      window.clearTimeout(t);
+      resolve(ctxOk !== false);
+    });
+  });
+}
 /** Zustand des Kontexts für Diagnose: none (noch nicht angelegt), running, suspended oder interrupted (iOS) */
 export const contextState = (): string => (ctx ? ctx.state : 'none');
 /** Nur für Tests: der Kontext, um ihn anzuhalten */
