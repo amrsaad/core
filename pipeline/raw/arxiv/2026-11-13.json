@@ -1,5 +1,795 @@
 {
  "source": "arxiv",
  "date": "2026-11-13",
- "records": []
+ "records": [
+  {
+   "sourceId": "arxiv:2611.16694",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16694",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "When Expert Disagreement Hurts: Prestige and Selectivity in LLM Decision Revision",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "When Expert Disagreement Hurts: Prestige and Selectivity in LLM Decision Revision",
+    "abstract": "When language models revise a decision after another agent disagrees, neither reversal counts nor final accuracy shows whether they are fixing mistakes or abandoning correct answers. We introduce a controlled two-pass audit that holds the question, the evidence, and the model's initial answer fixed and varies only the revision context: neutral reflection, anonymous disagreement, or disagreement attributed to a domain expert. For binary decisions the accounting is exact: revision raises accuracy only if it is selective enough, reversing wrong answers more than $a/(1-a)$ times as often as correct ones, where $a$ is initial accuracy (nine times at 90%). Across five models and 1,989 evidence-grounded decisions in medicine, science, and law, no model clears this bar under expert disagreement, and accuracy falls by up to 16.1 points. The expert label, a prestige cue, adds reversals for four of the five models, yet its effect on accuracy ranges from a 5.2-point loss to a 2.4-point gain, so reversal counts are a poor proxy for harm. With identical arguments from both sources, the label still raises reversal for three proprietary models and in a pooled analysis of four newer models. Models also respond to stated source reliability. Revision pipelines should therefore be evaluated with paired, conditional metrics, per model and protocol."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T12:11:03Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16694": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16693",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16693",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "MobileProbe: Adaptive Security Evaluation of Mobile Agents via Trajectory-Aware Injection",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "MobileProbe: Adaptive Security Evaluation of Mobile Agents via Trajectory-Aware Injection",
+    "abstract": "Mobile GUI agents read the screen of a phone and operate apps on a user's behalf to complete multi-step tasks such as online shopping or messaging. Because the agent acts on whatever the screen shows, an attacker can embed malicious instructions into ordinary UI content and redirect its actions. We refer to this threat as environmental injection attack (EIA). Existing benchmarks measure this risk by pinning hand-crafted payloads to a fixed step of a fixed task. This approach faces two limitations. First, each payload is bound to one task in one app and does not transfer without manual redesign. Second, agents given the same task may follow different routes, so an agent that never reaches the injected page is recorded as safe without being tested. This insufficient test coverage can cause fixed-point benchmarks to underestimate the security risk of deployed mobile agents. In this work, we propose MobileProbe, a trajectory-aware red-teaming framework that evaluates mobile agents adaptively. MobileProbe discovers attacker-controllable content surfaces through automated pentesting, localizes vulnerable decision points along the agent's trajectory, and iteratively refines context-aware payloads through a surrogate-filtered evolutionary loop. We construct a benchmark of 83 long-horizon attack instances spanning 12 mobile applications. Each is annotated with a Confidentiality, Integrity, or Availability (CIA) attack goal to cover the principal categories of security threats facing mobile agents. On three representative agent architectures, MobileProbe attains higher attack success rates than human-written, zero-shot LLM, and prior automated red-teaming baselines adapted to the mobile domain. MobileProbe can serve as a pre-deployment auditing tool to systematically uncover vulnerabilities and inform security hardening of mobile agents."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T12:08:43Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16693": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16678",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16678",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Edge-Gradient Augmentation under Reinforcement Learning for Temporal Graph",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Edge-Gradient Augmentation under Reinforcement Learning for Temporal Graph",
+    "abstract": "Temporal link prediction is critical for understand- ing dynamic interactions in evolving networks, informing appli- cations ranging from social network analysis to recommendation systems. Existing methods typically rely on raw temporal graph data, often neglecting explicit edge-change information that can significantly improve predictive performance. To address this gap, we propose edge-gradient reinforced learning (EG-RL), a framework that explicitly encodes edge-gradient events (edge births and deaths) through dedicated node and link encoding modules. EG-RL uses a policy-driven reinforcement-learning mechanism to dynamically select and augment the most infor- mative edge snapshots, guided by critic-based feedback to opti- mize prediction accuracy. The model comprises distinct modules for node encoding, link encoding, token mixing, and channel mixing, integrated through global pooling and followed by a two-layer multilayer perceptron classifier. Extensive experiments on multiple dynamic graph datasets demonstrate substantial gains in area under the receiver operating characteristic curve and average precision. Ablation studies further confirm the necessity of adaptive edge-gradient augmentation and validate the effectiveness of the proposed encoding and reinforcement- learning mechanisms."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T11:53:35Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16678": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16666",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16666",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Natural Gradient Learning in Predictive Coding through Lateral Circuits",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Natural Gradient Learning in Predictive Coding through Lateral Circuits",
+    "abstract": "Predictive coding (PC) trains neural networks through local energy-minimization dynamics without depending on a global error signal that backpropagation (BP) requires. Although PC is a promising alternative algorithm for efficient learning, the computational cost of inference dynamics currently outweighs the resulting learning benefits in practice. In this work, we take inspiration from optimization theory to extract more learning benefit from each inference phase. We introduce Natural PC, which augments standard PC with a lateral circuit, enabling exact and efficient natural gradient learning locally in space and time. Our lateral circuit learns the activity correlations that determine the Fisher information matrix and implicitly computes its inverse, avoiding expensive matrix inversion. Across all tested image reconstruction benchmarks, Natural PC achieves state of the art in terms of sample and compute efficiency compared to existing PC approaches. Most notably, Natural PC scales to ImageNet and matches the performance of BP trained with AdamW and various second-order optimizers at an order of magnitude lower computational cost while also using two orders of magnitude fewer training samples. Our results demonstrate that local natural gradient learning makes PC competitive with BP in both sample efficiency and computational cost in reconstruction tasks."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T11:42:17Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16666": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16662",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16662",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "MuSeToM: Multi-Sensory Evaluation of Belief Revision with Textual Cues Across Six Senses",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "MuSeToM: Multi-Sensory Evaluation of Belief Revision with Textual Cues Across Six Senses",
+    "abstract": "Theory of Mind (ToM), the ability to infer mental states in others, is pivotal for human social cognition. Existing evaluations of ToM in large language models (LLMs) mainly focus on static belief attribution and false-belief reasoning, leaving a critical aspect of social reasoning underexplored: can LLMs decide whether perceptual evidence is sufficient to justify another person's belief revision? To address this gap, we present MuSeToM, a human-validated, text-based benchmark for evaluating epistemic belief revision in ToM reasoning. MuSeToM contains 2,415 instances adapted from BigToM and OpenToM, with textual cues spanning six sensory categories, and tests whether models can determine when a protagonist should revise a belief and infer the resulting updated belief state. Using MuSeToM, we systematically evaluate state-of-the-art LLMs under direct and chain-of-thought prompting, revealing a pronounced dissonance: while models often detect that a belief may change, they struggle to identify the updated belief and frequently over-update on perceptually salient but epistemically insufficient cues."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T11:38:52Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16662": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16661",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16661",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Reducing Batch Makespan for LLM Agent Workloads through Inference-Environment Coordination",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Reducing Batch Makespan for LLM Agent Workloads through Inference-Environment Coordination",
+    "abstract": "Efficient batch execution of agent tasks is critical to LLM training and development workflows, including benchmark evaluation, synthetic-data generation, and RL rollouts. Since these tasks alternate between LLM inference and environment interaction, we present coordinated optimizations to reduce batch makespan, the time required to complete all tasks in a batch. For hybrid LLMs, a workload-based resource model guides GPU-memory allocation between key-value (KV) cache and recurrent state and provides a reference sample concurrency to exploit parallelism while limiting recomputation. Trajectory-aware routing and scheduling promote cache reuse while balancing worker load. Under constrained environment capacity, we decouple sample admission from environment execution and introduce Chain-Advancing Action Scheduling (CAAS), which prioritizes long chains using observed progress to shorten the batch tail. Controlled replay combines actual inference with recorded environment responses and durations for ablations of individual optimizations. Live evaluations with Ling-3.0-Flash and Ling-3.1-Flash on the BFCL, SWE-bench Multilingual, WideSearch, and MCP-Atlas benchmarks demonstrate makespan reductions of 10.4% to 65.0%, while evaluation scores remain aligned. Furthermore, these methods have been successfully applied to training and evaluation workflows for the Ling-3.x model series, accelerating the model-development cycle."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T11:38:21Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16661": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16647",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16647",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "InertiaMPDD: Multimodal Personalized Depression Detection via Emotional Inertia-Inspired Dynamics Modeling",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "InertiaMPDD: Multimodal Personalized Depression Detection via Emotional Inertia-Inspired Dynamics Modeling",
+    "abstract": "Multimodal depression screening estimates risk from speech, visual behavior and language. Current methods mainly predict labels, with limited evidence of departures from a non-depressed reference. Recording-level supervision also leaves fine-grained emotional dynamics unannotated. Motivated by emotional inertia, the persistence of affect, InertiaMPDD learns healthy next-state patterns using a world-model-inspired latent predictor. Using pretrained multimodal representations, it predicts from observed history and context. Reference deviation, residual decay rate and a Jacobian spectral descriptor form reference-derived emotional dynamics descriptors, evaluated as candidate proxy biomarkers for standalone screening and personalized decision correction. Across five cohorts from four datasets, fusion reaches 98.41% F1 on D-Vlog and 84.98% on LMVD. Standalone descriptors outperform fixed additive fusion on MPDD but discriminate weakly on AVEC2014. These findings distinguish reference informativeness from fusion benefit and reveal context-dependent utility."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T11:22:19Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z"
+  },
+  {
+   "sourceId": "arxiv:2611.16642",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16642",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Dataset Distillation via Drifting",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Dataset Distillation via Drifting",
+    "abstract": "The task of dataset distillation concerns the learning of a small set of synthetic samples that can serve as an effective replacement for a large real dataset when used for downstream tasks. While many solutions have been proposed since the problem's inception, most of them primarily seek to optimize the distilled data with respect to a classifier. In this work, we propose a new distillation method that learns a set of samples such that they directly approximate the per-class data distribution. Specifically, we \"drift\" our distilled data in the latent space of a feature extractor such that they move both toward the real data and away from each other without using a classification objective. We find that our drifted data cover the real distribution significantly better than existing methods while still serving as powerful training samples for classification. Furthermore, we showcase our method's use as a visualization tool for better interpreting models and extend it beyond images to other modalities. Our work advances the frontier of dataset distillation, offering a novel synthesis method and proposing distribution-based metrics as a complementary evaluation. More broadly, our findings help address the growing need to understand both data and models by uncovering more about how they interact."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T11:17:40Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16642": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16630",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16630",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "When Chekhov's Gun Fires Anyway: Over-Realization in Text-to-Image Models",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "When Chekhov's Gun Fires Anyway: Over-Realization in Text-to-Image Models",
+    "abstract": "In text-to-image generation, a target that the prompt mentions often appears in the generated image in a way the prompt does not call for. We call this failure over-realization. Mental-spaces theory points to the situations where it can happen: under a negation, inside what a character believes or imagines, as the vehicle of a figurative comparison, or behind a viewpoint that hides the target. Prior work has studied only negation in depth, and the conventional alignment and preference metrics do not penalize the failure. We build OverReal to measure it: OverReal-Gen, 698 prompts covering the four situations, on which we measure each generator's over-realization rate; and OverReal-Det, 2,841 generated images human-labeled for whether and how the target is over-realized, on which we verify the automatic judge that produces this rate. Our evaluation of eight text-to-image systems reveals that all of them over-realize, and that conventional metrics such as CLIPScore reward the failure rather than penalize it. Prompt expansion only partly mitigates the failure. Inside the generator, the diffusion backbone attends to a mentioned target almost as much as to a requested one. The cue words that should hold the target back receive less attention than ordinary words."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T11:03:25Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16630": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16628",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16628",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Safety as a Budget: Calibrating the Control Channel of Constrained GRPO for Vision-Language Models",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Safety as a Budget: Calibrating the Control Channel of Constrained GRPO for Vision-Language Models",
+    "abstract": "Reinforcement learning can teach vision-language models (VLMs) to decline harmful image-text requests, but how safe the result becomes is set indirectly, through reward weights found by trial runs. Stating safety as budgets on the rate of harmful assistance and the rate of over-refusal, enforced by Lagrange multipliers inside GRPO with an off-the-shelf scorer as the cost, is the natural fix, and it fails twice. The multiplier compares the scorer's mean with the budget, and scorers built for ranking get the mean wrong: a fixed-point analysis shows that the mean bias, not the budget, then decides whether the multiplier settles, saturates or switches off. And standard GRPO standardizes the penalized reward within each group, which cancels the multiplier before it reaches the gradient. Two-channel constrained GRPO repairs both: the base reward keeps the raw score for the within-group comparison, the penalty and the constraint estimate pass through a monotone map fitted on judge-labeled training responses, and the advantage keeps the multiplier. On a Qwen3-VL-2B policy with a training-free readout of an open 4B model as the scorer, held-out harm on 1,037 adversarial prompts falls from 8.9% under standard GRPO to 4.8%, lower in every seed, where the uncalibrated budget gives 7.6%; over-refusal stays at most 2% on 400 benign queries and MMBench is unchanged. The gain is largest where the intent sits in the image (10.1% -> 5.1%) and grows on the unseen HADES benchmark (28.9% -> 12.8%). Order-preserving distortions of the scores reproduce each predicted controller state in every seed, and the results hold under a map fitted on another judge's labels, an image-reading judge and a human audit."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T11:00:14Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z"
+  },
+  {
+   "sourceId": "arxiv:2611.16627",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16627",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Folio: Recoverable Multi-Resolution Context Folding for Long-Horizon Language Agents",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Folio: Recoverable Multi-Resolution Context Folding for Long-Horizon Language Agents",
+    "abstract": "Long-horizon language agents accumulate tool results and replies until the history no longer fits the context window. Current agents shrink this history by having a model summarize it, so each compaction rereads and rewrites the history it replaces, and cache-aware triggers decide when to compact while taking the size of the result as given. We present Folio, a context manager that records, folds, and recovers history through one set of handles. While the agent runs, Folio records three linked levels: a short turn note the model writes as part of its ordinary reply (L1), an event manifest of every call written by the runtime (L2), and the captured source records (L3). Because these views already exist, the runtime folds the context programmatically, selecting coarser views for older turns. The fold prints the handles that index L2 and L3, so recovery tools that read bounded pages, compute over full text in files, and keep findings in a persistent dossier reach the evidence the agent needs with little added input. The fold trigger prices an explicit landing point that includes the retained budget. On 75 LOCA-bench tasks with DeepSeek-V4-Pro behind every system, Folio solves 66 tasks against 54 for the same runtime with model-written compaction and 49-59 for Claude Code, Codex, and SoL-Pi, in about half their working time, at 2.4 times lower cost than that runtime; each fold takes a median of 0.6 seconds."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T10:59:40Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16627": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16621",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16621",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Studies on Sign Language Retrieval in Low-Resource Dictionary Settings",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Studies on Sign Language Retrieval in Low-Resource Dictionary Settings",
+    "abstract": "Most sign languages have no annotated corpus, only small dictionaries with one or a few example videos per sign. This study examines how well a pose encoder trained on a single sign language serves such languages without any target-language training. An encoder trained with metric learning on American Sign Language (ASL-Citizen) is evaluated frozen on six datasets of Turkish, Russian, Indian, Argentinian, Pakistani and Sri Lankan sign languages, with one or four clips per sign enrolled and, where signer identities are available, the query's signer excluded from the gallery. With one enrolled clip, the encoder retrieves the correct sign first in 36.4-80.7 % of queries, against 16.0-69.6 % for the best learning-free method (angle-based dynamic time warping) and a six-target mean of 39.3 % for an ASL-trained OpenHands graph network. In a crossed ablation of the encoder (embedding geometry, aggregation of body and hand embeddings, training objective, and attention between articulators), two choices matter: a per-pair InfoNCE objective outperforms supervised contrastive and cross-entropy training, and blocking attention between body, left hand and right hand inside the encoder raises accuracy by up to 5.1 points. The best configuration reaches 68.0 % one-shot accuracy (59.0 % for the reference encoder). On CISLR, an Indian Sign Language dictionary of 4,765 words with one video per word, the encoders find the correct word first for 17.3-19.0 % of queries, above the 16.8 % of the original RGB baseline. Over eight seeds with the joint encoder, spherical, Euclidean and hyperbolic embedding spaces differ by at most 1.6 points, except the hyperbolic token-attention head trained with InfoNCE, which is 1.4-2.0 points worse, so the geometry is a minor factor."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T10:57:50Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16621": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16612",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16612",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Unibuc - NLP at \"Voight-Kampff\" Generative AI Detection PAN 2025",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Unibuc - NLP at \"Voight-Kampff\" Generative AI Detection PAN 2025",
+    "abstract": "This paper describes the approach of the Unibuc - NLP team in tackling the \"Voight-Kampff\" Generative AI Detection task from PAN at CLEF 2025. In the Subtask 1: Voight-Kampff AI Detection Sensitivity we have explored different approaches of leveraging embeddings extracted from LLMs, using either classical ML models or further fine-tuning LLMs with a classification head for the downstream binary classification task. Our experiments showed that using a majority vote ensemble of classical ML models (Light GBM, XGB, Logistic Regression and SVM) is comparable with fine-tuning for downstream task achieving around 99.4% F1 score. For the Subtask 2: Human-AI Collaborative Text Classification we explored a way of combining features at different layers extracted using transformer backbone with layer-wise projection and attentive pooling which proved modest results."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T10:49:03Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z"
+  },
+  {
+   "sourceId": "arxiv:2611.16609",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16609",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "A Dual-Branch Graph and Convolutional Network for Interpretable Movement EEG Classification",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "A Dual-Branch Graph and Convolutional Network for Interpretable Movement EEG Classification",
+    "abstract": "Decoding upper-limb movements from scalp electroencephalography (EEG) is an important problem for brain-computer interfaces (BCIs), but many deep learning models provide limited insight into the brain regions underlying their predictions. We propose a two-branch architecture that combines an LGGNet-inspired local-global graph branch with an EEGNet-style convolutional branch for movement-versus-rest classification. The graph branch groups 61 EEG electrodes into anatomically informed regions and learns their spatial relationships, providing a direct representation of the regions emphasized by the model. We evaluate the proposed architecture using leave-one-subject-out cross-validation on the Ofner upper-limb movement dataset. The model achieves a mean F1-score of 0.74 +/- 0.06 across subjects. Beyond classification performance, we analyze the learned graph structure to identify the regions with the strongest connectivity. Across all held-out subjects, the highest connectivity is consistently observed in the Parietal Left Low region, corresponding to electrodes P1 and P3. This region is opposite to the performed right-arm movements and lies within the posterior parietal area previously associated with upper-limb movement processing. These results show that incorporating a region-based graph into the decoder can provide an anatomically interpretable representation while maintaining effective movement classification, offering a practical approach toward more transparent EEG-based BCIs."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T10:47:37Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z"
+  },
+  {
+   "sourceId": "arxiv:2611.16591",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16591",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Singularity-Bench: Can Agents Build Agents?",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Singularity-Bench: Can Agents Build Agents?",
+    "abstract": "Frontier AI agents increasingly succeed on realistic, long-horizon tasks and are beginning to improve the systems through which they operate. Yet existing benchmarks often restrict agents to narrow action spaces, use simplified environments, or rely on verification methods that are unreliable for evaluating arbitrary agent-generated systems. We introduce Singularity-Bench, an open-ended benchmark for autonomous AI development with six end-to-end tasks spanning pre-training, mid-training, post-training, inference, the agent harness, and cluster orchestration. Each task requires agents to implement core systems from a minimal starting point and evaluates them against mature human-engineered baselines on identical hardware. Additionally, through extensive red-teaming covering 9 of the 10 categories in the OWASP Top 10 for Agentic Applications, we expose reward-hacking vulnerabilities in the conventional Harbor framework and develop Breakwater, an extension of Harbor that blocks all attacks tested in our study. Across 11 agents built from 7 frontier models and 2 harnesses, Opus 5.5 with Claude Code matches or outperforms the human baseline on all six tasks with a Singularity-Index of 1.25, suggesting it may have the skills needed to reach the singularity. The remaining agents average only 0.58. Our vision is for Singularity-Bench to track how much of AI development agents can already automate and when they may transition from assisting to taking end-to-end responsibility for building stronger successors."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T10:24:51Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16591": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16590",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16590",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "AstroMemBench: A Benchmark for Memory Systems in Embodied Spacecraft Agents",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "AstroMemBench: A Benchmark for Memory Systems in Embodied Spacecraft Agents",
+    "abstract": "Long-term spacecraft autonomy requires embodied agents to use operational history under communication delays, time-critical operations, environmental uncertainty, complex physical interactions, power and computational constraints, and safety and reliability requirements. We introduce AstroMemBench and a Scenario-Challenge-Capability design method that maps these requirements to executable memory tests. The benchmark covers 16 memory subchallenges through 140 templates and 2240 instances across nine tasks in planetary surface operations, on-orbit servicing, and deep-space exploration. A deterministic environment scores actions for task completion, state changes, safety, and resource use. Ablations under nine conditions show that the benchmark is sensitive to how accurately agents recover and use historical information and to differences in memory-system design. Main experiments compare six configurations. Mem0, Chain-of-Memory, LightMem, and retrieval-augmented generation (RAG) improve same-session mean scores over native Pi Agent, with no clear advantage of the three memory systems over RAG. After a session restart, Mem0 outperforms RAG by 12.25 points. Benefits favor instruction retention and result reuse over ongoing state tracking and energy reservation. AstroMemBench supports the design, development, and selection of memory systems for embodied spacecraft agents. AstroMemBench 1.0 and its evaluation code are publicly available: https://github.com/flyingView/AstroMemBench-v1."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T10:23:15Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16590": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16586",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16586",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Large Language Models as Digital Twins: a Distribution-Aware Questionnaire-Based Evaluation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Large Language Models as Digital Twins: a Distribution-Aware Questionnaire-Based Evaluation",
+    "abstract": "This paper investigates whether Large Language Models can answer a personality questionnaire as a specific individual would. Given a user's social-media posts, the model completes the BFI-2-60 Big Five questionnaire as that user. The predicted responses are converted into trait scores and compared with the user's actual scores. We evaluate GPT-4, Gemma, Llama 3.1, and Mistral on the MyPersonality dataset. To determine whether predictions reflect information from the user's writing, we compare them with answers produced without user text and with values derived from general population tendencies. We measure prediction error across all users and separately for individuals with low, intermediate, and high trait scores. We also test whether an LLM can express an explicit personality profile when given only the target Big Five scores, without user text, and examine how predictions change as more text is provided. The results show that user text does not consistently improve performance. Models perform better near the middle of the trait distribution, while at the lower and upper ends they often remain close to central values or perform well at one end but poorly at the other. When given an explicit profile, GPT-4 most clearly translates trait information into consistent questionnaire responses, particularly for Extraversion and Neuroticism. Increasing context does not systematically reduce error: open-source models fluctuate more, whereas GPT-4 remains comparatively stable. Overall, the evaluated models do not consistently reproduce the questionnaire behavior of specific individuals."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T10:18:16Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16586": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16581",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16581",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Do the Details Help the Whole? One-Way Transfer from Person Actions to Group Intent in VLMs on JRDB-Social",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Do the Details Help the Whole? One-Way Transfer from Person Actions to Group Intent in VLMs on JRDB-Social",
+    "abstract": "Social scene datasets label people at two levels: what each person is doing and what the group is there for. Training on both levels at once is often assumed to help each of them. We test this assumption for vision-language models (VLMs) on JRDB-Social, treating person actions as the details and group intent as the whole. We fine-tune Qwen3.5 4B under eight training arms with three seeds, repeat the core arms on Qwen3.5 9B and Qwen3-VL 4B, and judge every arm with a verdict rule fixed before testing. Writing each member's actions before the intent raises intent macro-F1 from 30.1 to 31.0, and writing the intent first reaches 31.2, while action F1 stays within 0.2 points of an action-only model. Under the selected recipe, no arm trained with intent improves actions. The gain requires correct, image-grounded actions: empty action lists or actions borrowed from another group with the same intent lower intent F1. Forced-prefix tests, occlusion, member masking, linear probes and component grafting show that the intent follows the written actions, relies more on people and partly resides in the vision tower. Supplying actions as input instead of as targets hurts both levels."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T10:14:07Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z"
+  },
+  {
+   "sourceId": "arxiv:2611.16561",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16561",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "SPARC: Accurate Photonic Matrix Multiplication via Representative Vectors",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "SPARC: Accurate Photonic Matrix Multiplication via Representative Vectors",
+    "abstract": "Photonic neural network accelerators have emerged as a promising solution for reducing the power consumption of deep neural network (DNN) inference by executing matrix multiplication on analog photonic hardware. However, their inference accuracy is limited by low-bit quantization required for photonic processing and by analog photonic noise. This paper proposes an approach for improving inference accuracy by exploiting the high similarity among activation vectors in DNNs. Specifically, our approach constructs a representative vector for each group of similar activation vectors, computes its inner product digitally with high precision, and offloads the residual inner products to the photonic accelerator. Since the activation vectors within each group are highly similar, the residual vectors have much smaller norms, thereby reducing the effects of quantization errors and analog photonic noise. Furthermore, our approach preserves the photonic inner-product computation pipeline, allowing seamless integration into existing and future photonic accelerators without hardware modification. Experimental results on six representative DNN models demonstrate that the proposed approach can improve inference accuracy across diverse network architectures and application domains."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T09:47:42Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16561": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16527",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16527",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "AI has its own style in mathematical proving",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "AI has its own style in mathematical proving",
+    "abstract": "As large language models increasingly generate mathematical proofs, whether they develop a proving style distinct from that of human mathematicians remains an open question. This question is particularly pressing as mathematicians increasingly voice concerns that proofs generated by large language models are difficult to interpret. Here we ask three large language models to independently reprove all 465 propositions of Euclid's \\textit{Elements} and compare their citation choices against the human-proof baseline through Jaccard similarity and complex network analysis. We find that AI-generated proofs differ from human proofs, and this difference is stable and reproducible: mean pairwise Jaccard similarity among AI runs (~0.68) is nearly twice that between AI and human proofs (~0.37), and cross-run classification consistency is also high. By examining citation structure in detail, we identify the concrete signature of this difference: approximately 40% of AI citations point to foundational elements (definitions, common notions, and postulates), compared with only 13\\% in human proofs; even among theorem-to-theorem citations, AI tends to cite more distant results. Roughly half of AI's extra citations trace to the upstream dependencies of the human proof. Together, these findings suggest that the AI proving style is a tendency to construct arguments on its own from foundational elements rather than directly citing later, more established results, which we term \"building from the ground up\". Our findings offer a new perspective on how AI systems organise and invoke mathematical knowledge, with implications for understanding the interpretability of AI-generated proofs."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T09:27:02Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16527": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16526",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16526",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Lost in Delegation: Studying the Effectiveness of Task Orchestration in Generative Search",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Lost in Delegation: Studying the Effectiveness of Task Orchestration in Generative Search",
+    "abstract": "LLMs have quickly evolved from models used in isolation to agentic systems that delegate tasks to external tools and other LLMs to solve complex assignments. This agentic augmentation has led to impressive capability gains. However, when and how delegation improves performance remains poorly understood. For example, it is unclear whether delegation helps when tasks involve post-cutoff information that the orchestrating LLM cannot reliably resolve from its own knowledge. In this work, we use purpose-built datasets with pre- and post-cutoff splits to compare various delegation modes. We find that delegation provides no consistent accuracy improvement over non-delegated setups, with effects varying across models and tasks. When tasks involve knowledge unavailable to the orchestrator, delegation can substantially degrade accuracy, while direct tool use with the same LLM performs much better. Our analysis identifies distorted delegated queries, inefficient tool use, and failures to preserve and use information between agents as recurring failure modes. These findings suggest that effective orchestration requires both well-calibrated delegation decisions and effective exchange of information between agents."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T09:25:33Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16526": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16525",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16525",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "ZONOS3-Mini Technical Report",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "ZONOS3-Mini Technical Report",
+    "abstract": "ZONOS3-Mini is an ultra-compact, ultra-fast, zero-shot voice-cloning TTS model. The model can run in real time on a laptop or smartphone. For its latency and size, it achieves state-of-the-art accuracy and cloning fidelity. To achieve this we propose a latent MoE backbone with only 886M parameters (100M active per token) and a new audio codec, Zyphra Audio Codec 1 (ZAC-1), which represents 44.1 kHz audio at a 15 Hz frame rate. On the new ZTTS2-Eval benchmark, ZONOS3-Mini reaches a 6.71% macro-average WER over 55 language sets (35 clean and 20 in the wild), which is competitive with larger and slower state-of-the-art models. We release the model weights, inference, and training code."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T09:24:22Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16525": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16524",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16524",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "A Joint LLM and Optimization Agent Solution for Drone Scheduling in Victim Search Missions",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "A Joint LLM and Optimization Agent Solution for Drone Scheduling in Victim Search Missions",
+    "abstract": "Victim search in wilderness areas is time-critical. Drones enable rapid area search, but scheduling them is challenging because victims may continue moving, detection results are uncertain, and effective decisions must combine structured mission information with unstructured contextual clues and domain knowledge. To address this, we propose an agent-aided drone scheduling system. The system employs an agent at the ground control station (GCS) to coordinate multiple drones over successive search cycles. In each cycle, the agent applies a scheduling policy that combines a large language model (LLM) for reasoning about where to search with an optimizer for determining how to dispatch the drones under energy constraints. Simulation results show that the proposed system consistently completes the victim-search mission, whereas none of the six non-LLM baselines does so and direct LLM scheduling is considerably less reliable. The source code is publicly available at https://github.com/1643204431/llm-uav-victim-search."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T09:20:54Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16524": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16523",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16523",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "RESYNC: Residual Latent-State Synchronization for Deadline-Bound Streaming Inference",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "RESYNC: Residual Latent-State Synchronization for Deadline-Bound Streaming Inference",
+    "abstract": "Predicting every observation in a high-rate stream requires a model to finish before the next arrival. A large model may offer better predictions but miss that deadline. We propose RESYNC: the large model runs asynchronously, while a fast path updates its latest exact but stale latent state using the observations received since that state was computed and applies its unchanged prediction head. The updater learns from the frozen model's representations without task labels. Across one real and two synthetic streams and five architecture families, RESYNC beats the best compact or distilled alternative with a paired 95% interval above zero in all twelve dataset--architecture pairs with a material teacher advantage at anchor ages of 4--12 observations, and in eleven pairs at older tested ages up to 32. The share of the teacher's gain preserved remains complete on the real stream but is lower and generally declines with anchor age on the synthetic streams. In live replay with 1 ms arrivals, the synchronous large models cannot deliver any predictions on time while RESYNC serves at least 99.4% of arrivals within the interval, with 0.35--0.62 ms median latency on one CPU thread: around the same speed as or faster than the compact model, and 7.9--17.7$\\times$ faster than synchronous large-model inference. RESYNC targets settings with background compute available but a strict per-observation response deadline."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T09:19:39Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16523": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16522",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16522",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "PISim: A Unified Photonic Inference Simulator for Hardware-Aware Cross-Layer Design-Space Exploration",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "PISim: A Unified Photonic Inference Simulator for Hardware-Aware Cross-Layer Design-Space Exploration",
+    "abstract": "Photonic neural accelerators offer ultra-low latency linear algebra, yet their usable numerical precision, sustainable throughput, and application accuracy remain tightly bounded by surrounding electro-optical interfaces and physical non-idealities. Pre-fabrication design-space exploration (DSE) requires a cross-layer electronic design automation (EDA) framework capable of evaluating disparate optical topologies under identical neural workloads and physical assumptions. We present \\textbf{PISim}, a unified Photonic Inference Simulator that couples pretrained deep neural network execution with physics-based models of six accelerator architecture families, six electro-optic modulator technologies, four optical source organizations, and direct or coherent readout schemes. PISim embeds stage-resolved impairment operators---covering control and analog-to-digital quantization, finite extinction ratio, shot noise, correlated relative-intensity noise (RIN), thermal drift, propagation loss, and channel crosstalk---alongside an analytical cycle-level interface timing model to expose electronic-optical bottlenecks. Using simulated MNIST multilayer perceptron (MLP) benchmarks, we demonstrate how PISim identifies optimal precision operating points under multi-impairment stress (peaking at 6 bits for Mach--Zehnder and microring modulators), quantifies a 52.5 percentage-point accuracy gap between VCSEL-array and parallel-fanout laser architectures arising, under the modeled conditions, from power partitioning and correlated source noise, and models interface-limited throughput scaling across emitter-array widths from 32 to 128 channels. This comprehensive framework establishes an extensible, reproducible foundation for accuracy-constrained Pareto optimization prior to photonic tape-out."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T09:18:27Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z"
+  },
+  {
+   "sourceId": "arxiv:2611.16502",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16502",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "SignRot: LLM Quantization with Massive Outlier-Aware Sign-Adjusted Rotation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "SignRot: LLM Quantization with Massive Outlier-Aware Sign-Adjusted Rotation",
+    "abstract": "While quantization compresses LLMs and accelerates inference, outlier activations impede efficient low-bit representation. In particular, massive outliers cause substantial performance degradation. Although rotation-based methods that rely on randomized Hadamard transforms for online inference aim to mitigate this, they can produce fragmented distributions with empty bins when a massive outlier dominates a token's activation. This fragmentation severely undermines uniform quantization performance. Moreover, massive outliers concentrate in the down-projection input, where the preceding nonlinearity requires the rotation to be applied at inference time. This constraint prevents training-based approaches such as SpinQuant from learning the online rotation at this position, as a learned dense matrix cannot use the Fast Walsh-Hadamard Transform and would require a full matrix multiplication during inference. To address this, we propose SignRot (Sign-adjusted Rotation), which identifies massive outlier channels and constructs a sign adjustment vector that unifies the signs of the corresponding Hadamard row, collapsing the bimodal distribution into a unimodal profile amenable to quantization. Since the aligned outlier shifts the activation mean away from zero, we pair SignRot with asymmetric activation quantization, whose zero-point absorbs this shift. As a lightweight, drop-in improvement compatible with any Hadamard-based quantization method, SignRot requires only a single calibration forward pass and adds only element-wise sign flips at inference, without an additional matrix multiplication. Applying SignRot to QuaRot achieves a WikiText2 perplexity of 5.88 and an average zero-shot reasoning accuracy of 72.73, surpassing SpinQuant on the LLaMA3-70B model. Code is available at https://github.com/HYU-ARK-Lab/SignRot."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T09:05:14Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16502": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16500",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16500",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "EvenVLM: A Text and Multimodal Dataset for the Even Language with Vision-Language Fine-Tuning",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "EvenVLM: A Text and Multimodal Dataset for the Even Language with Vision-Language Fine-Tuning",
+    "abstract": "We present EvenVLM, the first text and multimodal (VQA) dataset for Even (Lamut), an endangered Northern Tungusic language spoken by approximately 6,800 people in Siberia. Our dataset comprises 50,521 structured Even-Russian entries extracted from dictionary and phrasebook sources via GPT-4o Mini-based parsing, from which we synthetically generate 107,543 training examples spanning translation, grammar, reading comprehension, and semantic classification. To address tokenization inefficiency on Even's agglutinative morphology, we propose a three-step tokenizer expansion algorithm that adds Even-specific graphemes (eng, oe, o-umlaut), whitelisted vocabulary, and BPE merges, reducing average tokens per word by 27% (4.99 to 3.64). Using LoRA fine-tuning of Qwen3-VL-4B, we adapt the model for text tasks (0.53% trainable parameters, rank 32) and separately for visual question answering (rank 64, frozen vision encoder). Our best configuration achieves 11.4% exact match and a 13.6 weighted score on text benchmarks, 0.1283 chrF for sentence translation, and 65% accuracy on VQA (up from 0% for the base model and text-only fine-tuning). We release our datasets, evaluation benchmarks, and training pipeline to support further research on Even and other low-resource languages."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T09:03:06Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z"
+  },
+  {
+   "sourceId": "arxiv:2611.16499",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16499",
+   "urlStatus": 404,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Recalibrating a Typed-Decision Model in an Afternoon: A Hands-On Recipe for Laya's Confidence Scores",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Recalibrating a Typed-Decision Model in an Afternoon: A Hands-On Recipe for Laya's Confidence Scores",
+    "abstract": "A typed-decision model such as Laya reads a text and a list of options that the caller defines, for example ticket categories, and returns a probability for each option. Code around it compares the top probability with a threshold to answer, abstain or escalate to a person. Earlier work reports, for a Turkish model, that temperature scaling can raise held-out calibration error (ECE). This tutorial gives a five-step recipe (measure, diagnose, fit, validate, deploy) in 130 lines of numpy with standard methods, none new. On 1,065 synthetic, LLM-labelled items the released Laya checkpoint has a pooled ECE of 0.073 but a bucket-macro ECE of 0.143 (0.127-0.184), the mean over buckets (questions grouped by type and option count): the 12-option bucket is over-confident by +0.22, the three-to-five-option bucket under-confident by 0.05, and they cancel. One global temperature makes pooled ECE worse (0.173); a cross-fitted temperature per bucket brings macro-ECE to 0.073 (0.078 over 10 fold assignments) and reaches 0.089 with 10 labelled items per bucket, but holding out one of seven evaluation sets gives 0.099. After the refit, a gate aimed at 10% error answers 46.3% of items (10.5% wrong) against 6.9% on the published confidences, but one cut-off per bucket on the published confidences answers 45.4%, so most of the gain comes from separating buckets. Confidence-only maps (Platt, histogram, isotonic) need 20 or more labelled items per bucket to approach the temperature; with 320 per bucket the lowest macro-ECE belongs to Platt. In these files the retrained checkpoints store no per-bucket table and the stored 12-option value 0.1006 is clamped to 0.5 at runtime; the refit helps 31 of 33 checkpoints on random folds and 21 with a set held out. Fit and test share one generator and LLM labels, so these are findings about these checkpoints and this data."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T09:02:57Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16499": 404
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16498",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16498",
+   "urlStatus": 404,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "How many LLM-labelled rows does a decision encoder need, and how wrong can the labels be?",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "How many LLM-labelled rows does a decision encoder need, and how wrong can the labels be?",
+    "abstract": "A decision encoder such as Laya reads a question with named options (for example, which department should handle a ticket) and a text, and picks an option. It reads both in one forward pass and returns a probability for every option, without writing any text. We ask how many LLM-written training rows such an encoder needs and how wrong those labels may be. We ran 19 fine-tunes of Laya (ModernBERT-large) on nested subsets of a 2,818-row pool and scored them on 1,065 held-out items from the same generator, so every test item is in-distribution and no out-of-family test was run. Accuracy rises from 69.4% before fine-tuning to 74.3% with 5% of the rows, 84.8% with 50% and 86.9% with all rows. The curve flattens, and a saturating fit with bootstrap intervals cannot pin down its plateau. Seed spread at 20% of the rows (s.d. 1.6 points) exceeds some of the steps between sizes. Giving small subsets as many updates as the full pool gains 1.9 points at 5% and 1.9 points at 20% of the rows (one seed; p=0.14 and 0.13), and at 20% that is below the 2.3-point difference between two ordinary seeds. A single run with 10% symmetric label noise shows no detectable change (-0.2 points, 95% interval -1.7 to +1.4); 20% costs 3.4 points and 40% costs 8.7 points. Confusable-pair noise at 20% costs 7.4 points, and under noise the model moves from over-confident to under-confident. An independent labeller disagrees with the gold labels on 3.5% of held-out items, and about half of its choice disagreements (16 of 33, leaving each item out of the partner map) name the partner option that the confusable-pair noise uses. Laya is +0.9 points ahead of a TF-IDF classifier trained on the same rows at full size (the interval includes zero) and +21.1 points ahead at 5% of the rows. Everything is synthetic, LLM-labelled and from one backbone, one trainer and mostly one seed."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T09:02:55Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16498": 404
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.16493",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.16493",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "ReA-Bench: Benchmarking Responsible Agent Auditing",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "ReA-Bench: Benchmarking Responsible Agent Auditing",
+    "abstract": "As agents perform tasks autonomously in local and cloud environments, auditing their execution trajectories can help service providers identify risks and improve agent harnesses and foundation models. Our analysis of production and red-team trajectories shows that some risks are repeatedly missed across auditing configurations. Overall recall obscures which risks are missed and whether higher recall comes with more false positives on legitimate behavior. Existing benchmarks offer limited insight into these failures. Generated trajectories can contain inconsistent tool calls and responses, conspicuous risky actions, or repetitive attack patterns. Grouping results by risk type also makes it difficult to tell whether auditors overlooked evidence, accepted an unsupported conclusion, or lacked information needed to make a judgment. We introduce ReA-Bench, a diagnostic benchmark for auditing responsible agent behavior. It organizes auditing challenges into six tiers: internal safety knowledge, contradictions within trajectories, evidence retrieval in long contexts, verification of sources and reasoning, indirect steering, and missing information. It includes challenging benign cases in which actions resemble risky ones but are consistent with the task and its authorization. It also provides paired trajectory versions to test whether auditors detect the same risks more reliably when the trajectory is shortened or missing information is supplied. Most samples are drawn from real production trajectories, with scenarios manually selected and adapted to preserve realistic tasks and risks that could plausibly arise during execution."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-12T09:01:24Z"
+   },
+   "fetchedAt": "2026-11-13T05:42:12.653Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.16493": 200
+   }
+  }
+ ]
 }

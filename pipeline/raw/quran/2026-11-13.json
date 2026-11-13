@@ -61,6 +61,66 @@
    "urlChecks": {
     "https://quran.com/3/9": 200
    }
+  },
+  {
+   "sourceId": "quran:3:10",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/3/10",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/3:10?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Ali 'Imran 3:10",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "إِنَّ ٱلَّذِينَ كَفَرُوا۟ لَن تُغْنِىَ عَنْهُمْ أَمْوَٰلُهُمْ وَلَآ أَوْلَـٰدُهُم مِّنَ ٱللَّهِ شَيْـًٔا ۖ وَأُو۟لَـٰٓئِكَ هُمْ وَقُودُ ٱلنَّارِ",
+    "translation": "Gewiß, denjenigen, die ungläubig sind, werden weder ihr Besitz noch ihre Kinder vor Allah etwas nützen. Sie sind es, die Brennstoff des (Höllen)feuers sein werden.",
+    "tafsir_muyassar": "إن الذين جحدوا الدين الحق وأنكروه، لن تنفعهم أموالهم ولا أولادهم من عذاب الله شيئًا إن وقع بهم في الدنيا، ولن تدفعه عنهم في الآخرة، وهؤلاء هم حطب النار يوم القيامة.",
+    "tafsir_ibnkathir": "<h2>On the Day of Resurrection, No Wealth or Offspring Shall Avail</h2><p>Allah states that the disbelievers shall be fuel for the Fire,</p><div class=\"arabic uthmani\">يَوْمَ لاَ يَنفَعُ الظَّـلِمِينَ مَعْذِرَتُهُمْ وَلَهُمُ الْلَّعْنَةُ وَلَهُمْ سُوءُ الدَّارِ </div><p>(The Day when their excuses will be of no profit to wrongdoers. Theirs will be the curse, and theirs will be the evil abode (i.e. painful torment in Hell-fire).) 40:52.</p><p>Further, what they were granted in this life of wealth and offspring shall not avail them with Allah, or save them from His punishment and severe torment. Similarly, Allah said,</p><div class=\"arabic uthmani\">فَلاَ تُعْجِبْكَ أَمْوَلُهُمْ وَلاَ أَوْلَـدُهُمْ إِنَّمَا يُرِيدُ اللَّهُ لِيُعَذِّبَهُمْ بِهَا فِي الْحَيَوةِ الدُّنْيَا وَتَزْهَقَ أَنفُسُهُمْ وَهُمْ كَـفِرُونَ </div><p>(So let not their wealth nor their children amaze you; in reality Allah's plan is to punish them with these things in the life of this world, and that their souls shall depart (die) while they are disbelievers.) 9:55, and,</p><div class=\"arabic uthmani\">لاَ يَغُرَّنَّكَ تَقَلُّبُ الَّذِينَ كَفَرُواْ فِى الْبِلَـدِ - مَتَـعٌ قَلِيلٌ ثُمَّ مَأْوَاهُمْ جَهَنَّمُ وَبِئْسَ الْمِهَادُ </div><p>(Let not the free disposal (and affluence) of the disbelievers throughout the land deceive you. A brief enjoyment; then, their ultimate abode is Hell; and worst indeed is that place for rest.) 3:196, 197.</p><p>Allah said in this Ayah 3:10,</p><div class=\"arabic uthmani\">إِنَّ الَّذِينَ كَفَرُواْ</div><p>(Verily, those who disbelieve) meaning, disbelieved in Allah's Ayat, denied His Messengers, defied His Books and did not benefit from His revelation to His Prophets,</p><div class=\"arabic uthmani\">لَن تُغْنِىَ عَنْهُمْ أَمْوَلُهُمْ وَلاَ أَوْلـدُهُم مِّنَ اللَّهِ شَيْئًا وَأُولَـئِكَ هُمْ وَقُودُ النَّارِ</div><p>(Neither their properties nor their offspring will avail them whatsoever against Allah; and it is they who will be fuel of the Fire.) meaning, they will be the wood with which the Fire is kindled and fed. Similarly, Allah said,</p><div class=\"arabic uthmani\">إِنَّكُمْ وَمَا تَعْبُدُونَ مِن دُونِ اللَّهِ حَصَبُ جَهَنَّمَ</div><p>(Certainly you (disbelievers) and that which you are worshipping now besides Allah, are (but) fuel for Hell!) 21:98.</p><p>Allah said next,</p><div class=\"arabic uthmani\">كَدَأْبِ ءَالِ فِرْعَوْنَ</div><p>(Like the Da'b of the people of Fira`wn.) Ad-Dahhak said that Ibn `Abbas said that the Ayah means, \"Like the behavior of the people of Fir`awn.\" This is the same Tafsir of `Ikrimah, Mujahid, Abu Malik, Ad-Dahhak, and others. Other scholars said that the Ayah means, \"Like the practice, conduct, likeness of the people of Fir`awn.\" These meanings are all plausible, for the Da'b means practice, behavior, tradition and habit. The Ayah indicates that the disbelievers will not benefit from their wealth or offspring. Rather, they will perish and be punished. This is the same end the people of Fir`awn and the previous nations met, those who rejected the Messengers, the Ayat, and proofs of Allah that they were sent with.</p><div class=\"arabic uthmani\">وَاللَّهُ شَدِيدُ الْعِقَابِ</div><p>(And Allah is severe in punishment.) meaning, His punishment is severe and His torment is painful. None can escape Allah's grasp, nor does anything escape His knowledge. Allah does what He wills and prevails over all things, it is He to Whom everything is humbled and there is no deity worthy of worship, nor any Lord except Him.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Ali 'Imran",
+    "surahNameDe": "Family of Imran",
+    "key": "3:10"
+   },
+   "fetchedAt": "2026-11-13T05:42:16.032Z",
+   "urlChecks": {
+    "https://quran.com/3/10": 200
+   }
+  },
+  {
+   "sourceId": "quran:3:11",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/3/11",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/3:11?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Ali 'Imran 3:11",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "كَدَأْبِ ءَالِ فِرْعَوْنَ وَٱلَّذِينَ مِن قَبْلِهِمْ ۚ كَذَّبُوا۟ بِـَٔايَـٰتِنَا فَأَخَذَهُمُ ٱللَّهُ بِذُنُوبِهِمْ ۗ وَٱللَّهُ شَدِيدُ ٱلْعِقَابِ",
+    "translation": "Nach der Art der Leute Fir’auns und derjenigen vor ihnen: Sie erklärten Unsere Zeichen für Lüge, und da ergriff sie Allah für ihre Sünden. Und Allah ist streng im Bestrafen.",
+    "tafsir_muyassar": "شأن الكافرين في تكذيبهم وما ينزل بهم، شأن آل فرعون والذين من قبلهم من الكافرين، أنكروا آيات الله الواضحة، فعاجلهم بالعقوبة بسبب تكذيبهم وعنادهم. والله شديد العقاب لمن كفر به وكذَّب رسله.",
+    "tafsir_ibnkathir": "<h2>On the Day of Resurrection, No Wealth or Offspring Shall Avail</h2><p>Allah states that the disbelievers shall be fuel for the Fire,</p><div class=\"arabic uthmani\">يَوْمَ لاَ يَنفَعُ الظَّـلِمِينَ مَعْذِرَتُهُمْ وَلَهُمُ الْلَّعْنَةُ وَلَهُمْ سُوءُ الدَّارِ </div><p>(The Day when their excuses will be of no profit to wrongdoers. Theirs will be the curse, and theirs will be the evil abode (i.e. painful torment in Hell-fire).) 40:52.</p><p>Further, what they were granted in this life of wealth and offspring shall not avail them with Allah, or save them from His punishment and severe torment. Similarly, Allah said,</p><div class=\"arabic uthmani\">فَلاَ تُعْجِبْكَ أَمْوَلُهُمْ وَلاَ أَوْلَـدُهُمْ إِنَّمَا يُرِيدُ اللَّهُ لِيُعَذِّبَهُمْ بِهَا فِي الْحَيَوةِ الدُّنْيَا وَتَزْهَقَ أَنفُسُهُمْ وَهُمْ كَـفِرُونَ </div><p>(So let not their wealth nor their children amaze you; in reality Allah's plan is to punish them with these things in the life of this world, and that their souls shall depart (die) while they are disbelievers.) 9:55, and,</p><div class=\"arabic uthmani\">لاَ يَغُرَّنَّكَ تَقَلُّبُ الَّذِينَ كَفَرُواْ فِى الْبِلَـدِ - مَتَـعٌ قَلِيلٌ ثُمَّ مَأْوَاهُمْ جَهَنَّمُ وَبِئْسَ الْمِهَادُ </div><p>(Let not the free disposal (and affluence) of the disbelievers throughout the land deceive you. A brief enjoyment; then, their ultimate abode is Hell; and worst indeed is that place for rest.) 3:196, 197.</p><p>Allah said in this Ayah 3:10,</p><div class=\"arabic uthmani\">إِنَّ الَّذِينَ كَفَرُواْ</div><p>(Verily, those who disbelieve) meaning, disbelieved in Allah's Ayat, denied His Messengers, defied His Books and did not benefit from His revelation to His Prophets,</p><div class=\"arabic uthmani\">لَن تُغْنِىَ عَنْهُمْ أَمْوَلُهُمْ وَلاَ أَوْلـدُهُم مِّنَ اللَّهِ شَيْئًا وَأُولَـئِكَ هُمْ وَقُودُ النَّارِ</div><p>(Neither their properties nor their offspring will avail them whatsoever against Allah; and it is they who will be fuel of the Fire.) meaning, they will be the wood with which the Fire is kindled and fed. Similarly, Allah said,</p><div class=\"arabic uthmani\">إِنَّكُمْ وَمَا تَعْبُدُونَ مِن دُونِ اللَّهِ حَصَبُ جَهَنَّمَ</div><p>(Certainly you (disbelievers) and that which you are worshipping now besides Allah, are (but) fuel for Hell!) 21:98.</p><p>Allah said next,</p><div class=\"arabic uthmani\">كَدَأْبِ ءَالِ فِرْعَوْنَ</div><p>(Like the Da'b of the people of Fira`wn.) Ad-Dahhak said that Ibn `Abbas said that the Ayah means, \"Like the behavior of the people of Fir`awn.\" This is the same Tafsir of `Ikrimah, Mujahid, Abu Malik, Ad-Dahhak, and others. Other scholars said that the Ayah means, \"Like the practice, conduct, likeness of the people of Fir`awn.\" These meanings are all plausible, for the Da'b means practice, behavior, tradition and habit. The Ayah indicates that the disbelievers will not benefit from their wealth or offspring. Rather, they will perish and be punished. This is the same end the people of Fir`awn and the previous nations met, those who rejected the Messengers, the Ayat, and proofs of Allah that they were sent with.</p><div class=\"arabic uthmani\">وَاللَّهُ شَدِيدُ الْعِقَابِ</div><p>(And Allah is severe in punishment.) meaning, His punishment is severe and His torment is painful. None can escape Allah's grasp, nor does anything escape His knowledge. Allah does what He wills and prevails over all things, it is He to Whom everything is humbled and there is no deity worthy of worship, nor any Lord except Him.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Ali 'Imran",
+    "surahNameDe": "Family of Imran",
+    "key": "3:11"
+   },
+   "fetchedAt": "2026-11-13T05:42:16.032Z",
+   "urlChecks": {
+    "https://quran.com/3/11": 200
+   }
   }
  ]
 }
