@@ -23,6 +23,13 @@ export const DIAG_FLUSH_MS = 5 * 60_000;
 /** Wartezeit nach einem Fehler, der sich von selbst erledigen kann: 15 s, 1 min, 5 min, dann alle 5 min (Issue 9) */
 export const RETRY_DELAYS = [15_000, 60_000, 5 * 60_000] as const;
 export const retryDelay = (fails: number) => RETRY_DELAYS[Math.min(Math.max(1, fails), RETRY_DELAYS.length) - 1];
+/**
+ * Scheitert das Schreiben ohne Antwort (Zeitlimit oder Netzfehler), geht es schnell weiter, solange die App sichtbar ist: 3 s, 10 s, 30 s, danach 1 min und alle 5 min.
+ * Der Nutzer schließt die App oft nach ein bis zwei Minuten, mit 15 s, 1 min, 5 min kam in 80 s kein zweiter Versuch durch (13.11.).
+ * Rate-Limit, Serverfehler, 401, 403 und 409 bleiben bei der alten Folge (retryDelay) oder ohne Wiederholung.
+ */
+export const UPLOAD_RETRY_DELAYS = [3_000, 10_000, 30_000, 60_000, 5 * 60_000] as const;
+export const uploadRetryDelay = (step: number) => UPLOAD_RETRY_DELAYS[Math.min(Math.max(1, step), UPLOAD_RETRY_DELAYS.length) - 1];
 
 export interface SyncStatus {
   hasToken: boolean;
@@ -81,6 +88,10 @@ export function createSync(deps: SyncDeps): Sync {
   let rev = 0;
   let pending = false;
   let fails = 0;
+  /** Gescheiterte Schreibversuche ohne Antwort in Folge (bis zum nächsten Erfolg), und der Stand beim letzten Sichtbarwerden: ab dort zählt die schnelle Folge von vorn */
+  let putFails = 0;
+  let putBase = 0;
+  let hidden = false;
   let active: Promise<void> | null = null;
   let again = false;
   let stopped = false;
@@ -160,7 +171,12 @@ export function createSync(deps: SyncDeps): Sync {
       // Unterscheidet sich nur das Protokoll, ist Schreiben nicht dringend (jeder Start und jede Rückkehr würde sonst einen Commit machen)
       if (remoteDoc && canonNoDiag(merged) === rawNoDiag && !flushDiag && now() - lastDiagWrite < DIAG_FLUSH_MS) return;
       try {
-        await writeRemote(token, await encryptDoc(key, merged), remote?.sha ?? null, `core state ${new Date(now()).toISOString()}`, deps.fetchImpl);
+        const stats = { bytes: 0 };
+        const t0 = now();
+        await writeRemote(token, await encryptDoc(key, merged), remote?.sha ?? null, `core state ${new Date(now()).toISOString()}`, deps.fetchImpl, stats);
+        log(`sync: PUT ok ${Math.round(stats.bytes / 1000)} kB in ${((now() - t0) / 1000).toFixed(1)} s${putFails > 0 ? ` (try ${putFails + 1})` : ''}`);
+        putFails = 0;
+        putBase = 0;
         lastDiagWrite = now();
         lastDiagT = Math.max(lastDiagT, newestT(lines));
         flushDiag = false;
@@ -220,11 +236,15 @@ export function createSync(deps: SyncDeps): Sync {
         const err = e instanceof SyncError ? e : new SyncError('server', 'Sync failed. Will retry.');
         set({ error: err.message });
         // Welche Anfrage scheitert und womit, statt nur "No connection" (Issue 45)
-        log(err.diagLine);
+        const fastPut = err.kind === 'offline' && err.where === 'PUT contents';
+        if (fastPut) putFails++;
+        log(err.bytes ? `${err.diagLine} (${Math.round(err.bytes / 1000)} kB, try ${putFails})` : err.diagLine);
         if (err.retry) {
           fails++;
           clearTimeout(retryTimer);
-          retryTimer = setTimeout(() => void run(), retryDelay(fails));
+          // Schnelle Wiederholung nur solange die App sichtbar ist. Verborgen holt visible(true) es sofort nach.
+          if (!fastPut) retryTimer = setTimeout(() => void run(), retryDelay(fails));
+          else if (!hidden) retryTimer = setTimeout(() => void run(), uploadRetryDelay(putFails - putBase));
         }
       } finally {
         set({ running: false });
@@ -257,6 +277,8 @@ export function createSync(deps: SyncDeps): Sync {
     },
     visible(v) {
       if (stopped) return;
+      hidden = !v;
+      if (v) putBase = putFails;
       // Zurück im Vordergrund gilt eine Offline-Pause nicht mehr: iOS meldet das online-Ereignis nicht immer, die Pause blieb dann für immer (Issue 45).
       // Ist das Netz wirklich weg, scheitert der Lauf und die Wiederholung (15 s, 1 min, 5 min) übernimmt.
       if (v && paused) {

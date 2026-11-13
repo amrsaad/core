@@ -24,6 +24,8 @@ export class SyncError extends Error {
   where?: string;
   /** Bei Abbruch ohne Antwort: 'timeout 20s' oder 'network TypeError online=true' (nur für die Diagnose) */
   detail?: string;
+  /** Größe der Anfrage in Byte, nur beim Schreiben gesetzt (nur für die Diagnose) */
+  bytes?: number;
   constructor(public kind: SyncErrorKind, message: string, public status?: number) {
     super(message);
   }
@@ -73,27 +75,35 @@ function failureOf(status: number, rateLimited: boolean): SyncError {
 /** Eine Anfrage, die nach einem Netzabbruch hängt, blockiert sonst jeden weiteren Lauf. Nach 20 s zählt sie als kein Netz. */
 export const REQUEST_TIMEOUT_MS = 20_000;
 
+/**
+ * Zeitlimit fürs Schreiben. Der Stand ist rund 1,3 MB groß (base64 in der Anfrage), im Mobilnetz mit schwachem Upload
+ * dauert das über 20 s (13.11.: zwei Sitzungen scheiterten daran). Bis 100 kB bleibt es bei 20 s, darüber kommt je 20 kB
+ * eine Sekunde dazu (gerechnet mit mindestens rund 160 kbit/s), höchstens 90 s.
+ */
+export const UPLOAD_TIMEOUT_MAX_MS = 90_000;
+export const uploadTimeoutMs = (bytes: number): number => Math.min(UPLOAD_TIMEOUT_MAX_MS, REQUEST_TIMEOUT_MS + Math.max(0, Math.ceil((bytes - 100_000) / 20_000)) * 1000);
+
 /** Kein Ergebnis von GitHub: Zeitlimit oder Netzfehler. Beides heißt "offline" (Wiederholung), aber die Diagnose sagt, was es war (Issue 45). */
-function noAnswer(where: string, timedOut: boolean, e: unknown): SyncError {
-  const err = new SyncError('offline', timedOut ? 'GitHub did not answer in 20 s. Will retry.' : 'No connection to GitHub. Will retry.');
+function noAnswer(where: string, timedOut: boolean, e: unknown, timeoutMs: number): SyncError {
+  const err = new SyncError('offline', timedOut ? `GitHub did not answer in ${Math.round(timeoutMs / 1000)} s. Will retry.` : 'No connection to GitHub. Will retry.');
   err.where = where;
   const online = typeof navigator !== 'undefined' ? ` online=${navigator.onLine}` : '';
   const name = e instanceof Error ? e.name : typeof e;
-  err.detail = timedOut ? `timeout ${REQUEST_TIMEOUT_MS / 1000}s` : `network ${name}${online}`;
+  err.detail = timedOut ? `timeout ${Math.round(timeoutMs / 1000)}s` : `network ${name}${online}`;
   return err;
 }
 
-async function req(f: Fetch, url: string, init: RequestInit, where: string): Promise<Response> {
+async function req(f: Fetch, url: string, init: RequestInit, where: string, timeoutMs: number = REQUEST_TIMEOUT_MS): Promise<Response> {
   const c = new AbortController();
   let timedOut = false;
   const t = setTimeout(() => {
     timedOut = true;
     c.abort();
-  }, REQUEST_TIMEOUT_MS);
+  }, timeoutMs);
   try {
     return await f(url, { ...init, signal: c.signal });
   } catch (e) {
-    throw noAnswer(where, timedOut, e);
+    throw noAnswer(where, timedOut, e, timeoutMs);
   } finally {
     clearTimeout(t);
   }
@@ -119,18 +129,23 @@ export async function readRemote(token: string, f: Fetch = fetch, path: string =
   return { text: utf8(blob.content), sha: j.sha };
 }
 
-export async function writeRemote(token: string, text: string, sha: string | null, message: string, f: Fetch = fetch): Promise<string> {
-  const r = await req(
-    f,
-    `${API_HOST}/repos/${REPO}/contents/${STATE_PATH}`,
-    {
-      method: 'PUT',
-      headers: { ...headers(token), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, content: toB64(text), ...(sha ? { sha } : {}) }),
-      cache: 'no-store',
-    },
-    'PUT contents',
-  );
+/** stats.bytes bekommt die Größe der Anfrage (für die Diagnose-Zeile), auch wenn das Schreiben scheitert */
+export async function writeRemote(token: string, text: string, sha: string | null, message: string, f: Fetch = fetch, stats?: { bytes: number }): Promise<string> {
+  const body = JSON.stringify({ message, content: toB64(text), ...(sha ? { sha } : {}) });
+  if (stats) stats.bytes = body.length;
+  let r: Response;
+  try {
+    r = await req(
+      f,
+      `${API_HOST}/repos/${REPO}/contents/${STATE_PATH}`,
+      { method: 'PUT', headers: { ...headers(token), 'Content-Type': 'application/json' }, body, cache: 'no-store' },
+      'PUT contents',
+      uploadTimeoutMs(body.length),
+    );
+  } catch (e) {
+    if (e instanceof SyncError) e.bytes = body.length;
+    throw e;
+  }
   if (!r.ok) throw failure(r.status, rateLimited(r), 'PUT contents');
   const j = (await r.json()) as { content?: { sha?: string } };
   return j.content?.sha ?? '';
