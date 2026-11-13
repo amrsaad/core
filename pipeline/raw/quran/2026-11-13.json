@@ -661,6 +661,66 @@
    "urlChecks": {
     "https://quran.com/3/29": 200
    }
+  },
+  {
+   "sourceId": "quran:3:30",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/3/30",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/3:30?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Ali 'Imran 3:30",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "يَوْمَ تَجِدُ كُلُّ نَفْسٍ مَّا عَمِلَتْ مِنْ خَيْرٍ مُّحْضَرًا وَمَا عَمِلَتْ مِن سُوٓءٍ تَوَدُّ لَوْ أَنَّ بَيْنَهَا وَبَيْنَهُۥٓ أَمَدًۢا بَعِيدًا ۗ وَيُحَذِّرُكُمُ ٱللَّهُ نَفْسَهُۥ ۗ وَٱللَّهُ رَءُوفٌۢ بِٱلْعِبَادِ",
+    "translation": "An dem Tag wird jede Seele das, was sie an Gutem getan hat, bereit finden. Und von dem, was sie an Bösem getan hat, hätte sie gern, wenn zwischen ihr und ihm ein weiter Abstand wäre. Und Allah mahnt euch zur Vorsicht vor Sich selbst. Allah ist Gnädig zu den Menschen.",
+    "tafsir_muyassar": "وفي يوم القيامة يوم الجزاء تجد كل نفس ما عملت من خير ينتظرها موفرًا لتُجزَى به، وما عملت من عمل سيِّئ تجده في انتظارها أيضًا، فتتمنى لو أن بينها وبين هذا العمل زمنًا بعيدًا. فاستعدوا لهذا اليوم، وخافوا بطش الإله الجبار. ومع شدَّة عقابه فإنه سبحانه المتصف بكمال الرحمة بالعباد.",
+    "tafsir_ibnkathir": "<h2>Allah Knows What the Hearts Conceal</h2><p>Allah tells His servants that He knows the secrets and apparent matters and that nothing concerning them escapes His observation. Rather, His knowledge encompasses them in all conditions, time frames, days and instances. His knowledge encompasses all that is in heaven and earth, and nothing not even the weight of an atom, or what is smaller than that in the earth, seas and mountains, escapes His observation. Indeed,</p><div class=\"arabic uthmani\">وَاللَّهُ عَلَى كُلِّ شَيْءٍ قَدِيرٌ</div><p>(And Allah is able to do all things.) and His ability encompasses everything. This Ayah alerts Allah's servants that they should fear Him enough to not commit what He prohibits and dislikes, for He has perfect knowledge in all they do and is able to punish them promptly. And He gives respite to some of them, then He punishes them, and He is Swift and Mighty in taking account. This is why Allah said afterwards,</p><div class=\"arabic uthmani\">يَوْمَ تَجِدُ كُلُّ نَفْسٍ مَّا عَمِلَتْ مِنْ خَيْرٍ مُّحْضَرًا</div><p>(On the Day when every person will be confronted with all the good he has done,) meaning, on the Day of Resurrection, Allah brings the good and evil deeds before the servant, just as He said,</p><div class=\"arabic uthmani\">يُنَبَّأُ الإِنسَـنُ يَوْمَئِذِ بِمَا قَدَّمَ وَأَخَّرَ </div><p>(On that Day man will be informed of what he sent forward, and what he left behind.) 75:13.</p><p>When the servant sees his good deeds, he becomes happy and delighted. When he sees the evil deeds he committed, he becomes sad and angry. Then he will wish that he could disown his evil work and that a long distance separated it from him. He will also say to the devil who used to accompany him in this life, and who used to encourage him to do evil;</p><div class=\"arabic uthmani\">يلَيْتَ بَيْنِي وَبَيْنَكَ بُعْدَ الْمَشْرِقَيْنِ فَبِئْسَ الْقَرِينُ</div><p>(\"Would that between me and you were the distance of the two easts ـ a horrible companion (indeed)!) 43:38.</p><p>Allah then said, while threatening and warning,</p><div class=\"arabic uthmani\">وَيُحَذِّرُكُمُ اللَّهُ نَفْسَهُ</div><p>(And Allah warns you against Himself) meaning, He warns you against His punishment. Allah then said, while bringing hope to His servants, so that they do not despair from His mercy or feel hopeless of His kindness,</p><div class=\"arabic uthmani\">وَاللَّهُ رَءُوفٌ بِالْعِبَادِ</div><p>(And Allah is full of kindness with the servants)</p><p>Al-Hasan Al-Basri said, \"Allah is so kind with them that He warns them against Himself.\" Others commented, \"He is merciful with His creation and likes for them to remain on His straight path and chosen religion, and to follow His honorable Messenger.\"</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Ali 'Imran",
+    "surahNameDe": "Family of Imran",
+    "key": "3:30"
+   },
+   "fetchedAt": "2026-11-13T23:18:38.996Z",
+   "urlChecks": {
+    "https://quran.com/3/30": 200
+   }
+  },
+  {
+   "sourceId": "quran:3:31",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/3/31",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/3:31?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Ali 'Imran 3:31",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "قُلْ إِن كُنتُمْ تُحِبُّونَ ٱللَّهَ فَٱتَّبِعُونِى يُحْبِبْكُمُ ٱللَّهُ وَيَغْفِرْ لَكُمْ ذُنُوبَكُمْ ۗ وَٱللَّهُ غَفُورٌ رَّحِيمٌ",
+    "translation": "Sag: Wenn ihr Allah liebt, dann folgt mir. So liebt euch Allah und vergibt euch eure Sünden. Allah ist Allvergebend und Barmherzig.",
+    "tafsir_muyassar": "قل -أيها الرسول-: إن كنتم تحبون الله حقا فاتبعوني وآمنوا بي ظاهرًا وباطنًا، يحببكم الله، ويمحُ ذنوبكم، فإنه غفور لذنوب عباده المؤمنين، رحيم بهم. وهذه الآية الكريمة حاكمة على كل من ادعى محبة الله -تعالى- وليس متبعًا لنبيه محمد صلى الله عيه وسلم حق الاتباع، مطيعًا له في أمره ونهيه، فإنه كاذب في دعواه حتى يتابع الرسول صلى الله عليه وسلم حق الاتباع.",
+    "tafsir_ibnkathir": "<h2>Allah's Love is Attained by Following the Messenger</h2><p>This honorable Ayah judges against those who claim to love Allah, yet do not follow the way of Muhammad . Such people are not true in their claim until they follow the Shari`ah (Law) of Muhammad and his religion in all his statements, actions and conditions. It is recorded in the Sahih that the Messenger of Allah ﷺ said,</p><p>«مَنْ عَمِلَ عَمَلًا لَيْسَ عَلَيْهِ أَمْرُنَا فَهُوَ رَد»</p><p>(Whoever commits an act that does not conform with our matter (religion), then it will be rejected of him.)</p><p>This is why Allah said here,</p><p>قُلْ إِن كُنتُمْ تُحِبُّونَ اللَّهَ فَاتَّبِعُونِى يُحْبِبْكُمُ اللَّهُ</p><p>(Say (O Muhammad to mankind): \"If you (really) love Allah, then follow me, Allah will love you...\") meaning, what you will earn is much more than what you sought in loving Him, for Allah will love you. Al-Hasan Al-Basri and several scholars among the Salaf commented, \"Some people claimed that they love Allah. So Allah tested them with this Ayah;</p><p>قُلْ إِن كُنتُمْ تُحِبُّونَ اللَّهَ فَاتَّبِعُونِى يُحْبِبْكُمُ اللَّهُ</p><p>(Say (O Muhammad to mankind): \"If you (really) love Allah, then follow me, Allah will love you...\"). \"</p><p>Allah then said,</p><p>وَيَغْفِرْ لَكُمْ ذُنُوبَكُمْ وَاللَّهُ غَفُورٌ رَّحِيمٌ</p><p>(\"And forgive you your sins. And Allah is Oft-Forgiving, Most Merciful.\") meaning, by your following the Messenger , you will earn all this with the blessing of his mission. Allah next commands everyone,</p><p>قُلْ أَطِيعُواْ اللَّهَ وَالرَّسُولَ فإِن تَوَلَّوْاْ</p><p>(Say: \"Obey Allah and the Messenger.\" But if they turn away) by defying the Prophet)</p><p>فَإِنَّ اللَّهَ لاَ يُحِبُّ الْكَـفِرِينَ</p><p>(then Allah does not like the disbelievers.) thus, testifying that defiance of the Messenger's way constitutes Kufr. Indeed, Allah does not like whoever does this, even if he claims that he loves Allah and seeks a means of approach to Him, unless, and until, he follows the unlettered Prophet, the Final Messenger from Allah to the two creations: mankind and the Jinn. This is the Prophet who, if the previous Prophets and mighty Messengers were to have been alive during his time, they would have no choice but to follow, obey him, and to abide by his Law. We will mention this fact when we explain the Ayah,</p><p>وَإِذْ أَخَذَ اللَّهُ مِيثَـقَ النَّبِيِّيْنَ</p><p>(And (remember) when Allah took the Covenant of the Prophets) 3:81, Allah willing.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Ali 'Imran",
+    "surahNameDe": "Family of Imran",
+    "key": "3:31"
+   },
+   "fetchedAt": "2026-11-13T23:18:38.996Z",
+   "urlChecks": {
+    "https://quran.com/3/31": 200
+   }
   }
  ]
 }
