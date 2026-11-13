@@ -721,6 +721,66 @@
    "urlChecks": {
     "https://quran.com/3/31": 200
    }
+  },
+  {
+   "sourceId": "quran:3:32",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/3/32",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/3:32?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Ali 'Imran 3:32",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "قُلْ أَطِيعُوا۟ ٱللَّهَ وَٱلرَّسُولَ ۖ فَإِن تَوَلَّوْا۟ فَإِنَّ ٱللَّهَ لَا يُحِبُّ ٱلْكَـٰفِرِينَ",
+    "translation": "Sag: Gehorcht Allah und dem Gesandten. Doch wenn sie sich abkehren, so liebt Allah die Ungläubigen nicht.",
+    "tafsir_muyassar": "قل -أيها الرسول-: أطيعوا الله باتباع كتابه، وأطيعوا الرسول باتباع سنته في حياته وبعد مماته، فإن هم أعرضوا عنك، وأصروا على ما هم عليه مِن كفر وضلال، فليسوا أهلا لمحبة الله; فإن الله لا يحب الكافرين.",
+    "tafsir_ibnkathir": "<h2>Allah's Love is Attained by Following the Messenger</h2><p>This honorable Ayah judges against those who claim to love Allah, yet do not follow the way of Muhammad . Such people are not true in their claim until they follow the Shari`ah (Law) of Muhammad and his religion in all his statements, actions and conditions. It is recorded in the Sahih that the Messenger of Allah ﷺ said,</p><p>«مَنْ عَمِلَ عَمَلًا لَيْسَ عَلَيْهِ أَمْرُنَا فَهُوَ رَد»</p><p>(Whoever commits an act that does not conform with our matter (religion), then it will be rejected of him.)</p><p>This is why Allah said here,</p><p>قُلْ إِن كُنتُمْ تُحِبُّونَ اللَّهَ فَاتَّبِعُونِى يُحْبِبْكُمُ اللَّهُ</p><p>(Say (O Muhammad to mankind): \"If you (really) love Allah, then follow me, Allah will love you...\") meaning, what you will earn is much more than what you sought in loving Him, for Allah will love you. Al-Hasan Al-Basri and several scholars among the Salaf commented, \"Some people claimed that they love Allah. So Allah tested them with this Ayah;</p><p>قُلْ إِن كُنتُمْ تُحِبُّونَ اللَّهَ فَاتَّبِعُونِى يُحْبِبْكُمُ اللَّهُ</p><p>(Say (O Muhammad to mankind): \"If you (really) love Allah, then follow me, Allah will love you...\"). \"</p><p>Allah then said,</p><p>وَيَغْفِرْ لَكُمْ ذُنُوبَكُمْ وَاللَّهُ غَفُورٌ رَّحِيمٌ</p><p>(\"And forgive you your sins. And Allah is Oft-Forgiving, Most Merciful.\") meaning, by your following the Messenger , you will earn all this with the blessing of his mission. Allah next commands everyone,</p><p>قُلْ أَطِيعُواْ اللَّهَ وَالرَّسُولَ فإِن تَوَلَّوْاْ</p><p>(Say: \"Obey Allah and the Messenger.\" But if they turn away) by defying the Prophet)</p><p>فَإِنَّ اللَّهَ لاَ يُحِبُّ الْكَـفِرِينَ</p><p>(then Allah does not like the disbelievers.) thus, testifying that defiance of the Messenger's way constitutes Kufr. Indeed, Allah does not like whoever does this, even if he claims that he loves Allah and seeks a means of approach to Him, unless, and until, he follows the unlettered Prophet, the Final Messenger from Allah to the two creations: mankind and the Jinn. This is the Prophet who, if the previous Prophets and mighty Messengers were to have been alive during his time, they would have no choice but to follow, obey him, and to abide by his Law. We will mention this fact when we explain the Ayah,</p><p>وَإِذْ أَخَذَ اللَّهُ مِيثَـقَ النَّبِيِّيْنَ</p><p>(And (remember) when Allah took the Covenant of the Prophets) 3:81, Allah willing.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Ali 'Imran",
+    "surahNameDe": "Family of Imran",
+    "key": "3:32"
+   },
+   "fetchedAt": "2026-11-13T23:55:55.904Z",
+   "urlChecks": {
+    "https://quran.com/3/32": 200
+   }
+  },
+  {
+   "sourceId": "quran:3:33",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/3/33",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/3:33?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Ali 'Imran 3:33",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "۞ إِنَّ ٱللَّهَ ٱصْطَفَىٰٓ ءَادَمَ وَنُوحًا وَءَالَ إِبْرَٰهِيمَ وَءَالَ عِمْرَٰنَ عَلَى ٱلْعَـٰلَمِينَ",
+    "translation": "Gewiß, Allah hat Adam und Nuh und die Sippe Ibrahims und die Sippe ’Imrans vor den (anderen) Weltenbewohnern auserwählt,",
+    "tafsir_muyassar": "إن الله اختار آدم ونوحًا وآل إبراهيم وآل عمران، وجعلهم أفضل أهل زمانهم.",
+    "tafsir_ibnkathir": "<h2>The Chosen Ones Among the People of the Earth</h2><p>Allah states that He has chosen these households over the people of the earth. For instance, Allah chose Adam, created him with His Hand and blew life into him. Allah commanded the angels to prostrate before Adam, taught him the names of everything and allowed him to dwell in Paradise, but then sent him down from it out of His wisdom. Allah chose Nuh and made him the first Messenger to the people of the earth, when the people worshipped idols and associated others with Allah in worship. Allah avenged the way Nuh was treated, for he kept calling his people day and night, in public and in secret, for a very long time. However, his calling them only made them shun him more, and this is when Nuh supplicated against them. So Allah caused them to drown, and none among them was saved, except those who followed the religion that Allah sent to Nuh. Allah also chose the household of Ibrahim, including the master of all mankind, and the Final Prophet, Muhammad, peace be upon him. Allah also chose the household of `Imran, the father of Marym bint `Imran, the mother of `Isa, peace be upon them. So `Isa is from the offspring of Ibrahim, as we will mention in the Tafsir of Surat Al-An`am, Allah willing, and our trust is in Him.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Ali 'Imran",
+    "surahNameDe": "Family of Imran",
+    "key": "3:33"
+   },
+   "fetchedAt": "2026-11-13T23:55:55.904Z",
+   "urlChecks": {
+    "https://quran.com/3/33": 200
+   }
   }
  ]
 }
