@@ -2101,6 +2101,266 @@
    "arabic": "أَلَمْ تَرَ إِلَى ٱلَّذِينَ أُوتُوا۟ نَصِيبًا مِّنَ ٱلْكِتَـٰبِ يُدْعَوْنَ إِلَىٰ كِتَـٰبِ ٱللَّهِ لِيَحْكُمَ بَيْنَهُمْ ثُمَّ يَتَوَلَّىٰ فَرِيقٌ مِّنْهُمْ وَهُم مُّعْرِضُونَ",
    "translation": "Siehst du nicht jene, denen ein Teil der Schrift gegeben wurde? Sie werden zum Buch Allahs aufgefordert, damit es zwischen ihnen richte. Hierauf kehrt sich eine Gruppe von ihnen ab, und sie sind Widerstrebende.",
    "reflection": "Was nimmst du heute aus diesem Vers mit?"
+  },
+  {
+   "id": "arxiv:2611.17241",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Ballad: Bandit-Based LLM Routing for Automated Heuristic Discovery",
+   "source": {
+    "id": "arxiv:2611.17241",
+    "title": "Ballad: Bandit-Based LLM Routing for Automated Heuristic Discovery",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.17241",
+    "excerpt": "Across five NP-hard combinatorial optimization problems and a pool of four models of varying capability and cost, Ballad not only matches the best individual LLM in hindsight but, in several cases, surpasses every individual model while reducing API cost by up to 65.6% relative to always using the strongest model."
+   },
+   "createdAt": "2026-11-13T16:20:09.679Z"
+  },
+  {
+   "id": "pmid:42042510",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Artificial Intelligence in Pulmonary Endoscopy",
+   "source": {
+    "id": "pmid:42042510",
+    "title": "Artificial Intelligence in Pulmonary Endoscopy: Current Evidence, Limitations, and Future Directions.",
+    "publisher": "Journal of imaging",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42042510/",
+    "excerpt": "AI has the potential to support lesion detection, navigation, and training in pulmonary endoscopy. However, robust prospective validation, standardized datasets, transparent model reporting, robust data governance, multidisciplinary collaboration, and careful integration into clinical practice are required before widespread adoption."
+   },
+   "createdAt": "2026-11-13T16:20:09.679Z"
+  },
+  {
+   "id": "pmid:42095999",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Artificial intelligence in periodontal disease research",
+   "source": {
+    "id": "pmid:42095999",
+    "title": "Artificial intelligence in periodontal disease research: a bibliometric and visualized analysis of global research trends (2007-2025).",
+    "publisher": "The Saudi dental journal",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42095999/",
+    "excerpt": "The findings offer valuable insights to help dentists and researchers understand current applications, identify frontiers, and potentially guide the future clinical translation of AI technologies in periodontology."
+   },
+   "createdAt": "2026-11-13T16:20:09.679Z"
+  },
+  {
+   "id": "arxiv:2611.17239",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "When Both Sides Adapt: The Challenges of Evaluating Interactive LLM Systems",
+   "source": {
+    "id": "arxiv:2611.17239",
+    "title": "When Both Sides Adapt: The Challenges of Evaluating Interactive LLM Systems",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.17239",
+    "excerpt": "Together, this work highlights the necessity of measuring both model performance as well as changes in the user behavior that the model induces."
+   },
+   "createdAt": "2026-11-13T16:20:09.679Z"
+  },
+  {
+   "id": "pmid:42792921",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "AI-Guided Systems Neurogenomics in Neurodevelopmental Disorders",
+   "source": {
+    "id": "pmid:42792921",
+    "title": "AI-Guided Systems Neurogenomics in Neurodevelopmental Disorders.",
+    "publisher": "Genes",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42792921/",
+    "excerpt": "The central proposition is that systems neurogenomics should be evaluated by whether mechanistically constrained integration provides reproducible information beyond established gene-level and simpler multimodal approaches."
+   },
+   "createdAt": "2026-11-13T16:20:09.679Z"
+  },
+  {
+   "id": "pmid:42798723",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Large language models for ophthalmic examination understanding",
+   "source": {
+    "id": "pmid:42798723",
+    "title": "Large language models for ophthalmic examination understanding: from information extraction to clinical decision support.",
+    "publisher": "Frontiers in medicine",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42798723/",
+    "excerpt": "Publicly available LLMs and MLLMs are evolving from report-parsing tools toward broader ophthalmic clinical assistants, but their use should follow a task-layered validation framework in which verification and human oversight increase with the clinical consequences of error."
+   },
+   "createdAt": "2026-11-13T16:20:09.679Z"
+  },
+  {
+   "id": "arxiv:2611.17220",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Scalable Conversational Assessment: Chat-Based Exams with a Two-Agent LLM Pipeline",
+   "source": {
+    "id": "arxiv:2611.17220",
+    "title": "Scalable Conversational Assessment: Chat-Based Exams with a Two-Agent LLM Pipeline",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.17220",
+    "excerpt": "Through manual and post-facto AI review of the transcripts we identified opportunities to improve the follow-up question generation and ensure that grading only credited ideas that the student (and not the interviewer) contributed."
+   },
+   "createdAt": "2026-11-13T16:20:09.679Z"
+  },
+  {
+   "id": "pmid:42564875",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Topical retinoids and risk of major congenital malformations and spontaneous abortion",
+   "source": {
+    "id": "pmid:42564875",
+    "title": "Topical retinoids and risk of major congenital malformations and spontaneous abortion: a systematic review and meta-analysis.",
+    "publisher": "Frontiers in drug safety and regulation",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42564875/",
+    "excerpt": "Topical retinoid exposure during the first trimester was not associated with increased risks of MCM or SAB. These findings support the relative safety of topical retinoids in early pregnancy; however the results were driven mainly by a single large registry study."
+   },
+   "createdAt": "2026-11-13T16:20:09.679Z"
+  },
+  {
+   "id": "pmid:42094944",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "The Use of Artificial Intelligence in Cleft Care: A Scoping Review",
+   "source": {
+    "id": "pmid:42094944",
+    "title": "The Use of Artificial Intelligence in Cleft Care: A Scoping Review.",
+    "publisher": "Plastic surgery (Oakville, Ont.)",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42094944/",
+    "excerpt": "While AI applications in cleft lip and palate care are promising across diagnostic, surgical, and educational domains, translation into routine clinical practice is hindered by limited validation, small homogeneous datasets, and inconsistent methodologies."
+   },
+   "createdAt": "2026-11-13T16:20:09.679Z"
+  },
+  {
+   "id": "arxiv:2611.17214",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Introducing Feedback Delays to Non-Delayed Adversarial MDPs",
+   "source": {
+    "id": "arxiv:2611.17214",
+    "title": "Introducing Feedback Delays to Non-Delayed Adversarial MDPs: Optimal $\\sqrt S$ and $\\sqrt K$ Dependencies in Tabular and Linear AMDPs",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.17214",
+    "excerpt": "They also naturally extend to delayed AMDPs with a total feedback delay $\\mathfrak D$, yielding the first bounds optimal in $S$ and $\\mathfrak D$ (tabular) and in $K$ and $\\mathfrak D$ (linear)."
+   },
+   "createdAt": "2026-11-13T16:20:09.679Z"
+  },
+  {
+   "id": "pmid:42794914",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Beyond pCR Prediction",
+   "source": {
+    "id": "pmid:42794914",
+    "title": "Beyond pCR Prediction: Subtype-Specific Artificial Intelligence for Treatment Tailoring in Breast Cancer Neoadjuvant Therapy.",
+    "publisher": "Cancers",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42794914/",
+    "excerpt": "Subtype-specific AI currently predicts response under fixed regimens with moderate-to-good discrimination; the evidence does not yet support changing an individual patient's systemic treatment."
+   },
+   "createdAt": "2026-11-13T16:20:09.679Z"
+  },
+  {
+   "id": "pmid:42847018",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Effects of time-restricted eating on body composition and performance in athletes",
+   "source": {
+    "id": "pmid:42847018",
+    "title": "Effects of time-restricted eating on body composition and performance in athletes: a systematic review and meta-analysis.",
+    "publisher": "Frontiers in nutrition",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42847018/",
+    "excerpt": "TRE may represent a feasible dietary strategy for athletes seeking modest reductions in body mass and body fat% without clear detrimental effects on performance. However, evidence remains limited by small samples, short interventions, and methodological concerns, warranting larger, well-controlled, and longer-term trials across diverse athletic populations."
+   },
+   "createdAt": "2026-11-13T16:20:09.679Z"
+  },
+  {
+   "id": "arxiv:2611.17186",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Cortex-FL: Agent-Mediated Collaboration for Federated Learning",
+   "source": {
+    "id": "arxiv:2611.17186",
+    "title": "Cortex-FL: Agent-Mediated Collaboration for Federated Learning",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.17186",
+    "excerpt": "We demonstrate the complete workflow on a four-node deployment, in which a model requested in natural language proceeds through collaboration formation, contract-governed training, verified model delivery, and x402 settlement on a blockchain testnet."
+   },
+   "createdAt": "2026-11-13T16:20:09.679Z"
+  },
+  {
+   "id": "pmid:42760575",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Physical activity and oxidative stress biomarkers in humans",
+   "source": {
+    "id": "pmid:42760575",
+    "title": "Physical activity and oxidative stress biomarkers in humans: a systematic review and quantitative meta-analysis.",
+    "publisher": "BMC sports science, medicine & rehabilitation",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42760575/",
+    "excerpt": "Physical activity selectively reduces lipid peroxidation and enhances non-enzymatic antioxidant capacity without uniformly upregulating enzymatic defenses. However, due to substantial heterogeneity, moderate methodological quality, and potential publication bias for GSH, these findings should be interpreted cautiously as exploratory."
+   },
+   "createdAt": "2026-11-13T16:20:09.679Z"
+  },
+  {
+   "id": "quran:3:24",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Dies, weil sie sagen: „Das (Höllen)feuer wird uns nur für eine bestimmte Anzahl von …",
+   "source": {
+    "id": "quran:3:24",
+    "title": "Sure Ali 'Imran, 3:24",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/3/24",
+    "excerpt": "ذلك الانصراف عن الحق سببه اعتقاد فاسد لدى أهل الكتاب; بأنهم لن يعذَّبوا إلا أيامًا قليلة، وهذا الاعتقاد أدى إلى جرأتهم على الله واستهانتهم بدينه، واستمرارهم على دينهم الباطل الذي خَدَعوا به أنفسهم."
+   },
+   "createdAt": "2026-11-13T16:20:09.679Z",
+   "arabic": "ذَٰلِكَ بِأَنَّهُمْ قَالُوا۟ لَن تَمَسَّنَا ٱلنَّارُ إِلَّآ أَيَّامًا مَّعْدُودَٰتٍ ۖ وَغَرَّهُمْ فِى دِينِهِم مَّا كَانُوا۟ يَفْتَرُونَ",
+   "translation": "Dies, weil sie sagen: „Das (Höllen)feuer wird uns nur für eine bestimmte Anzahl von Tagen berühren. Was sie (an Lügen) zu ersinnen pflegten, hat sie über ihre Religion getäuscht.",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?"
+  },
+  {
+   "id": "quran:3:25",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Aber wie (wird es sein), wenn Wir sie zu einem Tag versammeln …",
+   "source": {
+    "id": "quran:3:25",
+    "title": "Sure Ali 'Imran, 3:25",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/3/25",
+    "excerpt": "فكيف يكون حالهم إذا جمعهم الله ليحاسَبوا في يوم لا شك في وقوعه -وهو يوم القيامة-، وأخذ كل واحد جزاءَ ما اكتسب، وهم لا يظلمون شيئا؟"
+   },
+   "createdAt": "2026-11-13T16:20:09.679Z",
+   "arabic": "فَكَيْفَ إِذَا جَمَعْنَـٰهُمْ لِيَوْمٍ لَّا رَيْبَ فِيهِ وَوُفِّيَتْ كُلُّ نَفْسٍ مَّا كَسَبَتْ وَهُمْ لَا يُظْلَمُونَ",
+   "translation": "Aber wie (wird es sein), wenn Wir sie zu einem Tag versammeln, an dem es keinen Zweifel gibt, und jeder Seele in vollem Maß zukommt, was sie verdient hat, und ihnen kein Unrecht zugefügt wird?",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?"
   }
  ]
 }
