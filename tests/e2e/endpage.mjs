@@ -233,8 +233,6 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     const ctx3 = await browser.newContext({ ...devices['iPhone 15'], serviceWorkers: 'block' });
     await ctx3.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
     await ctx3.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
-    // Runde 9: Audio-Slots sind sofort bereit, die Datei wird früher angefragt. Damit der Moment sicher nie spielbereit wird (und auch nicht als Fehler endet), bleibt die Anfrage offen.
-    await ctx3.route('https://stream.test/**', () => {});
     const p3 = await ctx3.newPage();
     await p3.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBody2 }));
     await p3.goto(`${url}?now=2026-10-23&seed=3#k=${k}`);
