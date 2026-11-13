@@ -18,6 +18,8 @@ export const WRITE_DELAY_MS = 10_000;
 /** Offline-Pause: Meldet der Browser das Netz nicht zurück (iOS lässt das online-Ereignis manchmal aus), endet sie nach 5 Minuten von selbst (Issue 45) */
 export const PAUSE_MAX_MS = 5 * 60_000;
 export const MAX_ATTEMPTS = 4;
+/** Runde 12: der erste Upload nach dem Öffnen wartet auf das erste PLAYING, höchstens so lange (ms). Downloads warten nie. */
+export const FIRST_WRITE_MAX_MS = 20_000;
 /** Unterscheidet sich nur das Diagnose-Protokoll, schreibt der Sync höchstens alle 5 Minuten, sofort beim Verlassen der App und bei Sync now (Entscheidung 31) */
 export const DIAG_FLUSH_MS = 5 * 60_000;
 /** Wartezeit nach einem Fehler, der sich von selbst erledigen kann: 15 s, 1 min, 5 min, dann alle 5 min (Issue 9) */
@@ -54,6 +56,10 @@ export interface SyncDeps {
   diag?(): readonly DiagEntry[];
   /** Eine Zeile ins Diagnose-Protokoll (Issue 45). Ohne Angabe geht sie in lib/diag.ts. */
   log?(line: string): void;
+  /** Runde 12: löst sich, sobald der erste Audio- oder Video-Moment spielt. Der erste Upload dieser Sitzung wartet darauf (höchstens FIRST_WRITE_MAX_MS), beim Verlassen der App und bei Sync now nie. Ohne Angabe wartet nichts. */
+  firstPlay?: () => Promise<void>;
+  /** Hat schon ein Moment gespielt? Dann wartet der erste Upload gar nicht. */
+  firstPlayed?: () => boolean;
   fetchImpl?: typeof fetch;
   now?: () => number;
   loadMeta?: () => Promise<{ lastSync?: number } | undefined>;
@@ -104,6 +110,36 @@ export function createSync(deps: SyncDeps): Sync {
   let lastDiagWrite = -Infinity;
   let lastDiagT = 0;
   let flushDiag = false;
+  /** Der erste Upload wartet nicht mehr (er hat gewartet, die App wurde verlassen, oder Sync now) und ein Aufruf, der das Warten gerade beendet */
+  let firstWriteOpen = !deps.firstPlay;
+  let releaseFirstWrite: ((why: string) => void) | null = null;
+  const openFirstWrite = (why: string) => {
+    firstWriteOpen = true;
+    releaseFirstWrite?.(why);
+  };
+  /** Wartet vor dem ersten Upload auf das erste PLAYING, höchstens FIRST_WRITE_MAX_MS. Gibt zurück, ob gewartet wurde. */
+  async function holdFirstWrite(): Promise<boolean> {
+    if (firstWriteOpen || !deps.firstPlay) return false;
+    if (deps.firstPlayed?.()) {
+      firstWriteOpen = true;
+      return false;
+    }
+    const t0 = now();
+    log('sync: first upload waits for first playback');
+    const why = await new Promise<string>((res) => {
+      const to = setTimeout(() => res('timeout'), FIRST_WRITE_MAX_MS);
+      const done = (w: string) => {
+        clearTimeout(to);
+        releaseFirstWrite = null;
+        res(w);
+      };
+      releaseFirstWrite = done;
+      void deps.firstPlay!().then(() => done('playing'), () => done('error'));
+    });
+    firstWriteOpen = true;
+    log(`sync: first upload released (${why}) after ${((now() - t0) / 1000).toFixed(1)} s`);
+    return true;
+  }
   const newestT = (l: readonly DiagEntry[]) => l.reduce((m, e) => Math.max(m, e.t), 0);
   const diagUnsynced = () => (deps.diag?.() ?? []).some((e) => e.t > lastDiagT);
 
@@ -170,6 +206,8 @@ export function createSync(deps: SyncDeps): Sync {
       }
       // Unterscheidet sich nur das Protokoll, ist Schreiben nicht dringend (jeder Start und jede Rückkehr würde sonst einen Commit machen)
       if (remoteDoc && canonNoDiag(merged) === rawNoDiag && !flushDiag && now() - lastDiagWrite < DIAG_FLUSH_MS) return;
+      // Runde 12: vor dem ersten Schreiben warten, bis der erste Moment spielt. Lesen und Zusammenführen sind schon geschehen und blieben davon unberührt.
+      if (await holdFirstWrite()) if (stopped) return;
       try {
         const stats = { bytes: 0 };
         const t0 = now();
@@ -273,6 +311,7 @@ export function createSync(deps: SyncDeps): Sync {
     },
     syncNow() {
       flushDiag = true;
+      openFirstWrite('sync now');
       return run(true);
     },
     visible(v) {
@@ -288,8 +327,14 @@ export function createSync(deps: SyncDeps): Sync {
         log('sync: pause ended on foreground, no online event came');
       }
       // Beim Verlassen sofort schreiben, was noch wartet. Beim Zurückkommen laden, was das andere Gerät geschrieben hat.
-      if (!v && !pending && !timer && !diagUnsynced()) return;
-      if (!v) flushDiag = true;
+      if (!v && !pending && !timer && !diagUnsynced()) {
+        openFirstWrite('app left');
+        return;
+      }
+      if (!v) {
+        flushDiag = true;
+        openFirstWrite('app left');
+      }
       void run();
     },
     offline() {

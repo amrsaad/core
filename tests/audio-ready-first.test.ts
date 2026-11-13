@@ -162,6 +162,8 @@ describe('Deck und Plan zusammen (Vorrat)', () => {
     const t = setup();
     t.deck.load(clip('now'), t.sink, { play: true, muted: false });
     await flush();
+    // Runde 12: der aktive Ausschnitt hat Daten (readyState 3), sonst stellt der Vorrat alle Netz-Abrufe bis auf einen zurück (das prüft audio-pool-adopt.test.ts)
+    t.els[0].readyState = 3;
     // Vorrat: der planmäßig nächste ist der langsame Barbell-Moment, dahinter zwei schnelle
     t.deck.fill([clip('slow'), clip('f1'), clip('f2')]);
     return t;
@@ -194,14 +196,17 @@ describe('Deck und Plan zusammen (Vorrat)', () => {
     expect(next.id).toBe('slow');
   });
 
-  it('ohne den Plan wäre der Wisch ein kalter Start gewesen und hätte den bereiten Eintrag verworfen (Befund 18:00)', async () => {
+  it('ohne den Plan wäre der Wisch auf den langsamen Eintrag früher ein kalter Start gewesen (Befund 18:00), Runde 12: das Element des Eintrags wird übernommen, nichts wird verworfen', async () => {
     const t = await boot();
     makeReady(t, 'f1');
     t.lines.length = 0;
+    const slowEl = elOf(t, 'slow');
     t.deck.load(clip('slow'), t.sink, { play: true, muted: false });
     await flush();
-    expect(t.lines.some((l) => /pool dropped slow \(started directly\)/.test(l))).toBe(true);
-    expect(t.lines.some((l) => /src net slow/.test(l))).toBe(true);
+    expect(t.lines.some((l) => /pool dropped slow/.test(l))).toBe(false);
+    expect(t.lines.some((l) => /src net slow/.test(l))).toBe(false);
+    expect(t.lines.some((l) => /^deck: pool adopt slow rs=0 meta=false after \d+ ms$/.test(l))).toBe(true);
+    expect(t.deck.element).toBe(slowEl);
   });
 
   it('(b) der planmäßig nächste ist bereit: Plan unverändert, Tausch auf ihn', async () => {
@@ -226,6 +231,8 @@ describe('Deck und Plan zusammen (Vorrat)', () => {
     const t = setup();
     t.deck.load(clip('now'), t.sink, { play: true, muted: false });
     await flush();
+    // Runde 12: aktiver Ausschnitt mit Daten, sonst stellt der Vorrat die Netz-Abrufe bis auf einen zurück
+    t.els[0].readyState = 3;
     t.deck.fill([clip('slow'), clip('f1'), clip('f2')]);
     makeReady(t, 'f1');
     makeReady(t, 'f2');

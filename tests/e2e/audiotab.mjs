@@ -145,7 +145,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     r.notes.iosTapMs = Date.now() - tStart;
     const d0 = await pi.evaluate(() => window.__core.diag());
     c.iosNeedsTapLine = d0.some((x) => /^audio: needs tap \S+ \(start\)$/.test(x));
-    c.iosPoolFilled = await waitFor(pi, () => window.__core.deck().ready >= 5, undefined, 8000);
+    // Runde 12 (Ziel B): solange der Start auf den Tipp wartet, läuft höchstens ein Vorlade-Abruf (weitere folgen alle 4 s), der Vorrat hält also mindestens den nächsten Moment bereit. Alle fünf nach dem Tipp.
+    c.iosPoolHoldsNextBeforeTap = await waitFor(pi, () => window.__core.deck().ready >= 1, undefined, 8000);
     // Länger als STILL_MS (6 s): keine Zeile "slow net", kein soundGuard, kein Watchdog, die Tippfläche bleibt
     await pi.waitForTimeout(7500);
     const d1 = await pi.evaluate(() => window.__core.diag());
@@ -155,6 +156,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await pi.mouse.click(vp.width / 2, vp.height / 2);
     c.iosTapPlays = await waitFor(pi, () => window.__core.state() === 1, undefined, 4000);
     c.iosTapGone = await waitFor(pi, () => !document.querySelector('[data-testid=tap-to-play]'), undefined, 2000);
+    c.iosPoolFilled = await waitFor(pi, () => window.__core.deck().ready >= 5, undefined, 8000);
     const needsBefore = (await pi.evaluate(() => window.__core.diag())).filter((x) => /needs tap|deck play refused/.test(x)).length;
     for (let n = 1; n <= 3; n++) {
       const before = await pi.evaluate(() => window.__core.idx());

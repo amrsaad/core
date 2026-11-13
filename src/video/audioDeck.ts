@@ -61,6 +61,9 @@ export const POOL = 5;
 /** Aus so vielen nächsten Momenten wählt der Vorrat seine POOL Ausschnitte, lokale zuerst (Brief 14b, Entscheidung 45). Entspricht dem Fenster der Vorrats-Tiefe (3 der nächsten 6). */
 export const POOL_WINDOW = 6;
 
+/** Runde 12: solange der aktive Moment nicht spielt, startet der Vorrat höchstens einen Netz-Abruf. Danach alle FILL_DEFER_MS einen weiteren, auch ohne dass der aktive spielt. */
+export const FILL_DEFER_MS = 4000;
+
 type Lane = 'plain' | 'level';
 
 /** Ein Element des Vorrats: hält den Anfang eines Ausschnitts fertig geladen (Entscheidung 47 und 52, Brief 11 und 14) */
@@ -206,6 +209,11 @@ export class AudioDeck {
   private lane: Lane = 'plain';
   /** Der Vorrat in Reihenfolge der Warteschlange (Brief 14): je Eintrag ein Element mit dem Anfang eines der nächsten Momente */
   private entries: PoolEntry[] = [];
+  /** Runde 12: letzter Aufruf von fill (für das Nachfüllen nach einer Zurückstellung), zusätzliche Netz-Abrufe durch den Zeitgeber, Zeile schon geschrieben, Zeitgeber */
+  private lastFill: { clips: readonly DeckClip[]; locOf: (key: string) => LocalClip | undefined; activePending: boolean } | null = null;
+  private extraNet = 0;
+  private deferNoted = false;
+  private deferTimer: ReturnType<typeof setTimeout> | null = null;
   /** Der Vorrat wurde verbraucht oder verworfen: sobald er wieder voll ist, meldet das Deck "pool refill" */
   private depleted = false;
   /** Elemente, auf denen ein play() in einer Geste wirklich angenommen wurde (Promise erfüllt). iOS erlaubt nur ihnen später play() ohne Geste. Ein Versuch allein zählt nicht. */
@@ -385,6 +393,8 @@ export class AudioDeck {
       }
       this.live = true;
       this.played = true;
+      // Runde 12: der aktive Moment spielt, zurückgestellte Vorlade-Abrufe starten jetzt (bis POOL)
+      if (this.deferNoted) this.refillDeferred();
       this.onMedia?.('playing');
       this.loading(false);
       this.snd = reduceSound(this.snd, 'playing', el);
@@ -537,9 +547,10 @@ export class AudioDeck {
       }
     }
     this.holding = null;
-    // Der Vorrat hält genau diesen Ausschnitt, aber er wird hier direkt gestartet: der Eintrag ist überholt, das Element wird frei
+    // Runde 12: der Vorrat hält genau diesen Ausschnitt. Sein Element wird übernommen, auch wenn es noch lädt (es hat schon Bytes an der richtigen Stelle).
+    // Verworfen wird nur ein Eintrag mit Fehler oder einer Spur, die nicht mehr passt, dann lädt der Start das Element neu.
     const inPool = this.entries.find((x) => x.clip.key === clip.key);
-    if (inPool) this.dropEntry(inPool, 'started directly');
+    if (inPool && this.adopt(inPool, play, forcePlain, from)) return;
     const loc = this.deps.local(clip.key);
     // Spurwahl (Lautheit): das Element der Spur, bei Misserfolg der Kette das unveränderte
     const pick = this.deps.lane?.(clip, !!loc, forcePlain) ?? { lane: 'plain' as const, why: 'no value' };
@@ -731,8 +742,9 @@ export class AudioDeck {
    * Brief 22 (Entscheidung 57): der Vorrat füllt sich sofort beim Start, vor dem ersten play() und vor der ersten Geste. Die Geste holt unlock() nach:
    * sie spielt jedes Element des Vorrats, das sie noch nicht gesehen hat, stumm an und hält es gleich wieder an (gesturePool).
    */
-  fill(clips: readonly DeckClip[], locOf: (key: string) => LocalClip | undefined = this.deps.local): number {
+  fill(clips: readonly DeckClip[], locOf: (key: string) => LocalClip | undefined = this.deps.local, activePending = false): number {
     if (!this.deps.standby || this.hidden()) return this.entries.length;
+    this.lastFill = { clips, locOf, activePending };
     const cand: DeckClip[] = [];
     for (const c of clips) {
       if (this.clip?.key === c.key && !this.done) continue;
@@ -764,7 +776,39 @@ export class AudioDeck {
     }
     // Lokale Quellen zuerst: sie sind in Millisekunden bereit, das Netz braucht Sekunden
     const missing = want.filter((c) => !this.entries.some((e) => e.clip.key === c.key));
-    const order = [...missing.filter((c) => loc.get(c.key)), ...missing.filter((c) => !loc.get(c.key))];
+    let order = [...missing.filter((c) => loc.get(c.key)), ...missing.filter((c) => !loc.get(c.key))];
+    // Runde 12: Vorrang für den aktiven Moment. Spielt er noch nicht, läuft höchstens ein Netz-Abruf (der für den nächsten Moment, er steht in der Reihenfolge vorn).
+    // Lokale Quellen kosten kein Netz und laufen immer. Die übrigen starten, sobald der aktive spielt, oder nach FILL_DEFER_MS nacheinander.
+    let deferred = 0;
+    if (this.activeBusy(activePending)) {
+      let room = Math.max(0, 1 + this.extraNet - this.entries.filter((e) => !e.local && !e.ready).length);
+      order = order.filter((c) => {
+        if (loc.get(c.key)) return true;
+        if (room > 0) {
+          room--;
+          return true;
+        }
+        deferred++;
+        return false;
+      });
+    } else this.extraNet = 0;
+    if (deferred > 0) {
+      if (!this.deferNoted) {
+        this.deferNoted = true;
+        this.diag('deck: pool fill deferred (active not playing)');
+      }
+      if (!this.deferTimer) {
+        this.deferTimer = setTimeout(() => {
+          this.deferTimer = null;
+          this.extraNet++;
+          this.refillDeferred();
+        }, FILL_DEFER_MS);
+      }
+    } else {
+      this.deferNoted = false;
+      if (this.deferTimer) clearTimeout(this.deferTimer);
+      this.deferTimer = null;
+    }
     for (const c of order) {
       this.startEntry(c, loc.get(c.key));
       changed = true;
@@ -777,6 +821,20 @@ export class AudioDeck {
       this.diag(`deck: pool fill ${this.entries.length}/${POOL} (local ${local}, net ${this.entries.length - local})`);
     }
     return this.entries.length;
+  }
+
+  /** Der aktive Moment spielt noch nicht: kein playing und weniger als readyState 3. Ohne aktiven Ausschnitt zählt er nur, wenn der Host einen erwartet (activePending, Kaltstart). */
+  private activeBusy(activePending: boolean): boolean {
+    if (this.live) return false;
+    if (this.clip && !this.done) return (this.el?.readyState ?? 0) < 3;
+    return activePending;
+  }
+
+  /** Zurückgestellte Vorlade-Abrufe nachholen (aktiver Moment spielt, oder die Frist ist um) */
+  private refillDeferred() {
+    const l = this.lastFill;
+    if (!l || this.hidden()) return;
+    this.fill(l.clips, l.locOf, l.activePending);
   }
 
   /** Einen Ausschnitt in ein freies Element laden (aus dem Vorrat lokal bevorzugt, sonst Netz). Nur sichtbar aufgerufen. */
@@ -916,26 +974,51 @@ export class AudioDeck {
     return this.entries.some((e) => this.usable(e)) ? 'swap' : 'stay';
   }
 
-  /** Tausch auf den Eintrag mit diesem Schlüssel (Wisch auf einen Moment, den der Vorrat fertig hält). false, wenn er nicht bereit ist. */
+  /**
+   * Tausch auf den Eintrag mit diesem Schlüssel (Wisch auf einen Moment, den der Vorrat hält). Runde 12: auch ein Eintrag, der noch lädt, wird übernommen
+   * (siehe adopt). false nur bei Fehler, verworfenem Element oder nicht mehr passender Spur, dann lädt der Aufrufer neu.
+   */
   private swapKey(key: string, sink: DeckSink | null): boolean {
     const e = this.entries.find((x) => x.clip.key === key);
-    if (!e || !this.usable(e)) return false;
-    if (e.lane === 'level' && this.deps.running && !this.deps.running()) {
-      this.diag(`deck: swap ${e.clip.id} ready=false (context not running)`);
-      this.depleted = true;
-      this.dropEntry(e, 'context not running');
+    if (!e) return false;
+    return this.adopt(e, true, false, e.clip.start, sink);
+  }
+
+  /**
+   * Eintrag des Vorrats für den Start dieses Ausschnitts übernehmen, bereit oder nicht. Gründe für false (der Eintrag fällt dann heraus, der Start lädt neu):
+   * - Fehler im Element (error)
+   * - iOS hat das Element verworfen (war bereit, readyState jetzt 0)
+   * - die geregelte Spur, aber der Web-Audio-Kontext läuft nicht, oder der Start verlangt die unveränderte Spur (forcePlain)
+   * Spur, Kette und Anpassung der Lautheit kommen mit dem Eintrag (swapEntry). iOS: das play() läuft auf dem Element des Eintrags. Hat es keine Freigabe und
+   * kommt der Aufruf nicht aus einer Geste, lehnt iOS ab (NotAllowedError), dann zeigt der Host die Tippfläche und der Tipp startet es (unlock, kick).
+   */
+  private adopt(e: PoolEntry, play: boolean, forcePlain: boolean, from: number, sink?: DeckSink | null): boolean {
+    if (e.el.error) {
+      this.dropEntry(e, 'error');
       return false;
     }
-    this.swapEntry(e, sink);
+    if (e.ready && !this.usable(e)) {
+      this.evict(e);
+      return false;
+    }
+    if (e.lane === 'level' && (forcePlain || (this.deps.running && !this.deps.running()))) {
+      this.diag(`deck: swap ${e.clip.id} ready=false (${forcePlain ? 'plain lane required' : 'context not running'})`);
+      this.depleted = true;
+      this.dropEntry(e, forcePlain ? 'plain lane required' : 'context not running');
+      return false;
+    }
+    this.swapEntry(e, sink ?? null, { keepSink: sink === undefined, play, from });
     return true;
   }
 
-  private swapEntry(s: PoolEntry, sink: DeckSink | null): DeckClip {
+  private swapEntry(s: PoolEntry, sink: DeckSink | null, via?: { keepSink: boolean; play: boolean; from: number }): DeckClip {
     const old = this.el;
     const clip = s.clip;
     const el = s.el;
+    const play = via?.play ?? true;
     this.entries = this.entries.filter((x) => x !== s);
     this.depleted = true;
+    this.extraNet = 0;
     if (old) el.muted = old.muted;
     this.el = el;
     this.lane = s.lane;
@@ -948,27 +1031,35 @@ export class AudioDeck {
     this.nudged = false;
     this.live = false;
     this.played = false;
-    this.want = true;
+    this.want = play;
     this.inflightAt = 0;
     this.kickTok++;
     this.skipNoted = false;
     this.needTapKey = '';
     this.offset = s.offset;
     this.isLocal = s.local;
-    this.resumeFrom = clip.start;
-    this.target = s.target;
+    // Ein Start ab anderer Stelle (Wiederaufnahme) setzt die Position des Eintrags neu
+    const from = via?.from ?? clip.start;
+    this.resumeFrom = from;
+    this.target = from === clip.start ? s.target : Math.max(0, from - s.offset);
     this.history.push(clip.key);
     if (this.history.length > 200) this.history.shift();
     this.snd = { muted: isSilent(el), playing: false, refused: false };
     // Der alte Player gibt ab (wie beim automatischen Weiter), der neue übernimmt später über load(), das den laufenden Ausschnitt erkennt (holds)
     // Der Sink steht vor dem play(): ein Element meldet "playing" auch synchron, der neue Player soll den Zustand nie verpassen
-    this.sink = sink;
+    if (!via?.keepSink) this.sink = sink;
     this.applyRate(el);
-    this.diag(`deck: swap ${clip.id} ready=true pool=${this.readyCount()}`);
-    this.kick('swap');
+    if (s.ready) this.diag(`deck: swap ${clip.id} ready=true pool=${this.readyCount()}`);
+    else {
+      // Runde 12: der Eintrag lädt noch. Sein Element behält Quelle und Bytes, nach den Metadaten springt seek(true) an die Position (loadedmetadata, mine).
+      this.diag(`deck: pool adopt ${clip.id} rs=${el.readyState} meta=${s.meta} after ${Date.now() - s.t0} ms`);
+      if (s.meta) this.seek(true);
+      this.loading(!s.local && el.readyState < 3);
+    }
+    if (play) this.kick('swap');
     // Das alte Element geht frei in den Vorrat zurück: pausiert, Quelle bleibt bis zur nächsten Befüllung (kein load() verdeckt)
     if (old && old !== el) this.halt(old, 'app: swap');
-    this.deps.playbackState?.('playing', 'swap');
+    if (play) this.deps.playbackState?.('playing', 'swap');
     return clip;
   }
 
@@ -1126,6 +1217,10 @@ export class AudioDeck {
     this.diag = () => {};
     this.entries = [];
     this.depleted = false;
+    if (this.deferTimer) clearTimeout(this.deferTimer);
+    this.deferTimer = null;
+    this.deferNoted = false;
+    this.lastFill = null;
     this.sink = null;
     this.want = false;
     this.done = true;

@@ -7,6 +7,7 @@ import { createSync, type Sync, type SyncStatus } from './controller';
 import { canon, onlyFeedTimeChanged, syncedChanged, type SyncDoc } from './merge';
 import type { DigestLatest } from '../../moments/digest';
 import { diagLog } from '../diag';
+import { hasFirstPlayed, waitFirstPlay } from './firstPlay';
 
 export interface SyncUi {
   status: SyncStatus;
@@ -35,6 +36,8 @@ export function useSync(state: AppState | null, access: SyncAccess, enabled: boo
       resolve: (d) => (resolveRef.current ? resolveRef.current(d) : d),
       getKey: syncKey,
       getToken: loadToken,
+      firstPlay: waitFirstPlay,
+      firstPlayed: hasFirstPlayed,
       diag: () => diagLog.entries(),
       adoptDigest: (l: DigestLatest) => access.adopt((st) => (st.digestLatest && canon(st.digestLatest) === canon(l) ? st : { ...st, digestLatest: l })),
       loadMeta: loadSyncMeta,

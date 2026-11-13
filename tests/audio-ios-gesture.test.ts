@@ -130,6 +130,8 @@ afterEach(() => {
 async function coldStart(t: T) {
   t.deck.load(clip('a'), t.sink, { play: true, muted: false });
   await flush();
+  // Runde 12: der aktive Ausschnitt hat Daten (readyState 3), sonst stellt der Vorrat alle Netz-Abrufe bis auf einen zurück. Dieser Test prüft die Freischaltung, nicht die Zurückstellung.
+  (t.deck.element as IosEl).readyState = 3;
   fillPool(t, IDS);
 }
 

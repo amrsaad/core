@@ -1,6 +1,7 @@
 import { describeMedia, holdsNeighbor, needsLoad, type MediaItem } from './slotplan';
 import { notesRow } from './notesrow';
 import { diagLog, netType } from '../lib/diag';
+import { markFirstPlay } from '../lib/sync/firstPlay';
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal, flushSync } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
@@ -1093,7 +1094,10 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       const c = deckClipOf(m);
       if (c) clips.push(c);
     }
-    audioDeck.fill(clips);
+    // Runde 12: der aktuelle Audio-Moment ist noch nicht im Deck (Kaltstart, fill kommt vor dem ersten play): der Vorrat startet dann höchstens einen Netz-Abruf
+    const curM = queue.current[idxRef.current];
+    const activePending = !!curM && formOf(curM) === 'audio' && !audioDeck.holds(keyOf(curM));
+    audioDeck.fill(clips, undefined, activePending);
   };
   const fillPoolRef = useRef(fillPool);
   fillPoolRef.current = fillPool;
@@ -1761,6 +1765,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                   if (st === STATE.PLAYING) {
                     slot.playedAt ||= performance.now();
                     openGate('first playing');
+                    // Runde 12: der erste Sync-Upload nach dem Öffnen wartet auf dieses erste PLAYING
+                    markFirstPlay();
                     startCover(slot);
                   } else {
                     syncCover(slot);
