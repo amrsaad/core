@@ -80,7 +80,7 @@ describe('Zustand mit alter ID wird umgestellt', () => {
   it('der Save zeigt den aktuellen Moment aus dem Pool (neuer Start, neue Untertitel), savedAt bleibt', () => {
     expect(Object.keys(s.savedMoments).sort()).toEqual([NEW, OTHER].sort());
     expect(s.savedMoments[NEW].moment).toEqual(fresh);
-    expect(s.savedMoments[NEW].moment.start).toBe(586.49);
+    expect(s.savedMoments[NEW].moment!.start).toBe(586.49);
     expect(s.savedMoments[NEW].savedAt).toBe('2026-10-28T10:00:00Z');
     expect(s.savedMoments[OTHER]).toEqual(oldState().savedMoments[OTHER]);
   });
@@ -151,7 +151,7 @@ describe('Sync mit einem Gerät, das noch alte IDs hat', () => {
     const b: AppState = { ...oldState(), syncTs: { [`saved:${OLD}`]: 12_000 } };
     const a: AppState = { ...emptyState(), syncTs: { [`saved:${NEW}`]: 9_000 } };
     const merged = mergeDocs(toDoc(a), migrateDoc(toDoc(b), idx));
-    expect(merged.state.savedMoments[NEW].moment.start).toBe(586.49);
+    expect(merged.state.savedMoments[NEW].moment!.start).toBe(586.49);
   });
 
   it('Reihenfolge egal: zwei umgestellte Dokumente führen zum gleichen Ergebnis, und danach ist nichts mehr umzustellen', () => {

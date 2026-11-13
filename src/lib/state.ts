@@ -48,8 +48,24 @@ export interface Settings {
   playbackRate?: Rate;
 }
 
+/** Kleiner Rest eines gemerkten Moments: genug für die Liste und den Link zur Quelle, wenn der Moment nicht mehr im Pool ist */
+export interface SavedStub {
+  id: string;
+  hook: string;
+  channel?: string;
+  videoTitle?: string;
+  url?: string;
+  area?: string;
+  form?: string;
+  start?: number;
+  end?: number;
+}
+
 export interface SavedMoment {
-  moment: Moment;
+  /** Altformat, nur noch in alten Ständen oder wenn der Moment nicht im Pool ist. slimSaved entfernt es, sobald der Pool den Moment kennt. */
+  moment?: Moment;
+  /** Kleiner Rest, bei neuen Einträgen immer gesetzt */
+  stub?: SavedStub;
   savedAt: string;
   /** im Wochenrückblick als umgesetzt markiert */
   done?: boolean;

@@ -59,7 +59,7 @@ describe('Sync mit Alias-Auflösung', () => {
     const fresh = device(api, true);
     await fresh.sync.syncNow();
     expect(Object.keys(fresh.state.savedMoments)).toEqual([NEW]);
-    expect(fresh.state.savedMoments[NEW].moment.id).toBe(NEW);
+    expect(fresh.state.savedMoments[NEW].moment!.id).toBe(NEW);
     expect(Object.keys(fresh.state.momentSeen)).toEqual([NEW]);
     expect(api.puts).toBe(2);
     const file = await decryptDoc(await key(), api.file!.text);

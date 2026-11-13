@@ -20,7 +20,7 @@
  * - Signale (moments/signals.ts): Zähler je Feld und Tag der größere Wert, missed vereinigt je Moment-ID mit dem jüngsten Eintrag, höchstens 20.
  * - Diagnose (lib/diag.ts, Entscheidung 31): Zeilen vereinigt nach Zeit, die letzten 500 bleiben. Das Feld löst allein keinen Sync aus (nicht in syncedChanged).
  */
-import type { AppState, SavedMoment, Settings, Swipe } from '../state';
+import type { AppState, SavedMoment, SavedStub, Settings, Swipe } from '../state';
 import type { Weights } from '../../moments/mix';
 import type { Moment, MomentLogEntry } from '../../moments/types';
 import type { DayCount } from '../../moments/today';
@@ -202,8 +202,23 @@ const pickMoment = (x: Moment, y: Moment): Moment => {
   return c >= 0 ? x : y;
 };
 
+/** Zwei stubs derselben ID: der mit dem größeren JSON-String, bei gleicher Länge der lexikografisch größere. Unabhängig von der Reihenfolge. */
+const pickStub = (x: SavedStub, y: SavedStub): SavedStub => {
+  const a = JSON.stringify(x);
+  const b = JSON.stringify(y);
+  return a.length !== b.length ? (a.length > b.length ? x : y) : a >= b ? x : y;
+};
+
+/**
+ * Alle Mischformen (alt/alt, neu/neu, alt/neu): hat eine Seite moment, bleibt es (das Verkleinern mit Pool-Wissen entscheidet später),
+ * stub kommt deterministisch von einer Seite. savedAt das frühere, done ODER.
+ */
 export const combineSaved = (x: SavedMoment, y: SavedMoment): SavedMoment => {
-  const out: SavedMoment = { moment: pickMoment(x.moment, y.moment), savedAt: cmp(x.savedAt, y.savedAt) <= 0 ? x.savedAt : y.savedAt };
+  const out: SavedMoment = { savedAt: cmp(x.savedAt, y.savedAt) <= 0 ? x.savedAt : y.savedAt };
+  const moment = x.moment && y.moment ? pickMoment(x.moment, y.moment) : (x.moment ?? y.moment);
+  if (moment) out.moment = moment;
+  const stub = x.stub && y.stub ? pickStub(x.stub, y.stub) : (x.stub ?? y.stub);
+  if (stub) out.stub = stub;
   if (x.done || y.done) out.done = true;
   return out;
 };

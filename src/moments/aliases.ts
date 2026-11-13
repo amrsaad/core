@@ -112,9 +112,10 @@ export function migrateDoc(d: SyncDoc, idx: AliasIndex): SyncDoc {
   const saved = sv.obj;
   // Gemerkte Momente zeigen das Abbild aus dem Pool (Start, Ende und Untertitel der aktuellen Fassung)
   for (const [k, v] of Object.entries(saved)) {
-    if (v.moment.id === k) continue;
-    const cur = idx.byId.get(k);
-    saved[k] = { ...v, moment: cur ?? { ...v.moment, id: k } };
+    let e = v;
+    if (e.moment && e.moment.id !== k) e = { ...e, moment: idx.byId.get(k) ?? { ...e.moment, id: k } };
+    if (e.stub && e.stub.id !== k) e = { ...e, stub: { ...e.stub, id: k } };
+    if (e !== v) saved[k] = e;
   }
   const recall: RecallState = {};
   for (const k of Object.keys(s.recall).sort((p, q) => Number(has(idx, p)) - Number(has(idx, q)) || (p < q ? -1 : 1))) {

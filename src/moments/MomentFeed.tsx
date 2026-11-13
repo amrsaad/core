@@ -58,6 +58,7 @@ import { FocusSheet } from '../components/FocusSheet';
 import { Icon } from '../components/Icon';
 import type { IconName } from '../components/icons';
 import { atTime } from './hook';
+import { newSaved, resolveSaved } from './saved';
 import { focusTabText } from '../components/head';
 import { statusOf } from '../components/status';
 import { Ambient } from './Ambient';
@@ -1014,8 +1015,9 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
 
   const [recall, setRecall] = useState<{ m: Moment; review: boolean } | null>(null);
   // Abrufkarten nehmen nur Momente aus dem Fokus (Entscheidung 39)
+  const poolById = useMemo(() => new Map(pool.map((x) => [x.id, x])), [pool]);
   const findMoment = (id: string): Moment | undefined => {
-    const m = stateRef.current.savedMoments[id]?.moment ?? pool.find((x) => x.id === id);
+    const m = resolveSaved(stateRef.current.savedMoments[id], id, poolById) ?? undefined;
     const f = focusRef.current;
     return m && focusActive(f, clockNow().getTime()) && !inFocus(m, f) ? undefined : m;
   };
@@ -2432,7 +2434,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     if (!m) return;
     navigator.vibrate?.(10);
     if (!stateRef.current.savedMoments[m.id]) {
-      update((s) => bumpCell({ ...s, savedMoments: { ...s.savedMoments, [m.id]: { moment: m, savedAt: new Date().toISOString() } }, momentWeights: signal(s.momentWeights, m, SIGNAL.save, clockNow().getTime()) }, today, hourKey(clockNow()), m, 'saves'));
+      update((s) => bumpCell({ ...s, savedMoments: { ...s.savedMoments, [m.id]: newSaved(m, new Date().toISOString()) }, momentWeights: signal(s.momentWeights, m, SIGNAL.save, clockNow().getTime()) }, today, hourKey(clockNow()), m, 'saves'));
       return;
     }
     update((s) => {

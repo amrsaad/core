@@ -18,6 +18,8 @@ import type { MomentPool } from './moments/types';
 import { Settings } from './screens/Settings';
 import type { Form } from './moments/form';
 import { nextRate, rateOf } from './lib/state';
+import { diagLog } from './lib/diag';
+import { countSlimmable, slimSaved } from './moments/saved';
 
 // v1 (Karten) und v2 (Shorts) bleiben im Code, sind aber nicht mehr in der Navigation.
 type Tab = 'feed' | 'saved' | 'settings';
@@ -45,13 +47,32 @@ export default function App() {
   // Geräte-Sync: sobald Zustand und Pool-Schlüssel da sind
   // Alte Moment-IDs (aliases im Pool) auf aktuelle umstellen: Saves, Gesehen, Protokoll, Herzen, Notizen, Abrufplan. Auch für den Stand vom anderen Gerät.
   const aliases = useMemo(() => (vault.status === 'open' ? buildAliasIndex(vault.pool.moments) : NO_ALIASES), [vault]);
-  const resolveDoc = useCallback((d: Parameters<typeof migrateDoc>[0]) => migrateDoc(d, aliases), [aliases]);
+  // Gemerkte Momente nur als Verweis: der Pool kennt die Fassung, der Eintrag braucht keine Kopie (slimSaved, Runde 11)
+  const slimDoc = useCallback(
+    (d: Parameters<typeof migrateDoc>[0]) => {
+      const sv = slimSaved(d.state.savedMoments, aliases.byId);
+      return sv === d.state.savedMoments ? d : { ...d, state: { ...d.state, savedMoments: sv } };
+    },
+    [aliases],
+  );
+  // Auch für den Stand vom anderen Gerät, vor dem Zusammenführen: so bringt ein alter Stand das volle moment nicht zurück
+  const resolveDoc = useCallback((d: Parameters<typeof migrateDoc>[0]) => slimDoc(migrateDoc(d, aliases)), [aliases, slimDoc]);
   const sync = useSync(state, access, !!state && vault.status === 'open', resolveDoc);
   const stateReady = !!state;
   useEffect(() => {
     // Einmal pro Pool, ohne neue Zeitstempel (adopt). Danach ist der Stand migriert und die Funktion tut nichts mehr.
     if (stateReady) access.adopt((s) => migrateState(s, aliases));
   }, [stateReady, aliases, access]);
+
+  const savedNow = state?.savedMoments;
+  useEffect(() => {
+    // Nach dem Laden des Pools und nach jeder Übernahme vom Sync: Altformat verkleinern. Ohne Änderung tut es nichts (gleicher Verweis, kein Schreiben).
+    if (!savedNow || vault.status !== 'open') return;
+    const next = slimSaved(savedNow, aliases.byId);
+    if (next === savedNow) return;
+    diagLog.push(`saved: slimmed ${countSlimmable(savedNow, aliases.byId)} of ${Object.keys(savedNow).length}`);
+    access.adopt((s) => (s.savedMoments === savedNow ? { ...s, savedMoments: next } : s));
+  }, [savedNow, vault.status, aliases, access]);
 
   useEffect(() => {
     // Einmalig auf die Regeln von Entscheidung 38 (Issue 28): niedrige Kanal- und Themagewichte aus Not for me und Skips anheben.
@@ -121,11 +142,11 @@ export default function App() {
         />
       </div>
       {desk && <aside ref={setPanel} className="dpanel" data-testid="desk-aside" data-nowheel aria-label="Moment" />}
-      {!desk && tab === 'saved' && <SavedMoments state={state} update={update} />}
+      {!desk && tab === 'saved' && <SavedMoments state={state} update={update} pool={vault.pool.moments} />}
       {!desk && tab === 'settings' && <Settings state={state} update={update} replace={replace} moments={vault.pool} skipped={vault.skipped} sync={sync} />}
       {desk && tab !== 'feed' && (
         <DeskSheet title={NAMES[tab]} onClose={() => setTab('feed')}>
-          {tab === 'saved' ? <SavedMoments state={state} update={update} /> : <Settings state={state} update={update} replace={replace} moments={vault.pool} skipped={vault.skipped} sync={sync} />}
+          {tab === 'saved' ? <SavedMoments state={state} update={update} pool={vault.pool.moments} /> : <Settings state={state} update={update} replace={replace} moments={vault.pool} skipped={vault.skipped} sync={sync} />}
         </DeskSheet>
       )}
       {desk && help && <DeskHelp onClose={() => setHelp(false)} />}
