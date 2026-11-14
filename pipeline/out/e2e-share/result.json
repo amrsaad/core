@@ -1,5 +1,5 @@
 {
- "at": "2026-11-14T04:34:21.690Z",
+ "at": "2026-11-14T05:10:38.617Z",
  "runs": [
   {
    "variant": "webkit",
@@ -64,16 +64,16 @@
    },
    "linkLength": 134,
    "copied": "Share hook 0\n\nContext one 0. Context two 0.\n\nKanal 0 · Folge 0 · 1:40\n\nhttp://127.0.0.1:4191/core/clip/#zq1YqU7Iy1FFKU7JSKstMSc1X0lEqBrKLMxKLDCAAKJIIVGNgoKOUBKTNgHQOUEVqHlAiBcjIKSkCsjKArGCgplSFjPz8bAUDpVoA",
-   "arId": "shar0000013:100",
+   "arId": "shar0000012:100",
    "payloadAudio": {
     "v": 1,
     "f": "audio",
-    "s": "https://stream.test/ep13.mp3",
+    "s": "https://stream.test/ep12.mp3",
     "a": 100,
     "b": 160,
     "l": "ar",
     "d": "rtl",
-    "h": "العين لا تنام 13"
+    "h": "العين لا تنام 12"
    },
    "linkLengthAudio": 182,
    "clip": {
@@ -94,8 +94,8 @@
     "fg": "rgb(255, 255, 255)",
     "nothingLocked": true
    },
-   "audioT0": 3.023287153,
-   "audioT1": 5.009226393,
+   "audioT0": 3.02784106,
+   "audioT1": 5.008384111,
    "ar": {
     "dir": "rtl",
     "html": "rtl",
@@ -212,7 +212,7 @@
     "nothingLocked": true
    },
    "audioT0": 3,
-   "audioT1": 5.023522,
+   "audioT1": 5.013766,
    "ar": {
     "dir": "rtl",
     "html": "rtl",
