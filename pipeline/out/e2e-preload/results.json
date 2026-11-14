@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-14T20:35:47.882Z",
+  "at": "2026-11-14T21:29:42.297Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -21,9 +21,9 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1632,
+        "coldStartMs": 1676,
         "rangeFetchesAfterStart": 0,
-        "requestsAfterStart": 7,
+        "requestsAfterStart": 6,
         "stockLines": [],
         "poorYoutubeOf120": 58,
         "normalYoutubeOf120": 68,
