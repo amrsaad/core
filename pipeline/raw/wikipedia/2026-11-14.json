@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-14",
+ "records": [
+  {
+   "sourceId": "wiki:de:Totenhütte von Benzingerode",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Totenh%C3%BCtte_von_Benzingerode",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/14",
+    "status": 200
+   },
+   "title": "Totenhütte von Benzingerode",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Totenhütte von Benzingerode ist ein bei archäologischen Untersuchungen im Nordosten von Benzingerode im nördlichen Harz entdecktes Gemeinschaftsgrab, das anhand der geborgenen Funde der jungsteinzeitlichen Bernburger Kultur zugeordnet werden kann."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-14T04:18:54.758Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Totenh%C3%BCtte_von_Benzingerode": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Mars (Planet)",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Mars_(Planet)",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/14",
+    "status": 200
+   },
+   "title": "Mars (Planet)",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Der Mars ist, von der Sonne aus gezählt, der vierte Planet im Sonnensystem und der äußere Nachbar der Erde. Er zählt zu den erdähnlichen (terrestrischen) Planeten."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-14T04:18:54.758Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Mars_(Planet)": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Petra Rossner",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Petra_Rossner",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/14",
+    "status": 200
+   },
+   "title": "Petra Rossner",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Petra Rossner ist eine ehemalige deutsche Radrennfahrerin. Nach ihrer Zeit als Aktive nach Ende der Saison 2004 wurde sie Trainerin des Team Columbia."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-14T04:18:54.758Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Petra_Rossner": 200
+   }
+  }
+ ]
+}
