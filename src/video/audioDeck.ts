@@ -31,6 +31,9 @@ const CONTEXT_GRACE_MS = 1500;
 /** Wie lange der erste Start auf die Blob-URL aus dem Vorrat wartet, bevor er vom Netz kommt (ms, Kaltstart, Brief 02) */
 const HOLD_MS = 1200;
 
+/** Runde 13: Abstände der Neustarts, wenn iOS direkt nach dem Sprung an die Startstelle ein "ended" meldet, ohne dass der Ausschnitt gespielt wurde (ms). Drei Versuche je Ausschnitt. */
+export const EARLY_RESTART_MS = [150, 400, 1000];
+
 /** So lange nach einem play() ohne Ergebnis hält der Deck weitere Anstöße (soundGuard, play des Feeds, canplay) vom selben Ausschnitt zurück, auch ohne Metadaten */
 const KICK_INFLIGHT_MS = 1500;
 
@@ -40,7 +43,8 @@ const KICK_INFLIGHT_MS = 1500;
  * binnen 2 s auf demselben Ausschnitt. Ein neuer Ausschnitt (start, swap) ist nie betroffen.
  */
 export function skipKick(s: { inflightAt: number; readyState: number }, now: number, why: string): boolean {
-  if (why === 'start' || why === 'swap') return false;
+  // Ein Neustart nach vorzeitigem ended ersetzt das stille play() des Starts (es bleibt auf iOS für immer offen), die Versuche bremsen sich selbst über ihre Zeitgeber
+  if (why === 'start' || why === 'swap' || why === 'restart') return false;
   if (s.inflightAt <= 0) return false;
   return s.readyState < 1 || now - s.inflightAt < KICK_INFLIGHT_MS;
 }
@@ -271,6 +275,10 @@ export class AudioDeck {
   private inflightAt = 0;
   private kickTok = 0;
   private skipNoted = false;
+  /** Runde 13: Zahl der Neustarts nach vorzeitigem ended für den aktuellen Ausschnitt, Zeitgeber des nächsten Versuchs, Aufgabe-Zeile schon geschrieben */
+  private earlyN = 0;
+  private earlyTimer: ReturnType<typeof setTimeout> | null = null;
+  private earlyGaveUp = false;
   /** Wer ein Element zuletzt angehalten hat (Diagnose, Issue 13): "app: wo". Fehlt der Eintrag beim pause-Ereignis, kam die Pause vom System. */
   private pauseBy = new WeakMap<DeckEl, string>();
   /** Ereignisse, die kamen, während die Seite im Hintergrund stand (Diagnose: laufen die Handler dort überhaupt) */
@@ -429,7 +437,11 @@ export class AudioDeck {
       if (!el.paused || this.done) return;
       // Am Ende der Quelle kommt pause vor ended. Das ist kein Anhalten: sonst meldet die App Pause, die Media Session steht auf paused,
       // und der Sperrbildschirm zeigt Pause, während der Ende-Handler gleich den nächsten Moment startet.
-      if (el.ended) return;
+      if (el.ended) {
+        // Runde 13: kam das Ende, ohne dass der Ausschnitt je spielte, ist es vorzeitig (iOS, stummer Start): neu starten
+        if (!this.played) this.earlyEnded(el);
+        return;
+      }
       this.live = false;
       this.sink?.state(PAUSED);
     });
@@ -443,6 +455,7 @@ export class AudioDeck {
       if (mine() && this.hidden()) this.hiddenStats.ended++;
       if (mine()) this.note(`ended event played=${this.played} hidden=${this.hidden()} ${this.stateText(el)}`);
       if (mine() && this.played) this.clipEnd('ended');
+      else if (mine()) this.earlyEnded(el);
     });
     el.addEventListener('timeupdate', () => {
       if (mine()) this.tick(el);
@@ -518,6 +531,60 @@ export class AudioDeck {
     });
   }
 
+  /** Neuer Ausschnitt im Element: Zähler und Zeitgeber der Neustarts zurücksetzen */
+  private resetEarly() {
+    this.earlyN = 0;
+    this.earlyGaveUp = false;
+    if (this.earlyTimer) clearTimeout(this.earlyTimer);
+    this.earlyTimer = null;
+  }
+
+  /**
+   * Runde 13 (Diag 14.11. 05:47): iOS meldete 29 ms nach dem Sprung an die Startstelle "ended" (played=false, rs=4) und pausierte das Element. Das play() des Starts
+   * blieb offen, und niemand rief es erneut auf, bis ein Tipp kam. Jetzt: springt zurück an die Startstelle und ruft play() erneut, höchstens EARLY_RESTART_MS.length mal.
+   * Kein Neustart, wenn der Mensch pausiert hat (want), der Ausschnitt zu Ende ist (done, Position am Ende), ein anderer geladen wurde, die Tippfläche steht oder die
+   * Datei kürzer ist als die Startstelle (anderer Fehler: wie ein unspielbarer Moment behandeln).
+   */
+  private earlyEnded(el: DeckEl) {
+    const c = this.clip;
+    if (el !== this.el || !c || this.done || !this.want || this.played || this.holding) return;
+    if (this.earlyTimer) return;
+    if (this.needTapKey === c.key) return;
+    const at = el.currentTime + this.offset;
+    if (c.end !== undefined && at >= c.end - END_EPS) return;
+    const dur = el.duration;
+    if (Number.isFinite(dur) && dur > 0 && dur + this.offset < c.start) {
+      if (!this.earlyGaveUp) {
+        this.earlyGaveUp = true;
+        this.diag(`deck: clip start beyond duration ${dur.toFixed(1)}`);
+        this.loading(false);
+        this.diag(`deck error ${c.id}`);
+        this.sink?.error();
+      }
+      return;
+    }
+    if (this.earlyN >= EARLY_RESTART_MS.length) {
+      if (!this.earlyGaveUp) {
+        this.earlyGaveUp = true;
+        this.diag('deck: early ended, giving up (tap starts)');
+      }
+      return;
+    }
+    const n = ++this.earlyN;
+    this.earlyTimer = setTimeout(() => {
+      this.earlyTimer = null;
+      // Zwischenzeitlich pausiert, beendet, gespielt oder ein anderer Ausschnitt geladen: nichts tun
+      if (el !== this.el || this.clip !== c || this.done || !this.want || this.played || this.holding || this.needTapKey === c.key) return;
+      this.diag(`deck: early ended, restart ${n} rs=${el.readyState} t=${el.currentTime.toFixed(1)}`);
+      try {
+        el.currentTime = this.target;
+      } catch {
+        /* iOS lehnt die Position ab */
+      }
+      this.kick('restart');
+    }, EARLY_RESTART_MS[n - 1]);
+  }
+
   private seek(afterMeta: boolean) {
     const el = this.el;
     if (!el || !this.clip) return;
@@ -583,6 +650,7 @@ export class AudioDeck {
     this.nudged = false;
     this.live = false;
     this.played = false;
+    this.resetEarly();
     this.want = play;
     this.inflightAt = 0;
     this.kickTok++;
@@ -625,6 +693,7 @@ export class AudioDeck {
     this.want = play;
     this.live = false;
     this.played = false;
+    this.resetEarly();
     this.diag(`deck: hold ${clip.id} for ${what}`);
     const t0 = Date.now();
     const timeout = new Promise<boolean>((r) => setTimeout(() => r(false), HOLD_MS));
@@ -1031,6 +1100,7 @@ export class AudioDeck {
     this.nudged = false;
     this.live = false;
     this.played = false;
+    this.resetEarly();
     this.want = play;
     this.inflightAt = 0;
     this.kickTok++;
@@ -1055,6 +1125,14 @@ export class AudioDeck {
       this.diag(`deck: pool adopt ${clip.id} rs=${el.readyState} meta=${s.meta} after ${Date.now() - s.t0} ms`);
       if (s.meta) this.seek(true);
       this.loading(!s.local && el.readyState < 3);
+    }
+    // Runde 13: ein Element, das im Vorrat schon "ended" war, spielte sonst von vorn (play() am Ende springt auf 0)
+    if (play && el.ended) {
+      try {
+        el.currentTime = this.target;
+      } catch {
+        /* nach loadedmetadata */
+      }
     }
     if (play) this.kick('swap');
     // Das alte Element geht frei in den Vorrat zurück: pausiert, Quelle bleibt bis zur nächsten Befüllung (kein load() verdeckt)
@@ -1203,6 +1281,7 @@ export class AudioDeck {
   release() {
     this.holdToken++;
     this.holding = null;
+    this.resetEarly();
     this.loading(false);
     this.onStart = null;
     this.onLoading = null;
@@ -1507,6 +1586,11 @@ export class AudioDeck {
     } catch {
       /* ohne Geste nichts zu tun */
     }
+  }
+
+  /** Pausiert das aktive Element gerade (Diagnose "ready but not playing")? Ohne Element: true. */
+  paused(): boolean {
+    return this.el?.paused ?? true;
   }
 
   /** readyState des aktiven Elements (der Feed gibt einen Moment mit Daten nie als hängend auf) */

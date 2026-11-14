@@ -2085,7 +2085,10 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         if (!hidden && waited > STILL_MS && !sl.stillLogged) {
           sl.stillLogged = true;
           sl.el?.setAttribute('data-hold', '');
-          diag.current.push(`${m.audio || m.form === 'audio' ? 'audio' : 'video'}: slow net, showing still ${m.id}, net ${netType()}, ${sl.bytesAt ? 'bytes arriving' : 'no bytes yet'}`);
+          // Runde 13: hat das aktive Audio-Element Daten (readyState 3 oder mehr) und spielt trotzdem nicht, liegt es nicht am Netz
+          if (form === 'audio' && audioDeck.holds(keyOf(m)) && audioDeck.readyState() >= 3) {
+            diag.current.push(`audio: ready but not playing, showing still ${m.id}, rs=${audioDeck.readyState()} paused=${audioDeck.paused()}`);
+          } else diag.current.push(`${m.audio || m.form === 'audio' ? 'audio' : 'video'}: slow net, showing still ${m.id}, net ${netType()}, ${sl.bytesAt ? 'bytes arriving' : 'no bytes yet'}`);
         }
         // Brief 12: hängt der aktuelle Moment und der nächste hat sein erstes Bild schon, bietet die Statuszeile "Next is ready" an (Tipp oder Wisch), kein Wechsel von selbst
         if (!hidden && waited > STILL_MS && !single) {
