@@ -1,5 +1,5 @@
 {
- "at": "2026-11-14T07:32:05.821Z",
+ "at": "2026-11-14T10:51:59.468Z",
  "runs": [
   {
    "variant": "webkit",
@@ -46,7 +46,7 @@
     "clipJRenders": true,
     "clipBadZ": true,
     "appLinkOpens": true,
-    "pageErrors": 0
+    "pageErrors": 1
    },
    "sheet": {
     "url": "http://127.0.0.1:4191/core/clip/#zq1YqU7Iy1FFKU7JSKstMSc1X0lEqBrKLMxKLDCAAKJIIVG",
@@ -94,8 +94,8 @@
     "fg": "rgb(255, 255, 255)",
     "nothingLocked": true
    },
-   "audioT0": 3.015525406,
-   "audioT1": 5.004348478,
+   "audioT0": 3.017072871,
+   "audioT1": 5.006135277,
    "ar": {
     "dir": "rtl",
     "html": "rtl",
@@ -115,8 +115,10 @@
     "start": "3",
     "title": "Clip hook from the hash · 127.0.0.1"
    },
-   "errors": [],
-   "ok": true
+   "errors": [
+    "Cache API operation failed: Context is stopped"
+   ],
+   "ok": false
   },
   {
    "variant": "chromium",
@@ -212,7 +214,7 @@
     "nothingLocked": true
    },
    "audioT0": 3,
-   "audioT1": 5.037626,
+   "audioT1": 5.027083,
    "ar": {
     "dir": "rtl",
     "html": "rtl",
