@@ -11,6 +11,7 @@ import { installGestures, onGesture } from '../moments/gesture';
 import { netType } from '../lib/diag';
 import { QUALITY_UP_MS, startQuality } from './warmup';
 import { abortAction } from '../moments/slotplan';
+import { aheadOf, skipsReload } from '../moments/neighborGate';
 
 /** gainDb: Anpassung der Lautheit des Moments in dB (Entscheidung 16), fehlt sie, bleibt der Moment unverändert */
 export type YTLoad = string | { videoId: string; startSeconds?: number; endSeconds?: number; gainDb?: number; suggestedQuality?: string };
@@ -57,6 +58,36 @@ export interface YTPlayer {
    * Moment, Ton und Tempo bleiben, der Slot wird nicht neu gebaut. play false: nur bereitstellen (Vorlade-Slot).
    */
   recoverAt?(pos: number, play: boolean): void;
+  /**
+   * Runde 15, nur Stream-Player: was das Element des laufenden Moments gerade tut (Stabilität, Stockung). null, wenn der Player keinen Stream
+   * (YouTube) oder das Audio-Element hält.
+   */
+  hlsObs?(): HlsObs | null;
+  /**
+   * Runde 15, nur Stream-Player: einen vorladenden Nachbarn entladen (Quelle weg, load()), damit die Leitung frei wird. Nur wenn das Element
+   * nicht der laufende Moment ist. true, wenn etwas freigegeben wurde. Der Slot muss danach neu geladen werden (cue).
+   */
+  unloadPreload?(): boolean;
+  /**
+   * Runde 15, nur Stream-Player: einmal behutsam nachhelfen, wenn der laufende Moment in waiting hängt. Pausiert: play() erneut,
+   * sonst die Position um 0,1 s vorsetzen. Gibt die Art zurück, null wenn nichts getan wurde.
+   */
+  nudge?(): 'play' | 'seek' | null;
+}
+
+/** Momentaufnahme des Stream-Elements (Runde 15) */
+export interface HlsObs {
+  rs: number;
+  paused: boolean;
+  playing: boolean;
+  /** ms seit playing ohne waiting danach, sonst 0 */
+  playingMs: number;
+  /** ms seit waiting ohne playing danach, sonst 0 */
+  waitingMs: number;
+  /** Sekunden Puffer vor der Abspielposition */
+  ahead: number;
+  /** Das Element hat eine Quelle */
+  loaded: boolean;
 }
 
 interface YTNamespace {
@@ -363,6 +394,9 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   let hlsSnd: SoundObs = SOUND_NONE;
   /** Brief 12: progress-Ereignisse des laufenden Stream-Elements seit dem letzten Laden (Daten kommen an) */
   let hlsProgress = 0;
+  /** Runde 15: Zeitpunkt des letzten playing (ohne waiting danach) und des letzten waiting (ohne playing danach), 0: nicht in diesem Zustand */
+  let playingAt = 0;
+  let waitingAt = 0;
   const soundChanged = () => events.onSound?.();
   const setHlsState = (st: number) => {
     hlsState = st;
@@ -433,6 +467,8 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     });
     el.addEventListener('playing', () => {
       if (!mine()) return;
+      playingAt = performance.now();
+      waitingAt = 0;
       hlsSnd = reduceSound(hlsSnd, 'playing', el);
       setHlsState(STATE.PLAYING);
       soundChanged();
@@ -441,11 +477,17 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     });
     el.addEventListener('pause', () => {
       if (!mine()) return;
+      playingAt = 0;
       hlsSnd = reduceSound(hlsSnd, 'pause', el);
       setHlsState(el.ended ? STATE.ENDED : STATE.PAUSED);
       soundChanged();
     });
-    el.addEventListener('waiting', () => mine() && setHlsState(STATE.BUFFERING));
+    el.addEventListener('waiting', () => {
+      if (!mine()) return;
+      waitingAt ||= performance.now();
+      playingAt = 0;
+      setHlsState(STATE.BUFFERING);
+    });
     el.addEventListener('ended', () => mine() && setHlsState(STATE.ENDED));
     el.addEventListener('progress', () => { if (mine()) hlsProgress++; });
     el.addEventListener('timeupdate', () => {
@@ -601,6 +643,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     const at = media.currentTime + offset;
     const running = !media.paused || a.play;
     delete media.dataset.src;
+    reloadWhy = `bail: ${why}`;
     prepareHls(a.id, a.start, a.end, running, a.gain, true, Math.max(a.start, at), why);
   };
 
@@ -622,10 +665,16 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   };
 
   const pending = new WeakMap<HTMLMediaElement, () => void>();
+  /** Runde 15: Grund für ein gewolltes erneutes Laden des Moments (Netzfehler, Spurwechsel), gesetzt unmittelbar vor prepareHls, für die Zeile "hls reload" */
+  let reloadWhy = '';
 
   const prepareHls = (id: string, start: number, end: number | undefined, play: boolean, gain: number, forcePlain = false, seekTo = start, forceWhy?: string) => {
     try { yt.pauseVideo(); } catch { /* noch nicht bereit */ }
     leaveDeck();
+    const why0 = reloadWhy;
+    reloadWhy = '';
+    const prevArgs = lastArgs;
+    const hadSrc = !!media.getAttribute('src');
     const loc = LOCAL.get(localKey(id, start, end));
     const src = loc?.url ?? HLS.get(id)!;
     // Spurwahl: geregelte Spur nur, wenn Web Audio läuft und die Quelle sicher durchgelassen wird (laneFor)
@@ -641,6 +690,14 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       } else chain.setDb(gain);
     }
     hlsLoud = chain ? { db: gain, how: 'web audio', linear: chain.linear() } : { db: 0, how: `unchanged: ${why}` };
+    // Runde 15: ein vorgeladener Nachbar wird nicht erneut geladen oder neu positioniert (vorher: erneuter cue nach der ersten Berührung rief onMeta
+    // und setzte currentTime, die Nachbarn meldeten loadedmetadata je zweimal). Gleiche Quelle, gleiches Element, gleicher Ausschnitt, kein Abspielwunsch.
+    const nextArgs = { id, start, end };
+    if (skipsReload(prevArgs, nextArgs, { sameEl: next === media, sameSrc: media.dataset.src === src, play, wantPlay, rs: media.readyState })) return;
+    // Zeile "hls reload": die Quelle dieses Moments war schon geladen und wird erneut gesetzt. Im Normalfall erscheint sie nie.
+    if (hadSrc && prevArgs && prevArgs.id === id && (why0 || (prevArgs.start === start && prevArgs.end === end))) {
+      diag(`hls reload ${id} reason=${why0 || (next !== media ? 'lane switch' : 'same source again')}`);
+    }
     if (next !== media) {
       // Elementwechsel (Reiterwechsel oder Spurwechsel): das alte Element anhalten, Ton und Tempo übernehmen
       const old = media;
@@ -701,6 +758,8 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     if (el.dataset.src !== src) {
       el.dataset.src = src;
       hlsProgress = 0;
+      playingAt = 0;
+      waitingAt = 0;
       abortRetries = 0;
       killedBy = 'load';
       el.addEventListener('loadedmetadata', onMeta, { once: true });
@@ -902,6 +961,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       const at = media.currentTime + offset;
       if (a.end !== undefined && a.end - at < 4) return;
       diag(`loud: attaching running moment at ${at.toFixed(1)} s (${pick.why})`);
+      reloadWhy = 'level lane';
       prepareHls(a.id, a.start, a.end, !media.paused || a.play, a.gain, false, Math.max(a.start, at));
     },
     recoverAt: (pos, play) => {
@@ -912,6 +972,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
       } else if (mode === 'hls' && a) {
         // Nach einem Netzfehler (Issue 9): Quelle neu setzen, ein Element mit Netzfehler lädt nur nach load() wieder. Ton (muted) und Tempo hängen am Element und bleiben.
         delete media.dataset.src;
+        reloadWhy = 'recover';
         prepareHls(a.id, a.start, a.end, play, a.gain, false, Math.min(Math.max(pos, a.start), a.end ?? pos));
       } else if (mode === 'yt') {
         try {
@@ -921,6 +982,45 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
           /* noch nicht bereit */
         }
       }
+    },
+    hlsObs: () => {
+      if (mode !== 'hls' || deckMode) return null;
+      const el = media;
+      const now = performance.now();
+      let ahead = 0;
+      try {
+        const r: [number, number][] = [];
+        for (let i = 0; i < el.buffered.length; i++) r.push([el.buffered.start(i), el.buffered.end(i)]);
+        ahead = aheadOf(r, el.currentTime);
+      } catch { /* kein buffered */ }
+      const playing = !el.paused && playingAt > 0;
+      return { rs: el.readyState, paused: el.paused, playing, playingMs: playing ? Math.round(now - playingAt) : 0, waitingMs: waitingAt ? Math.round(now - waitingAt) : 0, ahead, loaded: !!el.getAttribute('src') };
+    },
+    unloadPreload: () => {
+      // Nur ein Element, das nicht spielt und nichts abspielen soll. Quelle freigeben (removeAttribute und load()) beendet die Anfragen sicher,
+      // preload auf none hält ein schon laufendes natives HLS nicht zuverlässig an.
+      if (mode !== 'hls' || deckMode || wantPlay || !media.getAttribute('src') || !media.paused) return false;
+      const el = media;
+      pending.get(el)?.();
+      pending.delete(el);
+      releaseEl(el);
+      hlsState = STATE.UNSTARTED;
+      lastArgs = null;
+      playingAt = 0;
+      waitingAt = 0;
+      return true;
+    },
+    nudge: () => {
+      if (mode !== 'hls' || deckMode || !wantPlay) return null;
+      const el = media;
+      if (el.paused) {
+        tryPlay('stall recovery');
+        return 'play';
+      }
+      try {
+        el.currentTime = Math.min(el.currentTime + 0.1, Number.isFinite(el.duration) && el.duration > 0 ? el.duration : el.currentTime + 0.1);
+      } catch { /* nicht setzbar */ }
+      return 'seek';
     },
     getPlayerState: () => (mode === 'hls' ? hlsState : ytState()),
     loud: () => {

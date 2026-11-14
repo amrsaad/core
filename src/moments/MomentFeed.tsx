@@ -1,4 +1,5 @@
 import { describeMedia, holdsNeighbor, needsLoad, type MediaItem } from './slotplan';
+import { neighborCall, recoverCall, type ActiveObs } from './neighborGate';
 import { notesRow } from './notesrow';
 import { diagLog, netType } from '../lib/diag';
 import { markFirstPlay } from '../lib/sync/firstPlay';
@@ -7,7 +8,7 @@ import { createPortal, flushSync } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL, topicLabel } from '../lib/labels';
 import type { AppState } from '../lib/state';
-import { audioDeck, createPlayer, deckClipOf, HLS, isIOS, LOCAL, loadYT, offlineYT, setDeckForm, STATE, type YTPlayer } from '../video/ytApi';
+import { AUDIO_ONLY, audioDeck, createPlayer, deckClipOf, HLS, isIOS, LOCAL, loadYT, offlineYT, setDeckForm, STATE, type YTPlayer } from '../video/ytApi';
 import { POOL, POOL_WINDOW, type DeckClip } from '../video/audioDeck';
 import { canWarm, coverMs, onNonCurrentPlaying, roleOf, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx, type WarmState } from '../video/warmup';
 import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, isFlat, onGesture, tabAfterSwipe, tabSwipe, type Gesture } from './gesture';
@@ -143,8 +144,11 @@ interface Slot {
   /** Issue 54 (iOS): Zeitgeber der Startüberwachung nach einem Start in der Geste (0: keine), und ob der eine Wiederholungsstart schon ging */
   startTimer: number;
   startRetried: boolean;
+  /** Runde 15: Erholungsversuche bei hängendem Stream-Moment (höchstens zwei) und Zeitpunkt des letzten */
+  recoveries: number;
+  recoveredAt: number;
 }
-const newSlot = (): Slot => ({ host: null, el: null, player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', loadStart: -1, broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, cover: null, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0, bytesSeen: 0, bytesAt: 0, cueAt: 0, preloadLogged: false, stillLogged: false, startTimer: 0, startRetried: false });
+const newSlot = (): Slot => ({ host: null, el: null, player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', loadStart: -1, broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, cover: null, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0, bytesSeen: 0, bytesAt: 0, cueAt: 0, preloadLogged: false, stillLogged: false, startTimer: 0, startRetried: false, recoveries: 0, recoveredAt: 0 });
 /**
  * Brief 23 (Issue 48): Auf iOS laufen YouTube-Momente nicht stumm vorgewärmt (WebKit hält sie beim Lautschalten ohne Geste an). Sie werden nur
  * per cue vorbereitet und beim Wisch direkt im Handler der Berührung laut gestartet (Variante a des Briefs). Eigene Streams sind nicht betroffen.
@@ -345,6 +349,11 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const gateOpen = useRef(false);
   const gateTimer = useRef(0);
   const gateWait = useRef(new Set<Slot>());
+  /**
+   * Runde 15: Vorrang für den aktiven Stream-Moment. Nachbarn warten (wait), bis er stabil spielt (siehe neighborGate.ts), dann laden sie einer nach dem anderen.
+   * started: Moment-ID und Zeitpunkt, ab dem das Vorladen freigegeben ist. logged: Momente, für die "deferred" schon in der Diag steht. at: Wechsel auf den aktuellen Moment.
+   */
+  const nbr = useRef({ wait: new Set<Slot>(), started: new Map<string, number>(), logged: new Set<string>(), idx: -1, at: 0 });
 
   /** Wischübergang: Bühne mit den Seiten und Ebene mit den Overlays bewegen sich gemeinsam, nur transform, direkt geschrieben (ohne React) */
   const stageEl = useRef<HTMLDivElement>(null);
@@ -601,6 +610,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       for (const sl of slots.current) {
         const nm = queue.current[sl.index];
         if (!sl.player || !sl.ready || sl.index <= idxRef.current || !nm?.gainDb || !HLS.has(nm.videoId)) continue;
+        // Runde 15: ein Nachbar, der noch wartet, hat nichts geladen. Er kommt später ohnehin auf die richtige Spur.
+        if (nbr.current.wait.has(sl)) continue;
         sl.mid = '';
         assign(sl, sl.index, false);
       }
@@ -843,6 +854,104 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       diag.current.push(`video: median ${st.median}ms, p90 ${st.p90}ms over last ${st.n} swipes`);
     }
   };
+  /** Der aktuelle Moment ist ein Stream-Moment (TED) im Video-Reiter: dann haben die Nachbarn zu warten (Runde 15) */
+  const activeIsStream = (): boolean => {
+    const cm = queue.current[idxRef.current];
+    return slots.current.length > 1 && !textRef.current && !!cm && cm.form !== 'text' && cm.form !== 'audio' && !cm.audio && HLS.has(cm.videoId) && !AUDIO_ONLY.has(cm.videoId);
+  };
+  /** Beobachtung des aktiven Stream-Moments für neighborCall */
+  const activeObs = (): ActiveObs => {
+    const cs = current();
+    const o = cs.player?.hlsObs?.() ?? null;
+    // Ohne Beobachtung (Player noch nicht bereit): wie ein Moment, der nicht spielt. So greift die Frist auch, wenn der aktive Moment gar nicht anläuft.
+    if (!o) return { playedBefore: cs.playedAt > 0, playing: false, playingMs: 0, waitingMs: 0, rs: 0, ahead: 0, userPaused: userPaused.current, sinceMs: Math.round(performance.now() - nbr.current.at) };
+    return { playedBefore: cs.playedAt > 0, playing: o.playing, playingMs: o.playingMs, waitingMs: o.waitingMs, rs: o.rs, ahead: o.ahead, userPaused: userPaused.current, sinceMs: Math.round(performance.now() - nbr.current.at) };
+  };
+  /** Ein Nachbar hat sein erstes Bild (canplay), oder braucht nichts */
+  const nbrReady = (j: number): boolean => {
+    const m = queue.current[j];
+    if (!m) return true;
+    if (m.form === 'text') return true;
+    const sl = slotFor(j);
+    return sl.index === j && (sl.broken || sl.preloadLogged || (sl.mid === m.id && !!sl.player?.isBuffered?.()));
+  };
+  /**
+   * Nachbar parken statt laden. Hält der Slot noch einen älteren Moment (Wisch: der Slot des vorigen Moments wird zum übernächsten), gibt er dessen Quelle frei,
+   * sonst puffert der vorige Moment weiter und nimmt dem aktiven die Leitung.
+   */
+  const parkNeighbor = (slot: Slot, m: Moment) => {
+    nbr.current.wait.add(slot);
+    if (slot.mid && slot.mid !== m.id && slot.player?.unloadPreload?.()) {
+      slot.mid = '';
+      slot.loadStart = -1;
+      slot.st = STATE.UNSTARTED;
+    }
+    if (!nbr.current.logged.has(m.id)) {
+      nbr.current.logged.add(m.id);
+      diag.current.push('video: neighbor preload deferred (active not stable)');
+    }
+  };
+  /**
+   * Alle 250 ms: darf ein wartender Nachbar jetzt laden, muss ein ladender angehalten werden. Reihenfolge: erst der nächste, der übernächste,
+   * wenn der nächste canplay hatte. Hängt der aktive Moment ohne Start, darf der nächste nach DEADLINE_MS laden (Zeile nennt die Frist).
+   */
+  const neighborTick = () => {
+    const n = nbr.current;
+    if (idxRef.current !== n.idx) {
+      n.idx = idxRef.current;
+      n.at = performance.now();
+    }
+    for (const sl of [...n.wait]) if (sl.index < 0 || sl.index <= idxRef.current || sl.index > idxRef.current + 2) n.wait.delete(sl);
+    if (!activeIsStream()) {
+      // Aktueller Moment ist kein Stream mehr (Wisch auf YouTube, Reiterwechsel): wartende Nachbarn laden nach den bisherigen Regeln
+      for (const sl of [...n.wait]) {
+        n.wait.delete(sl);
+        if (sl.player && sl.ready && sl.index > idxRef.current) assign(sl, sl.index, false);
+      }
+      return;
+    }
+    const a = activeObs();
+    for (const [id] of n.started) {
+      const k = queue.current.findIndex((x) => x.id === id);
+      if (k < idxRef.current - 1 || k > idxRef.current + 2) n.started.delete(id);
+    }
+    for (const rank of [1, 2] as const) {
+      const j = idxRef.current + rank;
+      const m = queue.current[j];
+      if (!m || m.form === 'text') continue;
+      const sl = slotFor(j);
+      if (sl.index !== j) continue;
+      const parked = n.wait.has(sl);
+      const startedAt = n.started.get(m.id) ?? 0;
+      const loading = !parked && startedAt > 0 && sl.mid === m.id;
+      const prevStartedAt = rank === 2 ? n.started.get(queue.current[j - 1]?.id ?? '') ?? 0 : 0;
+      const c = neighborCall(a, {
+        rank,
+        started: loading,
+        canplay: sl.preloadLogged && sl.mid === m.id,
+        prevCanplay: rank === 1 || nbrReady(j - 1),
+        prevStartedMs: prevStartedAt ? Math.round(performance.now() - prevStartedAt) : 0,
+      });
+      if (c.call === 'start' && parked) {
+        n.wait.delete(sl);
+        n.started.set(m.id, performance.now());
+        diag.current.push(`video: neighbor preload start ${m.id}${c.why === 'deadline' ? ' (deadline 6 s, active not stable)' : c.why === 'paused' ? ' (active paused)' : ''}`);
+        assign(sl, j, false);
+      } else if (c.call === 'pause' && loading && sl.player?.unloadPreload?.()) {
+        // Stockt der aktive Moment, hört der ladende Nachbar auf: Quelle frei, später neu cuen
+        const mid = sl.mid;
+        sl.mid = '';
+        sl.loadStart = -1;
+        sl.st = STATE.UNSTARTED;
+        sl.cueAt = 0;
+        n.started.delete(m.id);
+        n.wait.add(sl);
+        diag.current.push(`video: neighbor preload paused (active stalled) ${mid}`);
+      }
+    }
+  };
+  const neighborTickRef = useRef(neighborTick);
+  neighborTickRef.current = neighborTick;
   /** Kaltstart: die Vorlade-Player laden erst, wenn der aktuelle Moment spielt (oder GATE_MS vergangen sind) */
   const openGate = (why: string) => {
     if (gateOpen.current) return;
@@ -880,6 +989,15 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       if (play) window.setTimeout(() => skipRef.current(), 0);
       return;
     }
+    // Runde 15: ein Stream-Moment (TED) ist aktuell, der Nachbar wartet, bis er stabil spielt (neighborTick gibt frei). Ein Nachbar, den neighborTick
+    // freigegeben hat (started), und ein schon geladener (mid gleich) gehen durch.
+    if (!play && activeIsStream() && !(nbr.current.started.has(m.id) && !nbr.current.wait.has(slot))) {
+      if (slot.mid !== m.id || !slot.player?.hlsObs?.()?.loaded) {
+        parkNeighbor(slot, m);
+        return;
+      }
+    }
+    if (play) nbr.current.wait.delete(slot);
     // Kaltstart (Issue 22): der aktuelle YouTube-Moment bekommt die Leitung zuerst, die Vorlade-Player warten bis er spielt
     if (!play && !gateOpen.current) {
       const cm = queue.current[idxRef.current];
@@ -910,6 +1028,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         slot.bytesSeen = 0;
         slot.bytesAt = 0;
         slot.cueAt = play ? 0 : performance.now();
+        slot.recoveries = 0;
+        slot.recoveredAt = 0;
         slot.preloadLogged = false;
         slot.stillLogged = false;
         resetWarm(slot);
@@ -1991,7 +2111,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         s.el?.removeAttribute('data-live');
         s.el?.removeAttribute('data-hold');
         window.clearTimeout(s.startTimer);
-        Object.assign(s, { player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', loadStart: -1, broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0, bytesSeen: 0, bytesAt: 0, cueAt: 0, preloadLogged: false, stillLogged: false, startTimer: 0, startRetried: false });
+        Object.assign(s, { player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', loadStart: -1, broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0, bytesSeen: 0, bytesAt: 0, cueAt: 0, preloadLogged: false, stillLogged: false, startTimer: 0, startRetried: false, recoveries: 0, recoveredAt: 0 });
         if (s.cover) s.cover.style.visibility = 'hidden';
       }
     };
@@ -2042,6 +2162,12 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pre]);
 
+  // Runde 15: Vorrang für den aktiven Stream-Moment, Nachbarn freigeben oder anhalten
+  useEffect(() => {
+    const t = window.setInterval(() => neighborTickRef.current(), 250);
+    return () => window.clearInterval(t);
+  }, []);
+
   // Ende genau bei end (Polling zusätzlich zu endSeconds), Fortschritt, Feed-Zeit
   useEffect(() => {
     let flushed = 0;
@@ -2089,6 +2215,16 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
           if (form === 'audio' && audioDeck.holds(keyOf(m)) && audioDeck.readyState() >= 3) {
             diag.current.push(`audio: ready but not playing, showing still ${m.id}, rs=${audioDeck.readyState()} paused=${audioDeck.paused()}`);
           } else diag.current.push(`${m.audio || m.form === 'audio' ? 'audio' : 'video'}: slow net, showing still ${m.id}, net ${netType()}, ${sl.bytesAt ? 'bytes arriving' : 'no bytes yet'}`);
+        }
+        // Runde 15: Erholung. Hängt der aktive Stream-Moment länger als 3 s in waiting, obwohl er schon gespielt hat, hilft die Überwachung einmal behutsam nach
+        // (höchstens zweimal je Moment). Sie sitzt hier neben Standbild und Watchdog, kein zweiter Wächter.
+        if (!hidden && sl.playedAt > 0 && activeIsStream()) {
+          const o = p.hlsObs?.();
+          if (o && recoverCall({ playedBefore: true, waitingMs: o.waitingMs, paused: o.paused, done: sl.recoveries, sinceLastMs: sl.recoveredAt ? Date.now() - sl.recoveredAt : Infinity, userPaused: userPaused.current }).call !== 'none' && p.nudge?.()) {
+            sl.recoveries++;
+            sl.recoveredAt = Date.now();
+            diag.current.push(`video: stall recovery #${sl.recoveries} ${m.id} rs=${o.rs} buffered=${o.ahead.toFixed(1)}`);
+          }
         }
         // Brief 12: hängt der aktuelle Moment und der nächste hat sein erstes Bild schon, bietet die Statuszeile "Next is ready" an (Tipp oder Wisch), kein Wechsel von selbst
         if (!hidden && waited > STILL_MS && !single) {
