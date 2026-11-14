@@ -1,5 +1,5 @@
 {
- "at": "2026-11-14T17:13:09.928Z",
+ "at": "2026-11-14T18:31:50.946Z",
  "runs": [
   {
    "browser": "webkit",
@@ -121,7 +121,7 @@
     "bg: deck while hidden 7 s: timeupdate 70, ended 0, clip ends 2, play calls 2",
     "bg: back bgaudio5:0"
    ],
-   "bgPoolFiveMs": 265,
+   "bgPoolFiveMs": 276,
    "bgPoolStart": {
     "fill": 3,
     "ok": 25,
@@ -209,11 +209,11 @@
     "bgstock1"
    ],
    "bgNextFiveMs": [
-    36,
-    15,
-    16,
+    31,
+    17,
     19,
-    13
+    22,
+    14
    ],
    "bgNextSkipLines": [
     "go 0->1",
@@ -226,27 +226,27 @@
     {
      "sync": true,
      "src": "https://stream.test/bgstock2.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:1:24 < swapEntry@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js < swapNext@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js: < dc@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:9:3422 < @http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:11:11003 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:1:24 < swapEntry@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js < swapNext@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js: < dc@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:9:3422 < @http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:11:11003 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock8.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:1:24 < swapEntry@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js < swapNext@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js: < dc@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:9:3422 < @http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:11:11003 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:1:24 < swapEntry@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js < swapNext@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js: < dc@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:9:3422 < @http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:11:11003 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock4.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:1:24 < swapEntry@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js < swapNext@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js: < dc@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:9:3422 < @http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:11:11003 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:1:24 < swapEntry@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js < swapNext@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js: < dc@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:9:3422 < @http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:11:11003 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock10.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:1:24 < swapEntry@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js < swapNext@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js: < dc@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:9:3422 < @http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:11:11003 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:1:24 < swapEntry@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js < swapNext@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js: < dc@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:9:3422 < @http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:11:11003 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock1.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:1:24 < swapEntry@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js < swapNext@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js: < dc@http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:9:3422 < @http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:11:11003 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:1:24 < swapEntry@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js < swapNext@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js: < dc@http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:9:3422 < @http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:11:11003 < @"
     }
    ],
    "bgNextQueuedLines": [
@@ -260,15 +260,15 @@
     "deck: pool fill 5/5 (local 0, net 5)",
     "deck: pool fill 5/5 (local 0, net 5)",
     "deck play#7 ok",
-    "deck: pool ready bgnet2 after 33 ms host=stream.test",
+    "deck: pool ready bgnet2 after 34 ms host=stream.test",
     "pool 1/5 ready",
-    "deck: pool ready bgstock3 after 33 ms host=stream.test",
+    "deck: pool ready bgstock3 after 34 ms host=stream.test",
     "pool 2/5 ready",
-    "deck: pool ready bgstock5 after 20 ms host=stream.test",
+    "deck: pool ready bgstock5 after 21 ms host=stream.test",
     "pool 3/5 ready",
-    "deck: pool ready bgnet0 after 20 ms host=stream.test",
+    "deck: pool ready bgnet0 after 21 ms host=stream.test",
     "pool 4/5 ready",
-    "deck: pool ready bgstock7 after 29 ms host=stream.test",
+    "deck: pool ready bgstock7 after 30 ms host=stream.test",
     "pool 5/5 ready"
    ],
    "bgHungLog": [
@@ -406,7 +406,7 @@
     "bg: deck while hidden 7 s: timeupdate 69, ended 0, clip ends 2, play calls 2",
     "bg: back bgaudio5:0"
    ],
-   "bgPoolFiveMs": 178,
+   "bgPoolFiveMs": 180,
    "bgPoolStart": {
     "fill": 3,
     "ok": 21,
@@ -498,7 +498,7 @@
     11,
     11,
     11,
-    13
+    11
    ],
    "bgNextSkipLines": [
     "go 0->1",
@@ -511,27 +511,27 @@
     {
      "sync": true,
      "src": "https://stream.test/bgstock2.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at lm.kick (http://127.0.0.1:4178/core/assets/main-mSYSTg56. < at lm.swapEntry (http://127.0.0.1:4178/core/assets/main-mSYS < at lm.swapNext (http://127.0.0.1:4178/core/assets/main-mSYST < at Object.dc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:11:111"
+     "stack": "at P.play (<anonymous>:9:134) < at lm.kick (http://127.0.0.1:4178/core/assets/main-BykmAgY-. < at lm.swapEntry (http://127.0.0.1:4178/core/assets/main-Bykm < at lm.swapNext (http://127.0.0.1:4178/core/assets/main-BykmA < at Object.dc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:11:111"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock8.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at lm.kick (http://127.0.0.1:4178/core/assets/main-mSYSTg56. < at lm.swapEntry (http://127.0.0.1:4178/core/assets/main-mSYS < at lm.swapNext (http://127.0.0.1:4178/core/assets/main-mSYST < at Object.dc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:11:111"
+     "stack": "at P.play (<anonymous>:9:134) < at lm.kick (http://127.0.0.1:4178/core/assets/main-BykmAgY-. < at lm.swapEntry (http://127.0.0.1:4178/core/assets/main-Bykm < at lm.swapNext (http://127.0.0.1:4178/core/assets/main-BykmA < at Object.dc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:11:111"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock4.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at lm.kick (http://127.0.0.1:4178/core/assets/main-mSYSTg56. < at lm.swapEntry (http://127.0.0.1:4178/core/assets/main-mSYS < at lm.swapNext (http://127.0.0.1:4178/core/assets/main-mSYST < at Object.dc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:11:111"
+     "stack": "at P.play (<anonymous>:9:134) < at lm.kick (http://127.0.0.1:4178/core/assets/main-BykmAgY-. < at lm.swapEntry (http://127.0.0.1:4178/core/assets/main-Bykm < at lm.swapNext (http://127.0.0.1:4178/core/assets/main-BykmA < at Object.dc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:11:111"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock10.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at lm.kick (http://127.0.0.1:4178/core/assets/main-mSYSTg56. < at lm.swapEntry (http://127.0.0.1:4178/core/assets/main-mSYS < at lm.swapNext (http://127.0.0.1:4178/core/assets/main-mSYST < at Object.dc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:11:111"
+     "stack": "at P.play (<anonymous>:9:134) < at lm.kick (http://127.0.0.1:4178/core/assets/main-BykmAgY-. < at lm.swapEntry (http://127.0.0.1:4178/core/assets/main-Bykm < at lm.swapNext (http://127.0.0.1:4178/core/assets/main-BykmA < at Object.dc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:11:111"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock1.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at lm.kick (http://127.0.0.1:4178/core/assets/main-mSYSTg56. < at lm.swapEntry (http://127.0.0.1:4178/core/assets/main-mSYS < at lm.swapNext (http://127.0.0.1:4178/core/assets/main-mSYST < at Object.dc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-mSYSTg56.js:11:111"
+     "stack": "at P.play (<anonymous>:9:134) < at lm.kick (http://127.0.0.1:4178/core/assets/main-BykmAgY-. < at lm.swapEntry (http://127.0.0.1:4178/core/assets/main-Bykm < at lm.swapNext (http://127.0.0.1:4178/core/assets/main-BykmA < at Object.dc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-BykmAgY-.js:11:111"
     }
    ],
    "bgNextQueuedLines": [
