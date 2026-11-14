@@ -1,80 +1,29 @@
 {
-  "startedAt": "2026-11-13T11:48:32.721Z",
+  "startedAt": "2026-11-14T11:10:26.931Z",
   "url": "https://amrsaad.github.io/core/",
   "browser": "chromium",
-  "ok": false,
-  "firstImageMs": 354,
+  "ok": true,
+  "firstImageMs": 258,
   "tabsOk": true,
   "tabs": {
     "audio": {
       "ok": true,
-      "ms": 130
+      "ms": 115
     },
     "text": {
       "ok": true,
-      "ms": 68
+      "ms": 58
     },
     "video": {
       "ok": true,
-      "ms": 84
+      "ms": 89
     }
   },
-  "errors": [
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--icon-sm)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--icon-sm)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--s-8)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--s-8)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\".",
-    "console Error: <svg> attribute height: Expected length, \"var(--rail-icon)\"."
-  ],
+  "errors": [],
   "failedRequests": [],
   "pageStatus": 200,
-  "pageLastModified": "Fri, 13 Nov 2026 06:44:19 GMT",
+  "pageLastModified": "Sat, 14 Nov 2026 07:40:28 GMT",
   "poolStatus": 200,
   "note": "",
-  "problems": [
-    "errors 48: console Error: <svg> attribute width: Expected length, \"var(--rail-icon)\"."
-  ]
+  "problems": []
 }
