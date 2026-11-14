@@ -13,7 +13,8 @@ describe('Sync Krypto', () => {
     d.state.momentDay = '2026-10-28';
     const text = await encryptDoc(await key(), d);
     const j = JSON.parse(text);
-    expect(Object.keys(j).sort()).toEqual(['ct', 'iv', 'v']);
+    expect(Object.keys(j).sort()).toEqual(['ct', 'iv', 'v', 'z']);
+    expect(j.z).toBe('gzip');
     expect(j.v).toBe(1);
     expect(text).not.toContain('2026-10-28');
     expect((await decryptDoc(await key(), text)).state.momentDay).toBe('2026-10-28');

@@ -16,6 +16,8 @@ const key = () => crypto.subtle.importKey('raw', new Uint8Array(32).fill(5), 'AE
 
 describe('Größe des Stands', () => {
   it('Aufschlüsselung: savedMoments, momentLog und diag sind die drei größten Felder, Umschlag und Anfrage wie erwartet', async () => {
+    // Runde 14: hier der ungepackte Weg (Browser ohne CompressionStream), gepackt misst tests/sync-gzip.test.ts
+    vi.stubGlobal('CompressionStream', undefined);
     const d = toDoc(makeState());
     const sizes = Object.entries(d.state)
       .map(([k, v]) => [k, canon(v).length] as const)
@@ -39,6 +41,7 @@ describe('Größe des Stands', () => {
     expect(bytes / env.length).toBeLessThan(1.4);
     // Das Zeitlimit wächst mit der Größe, das Ergebnis dieser Messung braucht mehr als 20 s
     expect(uploadTimeoutMs(bytes)).toBeGreaterThan(REQUEST_TIMEOUT_MS);
+    vi.unstubAllGlobals();
   });
 
   it('die unbegrenzten Listen haben eine Obergrenze: Protokoll 3000, Diagnose 500', () => {
@@ -84,6 +87,7 @@ describe('Steuerung: Schreiben scheitert', () => {
   afterEach(() => {
     running.forEach((s) => s.stop());
     running.length = 0;
+    vi.unstubAllGlobals();
     vi.useRealTimers();
   });
 
@@ -111,7 +115,7 @@ describe('Steuerung: Schreiben scheitert', () => {
     void t.s.start();
     await advance(50);
     await advance(20_100);
-    expect(t.lines[0]).toMatch(/^sync: PUT contents timeout 20s \(\d+ kB, try 1\)$/);
+    expect(t.lines.find((l) => l.startsWith('sync: PUT contents'))).toMatch(/^sync: PUT contents timeout 20s \(\d+ kB, try 1\)$/);
     expect(t.puts()).toBe(1);
     await advance(3_000);
     expect(t.puts()).toBe(2);
@@ -142,7 +146,7 @@ describe('Steuerung: Schreiben scheitert', () => {
     const t = dev((n) => (n === 1 ? Promise.reject(new TypeError('Load failed')) : null));
     void t.s.start();
     await advance(50);
-    expect(t.lines[0]).toMatch(/^sync: PUT contents network TypeError.* \(\d+ kB, try 1\)$/);
+    expect(t.lines.find((l) => l.startsWith('sync: PUT contents'))).toMatch(/^sync: PUT contents network TypeError.* \(\d+ kB, try 1\)$/);
     await advance(2_900);
     expect(t.puts()).toBe(1);
     await advance(200);
@@ -188,6 +192,8 @@ describe('Steuerung: Schreiben scheitert', () => {
   });
 
   it('großer Stand: das Zeitlimit liegt über 20 s und die Zeile nennt die Größe in kB', async () => {
+    // ohne gzip, damit die Anfrage so groß ist wie im Befund vom 13.11. (gepackt rechnet das Limit mit der kleineren, tatsächlich gesendeten Größe)
+    vi.stubGlobal('CompressionStream', undefined);
     const t = dev((n, i) => (n === 1 ? hang(i) : null), makeState());
     void t.s.start();
     await advance(500);
@@ -225,9 +231,10 @@ describe('Kompatibilität', () => {
     expect(merged.v).toBe(old.v);
     // Alles aus dem alten Stand bleibt erhalten
     for (const id of Object.keys(old.state.momentSeen)) expect(merged.state.momentSeen[id]).toBeLessThanOrEqual(old.state.momentSeen[id]);
-    // Hochgeladen wird derselbe Umschlag wie bisher: {"v","iv","ct"}, entschlüsselt ein JSON mit den Feldern, die die Pipeline liest
+    // Hochgeladen wird der Umschlag {"v","z","iv","ct"} (z nur mit gzip), entschlüsselt ein JSON mit den Feldern, die die Pipeline liest
     const env = JSON.parse(await encryptDoc(raw, merged));
-    expect(Object.keys(env).sort()).toEqual(['ct', 'iv', 'v']);
+    expect(Object.keys(env).sort()).toEqual(['ct', 'iv', 'v', 'z']);
+    expect(env.z).toBe('gzip');
     const back = await decryptDoc(raw, JSON.stringify(env));
     for (const k of ['momentSeen', 'diag', 'feedbackNotes', 'mutedChannels', 'momentRejected', 'momentSwipes', 'momentLog', 'savedMoments', 'momentWeights']) expect(back.state).toHaveProperty(k);
     expect(canon(back)).toBe(canon(merged));

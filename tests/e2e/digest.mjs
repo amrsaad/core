@@ -6,6 +6,7 @@
 // Aufruf: node tests/e2e/digest.mjs <url> <ausgabeordner>   (vorher npm run build, dann vite preview)
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
+import { gunzipSync } from 'node:zlib';
 import { chromium, devices, webkit } from 'playwright';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-digest'] = process.argv.slice(2);
@@ -33,7 +34,9 @@ const encryptJson = async (value) => {
 const decryptFile = async (text) => {
   const j = JSON.parse(text);
   const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: Buffer.from(j.iv, 'base64url') }, key, Buffer.from(j.ct, 'base64url'));
-  return JSON.parse(new TextDecoder().decode(pt));
+  // Runde 14: z: "gzip" heißt, der Klartext ist gepackt; ohne z wie bisher JSON-Text
+  if (j.z !== undefined && j.z !== 'gzip') throw new Error(`unbekannte Kompression ${j.z}`);
+  return JSON.parse(j.z === 'gzip' ? gunzipSync(Buffer.from(pt)).toString('utf8') : new TextDecoder().decode(pt));
 };
 const encToken = async (t) => {
   const iv = crypto.getRandomValues(new Uint8Array(12));

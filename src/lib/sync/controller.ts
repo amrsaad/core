@@ -9,7 +9,7 @@
  */
 import type { AppState } from '../state';
 import { applyDoc, canon, canonNoDiag, mergeDocs, SYNC_VERSION, toDoc, withDiag, type SyncDoc } from './merge';
-import { CryptoFail, decryptDoc, decryptLatest, encryptDoc } from './crypto';
+import { CryptoFail, decryptDoc, decryptLatest, encryptDoc, type PackStats } from './crypto';
 import { DIGEST_PATH, readRemote, SyncError, writeRemote } from './github';
 import type { DigestLatest } from '../../moments/digest';
 import { diagLog, type DiagEntry } from '../diag';
@@ -210,8 +210,11 @@ export function createSync(deps: SyncDeps): Sync {
       if (await holdFirstWrite()) if (stopped) return;
       try {
         const stats = { bytes: 0 };
+        const pack: PackStats = { raw: 0, packed: 0, compressed: false };
+        const body = await encryptDoc(key, merged, pack);
+        log(pack.compressed ? `sync: packed ${Math.round(pack.raw / 1000)} kB to ${Math.round(pack.packed / 1000)} kB` : `sync: not packed ${Math.round(pack.raw / 1000)} kB (no gzip here)`);
         const t0 = now();
-        await writeRemote(token, await encryptDoc(key, merged), remote?.sha ?? null, `core state ${new Date(now()).toISOString()}`, deps.fetchImpl, stats);
+        await writeRemote(token, body, remote?.sha ?? null, `core state ${new Date(now()).toISOString()}`, deps.fetchImpl, stats);
         log(`sync: PUT ok ${Math.round(stats.bytes / 1000)} kB in ${((now() - t0) / 1000).toFixed(1)} s${putFails > 0 ? ` (try ${putFails + 1})` : ''}`);
         putFails = 0;
         putBase = 0;
