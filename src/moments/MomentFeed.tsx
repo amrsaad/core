@@ -1,5 +1,5 @@
 import { describeMedia, holdsNeighbor, needsLoad, type MediaItem } from './slotplan';
-import { neighborCall, recoverCall, type ActiveObs } from './neighborGate';
+import { neighborCall, recoverCall, youtubeObs, type ActiveObs } from './neighborGate';
 import { notesRow } from './notesrow';
 import { diagLog, netType } from '../lib/diag';
 import { markFirstPlay } from '../lib/sync/firstPlay';
@@ -353,7 +353,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
    * Runde 15: Vorrang für den aktiven Stream-Moment. Nachbarn warten (wait), bis er stabil spielt (siehe neighborGate.ts), dann laden sie einer nach dem anderen.
    * started: Moment-ID und Zeitpunkt, ab dem das Vorladen freigegeben ist. logged: Momente, für die "deferred" schon in der Diag steht. at: Wechsel auf den aktuellen Moment.
    */
-  const nbr = useRef({ wait: new Set<Slot>(), started: new Map<string, number>(), logged: new Set<string>(), idx: -1, at: 0 });
+  const nbr = useRef({ wait: new Set<Slot>(), started: new Map<string, number>(), logged: new Set<string>(), idx: -1, at: 0, yt: { id: '', at: 0 } });
 
   /** Wischübergang: Bühne mit den Seiten und Ebene mit den Overlays bewegen sich gemeinsam, nur transform, direkt geschrieben (ohne React) */
   const stageEl = useRef<HTMLDivElement>(null);
@@ -859,9 +859,19 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     const cm = queue.current[idxRef.current];
     return slots.current.length > 1 && !textRef.current && !!cm && cm.form !== 'text' && cm.form !== 'audio' && !cm.audio && HLS.has(cm.videoId) && !AUDIO_ONLY.has(cm.videoId);
   };
-  /** Beobachtung des aktiven Stream-Moments für neighborCall */
+  /** Runde 16: der aktuelle Moment ist ein YouTube-Moment im Video-Reiter: HLS-Nachbarn warten, bis er spielt */
+  const activeIsYoutube = (): boolean => {
+    const cm = queue.current[idxRef.current];
+    return slots.current.length > 1 && !textRef.current && !!cm && cm.form !== 'text' && cm.form !== 'audio' && !cm.audio && streamKind(cm) === 'youtube';
+  };
+  /** Beobachtung des aktiven Moments für neighborCall (Stream: Element, YouTube: Zustand und Zeit seit PLAYING) */
   const activeObs = (): ActiveObs => {
     const cs = current();
+    if (activeIsYoutube()) {
+      const y = nbr.current.yt;
+      const sinceMs = Math.round(performance.now() - nbr.current.at);
+      return youtubeObs({ st: cs.st, playingAtMs: y.id === cs.mid && y.at > 0 ? Math.round(performance.now() - y.at) : 0, userPaused: userPaused.current, sinceMs });
+    }
     const o = cs.player?.hlsObs?.() ?? null;
     // Ohne Beobachtung (Player noch nicht bereit): wie ein Moment, der nicht spielt. So greift die Frist auch, wenn der aktive Moment gar nicht anläuft.
     if (!o) return { playedBefore: cs.playedAt > 0, playing: false, playingMs: 0, waitingMs: 0, rs: 0, ahead: 0, userPaused: userPaused.current, sinceMs: Math.round(performance.now() - nbr.current.at) };
@@ -888,7 +898,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     }
     if (!nbr.current.logged.has(m.id)) {
       nbr.current.logged.add(m.id);
-      diag.current.push('video: neighbor preload deferred (active not stable)');
+      diag.current.push(activeIsYoutube() ? 'video: neighbor preload deferred (youtube not playing)' : 'video: neighbor preload deferred (active not stable)');
     }
   };
   /**
@@ -902,7 +912,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       n.at = performance.now();
     }
     for (const sl of [...n.wait]) if (sl.index < 0 || sl.index <= idxRef.current || sl.index > idxRef.current + 2) n.wait.delete(sl);
-    if (!activeIsStream()) {
+    if (!activeIsStream() && !activeIsYoutube()) {
       // Aktueller Moment ist kein Stream mehr (Wisch auf YouTube, Reiterwechsel): wartende Nachbarn laden nach den bisherigen Regeln
       for (const sl of [...n.wait]) {
         n.wait.delete(sl);
@@ -935,7 +945,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       if (c.call === 'start' && parked) {
         n.wait.delete(sl);
         n.started.set(m.id, performance.now());
-        diag.current.push(`video: neighbor preload start ${m.id}${c.why === 'deadline' ? ' (deadline 6 s, active not stable)' : c.why === 'paused' ? ' (active paused)' : ''}`);
+        diag.current.push(`video: neighbor preload start ${m.id}${c.why === 'deadline' ? ' (deadline 6 s, ' + (activeIsYoutube() ? 'youtube not playing)' : 'active not stable)') : c.why === 'paused' ? ' (active paused)' : ''}`);
         assign(sl, j, false);
       } else if (c.call === 'pause' && loading && sl.player?.unloadPreload?.()) {
         // Stockt der aktive Moment, hört der ladende Nachbar auf: Quelle frei, später neu cuen
@@ -991,7 +1001,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     }
     // Runde 15: ein Stream-Moment (TED) ist aktuell, der Nachbar wartet, bis er stabil spielt (neighborTick gibt frei). Ein Nachbar, den neighborTick
     // freigegeben hat (started), und ein schon geladener (mid gleich) gehen durch.
-    if (!play && activeIsStream() && !(nbr.current.started.has(m.id) && !nbr.current.wait.has(slot))) {
+    // Runde 16: dasselbe, wenn ein YouTube-Moment aktuell ist und der Nachbar ein HLS-Stream ist (YouTube-Nachbarn bleiben unverändert).
+    if (!play && (activeIsStream() || (activeIsYoutube() && HLS.has(m.videoId))) && !(nbr.current.started.has(m.id) && !nbr.current.wait.has(slot))) {
       if (slot.mid !== m.id || !slot.player?.hlsObs?.()?.loaded) {
         parkNeighbor(slot, m);
         return;
@@ -1884,11 +1895,14 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                 if (slot.index === idxRef.current) {
                   if (st === STATE.PLAYING) {
                     slot.playedAt ||= performance.now();
+                    // Runde 16: Zeit seit dem letzten Eintritt in PLAYING ohne Unterbrechung (Nachbar-Sperre bei YouTube)
+                    if (nbr.current.yt.id !== slot.mid || !nbr.current.yt.at) nbr.current.yt = { id: slot.mid, at: performance.now() };
                     openGate('first playing');
                     // Runde 12: der erste Sync-Upload nach dem Öffnen wartet auf dieses erste PLAYING
                     markFirstPlay();
                     startCover(slot);
                   } else {
+                    if (nbr.current.yt.id === slot.mid) nbr.current.yt.at = 0;
                     syncCover(slot);
                     if (st === STATE.BUFFERING && slot.playedAt) {
                       slot.stalls++;

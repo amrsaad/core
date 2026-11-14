@@ -1,6 +1,6 @@
 // Runde 15: Vorrang für den aktiven Stream-Moment. Wann darf welcher Nachbar laden, wann wird angehalten, Frist, Erholung, kein doppeltes Laden.
 import { describe, expect, it } from 'vitest';
-import { aheadOf, DEADLINE_MS, isStable, isStalled, neighborCall, recoverCall, skipsReload, type ActiveObs, type NeighborObs } from '../src/moments/neighborGate';
+import { aheadOf, DEADLINE_MS, isStable, isStalled, neighborCall, recoverCall, skipsReload, youtubeObs, STABLE_PLAYING_MS, type ActiveObs, type NeighborObs } from '../src/moments/neighborGate';
 
 const act = (o: Partial<ActiveObs> = {}): ActiveObs => ({ playedBefore: false, playing: false, playingMs: 0, waitingMs: 0, rs: 0, ahead: 0, userPaused: false, sinceMs: 0, ...o });
 const nb = (o: Partial<NeighborObs> = {}): NeighborObs => ({ rank: 1, started: false, canplay: false, prevCanplay: true, prevStartedMs: 0, ...o });
@@ -113,5 +113,31 @@ describe('skipsReload', () => {
     expect(skipsReload(m, m, { ...ok, wantPlay: true })).toBe(false);
     expect(skipsReload(m, m, { ...ok, rs: 0 })).toBe(false);
     expect(skipsReload(null, m, ok)).toBe(false);
+  });
+});
+
+describe('youtubeObs (Runde 16)', () => {
+  const y = (o: Partial<Parameters<typeof youtubeObs>[0]> = {}) => youtubeObs({ st: -1, playingAtMs: 0, userPaused: false, sinceMs: 0, ...o });
+  it('parkt, solange YouTube nicht spielt (kein Start, hängender Start, Puffern)', () => {
+    for (const o of [{ st: -1 }, { st: 5 }, { st: 3 }, { st: 2 }, { st: 1, playingAtMs: 0 }]) {
+      expect(neighborCall(y({ ...o, sinceMs: 3000 }), nb())).toEqual({ call: 'defer' });
+    }
+  });
+  it('parkt bei PLAYING unter 2 s, gibt ab 2 s ohne Unterbrechung frei', () => {
+    expect(neighborCall(y({ st: 1, playingAtMs: STABLE_PLAYING_MS - 1, sinceMs: 3000 }), nb())).toEqual({ call: 'defer' });
+    expect(neighborCall(y({ st: 1, playingAtMs: STABLE_PLAYING_MS, sinceMs: 3000 }), nb())).toEqual({ call: 'start', why: 'stable' });
+  });
+  it('gibt nach der Frist frei, auch wenn YouTube hängt', () => {
+    expect(neighborCall(y({ sinceMs: DEADLINE_MS - 1 }), nb())).toEqual({ call: 'defer' });
+    expect(neighborCall(y({ sinceMs: DEADLINE_MS }), nb())).toEqual({ call: 'start', why: 'deadline' });
+  });
+  it('Pufferpause von YouTube pausiert keinen Nachbarn und der übernächste folgt dem nächsten', () => {
+    expect(neighborCall(y({ st: 3, sinceMs: 9000 }), nb({ started: true }))).toEqual({ call: 'keep' });
+    const ok = y({ st: 1, playingAtMs: 2500 });
+    expect(neighborCall(ok, nb({ rank: 2, prevCanplay: false, prevStartedMs: 1000 }))).toEqual({ call: 'defer' });
+    expect(neighborCall(ok, nb({ rank: 2, prevCanplay: true }))).toEqual({ call: 'start', why: 'stable' });
+  });
+  it('Nutzerpause gibt frei', () => {
+    expect(neighborCall(y({ userPaused: true }), nb())).toEqual({ call: 'start', why: 'paused' });
   });
 });

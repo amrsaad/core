@@ -35,6 +35,16 @@ export interface ActiveObs {
   sinceMs: number;
 }
 
+/**
+ * Runde 16: Beobachtung eines aktiven YouTube-Moments. Es gibt kein readyState und kein buffered, darum rs 0 und ahead 0: stabil wird er nur über
+ * "spielt seit 2 s ohne Unterbrechung" (st 1, playingAtMs = Zeit seit dem letzten Eintritt in PLAYING, 0 wenn nicht spielend). playedBefore bleibt false,
+ * damit bei hängendem YouTube die Frist greift und eine Pufferpause keine Stockung (Pause der Nachbarn) auslöst.
+ */
+export function youtubeObs(o: { st: number; playingAtMs: number; userPaused: boolean; sinceMs: number }): ActiveObs {
+  const playing = o.st === 1 && o.playingAtMs > 0;
+  return { playedBefore: false, playing, playingMs: playing ? o.playingAtMs : 0, waitingMs: 0, rs: 0, ahead: 0, userPaused: o.userPaused, sinceMs: o.sinceMs };
+}
+
 /** Stabil: spielt seit mindestens 2 s ohne waiting, oder readyState 4 mit mindestens 8 s Puffer */
 export function isStable(a: Pick<ActiveObs, 'playing' | 'playingMs' | 'waitingMs' | 'rs' | 'ahead'>): boolean {
   if (a.playing && a.waitingMs === 0 && a.playingMs >= STABLE_PLAYING_MS) return true;
