@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-14T15:41:29.390Z",
+  "at": "2026-11-14T16:05:07.478Z",
   "runs": [
     {
       "variant": "webkit",
@@ -122,14 +122,14 @@
         "b24ComesBackOnce": true,
         "b24BlockedLine": true,
         "b24EndCountsNotBlocked": true,
-        "b24NotSeenAfterBlock": false,
+        "b24NotSeenAfterBlock": true,
         "b24Reload2End": true,
         "b24StartOneBlocked": true,
         "b24Reload2Count": true,
         "b24Reload2ButtonOff": true,
         "b24AudioEndAtOnce": true,
         "b24BlockedNeverShown": true,
-        "b24ExpiredShown": false,
+        "b24ExpiredShown": true,
         "b24ExpiredStartLine": true,
         "b24NoPageErrors": true,
         "b57FeedLoaded": true,
@@ -169,7 +169,7 @@
       ],
       "seenAudio": 2,
       "b24Blocked": "endp0000006:100",
-      "b24Rejected": true
+      "b24Rejected": false
     }
   ]
 }
