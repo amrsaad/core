@@ -1,5 +1,5 @@
 {
- "at": "2026-11-14T04:22:11.330Z",
+ "at": "2026-11-14T04:58:22.648Z",
  "runs": [
   {
    "browser": "webkit",
@@ -121,7 +121,7 @@
     "bg: deck while hidden 7 s: timeupdate 69, ended 0, clip ends 2, play calls 2",
     "bg: back bgaudio5:0"
    ],
-   "bgPoolFiveMs": 242,
+   "bgPoolFiveMs": 227,
    "bgPoolStart": {
     "fill": 3,
     "ok": 25,
@@ -131,7 +131,7 @@
     "bg: mediasession none to playing (feed paused=false) hidden=false",
     "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: left bgaudio0:0",
-    "bg: deck page hidden +1 s: paused=false ended=false t=1.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck page hidden +1 s: paused=false ended=false t=1.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: deck clip end via timeupdate hidden=true pool=5 onAdvance=true advance=yes rs=0 muted=false t=4.0",
     "bg: ms playbackState playing (swap)",
     "bg: deck advance bgaudio0 to bgaudio1: swap and play() in this handler, new element true, next from storage false, readyState 0",
@@ -209,11 +209,11 @@
     "bgstock1"
    ],
    "bgNextFiveMs": [
-    26,
-    15,
+    28,
+    12,
     15,
     11,
-    12
+    11
    ],
    "bgNextSkipLines": [
     "go 0->1",
@@ -226,32 +226,32 @@
     {
      "sync": true,
      "src": "https://stream.test/bgstock2.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:1:23 < swapEntry@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js < swapNext@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js: < ac@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:9:3129 < @http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:11:11012 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:1:24 < swapEntry@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js < swapNext@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js: < oc@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:9:3129 < @http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:11:11012 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock8.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:1:23 < swapEntry@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js < swapNext@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js: < ac@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:9:3129 < @http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:11:11012 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:1:24 < swapEntry@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js < swapNext@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js: < oc@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:9:3129 < @http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:11:11012 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock4.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:1:23 < swapEntry@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js < swapNext@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js: < ac@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:9:3129 < @http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:11:11012 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:1:24 < swapEntry@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js < swapNext@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js: < oc@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:9:3129 < @http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:11:11012 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock10.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:1:23 < swapEntry@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js < swapNext@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js: < ac@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:9:3129 < @http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:11:11012 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:1:24 < swapEntry@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js < swapNext@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js: < oc@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:9:3129 < @http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:11:11012 < @"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock1.mp3#t=10",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:1:23 < swapEntry@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js < swapNext@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js: < ac@http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:9:3129 < @http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:11:11012 < @"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:1:24 < swapEntry@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js < swapNext@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js: < oc@http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:9:3129 < @http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:11:11012 < @"
     }
    ],
    "bgNextQueuedLines": [
     "deck: pool fill 5/5 (local 0, net 5)",
-    "deck: pool ready bgstock9 after 30 ms host=stream.test",
+    "deck: pool ready bgstock9 after 31 ms host=stream.test",
     "pool 1/5 ready",
     "deck: swap bgstock9 ready=true pool=0",
     "deck play#7 swap rs=0 muted=false t=10.0",
@@ -260,9 +260,9 @@
     "deck: pool fill 5/5 (local 0, net 5)",
     "deck: pool fill 5/5 (local 0, net 5)",
     "deck play#7 ok",
-    "deck: pool ready bgnet2 after 33 ms host=stream.test",
+    "deck: pool ready bgnet2 after 35 ms host=stream.test",
     "pool 1/5 ready",
-    "deck: pool ready bgstock3 after 33 ms host=stream.test",
+    "deck: pool ready bgstock3 after 35 ms host=stream.test",
     "pool 2/5 ready",
     "deck: pool ready bgstock5 after 20 ms host=stream.test",
     "pool 3/5 ready",
@@ -386,9 +386,9 @@
    },
    "bgAudioLog": [
     "bg: mediasession none to playing (feed paused=false) hidden=false",
-    "bg: deck page hidden: paused=false ended=false t=1.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck page hidden: paused=false ended=false t=1.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: left bgaudio0:0",
-    "bg: deck page hidden +1 s: paused=false ended=false t=2.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck page hidden +1 s: paused=false ended=false t=2.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: deck clip end via timeupdate hidden=true pool=5 onAdvance=true advance=yes rs=0 muted=false t=4.0",
     "bg: ms playbackState playing (swap)",
     "bg: deck advance bgaudio0 to bgaudio1: swap and play() in this handler, new element true, next from storage false, readyState 0",
@@ -403,10 +403,10 @@
     "bg: started bgaudio5:0",
     "bg: next bgaudio5:0",
     "bg: deck page visible: paused=false ended=false t=0.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
-    "bg: deck while hidden 7 s: timeupdate 69, ended 0, clip ends 2, play calls 2",
+    "bg: deck while hidden 7 s: timeupdate 70, ended 0, clip ends 2, play calls 2",
     "bg: back bgaudio5:0"
    ],
-   "bgPoolFiveMs": 168,
+   "bgPoolFiveMs": 150,
    "bgPoolStart": {
     "fill": 3,
     "ok": 21,
@@ -414,9 +414,9 @@
    },
    "bgRowLog": [
     "bg: mediasession none to playing (feed paused=false) hidden=false",
-    "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck page hidden: paused=false ended=false t=0.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: left bgaudio0:0",
-    "bg: deck page hidden +1 s: paused=false ended=false t=1.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck page hidden +1 s: paused=false ended=false t=1.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: deck clip end via timeupdate hidden=true pool=5 onAdvance=true advance=yes rs=0 muted=false t=4.0",
     "bg: ms playbackState playing (swap)",
     "bg: deck advance bgaudio0 to bgaudio1: swap and play() in this handler, new element true, next from storage false, readyState 0",
@@ -495,9 +495,9 @@
    ],
    "bgNextFiveMs": [
     11,
-    8,
-    8,
-    9,
+    6,
+    7,
+    7,
     7
    ],
    "bgNextSkipLines": [
@@ -511,27 +511,27 @@
     {
      "sync": true,
      "src": "https://stream.test/bgstock2.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at Zp.kick (http://127.0.0.1:4178/core/assets/main-DfsGZAeH. < at Zp.swapEntry (http://127.0.0.1:4178/core/assets/main-DfsG < at Zp.swapNext (http://127.0.0.1:4178/core/assets/main-DfsGZ < at Object.ac [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:11:111"
+     "stack": "at P.play (<anonymous>:9:134) < at em.kick (http://127.0.0.1:4178/core/assets/main-Bnlf8lmW. < at em.swapEntry (http://127.0.0.1:4178/core/assets/main-Bnlf < at em.swapNext (http://127.0.0.1:4178/core/assets/main-Bnlf8 < at Object.oc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:11:111"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock8.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at Zp.kick (http://127.0.0.1:4178/core/assets/main-DfsGZAeH. < at Zp.swapEntry (http://127.0.0.1:4178/core/assets/main-DfsG < at Zp.swapNext (http://127.0.0.1:4178/core/assets/main-DfsGZ < at Object.ac [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:11:111"
+     "stack": "at P.play (<anonymous>:9:134) < at em.kick (http://127.0.0.1:4178/core/assets/main-Bnlf8lmW. < at em.swapEntry (http://127.0.0.1:4178/core/assets/main-Bnlf < at em.swapNext (http://127.0.0.1:4178/core/assets/main-Bnlf8 < at Object.oc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:11:111"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock4.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at Zp.kick (http://127.0.0.1:4178/core/assets/main-DfsGZAeH. < at Zp.swapEntry (http://127.0.0.1:4178/core/assets/main-DfsG < at Zp.swapNext (http://127.0.0.1:4178/core/assets/main-DfsGZ < at Object.ac [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:11:111"
+     "stack": "at P.play (<anonymous>:9:134) < at em.kick (http://127.0.0.1:4178/core/assets/main-Bnlf8lmW. < at em.swapEntry (http://127.0.0.1:4178/core/assets/main-Bnlf < at em.swapNext (http://127.0.0.1:4178/core/assets/main-Bnlf8 < at Object.oc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:11:111"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock10.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at Zp.kick (http://127.0.0.1:4178/core/assets/main-DfsGZAeH. < at Zp.swapEntry (http://127.0.0.1:4178/core/assets/main-DfsG < at Zp.swapNext (http://127.0.0.1:4178/core/assets/main-DfsGZ < at Object.ac [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:11:111"
+     "stack": "at P.play (<anonymous>:9:134) < at em.kick (http://127.0.0.1:4178/core/assets/main-Bnlf8lmW. < at em.swapEntry (http://127.0.0.1:4178/core/assets/main-Bnlf < at em.swapNext (http://127.0.0.1:4178/core/assets/main-Bnlf8 < at Object.oc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:11:111"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock1.mp3#t=10",
-     "stack": "at P.play (<anonymous>:9:134) < at Zp.kick (http://127.0.0.1:4178/core/assets/main-DfsGZAeH. < at Zp.swapEntry (http://127.0.0.1:4178/core/assets/main-DfsG < at Zp.swapNext (http://127.0.0.1:4178/core/assets/main-DfsGZ < at Object.ac [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-DfsGZAeH.js:11:111"
+     "stack": "at P.play (<anonymous>:9:134) < at em.kick (http://127.0.0.1:4178/core/assets/main-Bnlf8lmW. < at em.swapEntry (http://127.0.0.1:4178/core/assets/main-Bnlf < at em.swapNext (http://127.0.0.1:4178/core/assets/main-Bnlf8 < at Object.oc [as current] (http://127.0.0.1:4178/core/assets < at http://127.0.0.1:4178/core/assets/main-Bnlf8lmW.js:11:111"
     }
    ],
    "bgNextQueuedLines": [
@@ -545,15 +545,15 @@
     "deck: pool fill 5/5 (local 0, net 5)",
     "deck: pool fill 5/5 (local 0, net 5)",
     "deck play#7 ok",
-    "deck: pool ready bgnet2 after 32 ms host=stream.test",
+    "deck: pool ready bgnet2 after 31 ms host=stream.test",
     "pool 1/5 ready",
-    "deck: pool ready bgstock3 after 32 ms host=stream.test",
+    "deck: pool ready bgstock3 after 31 ms host=stream.test",
     "pool 2/5 ready",
     "deck: pool ready bgstock5 after 20 ms host=stream.test",
     "pool 3/5 ready",
     "deck: pool ready bgnet0 after 20 ms host=stream.test",
     "pool 4/5 ready",
-    "deck: pool ready bgstock7 after 29 ms host=stream.test",
+    "deck: pool ready bgstock7 after 30 ms host=stream.test",
     "pool 5/5 ready"
    ],
    "bgHungLog": [
