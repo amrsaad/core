@@ -181,8 +181,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     await playThrough(p2);
     c.b24VideoEndFirst = (await audioButton(p2)) === `Audio, ${NA2} new`;
     // Erstes Wegwischen: zählt, keine Sperre, der Moment bleibt ungesehen
+    // Der Moment startet nicht (wie p3): sonst läuft das Deck je nach Lastlage vor dem Wisch an, der Wisch wäre ein schneller Skip nach Spielzeit (Entscheidung 36) statt Sperrzähler, und der Test wäre unzuverlässig
+    await p2.evaluate(() => { window.__mediaNoStart = true; });
     await p2.click('[data-testid=end-audio]');
     const a1 = await swipeAtOnce(p2);
+    await p2.evaluate(() => { window.__mediaNoStart = false; });
     r.b24Blocked = a1;
     await p2.waitForTimeout(300);
     c.b24FirstSkipLogged = await diagHas(p2, `skipped (not seen) ${a1}`);
@@ -197,8 +200,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     await p2.reload();
     c.b24ReloadEnd = await waitFor(p2, endPage);
     c.b24StartNoneBlocked = await diagHas(p2, 'skip: 0 blocked');
+    await p2.evaluate(() => { window.__mediaNoStart = true; });
     await p2.click('[data-testid=end-audio]');
     const a1again = await swipeAtOnce(p2);
+    await p2.evaluate(() => { window.__mediaNoStart = false; });
     c.b24ComesBackOnce = a1again === a1;
     c.b24BlockedLine = await waitFor(p2, (l) => window.__core.diag().some((x) => x === l), `skip: ${a1} blocked 30 d (2 skips)`, 3000);
     await dump(p2, 'nach BlockedLine', a1);
