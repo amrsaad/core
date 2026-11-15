@@ -1,5 +1,5 @@
 {
- "at": "2026-11-14T23:53:50.881Z",
+ "at": "2026-11-15T05:06:28.677Z",
  "runs": [
   {
    "browser": "webkit",
@@ -49,12 +49,12 @@
    },
    "diagLines": 15,
    "diagSample": [
-    "xebw slot0 sy1:1 state 2",
-    "xebw sync: packed 1 kB to 1 kB",
-    "xebw sync: PUT ok 1 kB in 0.0 s",
-    "xebw app: hidden"
+    "ka2q slot0 sy4:1 state 2",
+    "ka2q sync: packed 1 kB to 1 kB",
+    "ka2q sync: PUT ok 1 kB in 0.0 s",
+    "ka2q app: hidden"
    ],
-   "writeDelayMs": 10030,
+   "writeDelayMs": 10032,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -111,12 +111,12 @@
    },
    "diagLines": 15,
    "diagSample": [
-    "lhj9 slot0 sy1:1 state 2",
-    "lhj9 sync: packed 1 kB to 1 kB",
-    "lhj9 sync: PUT ok 1 kB in 0.0 s",
-    "lhj9 app: hidden"
+    "mjxq slot0 sy4:1 state 2",
+    "mjxq sync: packed 1 kB to 1 kB",
+    "mjxq sync: PUT ok 1 kB in 0.0 s",
+    "mjxq app: hidden"
    ],
-   "writeDelayMs": 10016,
+   "writeDelayMs": 10017,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
