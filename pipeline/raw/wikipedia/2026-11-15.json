@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-15",
+ "records": [
+  {
+   "sourceId": "wiki:de:Stangeria eriopus",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Stangeria_eriopus",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/15",
+    "status": 200
+   },
+   "title": "Stangeria eriopus",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Stangeria eriopus ist eine Pflanzenart der Palmfarne (Cycadales); sie ist die einzige Art der monotypischen Gattung Stangeria. Die Art ist endemisch in einem schmalen Streifen an der Ostküste Südafrikas und dem südlichen Mosambik. Stangeria eriopus ist ein sehr langlebiger, ausdauernder, immergrüner Palmfarn. Die gestielten, gefiederten Laubblätter sehen Farnwedeln sehr ähnlich und werden zwischen 25 Zentimeter und zwei Meter lang. Die IUCN stuft Stangeria eriopus auf ihrer Roten Liste als Potentiell gefährdet ein. Die Art ist vor allem durch die Zerstörung ihres Lebensraumes und durch Ausgraben der Pflanzen bedroht. Eine weitere mögliche Bedrohung der Art ist die Deckelschildlaus Aulacaspis yasumatsui, die ursprünglich aus Thailand stammt und dort Palmfarne befällt."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-15T05:01:44.251Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Stangeria_eriopus": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Riesenmaulhai",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Riesenmaulhai",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/15",
+    "status": 200
+   },
+   "title": "Riesenmaulhai",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Der Riesenmaulhai ist neben Walhai und Riesenhai eine der drei zurzeit bekannten Haiarten, die sich von Kleinstlebewesen ernähren. Seit seiner Entdeckung im Jahre 1976 ist er die einzige Art in der nur aus einer Gattung bestehenden Familie der Riesenmaulhaie."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-15T05:01:44.251Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Riesenmaulhai": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Helmut Fischer",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Helmut_Fischer",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/15",
+    "status": 200
+   },
+   "title": "Helmut Fischer",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Helmut Fischer war ein deutscher Schauspieler, der vor allem durch seine Rollen als bayerischer Volksschauspieler bekannt wurde. Er verkörperte in seinen Rollen den charmanten Hallodri und Vorstadt-Casanova. Fischers Markenzeichen war sein staksiger Gang, der mit einem Bandscheibenschaden zusammenhing. Besondere Popularität erlangte Fischer in der Rolle des Münchner Originals Monaco Franze."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-15T05:01:44.251Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Helmut_Fischer": 200
+   }
+  }
+ ]
+}
