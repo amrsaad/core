@@ -624,8 +624,9 @@ const runIosSwipes = async (browser, name) => {
     c.cNoGuardRetry = !lines.some((x) => /^soundGuard/.test(x));
     c.cTapPlaysInGesture = playsAfterTap && after.some((x) => x === `yt: play in gesture ${m.id} (tap)`) && after.some((x) => x.startsWith(`yt: playing after gesture ${m.id}`));
   }
-  // Teil 3 (Issue 54): der Start in der Geste kommt nie auf PLAYING (state 3, dann -1, window.__ytStartHang). Erwartet: nach 3 s genau ein
-  // "yt: retry start", nach weiteren 3 s die Tippfläche "Tap to play", kein soundGuard, kein watchdog, kein Skip in 13 s. Der Tipp (Schalter weg) startet in der Geste.
+  // Teil 3 (Issue 54): der Start in der Geste kommt nie auf PLAYING (state 3, dann -1, window.__ytStartHang). Erwartet (Runde 18b, nach Runde 19): der erste
+  // "yt: retry start" früh (rund 0,8 s), höchstens zwei, nach rund 6 s die Tippfläche "Tap to play", kein soundGuard, kein watchdog, kein Skip in 13 s.
+  // Der Tipp (Schalter weg) startet in der Geste, danach spielt der Moment.
   {
     await page.waitForTimeout(1500);
     const idx0 = await page.evaluate(() => window.__core.idx());
@@ -656,7 +657,7 @@ const runIosSwipes = async (browser, name) => {
     r.startHang = { id: m.id, cuedBefore, moved, retried, retryAfterMs, tapShown, tapAfterMs, atTap, idxAfter, still, status, playsAfterTap, lines: after.filter((x) => /^yt:|^soundGuard|^watchdog|state |^skipped|^video: gave up/.test(x)) };
     c.hCuedBeforeSwipe = cuedBefore === 5;
     c.hPlayInGesture = moved && lines.some((x) => x === `yt: play in gesture ${m.id}`);
-    c.hOneRetryAround3s = retried && lines.filter((x) => x.startsWith(`yt: retry start ${m.id}`)).length === 1 && retryAfterMs >= 2500 && retryAfterMs < 6500;
+    c.hEarlyRetry = retried && lines.filter((x) => x.startsWith(`yt: retry start ${m.id}`)).length <= 2 && retryAfterMs >= 600 && retryAfterMs < 2000;
     c.hTapAfterRetry = tapShown && !tapBeforeRetry && tapAfterMs >= 5500 && tapAfterMs < 10_000 && lines.some((x) => x.startsWith(`yt: no start ${m.id} st=`)) && lines.some((x) => x === `yt: tap to play ${m.id}`);
     c.hTapSurface = tapShown && atTap.tapAttr && atTap.tapText === 'Tap to play' && atTap.tapVisible && atTap.poster && atTap.play && !atTap.paused;
     c.hNoSoundGuard = !lines.some((x) => /^soundGuard/.test(x));

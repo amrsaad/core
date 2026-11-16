@@ -28,9 +28,17 @@ export function setFeedLoading(on: boolean): void {
 }
 export const isFeedLoading = (): boolean => feedLoading;
 
+/** Runde 18b: schwaches Netz (Merker im Audio-Deck oder für Video im Feed). Nur dann drosselt der Sync seine Uploads. */
+let weakNet = false;
+export function setWeakNet(on: boolean): void {
+  weakNet = on;
+}
+export const isWeakNet = (): boolean => weakNet;
+
 /** Nur für Tests */
 export function resetFirstPlay(): void {
   played = false;
   feedLoading = false;
+  weakNet = false;
   waiters.clear();
 }

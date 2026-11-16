@@ -2,7 +2,7 @@ import { describeMedia, holdsNeighbor, needsLoad, type MediaItem } from './slotp
 import { isWeakNet, neighborCall, recoverCall, slowStart, START_POLL_MS, startWatchCall, weakUntil, youtubeObs, type ActiveObs } from './neighborGate';
 import { notesRow } from './notesrow';
 import { diagLog, netType } from '../lib/diag';
-import { markFirstPlay, setFeedLoading } from '../lib/sync/firstPlay';
+import { markFirstPlay, setFeedLoading, setWeakNet } from '../lib/sync/firstPlay';
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal, flushSync } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
@@ -2231,6 +2231,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   useEffect(() => {
     let flushed = 0;
     const t = window.setInterval(() => {
+      // Runde 18b: Merker "schwaches Netz" (Audio-Deck oder Video) an den Sync melden, nur dann drosselt er Uploads
+      setWeakNet(weakNow());
       if (moving()) return;
       const sl = current();
       const p = sl.player;
@@ -2367,6 +2369,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     return () => {
       window.clearInterval(t);
       setFeedLoading(false);
+      setWeakNet(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finish, today]);

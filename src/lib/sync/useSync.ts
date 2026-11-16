@@ -7,7 +7,7 @@ import { createSync, type Sync, type SyncStatus } from './controller';
 import { canon, onlyFeedTimeChanged, syncedChanged, type SyncDoc } from './merge';
 import type { DigestLatest } from '../../moments/digest';
 import { diagLog } from '../diag';
-import { hasFirstPlayed, isFeedLoading, waitFirstPlay } from './firstPlay';
+import { hasFirstPlayed, isFeedLoading, isWeakNet, waitFirstPlay } from './firstPlay';
 
 export interface SyncUi {
   status: SyncStatus;
@@ -39,6 +39,7 @@ export function useSync(state: AppState | null, access: SyncAccess, enabled: boo
       firstPlay: waitFirstPlay,
       firstPlayed: hasFirstPlayed,
       uploadBusy: isFeedLoading,
+      weakNet: isWeakNet,
       diag: () => diagLog.entries(),
       adoptDigest: (l: DigestLatest) => access.adopt((st) => (st.digestLatest && canon(st.digestLatest) === canon(l) ? st : { ...st, digestLatest: l })),
       loadMeta: loadSyncMeta,

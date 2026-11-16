@@ -1,7 +1,8 @@
 // Runde 18 (Diag 16.11., Mobilfunk): der Sync lud mehrfach je Minute 190 kB hoch und nahm dem Ton die Bandbreite.
-// Sichtbar höchstens ein Upload je 60 s, keiner, solange ein Moment lädt. Verdeckt, Sync now: sofort.
+// Runde 18b: Lücke (60 s) und uploadBusy gelten nur bei schwachem Netz (weakNet), sonst gilt das Verhalten vor Runde 18 (10 s nach der Änderung).
+// Busy hält einen fälligen Upload höchstens UPLOAD_BUSY_MAX_MS zurück. Verdeckt, Sync now: sofort.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createSync, UPLOAD_BUSY_RECHECK_MS, UPLOAD_GAP_MS, WRITE_DELAY_MS } from '../src/lib/sync/controller';
+import { createSync, UPLOAD_BUSY_MAX_MS, UPLOAD_BUSY_RECHECK_MS, UPLOAD_GAP_MS, WRITE_DELAY_MS } from '../src/lib/sync/controller';
 import { emptyState } from '../src/lib/state';
 import { fakeApi } from './sync-fake-api';
 
@@ -28,7 +29,7 @@ describe('Sync: Drossel der Uploads', () => {
     vi.useRealTimers();
   });
 
-  function dev(busy: () => boolean = () => false) {
+  function dev(busy: () => boolean = () => false, weak: () => boolean = () => true) {
     const api = fakeApi();
     const d = { state: { ...emptyState(), momentSeen: { m0: 1_700_000_000_000 } as Record<string, number> } };
     const s = createSync({
@@ -40,6 +41,7 @@ describe('Sync: Drossel der Uploads', () => {
       now: () => Date.now(),
       log: () => {},
       uploadBusy: () => busy(),
+      weakNet: () => weak(),
     });
     running.push(s);
     let i = 0;
@@ -51,7 +53,7 @@ describe('Sync: Drossel der Uploads', () => {
     return { s, api, change, gets };
   }
 
-  it('sichtbar: der zweite Upload kommt frühestens UPLOAD_GAP_MS nach dem ersten', async () => {
+  it('schwaches Netz, sichtbar: der zweite Upload kommt frühestens UPLOAD_GAP_MS nach dem ersten', async () => {
     const t = dev();
     t.change();
     await advance(WRITE_DELAY_MS + 100);
@@ -63,6 +65,23 @@ describe('Sync: Drossel der Uploads', () => {
     expect(t.api.puts).toBe(1);
     await advance(UPLOAD_GAP_MS);
     expect(t.api.puts).toBe(2);
+  });
+
+  it('gutes Netz: kein Mindestabstand, jede Änderung geht 10 s später raus', async () => {
+    const t = dev(() => false, () => false);
+    t.change();
+    await advance(WRITE_DELAY_MS + 100);
+    expect(t.api.puts).toBe(1);
+    t.change();
+    await advance(WRITE_DELAY_MS + 100);
+    expect(t.api.puts).toBe(2);
+  });
+
+  it('gutes Netz: ein ladender Moment (uploadBusy) hält den Upload nicht zurück', async () => {
+    const t = dev(() => true, () => false);
+    t.change();
+    await advance(WRITE_DELAY_MS + 100);
+    expect(t.api.puts).toBe(1);
   });
 
   it('das Warten kostet keine Downloads', async () => {
@@ -99,15 +118,26 @@ describe('Sync: Drossel der Uploads', () => {
     expect(t.api.puts).toBe(2);
   });
 
-  it('lädt ein Moment (uploadBusy), startet kein Upload. Danach geht es nach der Rückmeldung los', async () => {
+  it('schwaches Netz: lädt ein Moment (uploadBusy), startet kein Upload. Danach geht es nach der Rückmeldung los', async () => {
     let busy = true;
     const t = dev(() => busy);
     t.change();
     await advance(WRITE_DELAY_MS + 100);
     expect(t.api.puts).toBe(0);
-    await advance(30_000);
+    await advance(15_000);
     expect(t.api.puts).toBe(0);
     busy = false;
+    await advance(UPLOAD_BUSY_RECHECK_MS + 100);
+    expect(t.api.puts).toBe(1);
+  });
+
+  it('schwaches Netz: busy hält einen fälligen Upload höchstens UPLOAD_BUSY_MAX_MS zurück', async () => {
+    const t = dev(() => true);
+    t.change();
+    await advance(WRITE_DELAY_MS + 100);
+    expect(t.api.puts).toBe(0);
+    await advance(UPLOAD_BUSY_MAX_MS - 5_000);
+    expect(t.api.puts).toBe(0);
     await advance(UPLOAD_BUSY_RECHECK_MS + 100);
     expect(t.api.puts).toBe(1);
   });

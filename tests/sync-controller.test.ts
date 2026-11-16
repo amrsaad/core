@@ -31,8 +31,6 @@ function device(api: FakeApi, fill = 5, token: string | null = TOKEN): Dev {
     getToken: async () => token,
     fetchImpl: api.fetch,
     now: () => Date.now(),
-    // Runde 18: die Drossel (60 s) hat eigene Tests (sync-throttle.test.ts), hier gelten die älteren Fristen
-    uploadGapMs: 0,
   });
   running.push(d.sync);
   return d;
@@ -297,7 +295,7 @@ describe('Netzabbruch (Issue 9)', () => {
   it('Ein Token, das kurz nicht lesbar ist, gilt nie als entfernt', async () => {
     const api = fakeApi();
     let tok: string | null = TOKEN;
-    const s = createSync({ getState: () => emptyState(), adopt: () => {}, getKey: () => rawKey(5), getToken: async () => tok, fetchImpl: api.fetch, now: () => Date.now(), uploadGapMs: 0 });
+    const s = createSync({ getState: () => emptyState(), adopt: () => {}, getKey: () => rawKey(5), getToken: async () => tok, fetchImpl: api.fetch, now: () => Date.now() });
     running.push(s);
     await s.start();
     await advance(10);
@@ -320,7 +318,7 @@ describe('Sync-Fehler sind lesbar, ein fehlendes online-Ereignis sperrt nie (Iss
   function plain(fetchImpl: typeof fetch) {
     const lines: string[] = [];
     const d = { state: emptyState() };
-    const s = createSync({ getState: () => d.state, adopt: (fn) => (d.state = fn(d.state)), getKey: () => rawKey(5), getToken: async () => TOKEN, fetchImpl, now: () => Date.now(), uploadGapMs: 0, log: (l) => lines.push(l) });
+    const s = createSync({ getState: () => d.state, adopt: (fn) => (d.state = fn(d.state)), getKey: () => rawKey(5), getToken: async () => TOKEN, fetchImpl, now: () => Date.now(), log: (l) => lines.push(l) });
     running.push(s);
     return { s, d, lines };
   }

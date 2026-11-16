@@ -19,6 +19,8 @@ export const WRITE_DELAY_MS = 10_000;
 export const UPLOAD_GAP_MS = 60_000;
 /** Runde 18: läuft ein Audio- oder Video-Moment noch nicht (lädt), prüft der Sync nach dieser Zeit erneut, ob er schreiben darf (ms) */
 export const UPLOAD_BUSY_RECHECK_MS = 5_000;
+/** Runde 18b: hält ein ladender Moment einen fälligen Upload länger als das zurück, läuft er trotzdem (ein hängender Moment darf den Abgleich nicht blockieren) */
+export const UPLOAD_BUSY_MAX_MS = 30_000;
 /** Offline-Pause: Meldet der Browser das Netz nicht zurück (iOS lässt das online-Ereignis manchmal aus), endet sie nach 5 Minuten von selbst (Issue 45) */
 export const PAUSE_MAX_MS = 5 * 60_000;
 export const MAX_ATTEMPTS = 4;
@@ -66,8 +68,10 @@ export interface SyncDeps {
   firstPlayed?: () => boolean;
   /** Runde 18: ein Audio- oder Video-Moment lädt und spielt noch nicht. Solange das so ist, startet kein Upload (außer beim Verlassen der App und bei Sync now). */
   uploadBusy?: () => boolean;
-  /** Runde 18: Mindestabstand zwischen zwei Uploads bei sichtbarer App (ms), Standard UPLOAD_GAP_MS */
+  /** Runde 18: Mindestabstand zwischen zwei Uploads bei sichtbarer App und schwachem Netz (ms), Standard UPLOAD_GAP_MS */
   uploadGapMs?: number;
+  /** Runde 18b: schwaches Netz (Merker aus Audio-Deck oder Video-Feed). Nur dann gelten Lücke und uploadBusy, sonst schreibt der Sync wie vor Runde 18. Ohne Angabe: gutes Netz. */
+  weakNet?: () => boolean;
   fetchImpl?: typeof fetch;
   now?: () => number;
   loadMeta?: () => Promise<{ lastSync?: number } | undefined>;
@@ -268,9 +272,17 @@ export function createSync(deps: SyncDeps): Sync {
   }
 
   /** Runde 18: wie lange ein Upload jetzt noch warten muss (0: darf). Beim Verlassen der App und bei Sync now nie, ein ladender Moment hält ihn zurück. */
+  let busySince = 0;
   const uploadWait = () => {
-    if (urgent || hidden) return 0;
-    if (deps.uploadBusy?.()) return UPLOAD_BUSY_RECHECK_MS;
+    // Runde 18b: nur im schwachen Netz. Sonst gilt das alte Verhalten (10 s nach der Änderung).
+    if (urgent || hidden || !deps.weakNet?.()) {
+      busySince = 0;
+      return 0;
+    }
+    if (deps.uploadBusy?.()) {
+      busySince ||= now();
+      if (now() - busySince < UPLOAD_BUSY_MAX_MS) return UPLOAD_BUSY_RECHECK_MS;
+    } else busySince = 0;
     return Math.max(0, lastPut + (deps.uploadGapMs ?? UPLOAD_GAP_MS) - now());
   };
 
