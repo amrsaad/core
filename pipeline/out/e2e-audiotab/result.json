@@ -1,5 +1,5 @@
 {
- "at": "2026-11-16T11:33:18.565Z",
+ "at": "2026-11-16T18:16:31.999Z",
  "runs": [
   {
    "browser": "webkit",
@@ -88,7 +88,7 @@
     "openCardBackOnReturn": true
    },
    "notes": {
-    "iosTapMs": 3,
+    "iosTapMs": 4,
     "iosGestureLines": [
      "deck: gesture pointerdown unlocked 6/6"
     ],
@@ -103,9 +103,9 @@
       "atrdy9",
       "atrdy2"
      ],
-     "n": 37
+     "n": 40
     },
-    "rfSwipeMs": 413,
+    "rfSwipeMs": 410,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -145,70 +145,70 @@
      "bg: next atshort2:0"
     ],
     "tempoWaiting": 0,
-    "tempoPaused": 8,
+    "tempoPaused": 4,
     "cue": {
-     "worst": 0,
-     "n": 623,
+     "worst": 1,
+     "n": 622,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.38",
+       "3.40",
        34,
        34
       ],
       [
-       "4.66",
+       "4.69",
        47,
        47
       ],
       [
-       "5.95",
+       "5.97",
        60,
        60
       ],
       [
-       "7.23",
+       "7.26",
        73,
        73
       ],
       [
-       "8.52",
+       "8.55",
        86,
        86
       ],
       [
-       "9.81",
+       "9.84",
        99,
        99
       ],
       [
-       "11.09",
-       111,
-       111
+       "11.13",
+       112,
+       112
       ],
       [
-       "12.38",
-       124,
-       124
+       "12.42",
+       125,
+       125
       ],
       [
-       "13.66",
-       137,
-       137
+       "13.70",
+       138,
+       138
       ],
       [
-       "14.95",
+       "14.99",
        150,
        150
       ],
       [
-       "16.24",
+       "16.28",
        163,
        163
       ],
       [
-       "17.52",
+       "17.57",
        176,
        176
       ]
@@ -217,7 +217,7 @@
     },
     "cueTempo": {
      "worst": 0,
-     "n": 547,
+     "n": 528,
      "rates": [
       1,
       1.5,
@@ -229,7 +229,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805064
+       "dueAt": 1792756805123
       }
      ],
      "idx": 6,
@@ -374,9 +374,9 @@
       "atrdy9",
       "atrdy2"
      ],
-     "n": 37
+     "n": 40
     },
-    "rfSwipeMs": 501,
+    "rfSwipeMs": 508,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -416,7 +416,7 @@
      "bg: next atshort2:0"
     ],
     "tempoWaiting": 0,
-    "tempoPaused": 3,
+    "tempoPaused": 10,
     "cue": {
      "worst": 0,
      "n": 601,
@@ -500,13 +500,13 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804922
+       "dueAt": 1792756804865
       }
      ],
      "idx": 6,
      "lines": [
       "bg: mediasession none to playing (feed paused=false) hidden=false",
-      "bg: deck pause event by=app: pause (user, media key or lock screen) hidden=false done=false rs=0 muted=false t=0.1",
+      "bg: deck pause event by=app: pause (user, media key or lock screen) hidden=false done=false rs=0 muted=false t=0.0",
       "bg: mediasession playing to paused (player state paused) hidden=false",
       "bg: mediasession paused to playing (handlers playing) hidden=false",
       "bg: deck pause event by=app: pause (user, media key or lock screen) hidden=false done=false rs=0 muted=false t=0.4",
@@ -587,7 +587,7 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "firstSoundMs": 2693,
+    "firstSoundMs": 2727,
     "diag": [
      "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
      "deck: src net pod-0006",
@@ -610,7 +610,7 @@
      "state": "playing",
      "pos": {
       "duration": 25,
-      "position": 0.001110999999994533,
+      "position": 0,
       "playbackRate": 1
      },
      "cold": 1,
@@ -626,9 +626,9 @@
      "want": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
      "id": "pod-0013:82"
     },
-    "lockNextMs": 21,
+    "lockNextMs": 27,
     "lockNextLines": [
-     "deck: swap pod-0013 ready=true pool=3",
+     "deck: swap pod-0013 ready=true pool=1",
      "deck play#3 swap rs=4 muted=false t=82.0",
      "deck play#3 ok"
     ],
