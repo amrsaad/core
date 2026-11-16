@@ -4,6 +4,7 @@ import {
   ADVANCE_MIN,
   AudioDeck,
   CLIP_RECOVER_MAX,
+  END_MIN_ADVANCE,
   END_NEAR_DUR,
   FROZEN_MS,
   frozen,
@@ -18,7 +19,7 @@ import {
 } from '../src/video/audioDeck';
 
 describe('plausibleEnd', () => {
-  const base = { t: 100, dur: 3000, clipEnd: 160 as number | undefined, offset: 0 };
+  const base = { t: 100, dur: 3000, clipEnd: 160 as number | undefined, offset: 0, advanced: 10 };
   it('Position am Start des Ausschnitts ist kein Ende', () => {
     expect(plausibleEnd({ ...base, t: 100 })).toBe(false);
     expect(plausibleEnd({ ...base, t: 130 })).toBe(false);
@@ -30,20 +31,32 @@ describe('plausibleEnd', () => {
     expect(plausibleEnd({ ...base, t: 170 })).toBe(true);
   });
   it('der Versatz der Quelle zählt zur Position', () => {
-    expect(plausibleEnd({ t: 40, dur: 3000, clipEnd: 160, offset: 120 })).toBe(true);
-    expect(plausibleEnd({ t: 30, dur: 3000, clipEnd: 160, offset: 120 })).toBe(false);
+    expect(plausibleEnd({ t: 40, dur: 3000, clipEnd: 160, offset: 120, advanced: 10 })).toBe(true);
+    expect(plausibleEnd({ t: 30, dur: 3000, clipEnd: 160, offset: 120, advanced: 10 })).toBe(false);
   });
   it('kurz vor duration ist ein Ende der Quelle, auch ohne clip.end', () => {
-    expect(plausibleEnd({ t: 3000 - END_NEAR_DUR, dur: 3000, clipEnd: undefined, offset: 0 })).toBe(true);
-    expect(plausibleEnd({ t: 3000 - END_NEAR_DUR - 0.1, dur: 3000, clipEnd: undefined, offset: 0 })).toBe(false);
+    expect(plausibleEnd({ t: 3000 - END_NEAR_DUR, dur: 3000, clipEnd: undefined, offset: 0, advanced: 10 })).toBe(true);
+    expect(plausibleEnd({ t: 3000 - END_NEAR_DUR - 0.1, dur: 3000, clipEnd: undefined, offset: 0, advanced: 10 })).toBe(false);
     expect(plausibleEnd({ ...base, clipEnd: 4000, t: 2999 })).toBe(true);
   });
   it('duration NaN, Infinity oder 0 und clip.end fehlt: nie plausibel', () => {
-    for (const dur of [NaN, Infinity, 0, -1]) expect(plausibleEnd({ t: 5000, dur, clipEnd: undefined, offset: 0 })).toBe(false);
+    for (const dur of [NaN, Infinity, 0, -1]) expect(plausibleEnd({ t: 5000, dur, clipEnd: undefined, offset: 0, advanced: 10 })).toBe(false);
   });
   it('duration Infinity: nur clip.end entscheidet', () => {
-    expect(plausibleEnd({ t: 161, dur: Infinity, clipEnd: 160, offset: 0 })).toBe(true);
-    expect(plausibleEnd({ t: 100, dur: Infinity, clipEnd: 160, offset: 0 })).toBe(false);
+    expect(plausibleEnd({ t: 161, dur: Infinity, clipEnd: 160, offset: 0, advanced: 10 })).toBe(true);
+    expect(plausibleEnd({ t: 100, dur: Infinity, clipEnd: 160, offset: 0, advanced: 10 })).toBe(false);
+  });
+  it('Runde 18: Dauer nahe der Position ohne gelaufenen Ausschnitt ist kein Ende (ended an der Startstelle, duration gleich t)', () => {
+    expect(plausibleEnd({ t: 1405.9, dur: 1405.9, clipEnd: 1453.9, offset: 0, advanced: 0 })).toBe(false);
+    expect(plausibleEnd({ t: 1405.9, dur: 1406.5, clipEnd: 1453.9, offset: 0, advanced: 1.9 })).toBe(false);
+    expect(plausibleEnd({ t: 1405.9, dur: 1405.9, clipEnd: undefined, offset: 0, advanced: 0 })).toBe(false);
+  });
+  it('Runde 18: ended nahe duration nach 3 s Lauf ist ein echtes Ende der Quelle', () => {
+    expect(plausibleEnd({ t: 1408.9, dur: 1409, clipEnd: 1453.9, offset: 0, advanced: 3 })).toBe(true);
+    expect(plausibleEnd({ t: 1408.9, dur: 1409, clipEnd: 1453.9, offset: 0, advanced: END_MIN_ADVANCE })).toBe(true);
+  });
+  it('Runde 18: die Position am clip.end gilt auch ohne advanced (der Ausschnitt ist am Ende)', () => {
+    expect(plausibleEnd({ t: 160, dur: 3000, clipEnd: 160, offset: 0, advanced: 0 })).toBe(true);
   });
   it('t NaN ist nie ein Ende', () => {
     expect(plausibleEnd({ ...base, t: NaN })).toBe(false);
@@ -114,13 +127,16 @@ describe('recoverStep', () => {
     expect(recoverStep({ n: 1, kind: 'ended', hidden: false })).toBe('rebuild');
     expect(recoverStep({ n: CLIP_RECOVER_MAX, kind: 'ended', hidden: false })).toBe('giveup');
   });
-  it('stehende Zeit baut sofort neu auf', () => {
-    expect(recoverStep({ n: 0, kind: 'frozen', hidden: false })).toBe('rebuild');
+  it('Runde 18: stehende Zeit mit ended=true beginnt auch mit soft, dann Neuaufbau', () => {
+    expect(recoverStep({ n: 0, kind: 'frozen', hidden: false })).toBe('soft');
+    expect(recoverStep({ n: 1, kind: 'frozen', hidden: false })).toBe('rebuild');
+    expect(recoverStep({ n: CLIP_RECOVER_MAX, kind: 'frozen', hidden: false })).toBe('giveup');
   });
   it('verdeckt kein Quellwechsel: Neuaufbau wird vertagt, die erste Stufe bleibt', () => {
     expect(recoverStep({ n: 1, kind: 'ended', hidden: true })).toBe('defer');
-    expect(recoverStep({ n: 0, kind: 'frozen', hidden: true })).toBe('defer');
+    expect(recoverStep({ n: 1, kind: 'frozen', hidden: true })).toBe('defer');
     expect(recoverStep({ n: 0, kind: 'ended', hidden: true })).toBe('soft');
+    expect(recoverStep({ n: 0, kind: 'frozen', hidden: true })).toBe('soft');
   });
 });
 
@@ -258,7 +274,7 @@ describe('Deck: falsches ended', () => {
     el.emit('pause');
     el.emit('ended');
     expect(t.states).not.toContain(0);
-    expect(t.lines.some((l) => l.startsWith('deck: false ended a t=414.1 dur=3000.0, recovering'))).toBe(true);
+    expect(t.lines.some((l) => l.startsWith('deck: false ended a t=414.1 dur=3000.0 adv=0.0, recovering'))).toBe(true);
     expect(el.plays).toBe(plays + 1);
     expect(el.currentTime).toBeCloseTo(c.start, 5);
     expect(el.loads).toBe(1);
@@ -293,6 +309,31 @@ describe('Deck: falsches ended', () => {
     const c = clip('a');
     const el = await boot(t, c);
     el.currentTime = c.end! + 0.01;
+    el.ended = true;
+    el.paused = true;
+    el.emit('ended');
+    expect(t.states).toContain(0);
+    expect(t.lines.some((l) => l.includes('false ended'))).toBe(false);
+  });
+  it('Runde 18: ended an der Startstelle mit duration gleich t (iOS, Quelle teilweise geladen) ist ein falsches Ende, Zeile mit adv', async () => {
+    const t = setup();
+    const c = clip('a', 1405.9, 48);
+    const el = await boot(t, c);
+    el.duration = 1405.9;
+    const plays = el.plays;
+    el.ended = true;
+    el.paused = true;
+    el.emit('ended');
+    expect(t.states).not.toContain(0);
+    expect(t.lines.some((l) => l.startsWith('deck: false ended a t=1405.9 dur=1405.9 adv=0.0, recovering'))).toBe(true);
+    expect(el.plays).toBe(plays + 1);
+  });
+  it('Runde 18: ended nahe duration nach 3 s Lauf ist ein echtes Ende', async () => {
+    const t = setup();
+    const c = clip('a', 2990, 100);
+    const el = await boot(t, c);
+    el.duration = 2994;
+    el.currentTime = 2993;
     el.ended = true;
     el.paused = true;
     el.emit('ended');
@@ -349,20 +390,67 @@ describe('Deck: Schnitt ohne timeupdate und stehende Zeit', () => {
     expect(t.states).toContain(0);
     expect(el.paused).toBe(true);
   });
-  it('stehende Zeit 4 s lang: Diag, Neuaufbau mit Sprung auf die Startstelle', async () => {
+  it('Runde 18: stehende Zeit mit ended=false ist Puffern: kein Neuaufbau, kein start(), Lade-Zustand am Sink, Diag einmal je Ausschnitt', async () => {
     const t = setup();
     const c = clip('a');
     const el = await boot(t, c);
+    const loads: boolean[] = [];
+    t.deck.onLoading = (on) => loads.push(on);
+    const plays = el.plays;
+    const n0 = t.lines.length;
     let now = 1_000_000;
     t.deck.heartbeat(now);
     now += FROZEN_MS - 1;
     t.deck.heartbeat(now);
-    expect(el.loads).toBe(1);
+    expect(t.states).not.toContain(3);
     now += 1;
     t.deck.heartbeat(now);
-    expect(t.lines).toContain('deck: time frozen a t=414.1 ended=false, recovering');
+    expect(t.lines).toContain('deck: buffering inferred (time not advancing) a t=414.1');
+    expect(t.states).toContain(3);
+    expect(loads).toEqual([true]);
+    expect(el.loads).toBe(1);
+    expect(el.plays).toBe(plays);
+    expect(t.lines.slice(n0).some((l) => l.includes('time frozen') || l.includes('rebuilding') || l.includes('src net'))).toBe(false);
+    // Bleibt die Zeit stehen, bleibt es beim Laden, die Zeile steht nur einmal
+    for (let i = 0; i < 3; i++) {
+      now += FROZEN_MS;
+      t.deck.heartbeat(now);
+      now += FROZEN_MS;
+      t.deck.heartbeat(now);
+    }
+    expect(t.lines.filter((l) => l.startsWith('deck: buffering inferred')).length).toBe(1);
+    expect(el.loads).toBe(1);
+    expect(t.errs()).toBe(0);
+    // Die Zeit läuft wieder: als laufend abgeleitet, Laden aus
+    el.currentTime += 0.5;
+    t.deck.heartbeat(now + 150);
+    el.currentTime += 0.5;
+    t.deck.heartbeat(now + 300);
+    expect(t.states[t.states.length - 1]).toBe(1);
+    expect(loads[loads.length - 1]).toBe(false);
+  });
+  it('Runde 18: stehende Zeit mit ended=true: erst soft (Position, play()), erst bei erneutem Stillstand der Neuaufbau', async () => {
+    const t = setup(false, true);
+    const c = clip('a');
+    const el = await boot(t, c);
+    el.currentTime = c.start + 5;
+    el.ended = true;
+    const plays = el.plays;
+    let now = 1_000_000;
+    t.deck.heartbeat(now);
+    now += FROZEN_MS;
+    t.deck.heartbeat(now);
+    expect(t.lines).toContain('deck: time frozen a t=419.1 ended=true, recovering');
+    expect(el.plays).toBe(plays + 1);
+    expect(el.loads).toBe(1);
+    expect(t.lines.some((l) => l.startsWith('deck: rebuilding'))).toBe(false);
+    // Es hilft nicht: wieder ended=true und stehende Zeit
+    el.ended = true;
+    t.deck.heartbeat(now + 150);
+    now += FROZEN_MS + 150;
+    t.deck.heartbeat(now);
     expect(el.loads).toBe(2);
-    expect(el.src).toContain('#t=414.1');
+    expect(t.lines.some((l) => l.startsWith('deck: rebuilding source a'))).toBe(true);
   });
   it('Puffern (readyState unter 3), Pause oder verdeckt: kein Alarm', async () => {
     const t = setup();

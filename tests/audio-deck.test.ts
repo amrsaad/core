@@ -655,7 +655,10 @@ describe('Vorrat: fünf Elemente (Brief 14, Entscheidung 52)', () => {
     const cs = ids.map(mk);
     const t = setupPool({ local: { [cs[1].key]: { url: 'blob:c', offset: 0 }, [cs[3].key]: { url: 'blob:e', offset: 0 } } });
     await boot(t, sbA);
-    expect(t.deck.fill(cs)).toBe(5);
+    // Runde 18: der aktive spielt, höchstens zwei Netz-Abrufe in Arbeit (b, d). f folgt, sobald b bereit ist.
+    expect(t.deck.fill(cs)).toBe(4);
+    fill(elOf(t, cs[0]));
+    expect(t.deck.poolInfo()).toHaveLength(5);
     expect(t.lines.filter((l) => l.startsWith('deck: pool load '))).toEqual([
       'deck: pool load c src=local',
       'deck: pool load e src=local',
@@ -719,8 +722,9 @@ describe('Vorrat: fünf Elemente (Brief 14, Entscheidung 52)', () => {
     const cs = ['b', 'c', 'd', 'e', 'f', 'g'].map(mk);
     const t = setupPool();
     await boot(t, sbA);
-    // Zuerst ist nichts lokal: die ersten fünf aus dem Netz
+    // Zuerst ist nichts lokal: die ersten fünf aus dem Netz (Runde 18: je zwei in Arbeit, die übrigen folgen mit der Bereitschaft)
     t.deck.fill(cs);
+    for (const c of cs.slice(0, 5)) fill(elOf(t, c));
     expect(t.deck.poolInfo().map((x) => x.id)).toEqual(['b', 'c', 'd', 'e', 'f']);
     // Danach liegen f und g im Vorrat: g verdrängt das hinterste Netz-Element, f wird lokal neu geladen
     t.local[cs[4].key] = { url: 'blob:f', offset: 0 };
@@ -735,6 +739,7 @@ describe('Vorrat: fünf Elemente (Brief 14, Entscheidung 52)', () => {
     const t = setupPool();
     await boot(t, sbA);
     t.deck.fill(cs);
+    for (const c of cs) fill(elOf(t, c));
     expect(t.lines).toContain('deck: pool fill 5/5 (local 0, net 5)');
     t.local[cs[0].key] = { url: 'blob:b', offset: 0 };
     t.local[cs[2].key] = { url: 'blob:d', offset: 0 };

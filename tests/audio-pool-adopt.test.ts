@@ -1,6 +1,6 @@
 // Runde 12 (Diag 13.11. 21:11): das Audio lud viel zu lange.
 // A: ein Eintrag des Vorrats, der noch nicht bereit ist (readyState 3 oder noch ohne Metadaten), wird beim Start seines Ausschnitts übernommen statt verworfen und neu geladen.
-// B: solange der aktive Moment nicht spielt, läuft höchstens ein Netz-Abruf des Vorrats, die übrigen folgen mit dem ersten playing oder nach 4 s nacheinander.
+// B: solange der aktive Moment nicht spielt, läuft höchstens ein Netz-Abruf des Vorrats, die übrigen folgen mit dem ersten playing. Runde 18: nie ein zweiter paralleler ohne Bereitschaft des ersten, spielend höchstens zwei.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AudioDeck, FILL_DEFER_MS, POOL, type DeckClip, type DeckEl, type DeckSink, type LocalClip } from '../src/video/audioDeck';
 
@@ -79,6 +79,13 @@ function setup(opts: { level?: boolean; local?: Record<string, LocalClip> } = {}
 }
 type T = ReturnType<typeof setup>;
 const elOf = (t: T, id: string) => t.els.find((x) => x.src.includes(`/${id}.mp3`))!;
+/** Das Element des Vorrats bekommt Metadaten und genug Daten (bereit) */
+const makeReady = (t: T, id: string) => {
+  const el = elOf(t, id);
+  el.emit('loadedmetadata');
+  el.readyState = 4;
+  el.emit('canplaythrough');
+};
 const netLoads = (t: T) => t.lines.filter((l) => l.startsWith('deck: pool load ')).length;
 
 beforeEach(() => {
@@ -248,7 +255,7 @@ describe('B: Vorrang für den aktiven Moment', () => {
     expect(netLoads(t)).toBe(POOL);
   });
 
-  it('sobald der aktive Moment spielt (playing), starten die übrigen bis POOL, ohne weiteren Aufruf des Hosts', async () => {
+  it('sobald der aktive Moment spielt (playing), laufen höchstens zwei Abrufe, jede Bereitschaft löst den nächsten aus (Runde 18), ohne Aufruf des Hosts', async () => {
     const t = setup();
     t.deck.load(clip('a'), t.sink, { play: false, muted: false });
     await flush();
@@ -256,24 +263,25 @@ describe('B: Vorrang für den aktiven Moment', () => {
     expect(netLoads(t)).toBe(1);
     t.deck.play(t.sink);
     await flush();
+    expect(netLoads(t)).toBe(2);
+    makeReady(t, 'b');
+    expect(netLoads(t)).toBe(3);
+    makeReady(t, 'c');
+    makeReady(t, 'd');
     expect(netLoads(t)).toBe(POOL);
     expect(t.deck.poolInfo().map((p) => p.id)).toEqual(ids);
   });
 
-  it('nach 4 s Zeitlimit der nächste Abruf, danach alle 4 s ein weiterer', async () => {
+  it('Runde 18: auch nach vielen Zeitlimits kein zweiter paralleler Abruf, solange der aktive nicht spielt. Erst die Bereitschaft des ersten löst den nächsten aus', async () => {
     const t = setup();
     t.deck.load(clip('a'), t.sink, { play: false, muted: false });
     await flush();
     t.deck.fill(cs);
     expect(netLoads(t)).toBe(1);
-    vi.advanceTimersByTime(FILL_DEFER_MS - 1);
+    vi.advanceTimersByTime(FILL_DEFER_MS * 6);
     expect(netLoads(t)).toBe(1);
-    vi.advanceTimersByTime(1);
+    makeReady(t, 'b');
     expect(netLoads(t)).toBe(2);
-    vi.advanceTimersByTime(FILL_DEFER_MS);
-    expect(netLoads(t)).toBe(3);
-    vi.advanceTimersByTime(FILL_DEFER_MS * 2);
-    expect(netLoads(t)).toBe(POOL);
   });
 
   it('aktives Element hat Daten (readyState 3), spielt aber noch nicht: nicht zurückgestellt', async () => {
@@ -282,8 +290,10 @@ describe('B: Vorrang für den aktiven Moment', () => {
     await flush();
     t.els[0].readyState = 3;
     t.deck.fill(cs);
-    expect(netLoads(t)).toBe(POOL);
-    expect(t.lines.some((l) => /fill deferred/.test(l))).toBe(false);
+    // Runde 18: nicht wegen des aktiven zurückgestellt, aber höchstens zwei in Arbeit (Budget)
+    expect(netLoads(t)).toBe(2);
+    expect(t.lines.some((l) => /fill deferred \(active not playing\)/.test(l))).toBe(false);
+    expect(t.lines).toContain('deck: pool fill deferred (net budget)');
   });
 
   it('lokale Quellen laufen auch zurückgestellt sofort, nur Netz-Abrufe zählen', async () => {

@@ -2,7 +2,7 @@ import { describeMedia, holdsNeighbor, needsLoad, type MediaItem } from './slotp
 import { neighborCall, recoverCall, youtubeObs, type ActiveObs } from './neighborGate';
 import { notesRow } from './notesrow';
 import { diagLog, netType } from '../lib/diag';
-import { markFirstPlay } from '../lib/sync/firstPlay';
+import { markFirstPlay, setFeedLoading } from '../lib/sync/firstPlay';
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal, flushSync } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
@@ -2198,7 +2198,11 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       const m = queue.current[idxRef.current];
       // Runde 17: Takt des Audio-Decks (läuft-Ableitung, falsches Ende, Schnitt ohne timeupdate, stehende Zeit), nur sichtbar und nur im Audio-Reiter
       if (form === 'audio' && m && audioDeck.exists && audioDeck.holds(keyOf(m)) && !forYouRef.current && !textRef.current && !recallRef.current && !isBackground(document.visibilityState)) audioDeck.heartbeat();
-      if (!p || !sl.ready || !m || forYouRef.current || textRef.current || recallRef.current) return;
+      if (!p || !sl.ready || !m || forYouRef.current || textRef.current || recallRef.current) {
+        // Runde 18: kein Moment mit Player im Blick: nichts lädt, der Sync darf schreiben
+        setFeedLoading(false);
+        return;
+      }
       const c = p.getCurrentTime?.() ?? 0;
       // Gesehen: mindestens eine Sekunde gespielt (Entscheidung 45). Im Hintergrund zählt das Ende (finish) oder die Rückkehr.
       if (!isBackground(document.visibilityState) && !seenMarked.current.has(m.id) && played.current.enough(m.id)) {
@@ -2213,6 +2217,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       if (sl.st === STATE.PLAYING || userPaused.current || !activeRef.current || (IOS && sl.selfPauses > 0) || tapRef.current === sl.mid) {
         waitSince.current = 0;
         setLoading(false);
+        setFeedLoading(false);
         setNextReady(false);
       } else {
         waitSince.current ||= Date.now();
@@ -2220,6 +2225,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         if (!navigator.onLine || sl.broken || Date.now() - netAt.current < 20_000) waitSince.current = Date.now() - 1000;
         const waited = Date.now() - waitSince.current;
         setLoading(waited > 400);
+        // Runde 18: lädt der Moment, startet der Sync keinen Upload (Bandbreite für den Ton)
+        setFeedLoading(waited > 400);
         // Brief 12: Daten kommen an? Der Zähler des Players ändert sich nur, wenn Bytes ankommen (progress, Pufferende, geladener Anteil).
         const bytes = p.bytes?.() ?? 0;
         if (bytes !== sl.bytesSeen) {
@@ -2314,7 +2321,10 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         }
       }
     }, POLL_MS);
-    return () => window.clearInterval(t);
+    return () => {
+      window.clearInterval(t);
+      setFeedLoading(false);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finish, today]);
 

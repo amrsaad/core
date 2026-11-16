@@ -15,6 +15,10 @@ import type { DigestLatest } from '../../moments/digest';
 import { diagLog, type DiagEntry } from '../diag';
 
 export const WRITE_DELAY_MS = 10_000;
+/** Runde 18: solange die App sichtbar ist, höchstens ein Upload in dieser Zeit (ms). Beim Verlassen der App und bei Sync now sofort. Im Mobilfunk nahm der Upload (190 kB, mehrfach je Minute) dem Ton die Bandbreite. */
+export const UPLOAD_GAP_MS = 60_000;
+/** Runde 18: läuft ein Audio- oder Video-Moment noch nicht (lädt), prüft der Sync nach dieser Zeit erneut, ob er schreiben darf (ms) */
+export const UPLOAD_BUSY_RECHECK_MS = 5_000;
 /** Offline-Pause: Meldet der Browser das Netz nicht zurück (iOS lässt das online-Ereignis manchmal aus), endet sie nach 5 Minuten von selbst (Issue 45) */
 export const PAUSE_MAX_MS = 5 * 60_000;
 export const MAX_ATTEMPTS = 4;
@@ -60,6 +64,10 @@ export interface SyncDeps {
   firstPlay?: () => Promise<void>;
   /** Hat schon ein Moment gespielt? Dann wartet der erste Upload gar nicht. */
   firstPlayed?: () => boolean;
+  /** Runde 18: ein Audio- oder Video-Moment lädt und spielt noch nicht. Solange das so ist, startet kein Upload (außer beim Verlassen der App und bei Sync now). */
+  uploadBusy?: () => boolean;
+  /** Runde 18: Mindestabstand zwischen zwei Uploads bei sichtbarer App (ms), Standard UPLOAD_GAP_MS */
+  uploadGapMs?: number;
   fetchImpl?: typeof fetch;
   now?: () => number;
   loadMeta?: () => Promise<{ lastSync?: number } | undefined>;
@@ -113,6 +121,10 @@ export function createSync(deps: SyncDeps): Sync {
   /** Der erste Upload wartet nicht mehr (er hat gewartet, die App wurde verlassen, oder Sync now) und ein Aufruf, der das Warten gerade beendet */
   let firstWriteOpen = !deps.firstPlay;
   let releaseFirstWrite: ((why: string) => void) | null = null;
+  /** Runde 18: Zeitpunkt des letzten erfolgreichen Uploads, ein Upload, der gerade sofort sein muss (App verlassen, Sync now), und ein zurückgestellter Lauf */
+  let lastPut = -Infinity;
+  let urgent = false;
+  let deferredUpload = false;
   const openFirstWrite = (why: string) => {
     firstWriteOpen = true;
     releaseFirstWrite?.(why);
@@ -206,6 +218,14 @@ export function createSync(deps: SyncDeps): Sync {
       }
       // Unterscheidet sich nur das Protokoll, ist Schreiben nicht dringend (jeder Start und jede Rückkehr würde sonst einen Commit machen)
       if (remoteDoc && canonNoDiag(merged) === rawNoDiag && !flushDiag && now() - lastDiagWrite < DIAG_FLUSH_MS) return;
+      // Runde 18: sichtbar höchstens ein Upload je UPLOAD_GAP_MS und keiner, solange ein Moment lädt. Zurückgestellt bleibt pending stehen, ein Zeitgeber holt es nach.
+      const wait = uploadWait();
+      if (wait > 0) {
+        deferredUpload = true;
+        clearTimeout(timer);
+        timer = setTimeout(() => void run(false, true), wait);
+        return;
+      }
       // Runde 12: vor dem ersten Schreiben warten, bis der erste Moment spielt. Lesen und Zusammenführen sind schon geschehen und blieben davon unberührt.
       if (await holdFirstWrite()) if (stopped) return;
       try {
@@ -219,6 +239,7 @@ export function createSync(deps: SyncDeps): Sync {
         putFails = 0;
         putBase = 0;
         lastDiagWrite = now();
+        lastPut = now();
         lastDiagT = Math.max(lastDiagT, newestT(lines));
         flushDiag = false;
         return;
@@ -246,7 +267,14 @@ export function createSync(deps: SyncDeps): Sync {
     }
   }
 
-  async function run(force = false): Promise<void> {
+  /** Runde 18: wie lange ein Upload jetzt noch warten muss (0: darf). Beim Verlassen der App und bei Sync now nie, ein ladender Moment hält ihn zurück. */
+  const uploadWait = () => {
+    if (urgent || hidden) return 0;
+    if (deps.uploadBusy?.()) return UPLOAD_BUSY_RECHECK_MS;
+    return Math.max(0, lastPut + (deps.uploadGapMs ?? UPLOAD_GAP_MS) - now());
+  };
+
+  async function run(force = false, fromTimer = false): Promise<void> {
     if (stopped) return;
     if (paused && !force) {
       if (now() - pausedAt < PAUSE_MAX_MS) return;
@@ -258,16 +286,25 @@ export function createSync(deps: SyncDeps): Sync {
       return active;
     }
     clearTimeout(timer);
+    // Runde 18: der Schreib-Zeitgeber prüft die Drossel vor jedem Netzzugriff, damit das Warten keine Downloads kostet. Die Änderung bleibt vorgemerkt (pending).
+    if (fromTimer && pending) {
+      const w = uploadWait();
+      if (w > 0) {
+        timer = setTimeout(() => void run(false, true), w);
+        return;
+      }
+    }
     const startRev = rev;
     active = (async () => {
       set({ running: true });
       try {
+        deferredUpload = false;
         await attempt();
         await loadDigest();
         if (fails > 0) log(`sync: ok again after ${fails} failed ${fails === 1 ? 'run' : 'runs'}`);
         fails = 0;
         clearTimeout(retryTimer);
-        if (rev === startRev) pending = false;
+        if (rev === startRev && !deferredUpload) pending = false;
         if (st.hasToken) {
           const t = now();
           set({ lastSync: t, error: null });
@@ -310,12 +347,15 @@ export function createSync(deps: SyncDeps): Sync {
       // Weiche Änderung (Nutzungszeit-Tick): startet die Frist nur, wenn keine läuft, schiebt eine laufende nie weiter
       if (soft && timer) return;
       clearTimeout(timer);
-      timer = setTimeout(() => void run(), WRITE_DELAY_MS);
+      timer = setTimeout(() => void run(false, true), WRITE_DELAY_MS);
     },
     syncNow() {
       flushDiag = true;
+      urgent = true;
       openFirstWrite('sync now');
-      return run(true);
+      return run(true).finally(() => {
+        urgent = false;
+      });
     },
     visible(v) {
       if (stopped) return;
@@ -338,6 +378,7 @@ export function createSync(deps: SyncDeps): Sync {
         flushDiag = true;
         openFirstWrite('app left');
       }
+      // Runde 18: verdeckt gilt die Drossel nicht (hidden ist oben gesetzt), nichts geht verloren
       void run();
     },
     offline() {

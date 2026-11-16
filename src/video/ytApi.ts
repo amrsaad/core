@@ -935,7 +935,8 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     isLocal: () => mode === 'hls' && (deckMode ? audioDeck.local(sink) : media.dataset.local === '1'),
     bytes: () => {
       if (mode === 'hls') {
-        if (deckMode) return 0;
+        // Runde 18: auch das Audio-Deck meldet ankommende Daten, sonst sieht der Hänge-Wächter des Feeds im schwachen Netz nie ein Byte und springt nach 25 s weiter
+        if (deckMode) return audioDeck.bytes(sink);
         // Pufferende in Zehntelsekunden plus Zahl der progress-Ereignisse: beides wächst nur, wenn Daten ankommen
         let end = 0;
         try { for (let i = 0; i < media.buffered.length; i++) end = Math.max(end, media.buffered.end(i)); } catch { /* kein Medium */ }

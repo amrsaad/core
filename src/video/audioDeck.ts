@@ -54,15 +54,21 @@ export const END_TOL = 0.25;
 /** Runde 17: ein ended so nah vor duration gilt als echtes Ende der Quelle (Sekunden) */
 export const END_NEAR_DUR = 1.5;
 
+/** Runde 18: so viele Sekunden muss ein Ausschnitt in diesem Element gelaufen sein, bevor eine Dauer nahe der Position als Ende der Quelle zählt */
+export const END_MIN_ADVANCE = 2;
+
 /**
  * Runde 17 (Diag 16.11.): iOS meldete "ended" direkt an der Startstelle (Tausch auf ein Vorrats-Element, direkter Start) oder hielt ended=true bei stehender Zeit.
  * Ein ended zählt nur, wenn es plausibel ist: die Position liegt am Ende des Ausschnitts (t plus offset, minus END_TOL), oder höchstens END_NEAR_DUR vor duration
  * (endlich und größer 0). Ohne clip.end und ohne gültige duration ist kein ended plausibel.
+ * Runde 18 (Diag 16.11. abends): bei teilweise geladener Quelle meldet iOS eine duration nahe der Position, die Dauer allein belegt kein Ende. Darum gilt der Weg über
+ * duration nur, wenn die Position seit Start oder letzter Wiederherstellung um mindestens END_MIN_ADVANCE gewachsen ist (advanced, Sekunden). Ein ended an der
+ * Startstelle ist damit immer falsch.
  */
-export function plausibleEnd(o: { t: number; dur: number; clipEnd: number | undefined; offset: number }): boolean {
+export function plausibleEnd(o: { t: number; dur: number; clipEnd: number | undefined; offset: number; advanced: number }): boolean {
   if (!Number.isFinite(o.t)) return false;
   if (o.clipEnd !== undefined && Number.isFinite(o.clipEnd) && o.t + o.offset >= o.clipEnd - END_TOL) return true;
-  return Number.isFinite(o.dur) && o.dur > 0 && o.t >= o.dur - END_NEAR_DUR;
+  return Number.isFinite(o.dur) && o.dur > 0 && o.t >= o.dur - END_NEAR_DUR && o.advanced >= END_MIN_ADVANCE;
 }
 
 /** Runde 17: Zeitproben seit dem letzten Zurücksetzen (erste, letzte, Anzahl) */
@@ -107,13 +113,38 @@ export function frozen(o: { prev: { t: number; at: number } | null; t: number; n
 export const CLIP_RECOVER_MAX = 2;
 export type RecoverStep = 'soft' | 'rebuild' | 'defer' | 'giveup';
 /**
- * Runde 17: welche Wiederherstellung als nächste. Ein erstes falsches Ende: Position setzen und play() (soft). Eingefrorene Zeit oder jedes weitere falsche Ende
- * (n >= 1): Quelle neu aufbauen (rebuild), verdeckt erst bei der Rückkehr (defer, kein Quellwechsel verdeckt). Nach CLIP_RECOVER_MAX: aufgeben.
+ * Runde 17: welche Wiederherstellung als nächste. Das erste Mal (n === 0), bei falschem Ende wie bei stehender Zeit mit ended=true: Position setzen und play() (soft).
+ * Runde 18: stehende Zeit mit ended=false ist Puffern und kommt hier nie an. Jedes weitere Mal (n >= 1): Quelle neu aufbauen (rebuild), verdeckt erst bei der
+ * Rückkehr (defer, kein Quellwechsel verdeckt). Nach CLIP_RECOVER_MAX: aufgeben.
  */
 export function recoverStep(o: { n: number; kind: 'ended' | 'frozen'; hidden: boolean }): RecoverStep {
   if (o.n >= CLIP_RECOVER_MAX) return 'giveup';
-  if (o.kind === 'ended' && o.n === 0) return 'soft';
+  if (o.n === 0) return 'soft';
   return o.hidden ? 'defer' : 'rebuild';
+}
+
+/** Runde 18: so lange gilt das Netz nach "pool slow" oder langem Warten auf playing als schwach (ms) */
+export const WEAK_NET_MS = 5 * 60_000;
+/** Runde 18: braucht der aktive Moment so lange bis playing, gilt das Netz als schwach (ms) */
+export const WEAK_PLAY_MS = 5000;
+/** Runde 18: im schwachen Netz lädt ein Vorrats-Eintrag nach einem Fehler frühestens nach dieser Zeit neu (ms), höchstens RELOAD_MAX mal je Ausschnitt */
+export const RELOAD_WAIT_MS = 15_000;
+export const RELOAD_MAX = 2;
+
+/**
+ * Runde 18 (Diag 16.11., Mobilfunk): wie viele neue Netz-Abrufe der Vorrat jetzt starten darf. inflight zählt Einträge mit Netz, die weder bereit noch
+ * fehlgeschlagen sind (lokale zählen nicht). Spielt der aktive Moment nicht, oder ist das Netz schwach: höchstens 1 in Arbeit. Sonst höchstens 2.
+ */
+export function poolBudget(o: { activePlaying: boolean; weakNet: boolean; inflight: number }): number {
+  const cap = o.activePlaying && !o.weakNet ? 2 : 1;
+  return Math.max(0, cap - Math.max(0, o.inflight));
+}
+
+/** Runde 18: darf ein Vorrats-Eintrag nach einem Fehler neu laden? Ohne schwaches Netz sofort (wie bisher). Sonst nach RELOAD_WAIT_MS, höchstens RELOAD_MAX mal. */
+export function reloadGate(o: { weakNet: boolean; fails: number; sinceMs: number }): 'now' | 'wait' | 'never' {
+  if (!o.weakNet || o.fails <= 0) return 'now';
+  if (o.fails > RELOAD_MAX) return 'never';
+  return o.sinceMs >= RELOAD_WAIT_MS ? 'now' : 'wait';
 }
 
 /** Ereignisse, in denen iOS ein play() annimmt (ein Tipp ohne Bewegung). pointerdown und das Ende eines Wischs gehören nicht dazu. */
@@ -132,7 +163,7 @@ export const POOL = 5;
 /** Aus so vielen nächsten Momenten wählt der Vorrat seine POOL Ausschnitte, lokale zuerst (Brief 14b, Entscheidung 45). Entspricht dem Fenster der Vorrats-Tiefe (3 der nächsten 6). */
 export const POOL_WINDOW = 6;
 
-/** Runde 12: solange der aktive Moment nicht spielt, startet der Vorrat höchstens einen Netz-Abruf. Danach alle FILL_DEFER_MS einen weiteren, auch ohne dass der aktive spielt. */
+/** Runde 12: Zeitgeber der Nachprüfung zurückgestellter Abrufe. Runde 18: er startet keinen zusätzlichen Abruf mehr über das Budget (poolBudget) hinaus. */
 export const FILL_DEFER_MS = 4000;
 
 type Lane = 'plain' | 'level';
@@ -210,6 +241,7 @@ export interface DeckEl {
   preservesPitch?: boolean;
   removeAttribute?(name: string): void;
   readonly error?: { code: number } | null;
+  readonly buffered?: { readonly length: number; end(i: number): number };
   play(): Promise<void> | undefined;
   pause(): void;
   load(): void;
@@ -282,8 +314,16 @@ export class AudioDeck {
   private entries: PoolEntry[] = [];
   /** Runde 12: letzter Aufruf von fill (für das Nachfüllen nach einer Zurückstellung), zusätzliche Netz-Abrufe durch den Zeitgeber, Zeile schon geschrieben, Zeitgeber */
   private lastFill: { clips: readonly DeckClip[]; locOf: (key: string) => LocalClip | undefined; activePending: boolean } | null = null;
-  private extraNet = 0;
   private deferNoted = false;
+  /** Runde 18: schwaches Netz bis zu diesem Zeitpunkt (0: nicht schwach), Zeitgeber für die Rückmeldung, Fehler je Ausschnitt (Anzahl, letzter Zeitpunkt), fill läuft gerade */
+  private weakUntil = 0;
+  private weakTimer: ReturnType<typeof setTimeout> | null = null;
+  private fails = new Map<string, { n: number; at: number }>();
+  private inFill = false;
+  /** Runde 18: Beginn des aktuellen Ausschnitts (Zeit bis playing), Schlüssel, für den "buffering inferred" schon in der Diag steht, Zahl der progress-Ereignisse des aktiven Elements */
+  private clipAt = 0;
+  private bufNoted = '';
+  private prog = 0;
   private deferTimer: ReturnType<typeof setTimeout> | null = null;
   /** Der Vorrat wurde verbraucht oder verworfen: sobald er wieder voll ist, meldet das Deck "pool refill" */
   private depleted = false;
@@ -333,6 +373,31 @@ export class AudioDeck {
   private unlocked = false;
   private refusedKey = '';
   private nudged = false;
+  /** Runde 18: gilt das Netz gerade als schwach? */
+  private weakNet(): boolean {
+    return this.weakUntil > Date.now();
+  }
+
+  /** Runde 18: schwaches Netz merken (WEAK_NET_MS ab jetzt). Diag einmal beim Wechsel, eine Rückmeldung beim Ablauf. */
+  private markWeak() {
+    const was = this.weakNet();
+    this.weakUntil = Date.now() + WEAK_NET_MS;
+    if (was) return;
+    this.diag('deck: weak net, pool one at a time');
+    const arm = (ms: number) => {
+      this.weakTimer = setTimeout(() => {
+        this.weakTimer = null;
+        const left = this.weakUntil - Date.now();
+        if (left > 0) return arm(left);
+        this.weakUntil = 0;
+        this.diag('deck: net ok, pool two at a time');
+        this.refillDeferred();
+      }, ms);
+    };
+    if (this.weakTimer) clearTimeout(this.weakTimer);
+    arm(WEAK_NET_MS);
+  }
+
   /** Das Element spielt gerade (Ereignis playing kam, seitdem weder Pause noch Puffern noch neue Quelle) */
   private live = false;
   /** Seit dem Laden dieses Ausschnitts kam mindestens ein playing */
@@ -469,6 +534,9 @@ export class AudioDeck {
       this.note(`advance to ${this.adv.to}: playing after ${Date.now() - this.adv.t0} ms, rate ${el.playbackRate}, ${this.stateText(el)}`);
       this.adv = null;
     }
+    // Runde 18: brauchte der Ausschnitt vom Start bis zum ersten playing mehr als WEAK_PLAY_MS (ohne Warten auf einen Tipp, nur Netz), ist das Netz schwach
+    const c0 = this.clip;
+    if (!this.played && c0 && !this.isLocal && this.clipAt > 0 && this.refusedKey !== c0.key && Date.now() - this.clipAt > WEAK_PLAY_MS) this.markWeak();
     this.live = true;
     this.played = true;
     // Runde 12: der aktive Moment spielt, zurückgestellte Vorlade-Abrufe starten jetzt (bis POOL)
@@ -503,6 +571,10 @@ export class AudioDeck {
       this.samp = null;
       this.sink?.state(BUFFERING);
       this.tick(el);
+    });
+    // Runde 18: Daten kommen an (Zähler für den Hänge-Wächter des Feeds, siehe bytes)
+    el.addEventListener('progress', () => {
+      if (mine()) this.prog++;
     });
     el.addEventListener('pause', () => {
       const by = this.pauseBy.get(el);
@@ -620,6 +692,10 @@ export class AudioDeck {
     this.samp = null;
     this.froz = null;
     this.okFor = null;
+    if (!this.rebuilding) {
+      this.clipAt = Date.now();
+      this.prog = 0;
+    }
     if (!this.rebuilding && (fresh || this.recov.key !== key)) this.recov = { key, n: 0, at: 0, pending: false, gaveUp: false };
   }
 
@@ -640,13 +716,15 @@ export class AudioDeck {
     if (!c || this.done) return;
     const t = el.currentTime;
     const dur = el.duration;
-    if (plausibleEnd({ t, dur, clipEnd: c.end, offset: this.offset })) {
+    // Runde 18: Sekunden, die der Ausschnitt in diesem Element seit Start oder letztem Neuaufbau gelaufen ist (target ist die Startstelle der Elementzeit)
+    const advanced = Number.isFinite(t) ? Math.max(0, t - this.target) : 0;
+    if (plausibleEnd({ t, dur, clipEnd: c.end, offset: this.offset, advanced })) {
       this.clipEnd(via);
       return;
     }
     // Die Abfrage wartet nach einer Wiederherstellung, bevor sie dasselbe ended noch einmal wertet
     if (via === 'poll' && Date.now() - this.recov.at < 600) return;
-    this.diag(`deck: false ended ${c.id} t=${t.toFixed(1)} dur=${Number.isFinite(dur) ? dur.toFixed(1) : String(dur)}, recovering`);
+    this.diag(`deck: false ended ${c.id} t=${t.toFixed(1)} dur=${Number.isFinite(dur) ? dur.toFixed(1) : String(dur)} adv=${advanced.toFixed(1)}, recovering`);
     this.recover(el, 'ended', t);
   }
 
@@ -732,9 +810,39 @@ export class AudioDeck {
     this.froz = r.next;
     if (r.frozen) {
       this.froz = null;
+      // Runde 18: stehende Zeit ohne ended ist Puffern (iOS meldet dabei oft kein waiting). Kein Neuaufbau, die geladenen Bytes bleiben. Nur Lade-Zustand.
+      if (!el.ended) {
+        this.bufferingInferred(el, c);
+        return;
+      }
       this.diag(`deck: time frozen ${c.id} t=${el.currentTime.toFixed(1)} ended=${el.ended}, recovering`);
       this.recover(el, 'frozen', el.currentTime);
     }
+  }
+
+  /** Runde 18: stehende Zeit bei ended=false: wie das waiting-Ereignis als Laden anzeigen. Sobald die Zeit wieder läuft, leitet inferPlaying (oder playing) es zurück. */
+  private bufferingInferred(el: DeckEl, c: DeckClip) {
+    if (this.bufNoted !== c.key) {
+      this.bufNoted = c.key;
+      this.diag(`deck: buffering inferred (time not advancing) ${c.id} t=${el.currentTime.toFixed(1)}`);
+    }
+    this.live = false;
+    this.samp = null;
+    this.sink?.state(BUFFERING);
+    this.loading(true);
+  }
+
+  /** Runde 18: Zähler der ankommenden Daten des aktiven Elements (Puffer in Zehntelsekunden, progress-Ereignisse). Wächst nur, wenn Daten kommen. */
+  bytes(sink: DeckSink): number {
+    const el = this.el;
+    if (this.sink !== sink || !el) return 0;
+    let end = 0;
+    try {
+      for (let i = 0; i < (el.buffered?.length ?? 0); i++) end = Math.max(end, el.buffered!.end(i));
+    } catch {
+      /* kein Medium */
+    }
+    return this.prog + Math.round(end * 10) + (el.readyState >= 2 ? 1 : 0);
   }
 
   /** Neuer Ausschnitt im Element: Zähler und Zeitgeber der Neustarts zurücksetzen */
@@ -1054,41 +1162,62 @@ export class AudioDeck {
     // Lokale Quellen zuerst: sie sind in Millisekunden bereit, das Netz braucht Sekunden
     const missing = want.filter((c) => !this.entries.some((e) => e.clip.key === c.key));
     let order = [...missing.filter((c) => loc.get(c.key)), ...missing.filter((c) => !loc.get(c.key))];
-    // Runde 12: Vorrang für den aktiven Moment. Spielt er noch nicht, läuft höchstens ein Netz-Abruf (der für den nächsten Moment, er steht in der Reihenfolge vorn).
-    // Lokale Quellen kosten kein Netz und laufen immer. Die übrigen starten, sobald der aktive spielt, oder nach FILL_DEFER_MS nacheinander.
+    // Runde 18: Vorrang für den aktiven Moment und Schonung des schwachen Netzes (poolBudget). Spielt der aktive nicht, oder ist das Netz schwach: höchstens ein Netz-Abruf
+    // in Arbeit, der nächste erst, wenn der vorige bereit ist oder fehlschlug. Spielt er: höchstens zwei. Lokale Quellen kosten kein Netz und laufen immer.
+    // Ein Eintrag nach Fehler lädt im schwachen Netz erst nach RELOAD_WAIT_MS, höchstens RELOAD_MAX mal (reloadGate).
+    const busy = this.activeBusy(activePending);
+    // Ohne aktiven und ohne erwarteten Moment konkurriert nichts um das Netz: bis POOL, im schwachen Netz einzeln
+    const idle = !(this.clip && !this.done) && !activePending;
+    const inflight = this.entries.filter((e) => !e.local && !e.ready).length;
+    let room = idle && !this.weakNet() ? POOL : poolBudget({ activePlaying: !busy, weakNet: this.weakNet(), inflight });
     let deferred = 0;
-    if (this.activeBusy(activePending)) {
-      let room = Math.max(0, 1 + this.extraNet - this.entries.filter((e) => !e.local && !e.ready).length);
-      order = order.filter((c) => {
-        if (loc.get(c.key)) return true;
-        if (room > 0) {
-          room--;
-          return true;
+    let waitMs = 0;
+    order = order.filter((c) => {
+      if (loc.get(c.key)) return true;
+      const f = this.fails.get(c.key);
+      if (f) {
+        const g = reloadGate({ weakNet: this.weakNet(), fails: f.n, sinceMs: Date.now() - f.at });
+        if (g === 'never') return false;
+        if (g === 'wait') {
+          const left = RELOAD_WAIT_MS - (Date.now() - f.at);
+          waitMs = waitMs ? Math.min(waitMs, left) : left;
+          return false;
         }
-        deferred++;
-        return false;
-      });
-    } else this.extraNet = 0;
+      }
+      if (room > 0) {
+        room--;
+        return true;
+      }
+      deferred++;
+      return false;
+    });
     if (deferred > 0) {
       if (!this.deferNoted) {
         this.deferNoted = true;
-        this.diag('deck: pool fill deferred (active not playing)');
+        this.diag(`deck: pool fill deferred (${busy ? 'active not playing' : 'net budget'})`);
       }
-      if (!this.deferTimer) {
-        this.deferTimer = setTimeout(() => {
+    } else this.deferNoted = false;
+    // Zurückgestellte Abrufe starten, wenn ein Eintrag bereit wird oder fehlschlägt, der aktive spielt oder die Wartezeit nach einem Fehler um ist.
+    // Der Zeitgeber ist nur das Netz darunter (neue Prüfung, kein zusätzlicher Abruf über das Budget hinaus).
+    if (this.deferTimer) clearTimeout(this.deferTimer);
+    this.deferTimer = null;
+    if (deferred > 0 || waitMs > 0) {
+      this.deferTimer = setTimeout(
+        () => {
           this.deferTimer = null;
-          this.extraNet++;
           this.refillDeferred();
-        }, FILL_DEFER_MS);
-      }
-    } else {
-      this.deferNoted = false;
-      if (this.deferTimer) clearTimeout(this.deferTimer);
-      this.deferTimer = null;
+        },
+        waitMs > 0 ? waitMs + 50 : FILL_DEFER_MS,
+      );
     }
-    for (const c of order) {
-      this.startEntry(c, loc.get(c.key));
-      changed = true;
+    this.inFill = true;
+    try {
+      for (const c of order) {
+        this.startEntry(c, loc.get(c.key));
+        changed = true;
+      }
+    } finally {
+      this.inFill = false;
     }
     // Reihenfolge der Warteschlange herstellen (neue Einträge kamen hinten dazu)
     const rank = new Map(want.map((c, i) => [c.key, i] as const));
@@ -1147,7 +1276,11 @@ export class AudioDeck {
     }
     // Brief 22: nach 8 s ohne Bereitschaft nur eine Zeile, der Eintrag bleibt. Er fällt erst heraus, wenn er das Fenster verlässt oder ein Fehler-Ereignis kommt.
     setTimeout(() => {
-      if (this.entries.includes(s) && !s.ready) this.diag(`deck: pool slow ${clip.id} 8000 ms rs=${el.readyState} meta=${s.meta}`);
+      if (this.entries.includes(s) && !s.ready) {
+        this.diag(`deck: pool slow ${clip.id} 8000 ms rs=${el.readyState} meta=${s.meta}`);
+        // Runde 18: ein langsamer Abruf des Vorrats macht das Netz schwach (nur Netz, lokale Quellen kommen nie hierher)
+        if (!s.local) this.markWeak();
+      }
     }, 8000);
     this.checkEntry(s);
     return s;
@@ -1171,6 +1304,7 @@ export class AudioDeck {
     if (!(s.cpt || rs >= 4 || (s.local && rs >= 3))) return;
     s.ready = true;
     s.rsAtReady = rs;
+    this.fails.delete(s.clip.key);
     // Der Host steht dabei: Max' Diag zeigt so, welche Quelle langsam lädt (Runde 8, Barbell 2 bis 5 s bis zum ersten Byte, Iron Culture 0,6 s)
     this.diag(`deck: pool ready ${s.clip.id} after ${Date.now() - s.t0} ms host=${s.local ? 'local' : hostOf(s.clip.url)}`);
     // Nach einem Tausch oder Verwerfen ist der Vorrat wieder voll
@@ -1184,12 +1318,16 @@ export class AudioDeck {
     } catch (e) {
       this.diag(`deck onReady failed ${e instanceof Error ? e.message : String(e)}`);
     }
+    // Runde 18: ein Abruf ist fertig, der nächste zurückgestellte darf starten
+    if (this.deferNoted && !this.inFill) this.refillDeferred();
   }
 
   /** Die Quelle eines Eintrags lud nicht: aus dem Vorrat einmal vom Netz, in der geregelten Spur einmal unverändert. Sichtbar füllt der Host neu. */
   private entryError(e: PoolEntry) {
     this.diag(`deck: pool failed ${e.clip.id} (${e.local ? 'local' : e.lane})`);
     const { clip, local, lane } = e;
+    // Runde 18: Fehler je Ausschnitt zählen (Netz), im schwachen Netz lädt er erst nach RELOAD_WAIT_MS neu (reloadGate in fill)
+    if (!local) this.fails.set(clip.key, { n: (this.fails.get(clip.key)?.n ?? 0) + 1, at: Date.now() });
     this.dropEntry(e, 'error');
     this.depleted = true;
     if (local) this.deps.dropLocal(clip.key);
@@ -1295,7 +1433,6 @@ export class AudioDeck {
     const play = via?.play ?? true;
     this.entries = this.entries.filter((x) => x !== s);
     this.depleted = true;
-    this.extraNet = 0;
     if (old) el.muted = old.muted;
     this.el = el;
     this.lane = s.lane;
@@ -1509,6 +1646,10 @@ export class AudioDeck {
     this.deferTimer = null;
     this.deferNoted = false;
     this.lastFill = null;
+    if (this.weakTimer) clearTimeout(this.weakTimer);
+    this.weakTimer = null;
+    this.weakUntil = 0;
+    this.fails.clear();
     this.sink = null;
     this.want = false;
     this.done = true;

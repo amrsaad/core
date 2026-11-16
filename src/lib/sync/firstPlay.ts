@@ -21,8 +21,16 @@ export function waitFirstPlay(): Promise<void> {
   return new Promise((res) => waiters.add(res));
 }
 
+/** Runde 18: ein Audio- oder Video-Moment lädt und spielt noch nicht (der Feed meldet es aus seiner Abfrage). Der Sync startet dann keinen Upload. */
+let feedLoading = false;
+export function setFeedLoading(on: boolean): void {
+  feedLoading = on;
+}
+export const isFeedLoading = (): boolean => feedLoading;
+
 /** Nur für Tests */
 export function resetFirstPlay(): void {
   played = false;
+  feedLoading = false;
   waiters.clear();
 }
