@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-16",
+ "records": [
+  {
+   "sourceId": "wiki:de:Milz",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Milz",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/16",
+    "status": 200
+   },
+   "title": "Milz",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Milz ist ein in den Blutkreislauf eingeschaltetes Organ des lymphatischen Systems bei Wirbeltieren. Die sich mit dem Organ beschäftigende Wissenschaft wird nach dem griechischen Fachbegriff als Splenologie bezeichnet. Die Milz ist im Regelfall nur einseitig vorhanden und liegt in der Bauchhöhle in der Nähe des Magens. Sie ist beim Menschen etwa 11 cm lang und 150 g schwer. Gelegentlich treten beim Menschen und auch bei anderen Säugetieren zusätzliche Milzen auf, die als Nebenmilzen bezeichnet werden. Die Milz ist von einer bindegewebigen Kapsel umgeben und das Milzgewebe wird in zwei Gruppen gegliedert, die als weiße und rote Milzpulpa bezeichnet werden. Die weiße Pulpa dient der Vermehrung der zu den weißen Blutkörperchen gehörenden Lymphozyten und spielt daher eine Rolle bei der Abwehr körperfremder Stoffe (Antigene). Die rote Pulpa dient dagegen der Aussonderung von Fremdpartikeln und überalterter und geschädigter roter Blutkörperchen sowie der Speicherung der Blutplättchen. Bei einigen Säugetieren wie Pferden und Hunden ist die Milz auch ein bedeutender Blutspeicher. Während die Milz bei niederen Wirbeltieren noch das wichtigste Organ der Blutbildung ist, geht diese Funktion bei vielen Säugetieren nach der Geburt verloren und das Organ spielt nur in der späten Fetalentwicklung eine Rolle bei der Bildung roter Blutkörperchen."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-16T04:12:28.914Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Milz": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Wolf Biermann",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Wolf_Biermann",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/16",
+    "status": 200
+   },
+   "title": "Wolf Biermann",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Karl Wolf Biermann ist ein deutscher Liedermacher und Lyriker. Sein erster Gedichtband Die Drahtharfe gehört zu den erfolgreichsten Lyriksammlungen der deutschen Nachkriegsliteratur. Sein populäres Gedicht und Lied Ermutigung wurde als „heimliche Nationalhymne der DDR“ bezeichnet und fand Eingang in kirchliche Gesangbücher."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-16T04:12:28.914Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Wolf_Biermann": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:NHL 1926/27",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/NHL_1926%2F27",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/16",
+    "status": 200
+   },
+   "title": "NHL 1926/27",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die NHL-Saison 1926/27 war die zehnte Spielzeit in der National Hockey League. Zehn Teams spielten jeweils 44 Spiele. Erstmals wurde in zwei Gruppen gespielt. In jeder Gruppe spielten der Drittplatzierte gegen den Zweiten das Viertelfinale, um dann gegen den Tabellenführer um die Teilnahme am Stanley-Cup-Finale zu spielen. Dort siegten die Ottawa Senators zweimal gegen die Boston Bruins, zwei weitere Spiele endeten unentschieden."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-16T04:12:28.914Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/NHL_1926%2F27": 200
+   }
+  }
+ ]
+}
