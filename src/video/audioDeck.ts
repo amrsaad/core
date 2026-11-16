@@ -378,6 +378,11 @@ export class AudioDeck {
     return this.weakUntil > Date.now();
   }
 
+  /** Runde 19: nur lesen, der Video-Feed fragt den Merker ab (Nachbar-Vorladen im schwachen Netz) */
+  isWeakNet(): boolean {
+    return this.weakNet();
+  }
+
   /** Runde 18: schwaches Netz merken (WEAK_NET_MS ab jetzt). Diag einmal beim Wechsel, eine Rückmeldung beim Ablauf. */
   private markWeak() {
     const was = this.weakNet();

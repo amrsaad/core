@@ -33,6 +33,80 @@ export interface ActiveObs {
   userPaused: boolean;
   /** Zeit seit dem Wechsel auf diesen Moment (ms) */
   sinceMs: number;
+  /** Runde 19: schwaches Netz (isWeakNet): nur der nächste Nachbar, erst nach WEAK_STABLE_MS stabilem Spiel, keine Frist. Fehlt: Netz gut. */
+  weak?: boolean;
+}
+
+/** Runde 19: so lange gilt das Netz nach einem Anlass als schwach (ms) */
+export const WEAK_VIDEO_MS = 5 * 60_000;
+/** Runde 19: Wisch bis playing länger als das ist ein Anlass für "schwaches Netz" (ms) */
+export const SLOW_START_MS = 3000;
+/** Runde 19: im schwachen Netz lädt der nächste Nachbar erst, wenn der aktive so lange am Stück ohne waiting spielt (ms) */
+export const WEAK_STABLE_MS = 3000;
+
+/** Runde 19: Wisch bis playing (ms) war so langsam, dass das Netz als schwach gilt */
+export function slowStart(ms: number): boolean {
+  return ms > SLOW_START_MS;
+}
+
+/** Runde 19: Ende des Merkers, wenn jetzt ein Anlass vorliegt */
+export function weakUntil(now: number): number {
+  return now + WEAK_VIDEO_MS;
+}
+
+/** Runde 19: schwaches Netz: der eigene Merker läuft noch, oder der Merker des Audio-Decks ist gesetzt */
+export function isWeakNet(o: { until: number; now: number; deckWeak: boolean }): boolean {
+  return o.until > o.now || o.deckWeak;
+}
+
+/** Runde 19: so viele Nachbarn dürfen vorladen (schwaches Netz: einer, sonst zwei) */
+export function neighborBudget(weak: boolean): 1 | 2 {
+  return weak ? 1 : 2;
+}
+
+/** Runde 19: stabil im schwachen Netz: spielt WEAK_STABLE_MS am Stück ohne waiting (der Puffer-Kurzschluss aus isStable gilt hier nicht) */
+export function isWeakStable(a: Pick<ActiveObs, 'playing' | 'playingMs' | 'waitingMs'>): boolean {
+  return a.playing && a.waitingMs === 0 && a.playingMs >= WEAK_STABLE_MS;
+}
+
+// Runde 19: Startüberwachung eines YouTube-Moments nach dem Startbefehl in der Geste (iOS). Der erste Befehl verpufft oft (Zustand 3, dann -1),
+// darum früh und gestaffelt nachstoßen, solange die Nutzeraktivierung von iOS noch gilt. Reine Funktion, der Feed führt sie aus.
+/** Erster Wiederholungsversuch, wenn der Player so lange nach dem Befehl nicht in Zustand 1 oder 3 ist (ms) */
+export const START_RETRY_FIRST_MS = 800;
+/** Zweiter Versuch so lange nach dem ersten (ms) */
+export const START_RETRY_NEXT_MS = 2000;
+/** Höchstens so viele Wiederholungsversuche vor der Tippfläche */
+export const START_RETRY_MAX = 2;
+/**
+ * Tippfläche so lange nach dem Startbefehl, wenn weder Spielen noch ein Versuch geholfen hat (ms). Bleibt bei 6 s: im Mobilfunk puffert der Player oft
+ * 4 bis 5 s im Zustand 3, eine frühere Tippfläche wäre dort ein Fehlalarm. Die Gewinne liegen bei den Versuchen, nicht bei der Tippfläche.
+ */
+export const START_GIVEUP_MS = 6000;
+/** Prüftakt, solange ein Versuch am Zustand 3 scheitert (ms) */
+export const START_POLL_MS = 250;
+
+export type StartCall =
+  /** Noch nichts tun, in waitMs erneut prüfen */
+  | { call: 'wait'; waitMs: number }
+  /** playVideo erneut senden (try = laufende Nummer ab 1) */
+  | { call: 'retry'; try: number }
+  /** Tippfläche zeigen */
+  | { call: 'tap' };
+
+/**
+ * Was die Startüberwachung jetzt tut. st = Zustand des Players, tries = bisherige Wiederholungen, sinceCmdMs = Zeit seit dem Startbefehl in der Geste,
+ * sinceTryMs = Zeit seit dem letzten Wiederholungsversuch (egal bei tries 0). Zustand 3 (puffert) und 1 (spielt) bekommen nie einen Versuch (Regel aus Runde 17).
+ * Versuche nur bei -1, 5 oder 2. Die Tippfläche kommt nach START_GIVEUP_MS, auch wenn der Player puffert (wie bisher).
+ */
+export function startWatchCall(o: { st: number; tries: number; sinceCmdMs: number; sinceTryMs: number }): StartCall {
+  if (o.sinceCmdMs >= START_GIVEUP_MS) return { call: 'tap' };
+  const giveIn = START_GIVEUP_MS - o.sinceCmdMs;
+  if (o.tries >= START_RETRY_MAX) return { call: 'wait', waitMs: Math.max(1, giveIn) };
+  const dueIn = o.tries === 0 ? START_RETRY_FIRST_MS - o.sinceCmdMs : START_RETRY_NEXT_MS - o.sinceTryMs;
+  if (dueIn > 0) return { call: 'wait', waitMs: Math.min(dueIn, giveIn) };
+  const retryable = o.st === -1 || o.st === 5 || o.st === 2;
+  if (!retryable) return { call: 'wait', waitMs: Math.min(START_POLL_MS, giveIn) };
+  return { call: 'retry', try: o.tries + 1 };
 }
 
 /**
@@ -95,9 +169,13 @@ export type NeighborCall =
 export function neighborCall(a: ActiveObs, n: NeighborObs): NeighborCall {
   if (n.canplay) return { call: 'keep' };
   if (isStalled(a)) return n.started ? { call: 'pause' } : { call: 'defer' };
+  // Runde 19: schwaches Netz, nur der nächste Nachbar. Ein ladender übernächster wird angehalten, ein wartender bleibt wartend.
+  if (a.weak && n.rank === 2) return n.started ? { call: 'pause' } : { call: 'defer' };
   if (n.rank === 2 && !n.prevCanplay && n.prevStartedMs < DEADLINE_MS) return n.started ? { call: 'keep' } : { call: 'defer' };
   if (n.started) return { call: 'keep' };
   if (a.userPaused) return { call: 'start', why: 'paused' };
+  // Runde 19: schwaches Netz: erst nach 3 s stabilem Spiel, keine Frist (ein hängender aktiver Moment bekäme sonst noch einen Konkurrenten)
+  if (a.weak) return isWeakStable(a) ? { call: 'start', why: 'stable' } : { call: 'defer' };
   if (isStable(a)) return { call: 'start', why: 'stable' };
   if (!a.playedBefore && a.sinceMs >= DEADLINE_MS) return { call: 'start', why: 'deadline' };
   return { call: 'defer' };

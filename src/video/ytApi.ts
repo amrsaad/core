@@ -423,6 +423,8 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
         }
         const cur = typeof yt.getPlaybackRate === 'function' ? yt.getPlaybackRate() : null;
         if (cur === want) return;
+        // Runde 19: kein Tempobefehl, solange der Player nicht spielt (Start in der Geste, Zustand 3 oder -1): Verdacht: er fiel dabei auf -1 zurück. Mit PLAYING setzt der Feed das Tempo.
+        if (ytState() !== STATE.PLAYING) return;
         yt.setPlaybackRate(want);
         if (attempt === 2) diag(`yt rate stuck at ${cur}, want ${want}`);
       } catch {

@@ -1,5 +1,5 @@
 import { describeMedia, holdsNeighbor, needsLoad, type MediaItem } from './slotplan';
-import { neighborCall, recoverCall, youtubeObs, type ActiveObs } from './neighborGate';
+import { isWeakNet, neighborCall, recoverCall, slowStart, START_POLL_MS, startWatchCall, weakUntil, youtubeObs, type ActiveObs } from './neighborGate';
 import { notesRow } from './notesrow';
 import { diagLog, netType } from '../lib/diag';
 import { markFirstPlay, setFeedLoading } from '../lib/sync/firstPlay';
@@ -164,11 +164,11 @@ const SELF_PAUSE_MS = 2500;
 const RESUME_MS = 1500;
 /**
  * Issue 54 (iOS): das Sicherheitsnetz aus Brief 23 greift nur bei einer Fremdpause (state 2). Bleibt der Player nach "play in gesture" bei -1, 3 oder 5
- * stehen (Max' Diag 10.11.: 35 s ohne PLAYING), kommt nach START_RETRY_MS ein einziger zweiter playVideo ("yt: retry start"), nach weiteren
- * START_GIVEUP_MS ohne PLAYING die Tippfläche "Tap to play". Solange die Überwachung läuft oder die Tippfläche steht: kein soundGuard, kein Watchdog-Skip.
+ * stehen (Max' Diag 10.11.: 35 s ohne PLAYING), kommt ein zweiter playVideo ("yt: retry start"), danach die Tippfläche "Tap to play". Solange die Überwachung
+ * läuft oder die Tippfläche steht: kein soundGuard, kein Watchdog-Skip.
+ * Runde 19: früh und gestaffelt statt einmal nach 3 s (startWatchCall in neighborGate.ts): Versuch 1 nach 800 ms, Versuch 2 nach weiteren 2000 ms,
+ * Tippfläche nach 6 s. Nie ein Versuch im Zustand 3 (puffert, Regel aus Runde 17).
  */
-const START_RETRY_MS = 3000;
-const START_GIVEUP_MS = 3000;
 /** Zeit, die der Start der Vorlade-Player nach dem Kaltstart höchstens hinter dem aktuellen Moment wartet (Issue 22) */
 const GATE_MS = 3500;
 /**
@@ -354,6 +354,26 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
    * started: Moment-ID und Zeitpunkt, ab dem das Vorladen freigegeben ist. logged: Momente, für die "deferred" schon in der Diag steht. at: Wechsel auf den aktuellen Moment.
    */
   const nbr = useRef({ wait: new Set<Slot>(), started: new Map<string, number>(), logged: new Set<string>(), idx: -1, at: 0, yt: { id: '', at: 0 } });
+  /**
+   * Runde 19: Merker "schwaches Netz" für Video (Mobilfunk, Diag 16.11.): until = Ende des eigenen Merkers (5 min), last = letzter gemeldeter Zustand (Diag einmal beim Wechsel).
+   * Anlässe: Wisch bis playing über 3 s, "slow net, showing still", oder der Merker des Audio-Decks. Solange er gilt, lädt höchstens der nächste Nachbar vor, erst nach 3 s stabilem Spiel.
+   */
+  const weakVid = useRef({ until: 0, last: false });
+  const weakForm = useRef(form);
+  weakForm.current = form;
+  const weakNow = (): boolean => isWeakNet({ until: weakVid.current.until, now: Date.now(), deckWeak: audioDeck.isWeakNet() });
+  /** Zustand des Merkers melden, wenn er gewechselt hat (nicht im Audio-Reiter, dort meldet das Deck selbst) */
+  const syncWeak = () => {
+    if (weakForm.current === 'audio') return;
+    const w = weakNow();
+    if (w === weakVid.current.last) return;
+    weakVid.current.last = w;
+    diag.current.push(w ? 'video: weak net, one neighbor' : 'video: net ok, two neighbors');
+  };
+  const markWeakVideo = () => {
+    weakVid.current.until = weakUntil(Date.now());
+    syncWeak();
+  };
 
   /** Wischübergang: Bühne mit den Seiten und Ebene mit den Overlays bewegen sich gemeinsam, nur transform, direkt geschrieben (ohne React) */
   const stageEl = useRef<HTMLDivElement>(null);
@@ -668,8 +688,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       sl.player.playVideo();
       sl.gestureAt = performance.now();
       sl.gestureLogged = false;
-      // Tempo gleich mit, der Zustandswechsel PLAYING kommt hier vor goTo und setzt es nicht mehr (ytApi prüft es nach)
-      sl.player.setPlaybackRate(clampRate(rateRef.current));
+      // Runde 19: kein setPlaybackRate mehr direkt nach dem Startbefehl. Der Player ist noch nicht gestartet und fiel nach 3 oft auf -1 zurück (Diag 16.11.),
+      // ein Tempobefehl mitten im Start ist der einzige eigene Befehl dort. Das Tempo kommt mit PLAYING (onState, auch für den Nachbarn in der Geste).
       diag.current.push(`yt: play in gesture ${m!.id}${soundOn.current ? '' : ' (muted)'}`);
       watchStart(sl);
     } catch {
@@ -683,33 +703,45 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     sl.startRetried = false;
   };
   /**
-   * Issue 54 (iOS): nach einem Start in der Geste muss PLAYING kommen. Bleibt der Player bei -1, 3 oder 5, geht nach START_RETRY_MS genau ein zweiter
-   * playVideo ab (ohne Tonänderung), nach weiteren START_GIVEUP_MS ohne PLAYING steht die Tippfläche "Tap to play" (Weg aus Brief 23).
+   * Issue 54 (iOS): nach einem Start in der Geste muss PLAYING kommen. Bleibt der Player bei -1, 3 oder 5, gehen gestaffelt bis zu zwei
+   * weitere playVideo ab (ohne Tonänderung, nie im Zustand 3, Runde 19: nach 800 ms und 2000 ms später), nach 6 s ohne PLAYING steht die Tippfläche "Tap to play" (Weg aus Brief 23).
    * Ein Nachbar, der nie aktuell wurde (Feder zurück), wird von undoGesturePlay abgeräumt, die Überwachung endet dort mit.
    */
   const watchStart = (sl: Slot) => {
     clearStartWatch(sl);
     const mid = sl.mid;
     const t0 = performance.now();
-    const stuck = () => sl.mid === mid && sl.index === idxRef.current && sl.st !== STATE.PLAYING && sl.st !== STATE.PAUSED && sl.st !== STATE.ENDED && !userPaused.current && !sl.broken && !textRef.current && !forYouRef.current && !recallRef.current;
-    const giveUp = () => {
+    let tries = 0;
+    let lastTryAt = 0;
+    // Runde 19: der Slot bleibt in der Geste noch Nachbar, bis die Feder endet (goTo). Das ist kein Hängen, die Überwachung wartet darauf.
+    const pendingIdx = () => sl.index !== idxRef.current && performance.now() - t0 < GESTURE_MS;
+    const stuck = () => sl.mid === mid && (sl.index === idxRef.current || pendingIdx()) && sl.st !== STATE.PLAYING && sl.st !== STATE.PAUSED && sl.st !== STATE.ENDED && !userPaused.current && !sl.broken && !textRef.current && !forYouRef.current && !recallRef.current;
+    const step = () => {
       sl.startTimer = 0;
       if (!stuck()) return;
-      diag.current.push(`yt: no start ${mid} st=${sl.st} after ${Math.round(performance.now() - t0)} ms`);
-      showTapPlay(sl);
-    };
-    sl.startTimer = window.setTimeout(() => {
-      sl.startTimer = 0;
-      if (!stuck()) return;
-      sl.startRetried = true;
-      diag.current.push(`yt: retry start ${mid} st=${sl.st}`);
-      try {
-        sl.player?.playVideo();
-      } catch {
-        /* Player nicht bereit */
+      const now = performance.now();
+      const c = startWatchCall({ st: sl.st, tries, sinceCmdMs: now - t0, sinceTryMs: lastTryAt ? now - lastTryAt : 0 });
+      if (c.call === 'tap') {
+        diag.current.push(`yt: no start ${mid} st=${sl.st} after ${Math.round(now - t0)} ms`);
+        showTapPlay(sl);
+        return;
       }
-      sl.startTimer = window.setTimeout(giveUp, START_GIVEUP_MS);
-    }, START_RETRY_MS);
+      if (c.call === 'retry') {
+        tries = c.try;
+        lastTryAt = now;
+        sl.startRetried = true;
+        diag.current.push(`yt: retry start ${mid} st=${sl.st} after ${Math.round(now - t0)} ms (try ${tries})`);
+        try {
+          sl.player?.playVideo();
+        } catch {
+          /* Player nicht bereit */
+        }
+        sl.startTimer = window.setTimeout(step, START_POLL_MS);
+        return;
+      }
+      sl.startTimer = window.setTimeout(step, c.waitMs);
+    };
+    step();
   };
   /** Brief 23 (Variante c): Tippfläche "Tap to play" für den aktuellen YouTube-Moment, der sich zweimal selbst angehalten hat. Leer: keine. */
   const [tapPlay, setTapPlay] = useState('');
@@ -837,6 +869,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       swipe.current = null;
       const ms = Math.round(performance.now() - sw.t0);
       diag.current.push(`first-frame ${ms}ms ${sw.buffered ? 'buffered' : 'cold'}${slot.player?.isLocal?.() ? ' local' : ''}`);
+      // Runde 19: Wisch bis playing über 3 s (nicht der Kaltstart der App) merkt das schwache Netz. Audio-Reiter: das Deck führt seinen eigenen Merker.
+      if (!vstat.current?.start && weakForm.current !== 'audio' && slowStart(ms)) markWeakVideo();
       pre?.recordStart(ms, sw.buffered);
       update((x) => ({ ...x, playLatency: addSample(x.playLatency, { ms, buffered: sw.buffered, at: Date.now() }) }));
     }
@@ -920,7 +954,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       }
       return;
     }
-    const a = activeObs();
+    syncWeak();
+    const a: ActiveObs = { ...activeObs(), weak: weakNow() };
     for (const [id] of n.started) {
       const k = queue.current.findIndex((x) => x.id === id);
       if (k < idxRef.current - 1 || k > idxRef.current + 2) n.started.delete(id);
@@ -988,8 +1023,10 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       return;
     }
     // Brief 12: im Datensparmodus oder bei 2g lädt nur der nächste Moment vor. Der übernächste bleibt frei (index -1), der Wisch holt ihn dann als nächsten nach.
-    if (!play && j - idxRef.current >= 2 && lowNet()) {
-      if (slot.mid !== m.id) diag.current.push(`video: preload ${m.id} deferred (save data or 2g)`);
+    // Runde 19: dasselbe im schwachen Netz (Merker), außer für einen YouTube-Moment auf iOS: sein cue lädt nur Metadaten und muss bereit sein, wenn der Wisch kommt
+    const weakRank2 = !iosYt(m) && weakNow();
+    if (!play && j - idxRef.current >= 2 && (lowNet() || weakRank2)) {
+      if (slot.mid !== m.id) diag.current.push(`video: preload ${m.id} deferred (${lowNet() ? 'save data or 2g' : 'weak net'})`);
       slot.index = -1;
       return;
     }
@@ -1002,7 +1039,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     // Runde 15: ein Stream-Moment (TED) ist aktuell, der Nachbar wartet, bis er stabil spielt (neighborTick gibt frei). Ein Nachbar, den neighborTick
     // freigegeben hat (started), und ein schon geladener (mid gleich) gehen durch.
     // Runde 16: dasselbe, wenn ein YouTube-Moment aktuell ist und der Nachbar ein HLS-Stream ist (YouTube-Nachbarn bleiben unverändert).
-    if (!play && (activeIsStream() || (activeIsYoutube() && HLS.has(m.videoId))) && !(nbr.current.started.has(m.id) && !nbr.current.wait.has(slot))) {
+    // Runde 19: im schwachen Netz warten auch YouTube-Nachbarn eines YouTube-Moments (außer dem iOS-cue, siehe oben), bis der aktive 3 s am Stück spielt
+    if (!play && (activeIsStream() || (activeIsYoutube() && (HLS.has(m.videoId) || (weakNow() && !iosYt(m))))) && !(nbr.current.started.has(m.id) && !nbr.current.wait.has(slot))) {
       if (slot.mid !== m.id || !slot.player?.hlsObs?.()?.loaded) {
         parkNeighbor(slot, m);
         return;
@@ -2002,7 +2040,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                 }
                 if (st === STATE.PLAYING) frameDone(slot);
                 // Gespeichertes Tempo (Pfeiler 17) bei jedem Start, auch nach Neuaufbau oder Wiederaufnahme eines Players
-                if (st === STATE.PLAYING && slot.index === idxRef.current) slot.player?.setPlaybackRate(clampRate(rateRef.current));
+                // Runde 19: auch der Nachbar, der im Wisch-Handler gestartet wurde und vor goTo PLAYING meldet (das Tempo ging beim Startbefehl nicht mehr mit)
+                if (st === STATE.PLAYING && (slot.index === idxRef.current || (!!slot.gestureAt && performance.now() - slot.gestureAt < GESTURE_MS && Math.abs(slot.index - idxRef.current) === 1))) slot.player?.setPlaybackRate(clampRate(rateRef.current));
                 if (slot.index === idxRef.current) syncHintRef.current();
                 if (st === STATE.ENDED && slot.index === idxRef.current) finish();
                 // Brief 23 (iOS): im Wisch-Handler gestartet, goTo kommt mit dem Ende der Feder. Bis dahin ist der Slot noch nicht der aktuelle, darf aber nicht anhalten.
@@ -2243,7 +2282,11 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
           // Runde 13: hat das aktive Audio-Element Daten (readyState 3 oder mehr) und spielt trotzdem nicht, liegt es nicht am Netz
           if (form === 'audio' && audioDeck.holds(keyOf(m)) && audioDeck.readyState() >= 3) {
             diag.current.push(`audio: ready but not playing, showing still ${m.id}, rs=${audioDeck.readyState()} paused=${audioDeck.paused()}`);
-          } else diag.current.push(`${m.audio || m.form === 'audio' ? 'audio' : 'video'}: slow net, showing still ${m.id}, net ${netType()}, ${sl.bytesAt ? 'bytes arriving' : 'no bytes yet'}`);
+          } else {
+            diag.current.push(`${m.audio || m.form === 'audio' ? 'audio' : 'video'}: slow net, showing still ${m.id}, net ${netType()}, ${sl.bytesAt ? 'bytes arriving' : 'no bytes yet'}`);
+            // Runde 19: Anlass für den Merker "schwaches Netz" im Video-Reiter
+            if (!m.audio && m.form !== 'audio' && weakForm.current !== 'audio') markWeakVideo();
+          }
         }
         // Runde 15: Erholung. Hängt der aktive Stream-Moment länger als 3 s in waiting, obwohl er schon gespielt hat, hilft die Überwachung einmal behutsam nach
         // (höchstens zweimal je Moment). Sie sitzt hier neben Standbild und Watchdog, kein zweiter Wächter.
@@ -3033,6 +3076,15 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       setCapOpen(true);
       return;
     }
+    // Runde 19: Tipp auf ein Video, das stumm spielt, obwohl Ton gewünscht ist (play() mit Ton abgelehnt, stumm gestartet): Ton an heißt nur muted=false am laufenden Element,
+    // im pointerup (Geste). Kein Pausentipp (er hielt das Video an und der nächste Tipp startete es wieder), kein Doppeltipp.
+    const mp = current().player;
+    if (soundOn.current && !textRef.current && !userPaused.current && mp && current().st === STATE.PLAYING && mp.isMuted?.()) {
+      mp.unMute();
+      diag.current.push('video: sound on in gesture pointerup (tap)');
+      syncHint();
+      return;
+    }
     const t = Date.now();
     if (t - r.lastUp < TAP_MS) {
       window.clearTimeout(r.tap);
@@ -3368,9 +3420,14 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       for (const sl of slots.current) sl.player?.unMute();
       const cs = current();
       if (cs.st !== STATE.PLAYING && !userPaused.current && !textRef.current && activeRef.current && !forYouRef.current && !recallRef.current) cs.player?.playVideo();
-    } else if (soundOn.current) {
+    } else if (soundOn.current && !(IOS && g.type === 'pointerdown')) {
+      // Runde 19: nie im pointerdown auf iOS. Er gilt WebKit bei Berührung nicht als Geste (siehe oben, firstPending): ein Entstummen dort hält das stumm spielende Video an,
+      // erst der folgende Tipp startete es wieder (Diag 16.11.: state 2, 0,9 s später play ohne Ton-Änderung). Entstummt wird erst im pointerup, am laufenden Element, ohne pause und ohne play.
       const cp = current().player;
-      if (cp?.isMuted?.()) cp.unMute();
+      if (cp?.isMuted?.()) {
+        cp.unMute();
+        diag.current.push(`video: sound on in gesture ${g.type}`);
+      }
     }
     syncHint();
   };
