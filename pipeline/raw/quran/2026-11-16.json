@@ -121,6 +121,66 @@
    "urlChecks": {
     "https://quran.com/3/63": 200
    }
+  },
+  {
+   "sourceId": "quran:3:64",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/3/64",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/3:64?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Ali 'Imran 3:64",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "قُلْ يَـٰٓأَهْلَ ٱلْكِتَـٰبِ تَعَالَوْا۟ إِلَىٰ كَلِمَةٍ سَوَآءٍۭ بَيْنَنَا وَبَيْنَكُمْ أَلَّا نَعْبُدَ إِلَّا ٱللَّهَ وَلَا نُشْرِكَ بِهِۦ شَيْـًٔا وَلَا يَتَّخِذَ بَعْضُنَا بَعْضًا أَرْبَابًا مِّن دُونِ ٱللَّهِ ۚ فَإِن تَوَلَّوْا۟ فَقُولُوا۟ ٱشْهَدُوا۟ بِأَنَّا مُسْلِمُونَ",
+    "translation": "Sag: O Leute der Schrift, kommt her zu einem zwischen uns und euch gleichen Wort: daß wir niemandem dienen außer Allah und Ihm nichts beigesellen und sich nicht die einen von uns die anderen zu Herren außer Allah nehmen. Doch wenn sie sich abkehren, dann sagt: Bezeugt, daß wir (Allah) ergeben sind.",
+    "tafsir_muyassar": "قل -أيها الرسول-<span class=\"blue\"> لأهل الكتاب من اليهود والنصارى:</span> تعالَوْا إلى كلمة عدل وحق نلتزم بها جميعًا: وهي أن نَخُص الله وحده بالعبادة، ولا نتخذ أي شريك معه، من وثن أو صنم أو صليب أو طاغوت أو غير ذلك، ولا يدين بعضنا لبعض بالطاعة من دون الله. فإن أعرضوا عن هذه الدعوة الطيبة فقولوا لهم -أيها المؤمنون-: اشهدوا علينا بأنا مسلمون منقادون لربنا بالعبودية والإخلاص. والدعوة إلى كلمة سواء، كما تُوجَّه إلى اليهود والنصارى، توجَّه إلى من جرى مجراهم.",
+    "tafsir_ibnkathir": "<h2>Every Person Knows about Tawhid</h2><p>This Ayah includes the People of the Book, the Jews and Christians, and those who follow their ways.</p><p>قُلْ يأَهْلَ الْكِتَـبِ تَعَالَوْاْ إِلَى كَلِمَةٍ</p><p>(Say: \"O people of the Scripture! Come to a word\")</p><p>`Word' - in Arabic - also means a complete sentence, as evident from this Ayah. Allah described this word as being one,</p><p>سَوَآءٍ بَيْنَنَا وَبَيْنَكُمْ</p><p>(that is the same between us and you), an honest and righteous word that is fair to both parties. Allah then explained this word,</p><p>أَلاَّ نَعْبُدَ إِلاَّ اللَّهَ وَلاَ نُشْرِكَ بِهِ شَيْئاً</p><p>(that we worship none but Allah (Alone), and that we associate no partners with Him,) we worship neither a statue, cross, idol, Taghut (false gods), fire or anything else. Rather, we worship Allah Alone without partners, and this is the message of all of Allah's Messengers. Allah said,</p><p>وَمَآ أَرْسَلْنَا مِن قَبْلِكَ مِن رَّسُولٍ إِلاَّ نُوحِى إِلَيْهِ أَنَّهُ لا إِلَـهَ إِلاَّ أَنَاْ فَاعْبُدُونِ</p><p>(And We did not send any Messenger before you but We revealed to him (saying): \"None has the right to be worshipped but I (Allah), so worship Me (Alone and none else).\") 21:25 and,</p><p>وَلَقَدْ بَعَثْنَا فِى كُلِّ أُمَّةٍ رَّسُولاً أَنِ اعْبُدُواْ اللَّهَ وَاجْتَنِبُواْ الْطَّـغُوتَ</p><p>(And verily, We have sent among every Ummah a Messenger (proclaiming): \"Worship Allah (Alone), and avoid (or keep away from) Taghut (all false deities).\") 16:36. Allah said next,</p><p>وَلاَ يَتَّخِذَ بَعْضُنَا بَعْضًا أَرْبَابًا مِّن دُونِ اللَّهِ</p><p>(\"and that none of us shall take others as lords besides Allah.\") Ibn Jurayj commented, \"We do not obey each other in disobedience to Allah.\"</p><p>فَإِن تَوَلَّوْاْ فَقُولُواْ اشْهَدُواْ بِأَنَّا مُسْلِمُونَ</p><p>(Then, if they turn away, say: \"Bear witness that we are Muslims.\") if they abandon this fair call, then let them know that you will remain in Islam as Allah has legislated for you.</p><p>We should mention that the letter that the Prophet sent to Heraclius reads, \"In the Name of Allah, the Most Gracious, the Most Merciful. From Muhammad, the Messenger of Allah ﷺ, to Heraclius, Leader of the Romans: peace be upon those who follow the true guidance. Embrace Islam and you will acquire safety, embrace Islam and Allah will grant you a double reward. However, if you turn away from it, then you will carry the burden of the peasants, and,</p><p>يأَهْلَ الْكِتَـبِ تَعَالَوْاْ إِلَى كَلِمَةٍ سَوَآءٍ بَيْنَنَا وَبَيْنَكُمْ أَلاَّ نَعْبُدَ إِلاَّ اللَّهَ وَلاَ نُشْرِكَ بِهِ شَيْئاً وَلاَ يَتَّخِذَ بَعْضُنَا بَعْضًا أَرْبَابًا مِّن دُونِ اللَّهِ فَإِن تَوَلَّوْاْ فَقُولُواْ اشْهَدُواْ بِأَنَّا مُسْلِمُونَ</p><p>(\"O people of the Scripture: Come to a word that is the same between us and you, that we worship none but Allah (Alone), and that we associate no partners with Him, and that none of us shall take others as lords besides Allah.\" Then, if they turn away, say: \"Bear witness that we are Muslims.\")\"</p><p>Muhammad bin Ishaq and other scholars said that the beginning of Surah Al `Imran, and more than eighty verses thereafter; were revealed about the delegation of Najran. Az-Zuhri stated that the people of Najran were the first people to pay the Jizyah (tax money paid to the Muslim State). However, there is no disagreement that the Ayah that ordained the Jizyah 9:29 was revealed after the Fath (conquering Makkah, and therefore, after the delegation of Najran came to Al-Madinah). So, how can this Ayah 3:64 be contained in the Prophet's letter to Heraclius before the victory of Makkah, and how can we harmonize between the statements of Muhammad bin Ishaq and Az-Zuhri The answer is that the delegation of Najran came before Al-Hudaybiyyah (before the victory of Makkah), and what they paid was in lieu of the Mubahalah; not as Jizyah. The Ayah about the Jizyah was later revealed, and its ruling supported what occurred with the Najran people. In support of this opinion, we should mention that in another instance, the ruling on dividing the booty into one - fifth (for the Prophet ) and four-fifths (for the fighters) agreed with the practice of `Abdullah bin Jahsh during the raid that he led before Badr. An Ayah later on upheld the way `Abdullah divided the booty. Therefore, it is possible that the Prophet wrote this statement (Say, \"O People of the Scripture. ..\") in his letter to Heraclius before the Ayah was revealed. Later on, the Qur'an agreed with the Prophet's statement, word by word. It is also a fact that the Qur'an was revealed in agreement with what `Umar said regarding the captured disbelievers at Badr, the Hijab (Muslim woman code of dress), refraining from performing prayer for the hypocrites, and regarding his statements:</p><p>وَاتَّخِذُواْ مِن مَّقَامِ إِبْرَهِيمَ مُصَلًّى</p><p>(And take you the Maqam (place) of Ibrahim as a place of prayer.) 2:125, and,</p><p>عَسَى رَبُّهُ إِن طَلَّقَكُنَّ أَن يُبْدِلَهُ أَزْوَجاً خَيْراً مِّنكُنَّ</p><p>(It may be if he divorced you (all) that his Lord will give him instead of you, wives better than you.) 66:5.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Ali 'Imran",
+    "surahNameDe": "Family of Imran",
+    "key": "3:64"
+   },
+   "fetchedAt": "2026-11-16T11:30:38.221Z",
+   "urlChecks": {
+    "https://quran.com/3/64": 200
+   }
+  },
+  {
+   "sourceId": "quran:3:65",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/3/65",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/3:65?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Ali 'Imran 3:65",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "يَـٰٓأَهْلَ ٱلْكِتَـٰبِ لِمَ تُحَآجُّونَ فِىٓ إِبْرَٰهِيمَ وَمَآ أُنزِلَتِ ٱلتَّوْرَىٰةُ وَٱلْإِنجِيلُ إِلَّا مِنۢ بَعْدِهِۦٓ ۚ أَفَلَا تَعْقِلُونَ",
+    "translation": "O Leute der Schrift, warum streitet ihr über Ibrahim, wo die Tora und das Evangelium erst nach ihm (als Offenbarung) herabgesandt worden sind? Begreift ihr denn nicht?",
+    "tafsir_muyassar": "يا أصحاب الكتب المنزلة من اليهود والنصارى، كيف يجادل كل منكم في أن إبراهيم عليه السلام كان على ملَّته، وما أُنزلت التوراة والإنجيل إلا من بعده؟<span class=\"blue\"> أفلا تفقهون خطأ قولكم:</span> إن إبراهيم كان يهودياً أو نصرانياً، وقد علمتم أن اليهودية والنصرانية حدثت بعد وفاته بحين؟",
+    "tafsir_ibnkathir": "<h2>Disputing with the Jews and Christians About the Religion of Ibrahim</h2><p>Allah censures the Jews and Christians for their dispute with Muslims over Ibrahim Al-Khalil and the claim each group made that he was one of them. Muhammad bin Ishaq bin Yasar reported that Ibn `Abbas said, \"The Christians of Najran and Jewish rabbis gathered before the Messenger of Allah ﷺ and disputed in front of him. The rabbis said, `Ibrahim was certainly Jewish.' The Christians said, `Certainly, Ibrahim was Christian.' So Allah sent down,</p><p>يأَهْلَ الْكِتَـبِ لِمَ تُحَآجُّونَ فِى إِبْرَهِيمَ</p><p>(O people of the Scripture (Jews and Christians)! Why do you dispute about Ibrahim,) meaning, `How is it that you, Jews, claim that Ibrahim was Jew, although he lived before Allah sent down the Tawrah to Musa How is it that you, Christians, claim that Ibrahim was Christian, although Christianity came after his time\" This is why Allah said,</p><p>أَفَلاَ تَعْقِلُونَ</p><p>(Have you then no sense)</p><p>Allah then said,</p><p>هأَنتُمْ هَـؤُلاءِ حَـجَجْتُمْ فِيمَا لَكُم بِهِ عِلمٌ فَلِمَ تُحَآجُّونَ فِيمَا لَيْسَ لَكُمْ بِهِ عِلْمٌ</p><p>(Verily, you are those who have disputed about that of which you have knowledge. Why do you then dispute concerning that of which you have no knowledge)</p><p>This Ayah criticizes those who argue and dispute without knowledge, just as the Jews and Christians did concerning Ibrahim. Had they disputed about their religions, which they had knowledge of, and about the Law that was legislated for them until Muhammad ﷺ was sent, it would have been better for them. Rather, they disputed about what they had no knowledge of, so Allah criticized them for this behavior. Allah commanded them to refer what they have no knowledge of to He Who knows the seen and unseen matters and Who knows the true reality of all things. This is why Allah said,</p><p>وَاللَّهُ يَعْلَمُ وَأَنتُمْ لاَ تَعْلَمُونَ</p><p>(It is Allah Who knows, and you know not.)</p><p>Allah said,</p><p>مَا كَانَ إِبْرَهِيمُ يَهُودِيًّا وَلاَ نَصْرَانِيًّا وَلَكِن كَانَ حَنِيفًا مُّسْلِمًا</p><p>(Ibrahim was neither a Jew nor a Christian, but he was a true Muslim Hanifa), shunning Shirk and living in Iman,</p><p>وَمَا كَانَ مِنَ الْمُشْرِكِينَ</p><p>(and he was not of the Mushrikin.)</p><p>This Ayah is similar to the Ayah in Surat Al-Baqarah,</p><p>وَقَالُواْ كُونُواْ هُودًا أَوْ نَصَـرَى تَهْتَدُواْ</p><p>(And they say, \"Be Jews or Christians, then you will be guided...\") 2:135.</p><p>Allah said next,</p><p>إِنَّ أَوْلَى النَّاسِ بِإِبْرَهِيمَ لَلَّذِينَ اتَّبَعُوهُ وَهَـذَا النَّبِىُّ وَالَّذِينَ ءَامَنُواْ وَاللَّهُ وَلِىُّ الْمُؤْمِنِينَ</p><p>(Verily, among mankind who have the best claim to Ibrahim are those who followed him, and this Prophet and those who have believed. And Allah is the Wali (Protector and Helper) of the believers.)</p><p>This Ayah means, \"The people who have the most right to be followers of Ibrahim are those who followed his religion and this Prophet, Muhammad ﷺ , and his Companions from the Muhajirin, Ansar and those who followed their lead.\" Sa`id bin Mansur recorded that Ibn Mas`ud said that the Messenger of Allah ﷺ said,</p><p>«إِنَّ لِكُلِّ نَبِيَ وُلَاةً مِنَ النَّبِيِّينَ، وَإِنَّ وَلِيِّي مِنْهُمْ أَبِي وَخَلِيلُ رَبِّي عَزَّ وَجَل»</p><p>(Every Prophet had a Wali (supporter, best friend) from among the Prophets. My Wali among them is my father Ibrahim, the Khalil (intimate friend) of my Lord, the Exalted and Most Honored)</p><p>The Prophet then recited,</p><p>إِنَّ أَوْلَى النَّاسِ بِإِبْرَهِيمَ لَلَّذِينَ اتَّبَعُوهُ</p><p>(Verily, among mankind who have the best claim to Ibrahim are those who followed him...)</p><p>Allah's statement,</p><p>وَاللَّهُ وَلِىُّ الْمُؤْمِنِينَ</p><p>(And Allah is the Wali (Protector and Helper) of the believers.) means, Allah is the Protector of all those who believe in His Messengers.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Ali 'Imran",
+    "surahNameDe": "Family of Imran",
+    "key": "3:65"
+   },
+   "fetchedAt": "2026-11-16T11:30:38.221Z",
+   "urlChecks": {
+    "https://quran.com/3/65": 200
+   }
   }
  ]
 }
