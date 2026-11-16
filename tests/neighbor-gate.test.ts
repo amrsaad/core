@@ -131,9 +131,21 @@ describe('youtubeObs (Runde 16)', () => {
     expect(neighborCall(y({ sinceMs: DEADLINE_MS - 1 }), nb())).toEqual({ call: 'defer' });
     expect(neighborCall(y({ sinceMs: DEADLINE_MS }), nb())).toEqual({ call: 'start', why: 'deadline' });
   });
-  it('Pufferpause von YouTube pausiert keinen Nachbarn und der übernächste folgt dem nächsten', () => {
+  it('Pufferpause nach dem ersten Spielen (Runde 17): kein Vorladen, auch nicht über die Frist, ein laufendes wird angehalten', () => {
+    const buf = y({ st: 3, sinceMs: 9000, playedBefore: true });
+    expect(neighborCall(buf, nb({ started: true }))).toEqual({ call: 'pause' });
+    expect(neighborCall(buf, nb({ started: false }))).toEqual({ call: 'defer' });
+    expect(neighborCall(buf, nb({ canplay: true }))).toEqual({ call: 'keep' });
+  });
+  it('zwischen zwei Pufferpausen (Zustand 1 unter 2 s) bleibt die Frist gesperrt, solange YouTube schon gespielt hat', () => {
+    expect(neighborCall(y({ st: 1, playingAtMs: 500, sinceMs: 9000, playedBefore: true }), nb())).toEqual({ call: 'defer' });
+  });
+  it('Puffern ohne bisheriges Spielen: die Frist aus Runde 16 gilt, das Vorladen wird nicht angehalten', () => {
     expect(neighborCall(y({ st: 3, sinceMs: 9000 }), nb({ started: true }))).toEqual({ call: 'keep' });
-    const ok = y({ st: 1, playingAtMs: 2500 });
+    expect(neighborCall(y({ st: 3, sinceMs: DEADLINE_MS }), nb())).toEqual({ call: 'start', why: 'deadline' });
+  });
+  it('nach stabilem Spielen folgt der übernächste dem nächsten', () => {
+    const ok = y({ st: 1, playingAtMs: 2500, playedBefore: true });
     expect(neighborCall(ok, nb({ rank: 2, prevCanplay: false, prevStartedMs: 1000 }))).toEqual({ call: 'defer' });
     expect(neighborCall(ok, nb({ rank: 2, prevCanplay: true }))).toEqual({ call: 'start', why: 'stable' });
   });

@@ -37,12 +37,16 @@ export interface ActiveObs {
 
 /**
  * Runde 16: Beobachtung eines aktiven YouTube-Moments. Es gibt kein readyState und kein buffered, darum rs 0 und ahead 0: stabil wird er nur über
- * "spielt seit 2 s ohne Unterbrechung" (st 1, playingAtMs = Zeit seit dem letzten Eintritt in PLAYING, 0 wenn nicht spielend). playedBefore bleibt false,
- * damit bei hängendem YouTube die Frist greift und eine Pufferpause keine Stockung (Pause der Nachbarn) auslöst.
+ * "spielt seit 2 s ohne Unterbrechung" (st 1, playingAtMs = Zeit seit dem letzten Eintritt in PLAYING, 0 wenn nicht spielend).
+ * Runde 17: hat der Moment schon gespielt (playedBefore) und puffert er jetzt (st 3), gilt das sofort als Stockung (waitingMs über STALL_MS): kein Vorladen,
+ * ein laufendes wird angehalten, auch nicht über die Frist. playedBefore bleibt auch zwischen den Pufferpausen wahr (Zustand 1 und 3 wechseln im Sekundentakt),
+ * sonst griffe die Frist in jedem kurzen Zustand 1. Ohne bisheriges Spielen gilt die Frist wie in Runde 16.
  */
-export function youtubeObs(o: { st: number; playingAtMs: number; userPaused: boolean; sinceMs: number }): ActiveObs {
+export function youtubeObs(o: { st: number; playingAtMs: number; userPaused: boolean; sinceMs: number; playedBefore?: boolean }): ActiveObs {
   const playing = o.st === 1 && o.playingAtMs > 0;
-  return { playedBefore: false, playing, playingMs: playing ? o.playingAtMs : 0, waitingMs: 0, rs: 0, ahead: 0, userPaused: o.userPaused, sinceMs: o.sinceMs };
+  const playedBefore = !!o.playedBefore;
+  const waitingMs = playedBefore && o.st === 3 ? STALL_MS + 1 : 0;
+  return { playedBefore, playing, playingMs: playing ? o.playingAtMs : 0, waitingMs, rs: 0, ahead: 0, userPaused: o.userPaused, sinceMs: o.sinceMs };
 }
 
 /** Stabil: spielt seit mindestens 2 s ohne waiting, oder readyState 4 mit mindestens 8 s Puffer */

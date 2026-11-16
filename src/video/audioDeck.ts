@@ -49,6 +49,73 @@ export function skipKick(s: { inflightAt: number; readyState: number }, now: num
   return s.readyState < 1 || now - s.inflightAt < KICK_INFLIGHT_MS;
 }
 
+/** Runde 17: Toleranz vor clip.end, ab der ein ended als Ende des Ausschnitts gilt (Sekunden Elementzeit) */
+export const END_TOL = 0.25;
+/** Runde 17: ein ended so nah vor duration gilt als echtes Ende der Quelle (Sekunden) */
+export const END_NEAR_DUR = 1.5;
+
+/**
+ * Runde 17 (Diag 16.11.): iOS meldete "ended" direkt an der Startstelle (Tausch auf ein Vorrats-Element, direkter Start) oder hielt ended=true bei stehender Zeit.
+ * Ein ended zählt nur, wenn es plausibel ist: die Position liegt am Ende des Ausschnitts (t plus offset, minus END_TOL), oder höchstens END_NEAR_DUR vor duration
+ * (endlich und größer 0). Ohne clip.end und ohne gültige duration ist kein ended plausibel.
+ */
+export function plausibleEnd(o: { t: number; dur: number; clipEnd: number | undefined; offset: number }): boolean {
+  if (!Number.isFinite(o.t)) return false;
+  if (o.clipEnd !== undefined && Number.isFinite(o.clipEnd) && o.t + o.offset >= o.clipEnd - END_TOL) return true;
+  return Number.isFinite(o.dur) && o.dur > 0 && o.t >= o.dur - END_NEAR_DUR;
+}
+
+/** Runde 17: Zeitproben seit dem letzten Zurücksetzen (erste, letzte, Anzahl) */
+export interface TimeSamples {
+  first: number;
+  last: number;
+  n: number;
+}
+/** Ein Sprung größer als das zwischen zwei Proben ist ein Seek, kein Fortschritt (Sekunden) */
+const SAMPLE_JUMP = 5;
+/** Runde 17: Zuwachs der Position über mindestens zwei Proben, ab dem das Element als laufend gilt (Sekunden) */
+export const ADVANCE_MIN = 0.25;
+
+/** Neue Probe der Position. Rückwärts oder ein Sprung vorwärts beginnt die Reihe neu. */
+export function sampleTime(prev: TimeSamples | null, t: number): TimeSamples | null {
+  if (!Number.isFinite(t)) return null;
+  if (!prev || t < prev.last || t - prev.last > SAMPLE_JUMP) return { first: t, last: t, n: 1 };
+  return { first: prev.first, last: t, n: prev.n + 1 };
+}
+
+/** Runde 17: mindestens zwei Proben und die Position ist um mehr als ADVANCE_MIN gewachsen */
+export function timeAdvancing(s: TimeSamples | null): boolean {
+  return !!s && s.n >= 2 && s.last - s.first > ADVANCE_MIN;
+}
+
+/** Runde 17: so lange darf die Position bei spielendem Element stehen, bevor es als eingefroren gilt (ms) */
+export const FROZEN_MS = 4000;
+/** Bewegung unter dieser Größe zählt als Stillstand (Sekunden) */
+const FROZEN_EPS = 0.05;
+
+/**
+ * Runde 17: Wächter gegen stehende Zeit. active heißt: Wunsch zu spielen, nicht pausiert, readyState 3 oder mehr, Ausschnitt nicht zu Ende, Seite sichtbar, Start schon
+ * geliefert. Ohne active (auch beim normalen Puffern) beginnt die Messung neu. Bewegt sich die Position, beginnt sie ebenfalls neu.
+ */
+export function frozen(o: { prev: { t: number; at: number } | null; t: number; now: number; active: boolean }): { next: { t: number; at: number } | null; frozen: boolean } {
+  if (!o.active || !Number.isFinite(o.t)) return { next: null, frozen: false };
+  if (!o.prev || Math.abs(o.t - o.prev.t) > FROZEN_EPS) return { next: { t: o.t, at: o.now }, frozen: false };
+  return { next: o.prev, frozen: o.now - o.prev.at >= FROZEN_MS };
+}
+
+/** Runde 17: höchstens so viele Wiederherstellungen je Ausschnitt (erste: Position und play(), zweite: Quelle neu aufbauen) */
+export const CLIP_RECOVER_MAX = 2;
+export type RecoverStep = 'soft' | 'rebuild' | 'defer' | 'giveup';
+/**
+ * Runde 17: welche Wiederherstellung als nächste. Ein erstes falsches Ende: Position setzen und play() (soft). Eingefrorene Zeit oder jedes weitere falsche Ende
+ * (n >= 1): Quelle neu aufbauen (rebuild), verdeckt erst bei der Rückkehr (defer, kein Quellwechsel verdeckt). Nach CLIP_RECOVER_MAX: aufgeben.
+ */
+export function recoverStep(o: { n: number; kind: 'ended' | 'frozen'; hidden: boolean }): RecoverStep {
+  if (o.n >= CLIP_RECOVER_MAX) return 'giveup';
+  if (o.kind === 'ended' && o.n === 0) return 'soft';
+  return o.hidden ? 'defer' : 'rebuild';
+}
+
 /** Ereignisse, in denen iOS ein play() annimmt (ein Tipp ohne Bewegung). pointerdown und das Ende eines Wischs gehören nicht dazu. */
 const ACTIVATING = new Set(['pointerup', 'touchend', 'click', 'keydown']);
 /** So lange nach einer solchen Geste (ms) darf ein Anstoß auch dann spielen, wenn die Tippfläche steht */
@@ -279,6 +346,12 @@ export class AudioDeck {
   private earlyN = 0;
   private earlyTimer: ReturnType<typeof setTimeout> | null = null;
   private earlyGaveUp = false;
+  /** Runde 17: Zeitproben für "läuft" aus fortschreitender Position, Messung gegen stehende Zeit, Wiederherstellungen je Ausschnitt (Schlüssel, Zahl, letzter Zeitpunkt, Neuaufbau verdeckt vertagt, aufgegeben), play() des Ausschnitts wurde erfüllt */
+  private samp: TimeSamples | null = null;
+  private froz: { t: number; at: number } | null = null;
+  private recov = { key: '', n: 0, at: 0, pending: false, gaveUp: false };
+  private rebuilding = false;
+  private okFor: DeckClip | null = null;
   /** Wer ein Element zuletzt angehalten hat (Diagnose, Issue 13): "app: wo". Fehlt der Eintrag beim pause-Ereignis, kam die Pause vom System. */
   private pauseBy = new WeakMap<DeckEl, string>();
   /** Ereignisse, die kamen, während die Seite im Hintergrund stand (Diagnose: laufen die Handler dort überhaupt) */
@@ -389,39 +462,45 @@ export class AudioDeck {
     el.pause();
   }
 
+  /** Das Element spielt (Ereignis playing, oder aus fortschreitender Position abgeleitet, Runde 17) */
+  private playingNow(el: DeckEl) {
+    const mine = () => el === this.el;
+    if (this.adv && this.adv.to === this.clip?.id) {
+      this.note(`advance to ${this.adv.to}: playing after ${Date.now() - this.adv.t0} ms, rate ${el.playbackRate}, ${this.stateText(el)}`);
+      this.adv = null;
+    }
+    this.live = true;
+    this.played = true;
+    // Runde 12: der aktive Moment spielt, zurückgestellte Vorlade-Abrufe starten jetzt (bis POOL)
+    if (this.deferNoted) this.refillDeferred();
+    this.onMedia?.('playing');
+    this.loading(false);
+    this.snd = reduceSound(this.snd, 'playing', el);
+    this.sink?.state(PLAYING);
+    this.sink?.sound?.();
+    this.tick(el);
+    // Web Audio läuft nicht (iOS hat den Kontext unterbrochen): die geregelte Spur wäre stumm, darum zurück auf die unveränderte
+    if (this.lane === 'level' && this.deps.running) {
+      window.setTimeout(() => {
+        if (mine() && this.lane === 'level' && !el.paused && !this.done && !this.deps.running?.()) {
+          this.deps.broken?.('context not running');
+          this.bail('context not running');
+        }
+      }, 700);
+    }
+  }
+
   private wire(el: DeckEl) {
     // Ereignisse des gerade nicht benutzten Elements zählen nicht, die eines Vorrats-Elements gehen nur an seine Bereitschaft (eine Verdrahtung je Element, nie doppelt)
     const mine = () => el === this.el;
     const entry = () => this.entryOf(el);
     el.addEventListener('playing', () => {
-      if (!mine()) return;
-      if (this.adv && this.adv.to === this.clip?.id) {
-        this.note(`advance to ${this.adv.to}: playing after ${Date.now() - this.adv.t0} ms, rate ${el.playbackRate}, ${this.stateText(el)}`);
-        this.adv = null;
-      }
-      this.live = true;
-      this.played = true;
-      // Runde 12: der aktive Moment spielt, zurückgestellte Vorlade-Abrufe starten jetzt (bis POOL)
-      if (this.deferNoted) this.refillDeferred();
-      this.onMedia?.('playing');
-      this.loading(false);
-      this.snd = reduceSound(this.snd, 'playing', el);
-      this.sink?.state(PLAYING);
-      this.sink?.sound?.();
-      this.tick(el);
-      // Web Audio läuft nicht (iOS hat den Kontext unterbrochen): die geregelte Spur wäre stumm, darum zurück auf die unveränderte
-      if (this.lane === 'level' && this.deps.running) {
-        window.setTimeout(() => {
-          if (mine() && this.lane === 'level' && !el.paused && !this.done && !this.deps.running?.()) {
-            this.deps.broken?.('context not running');
-            this.bail('context not running');
-          }
-        }, 700);
-      }
+      if (mine()) this.playingNow(el);
     });
     el.addEventListener('waiting', () => {
       if (!mine()) return;
       this.live = false;
+      this.samp = null;
       this.sink?.state(BUFFERING);
       this.tick(el);
     });
@@ -430,6 +509,7 @@ export class AudioDeck {
       this.pauseBy.delete(el);
       if (mine()) this.note(`pause event by=${by ?? (el.ended ? 'media end' : 'system')} hidden=${this.hidden()} done=${this.done} ${this.stateText(el)}`);
       if (!mine()) return;
+      this.samp = null;
       this.snd = reduceSound(this.snd, 'pause', el);
       this.sink?.sound?.();
       this.tick(el);
@@ -454,13 +534,16 @@ export class AudioDeck {
     el.addEventListener('ended', () => {
       if (mine() && this.hidden()) this.hiddenStats.ended++;
       if (mine()) this.note(`ended event played=${this.played} hidden=${this.hidden()} ${this.stateText(el)}`);
-      if (mine() && this.played) this.clipEnd('ended');
+      // Runde 17: ein ended zählt nur, wenn es plausibel ist (Ende des Ausschnitts oder der Quelle), sonst Wiederherstellung statt Weiter
+      if (mine() && this.played) this.endedCheck(el, 'ended');
       else if (mine()) this.earlyEnded(el);
     });
     el.addEventListener('timeupdate', () => {
       if (mine()) this.tick(el);
       const c = this.clip;
       if (mine() && this.hidden()) this.hiddenStats.tu++;
+      // Runde 17: "playing" blieb aus, die Position schreitet aber fort: als laufend ableiten
+      if (mine()) this.inferPlaying(el);
       if (!mine() || !c || c.end === undefined || el.paused) return;
       if (el.currentTime >= c.end - this.offset - END_EPS) this.clipEnd('timeupdate');
     });
@@ -491,6 +574,7 @@ export class AudioDeck {
       this.checkEntry(e);
     });
     el.addEventListener('seeked', () => {
+      if (mine()) this.samp = null;
       const e = entry();
       if (e) this.checkEntry(e);
     });
@@ -529,6 +613,128 @@ export class AudioDeck {
       this.diag(`deck error ${c.id}`);
       this.sink?.error();
     });
+  }
+
+  /** Runde 17: neuer Ausschnitt (oder neue Quelle desselben): Proben und Messung neu. Die Wiederherstellungen zählen je Ausschnitt, ein Neuaufbau selbst setzt sie nicht zurück. */
+  private noteClip(key: string, fresh = false) {
+    this.samp = null;
+    this.froz = null;
+    this.okFor = null;
+    if (!this.rebuilding && (fresh || this.recov.key !== key)) this.recov = { key, n: 0, at: 0, pending: false, gaveUp: false };
+  }
+
+  /** Runde 17: das Ereignis playing blieb aus, das Element ist nicht pausiert und seine Position wächst über mindestens zwei Proben um mehr als ADVANCE_MIN */
+  private inferPlaying(el: DeckEl) {
+    const c = this.clip;
+    if (!c || this.done || this.live || el.paused || el.readyState < 3 || this.holding) return;
+    this.samp = sampleTime(this.samp, el.currentTime);
+    if (!timeAdvancing(this.samp)) return;
+    this.samp = null;
+    this.diag(`deck: playing inferred (time advancing) ${c.id}`);
+    this.playingNow(el);
+  }
+
+  /** Runde 17: ended (Ereignis oder el.ended): Ende nur, wenn plausibel, sonst falsches Ende mit Wiederherstellung */
+  private endedCheck(el: DeckEl, via: 'ended' | 'poll') {
+    const c = this.clip;
+    if (!c || this.done) return;
+    const t = el.currentTime;
+    const dur = el.duration;
+    if (plausibleEnd({ t, dur, clipEnd: c.end, offset: this.offset })) {
+      this.clipEnd(via);
+      return;
+    }
+    // Die Abfrage wartet nach einer Wiederherstellung, bevor sie dasselbe ended noch einmal wertet
+    if (via === 'poll' && Date.now() - this.recov.at < 600) return;
+    this.diag(`deck: false ended ${c.id} t=${t.toFixed(1)} dur=${Number.isFinite(dur) ? dur.toFixed(1) : String(dur)}, recovering`);
+    this.recover(el, 'ended', t);
+  }
+
+  /**
+   * Runde 17: Wiederherstellung eines Ausschnitts, dessen Element ein falsches Ende meldete oder mit stehender Zeit hängt. Erst Position auf die Startstelle und
+   * play() (soft), dann die Quelle am selben Element neu aufbauen (start() mit unveränderter Spur wie in bail(), nach loadedmetadata springt seek(true) auf target).
+   * Höchstens CLIP_RECOVER_MAX je Ausschnitt, danach der Fehlerweg des Hosts. Verdeckt kein Quellwechsel: der Neuaufbau wartet auf die Rückkehr (heartbeat).
+   */
+  private recover(el: DeckEl, kind: 'ended' | 'frozen', t: number) {
+    const c = this.clip;
+    if (!c || this.done || !this.want || this.holding) return;
+    if (this.recov.gaveUp) return;
+    const step = recoverStep({ n: this.recov.n, kind, hidden: this.hidden() });
+    // Läuft der Ausschnitt schon, bleibt die Stelle erhalten, am Start (t auf der Startstelle) gilt target
+    const mid = Number.isFinite(t) && t > this.target && (c.end === undefined || t + this.offset < c.end - END_TOL);
+    const at = mid ? t : this.target;
+    if (step === 'giveup') {
+      this.recov.gaveUp = true;
+      this.diag(`deck: recovery gave up ${c.id}`);
+      this.loading(false);
+      this.diag(`deck error ${c.id}`);
+      this.sink?.error();
+      return;
+    }
+    if (step === 'defer') {
+      this.recov.pending = true;
+      return;
+    }
+    this.recov.n++;
+    this.recov.at = Date.now();
+    this.recov.pending = false;
+    this.froz = null;
+    this.samp = null;
+    if (step === 'soft') {
+      try {
+        el.currentTime = at;
+      } catch {
+        /* iOS lehnt die Position ab */
+      }
+      this.kick('restart');
+      return;
+    }
+    this.diag(`deck: rebuilding source ${c.id} from ${(at + this.offset).toFixed(1)}`);
+    this.rebuilding = true;
+    try {
+      this.start(c, this.want, true, Math.max(c.start, at + this.offset), 'recovery');
+    } finally {
+      this.rebuilding = false;
+    }
+  }
+
+  /**
+   * Runde 17: Takt des Feeds (Abfrage alle 150 ms), nur sichtbar. Leitet "läuft" aus fortschreitender Position ab, wertet el.ended nur bei Plausibilität,
+   * löst den Schnitt am Ende auch ohne timeupdate aus und erkennt stehende Zeit. Verdeckt tut der Takt nichts (Tausch nur im Ereignis-Handler, kein load()).
+   */
+  heartbeat(now = Date.now()) {
+    const el = this.el;
+    const c = this.clip;
+    if (!el || !c || this.done || this.holding || this.hidden()) {
+      this.froz = null;
+      return;
+    }
+    // Ein vertagter Neuaufbau kommt zurück, sobald die Seite wieder sichtbar ist
+    if (this.recov.pending && this.want && !this.recov.gaveUp) {
+      this.recover(el, 'frozen', el.currentTime);
+      return;
+    }
+    this.inferPlaying(el);
+    if (this.played && el.ended) {
+      this.endedCheck(el, 'poll');
+      return;
+    }
+    if (c.end !== undefined && !el.paused && el.currentTime + this.offset >= c.end - END_EPS) {
+      this.clipEnd('poll');
+      return;
+    }
+    const r = frozen({
+      prev: this.froz,
+      t: el.currentTime,
+      now,
+      active: this.want && !el.paused && el.readyState >= 3 && (this.played || this.okFor === c),
+    });
+    this.froz = r.next;
+    if (r.frozen) {
+      this.froz = null;
+      this.diag(`deck: time frozen ${c.id} t=${el.currentTime.toFixed(1)} ended=${el.ended}, recovering`);
+      this.recover(el, 'frozen', el.currentTime);
+    }
   }
 
   /** Neuer Ausschnitt im Element: Zähler und Zeitgeber der Neustarts zurücksetzen */
@@ -614,6 +820,7 @@ export class AudioDeck {
       }
     }
     this.holding = null;
+    this.noteClip(clip.key);
     // Runde 12: der Vorrat hält genau diesen Ausschnitt. Sein Element wird übernommen, auch wenn es noch lädt (es hat schon Bytes an der richtigen Stelle).
     // Verworfen wird nur ein Eintrag mit Fehler oder einer Spur, die nicht mehr passt, dann lädt der Start das Element neu.
     const inPool = this.entries.find((x) => x.clip.key === clip.key);
@@ -751,6 +958,7 @@ export class AudioDeck {
         // Ein angenommenes play() schaltet dieses Element frei, und der Ausschnitt braucht keinen Tipp mehr
         this.unlockedEls.add(el);
         if (el === this.el) this.needTapKey = '';
+        if (el === this.el) this.okFor = this.clip;
         this.diag(`deck play#${n} ok`);
         // Nach jedem erfüllten play() füllt der Host den Vorrat auf (Brief 14, Schritt 2)
         if (el === this.el) this.onPlayed?.();
@@ -1095,6 +1303,7 @@ export class AudioDeck {
     this.loudInfo = s.chain ? { db: clip.gain ?? 0, how: 'web audio' } : { db: 0, how: `unchanged: ${s.why}` };
     this.holding = null;
     this.holdToken++;
+    this.noteClip(clip.key, true);
     this.clip = clip;
     this.done = false;
     this.nudged = false;

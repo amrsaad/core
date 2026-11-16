@@ -870,7 +870,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     if (activeIsYoutube()) {
       const y = nbr.current.yt;
       const sinceMs = Math.round(performance.now() - nbr.current.at);
-      return youtubeObs({ st: cs.st, playingAtMs: y.id === cs.mid && y.at > 0 ? Math.round(performance.now() - y.at) : 0, userPaused: userPaused.current, sinceMs });
+      return youtubeObs({ st: cs.st, playingAtMs: y.id === cs.mid && y.at > 0 ? Math.round(performance.now() - y.at) : 0, userPaused: userPaused.current, sinceMs, playedBefore: cs.playedAt > 0 });
     }
     const o = cs.player?.hlsObs?.() ?? null;
     // Ohne Beobachtung (Player noch nicht bereit): wie ein Moment, der nicht spielt. So greift die Frist auch, wenn der aktive Moment gar nicht anläuft.
@@ -956,7 +956,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         sl.cueAt = 0;
         n.started.delete(m.id);
         n.wait.add(sl);
-        diag.current.push(`video: neighbor preload paused (active stalled) ${mid}`);
+        diag.current.push(`video: neighbor preload paused (${activeIsYoutube() ? 'youtube buffering' : 'active stalled'}) ${mid}`);
       }
     }
   };
@@ -1139,6 +1139,12 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       if (IOS && sl.startTimer) return;
       // Runde 7: steht die Tippfläche (YouTube oder Audio), startet nur der Tipp, nie ein Anstoß ohne Geste
       if (tapRef.current === sl.mid) return;
+      // Runde 17: ein YouTube-Player im Zustand 3 puffert schon auf Spielen. Ein weiteres playVideo() stört den Puffer (Diag 16.11.: drei Anstöße in 5 s bei Stockung),
+      // darum nur lesen und später erneut prüfen. Bleibt er nicht im Puffern, greift der Anstoß wie bisher.
+      if (sl.st === STATE.BUFFERING && sl.index === idxRef.current && activeIsYoutube()) {
+        soundGuard(j, attempt);
+        return;
+      }
       diag.current.push(`soundGuard slot${sl.index} st=${sl.st} attempt=${attempt}`);
       try { sl.player.playVideo(); } catch { /* Player noch nicht bereit */ }
       if (attempt < 3) soundGuard(j, attempt + 1);
@@ -2190,6 +2196,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       const sl = current();
       const p = sl.player;
       const m = queue.current[idxRef.current];
+      // Runde 17: Takt des Audio-Decks (läuft-Ableitung, falsches Ende, Schnitt ohne timeupdate, stehende Zeit), nur sichtbar und nur im Audio-Reiter
+      if (form === 'audio' && m && audioDeck.exists && audioDeck.holds(keyOf(m)) && !forYouRef.current && !textRef.current && !recallRef.current && !isBackground(document.visibilityState)) audioDeck.heartbeat();
       if (!p || !sl.ready || !m || forYouRef.current || textRef.current || recallRef.current) return;
       const c = p.getCurrentTime?.() ?? 0;
       // Gesehen: mindestens eine Sekunde gespielt (Entscheidung 45). Im Hintergrund zählt das Ende (finish) oder die Rückkehr.
