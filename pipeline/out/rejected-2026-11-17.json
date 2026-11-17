@@ -1,25 +1,18 @@
 {
  "date": "2026-11-17",
  "seed": false,
- "candidates": 70,
- "accepted": 69,
- "rejectedCount": 1,
- "passRate": 0.986,
+ "candidates": 123,
+ "accepted": 123,
+ "rejectedCount": 0,
+ "passRate": 1,
  "selected": 16,
  "selectedByArea": {
   "brain": 14,
   "body": 0,
   "beat": 2
  },
- "total": 2858,
- "rejected": [
-  {
-   "id": "arxiv:2611.20195",
-   "rule": 1,
-   "reason": "source.url lieferte HTTP 404",
-   "headline": "How Specification Explicitness Shapes Failure in LLM-Generated Code"
-  }
- ],
+ "total": 2874,
+ "rejected": [],
  "skippedByBuilder": [
   {
    "id": "arxiv:2611.20230",
@@ -67,6 +60,30 @@
   },
   {
    "id": "arxiv:2611.20049",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "arxiv:2611.21605",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "arxiv:2611.21602",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "arxiv:2611.21586",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "arxiv:2611.21517",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "arxiv:2611.21488",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "arxiv:2611.21480",
    "reason": "Titel zu lang für Headline"
   },
   {
@@ -1015,6 +1032,358 @@
   },
   {
    "id": "pmid:36580280",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41707077",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41802172",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41678750",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41564280",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42785498",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40668983",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41672366",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42489607",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40849032",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41954482",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
+  },
+  {
+   "id": "pmid:39746595",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42854198",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40958158",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41106581",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:38647511",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:38613533",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:37406879",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:34538777",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:37611892",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36423732",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36642673",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36585290",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36333227",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:37154065",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36736070",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36402656",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42415766",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42366266",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42114563",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42712471",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41675569",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41918730",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42656371",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42614313",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42416210",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42625611",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42535866",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41783703",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42609654",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42460074",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42261281",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41474738",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
+  },
+  {
+   "id": "pmid:41803519",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41993988",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41744592",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42222084",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42428503",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42793640",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41958562",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40954364",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42898694",
+   "reason": "kein Conclusion-Satz unter 400 Zeichen"
+  },
+  {
+   "id": "pmid:41108711",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42971091",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42785737",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42793461",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42973833",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42576231",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42723886",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42639196",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42506399",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42629596",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36752769",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:38015740",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:37752006",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36796860",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36623867",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:37235209",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:38216322",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41475973",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40619882",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39810703",
+   "reason": "kein Conclusion-Satz unter 400 Zeichen"
+  },
+  {
+   "id": "pmid:41416636",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39042054",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42013467",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41667153",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42709703",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39350601",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42483938",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40845212",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39074168",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:37844569",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
+  },
+  {
+   "id": "pmid:42811668",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40639966",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41843416",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39837589",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39532315",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41087038",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39193818",
    "reason": "Titel zu lang für Headline"
   }
  ]
