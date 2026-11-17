@@ -1,5 +1,5 @@
 {
- "at": "2026-11-17T17:40:33.443Z",
+ "at": "2026-11-17T18:51:29.265Z",
  "runs": [
   {
    "browser": "webkit",
@@ -88,7 +88,7 @@
     "openCardBackOnReturn": true
    },
    "notes": {
-    "iosTapMs": 10,
+    "iosTapMs": 3,
     "iosGestureLines": [
      "deck: gesture pointerdown unlocked 6/6"
     ],
@@ -105,7 +105,7 @@
      ],
      "n": 40
     },
-    "rfSwipeMs": 507,
+    "rfSwipeMs": 441,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -145,79 +145,79 @@
      "bg: next atshort2:0"
     ],
     "tempoWaiting": 0,
-    "tempoPaused": 4,
+    "tempoPaused": 1,
     "cue": {
-     "worst": 1,
-     "n": 613,
+     "worst": 0,
+     "n": 622,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.48",
-       35,
-       35
+       "3.39",
+       34,
+       34
       ],
       [
-       "4.79",
-       48,
-       48
+       "4.68",
+       47,
+       47
       ],
       [
-       "6.08",
-       61,
-       61
+       "5.96",
+       60,
+       60
       ],
       [
-       "7.39",
-       74,
-       74
+       "7.25",
+       73,
+       73
       ],
       [
-       "8.69",
-       87,
-       87
+       "8.54",
+       86,
+       86
       ],
       [
-       "10.00",
-       100,
-       100
+       "9.82",
+       99,
+       99
       ],
       [
-       "11.30",
-       113,
-       113
+       "11.11",
+       112,
+       112
       ],
       [
-       "12.60",
-       126,
-       126
+       "12.40",
+       124,
+       124
       ],
       [
-       "13.90",
-       139,
-       139
+       "13.68",
+       137,
+       137
       ],
       [
-       "15.20",
-       153,
-       153
+       "14.97",
+       150,
+       150
       ],
       [
-       "16.50",
-       166,
-       166
+       "16.26",
+       163,
+       163
       ],
       [
-       "17.80",
-       178,
-       178
+       "17.54",
+       176,
+       176
       ]
      ],
      "rate": 2
     },
     "cueTempo": {
      "worst": 1,
-     "n": 512,
+     "n": 548,
      "rates": [
       1,
       1.5,
@@ -229,7 +229,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805121
+       "dueAt": 1792756805124
       }
      ],
      "idx": 6,
@@ -416,7 +416,7 @@
      "bg: next atshort2:0"
     ],
     "tempoWaiting": 0,
-    "tempoPaused": 9,
+    "tempoPaused": 10,
     "cue": {
      "worst": 0,
      "n": 601,
@@ -424,62 +424,62 @@
      "shownNow": 0,
      "gaps": [
       [
-       "3.40",
+       "3.42",
        35,
        35
       ],
       [
-       "4.74",
+       "4.76",
        48,
        48
       ],
       [
-       "6.07",
+       "6.09",
        61,
        61
       ],
       [
-       "7.40",
+       "7.42",
        75,
        75
       ],
       [
-       "8.74",
+       "8.75",
        88,
        88
       ],
       [
-       "10.07",
+       "10.09",
        101,
        101
       ],
       [
-       "11.40",
+       "11.42",
        115,
        115
       ],
       [
-       "12.74",
+       "12.75",
        128,
        128
       ],
       [
-       "14.07",
+       "14.09",
        141,
        141
       ],
       [
-       "15.40",
+       "15.42",
        155,
        155
       ],
       [
-       "16.74",
+       "16.75",
        168,
        168
       ],
       [
-       "18.07",
+       "18.09",
        181,
        181
       ]
@@ -587,7 +587,7 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "firstSoundMs": 2742,
+    "firstSoundMs": 2733,
     "diag": [
      "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
      "deck: src net pod-0006",
@@ -626,7 +626,7 @@
      "want": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
      "id": "pod-0013:82"
     },
-    "lockNextMs": 15,
+    "lockNextMs": 33,
     "lockNextLines": [
      "deck: swap pod-0013 ready=true pool=1",
      "deck play#3 swap rs=4 muted=false t=82.0",
