@@ -81,7 +81,7 @@ describe('mergeDiag', () => {
       expect(mergeDiag(mergeDiag(a, b), c)).toEqual(mergeDiag(a, mergeDiag(b, c)));
       expect(ab!.length).toBeLessThanOrEqual(2000);
     }
-  });
+  }, 30000); // Runde 20: 2000 Zeilen Puffer, auf langsamen CI-Rechnern über 5 s
 });
 
 describe('Diagnose im Sync-Stand', () => {
