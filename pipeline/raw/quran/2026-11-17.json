@@ -481,6 +481,66 @@
    "urlChecks": {
     "https://quran.com/3/85": 200
    }
+  },
+  {
+   "sourceId": "quran:3:86",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/3/86",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/3:86?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Ali 'Imran 3:86",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "كَيْفَ يَهْدِى ٱللَّهُ قَوْمًا كَفَرُوا۟ بَعْدَ إِيمَـٰنِهِمْ وَشَهِدُوٓا۟ أَنَّ ٱلرَّسُولَ حَقٌّ وَجَآءَهُمُ ٱلْبَيِّنَـٰتُ ۚ وَٱللَّهُ لَا يَهْدِى ٱلْقَوْمَ ٱلظَّـٰلِمِينَ",
+    "translation": "Wie sollte Allah ein Volk rechtleiten, das (wieder) ungläubig wurde, nachdem es den Glauben (angenommen) hatte und (nachdem) es bezeugt hatte, daß der Gesandte wahrhaft ist, und (nachdem) zu ihm die klaren Beweise gekommen waren! Und Allah leitet nicht das ungerechte Volk recht.",
+    "tafsir_muyassar": "كيف يوفق الله للإيمان به وبرسوله قومًا جحدوا نبوة محمد صلى الله عليه وسلم بعد إيمانهم به، وشهدوا أن محمدًا صلى الله عليه وسلم حق وما جاء به هو الحق، وجاءهم الحجج من عند الله والدلائل بصحة ذلك؟ والله لا يوفق للحق والصواب الجماعة الظلمة، وهم الذين عدلوا عن الحق إلى الباطل، فاختاروا الكفر على الإيمان.",
+    "tafsir_ibnkathir": "<h2>Allah Does Not Guide People Who Disbelieve After they Believed, Unless They Repent</h2><p>Ibn Jarir recorded that Ibn `Abbas said, \"A man from the Ansar embraced Islam, but later reverted and joined the polytheists. He later on became sorry and sent his people to, `Ask the Messenger of Allah ﷺ for me, if I can repent.' Then,</p><p>كَيْفَ يَهْدِى اللَّهُ قَوْمًا كَفَرُواْ بَعْدَ إِيمَـنِهِمْ</p><p>(How shall Allah guide a people who disbelieved after their belief) until,</p><p>فَإِنَّ اللَّهَ غَفُورٌ رَّحِيمٌ</p><p>(Verily, Allah is Oft-Forgiving, Most Merciful.) was revealed and his people sent word to him and he re-embraced Islam.\"</p><p>This is the wording recorded by An-Nasa'i, Al-Hakim and Ibn Hibban. Al-Hakim said, \"Its chain is Sahih and they did not record it.\"</p><p>Allah's statement,</p><p>كَيْفَ يَهْدِى اللَّهُ قَوْمًا كَفَرُواْ بَعْدَ إِيمَـنِهِمْ وَشَهِدُواْ أَنَّ الرَّسُولَ حَقٌّ وَجَآءَهُمُ الْبَيِّنَـتُ</p><p>(How shall Allah guide a people who disbelieved after their belief and after they bore witness that the Messenger is true and after clear proofs came to them)</p><p>means, the proofs and evidences were established, testifying to the truth of what the Messenger was sent with. The truth was thus explained to them, but they reverted to the darkness of polytheism. Therefore, how can such people deserve guidance after they willingly leapt into utter blindness This is why Allah said,</p><p>وَاللَّهُ لاَ يَهْدِى الْقَوْمَ الظَّـلِمِينَ</p><p>(And Allah guides not the people who are wrongdoers.)</p><p>He then said,</p><p>أُوْلَـئِكَ جَزَآؤُهُمْ أَنَّ عَلَيْهِمْ لَعْنَةَ اللَّهِ وَالْمَلَـئِكَةِ وَالنَّاسِ أَجْمَعِينَ</p><p>(They are those whose recompense is that on them (rests) the curse of Allah, of the angels and of all mankind.)</p><p>Allah curses them and His creation also curses them.</p><p>خَـلِدِينَ فِيهَآ</p><p>(They will abide therein) in the curse,</p><p>لاَ يُخَفَّفُ عَنْهُمُ الْعَذَابُ وَلاَ هُمْ يُنظَرُونَ</p><p>(Neither will their torment be lightened nor will it be delayed or postponed.) for, the torment will not be lessened, not even for an hour. After that, Allah said,</p><p>إِلاَّ الَّذِينَ تَابُواْ مِن بَعْدِ ذَلِكَ وَأَصْلَحُواْ فَإِنَّ اللَّهَ غَفُورٌ رَّحِيمٌ</p><p>(Except for those who repent after that and do righteous deeds. Verily, Allah is Oft-Forgiving, Most Merciful.)</p><p>This Ayah indicates Allah's kindness, graciousness, compassion, mercy and favor on His creatures when they repent to Him, for He forgives them in this case.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Ali 'Imran",
+    "surahNameDe": "Family of Imran",
+    "key": "3:86"
+   },
+   "fetchedAt": "2026-11-17T20:55:37.266Z",
+   "urlChecks": {
+    "https://quran.com/3/86": 200
+   }
+  },
+  {
+   "sourceId": "quran:3:87",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/3/87",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/3:87?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Ali 'Imran 3:87",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "أُو۟لَـٰٓئِكَ جَزَآؤُهُمْ أَنَّ عَلَيْهِمْ لَعْنَةَ ٱللَّهِ وَٱلْمَلَـٰٓئِكَةِ وَٱلنَّاسِ أَجْمَعِينَ",
+    "translation": "Der Lohn jener ist, daß auf ihnen der Fluch Allahs und der Engel und der Menschen allesamt liegt,",
+    "tafsir_muyassar": "أولئك الظالمون جزاؤهم أنَّ عليهم لعنة الله والملائكة والناسِ أجمعين، فهم مطرودون من رحمة الله.",
+    "tafsir_ibnkathir": "<h2>Allah Does Not Guide People Who Disbelieve After they Believed, Unless They Repent</h2><p>Ibn Jarir recorded that Ibn `Abbas said, \"A man from the Ansar embraced Islam, but later reverted and joined the polytheists. He later on became sorry and sent his people to, `Ask the Messenger of Allah ﷺ for me, if I can repent.' Then,</p><p>كَيْفَ يَهْدِى اللَّهُ قَوْمًا كَفَرُواْ بَعْدَ إِيمَـنِهِمْ</p><p>(How shall Allah guide a people who disbelieved after their belief) until,</p><p>فَإِنَّ اللَّهَ غَفُورٌ رَّحِيمٌ</p><p>(Verily, Allah is Oft-Forgiving, Most Merciful.) was revealed and his people sent word to him and he re-embraced Islam.\"</p><p>This is the wording recorded by An-Nasa'i, Al-Hakim and Ibn Hibban. Al-Hakim said, \"Its chain is Sahih and they did not record it.\"</p><p>Allah's statement,</p><p>كَيْفَ يَهْدِى اللَّهُ قَوْمًا كَفَرُواْ بَعْدَ إِيمَـنِهِمْ وَشَهِدُواْ أَنَّ الرَّسُولَ حَقٌّ وَجَآءَهُمُ الْبَيِّنَـتُ</p><p>(How shall Allah guide a people who disbelieved after their belief and after they bore witness that the Messenger is true and after clear proofs came to them)</p><p>means, the proofs and evidences were established, testifying to the truth of what the Messenger was sent with. The truth was thus explained to them, but they reverted to the darkness of polytheism. Therefore, how can such people deserve guidance after they willingly leapt into utter blindness This is why Allah said,</p><p>وَاللَّهُ لاَ يَهْدِى الْقَوْمَ الظَّـلِمِينَ</p><p>(And Allah guides not the people who are wrongdoers.)</p><p>He then said,</p><p>أُوْلَـئِكَ جَزَآؤُهُمْ أَنَّ عَلَيْهِمْ لَعْنَةَ اللَّهِ وَالْمَلَـئِكَةِ وَالنَّاسِ أَجْمَعِينَ</p><p>(They are those whose recompense is that on them (rests) the curse of Allah, of the angels and of all mankind.)</p><p>Allah curses them and His creation also curses them.</p><p>خَـلِدِينَ فِيهَآ</p><p>(They will abide therein) in the curse,</p><p>لاَ يُخَفَّفُ عَنْهُمُ الْعَذَابُ وَلاَ هُمْ يُنظَرُونَ</p><p>(Neither will their torment be lightened nor will it be delayed or postponed.) for, the torment will not be lessened, not even for an hour. After that, Allah said,</p><p>إِلاَّ الَّذِينَ تَابُواْ مِن بَعْدِ ذَلِكَ وَأَصْلَحُواْ فَإِنَّ اللَّهَ غَفُورٌ رَّحِيمٌ</p><p>(Except for those who repent after that and do righteous deeds. Verily, Allah is Oft-Forgiving, Most Merciful.)</p><p>This Ayah indicates Allah's kindness, graciousness, compassion, mercy and favor on His creatures when they repent to Him, for He forgives them in this case.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Ali 'Imran",
+    "surahNameDe": "Family of Imran",
+    "key": "3:87"
+   },
+   "fetchedAt": "2026-11-17T20:55:37.266Z",
+   "urlChecks": {
+    "https://quran.com/3/87": 200
+   }
   }
  ]
 }
