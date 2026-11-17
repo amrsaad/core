@@ -18,7 +18,7 @@
  * - Wegwischer ohne Wiedergabe (Brief 24, momentSwipes): vereinigt je Moment-ID. Ein Wegwischen ist ein Ereignis, kein Zähler je Gerät: je ID das Maximum von n
  *   und die spätere Sperre, nie die Summe. Liegt das letzte Wegwischen einer Seite nach der abgelaufenen Sperre der anderen, gilt nur die spätere Seite (Neuanfang mit n = 1).
  * - Signale (moments/signals.ts): Zähler je Feld und Tag der größere Wert, missed vereinigt je Moment-ID mit dem jüngsten Eintrag, höchstens 20.
- * - Diagnose (lib/diag.ts, Entscheidung 31): Zeilen vereinigt nach Zeit, die letzten 500 bleiben. Das Feld löst allein keinen Sync aus (nicht in syncedChanged).
+ * - Diagnose (lib/diag.ts, Entscheidung 31): Zeilen vereinigt nach Zeit, die letzten DIAG_MAX (2000) bleiben. Das Feld löst allein keinen Sync aus (nicht in syncedChanged).
  */
 import type { AppState, SavedMoment, SavedStub, Settings, Swipe } from '../state';
 import type { Weights } from '../../moments/mix';
@@ -62,7 +62,7 @@ export interface SyncState {
   momentUnseen?: Record<string, number>;
   /** Brief 24: Wegwischer ohne Wiedergabe je Moment, je ID das Maximum (mergeSwipes). Fehlt bei Geräten ohne Wegwischer. */
   momentSwipes?: Record<string, Swipe>;
-  /** Diagnose-Zeilen aller Geräte (Entscheidung 31), Ringpuffer mit 500 Zeilen, nach Zeit zusammengeführt. Fehlt bei Geräten ohne Zeilen. */
+  /** Diagnose-Zeilen aller Geräte (Entscheidung 31), Ringpuffer mit DIAG_MAX (2000) Zeilen, nach Zeit zusammengeführt. Fehlt bei Geräten ohne Zeilen. */
   diag?: DiagEntry[];
   momentLiked: Record<string, number>;
   momentAsked: Record<string, number>;

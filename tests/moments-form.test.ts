@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { emptyFormLine, endButtonLabel, endLine, END_SUB, filterPool, formOf, FORMS, momentText, otherForms, textEndReached, unseenCount } from '../src/moments/form';
+import { emptyFormLine, endButtonLabel, endLine, END_SUB, filterPool, formOf, FORMS, measuresWait, momentText, otherForms, textEndReached, unseenCount } from '../src/moments/form';
 
 describe('Formwahl (Runde 1, Punkt 3)', () => {
   it('drei Stellungen in fester Reihenfolge', () => expect(FORMS).toEqual(['video', 'audio', 'text']));
@@ -55,5 +55,16 @@ describe('Endseite (Auftrag 29.10.2026)', () => {
     expect(unseenCount(pool, 'audio', { a: 1 }, { M: 'x' })).toBe(1);
     expect(unseenCount(pool, 'text', {}, {})).toBe(1);
     expect(unseenCount(pool, 'video', { e: 5 }, {})).toBe(0);
+  });
+});
+
+describe('Wartemessung nur für Audio und Video (Runde 21)', () => {
+  it('Audio und Video messen, Text und fehlender Moment nicht', () => {
+    expect(measuresWait({ form: 'video' })).toBe(true);
+    expect(measuresWait({ form: 'audio' })).toBe(true);
+    expect(measuresWait({ audio: true })).toBe(true);
+    expect(measuresWait({})).toBe(true);
+    expect(measuresWait({ form: 'text' })).toBe(false);
+    expect(measuresWait(undefined)).toBe(false);
   });
 });

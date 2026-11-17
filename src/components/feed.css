@@ -420,18 +420,25 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
   right: 0;
   top: calc(var(--safe-t) + var(--head-h));
   bottom: 0;
-  padding: var(--s-10) calc(var(--safe-r) + var(--margin)) calc(var(--safe-b) + var(--s-4)) calc(var(--safe-l) + var(--margin));
+  padding: var(--s-4) calc(var(--safe-r) + var(--margin)) calc(var(--safe-b) + var(--s-3)) calc(var(--safe-l) + var(--margin));
   background: var(--bg);
   color: var(--text);
   display: flex;
   flex-direction: column;
-  gap: var(--s-4);
+  justify-content: flex-start;
+  gap: var(--s-3);
   overflow: hidden;
 }
 .vrecall-origin { flex: none; display: flex; flex-direction: column; max-width: var(--desk-read); width: 100%; margin-inline: auto; }
-.vrecall-origin .vtext-hook { margin-bottom: var(--s-2); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.vrecall-origin .vtext-hook { margin-bottom: var(--s-2); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
 .vrecall-origin .vtext-source { min-height: 0; }
-.vrecall-page .recall { position: relative; inset: auto; top: auto; bottom: auto; left: auto; right: auto; flex: 0 1 auto; min-height: 0; width: 100%; animation: none; margin-top: auto; }
+.vrecall-page .recall { position: relative; inset: auto; top: auto; bottom: auto; left: auto; right: auto; flex: 0 1 auto; min-height: 0; width: 100%; animation: none; margin-top: 0; }
+/* Kennzeichnung oben und "Show text": eine zusammenhängende Spalte mit Hook und Karte, ohne leere Fläche dazwischen */
+.vrecall-page > .recall-tag, .vrecall-page > .recall-peek { flex: none; width: 100%; max-width: var(--desk-read); margin-inline: auto; }
+.vrecall-page .vkicker { margin-bottom: var(--s-1); }
+.recall-peek { margin-top: calc(-1 * var(--s-2)); display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-1); }
+.recall-showtext { min-height: var(--hit); padding: 0; background: none; border: 0; color: var(--muted); font-size: var(--t-meta); line-height: var(--t-meta-lh); text-decoration: underline; text-underline-offset: 3px; }
+.recall-peektext { width: 100%; max-height: 40vh; max-height: 40dvh; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; white-space: pre-line; overflow-wrap: anywhere; font-size: var(--t-body); line-height: var(--t-body-lh); color: var(--body); padding: var(--s-3); border-radius: var(--r-btn); background: var(--surface-2); }
 /* Bereich und Sprecher stehen schon im Kopf der Seite, das Vorschaubild hat ein Text-Moment nicht */
 .vrecall-page .recall-source { display: none; }
 

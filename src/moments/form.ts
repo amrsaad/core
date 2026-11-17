@@ -14,6 +14,8 @@ export const FORM_LABEL: Record<Form, string> = { video: 'Video', audio: 'Audio'
  * Mischung und Lernen laufen danach innerhalb des Filters.
  */
 export const formOf = (m: Pick<Moment, 'audio' | 'form'>): Form => m.form ?? (m.audio ? 'audio' : 'video');
+/** Runde 21: die Messung "wait:" und "gap:" gilt nur für Audio und Video. Im Text-Reiter wäre sie die Lesezeit. */
+export const measuresWait = (m: Pick<Moment, 'audio' | 'form'> | null | undefined): boolean => !!m && formOf(m) !== 'text';
 export const inForm = (m: Pick<Moment, 'audio' | 'form'>, f: Form): boolean => formOf(m) === f;
 export const filterPool = <T extends Pick<Moment, 'audio' | 'form'>>(pool: T[], f: Form): T[] => pool.filter((m) => inForm(m, f));
 /** Zeile, wenn der Filter leer ist */

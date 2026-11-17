@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
 import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import { Icon } from '../components/Icon';
-import { shuffleOrder } from './recall';
+import { recallTag, shuffleOrder } from './recall';
 import { isArabic, thumbOf, type Moment } from './types';
 import { sourceLine } from './source';
 
@@ -9,6 +9,29 @@ import { sourceLine } from './source';
 export function originOf(m: Moment): { hook: string; dir: 'rtl' | 'ltr'; source: string } {
   const src = sourceLine(m);
   return { hook: m.hook, dir: isArabic(m.hook) ? 'rtl' : 'ltr', source: src ? `${src.prefix}${src.text}` : '' };
+}
+
+/** Kennzeichnungszeile: macht klar, dass die Karte eine Wiederholungsfrage zu früher Gelesenem ist */
+export function RecallTag({ review, day, dir }: { review: boolean; day?: string | null; dir?: 'rtl' | 'ltr' }) {
+  return <div className="recall-tag" data-testid="recall-tag" dir={dir} lang="en">{recallTag(review, day)}</div>;
+}
+
+/** Knopf "Show text" und scrollbarer Ursprungstext, nur im Text-Reiter. Tipp und Wisch bleiben im Bereich, die Karte bekommt davon nichts. */
+export function RecallTextPeek({ text, dir }: { text: string; dir: 'rtl' | 'ltr' }) {
+  const [open, setOpen] = useState(false);
+  const stop = (e: React.SyntheticEvent) => e.stopPropagation();
+  return (
+    <div className="recall-peek" onPointerDown={stop} onPointerUp={stop} onTouchStart={stop} onTouchEnd={stop}>
+      <button type="button" className="recall-showtext" data-testid="recall-showtext" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+        {open ? 'Hide text' : 'Show text'}
+      </button>
+      {open && (
+        <div className="recall-peektext" data-testid="recall-peektext" dir={dir} lang={dir === 'rtl' ? 'ar' : 'en'} tabIndex={0}>
+          {text}
+        </div>
+      )}
+    </div>
+  );
 }
 
 /** Steuerung von außen, nur im Desktop-Modus: Antwort nach angezeigter Stelle (0 bis 2) wählen */
@@ -21,7 +44,7 @@ export interface RecallCtl {
  * Erst nach dem Tipp: richtige Antwort grün, falsch gewählte rot, dann recall.why und "Next".
  * Die Wertung zählt beim Tipp. Wischen nach oben schließt, vor der Wahl ohne Wertung. Arabisch läuft rechtsläufig.
  */
-export function RecallCard({ m, review, rng, onAnswer, onClose, keys, ctl, origin = true }: { m: Moment; review: boolean; origin?: boolean; rng: () => number; onAnswer: (got: boolean) => void; onClose: () => void; keys?: boolean; ctl?: MutableRefObject<RecallCtl | null> }) {
+export function RecallCard({ m, review, read, rng, onAnswer, onClose, keys, ctl, origin = true }: { m: Moment; review: boolean; read?: string | null; origin?: boolean; rng: () => number; onAnswer: (got: boolean) => void; onClose: () => void; keys?: boolean; ctl?: MutableRefObject<RecallCtl | null> }) {
   const r = m.recall!;
   const order = useMemo(() => shuffleOrder(r.options.length, rng), [m.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const [chosen, setChosen] = useState<number | null>(null);
@@ -63,6 +86,7 @@ export function RecallCard({ m, review, rng, onAnswer, onClose, keys, ctl, origi
           <div className="recall-speaker">{speaker}{review ? ' · again' : ''}</div>
         </div>
       </div>
+      {origin && <RecallTag review={review} day={read} dir={dir} />}
       {origin && (
         <div className="recall-origin" data-testid="recall-hook">
           <p className="recall-hook" dir={originOf(m).dir}>{originOf(m).hook}</p>

@@ -6,8 +6,10 @@ import {
   CLIP_RECOVER_MAX,
   END_MIN_ADVANCE,
   END_NEAR_DUR,
+  ENDED_DEBOUNCE_MS,
   FROZEN_MS,
   frozen,
+  ignoreEnded,
   plausibleEnd,
   recoverStep,
   sampleTime,
@@ -290,6 +292,8 @@ describe('Deck: falsches ended', () => {
     };
     fake();
     expect(el.loads).toBe(1);
+    // Runde 21: ein zweites ended innerhalb von 300 ms zählt nicht (eigener Test unten)
+    vi.advanceTimersByTime(ENDED_DEBOUNCE_MS);
     fake();
     expect(el.loads).toBe(2);
     expect(t.els.length).toBeGreaterThanOrEqual(1);
@@ -299,10 +303,26 @@ describe('Deck: falsches ended', () => {
     el.readyState = 4;
     el.emit('loadedmetadata');
     await flush();
+    vi.advanceTimersByTime(ENDED_DEBOUNCE_MS);
     fake();
     expect(t.errs()).toBe(1);
     expect(t.lines).toContain('deck: recovery gave up a');
     expect(t.states).not.toContain(0);
+  });
+  it('Runde 21: ein zweites ended Millisekunden nach der Wiederherstellung wird ignoriert, kein Neuaufbau', async () => {
+    const t = setup();
+    const c = clip('a');
+    const el = await boot(t, c);
+    el.ended = true;
+    el.paused = true;
+    el.emit('ended');
+    expect(t.lines.some((l) => l.includes('false ended'))).toBe(true);
+    el.currentTime = 0;
+    el.duration = 0;
+    el.emit('ended');
+    expect(el.loads).toBe(1);
+    expect(t.lines.some((l) => l.startsWith('deck: ended ignored a (recovering)'))).toBe(true);
+    expect(t.lines.some((l) => l.startsWith('deck: rebuilding source'))).toBe(false);
   });
   it('echtes Ende (Position am clip.end) bleibt ein Ende', async () => {
     const t = setup();
@@ -361,6 +381,7 @@ describe('Deck: falsches ended', () => {
       el.emit('ended');
     };
     fake();
+    vi.advanceTimersByTime(ENDED_DEBOUNCE_MS);
     fake();
     expect(el.loads).toBe(1);
     t.state.hidden = false;
@@ -480,5 +501,26 @@ describe('Deck: Schnitt ohne timeupdate und stehende Zeit', () => {
       t.deck.heartbeat(now);
     }
     expect(t.lines.some((l) => l.includes('time frozen') || l.includes('false ended'))).toBe(false);
+  });
+});
+
+describe('ignoreEnded (Runde 21)', () => {
+  it('innerhalb von 300 ms nach Beginn der Wiederherstellung wird ignoriert', () => {
+    expect(ignoreEnded({ sinceRecoverMs: 5, t: 12, dur: 90 })).toBe('recovering');
+    expect(ignoreEnded({ sinceRecoverMs: ENDED_DEBOUNCE_MS - 1, t: 12, dur: 90 })).toBe('recovering');
+    expect(ignoreEnded({ sinceRecoverMs: ENDED_DEBOUNCE_MS, t: 12, dur: 90 })).toBeNull();
+  });
+  it('leere Dauer an der Startstelle wird ignoriert', () => {
+    expect(ignoreEnded({ sinceRecoverMs: 5000, t: 0, dur: 0 })).toBe('empty');
+    expect(ignoreEnded({ sinceRecoverMs: 5000, t: 0.4, dur: Number.NaN })).toBe('empty');
+    expect(ignoreEnded({ sinceRecoverMs: 5000, t: 0, dur: Number.POSITIVE_INFINITY })).toBe('empty');
+  });
+  it('leere Dauer bei t ab 0,5 oder gültige Dauer wird gewertet', () => {
+    expect(ignoreEnded({ sinceRecoverMs: 5000, t: 0.5, dur: 0 })).toBeNull();
+    expect(ignoreEnded({ sinceRecoverMs: 5000, t: 0, dur: 60 })).toBeNull();
+    expect(ignoreEnded({ sinceRecoverMs: Number.POSITIVE_INFINITY, t: 30, dur: 60 })).toBeNull();
+  });
+  it('ein echtes Ende bleibt davon unberührt (plausibleEnd zuerst)', () => {
+    expect(plausibleEnd({ t: 160, dur: 0, clipEnd: 160, offset: 0, advanced: 60 })).toBe(true);
   });
 });

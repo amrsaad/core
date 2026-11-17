@@ -122,6 +122,19 @@ export function plausibleEnd(o: { t: number; dur: number; clipEnd: number | unde
   return Number.isFinite(o.dur) && o.dur > 0 && o.t >= o.dur - END_NEAR_DUR && o.advanced >= END_MIN_ADVANCE;
 }
 
+/** Runde 21: Fenster nach Beginn einer Wiederherstellung, in dem ein weiteres ended nicht gewertet wird (ms) */
+export const ENDED_DEBOUNCE_MS = 300;
+/**
+ * Runde 21 (Geräteprotokoll): nach "false ended ... recovering" folgte Millisekunden später ein zweites ended mit t=0 und dur=0, das unnötig den Neuaufbau der Quelle auslöste.
+ * Gilt nur für ein ended, das plausibleEnd nicht als echtes Ende wertet. Grund oder null (dann wird es wie bisher gewertet):
+ * "recovering", wenn seit Beginn einer Wiederherstellung weniger als ENDED_DEBOUNCE_MS vergangen sind, "empty", wenn duration 0 oder nicht endlich ist und t unter 0,5 liegt.
+ */
+export function ignoreEnded(o: { sinceRecoverMs: number; t: number; dur: number }): 'recovering' | 'empty' | null {
+  if (o.sinceRecoverMs >= 0 && o.sinceRecoverMs < ENDED_DEBOUNCE_MS) return 'recovering';
+  if ((!Number.isFinite(o.dur) || o.dur === 0) && Number.isFinite(o.t) && o.t < 0.5) return 'empty';
+  return null;
+}
+
 /** Runde 17: Zeitproben seit dem letzten Zurücksetzen (erste, letzte, Anzahl) */
 export interface TimeSamples {
   first: number;
@@ -823,6 +836,12 @@ export class AudioDeck {
     const advanced = Number.isFinite(t) ? Math.max(0, t - this.target) : 0;
     if (plausibleEnd({ t, dur, clipEnd: c.end, offset: this.offset, advanced })) {
       this.clipEnd(via);
+      return;
+    }
+    // Runde 21: zweites ended kurz nach der Wiederherstellung oder mit leerer Dauer an der Startstelle: ignorieren (Abfrage still, Ereignis mit Diag-Zeile)
+    const skip = ignoreEnded({ sinceRecoverMs: this.recov.at ? Date.now() - this.recov.at : Number.POSITIVE_INFINITY, t, dur });
+    if (skip) {
+      if (via === 'ended') this.diag(`deck: ended ignored ${c.id} (${skip})`);
       return;
     }
     // Die Abfrage wartet nach einer Wiederherstellung, bevor sie dasselbe ended noch einmal wertet

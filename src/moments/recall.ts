@@ -94,3 +94,29 @@ export function shuffleOrder(n: number, rng: () => number = Math.random): number
 
 /** "gekonnt" nur nach einer richtigen Wahl (R22) */
 export const isKnown = (recall: RecallState, id: string) => !!recall[id]?.results.some((r) => r.got);
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** Tag (YYYY-MM-DD), an dem der Moment zuletzt gelesen oder gesehen wurde: jüngster momentLog-Eintrag mit Wiedergabe, sonst momentSeen. null = unbekannt. */
+export function lastReadDay(log: { id: string; day: string; ended: boolean; watched: number }[], seen: Record<string, number> | undefined, id: string, dayOf: (ms: number) => string): string | null {
+  let best: string | null = null;
+  for (const e of log) if (e.id === id && (e.watched > 0 || e.ended) && /^\d{4}-\d{2}-\d{2}$/.test(e.day) && (best === null || e.day > best)) best = e.day;
+  if (best) return best;
+  const at = seen?.[id];
+  return typeof at === 'number' && at > 0 ? dayOf(at) : null;
+}
+
+/** "12 Nov" aus YYYY-MM-DD, sonst null */
+export function formatReadDay(day: string | null | undefined): string | null {
+  const m = /^\d{4}-(\d{2})-(\d{2})$/.exec(day ?? '');
+  if (!m) return null;
+  const mon = MONTHS[Number(m[1]) - 1];
+  return mon ? `${Number(m[2])} ${mon}` : null;
+}
+
+/** Kennzeichnungszeile oben auf der Abrufkarte: "Recall · read 12 Nov", bei Wiederholung "Recall again · read 12 Nov", ohne Datum nur "Recall" */
+export function recallTag(review: boolean, day: string | null | undefined): string {
+  const head = review ? 'Recall again' : 'Recall';
+  const d = formatReadDay(day);
+  return d ? `${head} · read ${d}` : head;
+}

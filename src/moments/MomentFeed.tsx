@@ -33,8 +33,8 @@ import { addSample } from './latency';
 import { captionLines, captionsShown } from './captions';
 import { CueClock, cueIndexAt } from './cueClock';
 import { countGotIt, countSeen, todayLine } from './today';
-import { answer, cardDue, pickRecall, recallQuiet, type Recent } from './recall';
-import { RecallCard, type RecallCtl } from './RecallCard';
+import { answer, cardDue, lastReadDay, pickRecall, recallQuiet, type Recent } from './recall';
+import { RecallCard, RecallTag, RecallTextPeek, type RecallCtl } from './RecallCard';
 import { canShowRecall, onReturn, onSwipe, requeueOpen, type QueueEntry } from './recallqueue';
 import { CaptionSheet } from './CaptionSheet';
 import { sourceLine } from './source';
@@ -50,7 +50,7 @@ import { makeRng } from './rng';
 import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
 import { addFrames, atRest, commitVelocity, dragY, frameSample, release, SPRING_BACK, SPRING_COMMIT, stepSpring, Velocity, type Spring, type SpringState } from './swipe';
 import { saveGate } from '../lib/useAppState';
-import { blockedCount, emptyFormLine, END_SUB, endButtonLabel, endLine, filterPool, formOf, FORM_LABEL, FORMS, momentText, otherForms, textEndReached, unseenCount, waitingLine, type Form } from './form';
+import { blockedCount, emptyFormLine, END_SUB, endButtonLabel, endLine, filterPool, formOf, FORM_LABEL, FORMS, measuresWait, momentText, otherForms, textEndReached, unseenCount, waitingLine, type Form } from './form';
 import { atEnd, EndLedger, isBackground, onLeave } from './background';
 import { PlayTracker } from './played';
 import { setMood } from '../design/mood';
@@ -778,16 +778,17 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     setTapPlay('');
   };
   /**
+   * Runde 21: nur für Audio und Video (measuresWait), Lesezeiten im Text-Reiter sind keine Wartezeit.
    * Runde 20: Wisch oder Tipp auf einen Moment beginnt die Messung der erlebten Wartezeit. Hing der vorige Moment noch (kein Fortschritt seit über GAP_MS), steht seine
    * Wartezeit oder Unterbrechung mit "(left)" im Protokoll, denn das Wegwischen ist dann der Befund. "first-frame" reicht dafür nicht: es endet mit dem Zustand PLAYING, nicht mit Zeitfortschritt.
    */
-  const startWait = (id: string | undefined) => {
+  const startWait = (m: Moment | undefined) => {
     const now = performance.now();
     const w = waitRef.current;
     if (w && now - w.t0 > GAP_MS) diag.current.push(`wait: ${w.id} ${Math.round(now - w.t0)} ms to play (left)`);
     const g = gapRef.current;
     if (g?.stalled) diag.current.push(`gap: ${g.id} ${Math.round(now - g.at)} ms (left)`);
-    waitRef.current = id ? { id, t0: now, last: null } : null;
+    waitRef.current = m && measuresWait(m) ? { id: m.id, t0: now, last: null } : null;
     gapRef.current = null;
   };
   /**
@@ -1243,7 +1244,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     }, attempt === 0 ? 1500 : 2500);
   };
 
-  const [recall, setRecall] = useState<{ m: Moment; review: boolean } | null>(null);
+  const [recall, setRecall] = useState<{ m: Moment; review: boolean; read: string | null } | null>(null);
   // Abrufkarten nehmen nur Momente aus dem Fokus (Entscheidung 39)
   const poolById = useMemo(() => new Map(pool.map((x) => [x.id, x])), [pool]);
   const findMoment = (id: string): Moment | undefined => {
@@ -1367,7 +1368,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     since.current = Date.now();
     waitSince.current = 0;
     swipe.current = { j: at, t0: performance.now(), buffered: true };
-    startWait(nm?.id);
+    startWait(nm);
     setCaption('');
     shownCue.current = -2;
     clock.current.reset();
@@ -1508,7 +1509,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     recallAnswered.current = false;
     recallEntry.current = e;
     current().player?.pauseVideo();
-    setRecall({ m: rm, review: e.review });
+    setRecall({ m: rm, review: e.review, read: lastReadDay(stateRef.current.momentLog, stateRef.current.momentSeen, rm.id, (ms) => dayKey(new Date(ms))) });
     if (fromQueue) diag.current.push(`recall: shown ${e.id} from queue`);
     return true;
   };
@@ -1651,7 +1652,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       const ready = !single && !!nm && target.ready && holds && (gesture || target.warm === 'done' || (target.warm === 'running' && target.st === STATE.PLAYING) || target.st === STATE.PAUSED || (target.st === STATE.CUED && !!target.player?.isBuffered?.()));
       clearTapPlay();
       swipe.current = { j: next, t0, buffered: ready };
-      startWait(nm?.id);
+      startWait(nm);
       // Warmlauf, Abdeckfläche und Nachrücken (warmup.ts), bevor assign den Slot anfasst
       const plan = single
         ? null
@@ -2301,7 +2302,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         return;
       }
       const c = p.getCurrentTime?.() ?? 0;
-      measureWait(m.id, sl.st, c);
+      if (measuresWait(m)) measureWait(m.id, sl.st, c);
       // Gesehen: mindestens eine Sekunde gespielt (Entscheidung 45). Im Hintergrund zählt das Ende (finish) oder die Rückkehr.
       if (!isBackground(document.visibilityState) && !seenMarked.current.has(m.id) && played.current.enough(m.id)) {
         seenMarked.current.add(m.id);
@@ -3123,7 +3124,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       }
       diag.current.push(au ? `audio: play in gesture ${sl.mid} (tap)` : `yt: play in gesture ${sl.mid} (tap)`);
       clearTapPlay();
-      startWait(queue.current[idxRef.current]?.id);
+      startWait(queue.current[idxRef.current]);
       // Issue 54: auch dieser Start wird überwacht (ein Wiederholungsstart, dann wieder die Tippfläche), nie ein Watchdog-Skip.
       // Audio: lehnt das Element den Start ab, meldet das Deck es sofort wieder und die Tippfläche steht erneut.
       if (!au) watchStart(sl);
@@ -3826,7 +3827,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const statusKind = statusOf({ offline: !online, syncError, loading: loading || (deckWait && form === 'audio'), nextReady: nextReady && form === 'video', background: bgShown && form === 'audio', muted: hint && form !== 'text' });
   const m = queue.current[idx];
   shownId.current = m?.id ?? '';
-  const recallEl = recall ? <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} rng={rng.current!} onAnswer={answerRecall} onClose={closeRecall} keys={!!desk} ctl={recallCtl} origin={form !== 'text'} /> : null;
+  const recallEl = recall ? <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} read={recall.read} rng={rng.current!} onAnswer={answerRecall} onClose={closeRecall} keys={!!desk} ctl={recallCtl} origin={form !== 'text'} /> : null;
   const saved = m && !!state.savedMoments[m.id];
   const liked = !!m && !!state.momentLiked?.[m.id];
   const captionsOn = !!m && form !== 'text' && captionsShown(form === 'audio' ? 'on' : state.settings.captionMode, m);
@@ -4106,13 +4107,16 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         // Ergänzung 35 (Issue 42): im Text-Reiter ist die Abrufkarte ein eigener Vollbild-Moment, nie ein Overlay über dem Lesetext.
         // Oben Hook und Quelle des Ursprungs-Moments als Bezug, darunter Frage und Antworten. Wischen nach oben auf der Karte schließt wie bisher.
         const src = sourceLine(recall.m);
+        const peek = formOf(recall.m) === 'text' ? cleanText(momentText(recall.m)) : '';
         return (
           <div className="vrecall-page" data-testid="recall-page" data-area={recall.m.area} style={{ ['--area' as string]: AREA_COLOR[recall.m.area] }}>
+            <RecallTag review={recall.review} day={recall.read} dir={isArabic(recall.m.recall?.question ?? '') ? 'rtl' : 'ltr'} />
             <div className="vrecall-origin" data-testid="recall-origin">
               <div className="vkicker">{AREA_LABEL[recall.m.area]} · {topicLabel(recall.m.topic)}</div>
               <h2 className="vtext-hook" dir="auto">{recall.m.hook}</h2>
               {src && <p className="vtext-source" dir="auto">{src.prefix}{src.text}</p>}
             </div>
+            {peek && <RecallTextPeek key={recall.m.id} text={peek} dir={isArabic(peek) ? 'rtl' : 'ltr'} />}
             {recallEl}
           </div>
         );
