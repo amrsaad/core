@@ -44,10 +44,12 @@ describe('Größe des Stands', () => {
     vi.unstubAllGlobals();
   });
 
-  it('die unbegrenzten Listen haben eine Obergrenze: Protokoll 3000, Diagnose 500', () => {
+  it('die unbegrenzten Listen haben eine Obergrenze: Protokoll 3000, Diagnose 2000', () => {
     expect(LOG_MAX).toBe(3000);
-    expect(DIAG_MAX).toBe(500);
-    const s = makeState({ pool: 1400, saved: 10, seen: 100, log: 5000, days: 40 });
+    expect(DIAG_MAX).toBe(2000);
+    const s0 = makeState({ pool: 1400, saved: 10, seen: 100, log: 5000, days: 40 });
+    // Runde 20: die Fixture hält 500 Zeilen (Größenmessung), die Obergrenze braucht mehr
+    const s = { ...s0, diag: Array.from({ length: DIAG_MAX + 300 }, (_, i) => ({ t: 1_790_000_000_000 + i, d: 'ab12', l: `z ${i}` })) };
     const m = mergeDocs(toDoc(s), toDoc(s));
     expect(m.state.momentLog.length).toBe(LOG_MAX);
     expect(m.state.diag!.length).toBe(DIAG_MAX);

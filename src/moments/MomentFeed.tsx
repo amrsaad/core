@@ -198,6 +198,8 @@ const COVER_BOTTOM = 48;
 const END_GUARD = 0.3;
 const FOR_YOU_MS = 6000;
 const POLL_MS = 150;
+/** Runde 20: ab so langer Unterbrechung (ms) steht die Zeile "gap" im Protokoll */
+const GAP_MS = 800;
 const TAP_MS = 260;
 const LONG_MS = 500;
 const LOG_MAX = 3000;
@@ -488,6 +490,10 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const lastBack = useRef<number | null>(null);
   const lockPrevRef = useRef<() => void>(() => {});
   const waitSince = useRef(0);
+  /** Runde 20: erlebte Wartezeit seit Wisch oder Tipp bis zum ersten Zeitfortschritt (last: Position der letzten Abfrage) */
+  const waitRef = useRef<{ id: string; t0: number; last: number | null } | null>(null);
+  /** Runde 20: Zeit ohne Fortschritt beim Abspielen (c, at: Position und Zeitpunkt des letzten Fortschritts, stalled: die Abfrage sah über GAP_MS Stillstand) */
+  const gapRef = useRef<{ id: string; c: number; at: number; stalled: boolean } | null>(null);
   rateRef.current = rateOf(state.settings);
   setTempo(clampRate(rateRef.current));
   // Tempo aus Sync, Desktop-Leiste oder Settings erreicht auch pausierte und wartende Slots
@@ -770,6 +776,54 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     if (!tapRef.current) return;
     tapRef.current = '';
     setTapPlay('');
+  };
+  /**
+   * Runde 20: Wisch oder Tipp auf einen Moment beginnt die Messung der erlebten Wartezeit. Hing der vorige Moment noch (kein Fortschritt seit über GAP_MS), steht seine
+   * Wartezeit oder Unterbrechung mit "(left)" im Protokoll, denn das Wegwischen ist dann der Befund. "first-frame" reicht dafür nicht: es endet mit dem Zustand PLAYING, nicht mit Zeitfortschritt.
+   */
+  const startWait = (id: string | undefined) => {
+    const now = performance.now();
+    const w = waitRef.current;
+    if (w && now - w.t0 > GAP_MS) diag.current.push(`wait: ${w.id} ${Math.round(now - w.t0)} ms to play (left)`);
+    const g = gapRef.current;
+    if (g?.stalled) diag.current.push(`gap: ${g.id} ${Math.round(now - g.at)} ms (left)`);
+    waitRef.current = id ? { id, t0: now, last: null } : null;
+    gapRef.current = null;
+  };
+  /**
+   * Runde 20: im Takt der Abfrage (kein eigener Zeitgeber). wait: erster Zeitfortschritt im Zustand PLAYING nach Wisch oder Tipp. gap: Unterbrechung über GAP_MS
+   * während des Abspielens (Wunsch zu spielen, nicht pausiert, sichtbar), geschrieben, wenn die Zeit wieder läuft. Ein Sprung über 5 s (Spulen) zählt nicht.
+   */
+  const measureWait = (id: string, st: number, c: number) => {
+    const now = performance.now();
+    if (userPaused.current || !activeRef.current || isBackground(document.visibilityState) || tapRef.current === id) {
+      waitRef.current = null;
+      gapRef.current = null;
+      return;
+    }
+    const w = waitRef.current;
+    if (w && w.id === id) {
+      const adv = w.last === null ? 0 : c - w.last;
+      w.last = c;
+      if (st === STATE.PLAYING && adv > 0.05 && adv < 5) {
+        diag.current.push(`wait: ${id} ${Math.round(now - w.t0)} ms to play`);
+        waitRef.current = null;
+      }
+    }
+    if (st !== STATE.PLAYING && st !== STATE.BUFFERING) {
+      gapRef.current = null;
+      return;
+    }
+    const g = gapRef.current;
+    if (!g || g.id !== id) {
+      gapRef.current = { id, c, at: now, stalled: false };
+      return;
+    }
+    const d = Math.abs(c - g.c);
+    if (d > 0.05) {
+      if (d < 5 && now - g.at > GAP_MS) diag.current.push(`gap: ${id} ${Math.round(now - g.at)} ms`);
+      gapRef.current = { id, c, at: now, stalled: false };
+    } else if (now - g.at > GAP_MS) g.stalled = true;
   };
 
   // ---- Video-Reiter: Warmlauf, Abdeckfläche, Vorlade-Gate (Issue 22, Entscheidung 29). Nur Referenzen, damit auch ältere Closures stimmen. ----
@@ -1313,6 +1367,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     since.current = Date.now();
     waitSince.current = 0;
     swipe.current = { j: at, t0: performance.now(), buffered: true };
+    startWait(nm?.id);
     setCaption('');
     shownCue.current = -2;
     clock.current.reset();
@@ -1596,6 +1651,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       const ready = !single && !!nm && target.ready && holds && (gesture || target.warm === 'done' || (target.warm === 'running' && target.st === STATE.PLAYING) || target.st === STATE.PAUSED || (target.st === STATE.CUED && !!target.player?.isBuffered?.()));
       clearTapPlay();
       swipe.current = { j: next, t0, buffered: ready };
+      startWait(nm?.id);
       // Warmlauf, Abdeckfläche und Nachrücken (warmup.ts), bevor assign den Slot anfasst
       const plan = single
         ? null
@@ -2245,6 +2301,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         return;
       }
       const c = p.getCurrentTime?.() ?? 0;
+      measureWait(m.id, sl.st, c);
       // Gesehen: mindestens eine Sekunde gespielt (Entscheidung 45). Im Hintergrund zählt das Ende (finish) oder die Rückkehr.
       if (!isBackground(document.visibilityState) && !seenMarked.current.has(m.id) && played.current.enough(m.id)) {
         seenMarked.current.add(m.id);
@@ -3066,6 +3123,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       }
       diag.current.push(au ? `audio: play in gesture ${sl.mid} (tap)` : `yt: play in gesture ${sl.mid} (tap)`);
       clearTapPlay();
+      startWait(queue.current[idxRef.current]?.id);
       // Issue 54: auch dieser Start wird überwacht (ein Wiederholungsstart, dann wieder die Tippfläche), nie ein Watchdog-Skip.
       // Audio: lehnt das Element den Start ab, meldet das Deck es sofort wieder und die Tippfläche steht erneut.
       if (!au) watchStart(sl);

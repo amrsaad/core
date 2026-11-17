@@ -83,18 +83,18 @@ describe('Diagnose reist im Sync', () => {
     expect((await remoteDiag(api)).map((x) => x.d)).toEqual(['aaaa', 'aaaa', 'bbbb']);
   });
 
-  it('der Ringpuffer im Stand hat nie mehr als 500 Zeilen, die ältesten fallen heraus', async () => {
+  it('der Ringpuffer im Stand hat nie mehr als 2000 Zeilen, die ältesten fallen heraus', async () => {
     const api = fakeApi();
     const a = device(api, 'aaaa');
-    for (let i = 0; i < 700; i++) {
+    for (let i = 0; i < 2200; i++) {
       a.log(`z ${i}`);
       vi.setSystemTime(Date.now() + 1);
     }
     await a.sync.syncNow();
     const d = await remoteDiag(api);
-    expect(d.length).toBe(500);
+    expect(d.length).toBe(2000);
     expect(d[0].l).toBe('z 200');
-    expect(d[499].l).toBe('z 699');
+    expect(d[1999].l).toBe('z 2199');
   });
 
   it('nur das Protokoll ist neu: kein Schreiben bei Start oder Rückkehr, Schreiben beim Verlassen und nach 5 Minuten', async () => {

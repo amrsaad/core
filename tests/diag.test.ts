@@ -17,12 +17,12 @@ const randomList = (rnd: () => number, n: number): DiagEntry[] =>
 beforeEach(() => diagLog.clear());
 
 describe('Diagnose-Ringpuffer', () => {
-  it('hält höchstens 500 Zeilen, die ältesten fallen heraus', () => {
-    expect(DIAG_MAX).toBe(500);
-    for (let i = 0; i < 620; i++) diagLog.push(`z ${i}`);
-    expect(diagLog.entries().length).toBe(500);
+  it('hält höchstens 2000 Zeilen, die ältesten fallen heraus', () => {
+    expect(DIAG_MAX).toBe(2000);
+    for (let i = 0; i < 2120; i++) diagLog.push(`z ${i}`);
+    expect(diagLog.entries().length).toBe(2000);
     expect(diagLog.raw()[0]).toBe('z 120');
-    expect(diagLog.raw()[499]).toBe('z 619');
+    expect(diagLog.raw()[1999]).toBe('z 2119');
   });
 
   it('Copy diagnostics bleibt: lines mit mm:ss, raw ohne Zeitstempel, auch nach über 99 Minuten gleich lang', () => {
@@ -54,13 +54,13 @@ describe('mergeDiag', () => {
     expect(mergeDiag(a, b)).toEqual([e(10, 'aaaa', 'a'), e(20, 'bbbb', 'b'), e(30, 'aaaa', 'c')]);
   });
 
-  it('behält die letzten 500, die ältesten fallen heraus', () => {
-    const a = Array.from({ length: 400 }, (_, i) => e(1000 + i, 'aaaa', `a${i}`));
-    const b = Array.from({ length: 400 }, (_, i) => e(2000 + i, 'bbbb', `b${i}`));
+  it('behält die letzten 2000, die ältesten fallen heraus', () => {
+    const a = Array.from({ length: 1600 }, (_, i) => e(1000 + i, 'aaaa', `a${i}`));
+    const b = Array.from({ length: 1600 }, (_, i) => e(5000 + i, 'bbbb', `b${i}`));
     const m = mergeDiag(a, b)!;
-    expect(m.length).toBe(500);
-    expect(m[0]).toEqual(e(1300, 'aaaa', 'a300'));
-    expect(m[499]).toEqual(e(2399, 'bbbb', 'b399'));
+    expect(m.length).toBe(2000);
+    expect(m[0]).toEqual(e(2200, 'aaaa', 'a1200'));
+    expect(m[1999]).toEqual(e(6599, 'bbbb', 'b1599'));
   });
 
   it('nichts auf beiden Seiten ergibt undefined, Fremdes und Kaputtes wird verworfen', () => {
@@ -69,17 +69,17 @@ describe('mergeDiag', () => {
     expect(mergeDiag([{ t: NaN, d: 'x', l: 'y' } as DiagEntry, null as unknown as DiagEntry, e(1, 'aaaa', 'ok')], undefined)).toEqual([e(1, 'aaaa', 'ok')]);
   });
 
-  it('vertauschbar, wiederholbar, gruppierbar (200 zufällige Fälle, 600 Zeilen)', () => {
+  it('vertauschbar, wiederholbar, gruppierbar (200 zufällige Fälle, 3600 Zeilen)', () => {
     const rnd = mulberry(7);
     for (let i = 0; i < 200; i++) {
-      const a = randomList(rnd, 300);
-      const b = randomList(rnd, 300);
-      const c = randomList(rnd, 300);
+      const a = randomList(rnd, 1200);
+      const b = randomList(rnd, 1200);
+      const c = randomList(rnd, 1200);
       const ab = mergeDiag(a, b);
       expect(mergeDiag(b, a)).toEqual(ab);
       expect(mergeDiag(ab, ab)).toEqual(ab);
       expect(mergeDiag(mergeDiag(a, b), c)).toEqual(mergeDiag(a, mergeDiag(b, c)));
-      expect(ab!.length).toBeLessThanOrEqual(500);
+      expect(ab!.length).toBeLessThanOrEqual(2000);
     }
   });
 });

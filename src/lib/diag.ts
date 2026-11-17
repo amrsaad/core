@@ -1,6 +1,6 @@
 // Diagnose-Protokoll der App (Max, 30.10.2026): eine Liste für Feed, Player, Hintergrund und Netz,
 // in Settings per "Copy diagnostics" kopierbar. Nie Schlüssel oder Token.
-// Entscheidung 31 (Core Wache): das Protokoll reist im Sync-Stand (Feld `diag`, Ringpuffer mit 500 Zeilen).
+// Entscheidung 31 (Core Wache): das Protokoll reist im Sync-Stand (Feld `diag`, Ringpuffer mit 2000 Zeilen).
 // Jede Zeile trägt dafür die Uhrzeit (ms) und eine kurze Geräte-Kennung. Zusammengeführt wird nach Zeit,
 // die ältesten Zeilen fallen heraus. "Copy diagnostics" zeigt weiter nur die Zeilen dieser Sitzung.
 import type { AppState } from './state';
@@ -13,8 +13,11 @@ export interface DiagEntry {
   l: string;
 }
 
-/** Zeilen im Ringpuffer, in der Sitzung und im Sync-Stand */
-export const DIAG_MAX = 500;
+/**
+ * Zeilen im Ringpuffer, in der Sitzung und im Sync-Stand. Runde 20: von 500 auf 2000 (eine Sitzung von 10 Minuten füllte 500 Zeilen, was davor geschah, war überschrieben).
+ * Gemessen mit echten Zeilen: 2000 Zeilen packen auf rund 31 kB statt 7 kB, der Upload wächst um etwa 40 kB. Der Stand liegt in IndexedDB, nicht in localStorage.
+ */
+export const DIAG_MAX = 2000;
 /** Längere Zeilen werden gekürzt, damit der Sync-Stand klein bleibt */
 export const DIAG_LINE_MAX = 240;
 

@@ -23,6 +23,57 @@ const END_EPS = 0.05;
 /** Abweichung der Position vom Start, ab der nach den Metadaten noch einmal gesprungen wird */
 const SEEK_TOL = 0.75;
 
+/**
+ * Runde 20 (Diag 17.11. 07:46): ein Vorrats-Element meldete readyState 4 und "bereit", obwohl hinter der Startstelle nichts gepuffert war (duration gleich Startstelle),
+ * beim Tausch folgten 5,6 s Stille. Bereit heißt jetzt: hinter der Startstelle liegen mindestens PREBUF_S Sekunden Puffer. 3 s Daten sind bei Tempo 2x noch 1,5 s Hörzeit,
+ * genug für den Anlauf, während der Rest nachläuft. Mehr würde das Bereitwerden im schwachen Netz nur verzögern.
+ */
+export const PREBUF_S = 3;
+/** Runde 20: so viel Puffer hinter der Position gilt als "es kommt etwas" (Anzeige: Laden oder Spielen) */
+export const AHEAD_MIN_S = 0.5;
+/** Runde 20: ein Puffer-Bereich zählt für eine Stelle, wenn er höchstens so weit danach beginnt (Sekunden, iOS startet Bereiche an Frame-Grenzen) */
+const BUF_EPS = 0.5;
+/** Runde 20: so lange wartet ein Vorrats-Eintrag mit zu dünnem Puffer, bevor der Seek einmal wiederholt wird (ms) */
+export const POOL_NUDGE_MS = 10_000;
+
+/** Runde 20: Puffer-Bereiche des Elements (TimeRanges oder Nachbau, start ist optional) */
+export interface BufRanges {
+  readonly length: number;
+  start?(i: number): number;
+  end(i: number): number;
+}
+
+/**
+ * Runde 20: Ende des Puffer-Bereichs, der die Stelle t einschließt. undefined: das Gerät liefert keine Bereiche (fehlt, leer oder wirft). null: Bereiche da, keiner schließt t ein.
+ */
+export function bufferedEnd(b: BufRanges | null | undefined, t: number): number | null | undefined {
+  try {
+    if (!b || !(b.length > 0)) return undefined;
+    let best: number | null = null;
+    for (let i = 0; i < b.length; i++) {
+      const st = b.start ? b.start(i) : 0;
+      const en = b.end(i);
+      if (st <= t + BUF_EPS && en >= t - 0.05 && (best === null || en > best)) best = en;
+    }
+    return best;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Runde 20: ist ein Vorrats-Eintrag wirklich bereit? Die bisherige Bedingung (canplaythrough oder readyState 4, lokal 3) prüft der Aufrufer, rs reist nur mit für die Diagnose.
+ * Hinter der Startstelle müssen Daten liegen. Mit Bereichen: einer schließt target ein und reicht
+ * mindestens margin darüber hinaus. Ohne Bereiche (leer auf dem Gerät): duration endlich und größer als target + margin. duration gleich target (Abstand unter 1 s) ist nie bereit.
+ */
+export function poolEntryReady(o: { rs: number; target: number; dur: number; buffered?: BufRanges | null; margin?: number }): boolean {
+  const margin = o.margin ?? PREBUF_S;
+  if (Number.isFinite(o.dur) && o.dur - o.target < 1) return false;
+  const end = bufferedEnd(o.buffered, o.target);
+  if (end === undefined) return Number.isFinite(o.dur) && o.dur > o.target + margin;
+  return end !== null && end >= o.target + margin;
+}
+
 /** Läuft ein Ausschnitt schon unverändert und bleiben weniger Sekunden, lohnt der Wechsel auf die geregelte Spur nicht mehr */
 const RELEVEL_MIN_LEFT = 4;
 /** So lange nach einer Unterbrechung des Kontexts warten, bevor auf die unveränderte Spur gewechselt wird (iOS setzt ihn oft von selbst fort) */
@@ -187,6 +238,8 @@ interface PoolEntry {
   ready: boolean;
   /** readyState, als der Eintrag bereit wurde. Fällt er danach auf 0, hat iOS das Element verworfen (Schritt 5). 0 heißt: nie Daten gesehen (kein Maßstab). */
   rsAtReady: number;
+  /** Runde 20: der Eintrag erfüllte die alte Bedingung, aber hinter der Startstelle lag noch kein Puffer (Zeile steht, Seek-Anstoß ist geplant) */
+  thin: boolean;
   t0: number;
 }
 
@@ -241,7 +294,9 @@ export interface DeckEl {
   preservesPitch?: boolean;
   removeAttribute?(name: string): void;
   readonly error?: { code: number } | null;
-  readonly buffered?: { readonly length: number; end(i: number): number };
+  readonly buffered?: BufRanges;
+  /** Runde 20: ein Seek läuft noch (seeked kommt danach) */
+  readonly seeking?: boolean;
   play(): Promise<void> | undefined;
   pause(): void;
   load(): void;
@@ -323,6 +378,8 @@ export class AudioDeck {
   /** Runde 18: Beginn des aktuellen Ausschnitts (Zeit bis playing), Schlüssel, für den "buffering inferred" schon in der Diag steht, Zahl der progress-Ereignisse des aktiven Elements */
   private clipAt = 0;
   private bufNoted = '';
+  /** Runde 20: nach Tausch oder Neustart ohne Puffer hinter der Position meldet playingNow kein "spielt", bis Daten da sind */
+  private guard: DeckEl | null = null;
   private prog = 0;
   private deferTimer: ReturnType<typeof setTimeout> | null = null;
   /** Der Vorrat wurde verbraucht oder verworfen: sobald er wieder voll ist, meldet das Deck "pool refill" */
@@ -532,6 +589,37 @@ export class AudioDeck {
     el.pause();
   }
 
+  /** Runde 20: liegt hinter der Position des Elements Puffer (mehr als AHEAD_MIN_S)? Ohne Bereiche auf dem Gerät: ja (kein Maßstab). */
+  private aheadOk(el: DeckEl): boolean {
+    const end = bufferedEnd(el.buffered, el.currentTime);
+    if (end === undefined) return true;
+    return end !== null && end > el.currentTime + AHEAD_MIN_S;
+  }
+
+  /** Runde 20: Wächter nach Tausch oder Neustart: true, solange noch kein Puffer hinter der Position liegt. Sobald er da ist, endet der Wächter. */
+  private starved(el: DeckEl): boolean {
+    if (this.guard !== el) return false;
+    if (this.aheadOk(el)) {
+      this.guard = null;
+      return false;
+    }
+    return true;
+  }
+
+  /** Runde 20: Text für die Zeilen "pool not ready yet" und "swap onto thin buffer": Puffer-Ende an der Stelle oder none */
+  private bufText(el: DeckEl, t: number): string {
+    const end = bufferedEnd(el.buffered, t);
+    return typeof end === 'number' ? end.toFixed(1) : 'none';
+  }
+
+  /** Runde 20: Lade-Zustand melden (wie waiting), ohne Neuaufbau */
+  private showLoading() {
+    this.live = false;
+    this.samp = null;
+    this.sink?.state(BUFFERING);
+    this.loading(true);
+  }
+
   /** Das Element spielt (Ereignis playing, oder aus fortschreitender Position abgeleitet, Runde 17) */
   private playingNow(el: DeckEl) {
     const mine = () => el === this.el;
@@ -542,14 +630,16 @@ export class AudioDeck {
     // Runde 18: brauchte der Ausschnitt vom Start bis zum ersten playing mehr als WEAK_PLAY_MS (ohne Warten auf einen Tipp, nur Netz), ist das Netz schwach
     const c0 = this.clip;
     if (!this.played && c0 && !this.isLocal && this.clipAt > 0 && this.refusedKey !== c0.key && Date.now() - this.clipAt > WEAK_PLAY_MS) this.markWeak();
-    this.live = true;
+    // Runde 20: nach Tausch oder Neustart ohne Daten hinter der Position ist "playing" des Elements kein Ton. Laden anzeigen, bis die Zeit läuft (inferPlaying leitet es zurück).
+    const starved = this.starved(el);
+    this.live = !starved;
     this.played = true;
     // Runde 12: der aktive Moment spielt, zurückgestellte Vorlade-Abrufe starten jetzt (bis POOL)
-    if (this.deferNoted) this.refillDeferred();
+    if (this.deferNoted && !starved) this.refillDeferred();
     this.onMedia?.('playing');
-    this.loading(false);
+    this.loading(starved);
     this.snd = reduceSound(this.snd, 'playing', el);
-    this.sink?.state(PLAYING);
+    this.sink?.state(starved ? BUFFERING : PLAYING);
     this.sink?.sound?.();
     this.tick(el);
     // Web Audio läuft nicht (iOS hat den Kontext unterbrochen): die geregelte Spur wäre stumm, darum zurück auf die unveränderte
@@ -580,6 +670,13 @@ export class AudioDeck {
     // Runde 18: Daten kommen an (Zähler für den Hänge-Wächter des Feeds, siehe bytes)
     el.addEventListener('progress', () => {
       if (mine()) this.prog++;
+      // Runde 20: neue Daten können einen Vorrats-Eintrag mit dünnem Puffer bereit machen
+      const e = entry();
+      if (e && !e.ready) this.checkEntry(e);
+    });
+    el.addEventListener('durationchange', () => {
+      const e = entry();
+      if (e && !e.ready) this.checkEntry(e);
     });
     el.addEventListener('pause', () => {
       const by = this.pauseBy.get(el);
@@ -694,6 +791,7 @@ export class AudioDeck {
 
   /** Runde 17: neuer Ausschnitt (oder neue Quelle desselben): Proben und Messung neu. Die Wiederherstellungen zählen je Ausschnitt, ein Neuaufbau selbst setzt sie nicht zurück. */
   private noteClip(key: string, fresh = false) {
+    this.guard = null;
     this.samp = null;
     this.froz = null;
     this.okFor = null;
@@ -769,7 +867,14 @@ export class AudioDeck {
       } catch {
         /* iOS lehnt die Position ab */
       }
+      // Runde 20: kein Puffer hinter der Stelle (falsches Ende an der Grenze des Geladenen): sofort Laden zeigen statt "spielt" bis zum ersten Zeitfortschritt. Keine weitere Aktion.
+      const starve = !this.aheadOk(el);
+      if (starve) this.guard = el;
       this.kick('restart');
+      if (starve) {
+        this.diag(`deck: restart without buffer ${c.id} t=${at.toFixed(1)} buf=${this.bufText(el, at)}`);
+        this.showLoading();
+      }
       return;
     }
     this.diag(`deck: rebuilding source ${c.id} from ${(at + this.offset).toFixed(1)}`);
@@ -831,10 +936,7 @@ export class AudioDeck {
       this.bufNoted = c.key;
       this.diag(`deck: buffering inferred (time not advancing) ${c.id} t=${el.currentTime.toFixed(1)}`);
     }
-    this.live = false;
-    this.samp = null;
-    this.sink?.state(BUFFERING);
-    this.loading(true);
+    this.showLoading();
   }
 
   /** Runde 18: Zähler der ankommenden Daten des aktiven Elements (Puffer in Zehntelsekunden, progress-Ereignisse). Wächst nur, wenn Daten kommen. */
@@ -1266,7 +1368,7 @@ export class AudioDeck {
     }
     const offset = loc?.offset ?? 0;
     const target = Math.max(0, clip.start - offset);
-    const s: PoolEntry = { clip, el, lane, why, chain, local: !!loc, offset, target, meta: false, cpt: false, ready: false, rsAtReady: 0, t0: Date.now() };
+    const s: PoolEntry = { clip, el, lane, why, chain, local: !!loc, offset, target, meta: false, cpt: false, ready: false, rsAtReady: 0, thin: false, t0: Date.now() };
     this.entries.push(s);
     this.diag(`deck: pool load ${clip.id} src=${loc ? 'local' : 'net'}`);
     el.src = loc?.url ?? withStart(clip.url, clip.start);
@@ -1291,6 +1393,26 @@ export class AudioDeck {
     return s;
   }
 
+  /** Runde 20: Eintrag erfüllt die alte Bedingung, aber hinter der Startstelle liegt zu wenig Puffer. Einmal je Eintrag eine Zeile, nach POOL_NUDGE_MS einmal der Seek erneut. */
+  private thinEntry(s: PoolEntry, rs: number) {
+    if (s.thin) return;
+    s.thin = true;
+    const el = s.el;
+    const dur = Number.isFinite(el.duration) ? el.duration.toFixed(1) : String(el.duration);
+    this.diag(`deck: pool not ready yet ${s.clip.id} rs=${rs} dur=${dur} target=${s.target.toFixed(1)} buf=${this.bufText(el, s.target)}`);
+    setTimeout(() => {
+      if (!this.entries.includes(s) || s.ready || this.hidden()) return;
+      try {
+        // Ein Seek löst auf iOS den Abruf des Bereichs aus, ohne die Quelle neu zu setzen
+        el.currentTime = s.target;
+      } catch {
+        /* iOS lehnt die Position ab */
+      }
+      this.diag(`deck: pool nudge ${s.clip.id} buf=${this.bufText(el, s.target)}`);
+      this.checkEntry(s);
+    }, POOL_NUDGE_MS);
+  }
+
   /** Metadaten da, Position gesetzt, genug Daten zum Durchspielen: der Eintrag ist bereit */
   private checkEntry(s: PoolEntry) {
     if (s.ready || !s.meta || !this.entries.includes(s)) return;
@@ -1304,9 +1426,16 @@ export class AudioDeck {
     } catch {
       /* iOS lehnt die Position ab, solange keine Metadaten da sind */
     }
+    // Runde 20: ein Seek läuft noch, readyState und Puffer sind erst nach seeked verlässlich (seeked ruft checkEntry erneut)
+    if (el.seeking) return;
     if (Math.abs(el.currentTime - s.target) > SEEK_TOL) return;
     const rs = el.readyState;
     if (!(s.cpt || rs >= 4 || (s.local && rs >= 3))) return;
+    // Runde 20: bereit erst, wenn hinter der Startstelle Daten liegen (duration gleich Startstelle meldet iOS bei teilweise geladenen Elementen)
+    if (!poolEntryReady({ rs, target: s.target, dur: el.duration, buffered: el.buffered })) {
+      this.thinEntry(s, rs);
+      return;
+    }
     s.ready = true;
     s.rsAtReady = rs;
     this.fails.delete(s.clip.key);
@@ -1470,8 +1599,14 @@ export class AudioDeck {
     // Der Sink steht vor dem play(): ein Element meldet "playing" auch synchron, der neue Player soll den Zustand nie verpassen
     if (!via?.keepSink) this.sink = sink;
     this.applyRate(el);
-    if (s.ready) this.diag(`deck: swap ${clip.id} ready=true pool=${this.readyCount()}`);
-    else {
+    if (s.ready) {
+      this.diag(`deck: swap ${clip.id} ready=true pool=${this.readyCount()}`);
+      // Runde 20: der Eintrag war bereit, hat hinter der Startstelle aber zu wenig Puffer: Zeile, getauscht wird trotzdem
+      if (play && !poolEntryReady({ rs: el.readyState, target: this.target, dur: el.duration, buffered: el.buffered })) {
+        const d = Number.isFinite(el.duration) ? el.duration.toFixed(1) : String(el.duration);
+        this.diag(`deck: swap onto thin buffer ${clip.id} rs=${el.readyState} dur=${d} target=${this.target.toFixed(1)} buf=${this.bufText(el, this.target)}`);
+      }
+    } else {
       // Runde 12: der Eintrag lädt noch. Sein Element behält Quelle und Bytes, nach den Metadaten springt seek(true) an die Position (loadedmetadata, mine).
       this.diag(`deck: pool adopt ${clip.id} rs=${el.readyState} meta=${s.meta} after ${Date.now() - s.t0} ms`);
       if (s.meta) this.seek(true);
@@ -1485,7 +1620,11 @@ export class AudioDeck {
         /* nach loadedmetadata */
       }
     }
+    // Runde 20: gar kein Puffer hinter der Stelle: Wächter vor dem play(), damit auch ein sofortiges "playing" nur als Laden erscheint
+    const starve = play && !this.aheadOk(el);
+    if (starve) this.guard = el;
     if (play) this.kick('swap');
+    if (starve) this.showLoading();
     // Das alte Element geht frei in den Vorrat zurück: pausiert, Quelle bleibt bis zur nächsten Befüllung (kein load() verdeckt)
     if (old && old !== el) this.halt(old, 'app: swap');
     if (play) this.deps.playbackState?.('playing', 'swap');
