@@ -18,3 +18,4 @@ Eine Zeile pro Lauf (täglich 04:00 UTC, .github/workflows/probe.yml). Erstes Bi
 | 2026-11-14 | 11:10:26 | 258 | ok | 0 | ok | actions |
 | 2026-11-15 | 11:43:27 | 239 | ok | 0 | ok | actions |
 | 2026-11-16 | 12:23:29 | 266 | ok | 0 | ok | actions |
+| 2026-11-17 | 12:43:45 | 259 | ok | 0 | ok | actions |
