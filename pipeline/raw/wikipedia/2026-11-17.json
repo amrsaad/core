@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-17",
+ "records": [
+  {
+   "sourceId": "wiki:de:Atopisches Ekzem",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Atopisches_Ekzem",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/17",
+    "status": 200
+   },
+   "title": "Atopisches Ekzem",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Das atopische Ekzem ist eine chronische, nicht ansteckende Hautkrankheit, die zu den atopischen Erkrankungen gehört. Weitere geläufige Bezeichnungen sind Neurodermitis, atopische Dermatitis und endogenes Ekzem. Außerdem wird die Erkrankung auch als chronisch konstitutionelles Ekzem, Asthmaekzem und Prurigo Besnier bezeichnet. Die Bezeichnung Neurodermitis stammt aus dem 19. Jahrhundert. Damals meinte man, die Ursache der Hauterkrankung sei eine Nervenentzündung. Später wurde diese Ansicht widerlegt, die Bezeichnung ist aber weiterhin geläufig. Hauptsymptome sind rote, schuppende, manchmal auch nässende Ekzeme auf der Haut und ein starker Juckreiz. Die Erkrankung verläuft schubweise und hat ein individuelles, vom Lebensalter abhängiges Erscheinungsbild. Das atopische Ekzem gilt als nicht heilbar, ist aber behandelbar. Die Therapie besteht je nach Schweregrad hauptsächlich aus der Behandlung der charakteristischen Hauttrockenheit, der äußerlichen Anwendung von entzündungshemmenden Wirkstoffen und systemischen Medikamenten."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-17T04:31:17.005Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Atopisches_Ekzem": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Lennox Lewis",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Lennox_Lewis",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/17",
+    "status": 200
+   },
+   "title": "Lennox Lewis",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Lennox Claudius Lewis, CBE, CM ist ein ehemaliger britisch-kanadischer Boxer. Zwischen 1992 und 2004 erkämpfte er sechs Weltmeistertitel im Schwergewicht und wurde 2009 in die International Boxing Hall of Fame aufgenommen. Als Amateur wurde er 1988 Olympiasieger im Superschwergewicht."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-17T04:31:17.005Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Lennox_Lewis": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Jeff Buckley",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Jeff_Buckley",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/17",
+    "status": 200
+   },
+   "title": "Jeff Buckley",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Jeffrey Scott Buckley war ein US-amerikanischer Singer-Songwriter und Gitarrist. Während seiner kurzen Karriere erlangte er vor allem durch seine ausdrucksstarke Stimme, die Verbindung unterschiedlicher Musikstile sowie seine intensive Bühnenpräsenz Anerkennung. Sein 1994 erschienenes Album Grace gilt als bedeutendes Werk der Rockmusik der 1990er Jahre und beeinflusste zahlreiche spätere Künstler. Besondere Bekanntheit erreichte Buckley mit seiner Interpretation des Liedes Hallelujah. Nach seinem frühen Tod durch einen Unfall gewann sein Werk weiter an Aufmerksamkeit und wurde zu einem festen Bestandteil der modernen Pop- und Rockmusikgeschichte."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-17T04:31:17.005Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Jeff_Buckley": 200
+   }
+  }
+ ]
+}
