@@ -1044,6 +1044,267 @@
    "arabic": "إِنَّ ٱلَّذِينَ يَشْتَرُونَ بِعَهْدِ ٱللَّهِ وَأَيْمَـٰنِهِمْ ثَمَنًا قَلِيلًا أُو۟لَـٰٓئِكَ لَا خَلَـٰقَ لَهُمْ فِى ٱلْـَٔاخِرَةِ وَلَا يُكَلِّمُهُمُ ٱللَّهُ وَلَا يَنظُرُ إِلَيْهِمْ يَوْمَ ٱلْقِيَـٰمَةِ وَلَا يُزَكِّيهِمْ وَلَهُمْ عَذَابٌ أَلِيمٌ",
    "translation": "Diejenigen, die ihren Bund mit Allah und ihre Eide für einen geringen Preis verkaufen, haben am Jenseits keinen Anteil. Und Allah wird am Tag der Auferstehung weder zu ihnen sprechen noch sie anschauen noch sie läutern. Für sie wird es schmerzhafte Strafe geben.",
    "reflection": "Was nimmst du heute aus diesem Vers mit?"
+  },
+  {
+   "id": "arxiv:2611.21600",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "How VLMs Plan What's Next",
+   "source": {
+    "id": "arxiv:2611.21600",
+    "title": "How VLMs Plan What's Next",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.21600",
+    "excerpt": "More broadly, it opens a way to study how models plan over complex multi-step tasks with long rollouts. Our project is available at https://plan.baulab.info/"
+   },
+   "createdAt": "2026-11-17T12:18:15.544Z"
+  },
+  {
+   "id": "pmid:40256322",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Mortality prediction of heart transplantation using machine learning models",
+   "source": {
+    "id": "pmid:40256322",
+    "title": "Mortality prediction of heart transplantation using machine learning models: a systematic review and meta-analysis.",
+    "publisher": "Frontiers in artificial intelligence",
+    "year": 2025,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/40256322/",
+    "excerpt": "ML models demonstrate moderate accuracy in predicting post-HT mortality, with CatBoost achieving the best performance. While ML shows potential for improving predictive precision, significant heterogeneity and biases highlight the need for standardized methods and further external validations to enhance clinical applicability."
+   },
+   "createdAt": "2026-11-17T12:18:15.544Z"
+  },
+  {
+   "id": "pmid:42239922",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Artificial Intelligence in Radiology: Hidden Fragilities and the Path to Resilience",
+   "source": {
+    "id": "pmid:42239922",
+    "title": "Artificial Intelligence in Radiology: Hidden Fragilities and the Path to Resilience.",
+    "publisher": "Saudi medical journal",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42239922/",
+    "excerpt": "This review introduces frameworks including risk assessment matrices, compliance guides, procurement checklists, evidence standards, lifecycle calculators, and implementation protocols to enable sustainable, patient centered, value driven integration."
+   },
+   "createdAt": "2026-11-17T12:18:15.544Z"
+  },
+  {
+   "id": "arxiv:2611.21598",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Mitigating Catastrophic Forgetting with Physics-Indexed Specialist Memory",
+   "source": {
+    "id": "arxiv:2611.21598",
+    "title": "Mitigating Catastrophic Forgetting with Physics-Indexed Specialist Memory: the Evolutionary Neuroplastic Agent",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.21598",
+    "excerpt": "The evidence concerns the complete architecture and does not isolate gradient-free optimization as the cause of retention or establish superiority over other continual-learning methods."
+   },
+   "createdAt": "2026-11-17T12:18:15.544Z"
+  },
+  {
+   "id": "pmid:42938267",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Generative Artificial Intelligence Models in Breast Cancer Diagnosis: A Systematic Review",
+   "source": {
+    "id": "pmid:42938267",
+    "title": "Generative Artificial Intelligence Models in Breast Cancer Diagnosis: A Systematic Review.",
+    "publisher": "Diagnostics (Basel, Switzerland)",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42938267/",
+    "excerpt": "This review provides valuable insights into current practices, identifies existing gaps, and highlights areas for future research, aiming to improve the reliability and applicability of AI-based diagnosis in clinical settings."
+   },
+   "createdAt": "2026-11-17T12:18:15.544Z"
+  },
+  {
+   "id": "pmid:42993795",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Nurses' Attitudes and Experiences With Generative AI in Clinical Practice",
+   "source": {
+    "id": "pmid:42993795",
+    "title": "Nurses' Attitudes and Experiences With Generative AI in Clinical Practice: Qualitative Systematic Review.",
+    "publisher": "Journal of medical Internet research",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42993795/",
+    "excerpt": "Nurses' engagement with GenAI ranges from passive observation to proactive integration, accompanied by legitimate concerns about functional reliability, professional role displacement, and accountability ambiguity. The moderating role of organizational readiness further highlights that training, tool optimization, and institutional governance remain critical yet often unmet."
+   },
+   "createdAt": "2026-11-17T12:18:15.544Z"
+  },
+  {
+   "id": "arxiv:2611.21579",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "ScenarioForge: Resource-Grounded Generation and Execution Validation of Cyber Exercises",
+   "source": {
+    "id": "arxiv:2611.21579",
+    "title": "ScenarioForge: Resource-Grounded Generation and Execution Validation of Cyber Exercises",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.21579",
+    "excerpt": "The artifacts support operationally rich, reproducible exercises for training and evaluation."
+   },
+   "createdAt": "2026-11-17T12:18:15.544Z"
+  },
+  {
+   "id": "pmid:41622914",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Outcome of ankle fractures in children: an updated systematic review and meta-analysis",
+   "source": {
+    "id": "pmid:41622914",
+    "title": "Outcome of ankle fractures in children: an updated systematic review and meta-analysis.",
+    "publisher": "Annals of the Royal College of Surgeons of England",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/41622914/",
+    "excerpt": "Removable boots or braces offer a favourable alternative to cast immobilisation for low-risk paediatric ankle fractures. However, the necessity of rigid over soft immobilisation remains uncertain. A definitive RCT based on a core outcome set and cost-effective analyses is required to inform treatment recommendations."
+   },
+   "createdAt": "2026-11-17T12:18:15.544Z"
+  },
+  {
+   "id": "pmid:42791848",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Artificial Intelligence-Driven Reproductive Bioengineering",
+   "source": {
+    "id": "pmid:42791848",
+    "title": "Artificial Intelligence-Driven Reproductive Bioengineering: Integrating Fertility Diagnostics, Organ-on-Chip Systems, Cryobiology and Epigenetic Safety for Precision Reproductive Medicine.",
+    "publisher": "Bioengineering (Basel, Switzerland)",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42791848/",
+    "excerpt": "Overcoming persistent challenges in biological complexity, data interoperability, and multicenter clinical validation will lead to the establishment of safe, scalable, and ethically governed healthcare infrastructures capable of protecting developmental integrity."
+   },
+   "createdAt": "2026-11-17T12:18:15.544Z"
+  },
+  {
+   "id": "arxiv:2611.21577",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "When Tool Names Are Not Identities: Measuring Provider Misbinding in MCP-Based AI Agents",
+   "source": {
+    "id": "arxiv:2611.21577",
+    "title": "When Tool Names Are Not Identities: Measuring Provider Misbinding in MCP-Based AI Agents",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.21577",
+    "excerpt": "Different models expose the same provider-binding weakness differently, including attacker-controlled provider selection, clarification requests, and unstable or inconsistent provider resolution."
+   },
+   "createdAt": "2026-11-17T12:18:15.544Z"
+  },
+  {
+   "id": "pmid:42501370",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "First global synthesis of heat-related mental health impacts in children and young people",
+   "source": {
+    "id": "pmid:42501370",
+    "title": "First global synthesis of heat-related mental health impacts in children and young people: a systematic review and meta-analysis.",
+    "publisher": "International journal of epidemiology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42501370/",
+    "excerpt": "High temperatures and heatwaves were associated with adverse mental health risks in children and young people. Data were lacking for some of the hottest and most socio-economically disadvantaged regions globally."
+   },
+   "createdAt": "2026-11-17T12:18:15.544Z"
+  },
+  {
+   "id": "pmid:42369145",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Generative artificial intelligence in public health",
+   "source": {
+    "id": "pmid:42369145",
+    "title": "Generative artificial intelligence in public health: a framework for governance and systemic integration.",
+    "publisher": "Frontiers in medicine",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42369145/",
+    "excerpt": "We subsequently propose a three-layer governance framework to navigate these issues, emphasizing that trustworthy AI ecosystems require more than technical excellence; they demand institutional foresight, inclusive governance, and a steadfast commitment to equitable, human-centered health futures."
+   },
+   "createdAt": "2026-11-17T12:18:15.544Z"
+  },
+  {
+   "id": "arxiv:2611.21562",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Severe but Harmless: Stress-Testing Shift Severity for Frozen Time-Series Forecasters",
+   "source": {
+    "id": "arxiv:2611.21562",
+    "title": "Severe but Harmless: Stress-Testing Shift Severity for Frozen Time-Series Forecasters",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.21562",
+    "excerpt": "We provide an equivariance-based stress-testing analysis that explains why severity readings can become decoupled from model degradation."
+   },
+   "createdAt": "2026-11-17T12:18:15.544Z"
+  },
+  {
+   "id": "pmid:42907936",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "ACR lung-RADS: updates and future directions",
+   "source": {
+    "id": "pmid:42907936",
+    "title": "ACR lung-RADS: updates and future directions.",
+    "publisher": "Cancer imaging : the official publication of the International Cancer Imaging Society",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42907936/",
+    "excerpt": "Continued refinement, guided by emerging evidence, multidisciplinary collaboration, and technological innovation, will be critical to advancing precision screening strategies and reducing the global burden of lung cancer.Clinical trial numberNot applicable."
+   },
+   "createdAt": "2026-11-17T12:18:15.544Z"
+  },
+  {
+   "id": "quran:3:78",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Und wahrlich, eine Gruppe von ihnen verdreht mit seinen Zungen die Schrift …",
+   "source": {
+    "id": "quran:3:78",
+    "title": "Sure Ali 'Imran, 3:78",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/3/78",
+    "excerpt": "وإنَّ مِن اليهود لَجماعةً يحرفون الكلام عن مواضعه، ويبدلون كلام الله; ليوهموا غيرهم أن هذا من الكلام المنزل، وهو التوراة، وما هو منها في شيء، ويقولون: هذا من عند الله أوحاه الله إلى نبيه موسى، وما هو من عند الله، وهم لأجل دنياهم يقولون على الله الكذب وهم يعلمون أنهم كاذبون."
+   },
+   "createdAt": "2026-11-17T12:18:15.544Z",
+   "arabic": "وَإِنَّ مِنْهُمْ لَفَرِيقًا يَلْوُۥنَ أَلْسِنَتَهُم بِٱلْكِتَـٰبِ لِتَحْسَبُوهُ مِنَ ٱلْكِتَـٰبِ وَمَا هُوَ مِنَ ٱلْكِتَـٰبِ وَيَقُولُونَ هُوَ مِنْ عِندِ ٱللَّهِ وَمَا هُوَ مِنْ عِندِ ٱللَّهِ وَيَقُولُونَ عَلَى ٱللَّهِ ٱلْكَذِبَ وَهُمْ يَعْلَمُونَ",
+   "translation": "Und wahrlich, eine Gruppe von ihnen verdreht mit seinen Zungen die Schrift, damit ihr es für zur Schrift gehörig haltet, während es nicht zur Schrift gehört. Und sie sagen: „Es ist von Allah, während es nicht von Allah ist. Und sie sprechen (damit) wissentlich eine Lüge gegen Allah aus.",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?",
+   "body": "The Jews Alter Allah's Words: Allah states that some Jews, may Allah's curses descend on them, distort Allah's Words with their tongues, change them from their appropriate places, and alter their intended meanings."
+  },
+  {
+   "id": "quran:3:79",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Es steht einem menschlichen Wesen nicht zu, daß ihm Allah die Schrift …",
+   "source": {
+    "id": "quran:3:79",
+    "title": "Sure Ali 'Imran, 3:79",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/3/79",
+    "excerpt": "ما ينبغي لأحد من البشر أن يُنزِّل الله عليه كتابه ويجعله حكمًا بين خلقه ويختاره نبياً، ثم يقول للناس: اعبدوني من دون الله، ولكن يقول: كونوا حكماء فقهاء علماء بما كنتم تُعَلِّمونه غيركم من وحي الله تعالى، وبما تدرسونه منه حفظًا وعلمًا وفقهًا."
+   },
+   "createdAt": "2026-11-17T12:18:15.544Z",
+   "arabic": "مَا كَانَ لِبَشَرٍ أَن يُؤْتِيَهُ ٱللَّهُ ٱلْكِتَـٰبَ وَٱلْحُكْمَ وَٱلنُّبُوَّةَ ثُمَّ يَقُولَ لِلنَّاسِ كُونُوا۟ عِبَادًا لِّى مِن دُونِ ٱللَّهِ وَلَـٰكِن كُونُوا۟ رَبَّـٰنِيِّـۧنَ بِمَا كُنتُمْ تُعَلِّمُونَ ٱلْكِتَـٰبَ وَبِمَا كُنتُمْ تَدْرُسُونَ",
+   "translation": "Es steht einem menschlichen Wesen nicht zu, daß ihm Allah die Schrift, das Urteil und das Prophetentum gibt, und er hierauf zu den Menschen sagt: „Seid Diener von mir anstatt Allahs!, sondern: „Seid Leute des Herrn, da ihr das Buch zu lehren und da ihr (es) zu erlernen pflegtet.",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?"
   }
  ]
 }
