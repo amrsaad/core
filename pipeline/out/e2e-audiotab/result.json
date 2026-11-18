@@ -1,5 +1,5 @@
 {
- "at": "2026-11-18T05:31:12.570Z",
+ "at": "2026-11-18T06:25:51.028Z",
  "runs": [
   {
    "browser": "webkit",
@@ -105,7 +105,7 @@
      ],
      "n": 40
     },
-    "rfSwipeMs": 428,
+    "rfSwipeMs": 406,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -147,76 +147,76 @@
     "tempoWaiting": 0,
     "tempoPaused": 10,
     "cue": {
-     "worst": 1,
-     "n": 622,
+     "worst": 0,
+     "n": 623,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.41",
-       35,
-       35
+       "3.35",
+       34,
+       34
       ],
       [
-       "4.70",
+       "4.64",
        47,
        47
       ],
       [
-       "5.98",
+       "5.92",
        60,
        60
       ],
       [
-       "7.27",
+       "7.21",
        73,
        73
       ],
       [
-       "8.56",
-       86,
-       86
+       "8.50",
+       85,
+       85
       ],
       [
-       "9.84",
-       99,
-       99
+       "9.78",
+       98,
+       98
       ],
       [
-       "11.13",
-       112,
-       112
+       "11.07",
+       111,
+       111
       ],
       [
-       "12.42",
-       125,
-       125
+       "12.35",
+       124,
+       124
       ],
       [
-       "13.70",
-       138,
-       138
+       "13.64",
+       137,
+       137
       ],
       [
-       "14.99",
+       "14.93",
        150,
        150
       ],
       [
-       "16.27",
+       "16.21",
        163,
        163
       ],
       [
-       "17.56",
-       176,
-       176
+       "17.50",
+       175,
+       175
       ]
      ],
      "rate": 2
     },
     "cueTempo": {
-     "worst": 1,
+     "worst": 0,
      "n": 546,
      "rates": [
       1,
@@ -229,7 +229,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805074
+       "dueAt": 1792756805043
       }
      ],
      "idx": 6,
@@ -359,7 +359,7 @@
     "openCardBackOnReturn": true
    },
    "notes": {
-    "iosTapMs": 2,
+    "iosTapMs": 1,
     "iosGestureLines": [
      "deck: gesture pointerdown unlocked 6/6"
     ],
@@ -375,7 +375,7 @@
      ],
      "n": 38
     },
-    "rfSwipeMs": 504,
+    "rfSwipeMs": 508,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -415,7 +415,7 @@
      "bg: next atshort2:0"
     ],
     "tempoWaiting": 0,
-    "tempoPaused": 7,
+    "tempoPaused": 1,
     "cue": {
      "worst": 0,
      "n": 601,
@@ -423,12 +423,12 @@
      "shownNow": 0,
      "gaps": [
       [
-       "3.41",
+       "3.42",
        35,
        35
       ],
       [
-       "4.74",
+       "4.75",
        48,
        48
       ],
@@ -438,47 +438,47 @@
        61
       ],
       [
-       "7.41",
+       "7.42",
        75,
        75
       ],
       [
-       "8.74",
+       "8.75",
        88,
        88
       ],
       [
-       "10.07",
+       "10.08",
        101,
        101
       ],
       [
-       "11.41",
+       "11.42",
        115,
        115
       ],
       [
-       "12.74",
+       "12.75",
        128,
        128
       ],
       [
-       "14.07",
+       "14.08",
        141,
        141
       ],
       [
-       "15.41",
+       "15.42",
        155,
        155
       ],
       [
-       "16.74",
+       "16.75",
        168,
        168
       ],
       [
-       "18.07",
+       "18.08",
        181,
        181
       ]
@@ -499,7 +499,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804925
+       "dueAt": 1792756804927
       }
      ],
      "idx": 6,
@@ -586,7 +586,7 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "firstSoundMs": 2702,
+    "firstSoundMs": 2688,
     "diag": [
      "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
      "deck: src net pod-0006",
@@ -625,7 +625,7 @@
      "want": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
      "id": "pod-0013:82"
     },
-    "lockNextMs": 22,
+    "lockNextMs": 13,
     "lockNextLines": [
      "deck: swap pod-0013 ready=true pool=1",
      "deck play#3 swap rs=4 muted=false t=82.0",
