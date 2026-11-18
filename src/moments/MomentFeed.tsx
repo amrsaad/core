@@ -3838,7 +3838,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const statusKind = statusOf({ offline: !online, syncError, loading: loading || (deckWait && form === 'audio'), nextReady: nextReady && form === 'video', background: bgShown && form === 'audio', muted: hint && form !== 'text' });
   const m = queue.current[idx];
   shownId.current = m?.id ?? '';
-  const recallEl = recall ? <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} read={recall.read} rng={rng.current!} onAnswer={answerRecall} onClose={closeRecall} onSkip={skipRecallCard} onDiag={(line) => diag.current.push(line)} keys={!!desk} ctl={recallCtl} origin={form !== 'text'} /> : null;
+  const recallEl = recall ? <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} read={recall.read} rng={rng.current!} onAnswer={answerRecall} onClose={closeRecall} onSkip={skipRecallCard} onDiag={(line) => diag.current.push(line)} keys={!!desk} ctl={recallCtl} origin={!!desk && form !== 'text'} /> : null;
   const saved = m && !!state.savedMoments[m.id];
   const liked = !!m && !!state.momentLiked?.[m.id];
   const captionsOn = !!m && form !== 'text' && captionsShown(form === 'audio' ? 'on' : state.settings.captionMode, m);
@@ -4113,9 +4113,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         </svg>
       )}
 
-      {recall && !desk && form !== 'text' && recallEl}
-      {recall && !desk && form === 'text' && (() => {
-        // Ergänzung 35 (Issue 42): im Text-Reiter ist die Abrufkarte ein eigener Vollbild-Moment, nie ein Overlay über dem Lesetext.
+      {recall && !desk && (() => {
+        // Ergänzung 35 (Issue 42), Runde 24: in allen drei Reitern (Text, Video, Audio) ist die Abrufkarte ein eigener Vollbild-Moment unter der Reiterleiste, nie ein Overlay über dem Lesetext oder dem Bild.
         // Oben Hook und Quelle des Ursprungs-Moments als Bezug, darunter Frage und Antworten. Vor der Antwort schließt nur "Skip", nach der Antwort "Next" oder ein Wisch nach oben auf der Karte.
         const src = sourceLine(recall.m);
         const peek = formOf(recall.m) === 'text' ? cleanText(momentText(recall.m)) : '';

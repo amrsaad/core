@@ -1,7 +1,7 @@
 // Issue 11: ein dauerhaftes Audio-Element, Quellwechsel und play() synchron im Ende-Handler.
 // Der Nachbau des Elements verhält sich wie ein Browser: load() setzt die Position zurück, Ereignisse kommen nur durch emit.
 import { describe, expect, it, vi } from 'vitest';
-import { AudioDeck, POOL, withStart, type DeckClip, type DeckEl, type DeckSink } from '../src/video/audioDeck';
+import { AudioDeck, POOL, type DeckClip, type DeckEl, type DeckSink } from '../src/video/audioDeck';
 
 class FakeEl implements DeckEl {
   src = '';
@@ -78,13 +78,6 @@ function setup(opts: { hidden?: boolean; local?: Record<string, { url: string; o
   return { deck, el, sink, states, lines, made: () => made, setHidden: (h: boolean) => (hidden = h) };
 }
 
-describe('withStart', () => {
-  it('hängt den Start als Medienfragment an, nur bei Netzquellen ohne Fragment', () => {
-    expect(withStart('https://a.test/x.mp3', 120)).toBe('https://a.test/x.mp3#t=120');
-    expect(withStart('https://a.test/x.mp3', 0)).toBe('https://a.test/x.mp3');
-    expect(withStart('https://a.test/x.mp3#t=5', 120)).toBe('https://a.test/x.mp3#t=5');
-  });
-});
 
 
 // Brief 14, Entscheidung 52: ein Vorrat aus fünf Elementen hält die nächsten fünf Ausschnitte fertig, Weiter tauscht nur die Rollen.

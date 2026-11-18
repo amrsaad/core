@@ -105,19 +105,31 @@ const clearScroll = (root: HTMLElement) => {
  */
 export function fitRoot(root: HTMLElement, from = 0, answered = false): number {
   clearScroll(root);
-  const needed: number[] = [];
-  const rooms: number[] = [];
-  for (let lv = 0; lv < fitLevels(answered); lv++) {
-    root.dataset.fit = String(lv);
-    const m = measure(root);
-    needed.push(m.needed);
-    rooms.push(m.room);
+  // Runde 24: der Block aus Frage und Antworten sitzt unten (margin-top: auto), gemessen wird der Bedarf ohne diese Verteilung (CSS: data-measuring)
+  root.setAttribute('data-measuring', '');
+  root.removeAttribute('data-noghost');
+  const pass = () => {
+    const needed: number[] = [];
+    const rooms: number[] = [];
+    for (let lv = 0; lv < fitLevels(answered); lv++) {
+      root.dataset.fit = String(lv);
+      const m = measure(root);
+      needed.push(m.needed);
+      rooms.push(m.room);
+    }
+    const level = pickRecallFit(needed, rooms, from);
+    root.dataset.fit = String(level);
+    return { level, over: fitOverflow(needed, rooms, level) };
+  };
+  let { level, over } = pass();
+  // Runde 24: der Platzhalter für die Erklärung (RecallCard, vor der Antwort) hält Raum frei, damit die Antworten danach nicht springen. Passt er auch auf der letzten Stufe
+  // nicht mehr, entfällt er: dann wächst der Block nach der Antwort nach oben, statt dass die Frage scrollt.
+  if (over > 0.5 && root.querySelector('.recall-ghost')) {
+    root.setAttribute('data-noghost', '');
+    ({ level, over } = pass());
   }
-  const level = pickRecallFit(needed, rooms, from);
-  root.dataset.fit = String(level);
-  const over = fitOverflow(needed, rooms, level);
   if (over > 0.5) {
-    const el = root.querySelector<HTMLElement>('.recall-why') ?? root.querySelector<HTMLElement>('.recall-q');
+    const el = root.querySelector<HTMLElement>('.recall-why:not(.recall-ghost)') ?? root.querySelector<HTMLElement>('.recall-q');
     if (el) {
       el.style.maxHeight = `${Math.max(44, Math.floor(el.getBoundingClientRect().height - over))}px`;
       el.style.overflowY = 'auto';
@@ -125,6 +137,7 @@ export function fitRoot(root: HTMLElement, from = 0, answered = false): number {
     }
   }
   trimHooks(root);
+  root.removeAttribute('data-measuring');
   return level;
 }
 
@@ -137,6 +150,7 @@ export interface RecallCtl {
  * Abrufkarte: Cover, Sprecher und Bereich, darunter die Frage, darunter die drei Antworten in zufälliger Reihenfolge.
  * Erst nach dem Tipp: richtige Antwort grün, falsch gewählte rot, dann recall.why und "Next".
  * Die Wertung zählt beim Tipp. Arabisch läuft rechtsläufig.
+ * Runde 24: in allen drei Reitern steht die Karte auf der vollen Seite unter der Reiterleiste (Bezug oben, Block aus Frage und Antworten unten in der Daumenzone).
  * Runde 23: Die Karte passt sich der sichtbaren Höhe in Stufen an (recallfit.ts, data-fit), nichts scrollt. Vor der Antwort wechselt sie nie durch einen Wisch:
  * weiter geht es über "Skip" (ohne Wertung) oder nach der Antwort über "Next" oder einen Wisch nach oben.
  */
@@ -235,12 +249,15 @@ export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, on
           return (
             <button key={i} className={`recall-option ${state}`} data-testid="recall-option" data-correct={i === r.correct ? '1' : '0'} data-state={state} disabled={chosen !== null && state === 'rest' ? true : undefined} aria-pressed={chosen === i} onClick={() => pick(i)}>
               <span>{r.options[i]}</span>
-              {state === 'right' && <Icon name="check" size="var(--icon-sm)" />}
+              {/* Runde 24: jede Option hält den Platz des Hakens frei, damit der Text nach der Antwort nicht anders umbricht und die Antworten nicht springen */}
+              {state === 'right' ? <Icon name="check" size="var(--icon-sm)" /> : !keys && <span className="recall-tick" aria-hidden="true" />}
               {keys && <kbd className="recall-key" aria-hidden="true">{shown + 1}</kbd>}
             </button>
           );
         })}
       </div>
+      {/* Runde 24: vor der Antwort hält ein unsichtbarer Platzhalter mit derselben Erklärung den Raum frei, damit die Antworten danach nicht springen */}
+      {chosen === null && !keys && <p className="recall-why recall-ghost" aria-hidden="true">{r.why}</p>}
       {chosen === null && !keys && onSkip && (
         <button type="button" className="recall-skip" data-testid="recall-skip" lang="en" onClick={onSkip}>
           Skip

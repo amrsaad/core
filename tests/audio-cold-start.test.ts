@@ -105,11 +105,11 @@ describe('Kaltstart mit spätem Startpunkt (Issue 58, Ziel 4)', () => {
     expect(lines.filter((l) => /^deck play#\d+ start/.test(l))).toHaveLength(1);
     expect(lines.filter((l) => /^deck play skipped/.test(l))).toHaveLength(1);
   });
-  it('Netzquelle mit Fragment: kein Sprung vor den Metadaten, der Sprung kommt, sobald das Element Metadaten hat', () => {
+  it('Netzquelle ohne Fragment (Runde 24): kein Sprung vor den Metadaten, der Sprung kommt, sobald das Element Metadaten hat', () => {
     const { deck, sink, els } = setup();
     deck.load(clip, sink, { play: true, muted: false });
     const el = deck.element as Cold;
-    expect(el.src.endsWith('#t=1819.22')).toBe(true);
+    expect(el.src).not.toContain('#');
     expect(el.sets).toEqual([]);
     el.readyState = 1;
     el.emit('loadedmetadata');

@@ -430,11 +430,16 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
   overflow: hidden;
 }
 .vrecall-page > * { flex: none; }
+/* Runde 24: Video und Audio liegen auf dunkler Bühne (Text-Token dort hell, --bg des hellen Geräts nicht), die Seite deckt das Bild mit der Bühne ab */
+.vfeed:not([data-surface='page']) .vrecall-page { background: var(--stage); }
 .vrecall-origin { display: flex; flex-direction: column; max-width: var(--desk-read); width: 100%; margin-inline: auto; }
 /* Hook: höchstens --rc-hook-lines Zeilen. Die Auslassung setzt RecallCard am Wortende (trimHooks), die Klammer hier ist nur das Netz darunter. */
 .vrecall-origin .vtext-hook { margin-bottom: var(--s-2); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--rc-hook-lines); line-clamp: var(--rc-hook-lines); overflow: hidden; }
 .vrecall-origin .vtext-source { min-height: 0; }
-.vrecall-page .recall { position: relative; inset: auto; top: auto; bottom: auto; left: auto; right: auto; flex: none; min-height: 0; width: 100%; animation: none; margin-top: 0; overflow: visible; }
+/* Runde 24: Bezug (Kennzeichnung, Hook, Quelle) steht oben, der Block aus Frage, Antworten und "Skip" beziehungsweise "Next" sitzt unten in der Daumenzone.
+   Freier Platz liegt zwischen Hook und Frage. Gemessen wird ohne diese Verteilung (data-measuring, siehe fitRoot). */
+.vrecall-page .recall { position: relative; inset: auto; top: auto; bottom: auto; left: auto; right: auto; flex: none; min-height: 0; width: 100%; animation: none; margin-top: auto; overflow: visible; }
+.vrecall-page[data-measuring] .recall { margin-top: 0; }
 /* Kennzeichnung oben und "Show text": eine zusammenhängende Spalte mit Hook und Karte, ohne leere Fläche dazwischen */
 .vrecall-page > .recall-tag, .vrecall-page > .recall-peek { width: 100%; max-width: var(--desk-read); margin-inline: auto; }
 .vrecall-page .vkicker { margin-bottom: var(--s-1); }

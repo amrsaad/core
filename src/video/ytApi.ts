@@ -438,6 +438,10 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     error: () => {
       if (mode === 'hls') events.onError?.(-1);
     },
+    // Runde 24: Schleife aus falschem Ende trotz Neuaufbau: Code 150 gilt im Feed als Inhaltsfehler, der Moment wird übersprungen (Netzfehler -1 überspringt nie)
+    broken: () => {
+      if (mode === 'hls') events.onError?.(150);
+    },
     sound: () => {
       if (mode === 'hls' && deckMode) soundChanged();
     },

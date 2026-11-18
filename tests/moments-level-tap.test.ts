@@ -74,7 +74,7 @@ describe('erste Berührung: laufenden Moment anbinden (relevel)', () => {
     t.plain.currentTime = 31.4;
     t.state.running = true;
     expect(t.deck.relevel()).toBe(true);
-    expect(t.level.src).toBe('https://pod.test/a.mp3#t=31.4');
+    expect(t.level.src).toBe('https://pod.test/a.mp3');
     expect(t.level.calls).toContain('play');
     expect(t.plain.paused).toBe(true);
     expect(t.state.chained).toEqual([6]);
@@ -135,7 +135,7 @@ describe('erste Berührung: laufenden Moment anbinden (relevel)', () => {
     t.state.running = true;
     t.deck.relevel();
     t.level.emit('error');
-    expect(t.plain.src).toBe('https://pod.test/a.mp3#t=42');
+    expect(t.plain.src).toBe('https://pod.test/a.mp3');
     expect(t.deck.loud(t.sink)?.how).toBe('unchanged: skipped cors');
     expect(t.plain.calls.filter((c) => c === 'play').length).toBe(2);
     t.plain.emit('loadedmetadata');
@@ -171,7 +171,7 @@ describe('Kontext wird unterbrochen (iOS, gesperrter Bildschirm)', () => {
     vi.advanceTimersByTime(1400);
     expect(t.plain.calls).not.toContain('play');
     vi.advanceTimersByTime(200);
-    expect(t.plain.src).toBe('https://pod.test/a.mp3#t=55.5');
+    expect(t.plain.src).toBe('https://pod.test/a.mp3');
     expect(t.plain.calls).toContain('play');
     expect(t.level.paused).toBe(true);
     expect(t.deck.loud(t.sink)?.how).toBe('unchanged: context suspended');
@@ -237,7 +237,7 @@ describe('Tempo ungleich 1x: nie Web Audio (Issue 13, Max 30.10.2026)', () => {
     t.level.currentTime = 40;
     t.deck.setRate(2);
     expect(t.lines.some((l) => l.includes('level lane abandoned (tempo)'))).toBe(true);
-    expect(t.plain.src).toBe('https://pod.test/a.mp3#t=40');
+    expect(t.plain.src).toBe('https://pod.test/a.mp3');
     expect(t.plain.calls).toContain('play');
     expect(t.level.paused).toBe(true);
     expect(t.plain.defaultPlaybackRate).toBe(2);

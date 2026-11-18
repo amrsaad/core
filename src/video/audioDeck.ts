@@ -214,6 +214,32 @@ export function recoverStep(o: { n: number; kind: 'ended' | 'frozen'; hidden: bo
   return o.hidden ? 'defer' : 'rebuild';
 }
 
+/** Runde 24: so nah (Sekunden) muss die Position an target liegen, damit sie als bestätigt gilt */
+export const POS_CONFIRM_TOL = 0.5;
+/** Runde 24: so lange (ms) bleibt das Element stumm, bis die Position bestätigt ist, danach ein letzter Sprung und Ton */
+export const POS_CONFIRM_MS = 1500;
+/** Runde 24: Position bestätigt: Metadaten da, kein Seek unterwegs, currentTime mindestens target minus 0,5 und bei target über 2 nicht unter 1 (Sprung auf den Folgenanfang) */
+export function positionConfirmed(o: { t: number; target: number; rs: number; seeking: boolean }): boolean {
+  if (o.rs < 1 || o.seeking || !Number.isFinite(o.t)) return false;
+  if (o.t < o.target - POS_CONFIRM_TOL) return false;
+  return !(o.target > 2 && o.t < 1);
+}
+
+/** Runde 24: höchstens so viele "false ended"-Wiederherstellungen je Moment in diesem Fenster (ms), danach Neuaufbau, danach gestört */
+export const FALSE_ENDED_MAX = 3;
+export const FALSE_ENDED_WINDOW_MS = 5000;
+export type FalseEndedStep = 'recover' | 'rebuild' | 'broken';
+/**
+ * Runde 24 (Geräteprotokoll 18.11.: rund 50 gleiche Zeilen "false ended" bei einem Moment): Schleifensicherung. Zählt die falschen Enden des Moments im Fenster
+ * (dieses eingeschlossen). Bis FALSE_ENDED_MAX: normale Wiederherstellung (recover). Das nächste: Neuaufbau der Quelle (rebuild), der Zähler beginnt neu.
+ * Kommt die Schleife nach dem Neuaufbau wieder über die Grenze: gestört (broken), der Moment wird gemeldet und der Feed geht weiter.
+ */
+export function falseEndedGate(o: { times: readonly number[]; now: number; rebuilt: boolean }): { times: number[]; step: FalseEndedStep } {
+  const times = [...o.times.filter((x) => o.now - x <= FALSE_ENDED_WINDOW_MS), o.now];
+  if (times.length <= FALSE_ENDED_MAX) return { times, step: 'recover' };
+  return { times: o.rebuilt ? times : [], step: o.rebuilt ? 'broken' : 'rebuild' };
+}
+
 /** Runde 18: so lange gilt das Netz nach "pool slow" oder langem Warten auf playing als schwach (ms) */
 export const WEAK_NET_MS = 5 * 60_000;
 /** Runde 18: braucht der aktive Moment so lange bis playing, gilt das Netz als schwach (ms) */
@@ -307,6 +333,8 @@ export interface DeckSink {
   /** Zustand des Elements, solange dieser Player es besitzt */
   state(st: number): void;
   error(): void;
+  /** Runde 24: der Moment ist gestört (Schleife aus falschem Ende trotz Neuaufbau): der Feed geht zum nächsten. Fehlt es, gilt error(). */
+  broken?(): void;
   /** Ton oder Wiedergabe des Elements hat sich geändert (volumechange, playing, pause, abgelehntes play): Hinweis neu lesen */
   sound?(): void;
   /** Messung am Element für die Untertitel (Issue 15): Quellzeit, Tempo, Ton läuft. Bei Quell- und Spurwechsel bleibt die Zeit stehen (playing false). */
@@ -396,8 +424,6 @@ const hostOf = (url: string): string => {
     return 'unknown';
   }
 };
-
-export const withStart = (url: string, start: number): string => (start > 0 && !url.includes('#') ? `${url}#t=${start}` : url);
 
 export class AudioDeck {
   /** Das aktive Element. Je Spur gibt es höchstens POOL + 1 (aktiv und die des Vorrats), alle bleiben im DOM und werden nie ersetzt. */
@@ -520,6 +546,12 @@ export class AudioDeck {
   private rebuilding = false;
   /** Runde 22: Korrekturen der Position vor dem Schnittbeginn je Ausschnitt */
   private posFix = { key: '', n: 0 };
+  /** Runde 24: Schleifensicherung gegen wiederholtes falsches Ende (siehe falseEndedGate) */
+  private fe = { key: '', times: [] as number[], rebuilt: false, dead: false };
+  /** Runde 24: stumm bis die Position bestätigt ist (real: der Ton-Zustand, den Host und Entsperrung wollen) */
+  private posHold: { el: DeckEl; key: string; id: string; target: number; real: boolean; t0: number; tick: ReturnType<typeof setInterval>; stop: ReturnType<typeof setTimeout> } | null = null;
+  /** Runde 24: für diesen Ausschnitt steht die Zeile "pos set" schon */
+  private posLineKey = '';
   /** Runde 22: Metadaten da und Startsprung gesetzt, erst dann prüft der Positionswächter */
   private armed = false;
   private okFor: DeckClip | null = null;
@@ -682,7 +714,7 @@ export class AudioDeck {
     if (this.deferNoted && !starved) this.refillDeferred();
     this.onMedia?.('playing');
     this.loading(starved);
-    this.snd = reduceSound(this.snd, 'playing', el);
+    this.snd = reduceSound(this.snd, 'playing', this.soundView(el));
     this.sink?.state(starved ? BUFFERING : PLAYING);
     this.sink?.sound?.();
     this.tick(el);
@@ -702,7 +734,10 @@ export class AudioDeck {
     const mine = () => el === this.el;
     const entry = () => this.entryOf(el);
     el.addEventListener('playing', () => {
-      if (mine()) this.playingNow(el);
+      if (mine()) {
+        this.checkPosHold();
+        this.playingNow(el);
+      }
     });
     el.addEventListener('waiting', () => {
       if (!mine()) return;
@@ -728,7 +763,7 @@ export class AudioDeck {
       if (mine()) this.note(`pause event by=${by ?? (el.ended ? 'media end' : 'system')} hidden=${this.hidden()} done=${this.done} ${this.stateText(el)}`);
       if (!mine()) return;
       this.samp = null;
-      this.snd = reduceSound(this.snd, 'pause', el);
+      this.snd = reduceSound(this.snd, 'pause', this.soundView(el));
       this.sink?.sound?.();
       this.tick(el);
       // Ein Pause-Ereignis, das einem Quellwechsel vorausging, ist veraltet: das Element spielt schon wieder
@@ -745,7 +780,12 @@ export class AudioDeck {
     });
     el.addEventListener('volumechange', () => {
       if (!mine()) return;
-      this.snd = reduceSound(this.snd, 'volumechange', el);
+      // Runde 24: entstummt der Host das Element, während die Position noch nicht bestätigt ist (ytApi.unMute schreibt auf alle Elemente), gilt das als Wunsch für die Zeit danach
+      if (this.posHold?.el === el && !el.muted) {
+        this.posHold.real = false;
+        el.muted = true;
+      }
+      this.snd = reduceSound(this.snd, 'volumechange', this.soundView(el));
       this.sink?.sound?.();
     });
     // Ein ended ohne vorheriges playing dieses Ausschnitts stammt vom vorigen Inhalt (zum Beispiel der Stille der Freischaltung) und zählt nicht
@@ -757,6 +797,7 @@ export class AudioDeck {
       else if (mine()) this.earlyEnded(el);
     });
     el.addEventListener('timeupdate', () => {
+      if (mine()) this.checkPosHold();
       if (mine() && this.guardPos(el)) return;
       if (mine()) this.tick(el);
       const c = this.clip;
@@ -784,6 +825,8 @@ export class AudioDeck {
       this.trialFailed = null;
       this.seek(true);
       this.armed = true;
+      this.posSetLine(el);
+      this.checkPosHold();
       this.onMedia?.('loadedmetadata');
     });
     // Zweiter Anstoß, wenn Daten da sind und das erste play() nichts bewirkt hat (iOS verwirft play() vor den Metadaten manchmal still)
@@ -794,7 +837,10 @@ export class AudioDeck {
       this.checkEntry(e);
     });
     el.addEventListener('seeked', () => {
-      if (mine()) this.samp = null;
+      if (mine()) {
+        this.samp = null;
+        this.checkPosHold();
+      }
       const e = entry();
       if (e) this.checkEntry(e);
     });
@@ -847,6 +893,103 @@ export class AudioDeck {
     }
     if (!this.rebuilding && (fresh || this.posFix.key !== key)) this.posFix = { key, n: 0 };
     if (!this.rebuilding && (fresh || this.recov.key !== key)) this.recov = { key, n: 0, at: 0, pending: false, gaveUp: false };
+    if (!this.rebuilding && (fresh || this.fe.key !== key)) this.fe = { key, times: [], rebuilt: false, dead: false };
+    this.posLineKey = '';
+  }
+
+  // ---- Runde 24: Position ohne Medienfragment, stumm bis bestätigt ----
+
+  /** Ton-Zustand, den Host und Entsperrung wollen: während der Stummhaltung der gemerkte, sonst der des Elements */
+  private realMuted(el: DeckEl): boolean {
+    return this.posHold?.el === el ? this.posHold.real : el.muted;
+  }
+
+  /** Das Element für Hinweis "Ton aus": die Stummhaltung bis zur Bestätigung zählt nicht */
+  private soundView(el: DeckEl) {
+    return { muted: this.realMuted(el), volume: el.volume, paused: el.paused };
+  }
+
+  /** Ton setzen (Host: load, setMuted). Während der Stummhaltung nur merken, gilt ab Bestätigung. */
+  private applyMuted(el: DeckEl, m: boolean) {
+    if (this.posHold?.el === el) {
+      this.posHold.real = m;
+      this.snd = reduceSound(this.snd, 'volumechange', this.soundView(el));
+      this.sink?.sound?.();
+      return;
+    }
+    el.muted = m;
+  }
+
+  /**
+   * Netzquellen tragen kein Medienfragment (#t=) mehr: iOS meldete damit duration gleich Startstelle und dann ended. Die Position setzt currentTime nach loadedmetadata.
+   * Damit vom Folgenanfang nie Ton zu hören ist, bleibt das Element stumm, bis currentTime an der Startstelle steht (höchstens POS_CONFIRM_MS, dann ein letzter Sprung).
+   * Nicht für lokale Quellen (nie ein Fragment) und nicht verdeckt (iOS verweigert dort das Entstummen ohne Geste vermutlich: lieber Ton als Stille).
+   */
+  private beginPosHold(el: DeckEl, c: DeckClip) {
+    this.releaseHold();
+    if (this.isLocal || this.target <= 0 || this.hidden()) return;
+    const key = c.key;
+    // Steht die Position schon (Eintrag des Vorrats an der Startstelle): nicht stumm schalten, kein Ton geht verloren
+    if (positionConfirmed({ t: el.currentTime, target: this.target, rs: el.readyState, seeking: !!el.seeking })) {
+      this.posSetLine(el);
+      this.diag(`deck: pos confirmed ${c.id} t=${el.currentTime.toFixed(1)} after 0 ms, unmute`);
+      return;
+    }
+    const tick = setInterval(() => this.checkPosHold(), 100);
+    const stop = setTimeout(() => this.posTimeout(), POS_CONFIRM_MS);
+    this.posHold = { el, key, id: c.id, target: this.target, real: el.muted, t0: Date.now(), tick, stop };
+    el.muted = true;
+  }
+
+  /** Zeile "pos set", einmal je Ausschnitt, sobald die Position wirklich gesetzt ist (Metadaten da). Nur Netzquellen (lokale hatten nie ein Fragment). */
+  private posSetLine(el: DeckEl) {
+    const c = this.clip;
+    if (!c || el !== this.el || this.isLocal || this.posLineKey === c.key) return;
+    this.posLineKey = c.key;
+    const d = Number.isFinite(el.duration) ? el.duration.toFixed(1) : String(el.duration);
+    this.diag(`deck: pos set ${c.id} target=${this.target.toFixed(1)} dur=${d} t=${el.currentTime.toFixed(1)} frag=none`);
+  }
+
+  private checkPosHold() {
+    const h = this.posHold;
+    if (!h) return;
+    const el = h.el;
+    if (el !== this.el || this.clip?.key !== h.key || this.done) {
+      this.releaseHold();
+      return;
+    }
+    if (!positionConfirmed({ t: el.currentTime, target: h.target, rs: el.readyState, seeking: !!el.seeking })) return;
+    this.diag(`deck: pos confirmed ${h.id} t=${el.currentTime.toFixed(1)} after ${Date.now() - h.t0} ms, unmute`);
+    this.releaseHold();
+  }
+
+  private posTimeout() {
+    const h = this.posHold;
+    if (!h) return;
+    const el = h.el;
+    if (el === this.el && this.clip?.key === h.key && !this.done) {
+      this.diag(`deck: pos unconfirmed ${h.id} t=${el.currentTime.toFixed(1)} target=${h.target.toFixed(1)} after ${POS_CONFIRM_MS} ms`);
+      try {
+        el.currentTime = h.target;
+      } catch {
+        /* iOS lehnt die Position ab */
+      }
+    }
+    this.releaseHold();
+  }
+
+  /** Stummhaltung beenden: Ton wie gemerkt (Host-Wunsch), Zeitgeber weg */
+  private releaseHold() {
+    const h = this.posHold;
+    if (!h) return;
+    clearInterval(h.tick);
+    clearTimeout(h.stop);
+    this.posHold = null;
+    try {
+      if (h.el.muted !== h.real) h.el.muted = h.real;
+    } catch {
+      /* Element weg */
+    }
   }
 
   /** Runde 17: das Ereignis playing blieb aus, das Element ist nicht pausiert und seine Position wächst über mindestens zwei Proben um mehr als ADVANCE_MIN */
@@ -882,6 +1025,27 @@ export class AudioDeck {
     }
     // Die Abfrage wartet nach einer Wiederherstellung, bevor sie dasselbe ended noch einmal wertet
     if (via === 'poll' && Date.now() - this.recov.at < 600) return;
+    // Runde 24: gestört gemeldet oder aufgegeben: still (früher 50 gleiche Zeilen in 10 s)
+    if (this.fe.dead) return;
+    const gate = falseEndedGate({ times: this.fe.times, now: Date.now(), rebuilt: this.fe.rebuilt });
+    this.fe.times = gate.times;
+    if (gate.step === 'rebuild') {
+      this.fe.rebuilt = true;
+      this.diag(`deck: false ended loop ${c.id} (more than ${FALSE_ENDED_MAX} in ${FALSE_ENDED_WINDOW_MS / 1000} s), rebuilding source`);
+      this.rebuildSource(c, Number.isFinite(t) && t > this.target ? t : this.target);
+      return;
+    }
+    if (gate.step === 'broken') {
+      this.fe.dead = true;
+      this.recov.gaveUp = true;
+      this.diag(`deck: moment broken ${c.id} (false ended loop after rebuild), skipping`);
+      this.loading(false);
+      if (this.sink?.broken) this.sink.broken();
+      else this.sink?.error();
+      return;
+    }
+    // Nach dem Aufgeben des weichen Wegs zählen weitere falsche Enden weiter (Schleife), melden aber nichts, bis die nächste Stufe greift
+    if (this.recov.gaveUp) return;
     this.diag(`deck: false ended ${c.id} t=${t.toFixed(1)} dur=${Number.isFinite(dur) ? dur.toFixed(1) : String(dur)} adv=${advanced.toFixed(1)}, recovering`);
     this.recover(el, 'ended', t);
   }
@@ -938,6 +1102,11 @@ export class AudioDeck {
       return;
     }
     this.diag(`deck: rebuilding source ${c.id} from ${(at + this.offset).toFixed(1)}`);
+    this.rebuildSource(c, at);
+  }
+
+  /** Quelle am selben Element neu aufbauen (ohne Fragment), ab at in Elementzeit */
+  private rebuildSource(c: DeckClip, at: number) {
     this.rebuilding = true;
     try {
       this.start(c, this.want, true, Math.max(c.start, at + this.offset), 'recovery');
@@ -1128,6 +1297,7 @@ export class AudioDeck {
       }
     }
     this.holding = null;
+    this.releaseHold();
     this.noteClip(clip.key);
     this.armed = false;
     // Runde 12: der Vorrat hält genau diesen Ausschnitt. Sein Element wird übernommen, auch wenn es noch lädt (es hat schon Bytes an der richtigen Stelle).
@@ -1156,7 +1326,7 @@ export class AudioDeck {
     this.loudInfo = chain ? { db: clip.gain ?? 0, how: 'web audio' } : { db: 0, how: `unchanged: ${why}` };
     if (old && old !== target) {
       // Spurwechsel: das alte Element anhalten und die Quelle freigeben (höchstens 3 Elemente mit Quelle), Ton übernehmen (das Tempo setzt applyRate gleich)
-      target.muted = old.muted;
+      target.muted = this.realMuted(old);
       this.halt(old, 'app: lane switch');
       this.clearSrc(old);
     }
@@ -1178,13 +1348,13 @@ export class AudioDeck {
     this.target = Math.max(0, from - this.offset);
     this.history.push(clip.key);
     if (this.history.length > 200) this.history.shift();
-    this.snd = { muted: isSilent(el), playing: false, refused: false };
+    this.snd = { muted: isSilent(this.soundView(el)), playing: false, refused: false };
     // Untertitel (Issue 15): bei Quell- und Spurwechsel die Zeit übernehmen und halten, bis das Element selbst wieder misst
     this.sink?.time?.(from, el.playbackRate || 1, false);
     // Eine Zeile je Start: kam die Quelle aus dem Offline-Vorrat (Blob) oder aus dem Netz (Issue 14)
     this.diag(`deck: src ${loc ? 'local' : 'net'} ${clip.id}`);
-    const srcUrl = loc?.url ?? withStart(clip.url, from);
-    el.src = srcUrl;
+    // Runde 24: nie ein Medienfragment (#t=), die Position kommt nach loadedmetadata (iOS meldete mit dem Fragment duration gleich Startstelle und ended)
+    el.src = loc?.url ?? clip.url;
     el.load();
     // Netzstart ohne Daten (readyState < 3 nach load() immer): die App zeigt "Loading" bis canplay, nie ein stiller Ausfall
     this.loading(!loc && el.readyState < 3);
@@ -1195,9 +1365,11 @@ export class AudioDeck {
     }
     // load() setzt das Tempo auf den Standard zurück: Standard und aktuelles Tempo gemeinsam setzen
     this.applyRate(el);
-    // Issue 58: ein Netzstart mit Startpunkt trägt ihn schon im Fragment (#t=). Ein Sprung vor den Metadaten ließe den Host zweimal an die späte Stelle suchen,
-    // der Sprung nach loadedmetadata (seek(true)) greift nur, wenn das Element die Stelle nicht angenommen hat.
-    if (!(this.target > 0 && !loc && srcUrl.includes('#t='))) this.seek(false);
+    // Issue 58: ein Netzstart mit Startpunkt springt erst nach loadedmetadata (seek(true)): ein Sprung vor den Metadaten ließe den Host zweimal an die späte Stelle suchen.
+    // Runde 24: ohne Fragment bleibt das Element bis zur bestätigten Position stumm.
+    if (!(this.target > 0 && !loc)) this.seek(false);
+    if (el.readyState >= 1) this.posSetLine(el);
+    this.beginPosHold(el, clip);
     if (play) this.kick('start');
   }
 
@@ -1222,6 +1394,8 @@ export class AudioDeck {
 
   /** Messung für die Untertitel: Quellzeit des Elements (currentTime plus Versatz), Tempo, und ob es gerade Ton liefert */
   private tick(el: DeckEl) {
+    // Runde 24: bis zur bestätigten Position ist die Zeit des Elements die vom Folgenanfang: Untertitel und Sperrbildschirm behalten die Startzeit
+    if (this.posHold?.el === el) return;
     this.sink?.time?.(el.currentTime + this.offset, el.playbackRate || 1, !el.paused && this.live);
     this.position(el);
   }
@@ -1465,7 +1639,8 @@ export class AudioDeck {
     const s: PoolEntry = { clip, el, lane, why, chain, local: !!loc, offset, target, meta: false, cpt: false, ready: false, rsAtReady: 0, thin: false, t0: Date.now() };
     this.entries.push(s);
     this.diag(`deck: pool load ${clip.id} src=${loc ? 'local' : 'net'}`);
-    el.src = loc?.url ?? withStart(clip.url, clip.start);
+    // Runde 24: ohne Medienfragment, die Position setzt currentTime (hier, nach den Metadaten in checkEntry)
+    el.src = loc?.url ?? clip.url;
     el.load();
     // load() setzt das Tempo zurück: Standard und aktuelles Tempo gemeinsam setzen
     this.applyRate(el);
@@ -1661,6 +1836,7 @@ export class AudioDeck {
     const play = via?.play ?? true;
     this.entries = this.entries.filter((x) => x !== s);
     this.depleted = true;
+    this.releaseHold();
     if (old) el.muted = old.muted;
     this.el = el;
     this.lane = s.lane;
@@ -1689,7 +1865,7 @@ export class AudioDeck {
     this.target = from === clip.start ? s.target : Math.max(0, from - s.offset);
     this.history.push(clip.key);
     if (this.history.length > 200) this.history.shift();
-    this.snd = { muted: isSilent(el), playing: false, refused: false };
+    this.snd = { muted: isSilent(this.soundView(el)), playing: false, refused: false };
     // Der alte Player gibt ab (wie beim automatischen Weiter), der neue übernimmt später über load(), das den laufenden Ausschnitt erkennt (holds)
     // Der Sink steht vor dem play(): ein Element meldet "playing" auch synchron, der neue Player soll den Zustand nie verpassen
     if (!via?.keepSink) this.sink = sink;
@@ -1721,6 +1897,9 @@ export class AudioDeck {
     // Runde 20: gar kein Puffer hinter der Stelle: Wächter vor dem play(), damit auch ein sofortiges "playing" nur als Laden erscheint
     const starve = play && !this.aheadOk(el);
     if (starve) this.guard = el;
+    // Runde 24: stumm bis die Position bestätigt ist (Quelle ohne Fragment, aber iOS meldete beim Tausch ein Ende an der Startstelle)
+    if (s.meta || s.ready) this.posSetLine(el);
+    if (play) this.beginPosHold(el, clip);
     if (play) this.kick('swap');
     if (starve) this.showLoading();
     // Das alte Element geht frei in den Vorrat zurück: pausiert, Quelle bleibt bis zur nächsten Befüllung (kein load() verdeckt)
@@ -1741,7 +1920,7 @@ export class AudioDeck {
       return;
     }
     if (name === 'NotAllowedError' && this.el) {
-      this.snd = reduceSound(this.snd, 'refused', this.el);
+      this.snd = reduceSound(this.snd, 'refused', this.soundView(this.el));
       this.sink?.sound?.();
     }
     if (c && this.refusedKey !== c.key) {
@@ -1929,7 +2108,7 @@ export class AudioDeck {
   load(clip: DeckClip, sink: DeckSink, opts: { play: boolean; muted: boolean }) {
     const el = this.element;
     this.sink = sink;
-    el.muted = opts.muted;
+    this.applyMuted(el, opts.muted);
     if (this.holds(clip.key) && el.src) {
       this.want = opts.play;
       if (opts.play) {
@@ -1940,7 +2119,7 @@ export class AudioDeck {
     }
     // Wisch auf einen Moment, den der Vorrat fertig hält: Rollen tauschen statt die Quelle zu wechseln (Brief 11, Schritt 4)
     if (opts.play && this.swapKey(clip.key, sink)) {
-      if (this.el) this.el.muted = opts.muted;
+      if (this.el) this.applyMuted(this.el, opts.muted);
       return;
     }
     this.start(clip, opts.play);
@@ -1969,7 +2148,7 @@ export class AudioDeck {
   }
 
   setMuted(sink: DeckSink, muted: boolean) {
-    if (this.sink === sink && this.el) this.el.muted = muted;
+    if (this.sink === sink && this.el) this.applyMuted(this.el, muted);
   }
 
   /** Tempo gilt für das eine Element, egal welcher Player es setzt */

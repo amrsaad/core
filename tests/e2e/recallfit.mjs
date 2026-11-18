@@ -6,9 +6,13 @@
 //  - ein senkrechter Wisch auf der unbeantworteten Karte wechselt nicht (Diag "recall: swipe blocked", höchstens einmal je Karte), "Skip" schließt ohne Wertung,
 //    nach der Antwort schließt ein Wisch nach oben,
 //  - "Show text" öffnet als Überlagerung, die Optionen bleiben an ihrem Platz.
-// Reiter Text (Seite), Video und Audio (Karte als Sheet über dem Medium). Fälle: normal, sehr lang (Frage und Optionen je 120 Zeichen), arabisch (rechtsläufig).
+// Runde 24: in allen drei Reitern ist die Karte dieselbe volle Seite unter der Reiterleiste (Bezug oben, Block aus Frage und Antworten unten). Zusätzlich je Reiter:
+//  - ab innerHeight 700 und normalem Inhalt ist die Stufe höchstens 1,
+//  - die Unterkante von "Skip" beziehungsweise "Next" liegt höchstens 25 Prozent der Flächenhöhe über dem unteren Rand der Fläche (kein Loch unten),
+//  - nach der Antwort bleiben die Antworten an ihrem Platz (gleiche Stufe, bis Stufe 4).
+// Reiter Text, Video und Audio. Fälle: normal, sehr lang (Frage und Optionen je 120 Zeichen), arabisch (rechtsläufig).
 // Aufruf: node tests/e2e/recallfit.mjs <url> <ausgabeordner>   (vorher npm run build, dann vite preview)
-// Browser: E2E_BROWSERS=chromium oder webkit wählt einen. ONLY=375x553,390x664 beschränkt auf diese Prüfhöhen und Breiten (zum Eintippen). SHOTS=<ordner> legt zusätzlich Screenshots für 390x664 und 375x553 ab.
+// Browser: E2E_BROWSERS=chromium oder webkit wählt einen. ONLY=375x553,390x664 beschränkt auf diese Prüfhöhen und Breiten (zum Eintippen). SHOTS=<ordner> legt zusätzlich Screenshots für 390x664, 390x793 und 375x553 ab (SCALE=2 für deviceScaleFactor 2).
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices, webkit } from 'playwright';
@@ -31,6 +35,8 @@ const HEIGHTS = [
   { h: 635, top: 0, bottom: 0 },
   { h: 553, top: 0, bottom: 0 },
   { h: 664, top: 47, bottom: 34, tag: 'safe' },
+  // Runde 24: Max' iPhone (Audio-Reiter, Diag "recall: shown ... h=793"), Web-App mit Dynamic Island und Home-Balken
+  { h: 793, top: 47, bottom: 34 },
 ];
 const WIDTHS = [390, 375];
 const FORMS = ['text', 'video', 'audio'];
@@ -97,7 +103,16 @@ const probe = (phase) => {
   [...document.querySelectorAll('[data-testid=recall-option]')].forEach((o, i) => add(`option${i}`, o, true));
   add('why', q('[data-testid=recall-why]'), phase === 'done');
   add('next', q('[data-testid=recall-next]'), phase === 'done');
+  // Lesbarkeit: Kontrast von Schrift zu ihrem tatsächlichen Hintergrund (nächster Vorfahr mit deckender Farbe), mindestens 4,5
+  const rgb = (c) => { const m = c.match(/rgba?\(([^)]+)\)/); if (!m) return null; const p = m[1].split(/[ ,\/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p[3] ?? 1 }; };
+  const lum = (c) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
+  const bgOf = (el) => { for (let e = el; e; e = e.parentElement) { const c = rgb(getComputedStyle(e).backgroundColor); if (c && c.a > 0.95) return c; } return { r: 255, g: 255, b: 255, a: 1 }; };
+  const contrast = (el) => { const fg = rgb(getComputedStyle(el).color); const bg = bgOf(el); if (!fg) return 21; const a = lum(fg), b = lum(bg); return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05); };
+  const lowContrast = [];
+  for (const [nm, el] of [['hook', q('[data-recall-hook]')], ['question', q('[data-testid=recall-question]')], ...[...document.querySelectorAll('[data-testid=recall-option]')].filter((o) => o.dataset.state !== 'rest').map((o, i) => [`option${i}`, o]), ['why', q('[data-testid=recall-why]')]]) if (el && vis(el) && contrast(el) < 4.5) lowContrast.push(`${nm} ${contrast(el).toFixed(1)}`);
   const rb = root.getBoundingClientRect();
+  const act = [q('[data-testid=recall-skip]'), q('[data-testid=recall-next]')].find((e) => e && vis(e));
+  const bottomGap = act ? rb.bottom - act.getBoundingClientRect().bottom : null;
   const cs = getComputedStyle(root);
   const inner = { top: rb.top + parseFloat(cs.paddingTop), bottom: rb.bottom - parseFloat(cs.paddingBottom) };
   const hook = q('[data-recall-hook]');
@@ -121,7 +136,9 @@ const probe = (phase) => {
     fonts: items.filter((x) => /^(question|option)/.test(x.name) && x.size < 15).map((x) => `${x.name} ${x.size}`),
     overlaps, clipped, hookInfo, scrollers, free: Math.round((limit - last) * 10) / 10, last: Math.round(last),
     optTops: [...document.querySelectorAll('[data-testid=recall-option]')].map((o) => Math.round(o.getBoundingClientRect().top)),
-    cardOpen: !!card,
+    why: (() => { const w = q('.recall-why'); const a = act; return { whyH: w ? Math.round(w.getBoundingClientRect().height) : null, actH: a ? Math.round(a.getBoundingClientRect().height) : null, actTop: a ? Math.round(a.getBoundingClientRect().top) : null }; })(),
+    kids: [...card.children].map((c) => `${c.className.split(' ')[0]}:${Math.round(c.getBoundingClientRect().top)}+${Math.round(c.getBoundingClientRect().height)}`).join(' '),
+    cardOpen: !!card, lowContrast, bottomGap, surfH: rb.height, hookTop: hook ? Math.round(hook.getBoundingClientRect().bottom) : null, qTop: Math.round(q('[data-testid=recall-question]').getBoundingClientRect().top),
   };
 };
 
@@ -167,7 +184,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     results.runs.push(r);
     const fail = (what, detail) => { r.checks[what] = false; results.failures.push(`${tag}: ${what}: ${detail}`); };
     const ok = (what) => { if (!(what in r.checks)) r.checks[what] = true; };
-    const ctx = await browser.newContext({ ...devices['iPhone 14'], viewport: { width: w, height: vh.h }, deviceScaleFactor: 1, serviceWorkers: 'block' });
+    const ctx = await browser.newContext({ ...devices['iPhone 14'], viewport: { width: w, height: vh.h }, colorScheme: process.env.SCHEME ?? 'light', deviceScaleFactor: Number(process.env.SCALE ?? 1), serviceWorkers: 'block' });
     await ctx.addInitScript(({ t, b }) => {
       window.__ytSlow = true;
       const put = () => { if (!document.documentElement) return false; const st = document.createElement('style'); st.textContent = `:root{--safe-top:${t}px;--safe-bottom:${b}px}`; document.documentElement.appendChild(st); return true; };
@@ -197,8 +214,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           await sleep(500);
           const before = await page.evaluate(probe, 'ask');
           r.cards.push({ form, case: c, phase: 'ask', fit: before.fit, free: before.free, scrollers: before.scrollers });
-          const shot = async (ph) => { if (process.env.SHOTS && (w === 390 && vh.h === 664 && !vh.tag || w === 375 && vh.h === 553)) await page.screenshot({ path: `${process.env.SHOTS}/${name}-${w}x${vh.h}-${form}-${c}-${ph}.png` }); };
+          const shot = async (ph) => { if (process.env.SHOTS && (w === 390 && (vh.h === 664 && !vh.tag || vh.h === 793) || w === 375 && vh.h === 553)) await page.screenshot({ path: `${process.env.SHOTS}/${name}-${w}x${vh.h}-${form}-${c}-${ph}.png` }); };
           await shot('ask');
+          const H0 = await page.evaluate(() => window.innerHeight);
           const verify = (p, ph) => {
             const t = `${where} ${ph}`;
             if (p.missing) return fail(`${t} Karte da`, 'keine Karte');
@@ -206,8 +224,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
             if (p.overlaps.length) fail(`${t} nichts überlappt`, p.overlaps.join(', ')); else ok(`${t} nichts überlappt`);
             if (p.small.length) fail(`${t} Tippflächen 44 px`, p.small.join(', ')); else ok(`${t} Tippflächen 44 px`);
             if (p.fonts.length) fail(`${t} Schrift mindestens 15 px`, p.fonts.join(', ')); else ok(`${t} Schrift mindestens 15 px`);
+            if (p.lowContrast.length) fail(`${t} Schrift lesbar (Kontrast 4,5)`, p.lowContrast.join(', ')); else ok(`${t} Schrift lesbar (Kontrast 4,5)`);
             if (p.clipped.length) fail(`${t} nichts abgeschnitten`, p.clipped.join(', ')); else ok(`${t} nichts abgeschnitten`);
             if (p.scrollers.length) fail(`${t} nichts scrollt`, `${p.scrollers.join(', ')} scrollt in sich (Stufe ${p.fit}, Platz ${p.free})`); else ok(`${t} nichts scrollt`);
+            if (H0 >= 700 && c === 'normal') { if (Number(p.fit) > 1) fail(`${t} Stufe höchstens 1 ab 700 px`, `Stufe ${p.fit} bei ${H0}`); else ok(`${t} Stufe höchstens 1 ab 700 px`); }
+            if (p.bottomGap !== null) { if (p.bottomGap > 0.25 * p.surfH + 0.5) fail(`${t} Abstand unten höchstens 25 Prozent`, `${Math.round(p.bottomGap)} von ${Math.round(p.surfH)} px`); else ok(`${t} Abstand unten höchstens 25 Prozent`); }
             if (c === 'arabic' && p.dir !== 'rtl') fail(`${t} arabisch rechtsläufig`, `dir=${p.dir}`); else ok(`${t} arabisch rechtsläufig`);
             const hk = p.hookInfo;
             if (hk) {
@@ -216,7 +237,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
               const prefix = hk.shown.replace(/…$/, '');
               const wordEnd = !cut || (hk.full.startsWith(prefix.trimEnd()) && /^\s/.test(hk.full.slice(prefix.trimEnd().length)) && hk.shown.endsWith('…'));
               if (!wordEnd) fail(`${t} Hook endet mit … an der Wortgrenze`, JSON.stringify(hk.shown)); else ok(`${t} Hook endet mit … an der Wortgrenze`);
-              if (lines > (Number(p.fit) >= 2 ? 1 : 2) + 0.05) fail(`${t} Hook höchstens ${Number(p.fit) >= 2 ? 1 : 2} Zeilen`, `${lines.toFixed(2)} Zeilen`); else ok(`${t} Hook Zeilenzahl`);
+              const maxL = Number(p.fit) >= 3 ? 1 : Number(p.fit) === 2 ? 2 : 3;
+              if (lines > maxL + 0.05) fail(`${t} Hook höchstens ${maxL} Zeilen`, `${lines.toFixed(2)} Zeilen`); else ok(`${t} Hook Zeilenzahl`);
             }
           };
           verify(before, 'vor der Antwort');
@@ -261,6 +283,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           r.cards.push({ form, case: c, phase: 'done', fit: after.fit, free: after.free, scrollers: after.scrollers });
           await shot('done');
           verify(after, 'nach der Antwort');
+          // Bis Stufe 4 bleiben die Antworten an ihrem Platz. Ab Stufe 5 (sehr wenig Höhe, sehr lange Texte) darf der Block nach der Antwort nach oben wachsen.
+          if (after.fit === before.fit && Number(before.fit) <= 4) { if (JSON.stringify(after.optTops) !== JSON.stringify(before.optTops)) fail(`${where} Antworten springen nicht`, `${before.optTops} -> ${after.optTops} (Stufe ${before.fit}, vorher ${before.kids}, nachher ${after.kids})`); else ok(`${where} Antworten springen nicht`); }
           if (await page.locator('[data-testid=recall-skip]').isVisible().catch(() => false)) fail(`${where} Skip nach der Antwort weg`, 'sichtbar'); else ok(`${where} Skip nach der Antwort weg`);
           // Nach der Antwort schließt ein Wisch nach oben (einmal je Reiter, Fall normal), sonst "Next"
           if (c === 'normal') {

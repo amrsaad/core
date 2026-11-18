@@ -1,6 +1,6 @@
 import type { Area } from '../types';
 
-export type Kind = 'story' | 'regel' | 'entscheidung' | 'mechanismus' | 'zahl';
+export type Kind = 'story' | 'regel' | 'entscheidung' | 'mechanismus' | 'zahl' | 'takeaway';
 
 /** Veröffentlichte Felder eines Moments (Belege bleiben im privaten Repo) */
 /** Abfragefrage zum Ausschnitt (Max, 26.10.): Anwendungsfrage, drei Antworten, eine richtig. Arabische Momente: Frage und Antworten auf Arabisch. */
@@ -59,6 +59,11 @@ export interface Moment {
   subtopic?: string[];
   /** Sprache des Sprechers (Entscheidung 23). Fehlt das Feld, schätzt focus.ts langOf sie aus Untertiteln und Text. */
   lang?: 'ar' | 'de' | 'en';
+  /** Nur kind takeaway (Runde 24): laufende Nummer, wörtliches Zitat, Herkunft und Anwendung der Kernaussage. Alle optional, ältere Pools haben sie nicht. */
+  takeawayNr?: number;
+  quote?: string;
+  origin?: string;
+  apply?: string;
   /** Veröffentlichung der Folge (ISO). Fehlt das Feld, zählt createdAt für "neue Folge jünger als 48 h" in mix.ts. */
   publishedAt?: string;
 }

@@ -1,5 +1,5 @@
 import { registerHls } from './video/ytApi';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { dayKey, now as clockNow } from './lib/clock';
 import { useAppState } from './lib/useAppState';
 import { useSync } from './lib/sync/useSync';
@@ -20,6 +20,7 @@ import type { Form } from './moments/form';
 import { nextRate, rateOf } from './lib/state';
 import { diagLog } from './lib/diag';
 import { countSlimmable, slimSaved } from './moments/saved';
+import { takeawayCounts, takeawayLine } from './moments/takeaways';
 
 // v1 (Karten) und v2 (Shorts) bleiben im Code, sind aber nicht mehr in der Navigation.
 type Tab = 'feed' | 'saved' | 'settings';
@@ -73,6 +74,15 @@ export default function App() {
     diagLog.push(`saved: slimmed ${countSlimmable(savedNow, aliases.byId)} of ${Object.keys(savedNow).length}`);
     access.adopt((s) => (s.savedMoments === savedNow ? { ...s, savedMoments: next } : s));
   }, [savedNow, vault.status, aliases, access]);
+
+  // Runde 24: beim Start eine Zeile, wie viele Kernaussagen (takeaway) im Pool stehen und wie viele ihrer Abrufkarten fällig sind
+  const takeawayNoted = useRef(false);
+  const recallNow = state?.recall;
+  useEffect(() => {
+    if (takeawayNoted.current || vault.status !== 'open' || !stateReady) return;
+    takeawayNoted.current = true;
+    diagLog.push(takeawayLine(takeawayCounts(vault.pool.moments, recallNow, clockNow().getTime())));
+  }, [vault, stateReady, recallNow]);
 
   useEffect(() => {
     // Einmalig auf die Regeln von Entscheidung 38 (Issue 28): niedrige Kanal- und Themagewichte aus Not for me und Skips anheben.

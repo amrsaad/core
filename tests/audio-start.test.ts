@@ -257,6 +257,8 @@ describe('Deck: Positionsstatus für den Sperrbildschirm', () => {
   it('Länge und Stelle des Moments, nicht der Folge, bei jedem timeupdate', () => {
     const t = deckSetup();
     t.deck.load(clip('a', 100, 147), t.sink, { play: true, muted: false });
+    // Runde 24: bis zur bestätigten Position (Metadaten da, Stelle erreicht) meldet das Deck die Startzeit, danach die Messung
+    t.el.readyState = 4;
     t.el.currentTime = 110;
     t.el.emit('timeupdate');
     expect(t.deck.lastPos).toEqual({ duration: 47, position: 10, playbackRate: 1 });
@@ -277,11 +279,12 @@ describe('Deck: Positionsstatus für den Sperrbildschirm', () => {
     const t = deckSetup();
     const sink: DeckSink = { state: () => {}, error: () => {}, time: (a, r, p) => times.push([a, r, p]) };
     t.deck.load(clip('a', 100, 147), sink, { play: true, muted: false });
-    t.el.currentTime = 20;
+    t.el.readyState = 4;
+    t.el.currentTime = 120;
     t.el.emit('timeupdate');
     times.length = 0;
     t.deck.setRate(2);
-    expect(times.at(-1)).toEqual([20, 2, true]);
+    expect(times.at(-1)).toEqual([120, 2, true]);
   });
 });
 

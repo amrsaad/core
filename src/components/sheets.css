@@ -4,10 +4,10 @@
  */
 
 /* ---------- Abrufkarte: liegt unter dem Moment, die Bildkarte bleibt oben sichtbar, Einblenden mit Spring ----------
-   Runde 23: Maße über --rc-* je Stufe (data-fit 0 bis 5, gewählt in RecallCard.tsx nach Messung, Regeln in recallfit.ts). Nichts scrollt, nichts liegt unter der unteren Leiste. */
+   Runde 23: Maße über --rc-* je Stufe (data-fit 0 bis 6, gewählt in RecallCard.tsx nach Messung, Regeln in recallfit.ts). Nichts scrollt, nichts liegt unter der unteren Leiste. */
 html {
   --rc-pt: var(--s-4);
-  --rc-pb: var(--s-3);
+  --rc-pb: var(--s-5);
   --rc-gap: var(--s-3);
   --rc-pad: var(--s-5);
   --rc-cgap: var(--s-3);
@@ -20,7 +20,7 @@ html {
   --rc-o-py: var(--s-3);
   --rc-o-px: var(--s-4);
   --rc-ogap: var(--s-2);
-  --rc-hook-lines: 2;
+  --rc-hook-lines: 3;
   --rc-why-lh: var(--t-body-lh);
 }
 /* Stufe 1 und höher: Abstände kleiner, Tippflächen genau 44 px */
@@ -35,8 +35,9 @@ html {
   --rc-o-py: var(--s-2);
   --rc-ogap: var(--s-2);
 }
-/* Stufe 2 und höher: Hook auf eine Zeile */
-:is(.vrecall-page, .recall):is([data-fit='2'], [data-fit='3'], [data-fit='4'], [data-fit='5'], [data-fit='6']) { --rc-hook-lines: 1; }
+/* Runde 24: Stufe 0 und 1 zeigen den Hook bis zu drei Zeilen, Stufe 2 zwei, ab Stufe 3 eine Zeile */
+:is(.vrecall-page, .recall):is([data-fit='2']) { --rc-hook-lines: 2; }
+:is(.vrecall-page, .recall):is([data-fit='3'], [data-fit='4'], [data-fit='5'], [data-fit='6']) { --rc-hook-lines: 1; }
 /* Stufe 3 und höher: Frage und Optionen eine Schriftstufe kleiner, Optionen nie unter 15 px */
 :is(.vrecall-page, .recall):is([data-fit='3'], [data-fit='4'], [data-fit='5'], [data-fit='6']) {
   --rc-q: 19px;
@@ -81,25 +82,13 @@ html {
   animation: sheet-in var(--dur-slow) var(--spring) both;
 }
 .recall > * { flex: none; }
-/* Stufe 5 im Video- und Audio-Reiter: die Karte reicht bis unter die Kopfzeile und deckt das Bild ab (das Bild steht ohnehin) */
-/* Stufe 5 und 6 im Video- und Audio-Reiter: wie die Abrufseite im Text-Reiter, volle Breite unter der Kopfzeile, ohne eigene Karte, das Bild dahinter ist verdeckt */
-.recall:is([data-fit='5'], [data-fit='6']) {
-  left: 0;
-  right: 0;
-  top: calc(var(--safe-t) + var(--head-h));
-  bottom: 0;
-  border-radius: 0;
-  box-shadow: none;
-  background: var(--surface);
-  padding: var(--s-2) calc(var(--safe-r) + var(--margin)) calc(var(--safe-b) + var(--nav-h, 0px) + var(--s-2)) calc(var(--safe-l) + var(--margin));
-}
 @keyframes sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 .recall-source { display: flex; gap: var(--s-3); align-items: center; }
 .recall-source img { width: var(--s-10); height: var(--s-6); object-fit: cover; border-radius: var(--s-1); background: var(--media-2); flex: none; }
 .recall-area { font-size: var(--t-meta); line-height: var(--t-meta-lh); font-weight: var(--w-tab); letter-spacing: var(--tracking-caps); text-transform: uppercase; }
 .recall-tag { font-size: var(--t-meta); line-height: var(--t-meta-lh); font-weight: var(--w-tab); letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--muted); flex: none; text-align: start; }
 /* "Skip" unter den Optionen, in der Daumenzone: unauffällig, 44 px hoch, nur vor der Antwort (danach steht an seiner Stelle "Next") */
-.recall-skip { align-self: center; min-height: var(--hit); min-width: calc(2 * var(--hit)); padding: 0 var(--s-5); background: none; border: 0; color: var(--muted); font-size: var(--t-meta); line-height: var(--t-meta-lh); font-weight: var(--w-tab); text-decoration: underline; text-underline-offset: 3px; }
+.recall-skip { align-self: center; min-height: var(--rc-o-minh); min-width: calc(2 * var(--hit)); padding: 0 var(--s-5); background: none; border: 0; color: var(--muted); font-size: var(--t-meta); line-height: var(--t-meta-lh); font-weight: var(--w-tab); text-decoration: underline; text-underline-offset: 3px; }
 .recall-speaker { font-size: var(--t-meta); line-height: var(--t-meta-lh); color: var(--muted); }
 .recall-origin { display: flex; flex-direction: column; gap: var(--s-1); }
 .recall-hook { margin: 0; font-size: var(--t-body); line-height: var(--t-body-lh); font-weight: var(--w-hook); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--rc-hook-lines); line-clamp: var(--rc-hook-lines); overflow: hidden; overflow-wrap: anywhere; }
@@ -130,6 +119,12 @@ html {
 .recall-option.rest { opacity: 0.55; }
 .recall-why { margin: var(--s-1) 0 0; font-size: var(--t-body); line-height: var(--rc-why-lh); color: var(--body); overflow-wrap: anywhere; }
 .recall-why[data-scroll], .recall-q[data-scroll] { touch-action: pan-y; }
+/* Runde 24: Platzhalter vor der Antwort, derselbe Text, nicht sichtbar, nicht lesbar für Hilfstechnik */
+.recall-ghost { visibility: hidden; pointer-events: none; }
+:is(.vrecall-page, .recall)[data-noghost] .recall-ghost { display: none; }
+.recall-tick { flex: none; width: var(--icon-sm); height: var(--icon-sm); }
+/* Ab Stufe 5 (sehr wenig Höhe) entfällt der Platz des Hakens: dort zählt jede Zeile, der Block darf nach der Antwort nach oben wachsen */
+:is(.vrecall-page, .recall):is([data-fit='5'], [data-fit='6']) .recall-tick { display: none; }
 .recall-primary {
   min-height: var(--rc-o-minh);
   border-radius: var(--r-btn);
