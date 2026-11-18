@@ -6,6 +6,7 @@ import {
   CLIP_RECOVER_MAX,
   END_MIN_ADVANCE,
   END_NEAR_DUR,
+  STEP_BACK,
   ENDED_DEBOUNCE_MS,
   FROZEN_MS,
   frozen,
@@ -144,7 +145,15 @@ describe('recoverStep', () => {
 
 class El implements DeckEl {
   src = '';
-  currentTime = 0;
+  private t = 0;
+  /** Runde 22: wie Safari. Eine Position unter duration hebt ended auf. */
+  get currentTime() {
+    return this.t;
+  }
+  set currentTime(v: number) {
+    this.t = v;
+    if (!Number.isFinite(this.duration) || v < this.duration) this.ended = false;
+  }
   paused = true;
   ended = false;
   readyState = 0;
@@ -166,6 +175,8 @@ class El implements DeckEl {
   }
   play() {
     this.plays++;
+    // Runde 22: play() auf einem beendeten Element (ended, oder Position gleich duration) springt an den Anfang (HTML-Spezifikation, Safari)
+    if (this.ended || (Number.isFinite(this.duration) && this.duration > 0 && this.t >= this.duration)) this.t = 0;
     this.paused = false;
     this.ended = false;
     if (!this.silent) this.emit('playing');
@@ -178,7 +189,7 @@ class El implements DeckEl {
   }
   load() {
     this.loads++;
-    this.currentTime = 0;
+    this.t = 0;
   }
   removeAttribute(n: string) {
     if (n === 'src') this.src = '';
@@ -278,7 +289,9 @@ describe('Deck: falsches ended', () => {
     expect(t.states).not.toContain(0);
     expect(t.lines.some((l) => l.startsWith('deck: false ended a t=414.1 dur=3000.0 adv=0.0, recovering'))).toBe(true);
     expect(el.plays).toBe(plays + 1);
-    expect(el.currentTime).toBeCloseTo(c.start, 5);
+    // Runde 22: im Ende-Zustand mit Rückschritt, nie über die Startstelle, nie unter 0,25 s davor
+    expect(el.currentTime).toBeLessThanOrEqual(c.start);
+    expect(el.currentTime).toBeGreaterThanOrEqual(c.start - STEP_BACK - 1e-9);
     expect(el.loads).toBe(1);
   });
   it('zweites falsches Ende: Quelle am selben Element neu, danach noch eines: Fehlerweg', async () => {
@@ -309,7 +322,7 @@ describe('Deck: falsches ended', () => {
     expect(t.lines).toContain('deck: recovery gave up a');
     expect(t.states).not.toContain(0);
   });
-  it('Runde 21: ein zweites ended Millisekunden nach der Wiederherstellung wird ignoriert, kein Neuaufbau', async () => {
+  it('Runde 21: ein zweites ended kurz nach der Wiederherstellung mit t nahe target wird ignoriert, kein Neuaufbau', async () => {
     const t = setup();
     const c = clip('a');
     const el = await boot(t, c);
@@ -317,8 +330,8 @@ describe('Deck: falsches ended', () => {
     el.paused = true;
     el.emit('ended');
     expect(t.lines.some((l) => l.includes('false ended'))).toBe(true);
-    el.currentTime = 0;
-    el.duration = 0;
+    el.paused = true;
+    el.ended = true;
     el.emit('ended');
     expect(el.loads).toBe(1);
     expect(t.lines.some((l) => l.startsWith('deck: ended ignored a (recovering)'))).toBe(true);

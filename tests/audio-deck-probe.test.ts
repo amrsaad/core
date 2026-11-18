@@ -45,6 +45,8 @@ class El {
     this.paused = true;
   }
   play() {
+    // Runde 22: wie Safari, play() im Ende-Zustand springt an den Anfang
+    if (this.ended || (Number.isFinite(this.duration) && this.duration > 0 && this.currentTime >= this.duration)) this.currentTime = 0;
     this.paused = false;
     return Promise.resolve();
   }

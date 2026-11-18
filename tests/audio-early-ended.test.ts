@@ -5,7 +5,15 @@ import { AudioDeck, EARLY_RESTART_MS, type DeckClip, type DeckEl, type DeckSink 
 
 class El implements DeckEl {
   src = '';
-  currentTime = 0;
+  private t = 0;
+  /** Runde 22: wie Safari, eine Position unter duration hebt ended auf */
+  get currentTime() {
+    return this.t;
+  }
+  set currentTime(v: number) {
+    this.t = v;
+    if (!Number.isFinite(this.duration) || v < this.duration) this.ended = false;
+  }
   paused = true;
   ended = false;
   readyState = 0;
@@ -26,6 +34,8 @@ class El implements DeckEl {
   }
   play() {
     this.plays++;
+    // Runde 22: wie Safari: play() im Ende-Zustand springt an den Anfang
+    if (this.ended || (Number.isFinite(this.duration) && this.duration > 0 && this.currentTime >= this.duration)) this.t = 0;
     this.paused = false;
     if (this.stall > 0) {
       this.stall--;
@@ -115,7 +125,9 @@ describe('A: vorzeitiges ended ohne gespielt zu haben', () => {
     vi.advanceTimersByTime(EARLY_RESTART_MS[0]);
     await flush();
     expect(el.plays).toBe(2);
-    expect(el.currentTime).toBe(414.1);
+    // Runde 22: im Ende-Zustand mit Rückschritt (kleiner als die Startstelle um höchstens 0,25 s)
+    expect(el.currentTime).toBeGreaterThanOrEqual(414.1 - 0.25 - 1e-9);
+    expect(el.currentTime).toBeLessThanOrEqual(414.1);
     expect(el.paused).toBe(false);
     expect(t.lines).toContain('deck: early ended, restart 1 rs=4 t=414.1');
     expect(t.lines.some((l) => /giving up/.test(l))).toBe(false);
@@ -130,7 +142,8 @@ describe('A: vorzeitiges ended ohne gespielt zu haben', () => {
     el.earlyEnd();
     vi.advanceTimersByTime(EARLY_RESTART_MS[0]);
     await flush();
-    expect(el.currentTime).toBe(414.1);
+    expect(el.currentTime).toBeGreaterThanOrEqual(414.1 - 0.25 - 1e-9);
+    expect(el.currentTime).toBeLessThanOrEqual(414.1);
     expect(el.plays).toBe(2);
   });
 
@@ -323,7 +336,8 @@ describe('D: übernommene Einträge des Vorrats', () => {
     vi.advanceTimersByTime(EARLY_RESTART_MS[0]);
     await flush();
     expect(restartLines(t)).toHaveLength(1);
-    expect(eb.currentTime).toBe(30);
+    expect(eb.currentTime).toBeGreaterThanOrEqual(30 - 0.25 - 1e-9);
+    expect(eb.currentTime).toBeLessThanOrEqual(30);
     expect(eb.plays).toBe(2);
   });
 
@@ -337,10 +351,12 @@ describe('D: übernommene Einträge des Vorrats', () => {
     eb.emit('loadedmetadata');
     eb.readyState = 4;
     eb.emit('canplaythrough');
-    eb.ended = true;
     eb.currentTime = 600;
+    eb.duration = 600;
+    eb.ended = true;
     t.deck.swapNext(t.sink);
-    expect(eb.currentTime).toBe(30);
+    expect(eb.currentTime).toBeGreaterThanOrEqual(30 - 0.25 - 1e-9);
+    expect(eb.currentTime).toBeLessThanOrEqual(30);
   });
 });
 

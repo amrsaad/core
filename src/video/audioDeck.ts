@@ -100,6 +100,31 @@ export function skipKick(s: { inflightAt: number; readyState: number }, now: num
   return s.readyState < 1 || now - s.inflightAt < KICK_INFLIGHT_MS;
 }
 
+/** Runde 22: kleiner Rückschritt hinter die Startstelle, damit currentTime unter der von iOS gemeldeten duration liegt und play() nicht auf 0 springt (Sekunden) */
+export const STEP_BACK = 0.25;
+/** Runde 22: so weit darf der Rückschritt vor den Schnittbeginn reichen (Sekunden Elementzeit) */
+const STEP_BACK_FLOOR = 0.3;
+/** Runde 22: Position mehr als so viele Sekunden vor target minus STEP_BACK gilt als vor dem Schnittbeginn */
+export const START_SLACK = 2;
+/** Runde 22: so viele Korrekturen der Position je Ausschnitt, danach Neuaufbau der Quelle */
+export const POS_FIX_MAX = 3;
+
+/** Runde 22: Position für play() aus dem Ende-Zustand: at minus STEP_BACK, nie unter 0 und nie vor startEl minus 0,3 s (startEl: Beginn des Ausschnitts in Elementzeit) */
+export function stepBackPos(at: number, startEl: number): number {
+  return Math.max(0, startEl - STEP_BACK_FLOOR, at - STEP_BACK);
+}
+
+/** Runde 22: Position für den Neustart an der Stelle at: im Ende-Zustand (ended, oder duration höchstens 0,1 s hinter at, wie iOS es bei teilweise geladener Quelle meldet) mit Rückschritt */
+export function restartPos(o: { ended: boolean; dur: number; at: number; startEl: number }): number {
+  const endState = o.ended || (Number.isFinite(o.dur) && o.dur > 0 && o.dur <= o.at + 0.1);
+  return endState ? stepBackPos(o.at, o.startEl) : o.at;
+}
+
+/** Runde 22: liegt die Position deutlich vor dem Schnittbeginn (Sprung auf den Folgenanfang)? Ein Ausschnitt nahe 0 hat kein Davor. */
+export function positionBeforeStart(o: { t: number; target: number }): boolean {
+  return Number.isFinite(o.t) && o.t < o.target - STEP_BACK - START_SLACK;
+}
+
 /** Runde 17: Toleranz vor clip.end, ab der ein ended als Ende des Ausschnitts gilt (Sekunden Elementzeit) */
 export const END_TOL = 0.25;
 /** Runde 17: ein ended so nah vor duration gilt als echtes Ende der Quelle (Sekunden) */
@@ -129,7 +154,9 @@ export const ENDED_DEBOUNCE_MS = 300;
  * Gilt nur für ein ended, das plausibleEnd nicht als echtes Ende wertet. Grund oder null (dann wird es wie bisher gewertet):
  * "recovering", wenn seit Beginn einer Wiederherstellung weniger als ENDED_DEBOUNCE_MS vergangen sind, "empty", wenn duration 0 oder nicht endlich ist und t unter 0,5 liegt.
  */
-export function ignoreEnded(o: { sinceRecoverMs: number; t: number; dur: number }): 'recovering' | 'empty' | null {
+export function ignoreEnded(o: { sinceRecoverMs: number; t: number; dur: number; target?: number }): 'recovering' | 'empty' | null {
+  // Runde 22: ein ended deutlich vor dem Schnittbeginn ist der Sprung auf 0 nach play() im Ende-Zustand, kein Echo. Es wird nie ignoriert (der Positionswächter holt die Stelle zurück).
+  if (o.target !== undefined && positionBeforeStart({ t: o.t, target: o.target })) return null;
   if (o.sinceRecoverMs >= 0 && o.sinceRecoverMs < ENDED_DEBOUNCE_MS) return 'recovering';
   if ((!Number.isFinite(o.dur) || o.dur === 0) && Number.isFinite(o.t) && o.t < 0.5) return 'empty';
   return null;
@@ -491,6 +518,10 @@ export class AudioDeck {
   private froz: { t: number; at: number } | null = null;
   private recov = { key: '', n: 0, at: 0, pending: false, gaveUp: false };
   private rebuilding = false;
+  /** Runde 22: Korrekturen der Position vor dem Schnittbeginn je Ausschnitt */
+  private posFix = { key: '', n: 0 };
+  /** Runde 22: Metadaten da und Startsprung gesetzt, erst dann prüft der Positionswächter */
+  private armed = false;
   private okFor: DeckClip | null = null;
   /** Wer ein Element zuletzt angehalten hat (Diagnose, Issue 13): "app: wo". Fehlt der Eintrag beim pause-Ereignis, kam die Pause vom System. */
   private pauseBy = new WeakMap<DeckEl, string>();
@@ -726,6 +757,7 @@ export class AudioDeck {
       else if (mine()) this.earlyEnded(el);
     });
     el.addEventListener('timeupdate', () => {
+      if (mine() && this.guardPos(el)) return;
       if (mine()) this.tick(el);
       const c = this.clip;
       if (mine() && this.hidden()) this.hiddenStats.tu++;
@@ -751,6 +783,7 @@ export class AudioDeck {
       }
       this.trialFailed = null;
       this.seek(true);
+      this.armed = true;
       this.onMedia?.('loadedmetadata');
     });
     // Zweiter Anstoß, wenn Daten da sind und das erste play() nichts bewirkt hat (iOS verwirft play() vor den Metadaten manchmal still)
@@ -812,6 +845,7 @@ export class AudioDeck {
       this.clipAt = Date.now();
       this.prog = 0;
     }
+    if (!this.rebuilding && (fresh || this.posFix.key !== key)) this.posFix = { key, n: 0 };
     if (!this.rebuilding && (fresh || this.recov.key !== key)) this.recov = { key, n: 0, at: 0, pending: false, gaveUp: false };
   }
 
@@ -830,6 +864,8 @@ export class AudioDeck {
   private endedCheck(el: DeckEl, via: 'ended' | 'poll') {
     const c = this.clip;
     if (!c || this.done) return;
+    // Runde 22: ein ended vor dem Schnittbeginn ist der Sprung auf 0: sofort zurück an die Stelle
+    if (this.guardPos(el)) return;
     const t = el.currentTime;
     const dur = el.duration;
     // Runde 18: Sekunden, die der Ausschnitt in diesem Element seit Start oder letztem Neuaufbau gelaufen ist (target ist die Startstelle der Elementzeit)
@@ -839,7 +875,7 @@ export class AudioDeck {
       return;
     }
     // Runde 21: zweites ended kurz nach der Wiederherstellung oder mit leerer Dauer an der Startstelle: ignorieren (Abfrage still, Ereignis mit Diag-Zeile)
-    const skip = ignoreEnded({ sinceRecoverMs: this.recov.at ? Date.now() - this.recov.at : Number.POSITIVE_INFINITY, t, dur });
+    const skip = ignoreEnded({ sinceRecoverMs: this.recov.at ? Date.now() - this.recov.at : Number.POSITIVE_INFINITY, t, dur, target: this.target });
     if (skip) {
       if (via === 'ended') this.diag(`deck: ended ignored ${c.id} (${skip})`);
       return;
@@ -855,11 +891,13 @@ export class AudioDeck {
    * play() (soft), dann die Quelle am selben Element neu aufbauen (start() mit unveränderter Spur wie in bail(), nach loadedmetadata springt seek(true) auf target).
    * Höchstens CLIP_RECOVER_MAX je Ausschnitt, danach der Fehlerweg des Hosts. Verdeckt kein Quellwechsel: der Neuaufbau wartet auf die Rückkehr (heartbeat).
    */
-  private recover(el: DeckEl, kind: 'ended' | 'frozen', t: number) {
+  private recover(el: DeckEl, kind: 'ended' | 'frozen', t: number, forceRebuild = false) {
     const c = this.clip;
     if (!c || this.done || !this.want || this.holding) return;
     if (this.recov.gaveUp) return;
-    const step = recoverStep({ n: this.recov.n, kind, hidden: this.hidden() });
+    let step = recoverStep({ n: this.recov.n, kind, hidden: this.hidden() });
+    // Runde 22: der Positionswächter verlangt den Neuaufbau (ein weicher Schritt hat die Stelle nicht gehalten)
+    if (forceRebuild && step === 'soft') step = this.hidden() ? 'defer' : 'rebuild';
     // Läuft der Ausschnitt schon, bleibt die Stelle erhalten, am Start (t auf der Startstelle) gilt target
     const mid = Number.isFinite(t) && t > this.target && (c.end === undefined || t + this.offset < c.end - END_TOL);
     const at = mid ? t : this.target;
@@ -881,8 +919,11 @@ export class AudioDeck {
     this.froz = null;
     this.samp = null;
     if (step === 'soft') {
+      // Runde 22: steht das Element im Ende-Zustand, hebt dieselbe Position ended nicht auf, und play() sprang auf 0. Darum ein kleiner Rückschritt.
+      const pos = restartPos({ ended: el.ended, dur: el.duration, at, startEl: c.start - this.offset });
+      if (pos !== at) this.diag(`deck: restart at reported end ${c.id} t=${at.toFixed(1)} dur=${Number.isFinite(el.duration) ? el.duration.toFixed(1) : String(el.duration)}, stepping back`);
       try {
-        el.currentTime = at;
+        el.currentTime = pos;
       } catch {
         /* iOS lehnt die Position ab */
       }
@@ -921,6 +962,7 @@ export class AudioDeck {
       this.recover(el, 'frozen', el.currentTime);
       return;
     }
+    if (this.guardPos(el)) return;
     this.inferPlaying(el);
     if (this.played && el.ended) {
       this.endedCheck(el, 'poll');
@@ -971,6 +1013,37 @@ export class AudioDeck {
     return this.prog + Math.round(end * 10) + (el.readyState >= 2 ? 1 : 0);
   }
 
+  /**
+   * Runde 22: Positionswächter. Läuft ein Ausschnitt und liegt die Position deutlich vor dem Schnittbeginn (iOS sprang nach play() im Ende-Zustand auf 0, der Ausschnitt
+   * spielte vom Folgenanfang), springt das Element sofort auf target zurück und spielt weiter. Höchstens POS_FIX_MAX Korrekturen je Ausschnitt, danach Neuaufbau der Quelle.
+   * Still vor Metadaten und erstem Seek (armed), im Neuaufbau, gehalten, pausiert vom Menschen und bei Live (duration Infinity). true: die Position war falsch (korrigiert oder Neuaufbau).
+   */
+  private guardPos(el: DeckEl): boolean {
+    const c = this.clip;
+    if (!c || el !== this.el || this.done || this.holding || this.rebuilding || !this.want || !this.armed) return false;
+    if (el.paused && !el.ended) return false;
+    if (el.readyState < 1 || el.seeking || el.duration === Number.POSITIVE_INFINITY) return false;
+    const t = el.currentTime;
+    if (!positionBeforeStart({ t, target: this.target })) return false;
+    if (this.posFix.n >= POS_FIX_MAX) {
+      this.diag(`deck: position before clip start ${c.id} t=${t.toFixed(1)} target=${this.target.toFixed(1)}, rebuilding`);
+      this.recover(el, 'frozen', t, true);
+      return true;
+    }
+    this.posFix.n++;
+    this.diag(`deck: position before clip start ${c.id} t=${t.toFixed(1)} target=${this.target.toFixed(1)}, reseek`);
+    this.froz = null;
+    this.samp = null;
+    try {
+      el.currentTime = this.target;
+    } catch {
+      /* iOS lehnt die Position ab */
+    }
+    // Steht ended nach der Position noch (leere Dauer), spielt play() wieder von 0: dann wartet es auf die Abfrage (falsches ended mit Rückschritt)
+    if (el.paused && !el.ended) this.kick('restart');
+    return true;
+  }
+
   /** Neuer Ausschnitt im Element: Zähler und Zeitgeber der Neustarts zurücksetzen */
   private resetEarly() {
     this.earlyN = 0;
@@ -1017,7 +1090,8 @@ export class AudioDeck {
       if (el !== this.el || this.clip !== c || this.done || !this.want || this.played || this.holding || this.needTapKey === c.key) return;
       this.diag(`deck: early ended, restart ${n} rs=${el.readyState} t=${el.currentTime.toFixed(1)}`);
       try {
-        el.currentTime = this.target;
+        // Runde 22: im Ende-Zustand mit Rückschritt, sonst springt play() auf 0
+        el.currentTime = restartPos({ ended: el.ended, dur: el.duration, at: this.target, startEl: c.start - this.offset });
       } catch {
         /* iOS lehnt die Position ab */
       }
@@ -1055,6 +1129,7 @@ export class AudioDeck {
     }
     this.holding = null;
     this.noteClip(clip.key);
+    this.armed = false;
     // Runde 12: der Vorrat hält genau diesen Ausschnitt. Sein Element wird übernommen, auch wenn es noch lädt (es hat schon Bytes an der richtigen Stelle).
     // Verworfen wird nur ein Eintrag mit Fehler oder einer Spur, die nicht mehr passt, dann lädt der Start das Element neu.
     const inPool = this.entries.find((x) => x.clip.key === clip.key);
@@ -1594,6 +1669,7 @@ export class AudioDeck {
     this.holding = null;
     this.holdToken++;
     this.noteClip(clip.key, true);
+    this.armed = s.meta || s.ready;
     this.clip = clip;
     this.done = false;
     this.nudged = false;
@@ -1632,9 +1708,12 @@ export class AudioDeck {
       this.loading(!s.local && el.readyState < 3);
     }
     // Runde 13: ein Element, das im Vorrat schon "ended" war, spielte sonst von vorn (play() am Ende springt auf 0)
-    if (play && el.ended) {
+    // Runde 22: auch bei von iOS gemeldeter duration gleich Startstelle (Ende gemeldet), die Position allein hebt ended dort nicht auf: Rückschritt
+    if (play && (el.ended || restartPos({ ended: false, dur: el.duration, at: this.target, startEl: clip.start - s.offset }) !== this.target)) {
+      const pos = restartPos({ ended: true, dur: el.duration, at: this.target, startEl: clip.start - s.offset });
+      this.diag(`deck: swap at reported end ${clip.id} t=${this.target.toFixed(1)} dur=${Number.isFinite(el.duration) ? el.duration.toFixed(1) : String(el.duration)}, stepping back`);
       try {
-        el.currentTime = this.target;
+        el.currentTime = pos;
       } catch {
         /* nach loadedmetadata */
       }

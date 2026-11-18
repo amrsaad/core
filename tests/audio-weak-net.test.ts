@@ -66,6 +66,8 @@ class El implements DeckEl {
     for (const f of this.on.get(type) ?? []) f();
   }
   play() {
+    // Runde 22: wie Safari, play() im Ende-Zustand springt an den Anfang
+    if (this.ended || (Number.isFinite(this.duration) && this.duration > 0 && this.currentTime >= this.duration)) this.currentTime = 0;
     this.paused = false;
     if (!this.quiet) this.emit('playing');
     return Promise.resolve();
