@@ -155,7 +155,7 @@ jobs:
           - group: 1
             dirs: pipeline/out/e2e-moments pipeline/out/e2e-desktop pipeline/out/e2e-keyrestore pipeline/out/e2e-sync
           - group: 2
-            dirs: pipeline/out/e2e-digest pipeline/out/e2e-background pipeline/out/e2e-preload pipeline/out/e2e-endpage pipeline/out/e2e-swipe
+            dirs: pipeline/out/e2e-digest pipeline/out/e2e-background pipeline/out/e2e-preload pipeline/out/e2e-endpage pipeline/out/e2e-swipe pipeline/out/e2e-recallfit
           - group: 3
             dirs: pipeline/out/e2e-loudness pipeline/out/e2e-offline pipeline/out/e2e-tempo pipeline/out/e2e-tempoperf
           - group: 4
@@ -236,6 +236,13 @@ jobs:
           npx vite preview --host 127.0.0.1 --port 4181 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4181/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/swipe.mjs http://127.0.0.1:4181/core/ pipeline/out/e2e-swipe
+      - name: Abrufkarte auf jede iPhone-Höhe testen (Runde 23; alles sichtbar vor und nach der Antwort, Hook mit Auslassung am Wortende, kein Wechsel durch Wischen, Skip; Text, Video, Audio; WebKit und Chromium)
+        if: always() && matrix.group == 2
+        timeout-minutes: 15
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4192 --strictPort &
+          node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4192/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
+          node tests/e2e/recallfit.mjs http://127.0.0.1:4192/core/ pipeline/out/e2e-recallfit
       - name: Gleiche Lautheit testen (GainNode je Moment, YouTube nur absenken, kein CORS und HLS unverändert, Settings-Diagnose; Chromium)
         if: matrix.group == 3
         timeout-minutes: 6

@@ -3,49 +3,119 @@
  * Nur Werte aus tokens.css.
  */
 
-/* ---------- Abrufkarte: liegt unter dem Moment, die Bildkarte bleibt oben sichtbar, Einblenden mit Spring ---------- */
+/* ---------- Abrufkarte: liegt unter dem Moment, die Bildkarte bleibt oben sichtbar, Einblenden mit Spring ----------
+   Runde 23: Maße über --rc-* je Stufe (data-fit 0 bis 5, gewählt in RecallCard.tsx nach Messung, Regeln in recallfit.ts). Nichts scrollt, nichts liegt unter der unteren Leiste. */
+html {
+  --rc-pt: var(--s-4);
+  --rc-pb: var(--s-3);
+  --rc-gap: var(--s-3);
+  --rc-pad: var(--s-5);
+  --rc-cgap: var(--s-3);
+  --rc-qm: var(--s-1);
+  --rc-q: var(--t-hook);
+  --rc-q-lh: var(--t-hook-lh);
+  --rc-o: var(--t-row);
+  --rc-o-lh: var(--t-row-lh);
+  --rc-o-minh: var(--s-12);
+  --rc-o-py: var(--s-3);
+  --rc-o-px: var(--s-4);
+  --rc-ogap: var(--s-2);
+  --rc-hook-lines: 2;
+  --rc-why-lh: var(--t-body-lh);
+}
+/* Stufe 1 und höher: Abstände kleiner, Tippflächen genau 44 px */
+:is(.vrecall-page, .recall):is([data-fit='1'], [data-fit='2'], [data-fit='3'], [data-fit='4'], [data-fit='5'], [data-fit='6']) {
+  --rc-pt: var(--s-2);
+  --rc-pb: var(--s-2);
+  --rc-gap: var(--s-2);
+  --rc-pad: var(--s-4);
+  --rc-cgap: var(--s-2);
+  --rc-qm: 0px;
+  --rc-o-minh: var(--hit);
+  --rc-o-py: var(--s-2);
+  --rc-ogap: var(--s-2);
+}
+/* Stufe 2 und höher: Hook auf eine Zeile */
+:is(.vrecall-page, .recall):is([data-fit='2'], [data-fit='3'], [data-fit='4'], [data-fit='5'], [data-fit='6']) { --rc-hook-lines: 1; }
+/* Stufe 3 und höher: Frage und Optionen eine Schriftstufe kleiner, Optionen nie unter 15 px */
+:is(.vrecall-page, .recall):is([data-fit='3'], [data-fit='4'], [data-fit='5'], [data-fit='6']) {
+  --rc-q: 19px;
+  --rc-q-lh: 24px;
+  --rc-o: 15px;
+  --rc-o-lh: 20px;
+}
+/* Stufe 4 und höher: Quelle, Bereichszeile und Kicker aus */
+:is(.vrecall-page, .recall):is([data-fit='4'], [data-fit='5'], [data-fit='6']) :is(.recall-hooksrc, .recall-source, .vtext-source, .vkicker) { display: none; }
+/* Stufe 5 und höher: Frage 17/22, engere Optionen */
+:is(.vrecall-page, .recall):is([data-fit='5'], [data-fit='6']) {
+  --rc-q: 17px;
+  --rc-q-lh: 22px;
+  --rc-o-py: 6px;
+  --rc-o-px: var(--s-3);
+  --rc-ogap: 6px;
+  --rc-cgap: 6px;
+  --rc-gap: 6px;
+  --rc-pad: var(--s-3);
+  --rc-why-lh: 20px;
+}
+/* Stufe 6 (nur nach der Antwort): Kennzeichnung und Hook aus, die Erklärung und "Next" behalten den Platz */
+:is(.vrecall-page, .recall)[data-fit='6'] :is(.recall-tag, .recall-origin, .vrecall-origin) { display: none; }
 .recall {
   position: absolute;
   z-index: 34;
   left: calc(var(--safe-l) + var(--margin));
   right: calc(var(--safe-r) + var(--margin));
   top: calc(var(--band-top) + var(--band-h) + var(--s-6));
-  bottom: calc(var(--safe-b) + var(--s-4));
+  bottom: calc(var(--safe-b) + var(--nav-h, 0px) + var(--s-4));
   max-width: var(--desk-read);
   margin-inline: auto;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow: hidden;
   background: var(--surface);
   color: var(--text);
   border-radius: var(--r-sheet);
   box-shadow: var(--shadow-media), var(--inset-hair);
-  padding: var(--s-5);
+  padding: var(--rc-pad);
   display: flex;
   flex-direction: column;
-  gap: var(--s-3);
+  gap: var(--rc-cgap);
   animation: sheet-in var(--dur-slow) var(--spring) both;
+}
+.recall > * { flex: none; }
+/* Stufe 5 im Video- und Audio-Reiter: die Karte reicht bis unter die Kopfzeile und deckt das Bild ab (das Bild steht ohnehin) */
+/* Stufe 5 und 6 im Video- und Audio-Reiter: wie die Abrufseite im Text-Reiter, volle Breite unter der Kopfzeile, ohne eigene Karte, das Bild dahinter ist verdeckt */
+.recall:is([data-fit='5'], [data-fit='6']) {
+  left: 0;
+  right: 0;
+  top: calc(var(--safe-t) + var(--head-h));
+  bottom: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--surface);
+  padding: var(--s-2) calc(var(--safe-r) + var(--margin)) calc(var(--safe-b) + var(--nav-h, 0px) + var(--s-2)) calc(var(--safe-l) + var(--margin));
 }
 @keyframes sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 .recall-source { display: flex; gap: var(--s-3); align-items: center; }
 .recall-source img { width: var(--s-10); height: var(--s-6); object-fit: cover; border-radius: var(--s-1); background: var(--media-2); flex: none; }
 .recall-area { font-size: var(--t-meta); line-height: var(--t-meta-lh); font-weight: var(--w-tab); letter-spacing: var(--tracking-caps); text-transform: uppercase; }
 .recall-tag { font-size: var(--t-meta); line-height: var(--t-meta-lh); font-weight: var(--w-tab); letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--muted); flex: none; text-align: start; }
+/* "Skip" unter den Optionen, in der Daumenzone: unauffällig, 44 px hoch, nur vor der Antwort (danach steht an seiner Stelle "Next") */
+.recall-skip { align-self: center; min-height: var(--hit); min-width: calc(2 * var(--hit)); padding: 0 var(--s-5); background: none; border: 0; color: var(--muted); font-size: var(--t-meta); line-height: var(--t-meta-lh); font-weight: var(--w-tab); text-decoration: underline; text-underline-offset: 3px; }
 .recall-speaker { font-size: var(--t-meta); line-height: var(--t-meta-lh); color: var(--muted); }
 .recall-origin { display: flex; flex-direction: column; gap: var(--s-1); }
-.recall-hook { margin: 0; font-size: var(--t-body); line-height: var(--t-body-lh); font-weight: var(--w-hook); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.recall-hook { margin: 0; font-size: var(--t-body); line-height: var(--t-body-lh); font-weight: var(--w-hook); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--rc-hook-lines); line-clamp: var(--rc-hook-lines); overflow: hidden; overflow-wrap: anywhere; }
 .recall-hooksrc { margin: 0; font-size: var(--t-body); opacity: 0.7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.recall-q { margin: var(--s-1) 0 var(--s-1); font-size: var(--t-hook); line-height: var(--t-hook-lh); font-weight: var(--w-hook); letter-spacing: var(--tracking-title); }
-.recall-options { display: flex; flex-direction: column; gap: var(--s-2); width: 100%; }
+.recall-q { margin: var(--rc-qm) 0; font-size: var(--rc-q); line-height: var(--rc-q-lh); font-weight: var(--w-hook); letter-spacing: var(--tracking-title); overflow-wrap: anywhere; overscroll-behavior: contain; }
+.recall-options { display: flex; flex-direction: column; gap: var(--rc-ogap); width: 100%; }
 .recall-option {
   width: 100%;
-  min-height: var(--s-12);
+  min-height: var(--rc-o-minh);
   border-radius: var(--r-btn);
   border: 1px solid transparent;
   background: var(--surface-2);
   color: var(--text);
-  padding: var(--s-3) var(--s-4);
-  font-size: var(--t-row);
-  line-height: var(--t-row-lh);
+  padding: var(--rc-o-py) var(--rc-o-px);
+  font-size: var(--rc-o);
+  line-height: var(--rc-o-lh);
   font-weight: var(--w-row);
   text-align: start;
   display: flex;
@@ -54,12 +124,14 @@
   gap: var(--s-3);
   transition: background var(--dur-cut) var(--ease), border-color var(--dur-cut) var(--ease);
 }
+.recall-option > span { min-width: 0; overflow-wrap: anywhere; }
 .recall-option.right { background: var(--ok-bg); border-color: var(--ok); }
 .recall-option.wrong { background: var(--danger-bg); border-color: var(--danger); }
 .recall-option.rest { opacity: 0.55; }
-.recall-why { margin: var(--s-1) 0 0; font-size: var(--t-body); line-height: var(--t-body-lh); color: var(--body); }
+.recall-why { margin: var(--s-1) 0 0; font-size: var(--t-body); line-height: var(--rc-why-lh); color: var(--body); overflow-wrap: anywhere; }
+.recall-why[data-scroll], .recall-q[data-scroll] { touch-action: pan-y; }
 .recall-primary {
-  min-height: var(--s-12);
+  min-height: var(--rc-o-minh);
   border-radius: var(--r-btn);
   background: var(--accent);
   color: var(--on-accent);
@@ -71,7 +143,7 @@
   gap: var(--s-3);
 }
 /* Desktop: die Karte steht im Panel rechts (Maße in index.css) */
-.desk .recall { animation: none; background: transparent; box-shadow: none; border-radius: 0; padding: var(--s-1) 0 0; max-width: none; }
+.desk .recall { animation: none; background: transparent; box-shadow: none; border-radius: 0; padding: var(--s-1) 0 0; max-width: none; overflow: visible; }
 
 /* ---------- Blatt (More, Fokus): Backdrop, Karte von unten mit Spring ---------- */
 .sheet-backdrop {

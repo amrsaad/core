@@ -329,6 +329,8 @@
     --accent: #4ade80; --on-accent: #04210f; --kicker: #4ade80; --hairline: rgba(255, 255, 255, 0.08); --tab-off: #3a4651; --glass: rgba(20, 26, 32, 0.78);
     color-scheme: dark;
   }
+  /* Runde 23: Richtig und falsch beantwortet auf der dunklen Bühne: die hellen Flächen des hellen Geräts machten weißen Text auf Mint unlesbar */
+  :is(.vfeed:not([data-surface='page']), .dbar, .dpanel) { --ok-bg: #12351f; --danger-bg: #3d1417; }
   [data-mood='brain'] :is(.vfeed:not([data-surface='page']), .dbar, .dpanel) {
     --text: #f4f5f8; --body: #d9dbe3; --muted: #8a8fa0; --soft: #7c8192; --surface: #14171d; --surface-2: #1d2129;
     --accent: #a594ff; --on-accent: #0b0d11; --kicker: #a594ff; --hairline: rgba(255, 255, 255, 0.08); --tab-off: #363a48; --glass: rgba(20, 23, 29, 0.78);

@@ -101,21 +101,18 @@ const poolTabs = await encPool(tabMoments);
 const k = Buffer.from(raw).toString('base64url');
 
 const results = { at: new Date().toISOString(), runs: [] };
-// Abrufkarte kommt nach jedem 4. Moment. Wo der Test etwas anderes prüft, wird sie per Wisch nach oben ohne Wertung geschlossen.
+// Abrufkarte kommt nach jedem 4. Moment. Wo der Test etwas anderes prüft, wird sie über den Knopf "Skip" ohne Wertung geschlossen.
 // Beim ersten Mal dient eine spätere Karte dem Treffer-Test (richtig wählen, 7 Tage), siehe hitState.
-const swipeUpCard = (page) =>
-  page.evaluate(() => {
-    const el = document.querySelector('[data-testid=recall-card]');
-    try {
-      const mk = (y) => new Touch({ identifier: 1, target: el, clientX: 100, clientY: y });
-      el.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, touches: [mk(500)], changedTouches: [mk(500)] }));
-      el.dispatchEvent(new TouchEvent('touchend', { bubbles: true, touches: [], changedTouches: [mk(300)] }));
-      return 'touch';
-    } catch {
-      window.__core.skipRecall();
-      return 'hook';
-    }
-  });
+const swipeUpCard = async (page) => {
+  // Runde 23: Eine unbeantwortete Karte wechselt nie durch einen Wisch. Überspringen geht über den Knopf "Skip" (ohne Wertung), wie früher das Wegwischen.
+  const btn = page.locator('[data-testid=recall-skip]');
+  if (await btn.count()) {
+    await btn.first().click();
+    return 'button';
+  }
+  await page.evaluate(() => window.__core.skipRecall());
+  return 'hook';
+};
 const hitState = { done: false, out: null, skipped: null, cards: [] };
 const skipRecall = async (page, name = 'x', out = 'pipeline/out/e2e-moments') => {
   if (!(await page.$('[data-testid=recall-card]'))) return;
@@ -279,10 +276,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       return {
         n: opts.length,
         before: !!document.querySelector('[data-testid=recall-why]') || !!document.querySelector('[data-testid=recall-next]'),
-        old: !!card?.querySelector('textarea') || /Got it|Missed|Skip|Show answer/.test(card?.textContent ?? ''),
+        old: !!card?.querySelector('textarea') || /Got it|Missed|Show answer/.test(card?.textContent ?? ''),
         dir: card?.getAttribute('dir'),
         qar: /[\u0600-\u06FF]/.test(q?.textContent ?? ''),
-        fullWidth: opts.every((o) => Math.abs(rect(o).width - (rect(card).width - 40)) < 2),
+        fullWidth: opts.every((o) => { const cs = getComputedStyle(card); return Math.abs(rect(o).width - (rect(card).width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight))) < 2; }),
         order: opts.map((o) => o.dataset.correct),
         cover: !!card?.querySelector('.recall-source img'),
         area: !!card?.querySelector('.recall-area')?.textContent,

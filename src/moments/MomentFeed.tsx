@@ -34,7 +34,7 @@ import { captionLines, captionsShown } from './captions';
 import { CueClock, cueIndexAt } from './cueClock';
 import { countGotIt, countSeen, todayLine } from './today';
 import { answer, cardDue, lastReadDay, pickRecall, recallQuiet, type Recent } from './recall';
-import { RecallCard, RecallTag, RecallTextPeek, type RecallCtl } from './RecallCard';
+import { RecallCard, RecallHook, RecallTag, RecallTextPeek, type RecallCtl } from './RecallCard';
 import { canShowRecall, onReturn, onSwipe, requeueOpen, type QueueEntry } from './recallqueue';
 import { CaptionSheet } from './CaptionSheet';
 import { sourceLine } from './source';
@@ -1257,6 +1257,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const answerRecall = (got: boolean) => {
     const r = recall;
     recallAnswered.current = true;
+    if (r) diag.current.push(`recall: answered ${r.m.id} ok=${got}`);
     // Richtig beantwortet ist ein starkes Plus für Kanal und Thema (Issue 24). Falsch ändert die Gewichte nicht.
     if (r) {
       const at = clockNow().getTime();
@@ -1277,6 +1278,14 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     if (!textRef.current && active && !userPaused.current) current().player?.playVideo();
     // Tempo nach der Karte erneut setzen, YouTube fällt nach Pause auf 1x zurück (Max 31.10.)
     applyRate();
+  };
+
+  /** "Skip" auf der unbeantworteten Karte: wie das frühere Wegwischen, keine Wertung (Treffer und Fehler bleiben aus, die Karte kommt nach der bestehenden Regel wieder) */
+  const skipRecallCard = () => {
+    if (recallAnswered.current) return;
+    const r = recall;
+    if (r) diag.current.push(`recall: skipped ${r.m.id}`);
+    closeRecall();
   };
 
   const closeForYou = () => {
@@ -3637,6 +3646,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       tapMs: () => stateRef.current.tapMs ?? [],
       swipeFrames: () => stateRef.current.swipeFrames ?? [],
       skipRecall: () => closeRecall(),
+      /** Nur Tests (Runde 23): Abrufkarte zu einem Moment des Pools sofort zeigen */
+      showRecall: (id: string, review = false) => { if (recallRef.current) return false; return openRecall({ id, review, dueAt: clockNow().getTime() }, false); },
       sound: () => soundOn.current,
       rate: () => rateRef.current,
       closeCaption: () => setCapOpen(false),
@@ -3827,7 +3838,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const statusKind = statusOf({ offline: !online, syncError, loading: loading || (deckWait && form === 'audio'), nextReady: nextReady && form === 'video', background: bgShown && form === 'audio', muted: hint && form !== 'text' });
   const m = queue.current[idx];
   shownId.current = m?.id ?? '';
-  const recallEl = recall ? <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} read={recall.read} rng={rng.current!} onAnswer={answerRecall} onClose={closeRecall} keys={!!desk} ctl={recallCtl} origin={form !== 'text'} /> : null;
+  const recallEl = recall ? <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} read={recall.read} rng={rng.current!} onAnswer={answerRecall} onClose={closeRecall} onSkip={skipRecallCard} onDiag={(line) => diag.current.push(line)} keys={!!desk} ctl={recallCtl} origin={form !== 'text'} /> : null;
   const saved = m && !!state.savedMoments[m.id];
   const liked = !!m && !!state.momentLiked?.[m.id];
   const captionsOn = !!m && form !== 'text' && captionsShown(form === 'audio' ? 'on' : state.settings.captionMode, m);
@@ -4105,7 +4116,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       {recall && !desk && form !== 'text' && recallEl}
       {recall && !desk && form === 'text' && (() => {
         // Ergänzung 35 (Issue 42): im Text-Reiter ist die Abrufkarte ein eigener Vollbild-Moment, nie ein Overlay über dem Lesetext.
-        // Oben Hook und Quelle des Ursprungs-Moments als Bezug, darunter Frage und Antworten. Wischen nach oben auf der Karte schließt wie bisher.
+        // Oben Hook und Quelle des Ursprungs-Moments als Bezug, darunter Frage und Antworten. Vor der Antwort schließt nur "Skip", nach der Antwort "Next" oder ein Wisch nach oben auf der Karte.
         const src = sourceLine(recall.m);
         const peek = formOf(recall.m) === 'text' ? cleanText(momentText(recall.m)) : '';
         return (
@@ -4113,7 +4124,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
             <RecallTag review={recall.review} day={recall.read} dir={isArabic(recall.m.recall?.question ?? '') ? 'rtl' : 'ltr'} />
             <div className="vrecall-origin" data-testid="recall-origin">
               <div className="vkicker">{AREA_LABEL[recall.m.area]} · {topicLabel(recall.m.topic)}</div>
-              <h2 className="vtext-hook" dir="auto">{recall.m.hook}</h2>
+              <RecallHook as="h2" className="vtext-hook" dir="auto" text={recall.m.hook} />
               {src && <p className="vtext-source" dir="auto">{src.prefix}{src.text}</p>}
             </div>
             {peek && <RecallTextPeek key={recall.m.id} text={peek} dir={isArabic(peek) ? 'rtl' : 'ltr'} />}
