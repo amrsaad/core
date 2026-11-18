@@ -1,8 +1,116 @@
 {
- "at": "2026-11-17T21:04:26.260Z",
+ "at": "2026-11-18T04:00:31.473Z",
  "runs": [
   {
    "browser": "webkit",
+   "pool": "stream",
+   "checks": {
+    "feedUp": true,
+    "playing": true,
+    "noHoldHint": true,
+    "defaultRate1": true,
+    "longPress15": true,
+    "chipShows15": true,
+    "chipTarget44": true,
+    "feedbackWithin150": true,
+    "playersAt15": true,
+    "sameMomentStillPlaying": true,
+    "storedLocally": true,
+    "longPress2": true,
+    "playersAt2": true,
+    "longPress1": true,
+    "playersAt1": true,
+    "backTo15": true,
+    "tapAdvancesTo2": true,
+    "tapAdvancesTo1": true,
+    "tapDidNotChangeMoment": true,
+    "rate15Again": true,
+    "swipeFromChipMoves": true,
+    "swipeFromChipKeepsRate": true,
+    "afterTabSwitchStored": true,
+    "backOnVideo": true,
+    "tabKeeps15": true,
+    "playersAfterTab": true,
+    "settingsShows15": true,
+    "settingsOptions": true,
+    "settingsNoHoldText": true,
+    "backFromSettings": true,
+    "settingsKeeps15": true,
+    "playersAfterSettings": true,
+    "noteOpen": true,
+    "noteKeeps15": true,
+    "reloaded": true,
+    "restartKeeps15": true,
+    "restartPlaying": true,
+    "restartPlayersAt15": true,
+    "noErrors": true
+   },
+   "notes": {
+    "chip": {
+     "text": "1.5x",
+     "w": 44,
+     "h": 44,
+     "onScreen": true
+    },
+    "feedbackMs": 5
+   }
+  },
+  {
+   "browser": "webkit",
+   "pool": "youtube",
+   "checks": {
+    "feedUp": true,
+    "playing": true,
+    "noHoldHint": true,
+    "defaultRate1": true,
+    "longPress15": true,
+    "chipShows15": true,
+    "chipTarget44": true,
+    "feedbackWithin150": true,
+    "playersAt15": true,
+    "sameMomentStillPlaying": true,
+    "storedLocally": true,
+    "longPress2": true,
+    "playersAt2": true,
+    "longPress1": true,
+    "playersAt1": true,
+    "backTo15": true,
+    "tapAdvancesTo2": true,
+    "tapAdvancesTo1": true,
+    "tapDidNotChangeMoment": true,
+    "rate15Again": true,
+    "swipeFromChipMoves": true,
+    "swipeFromChipKeepsRate": true,
+    "afterTabSwitchStored": true,
+    "backOnVideo": true,
+    "tabKeeps15": true,
+    "playersAfterTab": true,
+    "settingsShows15": true,
+    "settingsOptions": true,
+    "settingsNoHoldText": true,
+    "backFromSettings": true,
+    "settingsKeeps15": true,
+    "playersAfterSettings": true,
+    "noteOpen": true,
+    "noteKeeps15": true,
+    "reloaded": true,
+    "restartKeeps15": true,
+    "restartPlaying": true,
+    "restartPlayersAt15": true,
+    "noErrors": true
+   },
+   "notes": {
+    "chip": {
+     "text": "1.5x",
+     "w": 44,
+     "h": 44,
+     "onScreen": true
+    },
+    "feedbackMs": 5
+   }
+  },
+  {
+   "browser": "chromium",
    "pool": "stream",
    "checks": {
     "feedUp": true,
@@ -56,114 +164,6 @@
    }
   },
   {
-   "browser": "webkit",
-   "pool": "youtube",
-   "checks": {
-    "feedUp": true,
-    "playing": true,
-    "noHoldHint": true,
-    "defaultRate1": true,
-    "longPress15": true,
-    "chipShows15": true,
-    "chipTarget44": true,
-    "feedbackWithin150": true,
-    "playersAt15": true,
-    "sameMomentStillPlaying": true,
-    "storedLocally": true,
-    "longPress2": true,
-    "playersAt2": true,
-    "longPress1": true,
-    "playersAt1": true,
-    "backTo15": true,
-    "tapAdvancesTo2": true,
-    "tapAdvancesTo1": true,
-    "tapDidNotChangeMoment": true,
-    "rate15Again": true,
-    "swipeFromChipMoves": true,
-    "swipeFromChipKeepsRate": true,
-    "afterTabSwitchStored": true,
-    "backOnVideo": true,
-    "tabKeeps15": true,
-    "playersAfterTab": true,
-    "settingsShows15": true,
-    "settingsOptions": true,
-    "settingsNoHoldText": true,
-    "backFromSettings": true,
-    "settingsKeeps15": true,
-    "playersAfterSettings": true,
-    "noteOpen": true,
-    "noteKeeps15": true,
-    "reloaded": true,
-    "restartKeeps15": true,
-    "restartPlaying": true,
-    "restartPlayersAt15": true,
-    "noErrors": true
-   },
-   "notes": {
-    "chip": {
-     "text": "1.5x",
-     "w": 44,
-     "h": 44,
-     "onScreen": true
-    },
-    "feedbackMs": 4
-   }
-  },
-  {
-   "browser": "chromium",
-   "pool": "stream",
-   "checks": {
-    "feedUp": true,
-    "playing": true,
-    "noHoldHint": true,
-    "defaultRate1": true,
-    "longPress15": true,
-    "chipShows15": true,
-    "chipTarget44": true,
-    "feedbackWithin150": true,
-    "playersAt15": true,
-    "sameMomentStillPlaying": true,
-    "storedLocally": true,
-    "longPress2": true,
-    "playersAt2": true,
-    "longPress1": true,
-    "playersAt1": true,
-    "backTo15": true,
-    "tapAdvancesTo2": true,
-    "tapAdvancesTo1": true,
-    "tapDidNotChangeMoment": true,
-    "rate15Again": true,
-    "swipeFromChipMoves": true,
-    "swipeFromChipKeepsRate": true,
-    "afterTabSwitchStored": true,
-    "backOnVideo": true,
-    "tabKeeps15": true,
-    "playersAfterTab": true,
-    "settingsShows15": true,
-    "settingsOptions": true,
-    "settingsNoHoldText": true,
-    "backFromSettings": true,
-    "settingsKeeps15": true,
-    "playersAfterSettings": true,
-    "noteOpen": true,
-    "noteKeeps15": true,
-    "reloaded": true,
-    "restartKeeps15": true,
-    "restartPlaying": true,
-    "restartPlayersAt15": true,
-    "noErrors": true
-   },
-   "notes": {
-    "chip": {
-     "text": "1.5x",
-     "w": 44,
-     "h": 44,
-     "onScreen": true
-    },
-    "feedbackMs": 2
-   }
-  },
-  {
    "browser": "chromium",
    "pool": "youtube",
    "checks": {
@@ -214,7 +214,7 @@
      "h": 44,
      "onScreen": true
     },
-    "feedbackMs": 2
+    "feedbackMs": 3
    }
   }
  ]
