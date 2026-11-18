@@ -1,5 +1,5 @@
 {
- "at": "2026-11-18T08:50:30.638Z",
+ "at": "2026-11-18T11:08:26.758Z",
  "runs": [
   {
    "browser": "webkit",
@@ -47,14 +47,14 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "diagLines": 15,
+   "diagLines": 16,
    "diagSample": [
-    "fiez slot0 sy6:1 state 2",
-    "fiez sync: packed 1 kB to 1 kB",
-    "fiez sync: PUT ok 1 kB in 0.0 s",
-    "fiez app: hidden"
+    "uzjp slot0 sy1:1 state 2",
+    "uzjp sync: packed 1 kB to 1 kB",
+    "uzjp sync: PUT ok 1 kB in 0.0 s",
+    "uzjp app: hidden"
    ],
-   "writeDelayMs": 10029,
+   "writeDelayMs": 10034,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -109,12 +109,12 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "diagLines": 15,
+   "diagLines": 16,
    "diagSample": [
-    "3kqa yt: warm cue slot2 sy1:1",
-    "3kqa sync: packed 1 kB to 1 kB",
-    "3kqa sync: PUT ok 1 kB in 0.0 s",
-    "3kqa app: hidden"
+    "i0b1 slot0 sy5:1 state 2",
+    "i0b1 sync: packed 1 kB to 1 kB",
+    "i0b1 sync: PUT ok 1 kB in 0.0 s",
+    "i0b1 app: hidden"
    ],
    "writeDelayMs": 10021,
    "hosts": [
