@@ -130,10 +130,19 @@ const touchSwipe = (page, sel, y0, y1) =>
     const el = document.querySelector(sel);
     const r = el.getBoundingClientRect();
     const x = r.left + r.width / 2;
-    const mk = (y) => new Touch({ identifier: 7, target: el, clientX: x, clientY: y });
-    el.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, cancelable: true, touches: [mk(y0)], changedTouches: [mk(y0)] }));
-    el.dispatchEvent(new TouchEvent('touchmove', { bubbles: true, cancelable: true, touches: [mk((y0 + y1) / 2)], changedTouches: [mk((y0 + y1) / 2)] }));
-    el.dispatchEvent(new TouchEvent('touchend', { bubbles: true, cancelable: true, touches: [], changedTouches: [mk(y1)] }));
+    // Ohne new Touch und new TouchEvent: WebKit auf dem Desktop wirft dort "Illegal constructor". Ein gewöhnliches Ereignis mit den Feldern touches und changedTouches
+    // trägt dieselben Daten, die Handler lesen nur clientX und clientY.
+    const mk = (y) => ({ identifier: 7, target: el, clientX: x, clientY: y, pageX: x, pageY: y, screenX: x, screenY: y });
+    const fire = (type, touches, changed) => {
+      const ev = new Event(type, { bubbles: true, cancelable: true });
+      Object.defineProperty(ev, 'touches', { value: touches });
+      Object.defineProperty(ev, 'targetTouches', { value: touches });
+      Object.defineProperty(ev, 'changedTouches', { value: changed });
+      el.dispatchEvent(ev);
+    };
+    fire('touchstart', [mk(y0)], [mk(y0)]);
+    fire('touchmove', [mk((y0 + y1) / 2)], [mk((y0 + y1) / 2)]);
+    fire('touchend', [], [mk(y1)]);
   }, { sel, y0, y1 });
 
 /** Echte Berührung per DevTools-Protokoll (nur Chromium): Finger setzt auf dem Element auf und zieht 250 px nach oben */
