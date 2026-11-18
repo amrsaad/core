@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-18",
+ "records": [
+  {
+   "sourceId": "wiki:de:Alicella gigantea",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Alicella_gigantea",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/18",
+    "status": 200
+   },
+   "title": "Alicella gigantea",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Alicella gigantea ist eine sehr große Art der Flohkrebse (Amphipoda) und die einzige Art innerhalb der Gattung Alicella. Die Tiere können eine Länge von bis zu 34 cm erreichen. Von eng verwandten Flohkrebsen unterscheiden sie sich hauptsächlich durch ihre Größe, wobei bei kleinen Exemplaren auch subtile anatomische Unterschiede zur Unterscheidung herangezogen werden können. Ihre Körpergröße wird oft als Beispiel für Tiefseegigantismus angeführt. Genetische Untersuchungen haben ein außergewöhnlich großes Kerngenom sowie Hinweise auf besondere evolutionäre Veränderungen bei Genen der Wachstumsregulation ergeben. Anders als viele andere Tiefseeamphipoden sind die Tiere weiß gefärbt. Sie bewegen sich dicht über dem Meeresboden schwimmend fort und ernähren sich vorwiegend von aus höheren Meeresschichten absinkendem Aas, wobei ihre Ernährung je nach Alter variiert und je nach Größe auch Algen, Plankton oder lebende Tiere umfassen kann."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-18T04:52:16.625Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Alicella_gigantea": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Berlin-Neukölln",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Berlin-Neuk%C3%B6lln",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/18",
+    "status": 200
+   },
+   "title": "Berlin-Neukölln",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Neukölln ist der nördlichste und am dichtesten bebaute, namensgebende Ortsteil des Berliner Bezirks Neukölln, der weithin aus Gründerzeitvierteln besteht. Bis 1920 war Neukölln eine eigenständige Stadt, die bis 1912 den Namen Rixdorf trug. Gelegentlich wird der Ortsteil zur Unterscheidung vom Bezirk auch als Nord-Neukölln bezeichnet."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-18T04:52:16.625Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Berlin-Neuk%C3%B6lln": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Dominion",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Dominion",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/18",
+    "status": 200
+   },
+   "title": "Dominion",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Dominions waren ab Anfang des 20. Jahrhunderts die sich selbst verwaltenden Kolonien sowie Irland innerhalb des Britischen Weltreiches."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-18T04:52:16.625Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Dominion": 200
+   }
+  }
+ ]
+}

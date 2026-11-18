@@ -1,0 +1,804 @@
+{
+ "source": "arxiv",
+ "date": "2026-11-18",
+ "records": [
+  {
+   "sourceId": "arxiv:2611.23229",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23229",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Ambient LLMs: Data-Efficient Supervised Fine-tuning via Temperature Matching",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Ambient LLMs: Data-Efficient Supervised Fine-tuning via Temperature Matching",
+    "abstract": "Collecting large-scale, diverse, and high-quality post-training datasets for autoregressive language models is challenging. Consequently, Supervised Fine-Tuning (SFT) is typically applied to datasets significantly smaller than those used for pre-training, which leads to overfitting and the catastrophic forgetting of the tails of the data distribution. To prevent this collapse, we introduce Ambient SFT, a principled framework for leveraging imperfect predictions to augment the fine-tuning set. In our method, a \"frozen\" version of the pre-trained model serves as a noisy teacher that the fine-tuned model must match at a coarse level. In particular, we require that the high-temperature versions of the conditional distributions produced by the post-training model should match the high-temperature versions of the pre-training ones. The temperature hyperparameter controls the level of trust in the pre-trained model, with the limit $T\\to \\infty$ reverting back to regular SFT and $T=1$ to knowledge distillation. We demonstrate that our approach outperforms standard SFT across domain adaptation, instruction-tuning, and reasoning, leading for up to $21\\%$ average relative improvement to standard SFT."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:59:37Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23229": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23225",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23225",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "StringQFT: A Multiuse Textbook Resource for AI-Assisted Theoretical Physics",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "StringQFT: A Multiuse Textbook Resource for AI-Assisted Theoretical Physics",
+    "abstract": "We present StringQFT as a textbook collection for string constructions of quantum field theory and as infrastructure for AI-assisted theoretical physics. The collection comprises 18 volumes, 190 chapters and 3,795 pages, covering brane probes, brane webs, geometric engineering, F-theory constructions, wrapped M5-branes and exact worldsheet constructions. Its open-book benchmark inventory contains 1,073 items, including 499 with automatic finite-answer checking. For retrieval-augmented generation, it provides 1,371 section records linked to textbook sources and PDF locations, together with a local lexical retriever. Training-data preparation is illustrated by 21 private, source-linked examples. For agents, it exposes 19 calculation tools with specified inputs and finite domains, connecting tool use to textbook derivations. We illustrate these uses through specific questions, retrieved passages and finite calculations. The textbook collection and accompanying resources are available at https://github.com/xingyang-yu/StringQFT."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:58:40Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23225": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23219",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23219",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Do LLM Agents Still Need to Be Told How to Self-Improve?",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Do LLM Agents Still Need to Be Told How to Self-Improve?",
+    "abstract": "LLM agents increasingly drive their own learning. Self-improvement methods delegate various components of model optimization to the models themselves. As models become more capable, this motivates a basic question: do these increasingly capable models still need us to specify how they should self-improve? In this paper we study an autonomous paradigm in which, given basic primitives, resources, and a general goal for self-improvement, agents construct their own self-learning algorithm for context-based optimization. Using the setting of gameplay as a testbed, a frozen LLM agent is given a compute budget and tools for collecting experience and updating text documents, and allowed to freely experiment without an externally imposed loop or access to real-world data. We find that sufficiently capable models do self-improve under these conditions, demonstrating strategies that align with classic cognitive frameworks for self-regulated learning and constructs from machine learning literature on self-generated curricula. Furthermore, we study the extent to which the learned text artifacts transfer to external benchmarks, observing improvement across different game horizons, mechanics, and 3D navigation."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:57:10Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23219": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23218",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23218",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "What Does a Bias Head Measure? Non-Identifiability in Head-Level Bias Attribution",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "What Does a Bias Head Measure? Non-Identifiability in Head-Level Bias Attribution",
+    "abstract": "Methods that localise social bias in large language models to individual attention heads and remove it by ablation are validated by their effect on a fairness metric, never by evidence that the statistic selecting the heads measures bias. We audit this on Qwen-2.5-7B-Instruct and Llama-3.1-8B-Instruct. The head map correlates at $ρ= -0.950$ and $-0.768$ with a label-blind response-length map, apparently identifying a surface confound. An intervention that breaks the length-label coupling rejects this reading: with the prompt held fixed, response length explains 1% of the statistic's variance. What does explain it is prompt identity, at 64% of variance, in an ordering that is not monotonic in length. Within any fixed prompt the fairness label, response length and the presence of a protected-group token are collinear at $φ= 0.95$, partly by definition of the labelling rule, so no observational analysis can attribute the map to any of them, and no method in this family performs an experiment that could. The substantive claims fail independently: bias selectivity is not late-layer-concentrated on either model under either reference reading, and no head set we tested reduces the unfairness rate when ablated. Its complement, scored on the opposite label, reliably destroys refusal behaviour ($p = 2.7\\times10^{-5}$), demonstrating that the pipeline detects effects at this scale."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:57:08Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23218": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23216",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23216",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Higher-Scoring Coding Models Did Not Get More Work Done",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Higher-Scoring Coding Models Did Not Get More Work Done",
+    "abstract": "New coding models advertise themselves on score improvements of coding benchmarks. Yet no study has tested if a model that scores higher on these benchmarks gets more real work done. On June 12, 2026, a U.S. export control directive banned access to Claude Fable 5 for 19 days, which forced users to switch to other models. During this time, most former Fable 5 users switched to Opus 4.8 (11 points lower on SWE-Bench Pro compared to Fable 5). We treat this suspension as a natural experiment, where the people and projects stayed the same and only the model changed, so we could isolate the effect of Fable 5 on user productivity. We tracked GitHub pull requests of 297 Fable 5 users before, during, and after the suspension. We used 8,908 developers who stayed on Opus 4.8 all the time as the control group. We also repeated the comparison across five model upgrades before and after the suspension in 2026 (1,208 developers, 15,442 pull requests). Fitting a difference-in-differences model with developer and date fixed effects, we found that having access to Fable 5 increased the 7-day merge rate of pull requests by only 1.4 percentage points [-1.4; +4.3], which was not statistically significant. Similarly, no significant increases of merge rates were found with the upgrades (weighted mean: -0.9 percentage points [-1.9; +0.2]); all five estimates were negative (95% intervals included 0, did not differ from each other). We also did not observe a significant increase in the number of pull requests merged per week (+2.4% [-4.9%; +10.2%])."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:56:42Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23216": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23206",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23206",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Reading Scene States: Uncovering Safety Failures in Vision-Language Models",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Reading Scene States: Uncovering Safety Failures in Vision-Language Models",
+    "abstract": "Vision-language models (VLMs) can provide harmful assistance by interpreting visual events, even without an explicit request for the underlying harmful objective. We identify this \\textbf{scene-state safety vulnerability} and introduce \\textbf{SceneSafetyBench}, comprising 375 image--question pairs spanning Initial, Medium, and Ultimate scene states and five visual presentations. Across eight VLMs, scene-state inputs elicit harmful assistance with attack success rates (ASRs) of 45.6--72.3\\%. Comparative analysis across three VLMs shows that scene-state inputs most closely resemble QR-related images in their layer-wise safety-related signal profiles, while exhibiting lower average late-layer readouts and distinct signal dynamics during generation. To turn this vulnerability into a systematic attack, we propose \\textbf{S3TA}, which translates harmful objectives into scene states, queries image--question pairs independently, and assembles the responses. On seven MM-SafetyBench categories across eight open-weight and commercial VLMs, S3TA achieves a model-average ASR of \\textbf{71.2\\%, exceeding the strongest baseline by 6.1 percentage points}. Text-side filters and visual moderation provide limited protection. These findings highlight the need to safeguard the assistance models infer through scene-grounded reasoning, beyond screening input content."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:48:02Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23206": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23205",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23205",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Fine-Tuning Gemma 4 Edge Models for MATLAB Signal-Processing Code with SFT and QLoRA on a Laptop iGPU",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Fine-Tuning Gemma 4 Edge Models for MATLAB Signal-Processing Code with SFT and QLoRA on a Laptop iGPU",
+    "abstract": "Small language models that run on a laptop are attractive for writing signal-processing code offline, but they make systematic errors on digital signal processing (DSP) conventions. We apply supervised fine-tuning (SFT) to the Gemma 4 edge models E2B and E4B with 66 checked examples covering 11 signal-processing MATLAB subtasks, using low-rank adaptation (LoRA) and quantized LoRA (QLoRA) on the integrated GPU (iGPU) of a laptop, and deploy the 8-bit integer (int8) models with the adapters through OpenVINO. On held-out variants scored by deterministic checkers, the pass rate rises from 18/66 to 37/66 (LoRA) and 37/66 (QLoRA) for E2B and from 32/66 to 47/66 for E4B (QLoRA). Reading all 159 failing programs shows that the adapters remove most errors of convention, such as the sign of a lag, units and array shapes, but few errors in building signals and noise. Applied at run time, the adapter costs 17-19% of the generation speed."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:47:37Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z"
+  },
+  {
+   "sourceId": "arxiv:2611.23202",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23202",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Agent Trust Infrastructure (ATI): A Federated Identity, Trust, Attestation, and Accountability Architecture for Cross-Organization Autonomous AI Agents",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Agent Trust Infrastructure (ATI): A Federated Identity, Trust, Attestation, and Accountability Architecture for Cross-Organization Autonomous AI Agents",
+    "abstract": "AI agents increasingly collaborate across organizational boundaries, invoking tools and interacting with agents operated by independent entities. Although existing agent frameworks support planning and coordination, they lack a common mechanism for verifying cross-organizational agent identity, execution integrity, and authorization. We propose the Agent Trust Infrastructure (ATI), a framework-independent security architecture built on Public Key Infrastructure (PKI), Zero Trust Architecture (ZTA), and remote attestation. ATI establishes federated trust through peer organizational certificate authorities (AgentCAs), eliminating the need for a shared root authority. Before executing requests, ATI validates agent certificates, verifies approved model, tool, and system-prompt configurations, and enforces authorization through three policy checks. We implement ATI as an external security enforcement layer that integrates with existing agent frameworks without modifying their underlying models. We evaluate ATI in a simulated federation of eight organizations using six agent frameworks, each deploying a five-agent team. Security experiments involve two organizations and assess 14 attack scenarios and six benign tasks across five agent models, using five attack variations and three repetitions per variation. A panel of judge models evaluates the experimental outcomes. With all enforcement mechanisms enabled, attack containment increases from 43% to 84% (40% to 80% for the 11 attack scenarios evaluated consistently across all configurations), while enforcement introduces approximately 174 microseconds of overhead per request. ATI is released as an open-source, framework-independent package that uses IETF WIMSE workload token formats for identity and request verification and Entity Attestation Tokens for model, tool, and system-prompt integrity verification."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:44:25Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23202": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23197",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23197",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Structure--Residual Inductive Biases for Language Model Pretraining",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Structure--Residual Inductive Biases for Language Model Pretraining",
+    "abstract": "Next-token prediction is relied upon to learn both predictive behavior and internal representations. We ask whether representation structure itself should be an explicit inductive bias. Motivated by the two-part coding view of Kolmogorov complexity, we study a structure--residual principle in which a representation separates structure from realization detail. We instantiate this principle in two complementary ways. Boundary Bottleneck Concept (BBC) routes information from token segments through boundary carriers while preserving local autoregressive computation. Continuous Concept (CC) regularizes representation geometry and induces a spectral decomposition into low-frequency structure and high-frequency residual. We derive coding bounds for both views and show that multiplicity-corrected boundary attention becomes exact as the within-segment path energy vanishes. Empirically, BBC and CC exhibit strikingly different depth preferences: BBC works best in early layers, whereas CC is most effective in later layers. At 300M training tokens, combining BBC and CC improves NLL by 1.44\\% on GPT-2 Medium. These gains persist with training runs up to 20B tokens. Representation diagnostics show that BBC increases the relative predictive importance of boundary states, while CC reduces spectral residual energy. Together, these results suggest that structure--residual biases can improve language-model pretraining beyond next-token prediction. Code: https://github.com/haihuang-ml/structure-residual"
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:38:27Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23197": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23192",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23192",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "WoRD: Diffusion-Based Posterior Inference for Online Goal Recognition",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "WoRD: Diffusion-Based Posterior Inference for Online Goal Recognition",
+    "abstract": "Goal recognition is the task of inferring an agent's intended goal from its observed behavior. Most existing work focuses on high-level symbolic recognition, abstracting away the continuous motion through which agents reach their goal. Methods that do reason over continuous trajectories rely on an explicit dynamics model that is hard to acquire and rarely transfers across settings. Neither approach explicitly learns how agents move toward each candidate goal, limiting accuracy on ambiguous trajectory prefixes where such knowledge is most needed. We present WoRD (Waypoint Recognition with Diffusion), which uses a learned trajectory prior to infer the agent's goal from partial observations. At each step, WoRD runs one warm-started denoising chain per candidate goal, steers each chain toward the observed trajectory through a closed-form log-likelihood gradient, and reweights the resulting samples by Bayes' rule into a calibrated posterior over goals. We evaluate WoRD on simulated robot settings, pedestrian trajectories, and vehicle trajectories using four metrics targeting distinct failure modes. Across all three settings, the same inference procedure preserves calibrated multimodal beliefs through ambiguous prefixes where filter- and classifier-based observers collapse to a single mode or grow overconfident."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:35:53Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23192": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23189",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23189",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Retrieval-Augmented Correction for Generalist Medical Image Segmentation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Retrieval-Augmented Correction for Generalist Medical Image Segmentation",
+    "abstract": "Automated segmentation is routinely used as the first step in quantitative image-based clinical workflows, where predicted masks are subsequently reviewed and corrected by human operators. Automated correction of the residual structural errors is currently addressed one anatomy at a time, so the number of trained correctors scales with the number of segmentation targets. We present GRACE, a retrieval-augmented refiner that edits an input mask under context drawn from a shared knowledge base of verified prior cases. The refiner is trained once on a multi-organ corpus spanning compact organs, cavities, branching vessels, and tumour lesions. In the held-out dataset-transfer evaluation, three held-out datasets query a fixed knowledge base built from training data only. A separate leave-one-anatomy-out experiment tests parameter-free index extension: verified cases of an unseen solid organ enter the knowledge base, and the refiner stays frozen. A light shape-aware projection head on a frozen multimodal encoder maps embedding similarity to the shape agreement of the masks, so the knowledge base returns cases that the refiner can use as a shape prior. We evaluate GRACE on 18 public datasets spanning CT, MRI and ultrasound, using nine refinement configurations and seven upstream segmentors that span weak, mid, and strong operating regimes. We report each change with the DSC of its input mask. On the weak tier, the input DSC is 0.386 and GRACE adds up to +0.35 DSC. On a strong segmentor, the input DSC is 0.932 and the mean change is small. Transfer to an imaging modality that is absent from training and from the index is partial and depends on the anatomy, and remains an open research direction. Our results suggest retrieval-conditioned refinement is a practical alternative to anatomy-specific correction models. Code: https://github.com/robustml-eurecom/grace"
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:33:42Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23189": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23185",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23185",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Polarity Composition Hypothesis: Causal Evidence from Negation in NLI",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Polarity Composition Hypothesis: Causal Evidence from Negation in NLI",
+    "abstract": "We investigate how language models process negation in natural language inference (NLI). We propose the \\textit{Polarity Composition Hypothesis}, a high-level causal model of this computation. Behavioral evaluations show that language-model predictions largely conform to the proposed hypothesis. Using Distributed Alignment Search, we identify causally effective subspaces aligned with the variables in the polarity-composition hypothesis. These representations transfer across negation forms and partially to a subset of MNLI. We release the dataset and code."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:30:35Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23185": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23179",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23179",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Say Less, Hallucinate Less? Diagnosing and Restoring Object Coverage in Preference-Optimized Vision-Language Models",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Say Less, Hallucinate Less? Diagnosing and Restoring Object Coverage in Preference-Optimized Vision-Language Models",
+    "abstract": "Preference optimization (PO) is the standard way to reduce object hallucination in large vision-language models. We find that four public PO checkpoints of LLaVA-1.5-7B also lower object coverage. They name fewer object categories, and their lower hallucination rates bring no significant gain in set-level object F1 on CHAIR. We therefore ask how much of the PO gain the base model can reproduce by stopping earlier. A positive end-of-sequence (EOS) logit bias lets the base model reach the recall of each PO model, and this early stopping alone reproduces 58 to 86 percent of the CHAIRi gain of three checkpoints on two disjoint COCO sets. Writing longer does not bring the lost categories back. Under greedy decoding, a negative EOS bias recovers only 2 to 9 percent of the lost CHAIR recall of these checkpoints, and 94 to 96 percent of the added object mentions repeat categories already named. On CHAIR, the base caption of the same image still names about half of the missed object categories. We therefore propose base-guided object-category restoration, which appends high-confidence base-only categories to the PO caption without training. With thresholds fixed on a development set, it brings three checkpoints within one point of the base recall on a held-out COCO set with a lower distinct-object hallucination rate than the base model. Against the recall-matched base stopping curve, its gain holds for RLAIF-V near the base recall and for RLAIF-V and CHAIR-DPO at an intermediate recall. We will release the code of the recall-controlled evaluation."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:24:58Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z"
+  },
+  {
+   "sourceId": "arxiv:2611.23174",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23174",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Inference after coding agents",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Inference after coding agents",
+    "abstract": "Empirical research is changing rapidly as AI coding agents are becoming increasingly proficient in every step of it, from writing code to manipulating data. We argue that while the potential of coding agents for science is vast, their use in hypothesis testing poses a substantial threat to classical inference, as these agents enable a supercharged form of selective inference. In particular, we argue that coding agents carrying out empirical research introduce a new type of post-selection inference that combines human-like, open-ended search over an implicit space of estimators with programmatic replayability of both the selection and the estimation process. Indeed, we find that on simulated data with zero effects, four frontier agents report significant p-values between 54% and 98% of the time when asked to produce a compelling finding. We propose a simple procedure for detecting and correcting these distortions. After an agent has completed its analysis, we reset and replay it on subsamples of the data to estimate the agent's relative probability of selecting that analysis when it looks statistically favorable. For agents with stable selection behavior, the resulting corrected test is asymptotically valid and consistent conditional on selection. Importantly, the correction is learned from the black-box agent's actual choices rather than a model of how it searches, so it remains valid even as AI technology continues to evolve rapidly. In simulations, the correction robustly lowers the high false rejection rates to near the nominal 5%. We illustrate the method on applications from two published papers."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:22:01Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23174": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23161",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23161",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Attribution Through the Decoder: Prediction-Space Explanations for Structured Outputs",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Attribution Through the Decoder: Prediction-Space Explanations for Structured Outputs",
+    "abstract": "Networks that predict angles, gaze directions, and rotations do not output these quantities directly: they emit raw coordinates that a fixed decoder, such as normalization, maps to the final prediction. Attribution methods are usually applied to the raw coordinates, so they can credit inputs for changes the decoder discards, such as rescaling a vector when only its direction matters. The resulting explanation can highlight inputs that have no effect on the prediction. We instead attribute through the decoder differential, which for normalization decoders reduces to a scaled tangent projection. We characterize invariance to output rescaling, show that every fixed smooth scalar target on a sphere has points of zero tangential sensitivity, and show that an endpoint-projected variant of Integrated Gradients can still attribute to scale-only inputs, whereas direct angular Integrated Gradients cannot. On synthetic tasks with analytically known relevance, ambient attribution assigns up to 72% of its mass to an irrelevant region. On MPIIGaze validation data, tangent Grad-CAM produces 44% greater prediction displacement under 10% pixel deletion. On PASCAL3D+ with a 6D rotation decoder, the full differential improves mean deletion displacement by 14.1 degrees over the ambient coordinate sum and by 13.8 degrees over a decoder-invariant scalar. Results for a two-polarity tangent LayerCAM variant are mixed: it exceeds ambient-sum LayerCAM on circular regression but no difference is detected on quaternion pose. These results separate two failure sources, radial contamination and scalarization loss. The approach uses existing attribution methods with decoder-aware targets, although some variants also require changes to attribution aggregation. An invariant attribution can still miss inputs that drive the prediction, so invariance and deletion performance should each be checked."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:13:50Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23161": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23158",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23158",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "MoE--LoRA Methods for Multilingual Adaptation: A Systematic Empirical Study",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "MoE--LoRA Methods for Multilingual Adaptation: A Systematic Empirical Study",
+    "abstract": "Routed low-rank adapters offer a parameter-efficient means to improve the performance of large language models (LLMs) across tasks. Hence, it is assumed that they can also be used to improve the support of low-resource languages in LLMs, which currently serve English far better than the thousands of other languages spoken worldwide. However, this assumption has never been verified empirically under a shared multilingual evaluation protocol. We address exactly this gap by comparing eight low-rank adaptation (LoRA) methods on a frozen base model using 200 unique languages in more than 9{,}000 evaluation settings. Our results suggest that a reduced-scale search can identify viable configurations of LoRA methods but does not reliably predict their relative performance, as the top-ranking configuration is never best at scale. LoRA reliably improves language-model fit on translation data, consistently degrades reading comprehension, and benefits low-resource languages most. These findings suggest that LoRA methods should be regarded as targeted tools rather than general-purpose means for improving the multilingual capabilities of LLMs."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:11:42Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23158": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23155",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23155",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "TextSphere: Efficient Text-to-Image Generation via Shared Hyperspherical Alignment and Uniformity",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "TextSphere: Efficient Text-to-Image Generation via Shared Hyperspherical Alignment and Uniformity",
+    "abstract": "Recent advances in text-to-image generation have substantially improved image quality, particularly through diffusion-based methods that require multiple inference steps. In contrast, Sphere Encoder offers an efficient generative framework capable of producing images with fewer forward steps. However, extending it to free-form text is nontrivial, because its class-conditioned design lacks cross-modal alignment. To address this challenge, we propose TextSphere, an efficient text-to-image generative framework that extends Sphere Encoder with language conditioning and cross-modal alignment. We incorporate pretrained CLIP text embeddings through adaptive layer normalization (AdaLN) to guide image generation while retaining the original spherical sampling mechanism. To bridge the cross-modal representation gap, we introduce a Spherical Semantic Alignment and Uniformity (SSAU) objective that jointly promotes semantic alignment and representation uniformity on the hypersphere. Experiments on CUB-200-2011, MS-COCO-2014, and Flickr30k demonstrate that TextSphere consistently reduces generation FID (gFID) over the text-conditioned baseline while achieving reconstruction FID (rFID) below 1.0. With only 4 and 6 sampling steps, TextSphere achieves lower gFID than the compared diffusion- and GAN-based models trained from scratch on CUB-200-2011 and MS-COCO-2014, respectively. We further observe that improved reconstruction fidelity does not necessarily yield better generation quality. In addition, we use Partial Least Squares Singular Value Decomposition (PLS-SVD) to analyze cross-modal alignment and modality gap, offering insight into the effectiveness of our approach."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:08:53Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z"
+  },
+  {
+   "sourceId": "arxiv:2611.23154",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23154",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Learning Stratified Policies for Inference-Time Objectives",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Learning Stratified Policies for Inference-Time Objectives",
+    "abstract": "Inference-time scaling improves the performance of large language models by sampling multiple responses and evaluating their collective utility. However, many existing approaches obtain these samples by repeatedly sampling from a single policy. In this work, we study if the sample budget at inference time can instead be allocated across a population of policies. We introduce stratified policies, where each of $k$ learned policies contributes one response to a $k$-sample inference-time objective. We realize this policy population using separate LoRA adapters on a shared language model backbone and optimize it for pass@$k$. We theoretically motivate the approach by analyzing the linear setting; a population of LoRAs can achieve zero best-of-$k$ approximation error in settings where every single LoRA has strictly positive prediction error. Empirically, we demonstrate that stratified policies consistently improve pass@$k$ over a single-policy baseline across multiple reasoning tasks. Overall, our results highlight how distributing samples across complementary policies can be a more effective use of sample budget than repeated i.i.d. sampling from a single policy at inference time."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T18:06:12Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23154": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23142",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23142",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Mind the Gap: A Deployed Multi-Agent System for Documentation Maintenance",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Mind the Gap: A Deployed Multi-Agent System for Documentation Maintenance",
+    "abstract": "The \"AI revolution\" has enabled teams across the technology industry to deliver software features at unprecedented velocity. While code evolves faster than ever, customer-facing documentation often struggles to stay up to speed. As users increasingly rely on LLM-based agents that consume documentation as their primary interface, the impact of this documentation gap worsens: stale information propagates and is treated as authoritative. Signals for identifying where documentation has fallen behind already exist in abundance, both explicit (e.g., resolved support tickets revealing what documentation lacks) and implicit (e.g., code-documentation discrepancies detectable from automated loops). We deploy a multi-agent system, built around a triage agent we call \"TriAgent,\" that continuously extracts these signals and repairs documentation drift. Over 43 days of shadow-mode operation, our system triaged 499 tickets and surfaced 92 gaps in the documentation. Using a panel of LLM judges from independent model families, 81.1% of TriAgent's verifiable assertions were correct (245 of the 302 assertions the human resolution addresses; majority of three judges); on length-comparable pairs the panel preferred TriAgent's response in 70.5% of pairs and the human engineer's in 23.2% (the rest had no judge majority). Importantly, agent- and human-sourced replies tended to be complementary, with the human often surfacing insights that were either buried within the existing documentation or missing from it entirely; our system turns each such insight into a documentation gap and, after human review, a fix. Repairing a gap measurably improved the agent's later answer: when the agent re-answered the same ticket after the repair, blinded judges preferred the post-repair answer over its own pre-repair answer 71.4% of the time (n=35). A blinded human audit confirms strong alignment on self-improvement."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T17:59:13Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23142": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23138",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23138",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "RSI-Prime: Training Models to Train Models",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "RSI-Prime: Training Models to Train Models",
+    "abstract": "Enabling large language models (LLMs) to autonomously conduct training and improve target models is an important foundation for recursive self-improvement (RSI). As LLMs expand their role from being trained to conducting training, their model-training capability warrants dedicated study and systematic development. To this end, we construct RSI-Prime, a dataset for improving model-training capability, comprising 350 complete experimental trajectories across seven task categories. To help LLMs learn to make high-quality experimental decisions from training practice, we perform fine-grained decision identification and quality annotation, then apply decision-level loss masking to exclude supervision on low-quality behavior. Experiments with GLM-5.3 on PostTrainBench, a benchmark for autonomous post-training, show that training on RSI-Prime yields a 31.95% relative improvement in overall performance over the original GLM-5.3, highlighting a path toward future RSI systems in which models autonomously sustain their own advancement."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T17:55:30Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23138": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23127",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23127",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "The Illusion of Grounding: Do Vision-Language Models Weigh Retrieved Text and Images Like an Ideal Observer?",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "The Illusion of Grounding: Do Vision-Language Models Weigh Retrieved Text and Images Like an Ideal Observer?",
+    "abstract": "Retrieval-augmented vision-language models (VLMs) answer from two sources of evidence that can each fail: the retrieved text can be wrong or noisy, and the image can be degraded or contradicted. We introduce GIB-200K, 200,000 image-question items built from COCO and Visual Genome, each expanded into controlled stress conditions: hard-negative retrieval noise (1-20 documents), visual ambiguity (Gaussian and motion blur, low-resource crops) and cross-modal conflict with counterfactual flip pairs. Instead of only measuring degradation, we ask how models combine the two modalities. From ideal Bayesian cue combination we derive a testable prediction that yields formal definitions of Knowledge Inertia (text over-weighted relative to the model's own image evidence) and Sensory Capture (the reverse), and we estimate the weights with a measurement-error-corrected regression whose recovery of known weights we verify. A counterfactual flip decomposition separates modality bias from concept priors, and a Grounding Illusion Score measures how much clean accuracy is not grounded in the image. We evaluate 4 open models on one frozen, seeded evaluation split of 2,000 GIB-200K items. All models are accurate on clean inputs (92.5%-94.2%) but adverse accuracy falls to 41.3%-59.9%. The two LLaVA models over-weight the text (Knowledge Inertia, w_T/w_I = 1.229 and 1.322), whereas InternVL3 favours the image (w_T/w_I = 0.680); between 34.8% and 71.4% of the clean answers that are correct are abandoned when the document lies. A training-free consistency check that compares the answer with and without retrieval trades coverage for accuracy under misleading documents, while falling back to the image fails when the image is heavily degraded. All per-instance outputs, code, and an audit that recomputes every reported open-model number are released."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T17:45:28Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23127": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23119",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23119",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Dynamic Task Allocation with Dialogue",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Dynamic Task Allocation with Dialogue",
+    "abstract": "Effective multi-agent collaboration requires agents to adapt task allocation as goals and responsibilities evolve. Prior task-allocation frameworks often assume static goals, full observability, or rely on large language models (LLMs) without explicit, verifiable beliefs about task allocation or intent. These assumptions limit their applicability to real-world collaboration, where agents often lack full information about each other's actions, progress, or local environment. To support dynamic task allocation under partial observability, we introduce a communication-augmented Bayesian task-allocation framework. Our agent uses dialogue to reduce uncertainty about the environment and collaborators, while keeping decisions grounded in explicit probabilistic beliefs. We evaluate our framework in an Overcooked domain extended with dynamically arriving tasks under both full and partial object-space observability. Our communication agent consistently outperforms a vanilla LLM agent in both settings. Additionally, our framework performs comparably to a non-communicating task-allocation baseline under full observability, but substantially outperforms it under partial observability as task complexity increases by an average speed up of 0.585 and completes on average 18 timesteps faster. These results indicate that our agent is more efficient in dynamic task allocation than baselines in partially observable environments, and that communication is important as available information decreases."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T17:37:17Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23119": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23115",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23115",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Nunchi: Ears Help Eyes in Multi-Party Conversations",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Nunchi: Ears Help Eyes in Multi-Party Conversations",
+    "abstract": "Identifying whom a person looks at is central to understanding multi-party conversations, yet gaze geometry alone becomes ambiguous as more people appear. Conversations offer cues that geometry lacks, such as who is speaking and what is said, but no gaze dataset provides them for many multi-party scenes. We introduce SORBET, a benchmark of 3,340 samples from 1,578 clips with synchronized speech, transcripts, and attended person labels, covering more multi-party scenes than existing gaze datasets. Prior gaze models struggle to use these cues, which come in different forms, must be linked to the right person, and can conflict with gaze geometry. We propose Nunchi, a framework that constructs a text prompt from the transcript and the outputs of gaze and speaker models, links every cue to the candidates with shared labels, and lets a vision-language model (VLM) weigh gaze geometry against conversational cues to identify the attended person. Nunchi outperforms the strongest existing method by 4.8 percentage points. On SORBET, conversational cues help whereas additional visual cues do not, and the gains hold across three VLMs, with automatic transcripts, and on two existing datasets."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T17:35:07Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23115": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23112",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23112",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Large-scale Neuron Community Discovery Reveals Neuron-Sparse Behaviors in Language Models",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Large-scale Neuron Community Discovery Reveals Neuron-Sparse Behaviors in Language Models",
+    "abstract": "What reusable units of computation can we discover within a language model's neurons? Prior work has shown that individual forward passes can often be sparsified post-hoc to small groups of neurons, but it has been unclear whether these groups form coherent computational entities reused across inputs. We introduce neuron community discovery, an unsupervised method for finding neuron groups that recur across prompts and are causally necessary and sufficient, within the layers they span, for common computations. The method combines gradient-based attribution, a graph connecting neurons that are repeatedly attributed together, and community detection. Applied to Llama-3.1-8B using ten million prompts, it discovers thousands of candidate communities. We evaluate them on held-out prompts through three causal tests: community necessity, sufficiency within a layer subset, and layer necessity. These tests identify groups whose removal disrupts predictions and whose retention preserves predictions despite ablating the remaining MLP neurons in the tested layers. Discovered communities support functions like grammatical agreement, token-probability calibration, fixed phrases, in-context copying, addition, and multiplication. With communities capped at 128 neurons across all layers, 10.3% of held-out prompts have at least one layer's contribution explained on a neuron-sparse basis. Coverage remains 8.7% when requiring at least four layers and 3.3% when requiring at least twelve. These results show that small groups of existing neurons can provide reusable computational components across prompts, and that such groups can be discovered at scale."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T17:33:20Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23112": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23106",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23106",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Natural Language Programming: Rethinking Language, Memory, and Cognition in the Era of Generative AI",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Natural Language Programming: Rethinking Language, Memory, and Cognition in the Era of Generative AI",
+    "abstract": "Generative Artificial Intelligence is transforming the role of natural language in computational systems. In classical Natural Language Processing (NLP), language was treated as an object of computation: something to analyse, classify, translate, or generate. Large Language Models (LLMs) challenge this perspective, enabling natural language to function increasingly as an executable cognitive medium through which humans structure reasoning, orchestrate problem solving, and regulate hybrid human/AI workflows. This paper introduces Natural Language Programming (NLPg) as a theoretical and epistemological extension of traditional NLP. Rather than focusing on language understanding alone, NLPg conceptualises prompts as dynamic cognitive artefacts that externalise goals, constraints, assumptions, validation criteria, and intermediate reasoning states. Prompting is thus not merely a technical interaction technique, but a form of dialogic cognitive programming operating within distributed human/AI memory architectures. Building on theories of distributed cognition, extended mind, metacognition, and dialogic learning, the paper proposes the notion of Dialogic Working Memory, describing how prompts and conversational states function as temporary external memory structures supporting reasoning continuity and reflective regulation. We further map existing memory architectures (BTMA, SKGE, RMR) onto this framework, illustrating how episodic, semantic, and metacognitive layers support long-horizon conversational coherence. Finally, implications for computational linguistics and AI/mediated knowledge systems are discussed, suggesting a post symbolic and post interface paradigm in which natural language operates simultaneously as communication medium, executable specification, cognitive scaffold, and distributed memory architecture."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T17:27:01Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23106": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23096",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23096",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Hidden-State Similarity Predicts Re-Elicitation After Inoculation Prompting",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Hidden-State Similarity Predicts Re-Elicitation After Inoculation Prompting",
+    "abstract": "Fine-tuning on narrow harmful tasks can cause emergent misalignment, where models generalize harmful behavior beyond the training distribution. Inoculation prompting can reduce this effect by explicitly eliciting the undesired behavior during training, but recent work shows that the behavior can reappear when evaluation prompts contain cues from the training context. We study what makes such prompts effective triggers. We find that, surprisingly, textual similarity to the inoculation prompt is an incomplete predictor. Instead, prompts are more likely to re-elicit suppressed behavior when they induce activation states similar to those produced by the inoculation context. These findings advance our understanding of how inoculation prompting modulates conditional misalignment, and suggest that activation space analysis can help identify when suppressed behaviors remain accessible under eval-time prompts."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T17:20:33Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23096": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23093",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23093",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "What's in a Tree ? Hierarchical $n$-gram models as controlled approximators of language",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "What's in a Tree ? Hierarchical $n$-gram models as controlled approximators of language",
+    "abstract": "Hierarchical models have been proposed as synthetic settings for studying language. However, their relevance to realistic language corpora remains underexplored. In this work, we introduce tree-grams, autoregressive generative $n$-gram models that build the conditional probability tensor $p(x_n \\mid x_{1:n-1})$ through a hierarchical composition of order-2 and order-3 tensors. $n$ controls the maximal context window, whereas a rank hyperparameter $d$ controls model capacity, yielding an interpretable and systematically scalable family of approximators of language. We show how tree-grams outperform existing $n$-gram baselines, while remaining competitive with deep transformer-based language models. We demonstrate the utility of such controlled approximations by using tree-grams as generative models. In particular, we show that hyperparameter transfer under $μ$P can be made more robust when narrower models are tuned on simpler data, generated by tree-grams with moderate $n$ and $d$. In addition, we show that entropy and effective range of correlations control performance gap after fine-tuning. This is because tree-grams allow us to explicitly control horizon and capacity. When allowed to route across candidate topologies, we observe emergent sparsity in tree-grams. Such concentrated routing permits pruning upto 95\\% of topologies without significant change in performance."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T17:14:01Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23093": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23091",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23091",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "BugGen 2.0: Rethinking the Roles of LLMs for Scalable RTL Bug Synthesis",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "BugGen 2.0: Rethinking the Roles of LLMs for Scalable RTL Bug Synthesis",
+    "abstract": "AI-assisted RTL localization and debugging need ground-truth bug datasets with known locations and observable failures, while testbench grading uses injected bugs to measure detection capability. Creating such datasets at scale remains a major EDA challenge. BugGen 1.0 shows that Large Language Models (LLMs) can generate context-aware RTL mutations. Still, it relies on the model for both choosing where to mutate and generating the edit, which increases inference costs and can lead to invalid choices. BugGen 2.0 changes this division of labor. Deterministic algorithms handle structural analysis, target selection, and validation, while the LLM focuses on localized semantic rewriting. Across four OpenTitan IP blocks and FabScalar with three LLMs, BugGen 2.0 reaches every requested quota of compilable bug scenarios that cause at least two test failures, with 14-16 of 16 configured mutation types represented. In completed same-model comparisons, it reduces token use by 6.8x-15.4x relative to BugGen 1.0 and 1.5x-7.9x relative to Firefly. BugGen 2.0 also expands the dataset without simulating every new bug. After finding accepted scenarios with observable failures, it generates alternative mutations at the same locations, simulates only a subset, and estimates acceptance for the rest. This skips 63.6% of AES and 33.9% of FabScalar variant simulations. Full simulation finds that 77.7% of AES variants and 95.2% of FabScalar variants are accepted, with a 1.09% estimation error on the directly comparable FabScalar set. These results show that focusing LLMs on semantic rewriting lowers inference and simulation cost while improving consistency across models and designs."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T17:11:54Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z"
+  },
+  {
+   "sourceId": "arxiv:2611.23081",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23081",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Learning to Undo: Transfer Reinforcement Learning under State Space Transformations",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Learning to Undo: Transfer Reinforcement Learning under State Space Transformations",
+    "abstract": "Transfer learning in reinforcement learning (RL) has shown strong empirical success. In this work, we take a more principled perspective by studying when and how transferring knowledge between MDPs (a source and a target) can be provably beneficial. Specifically, we consider the case where there exists an undo map such that applying this map to the target's state space recovers the source exactly. We propose an algorithm that learns this map by matching state feature statistics gathered from both MDPs, and then uses it to transfer the source policy to the target. We theoretically justify the algorithm by analyzing the setting when the undo map is linear and the source is linearly-$Q^\\star$ realizable, where our approach has strictly better sample complexity than tabula rasa RL in the target MDP. Empirically, we demonstrate that these benefits extend beyond this regime: on challenging continuous control tasks and Atari games, our method achieves significantly better sample efficiency. Overall, our results highlight how shared structure between tasks can be leveraged for efficient transfer of policies across environments."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T17:06:51Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23081": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.23080",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.23080",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Colombo: A Frontier-to-Frontier Autoresearch System for Oracle-Based Optimization",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Colombo: A Frontier-to-Frontier Autoresearch System for Oracle-Based Optimization",
+    "abstract": "Science advances from frontier to frontier as discoveries reshape what is known and create the basis for further discovery. We present Colombo, a self-organizing AI researcher that drives this renewal, first instantiated in oracle-based optimization. Here, the central question is how efficiently a problem class can be solved through a prescribed information interface and what costs no admissible algorithm can avoid. The gap between achievable guarantees and unavoidable limits defines the frontier recorded in its Complexity Atlas, a living map of frontier settings and the current state of knowledge. Self-Organization turns unresolved gaps into adaptive research programmes, coordinating conjecture formation, mathematical investigation, and replanning as evidence accumulates. Adversarial Co-Ascent develops algorithms and hard families through reciprocal challenge, exposing mechanisms of information use and concealment that guide stronger methods and proofs of unavoidable costs. Independent review and Lean-based formal certification check mathematical claims, while the Long-Term Memory carries supported findings and research experience across settings. To date, Colombo has established optimal or near-optimal rates for more than fifty settings in the Atlas. Colombo thus takes a concrete step toward Autopoietic Science: a scientific process whose validated advances regenerate the conditions of its own progress, continually reshaping how inquiry is organized and what it can discover."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-17T17:06:23Z"
+   },
+   "fetchedAt": "2026-11-18T04:52:10.783Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.23080": 200
+   }
+  }
+ ]
+}
