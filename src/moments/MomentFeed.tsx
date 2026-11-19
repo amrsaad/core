@@ -1984,6 +1984,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                 if (slot.index === idxRef.current) syncHintRef.current();
               },
               onReady: () => {
+                // Der Spieler kann vor onReady schon abgebaut sein (Reiterwechsel, Abrufkarte)
+                if (!slot.player) return;
                 slot.ready = true;
                 const vsr = vstat.current;
                 if (vsr && slot.index === vsr.j && vsr.readyAt === null) vsr.readyAt = Math.round(performance.now() - vsr.t0);
