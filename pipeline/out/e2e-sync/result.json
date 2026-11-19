@@ -1,5 +1,5 @@
 {
- "at": "2026-11-19T13:08:10.584Z",
+ "at": "2026-11-19T14:19:22.342Z",
  "runs": [
   {
    "browser": "webkit",
@@ -49,12 +49,12 @@
    },
    "diagLines": 16,
    "diagSample": [
-    "9glg slot0 sy6:1 state 2",
-    "9glg sync: packed 1 kB to 1 kB",
-    "9glg sync: PUT ok 1 kB in 0.0 s",
-    "9glg app: hidden"
+    "e79c slot0 sy0:1 state 2",
+    "e79c sync: packed 1 kB to 1 kB",
+    "e79c sync: PUT ok 1 kB in 0.0 s",
+    "e79c app: hidden"
    ],
-   "writeDelayMs": 10021,
+   "writeDelayMs": 10024,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -81,9 +81,9 @@
     "diagOneDevice": true,
     "diagNoSecrets": true,
     "noWriteBefore10s": true,
-    "writeAfter10s": true,
-    "writeDelayAbout10s": true,
-    "captionInFile": true,
+    "writeAfter10s": false,
+    "writeDelayAbout10s": false,
+    "captionInFile": false,
     "debounceOneWrite": true,
     "debounceFromLast": true,
     "bUnlocked": true,
@@ -109,14 +109,14 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "diagLines": 16,
+   "diagLines": 15,
    "diagSample": [
-    "kt9c slot0 sy5:1 state 2",
-    "kt9c sync: packed 1 kB to 1 kB",
-    "kt9c sync: PUT ok 1 kB in 0.0 s",
-    "kt9c app: hidden"
+    "7qhw yt: warm cue slot2 sy0:1",
+    "7qhw sync: packed 1 kB to 1 kB",
+    "7qhw sync: PUT ok 1 kB in 0.0 s",
+    "7qhw app: hidden"
    ],
-   "writeDelayMs": 10017,
+   "writeDelayMs": -790,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -126,6 +126,10 @@
    "errors": []
   }
  ],
- "failed": [],
+ "failed": [
+  "chromium.writeAfter10s",
+  "chromium.writeDelayAbout10s",
+  "chromium.captionInFile"
+ ],
  "exceptions": []
 }
