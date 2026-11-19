@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-19",
+ "records": [
+  {
+   "sourceId": "wiki:de:Diplodia sapinea",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Diplodia_sapinea",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/19",
+    "status": 200
+   },
+   "title": "Diplodia sapinea",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Diplodia sapinea Fuckel ist ein opportunistischer Schwächeparasit aus der Familie der Botryosphaeriaceae, der als Erreger des Diplodia-Triebsterbens weltweit an Kiefern und anderen Nadelbäumen vorkommt. Der Pilz lebt charakteristischerweise als symptomloser Endophyt in gesunden Bäumen und kann unter abiotischen Stressbedingungen – insbesondere Dürre, Hitze und Hagelschlag – von der endophytischen in die pathogene Lebensweise übergehen. Als wärmeliebender Organismus mit einem Temperaturoptimum von 25 bis 30 °C wird Diplodia sapinea durch fortschreitende Klimaerwärmung begünstigt und breitet sich zunehmend in bisher kühlere Regionen Nordeuropas aus, wo er erhebliche wirtschaftliche Schäden in Kiefernbeständen, Plantagen und Baumschulen verursacht."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-19T11:41:31.466Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Diplodia_sapinea": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Christlich-Soziale Union in Bayern",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Christlich-Soziale_Union_in_Bayern",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/19",
+    "status": 200
+   },
+   "title": "Christlich-Soziale Union in Bayern",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Christlich-Soziale Union in Bayern e. V. (CSU) ist eine politische Partei in Deutschland und dominiert als Landespartei die bayerische Politik. Sie wird im politischen Spektrum mittig-rechts verortet."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-19T11:41:31.466Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Christlich-Soziale_Union_in_Bayern": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Kabinett Adenauer I",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Kabinett_Adenauer_I",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/19",
+    "status": 200
+   },
+   "title": "Kabinett Adenauer I",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Das Kabinett Adenauer I war die von 1949 bis 1953 amtierende erste deutsche Bundesregierung."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-19T11:41:31.466Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Kabinett_Adenauer_I": 200
+   }
+  }
+ ]
+}
