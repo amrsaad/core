@@ -193,8 +193,10 @@ describe('A: vorzeitiges ended ohne gespielt zu haben', () => {
     t.deck.load(clip('b', 30), t.sink, { play: true, muted: true });
     await flush();
     t.lines.length = 0;
-    el.stall = 99;
-    el.earlyEnd();
+    // Runde 26: der verlassene Moment bleibt in seinem Element, b läuft in einem neuen
+    const el2 = t.els.find((x) => x.src.includes('/b.mp3'))!;
+    el2.stall = 99;
+    el2.earlyEnd();
     vi.advanceTimersByTime(EARLY_RESTART_MS[0]);
     expect(restartLines(t)).toHaveLength(1);
   });

@@ -276,6 +276,18 @@ export function dataReady(o: { at: number; t: number; dur: number; rs: number; b
 export const WEAK_NET_MS = 5 * 60_000;
 /** Runde 18: braucht der aktive Moment so lange bis playing, gilt das Netz als schwach (ms) */
 export const WEAK_PLAY_MS = 5000;
+/**
+ * Runde 26 (Diag 19.11. 09:16:47): so viele zuletzt verlassene Momente bleiben geladen und pausiert im Deck, damit das Zurückwischen ohne Kaltstart tauscht.
+ * Jeder behaltene Moment kostet einen Platz des Vorrats (Elemente je Spur bleiben POOL + 1: aktiv, behalten, Vorrat). Der Platz kommt vom am weitesten vorausliegenden Eintrag.
+ * Zwei Momente zurück kosten einen zweiten Platz (Vorrat dann nur noch 3), darum bleibt es bei einem.
+ */
+export const KEEP_PREV = 1;
+/** Runde 26: ein Vorrats-Eintrag, der in so kurzer Zeit bereit wird (ms), zählt als Zeichen für ein gutes Netz (zwei in Folge heben "schwach" auf) */
+export const WEAK_OK_READY_MS = 3000;
+/** Runde 26: ein Netzstart, der in so kurzer Zeit spielt (ms), zählt ebenso */
+export const WEAK_OK_START_MS = 2000;
+/** Runde 26: so viele schnelle Ereignisse in Folge heben "schwach" auf */
+export const WEAK_OK_RUN = 2;
 /** Runde 18: im schwachen Netz lädt ein Vorrats-Eintrag nach einem Fehler frühestens nach dieser Zeit neu (ms), höchstens RELOAD_MAX mal je Ausschnitt */
 export const RELOAD_WAIT_MS = 15_000;
 export const RELOAD_MAX = 2;
@@ -339,6 +351,8 @@ interface PoolEntry {
   /** Runde 20: der Eintrag erfüllte die alte Bedingung, aber hinter der Startstelle lag noch kein Puffer (Zeile steht, Seek-Anstoß ist geplant) */
   thin: boolean;
   t0: number;
+  /** Runde 26: "pool slow" wurde gemeldet (8 s ohne Bereitschaft) */
+  slow?: boolean;
 }
 
 /** Stand eines Eintrags für Host und Diagnose */
@@ -467,6 +481,11 @@ export class AudioDeck {
   private lane: Lane = 'plain';
   /** Der Vorrat in Reihenfolge der Warteschlange (Brief 14): je Eintrag ein Element mit dem Anfang eines der nächsten Momente */
   private entries: PoolEntry[] = [];
+  /** Runde 26: zuletzt verlassene Momente, geladen und pausiert (siehe KEEP_PREV), ältester zuerst. Nie zugleich im Vorrat. */
+  private kept: PoolEntry[] = [];
+  /** Runde 26: schnelle Netz-Ereignisse in Folge (hebt "schwach" auf), der aktive Moment kam per Netzstart (nicht per Tausch) */
+  private weakFast = 0;
+  private coldNet = false;
   /** Runde 12: letzter Aufruf von fill (für das Nachfüllen nach einer Zurückstellung), zusätzliche Netz-Abrufe durch den Zeitgeber, Zeile schon geschrieben, Zeitgeber */
   private lastFill: { clips: readonly DeckClip[]; locOf: (key: string) => LocalClip | undefined; activePending: boolean } | null = null;
   private deferNoted = false;
@@ -544,6 +563,7 @@ export class AudioDeck {
   private markWeak() {
     const was = this.weakNet();
     this.weakUntil = Date.now() + WEAK_NET_MS;
+    this.weakFast = 0;
     if (was) return;
     this.diag('deck: weak net, pool one at a time');
     const arm = (ms: number) => {
@@ -558,6 +578,25 @@ export class AudioDeck {
     };
     if (this.weakTimer) clearTimeout(this.weakTimer);
     arm(WEAK_NET_MS);
+  }
+
+  /** Runde 26: ein schnelles Netz-Ereignis (Eintrag bereit oder Netzstart spielt). WEAK_OK_RUN in Folge heben "schwach" auf, ein langsames setzt die Zählung zurück. */
+  private noteFast(ms: number, limit: number, what: string) {
+    if (!this.weakNet()) {
+      this.weakFast = 0;
+      return;
+    }
+    if (ms > limit) {
+      this.weakFast = 0;
+      return;
+    }
+    if (++this.weakFast < WEAK_OK_RUN) return;
+    this.weakFast = 0;
+    this.weakUntil = 0;
+    if (this.weakTimer) clearTimeout(this.weakTimer);
+    this.weakTimer = null;
+    this.diag(`deck: weak net off (${what} ${ms} ms, ${WEAK_OK_RUN} in a row)`);
+    this.refillDeferred();
   }
 
   /** Das Element spielt gerade (Ereignis playing kam, seitdem weder Pause noch Puffern noch neue Quelle) */
@@ -637,7 +676,69 @@ export class AudioDeck {
   }
 
   private spare(lane: Lane): DeckEl {
-    return this.pool[lane].find((e) => e !== this.el && !this.entryOf(e)) ?? this.makeEl(lane);
+    return this.pool[lane].find((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e)) ?? this.makeEl(lane);
+  }
+
+  private keptOf(el: DeckEl): PoolEntry | undefined {
+    return this.kept.find((k) => k.el === el);
+  }
+
+  /** Runde 26: Stand des aktiven Elements als Eintrag, falls es sich zum Behalten eignet (Daten da, kein Fehler, keine Stille-Quelle) */
+  private snapActive(): PoolEntry | null {
+    const el = this.el;
+    const c = this.clip;
+    if (!el || !c || this.holding || !el.src || el.src.startsWith('data:') || el.error || el.readyState < 1) return null;
+    return {
+      clip: c,
+      el,
+      lane: this.lane,
+      why: this.loudInfo.how.replace(/^unchanged: /, ''),
+      chain: this.loudLinear ? { linear: this.loudLinear } : null,
+      local: this.isLocal,
+      offset: this.offset,
+      target: Math.max(0, c.start - this.offset),
+      meta: true,
+      cpt: true,
+      ready: true,
+      rsAtReady: el.readyState,
+      thin: false,
+      t0: Date.now(),
+    };
+  }
+
+  /** Runde 26: der verlassene Moment bleibt geladen. Ältere gehen über KEEP_PREV hinaus frei, und der Vorrat gibt seinen am weitesten vorausliegenden Eintrag ab, bis alles in POOL + 1 Elemente passt. */
+  private addKept(p: PoolEntry) {
+    for (const k of this.kept.filter((x) => x.clip.key === p.clip.key)) this.releaseKept(k);
+    this.kept.push(p);
+    while (this.kept.length > KEEP_PREV) this.releaseKept(this.kept[0]);
+    while (this.entries.length > POOL - this.kept.length) {
+      const far = this.entries[this.entries.length - 1];
+      this.dropEntry(far, 'room for kept');
+    }
+    this.diag(`deck: keep prev ${p.clip.id} (kept ${this.kept.length})`);
+  }
+
+  private releaseKept(k: PoolEntry) {
+    this.kept = this.kept.filter((x) => x !== k);
+    if (!this.hidden()) this.clearSrc(k.el);
+  }
+
+  /** Runde 26: ein freies Element der Spur (weder aktiv noch Vorrat noch behalten), nötigenfalls vom Vorrat abgezweigt. null, wenn keins zu haben ist. */
+  private freeEl(lane: Lane): DeckEl | null {
+    const find = () => this.pool[lane].find((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e)) ?? null;
+    let el = find();
+    if (!el && this.pool[lane].length < POOL + 1) {
+      const made = this.makeEl(lane);
+      if (made !== this.el && !this.entryOf(made) && !this.keptOf(made)) el = made;
+    }
+    if (!el) {
+      const far = [...this.entries].reverse().find((e) => e.lane === lane);
+      if (far) {
+        this.dropEntry(far, 'room for kept');
+        el = find();
+      }
+    }
+    return el;
   }
 
   private makeEl(lane: Lane): DeckEl {
@@ -744,7 +845,11 @@ export class AudioDeck {
     }
     // Runde 18: brauchte der Ausschnitt vom Start bis zum ersten playing mehr als WEAK_PLAY_MS (ohne Warten auf einen Tipp, nur Netz), ist das Netz schwach
     const c0 = this.clip;
-    if (!this.played && c0 && !this.isLocal && this.clipAt > 0 && this.refusedKey !== c0.key && Date.now() - this.clipAt > WEAK_PLAY_MS) this.markWeak();
+    if (!this.played && c0 && !this.isLocal && this.clipAt > 0 && this.refusedKey !== c0.key) {
+      const took = Date.now() - this.clipAt;
+      if (took > WEAK_PLAY_MS) this.markWeak();
+      else if (this.coldNet) this.noteFast(took, WEAK_OK_START_MS, 'net start');
+    }
     // Runde 20: nach Tausch oder Neustart ohne Daten hinter der Position ist "playing" des Elements kein Ton. Laden anzeigen, bis die Zeit läuft (inferPlaying leitet es zurück).
     const starved = this.starved(el);
     this.live = !starved;
@@ -1504,21 +1609,31 @@ export class AudioDeck {
     this.armed = false;
     // Runde 12: der Vorrat hält genau diesen Ausschnitt. Sein Element wird übernommen, auch wenn es noch lädt (es hat schon Bytes an der richtigen Stelle).
     // Verworfen wird nur ein Eintrag mit Fehler oder einer Spur, die nicht mehr passt, dann lädt der Start das Element neu.
-    const inPool = this.entries.find((x) => x.clip.key === clip.key);
+    const inPool = this.entries.find((x) => x.clip.key === clip.key) ?? this.kept.find((x) => x.clip.key === clip.key);
     if (inPool && this.adopt(inPool, play, forcePlain, from)) return;
     const loc = this.deps.local(clip.key);
     // Spurwahl (Lautheit): das Element der Spur, bei Misserfolg der Kette das unveränderte
     const pick = this.deps.lane?.(clip, !!loc, forcePlain) ?? { lane: 'plain' as const, why: 'no value' };
     let lane = pick.lane;
     let why = forcePlain && forceWhy ? forceWhy : pick.why;
-    let target = this.ensure(lane);
+    // Runde 26: der verlassene Moment bleibt in seinem Element, der Start lädt in ein freies (Zurückwischen ohne Kaltstart)
+    let prev = this.clip && this.clip.key !== clip.key ? this.snapActive() : null;
+    const pickEl = (l: Lane): DeckEl => {
+      if (prev) {
+        const f = this.freeEl(l);
+        if (f) return f;
+        prev = null;
+      }
+      return this.ensure(l);
+    };
+    let target = pickEl(lane);
     let chain: { linear: () => number } | null = null;
     if (lane === 'level') {
       chain = this.deps.chain?.(target, clip.gain ?? 0) ?? null;
       if (!chain) {
         lane = 'plain';
         why = 'no audio graph';
-        target = this.ensure('plain');
+        target = pickEl('plain');
       }
     }
     const old = this.el;
@@ -1530,7 +1645,8 @@ export class AudioDeck {
       // Spurwechsel: das alte Element anhalten und die Quelle freigeben (höchstens 3 Elemente mit Quelle), Ton übernehmen (das Tempo setzt applyRate gleich)
       target.muted = this.realMuted(old);
       this.halt(old, 'app: lane switch');
-      this.clearSrc(old);
+      if (prev && prev.el === old) this.addKept(prev);
+      else this.clearSrc(old);
     }
     const el = target;
     this.clip = clip;
@@ -1546,6 +1662,7 @@ export class AudioDeck {
     this.needTapKey = '';
     this.offset = loc?.offset ?? 0;
     this.isLocal = !!loc;
+    this.coldNet = !loc;
     this.resumeFrom = from;
     this.target = Math.max(0, from - this.offset);
     this.history.push(clip.key);
@@ -1715,16 +1832,31 @@ export class AudioDeck {
       if (!cand.some((w) => w.key === c.key)) cand.push(c);
     }
     const loc = new Map(cand.map((c) => [c.key, locOf(c.key)] as const));
-    // Auswahl: der nächste Kandidat, dann alle lokalen in Reihenfolge, dann Netz bis POOL. Der Vorrat bleibt in Reihenfolge der Warteschlange.
+    let changed = false;
+    // Runde 26: ein behaltener Moment, der wieder zu den nächsten gehört (Zurückwischen: der verlassene ist jetzt der nächste), geht in den Vorrat zurück, geladen und bereit
+    const firstKeys = new Set(cand.map((c) => c.key));
+    for (const k of [...this.kept]) {
+      if (!firstKeys.has(k.clip.key) || this.entries.some((e) => e.clip.key === k.clip.key)) continue;
+      this.kept = this.kept.filter((x) => x !== k);
+      this.entries.push(k);
+      try {
+        if (!k.el.paused) k.el.pause();
+        if (Math.abs(k.el.currentTime - k.target) > SEEK_TOL / 2) k.el.currentTime = k.target;
+      } catch {
+        /* Position nicht setzbar, der Tausch setzt sie neu */
+      }
+      changed = true;
+    }
+    // Auswahl: der nächste Kandidat, dann alle lokalen in Reihenfolge, dann Netz bis POOL (Runde 26: minus die behaltenen Elemente). Der Vorrat bleibt in Reihenfolge der Warteschlange.
+    const cap = Math.max(1, POOL - this.kept.length);
     const chosen = new Set<string>(cand.slice(0, 1).map((c) => c.key));
     const rest = cand.slice(1);
     for (const c of [...rest.filter((x) => loc.get(x.key)), ...rest.filter((x) => !loc.get(x.key))]) {
-      if (chosen.size >= POOL) break;
+      if (chosen.size >= cap) break;
       chosen.add(c.key);
     }
     const want = cand.filter((c) => chosen.has(c.key));
     const keys = new Set(want.map((c) => c.key));
-    let changed = false;
     for (const e of [...this.entries]) {
       if (e.rsAtReady > 0 && e.ready && e.el.readyState === 0) {
         this.evict(e);
@@ -1747,7 +1879,9 @@ export class AudioDeck {
     const busy = this.activeBusy(activePending);
     // Ohne aktiven und ohne erwarteten Moment konkurriert nichts um das Netz: bis POOL, im schwachen Netz einzeln
     const idle = !(this.clip && !this.done) && !activePending;
-    const inflight = this.entries.filter((e) => !e.local && !e.ready).length;
+    // Runde 26: ein Eintrag, der "pool slow" meldete und Daten hat (nur der Puffer ist zu dünn), hält das Budget nicht fest (Diag 19.11. 09:16:33: er blockierte jeden weiteren Abruf)
+    const inflight = this.entries.filter((e) => !e.local && !e.ready && !(e.slow && e.el.readyState >= 3)).length;
+    const nextKey = cand[0]?.key;
     let room = idle && !this.weakNet() ? POOL : poolBudget({ activePlaying: !busy, weakNet: this.weakNet(), inflight });
     let deferred = 0;
     let waitMs = 0;
@@ -1763,7 +1897,8 @@ export class AudioDeck {
           return false;
         }
       }
-      if (room > 0) {
+      // Runde 26: der nächste Moment lädt immer vor, auch im schwachen Netz (solange der aktive spielt oder nichts läuft)
+      if (room > 0 || (c.key === nextKey && !busy)) {
         room--;
         return true;
       }
@@ -1857,9 +1992,11 @@ export class AudioDeck {
     // Brief 22: nach 8 s ohne Bereitschaft nur eine Zeile, der Eintrag bleibt. Er fällt erst heraus, wenn er das Fenster verlässt oder ein Fehler-Ereignis kommt.
     setTimeout(() => {
       if (this.entries.includes(s) && !s.ready) {
+        s.slow = true;
         this.diag(`deck: pool slow ${clip.id} 8000 ms rs=${el.readyState} meta=${s.meta}`);
         // Runde 18: ein langsamer Abruf des Vorrats macht das Netz schwach (nur Netz, lokale Quellen kommen nie hierher)
-        if (!s.local) this.markWeak();
+        // Runde 26: nicht, wenn das Element Daten hat (readyState 3 oder mehr): dann ist nur der Puffer hinter der Startstelle dünn, das Netz antwortet (Diag 19.11. 09:16:24, rs=4 meta=true)
+        if (!s.local && el.readyState < 3) this.markWeak();
       }
     }, 8000);
     this.checkEntry(s);
@@ -1925,6 +2062,8 @@ export class AudioDeck {
     } catch (e) {
       this.diag(`deck onReady failed ${e instanceof Error ? e.message : String(e)}`);
     }
+    // Runde 26: ein schneller Abruf zählt für ein gutes Netz
+    if (!s.local) this.noteFast(Date.now() - s.t0, WEAK_OK_READY_MS, 'pool ready');
     // Runde 18: ein Abruf ist fertig, der nächste zurückgestellte darf starten
     if (this.deferNoted && !this.inFill) this.refillDeferred();
   }
@@ -1952,6 +2091,7 @@ export class AudioDeck {
   /** Eintrag aus dem Vorrat nehmen. Das Element bleibt, wie es ist (pausiert, Quelle bleibt bis zur nächsten Befüllung). Sichtbar wird die Quelle freigegeben, verdeckt nie (kein load()). */
   private dropEntry(e: PoolEntry, why: string) {
     this.entries = this.entries.filter((x) => x !== e);
+    this.kept = this.kept.filter((x) => x !== e);
     this.diag(`deck: pool dropped ${e.clip.id} (${why})`);
     if (!this.hidden()) this.clearSrc(e.el);
   }
@@ -2001,7 +2141,7 @@ export class AudioDeck {
    * (siehe adopt). false nur bei Fehler, verworfenem Element oder nicht mehr passender Spur, dann lädt der Aufrufer neu.
    */
   private swapKey(key: string, sink: DeckSink | null): boolean {
-    const e = this.entries.find((x) => x.clip.key === key);
+    const e = this.entries.find((x) => x.clip.key === key) ?? this.kept.find((x) => x.clip.key === key);
     if (!e) return false;
     return this.adopt(e, true, false, e.clip.start, sink);
   }
@@ -2038,8 +2178,13 @@ export class AudioDeck {
     const clip = s.clip;
     const el = s.el;
     const play = via?.play ?? true;
+    // Runde 26: der verlassene Moment, bevor die Felder des aktiven Moments überschrieben werden
+    const prev = old && old !== el ? this.snapActive() : null;
+    const fromKept = this.kept.includes(s);
     this.noteDur(el, clip.key);
     this.entries = this.entries.filter((x) => x !== s);
+    this.kept = this.kept.filter((x) => x !== s);
+    this.coldNet = false;
     this.depleted = true;
     this.releaseHold();
     if (old) el.muted = old.muted;
@@ -2068,6 +2213,15 @@ export class AudioDeck {
     const from = via?.from ?? clip.start;
     this.resumeFrom = from;
     this.target = from === clip.start ? s.target : Math.max(0, from - s.offset);
+    if (fromKept) {
+      // Runde 26: zurück auf einen behaltenen Moment: Start an der Startstelle des Moments, nicht dort, wo er verlassen wurde
+      this.diag(`deck: swap back ${clip.id} from kept`);
+      try {
+        if (Math.abs(el.currentTime - this.target) > SEEK_TOL / 2) el.currentTime = this.target;
+      } catch {
+        /* nach loadedmetadata */
+      }
+    }
     this.history.push(clip.key);
     if (this.history.length > 200) this.history.shift();
     this.snd = { muted: isSilent(this.soundView(el)), playing: false, refused: false };
@@ -2108,7 +2262,10 @@ export class AudioDeck {
     if (play) this.kick('swap');
     if (starve) this.showLoading();
     // Das alte Element geht frei in den Vorrat zurück: pausiert, Quelle bleibt bis zur nächsten Befüllung (kein load() verdeckt)
-    if (old && old !== el) this.halt(old, 'app: swap');
+    if (old && old !== el) {
+      this.halt(old, 'app: swap');
+      if (prev) this.addKept(prev);
+    }
     if (play) this.deps.playbackState?.('playing', 'swap');
     return clip;
   }
@@ -2268,6 +2425,8 @@ export class AudioDeck {
     this.needTapKey = '';
     this.diag = () => {};
     this.entries = [];
+    this.kept = [];
+    this.weakFast = 0;
     this.depleted = false;
     if (this.deferTimer) clearTimeout(this.deferTimer);
     this.deferTimer = null;
@@ -2424,7 +2583,7 @@ export class AudioDeck {
             if (e) {
               // Die Position bleibt am Start des Ausschnitts (checkEntry zieht bei größerer Abweichung nach)
               if (e.ready && Math.abs(el.currentTime - e.target) > SEEK_TOL / 2) el.currentTime = e.target;
-            } else this.clearSrc(el);
+            } else if (!this.keptOf(el)) this.clearSrc(el);
           } catch {
             /* Element schon weg */
           }

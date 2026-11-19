@@ -189,7 +189,8 @@ describe('Freischalten des Vorrats (Ziel A)', () => {
     t.deck.load(clip('b'), t.sink, { play: true, muted: false });
     await flush();
     // Neuer Moment mit geregelter Spur: dafür entsteht ein neues Element, das keine Geste gesehen hat
-    t.deck.fill([clip('c'), clip('d'), clip('e'), clip('f'), clip('lv')]);
+    // Runde 26: ein Platz gehört dem behaltenen Moment, der Vorrat hat vier Plätze
+    t.deck.fill([clip('c'), clip('lv'), clip('d'), clip('e'), clip('f')]);
     const lv = t.els.find((x) => x.src.includes('/lv.mp3'))!;
     expect(lv.played).toBe(false);
     t.lines.length = 0;
