@@ -81,6 +81,10 @@ function setup() {
   const els: El[] = [];
   const deck = new AudioDeck({
     standby: true,
+    // Runde 27: dieses Verhalten (Eintrag springt sofort, Geste spielt jeden Eintrag an) gilt mit probeParked: true; die neue Regel prüft audio-unlock-first.test.ts
+    probeParked: true,
+    // Runde 27: diese Datei prüft die bestehende Kette (Warten, Wiederherstellung, Neuaufbau) am selben Element, das Ausweichen steht in audio-collapse.test.ts
+    dodge: false,
     local: () => undefined,
     dropLocal: () => {},
     make: () => {

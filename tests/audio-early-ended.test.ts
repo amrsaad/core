@@ -74,6 +74,8 @@ function setup() {
   const els: El[] = [];
   const deck = new AudioDeck({
     standby: true,
+    // Runde 27: dieses Verhalten (Eintrag springt sofort, Geste spielt jeden Eintrag an) gilt mit probeParked: true; die neue Regel prüft audio-unlock-first.test.ts
+    probeParked: true,
     local: () => undefined,
     dropLocal: () => {},
     make: () => {
@@ -350,11 +352,12 @@ describe('D: übernommene Einträge des Vorrats', () => {
     const b = clip('b', 30);
     t.deck.fill([b]);
     const eb = t.els.find((x) => x.src.includes('/b.mp3'))!;
+    // Runde 27: die echte Dauer ist von Anfang an 600 (ein ended bei 600 ist ein echtes Ende, kein Kollaps, der Tausch geht sonst auf ein frisches Element)
+    eb.duration = 600;
     eb.emit('loadedmetadata');
     eb.readyState = 4;
     eb.emit('canplaythrough');
     eb.currentTime = 600;
-    eb.duration = 600;
     eb.ended = true;
     t.deck.swapNext(t.sink);
     expect(eb.currentTime).toBeGreaterThanOrEqual(30 - 0.25 - 1e-9);

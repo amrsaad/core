@@ -94,6 +94,8 @@ function setup(quiet = false) {
   const els: El[] = [];
   const deck = new AudioDeck({
     standby: true,
+    // Runde 27: dieses Verhalten (Eintrag springt sofort, Geste spielt jeden Eintrag an) gilt mit probeParked: true; die neue Regel prüft audio-unlock-first.test.ts
+    probeParked: true,
     local: () => undefined,
     dropLocal: () => {},
     make: () => {

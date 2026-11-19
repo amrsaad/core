@@ -95,6 +95,8 @@ function setupPool(opts: PoolOpts = {}) {
   const chained: number[] = [];
   const deck = new AudioDeck({
     standby: opts.standby ?? true,
+    // Runde 27: dieses Verhalten (Eintrag springt sofort) gilt mit probeParked: true; die neue Regel prüft audio-unlock-first.test.ts
+    probeParked: true,
     local: (k) => local[k],
     dropLocal: (k) => {
       dropped.push(k);

@@ -315,6 +315,18 @@ const GESTURE_WINDOW_MS = 120;
 /** So lange wartet die Diag-Zeile "deck: gesture ... unlocked" auf die Ergebnisse der Freischaltung, bevor sie mit dem Stand schreibt (ms) */
 const UNLOCK_LINE_MS = 800;
 
+/**
+ * Runde 27 (Geräteprotokolle 18. und 19.11.): jede Geste spielte alle noch nicht freigeschalteten Vorrats-Elemente stumm an (probe), auch solche, die schon auf eine ferne Startstelle
+ * geparkt waren und dort nur rund 1,6 s Puffer hatten. Alle 7 kaputten Vorrats-Wechsel hatten so eine Geste davor, 0 von rund 20 Wechseln ohne Geste (Korrelation, kein Beweis).
+ * false: ein geparktes Element (Position schon auf der Startstelle, Startstelle über 0) bekommt in der Geste kein play(). Ein Vorrats-Element wird stattdessen freigeschaltet, bevor es springt.
+ * true: das alte Verhalten (Gegenprobe am Gerät).
+ */
+export const PROBE_PARKED = false;
+/** Runde 27: Ausweichen auf ein frisches Element: so viel früher (Sekunden Elementzeit) liegt dort das Ziel */
+export const DODGE_BACK = 1;
+/** Runde 27: so viele Sekunden Spielzeit auf dem frischen Element, bis "fresh element ... ok" gilt */
+export const FRESH_OK_S = 2;
+
 /** Null Sekunden Stille: schaltet das Element durch eine Geste frei, bevor der erste echte Moment kommt */
 const SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
 
@@ -353,6 +365,11 @@ interface PoolEntry {
   t0: number;
   /** Runde 26: "pool slow" wurde gemeldet (8 s ohne Bereitschaft) */
   slow?: boolean;
+  /** Runde 27: das Element war beim Laden nicht freigeschaltet: kein Sprung zur Startstelle, es bleibt bei t=0 und gilt als nicht bereit, bis eine Geste es dort freischaltet */
+  hold?: boolean;
+  /** Runde 27: "parked locked" wurde gemeldet */
+  lockedNoted?: boolean;
+  reprobed?: boolean;
 }
 
 /** Stand eines Eintrags für Host und Diagnose */
@@ -413,6 +430,8 @@ export interface DeckEl {
   readonly seekable?: BufRanges;
   /** Runde 20: ein Seek läuft noch (seeked kommt danach) */
   readonly seeking?: boolean;
+  /** Runde 27: nur für die Diagnose "deck: collapse" */
+  readonly networkState?: number;
   play(): Promise<void> | undefined;
   pause(): void;
   load(): void;
@@ -442,6 +461,10 @@ export interface DeckDeps {
   hidden?: () => boolean;
   /** Media Session des Betriebssystems setzen (Standard: navigator.mediaSession.playbackState), why für die Diagnose */
   playbackState?: (s: 'playing' | 'paused', why: string) => void;
+  /** Runde 27: true gilt das alte Verhalten der Geste (PROBE_PARKED), Standard die Konstante */
+  probeParked?: boolean;
+  /** Runde 27: false schaltet das Ausweichen auf ein frisches Element ab (Tests der bestehenden Kette), Standard true */
+  dodge?: boolean;
   /** Element-Vorrat (Entscheidung 47 und 52): fill() lädt die nächsten POOL Ausschnitte in eigene Elemente vor, swapNext() tauscht nur die Rollen. Aus: fill() tut nichts. */
   standby?: boolean;
 }
@@ -623,9 +646,8 @@ export class AudioDeck {
   private fe = { key: '', times: [] as number[], rebuilt: false, dead: false };
   /** Runde 24: stumm bis die Position bestätigt ist (real: der Ton-Zustand, den Host und Entsperrung wollen) */
   private posHold: { el: DeckEl; key: string; id: string; target: number; real: boolean; t0: number; tick: ReturnType<typeof setInterval>; stop: ReturnType<typeof setTimeout> } | null = null;
-  /** Runde 25: größte je gemeldete endliche Dauer je Moment (Elementzeit), Momente, für die "duration dropped" schon steht, Wartevorgänge je Moment, der laufende Wartevorgang */
+  /** Runde 25: größte je gemeldete endliche Dauer je Moment (Elementzeit), Wartevorgänge je Moment, der laufende Wartevorgang */
   private realDur = new Map<string, number>();
-  private durDrop = new Set<string>();
   private dw = { key: '', n: 0, timedOut: false };
   private dataWait: { el: DeckEl; key: string; id: string; at: number; t0: number; prog0: number; nudged: boolean; tick: ReturnType<typeof setInterval>; stop: ReturnType<typeof setTimeout> } | null = null;
   /** Runde 24: für diesen Ausschnitt steht die Zeile "pos set" schon */
@@ -661,7 +683,90 @@ export class AudioDeck {
   private loadingOn = false;
   diag: (line: string) => void = () => {};
 
-  constructor(private deps: DeckDeps) {}
+  /** Runde 27: Messpunkte je Element (Zeitpunkte von Sprung, play und Laden, ob ein Freischaltversuch lief, letzte endliche Dauer) für die Diag-Zeilen collapse und dur drop */
+  private stat = new WeakMap<DeckEl, { seekAt: number; playAt: number; loadAt: number; probed: boolean; dur: number }>();
+  /** Runde 27: Ausweichen auf ein frisches Element: je Moment höchstens eins (Schlüssel, Zahl), das frische Element, solange es beobachtet wird */
+  private dg = { key: '', n: 0 };
+  private fresh: { el: DeckEl; key: string; id: string; from: number } | null = null;
+  private envNoted = false;
+  private lastCol: { el: DeckEl; at: number } | null = null;
+  private allNoted = false;
+  private t0 = Date.now();
+  private probeParked: boolean;
+  private dodgeOn: boolean;
+
+  constructor(private deps: DeckDeps) {
+    this.probeParked = deps.probeParked ?? PROBE_PARKED;
+    this.dodgeOn = deps.dodge ?? true;
+  }
+
+  private st(el: DeckEl) {
+    let r = this.stat.get(el);
+    if (!r) {
+      r = { seekAt: 0, playAt: 0, loadAt: 0, probed: false, dur: Number.NaN };
+      this.stat.set(el, r);
+    }
+    return r;
+  }
+
+  /** Runde 27: Quelle wurde gesetzt (neues Laden): Messpunkte des Elements neu */
+  private markLoad(el: DeckEl) {
+    const r = this.st(el);
+    r.loadAt = Date.now();
+    r.seekAt = 0;
+    r.playAt = 0;
+    r.probed = false;
+    r.dur = Number.NaN;
+  }
+
+  /** Runde 27: eine Zeile je Sitzung: Gerät und Betriebssystem, ob als App auf dem Home-Bildschirm (standalone) */
+  private noteEnv() {
+    if (this.envNoted) return;
+    this.envNoted = true;
+    try {
+      const nav = typeof navigator !== 'undefined' ? (navigator as Navigator & { standalone?: boolean }) : undefined;
+      const ua = nav?.userAgent ?? 'none';
+      const m = /OS (\d+)[_.](\d+)/.exec(ua);
+      const short = m ? `${/iPad/.test(ua) ? 'iPad' : /iPhone/.test(ua) ? 'iPhone' : 'iOS'} iOS ${m[1]}.${m[2]}` : ua.slice(0, 60);
+      const sa = nav?.standalone === true || (typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches);
+      this.diag(`env: ua=${short} standalone=${sa ? 1 : 0}`);
+    } catch {
+      this.diag('env: ua=unknown standalone=0');
+    }
+  }
+
+  /** Runde 27: Kennung des Moments, der in diesem Element steckt (für die Diag-Zeilen) */
+  private idOf(el: DeckEl): string {
+    return this.entryOf(el)?.clip.id ?? this.keptOf(el)?.clip.id ?? (el === this.el ? this.clip?.id : undefined) ?? 'spare';
+  }
+
+  private ranges(b: BufRanges | null | undefined): string {
+    try {
+      if (!b || !(b.length > 0)) return '[]';
+      const out: string[] = [];
+      for (let i = 0; i < Math.min(3, b.length); i++) out.push(`${(b.start ? b.start(i) : 0).toFixed(1)}-${b.end(i).toFixed(1)}`);
+      return `[${out.join(',')}]`;
+    } catch {
+      return '[]';
+    }
+  }
+
+  private since(at: number): string {
+    return at > 0 ? String(Date.now() - at) : 'none';
+  }
+
+  private num(n: number): string {
+    return Number.isFinite(n) ? n.toFixed(1) : String(n);
+  }
+
+  /** Runde 27: Zeile "deck: collapse": Stand des Elements beim Kollaps der Dauer */
+  private collapseLine(el: DeckEl, id: string) {
+    const r = this.st(el);
+    const loading = this.all().filter((e) => !!e.src && !e.src.startsWith('data:') && (e.networkState ?? (e.readyState < 4 ? 2 : 1)) === 2).length;
+    this.diag(
+      `deck: collapse ${id} dur=${this.num(el.duration)} t=${this.num(el.currentTime)} rs=${el.readyState} ns=${el.networkState ?? 'n/a'} err=${el.error?.code ?? 'none'} seeking=${el.seeking ? 1 : 0} buf=${this.ranges(el.buffered)} seekable=${this.ranges(el.seekable)} played=${this.ranges((el as unknown as { played?: BufRanges }).played)} sinceSeek=${this.since(r.seekAt)} sincePlay=${this.since(r.playAt)} sinceLoad=${this.since(r.loadAt)} unlocked=${this.unlockedEls.has(el) ? 1 : 0} probed=${r.probed ? 1 : 0} loading=${loading}`,
+    );
+  }
 
   /** Das Element, angelegt beim ersten Gebrauch. Es wird nie ersetzt. */
   get element(): DeckEl {
@@ -900,10 +1005,25 @@ export class AudioDeck {
       const e = entry();
       if (e && !e.ready) this.checkEntry(e);
     });
+    el.addEventListener('seeking', () => {
+      this.st(el).seekAt = Date.now();
+    });
+    el.addEventListener('play', () => {
+      this.st(el).playAt = Date.now();
+    });
     el.addEventListener('durationchange', () => {
       const e = entry();
       const key = e?.clip.key ?? (mine() ? this.clip?.key : undefined);
-      if (key !== undefined) this.noteDur(el, key, e?.clip.id ?? this.clip?.id);
+      // Runde 27: fällt die Dauer eines Elements um mehr als REAL_END_GAP, eine Zeile mit dem Stand (ersetzt "duration dropped" aus Runde 25)
+      const r = this.st(el);
+      const d = el.duration;
+      if (Number.isFinite(d) && Number.isFinite(r.dur) && d < r.dur - REAL_END_GAP) {
+        this.diag(
+          `deck: dur drop ${this.idOf(el)} ${this.num(r.dur)} -> ${this.num(d)} t=${this.num(el.currentTime)} rs=${el.readyState} paused=${el.paused ? 1 : 0} seeking=${el.seeking ? 1 : 0} sinceSeek=${this.since(r.seekAt)} sincePlay=${this.since(r.playAt)} probed=${r.probed ? 1 : 0}`,
+        );
+      }
+      r.dur = Number.isFinite(d) ? d : Number.NaN;
+      if (key !== undefined) this.noteDur(el, key);
       if (e && !e.ready) this.checkEntry(e);
       if (mine()) this.pollData();
     });
@@ -952,6 +1072,7 @@ export class AudioDeck {
       if (mine()) this.pollData();
       if (mine() && this.guardPos(el)) return;
       if (mine()) this.tick(el);
+      if (mine() && this.fresh) this.freshOk(el);
       const c = this.clip;
       if (mine() && this.hidden()) this.hiddenStats.tu++;
       // Runde 17: "playing" blieb aus, die Position schreitet aber fort: als laufend ableiten
@@ -1053,6 +1174,8 @@ export class AudioDeck {
     if (!this.rebuilding && (fresh || this.recov.key !== key)) this.recov = { key, n: 0, at: 0, pending: false, gaveUp: false };
     if (!this.rebuilding && (fresh || this.fe.key !== key)) this.fe = { key, times: [], rebuilt: false, dead: false };
     if (!this.rebuilding && (fresh || this.dw.key !== key)) this.dw = { key, n: 0, timedOut: false };
+    if (!this.rebuilding && (fresh || this.dg.key !== key)) this.dg = { key, n: 0 };
+    if (!this.rebuilding) this.fresh = null;
     this.posLineKey = '';
   }
 
@@ -1183,6 +1306,9 @@ export class AudioDeck {
       return;
     }
     if (this.tryWait(el, c)) return;
+    // Runde 27: Dauer gleich Position, Daten dahinter: nicht dasselbe Element neu aufbauen, ein frisches nehmen
+    const col = this.dodgeCollapse(el, c);
+    if (col === 'dodged') return;
     if (plausibleEnd({ t, dur, clipEnd: c.end, offset: this.offset, advanced })) {
       this.clipEnd(via);
       return;
@@ -1201,6 +1327,7 @@ export class AudioDeck {
     this.fe.times = gate.times;
     if (gate.step === 'rebuild') {
       this.fe.rebuilt = true;
+      if (col !== 'logged') this.collapseLine(el, c.id);
       this.diag(`deck: false ended loop ${c.id} (more than ${FALSE_ENDED_MAX} in ${FALSE_ENDED_WINDOW_MS / 1000} s), rebuilding source`);
       this.rebuildSource(c, Number.isFinite(t) && t > this.target ? t : this.target);
       return;
@@ -1208,6 +1335,7 @@ export class AudioDeck {
     if (gate.step === 'broken') {
       this.fe.dead = true;
       this.recov.gaveUp = true;
+      if (col !== 'logged') this.collapseLine(el, c.id);
       this.diag(`deck: moment broken ${c.id} (false ended loop after rebuild), skipping`);
       this.loading(false);
       if (this.sink?.broken) this.sink.broken();
@@ -1216,14 +1344,138 @@ export class AudioDeck {
     }
     // Nach dem Aufgeben des weichen Wegs zählen weitere falsche Enden weiter (Schleife), melden aber nichts, bis die nächste Stufe greift
     if (this.recov.gaveUp) return;
+    if (col !== 'logged') this.collapseLine(el, c.id);
     this.diag(`deck: false ended ${c.id} t=${t.toFixed(1)} dur=${Number.isFinite(dur) ? dur.toFixed(1) : String(dur)} adv=${advanced.toFixed(1)}, recovering`);
     this.recover(el, 'ended', t);
   }
 
+  // ---- Runde 27: Kollaps der Dauer, Ausweichen auf ein frisches Element ----
+
+  /**
+   * Kollaps: iOS meldet duration gleich Position (Ende), obwohl die Datei weiter reicht. Die bekannte echte Dauer (auch von früheren Elementen desselben Moments)
+   * oder das Puffer-Ende liegt mehr als REAL_END_GAP hinter der Position. Eine Position unter 0,5 s ist der leere Fall (ignoreEnded), kein Kollaps.
+   */
+  private collapsed(el: DeckEl, c: DeckClip): boolean {
+    const t = el.currentTime;
+    const d = el.duration;
+    if (!Number.isFinite(t) || !Number.isFinite(d) || t < 0.5 || d > t + 0.5) return false;
+    this.noteDur(el, c.key);
+    let end = this.realDur.get(c.key) ?? 0;
+    const be = bufferedEnd(el.buffered, t);
+    if (typeof be === 'number') end = Math.max(end, be);
+    return end > t + REAL_END_GAP;
+  }
+
+  /**
+   * Beim Ende des aktiven Elements: ist es ein Kollaps und darf ausgewichen werden? 'dodged': auf ein frisches Element gewechselt, der Aufrufer tut nichts mehr.
+   * 'logged': Kollaps, Zeile steht, es geht in die bestehende Kette (zweiter Kollaps, schon einmal ausgewichen, verdeckt, lokal, kein freies Element).
+   * 'none': kein Kollaps (oder nicht zuständig), nichts geschrieben.
+   */
+  private dodgeCollapse(el: DeckEl, c: DeckClip): 'dodged' | 'logged' | 'none' {
+    if (el !== this.el || this.clip !== c || this.done || this.holding || !this.want || this.isLocal) return 'none';
+    if (!this.collapsed(el, c)) return 'none';
+    // pause und ended desselben Kollapses kommen kurz nacheinander: eine Zeile
+    if (this.lastCol && this.lastCol.el === el && Date.now() - this.lastCol.at < 500) return 'logged';
+    this.lastCol = { el, at: Date.now() };
+    this.collapseLine(el, c.id);
+    // Ein zweiter Kollaps auf dem frischen Element: die bestehende Kette
+    if (this.fresh && this.fresh.el === el && this.fresh.key === c.key) {
+      this.diag(`deck: fresh element ${c.id} collapsed`);
+      this.fresh = null;
+      return 'logged';
+    }
+    // Verdeckt lädt iOS nichts nach, ein load() hängt das Element: kein Ausweichen
+    if (!this.dodgeOn || this.hidden() || (this.dg.key === c.key && this.dg.n >= 1)) return 'logged';
+    return this.dodge(el, c) ? 'dodged' : 'logged';
+  }
+
+  /** Ein freies Element der Spur für das Ausweichen. Freigeschaltete zuerst, nötigenfalls gibt der am weitesten vorausliegende Eintrag seinen Platz ab (nie der nächste, nie der behaltene). */
+  private freshEl(lane: Lane, old: DeckEl): DeckEl | null {
+    const free = this.pool[lane].filter((e) => e !== old && e !== this.el && !this.entryOf(e) && !this.keptOf(e));
+    const far = this.entries.filter((e, i) => i > 0 && e.lane === lane).reverse();
+    const take = (e: PoolEntry): DeckEl => {
+      this.dropEntry(e, 'room for fresh');
+      this.depleted = true;
+      return e.el;
+    };
+    const freeU = free.find((e) => this.unlockedEls.has(e));
+    if (freeU) return freeU;
+    const farU = far.find((e) => this.unlockedEls.has(e.el));
+    if (farU) return take(farU);
+    if (free[0]) return free[0];
+    if (this.pool[lane].length < POOL + 1) {
+      const made = this.makeEl(lane);
+      if (made !== old && made !== this.el && !this.entryOf(made) && !this.keptOf(made)) return made;
+    }
+    return far[0] ? take(far[0]) : null;
+  }
+
+  /**
+   * Dieselbe Adresse in ein anderes Element laden, Ziel DODGE_BACK früher, spielen. Das alte Element gibt seine Quelle frei. Höchstens einmal je Moment (dg).
+   * Beim Wechsel zählen die Wiederherstellungs-Zähler weiter (rebuilding), danach greift bei erneutem Kollaps die bestehende Kette.
+   */
+  private dodge(old: DeckEl, c: DeckClip): boolean {
+    const fresh = this.freshEl(this.lane, old);
+    if (!fresh) return false;
+    let chain: { linear: () => number } | null = null;
+    if (this.lane === 'level') {
+      chain = this.deps.chain?.(fresh, c.gain ?? 0) ?? null;
+      if (!chain) return false;
+    }
+    const at = Math.max(this.target, old.currentTime);
+    const target = Math.max(0, at - DODGE_BACK);
+    this.dg = { key: c.key, n: this.dg.key === c.key ? this.dg.n + 1 : 1 };
+    const muted = this.realMuted(old);
+    this.rebuilding = true;
+    try {
+      this.noteClip(c.key);
+    } finally {
+      this.rebuilding = false;
+    }
+    this.releaseHold();
+    this.halt(old, 'app: dodge to fresh element');
+    this.clearSrc(old);
+    fresh.muted = muted;
+    this.el = fresh;
+    if (this.lane === 'level') this.loudLinear = chain ? chain.linear : null;
+    this.armed = false;
+    this.live = false;
+    this.played = false;
+    this.nudged = false;
+    this.resetEarly();
+    this.inflightAt = 0;
+    this.kickTok++;
+    this.skipNoted = false;
+    this.needTapKey = '';
+    this.target = target;
+    this.resumeFrom = target + this.offset;
+    this.snd = { muted: isSilent(this.soundView(fresh)), playing: false, refused: false };
+    this.sink?.time?.(target + this.offset, fresh.playbackRate || 1, false);
+    this.markLoad(fresh);
+    fresh.src = c.url;
+    fresh.load();
+    this.loading(fresh.readyState < 3);
+    this.applyRate(fresh);
+    if (!(this.target > 0)) this.seek(false);
+    this.beginPosHold(fresh, c);
+    this.fresh = { el: fresh, key: c.key, id: c.id, from: target };
+    if (this.want) this.kick('start');
+    return true;
+  }
+
+  /** Das frische Element hat FRESH_OK_S Sekunden gespielt: eine Zeile, dann ist die Beobachtung zu Ende */
+  private freshOk(el: DeckEl) {
+    const f = this.fresh;
+    if (!f || f.el !== el || this.clip?.key !== f.key) return;
+    if (el.paused || el.seeking || el.currentTime - f.from < FRESH_OK_S) return;
+    this.diag(`deck: fresh element ${f.id} ok`);
+    this.fresh = null;
+  }
+
   // ---- Runde 25: Warten auf Daten nach einem Ende vor der echten Dauer ----
 
-  /** Größte je gemeldete endliche Dauer dieses Moments merken (duration, suchbarer Bereich, Puffer-Ende). Einmal je Moment die Zeile "duration dropped", wenn die Dauer danach fällt. */
-  private noteDur(el: DeckEl, key: string, id?: string) {
+  /** Größte je gemeldete endliche Dauer dieses Moments merken (duration, suchbarer Bereich, Puffer-Ende). Die Zeile "dur drop" schreibt der Listener durationchange (Runde 27). */
+  private noteDur(el: DeckEl, key: string) {
     const prev = this.realDur.get(key);
     let best = prev ?? 0;
     const d = el.duration;
@@ -1238,10 +1490,6 @@ export class AudioDeck {
     };
     if (Number.isFinite(d) && d > best) best = d;
     best = Math.max(best, maxEnd(el.seekable), maxEnd(el.buffered));
-    if (prev !== undefined && id && Number.isFinite(d) && d < prev - REAL_END_GAP && !this.durDrop.has(key)) {
-      this.durDrop.add(key);
-      this.diag(`deck: duration dropped ${id} from ${prev.toFixed(1)} to ${d.toFixed(1)} at t=${el.currentTime.toFixed(1)}`);
-    }
     if (best > 0 && best !== prev) {
       this.realDur.set(key, best);
       if (this.realDur.size > 40) this.realDur.delete(this.realDur.keys().next().value as string);
@@ -1537,12 +1785,16 @@ export class AudioDeck {
   private earlyEnded(el: DeckEl) {
     const c = this.clip;
     if (el !== this.el || !c || this.done || !this.want || this.played || this.holding || this.dataWait) return;
-    if (this.earlyTimer) return;
     if (this.needTapKey === c.key) return;
     const at = el.currentTime + this.offset;
     if (c.end !== undefined && at >= c.end - END_EPS) return;
+    // Runde 27: Kollaps beim Start (play stumm vor dem Sprung, Ende kurz nach der Position): ein frisches Element statt Neustart am selben
+    if (this.dodgeCollapse(el, c) === 'dodged') return;
+    if (this.earlyTimer) return;
     const dur = el.duration;
-    if (Number.isFinite(dur) && dur > 0 && dur + this.offset < c.start) {
+    // Runde 27: nicht, wenn die echte Dauer des Moments (frühere Elemente, Puffer) hinter der Startstelle liegt: dann ist die gemeldete Dauer ein Kollaps, keine kurze Datei
+    const real = this.realDur.get(c.key);
+    if (Number.isFinite(dur) && dur > 0 && dur + this.offset < c.start && !(real !== undefined && real + this.offset >= c.start)) {
       if (!this.earlyGaveUp) {
         this.earlyGaveUp = true;
         this.diag(`deck: clip start beyond duration ${dur.toFixed(1)}`);
@@ -1673,6 +1925,8 @@ export class AudioDeck {
     // Eine Zeile je Start: kam die Quelle aus dem Offline-Vorrat (Blob) oder aus dem Netz (Issue 14)
     this.diag(`deck: src ${loc ? 'local' : 'net'} ${clip.id}`);
     // Runde 24: nie ein Medienfragment (#t=), die Position kommt nach loadedmetadata (iOS meldete mit dem Fragment duration gleich Startstelle und ended)
+    this.noteEnv();
+    this.markLoad(el);
     el.src = loc?.url ?? clip.url;
     el.load();
     // Netzstart ohne Daten (readyState < 3 nach load() immer): die App zeigt "Loading" bis canplay, nie ein stiller Ausfall
@@ -1748,6 +2002,7 @@ export class AudioDeck {
     if (this.hidden()) this.hiddenStats.plays++;
     this.diag(`deck play#${n} ${why} ${this.stateText(el)}`);
     let p: Promise<void> | undefined;
+    this.st(el).playAt = Date.now();
     try {
       p = el.play();
     } catch (e) {
@@ -1761,6 +2016,7 @@ export class AudioDeck {
         this.unlocked = true;
         // Ein angenommenes play() schaltet dieses Element frei, und der Ausschnitt braucht keinen Tipp mehr
         this.unlockedEls.add(el);
+        this.noteAllUnlocked();
         if (el === this.el) this.needTapKey = '';
         if (el === this.el) this.okFor = this.clip;
         this.diag(`deck play#${n} ok`);
@@ -1880,7 +2136,7 @@ export class AudioDeck {
     // Ohne aktiven und ohne erwarteten Moment konkurriert nichts um das Netz: bis POOL, im schwachen Netz einzeln
     const idle = !(this.clip && !this.done) && !activePending;
     // Runde 26: ein Eintrag, der "pool slow" meldete und Daten hat (nur der Puffer ist zu dünn), hält das Budget nicht fest (Diag 19.11. 09:16:33: er blockierte jeden weiteren Abruf)
-    const inflight = this.entries.filter((e) => !e.local && !e.ready && !(e.slow && e.el.readyState >= 3)).length;
+    const inflight = this.entries.filter((e) => !e.local && !e.ready && !(e.slow && e.el.readyState >= 3) && !(e.hold && e.meta)).length;
     const nextKey = cand[0]?.key;
     let room = idle && !this.weakNet() ? POOL : poolBudget({ activePlaying: !busy, weakNet: this.weakNet(), inflight });
     let deferred = 0;
@@ -1979,13 +2235,16 @@ export class AudioDeck {
     this.entries.push(s);
     this.diag(`deck: pool load ${clip.id} src=${loc ? 'local' : 'net'}`);
     // Runde 24: ohne Medienfragment, die Position setzt currentTime (hier, nach den Metadaten in checkEntry)
+    this.markLoad(el);
+    // Runde 27: ein Element ohne Freischaltung springt nicht: es bleibt bei t=0, die nächste Geste schaltet es dort frei (gesturePool), danach folgt der Sprung
+    if (!this.probeParked && target > SEEK_TOL && !this.unlockedEls.has(el)) s.hold = true;
     el.src = loc?.url ?? clip.url;
     el.load();
     // load() setzt das Tempo zurück: Standard und aktuelles Tempo gemeinsam setzen
     this.applyRate(el);
     try {
       // iOS setzt die Position erst nach loadedmetadata, dort folgt der zweite Versuch
-      if (target > 0) el.currentTime = target;
+      if (target > 0 && !s.hold) el.currentTime = target;
     } catch {
       /* nach loadedmetadata */
     }
@@ -2001,6 +2260,24 @@ export class AudioDeck {
     }, 8000);
     this.checkEntry(s);
     return s;
+  }
+
+  /** Runde 27: steht das Element schon auf seiner fernen Startstelle (Sprung ausgeführt)? Nur so ein Element wird in der Geste nicht angespielt. Ein wartendes (hold) steht bei t=0 und wird angespielt. */
+  private parked(e: PoolEntry): boolean {
+    return e.target > SEEK_TOL && !e.hold;
+  }
+
+  /** Runde 27: einmal je Sitzung, wenn alle Elemente einer Spur freigeschaltet sind */
+  private noteAllUnlocked() {
+    if (this.allNoted) return;
+    for (const lane of ['plain', 'level'] as const) {
+      const l = this.pool[lane];
+      if (l.length >= POOL + 1 && l.every((e) => this.unlockedEls.has(e))) {
+        this.allNoted = true;
+        this.diag(`deck: all unlocked ${l.length}/${l.length} after ${Date.now() - this.t0} ms`);
+        return;
+      }
+    }
   }
 
   /** Runde 20: Eintrag erfüllt die alte Bedingung, aber hinter der Startstelle liegt zu wenig Puffer. Einmal je Eintrag eine Zeile, nach POOL_NUDGE_MS einmal der Seek erneut. */
@@ -2027,6 +2304,11 @@ export class AudioDeck {
   private checkEntry(s: PoolEntry) {
     if (s.ready || !s.meta || !this.entries.includes(s)) return;
     const el = s.el;
+    // Runde 27: erst freischalten, dann springen. Ohne Freischaltung wartet der Eintrag bei t=0 auf die nächste Geste.
+    if (s.hold) {
+      if (!this.unlockedEls.has(el)) return;
+      s.hold = false;
+    }
     try {
       if (Math.abs(el.currentTime - s.target) > SEEK_TOL) {
         el.currentTime = s.target;
@@ -2181,6 +2463,7 @@ export class AudioDeck {
     // Runde 26: der verlassene Moment, bevor die Felder des aktiven Moments überschrieben werden
     const prev = old && old !== el ? this.snapActive() : null;
     const fromKept = this.kept.includes(s);
+    let unparked = false;
     this.noteDur(el, clip.key);
     this.entries = this.entries.filter((x) => x !== s);
     this.kept = this.kept.filter((x) => x !== s);
@@ -2239,27 +2522,40 @@ export class AudioDeck {
     } else {
       // Runde 12: der Eintrag lädt noch. Sein Element behält Quelle und Bytes, nach den Metadaten springt seek(true) an die Position (loadedmetadata, mine).
       this.diag(`deck: pool adopt ${clip.id} rs=${el.readyState} meta=${s.meta} after ${Date.now() - s.t0} ms`);
-      if (s.meta) this.seek(true);
+      // Runde 27: ein Element, das noch bei t=0 wartet (nie freigeschaltet): play() in dieser Geste stumm, erst danach der Sprung (Position bestätigen, Ton an wie beim Kaltstart)
+      if (s.hold && !this.unlockedEls.has(el)) {
+        unparked = true;
+        this.diag(`deck: swap unparked ${clip.id} (unlock in swipe)`);
+      } else if (s.meta) this.seek(true);
       this.loading(!s.local && el.readyState < 3);
     }
     // Runde 13: ein Element, das im Vorrat schon "ended" war, spielte sonst von vorn (play() am Ende springt auf 0)
     // Runde 22: auch bei von iOS gemeldeter duration gleich Startstelle (Ende gemeldet), die Position allein hebt ended dort nicht auf: Rückschritt
+    let dodged = false;
     if (play && (el.ended || restartPos({ ended: false, dur: el.duration, at: this.target, startEl: clip.start - s.offset }) !== this.target)) {
-      const pos = restartPos({ ended: true, dur: el.duration, at: this.target, startEl: clip.start - s.offset });
-      this.diag(`deck: swap at reported end ${clip.id} t=${this.target.toFixed(1)} dur=${Number.isFinite(el.duration) ? el.duration.toFixed(1) : String(el.duration)}, stepping back`);
-      try {
-        el.currentTime = pos;
-      } catch {
-        /* nach loadedmetadata */
+      // Runde 27: Kollaps (Dauer gleich Position, echte Dauer oder Puffer weiter hinten): ein frisches Element statt Rückschritt am selben. Verdeckt nie (kein load()).
+      const col = this.collapsed(el, clip);
+      this.lastCol = { el, at: Date.now() };
+      this.collapseLine(el, clip.id);
+      dodged = col && this.dodgeOn && !this.hidden() && !this.isLocal && this.dodge(el, clip);
+      if (!dodged) {
+        const pos = restartPos({ ended: true, dur: el.duration, at: this.target, startEl: clip.start - s.offset });
+        this.diag(`deck: swap at reported end ${clip.id} t=${this.target.toFixed(1)} dur=${Number.isFinite(el.duration) ? el.duration.toFixed(1) : String(el.duration)}, stepping back`);
+        try {
+          el.currentTime = pos;
+        } catch {
+          /* nach loadedmetadata */
+        }
       }
     }
     // Runde 20: gar kein Puffer hinter der Stelle: Wächter vor dem play(), damit auch ein sofortiges "playing" nur als Laden erscheint
-    const starve = play && !this.aheadOk(el);
+    const starve = !dodged && play && !this.aheadOk(el);
     if (starve) this.guard = el;
     // Runde 24: stumm bis die Position bestätigt ist (Quelle ohne Fragment, aber iOS meldete beim Tausch ein Ende an der Startstelle)
-    if (s.meta || s.ready) this.posSetLine(el);
-    if (play) this.beginPosHold(el, clip);
-    if (play) this.kick('swap');
+    if (!dodged && (s.meta || s.ready)) this.posSetLine(el);
+    if (!dodged && play) this.beginPosHold(el, clip);
+    if (!dodged && play) this.kick('swap');
+    if (unparked && s.meta) this.seek(true);
     if (starve) this.showLoading();
     // Das alte Element geht frei in den Vorrat zurück: pausiert, Quelle bleibt bis zur nächsten Befüllung (kein load() verdeckt)
     if (old && old !== el) {
@@ -2567,14 +2863,21 @@ export class AudioDeck {
     if (this.probes.has(el)) return;
     const r = { n: 1, muted: el.muted };
     this.probes.set(el, r);
+    this.st(el).probed = true;
+    this.diag(`deck: probe ${this.idOf(el)} at t=${this.num(el.currentTime)} rs=${el.readyState} dur=${this.num(el.duration)}`);
     const gid = this.gid;
     const type = this.lastGesture;
+    const src0 = el.src;
     this.gestureOpen.set(gid, (this.gestureOpen.get(gid) ?? 0) + 1);
     const settle = (ok: boolean) => {
-      if (ok) this.unlockedEls.add(el);
+      if (ok) {
+        this.unlockedEls.add(el);
+        this.noteAllUnlocked();
+      }
       r.n--;
       if (r.n <= 0 && this.probes.get(el) === r) {
         this.probes.delete(el);
+        this.diag(`deck: probe done ${this.idOf(el)} ok=${ok ? 1 : 0} dur=${this.num(el.duration)} t=${this.num(el.currentTime)}`);
         if (el !== this.el) {
           const e = this.entryOf(el);
           try {
@@ -2583,6 +2886,15 @@ export class AudioDeck {
             if (e) {
               // Die Position bleibt am Start des Ausschnitts (checkEntry zieht bei größerer Abweichung nach)
               if (e.ready && Math.abs(el.currentTime - e.target) > SEEK_TOL / 2) el.currentTime = e.target;
+              // Runde 27: ein Eintrag, dessen Sprung auf die Freischaltung wartete, springt jetzt (nur nach angenommenem play())
+              else if (!e.ready) {
+                this.checkEntry(e);
+                // Der Eintrag lud seine Quelle, während die Probe lief (sie wurde abgebrochen): sofort noch einmal bei t=0, damit er nicht bis zur nächsten Geste wartet
+                if (!ok && e.hold && el.src !== src0 && !e.reprobed) {
+                  e.reprobed = true;
+                  this.probe(el);
+                }
+              }
             } else if (!this.keptOf(el)) this.clearSrc(el);
           } catch {
             /* Element schon weg */
@@ -2641,7 +2953,15 @@ export class AudioDeck {
    * bis ein play() angenommen wurde.
    */
   private gesturePool() {
-    for (const e of this.entries) this.probe(e.el);
+    // Runde 27: ein geparktes Element (schon auf der fernen Startstelle, wenig Puffer) bekommt kein play(), das war die Hypothese zum Dauer-Kollaps (PROBE_PARKED)
+    for (const e of this.entries) {
+      if (this.probeParked || !this.parked(e)) this.probe(e.el);
+      else if (!this.unlockedEls.has(e.el) && !e.lockedNoted) {
+        // Randfall: geparkt und nicht freigeschaltet (Freigabe von iOS zurückgenommen): keine Probe
+        e.lockedNoted = true;
+        this.diag(`deck: parked locked ${e.clip.id}`);
+      }
+    }
   }
 
   time(sink: DeckSink): number | null {
@@ -2696,6 +3016,7 @@ export class AudioDeck {
 
   /** Aus einer Geste heraus aufrufen: schaltet das Element für späteres play() ohne Geste frei. Wirkt nur einmal je Seite. */
   unlock(type = 'click') {
+    this.noteEnv();
     this.session();
     this.gid++;
     this.lastGesture = type;
