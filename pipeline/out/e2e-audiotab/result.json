@@ -1,5 +1,5 @@
 {
- "at": "2026-11-19T11:45:53.541Z",
+ "at": "2026-11-19T13:05:06.899Z",
  "runs": [
   {
    "browser": "webkit",
@@ -105,7 +105,7 @@
      ],
      "n": 42
     },
-    "rfSwipeMs": 412,
+    "rfSwipeMs": 406,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -145,70 +145,70 @@
      "bg: next atshort2:0"
     ],
     "tempoWaiting": 0,
-    "tempoPaused": 9,
+    "tempoPaused": 10,
     "cue": {
      "worst": 0,
-     "n": 622,
+     "n": 623,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.39",
+       "3.36",
        34,
        34
       ],
       [
-       "4.67",
+       "4.64",
        47,
        47
       ],
       [
-       "5.96",
+       "5.93",
        60,
        60
       ],
       [
-       "7.25",
+       "7.21",
        73,
        73
       ],
       [
-       "8.53",
+       "8.50",
        86,
        86
       ],
       [
-       "9.82",
-       99,
-       99
+       "9.79",
+       98,
+       98
       ],
       [
-       "11.10",
-       112,
-       112
+       "11.07",
+       111,
+       111
       ],
       [
-       "12.39",
+       "12.36",
        124,
        124
       ],
       [
-       "13.68",
+       "13.64",
        137,
        137
       ],
       [
-       "14.96",
+       "14.93",
        150,
        150
       ],
       [
-       "16.25",
+       "16.22",
        163,
        163
       ],
       [
-       "17.54",
+       "17.50",
        176,
        176
       ]
@@ -216,8 +216,8 @@
      "rate": 2
     },
     "cueTempo": {
-     "worst": 1,
-     "n": 552,
+     "worst": 0,
+     "n": 555,
      "rates": [
       1,
       1.5,
@@ -229,7 +229,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805066
+       "dueAt": 1792756805050
       }
      ],
      "idx": 6,
@@ -371,9 +371,10 @@
      "ready": [
       "atrdy7",
       "atrdy3",
-      "atrdy9"
+      "atrdy9",
+      "atrdy2"
      ],
-     "n": 40
+     "n": 42
     },
     "rfSwipeMs": 509,
     "bgLines": [
@@ -415,7 +416,7 @@
      "bg: next atshort2:0"
     ],
     "tempoWaiting": 0,
-    "tempoPaused": 5,
+    "tempoPaused": 1,
     "cue": {
      "worst": 0,
      "n": 601,
@@ -423,7 +424,7 @@
      "shownNow": 0,
      "gaps": [
       [
-       "3.41",
+       "3.42",
        35,
        35
       ],
@@ -438,7 +439,7 @@
        61
       ],
       [
-       "7.41",
+       "7.42",
        75,
        75
       ],
@@ -453,12 +454,12 @@
        101
       ],
       [
-       "11.41",
+       "11.42",
        115,
        115
       ],
       [
-       "12.74",
+       "12.75",
        128,
        128
       ],
@@ -468,7 +469,7 @@
        141
       ],
       [
-       "15.41",
+       "15.42",
        155,
        155
       ],
@@ -499,7 +500,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804925
+       "dueAt": 1792756804911
       }
      ],
      "idx": 6,
@@ -586,7 +587,7 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "firstSoundMs": 2695,
+    "firstSoundMs": 2675,
     "diag": [
      "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
      "deck: src net pod-0006",
@@ -625,7 +626,7 @@
      "want": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
      "id": "pod-0013:82"
     },
-    "lockNextMs": 18,
+    "lockNextMs": 16,
     "lockNextLines": [
      "deck: swap pod-0013 ready=true pool=1",
      "deck play#3 swap rs=4 muted=false t=82.0",
