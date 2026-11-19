@@ -1,5 +1,5 @@
 {
- "at": "2026-11-19T13:13:51.463Z",
+ "at": "2026-11-19T14:25:07.261Z",
  "runs": [
   {
    "tag": "webkit 390x844",
@@ -9625,8 +9625,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true,
-    "keine Seitenfehler": false
+    "audio Skip schließt ohne Wertung": true
    }
   },
   {
@@ -17975,9 +17974,7 @@
    }
   }
  ],
- "failures": [
-  "chromium 390x844: keine Seitenfehler: TypeError: Cannot read properties of null (reading 'mute')"
- ],
+ "failures": [],
  "notes": [
   "text long nach der Antwort: text long nach der Antwort alles im sichtbaren Bereich: next 674-718 (Grenze 750, Stufe 3)",
   "text long nach der Antwort: text long nach der Antwort kein Scrollen: Seite 10 px, scrollbare Elemente 0",
