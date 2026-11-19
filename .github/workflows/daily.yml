@@ -68,10 +68,13 @@ jobs:
       - name: Videos (Kanäle auflösen, Shorts holen, Pool ergänzen)
         id: videos
         continue-on-error: true
+        # Schritt-Grenze: ein hängender Abruf macht den Schritt rot statt den ganzen Job abzubrechen (abgebrochen sperrt den Deploy)
+        timeout-minutes: 10
         run: npx tsx pipeline/video/run.ts ${{ contains(github.event.head_commit.message, '[video-seed]') && '--seed' || '' }}
       - name: Karten holen
         id: fetch
         continue-on-error: true
+        timeout-minutes: 20
         run: npx tsx pipeline/fetch/all.ts $SEED
       - name: Karten bauen und prüfen
         id: cards
