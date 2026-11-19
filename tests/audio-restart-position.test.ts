@@ -3,6 +3,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   AudioDeck,
+  DATA_WAIT_MS,
   ENDED_DEBOUNCE_MS,
   POS_FIX_MAX,
   STEP_BACK,
@@ -162,8 +163,11 @@ describe('falsches ended mit duration gleich currentTime', () => {
     el.paused = true;
     el.emit('pause');
     el.emit('ended');
-    expect(t.lines.some((l) => l.startsWith('deck: false ended a t=303.6 dur=303.6 adv=0.0, recovering'))).toBe(true);
-    expect(t.lines.some((l) => l.startsWith('deck: restart at reported end a'))).toBe(true);
+    // Runde 25: erst wartet das Element DATA_WAIT_MS auf Daten (keine Daten kommen), dann greift die Wiederherstellung wie bisher
+    expect(t.lines.some((l) => l.startsWith('deck: false ended'))).toBe(false);
+    vi.advanceTimersByTime(DATA_WAIT_MS);
+    // der sanfte Anstoß des Wartens hat schon einen Rückschritt gesetzt (303,35), die Wiederherstellung startet von dort
+    expect(t.lines.some((l) => /^deck: false ended a t=303\.\d dur=303\.6 adv=0\.0, recovering/.test(l))).toBe(true);
     expect(el.plays).toBe(plays + 1);
     expect(el.jumps).toBe(0);
     expect(el.currentTime).toBeGreaterThanOrEqual(c.start - STEP_BACK - 1e-9);
@@ -171,7 +175,7 @@ describe('falsches ended mit duration gleich currentTime', () => {
     expect(el.currentTime).toBeGreaterThan(0);
     expect(t.states).not.toContain(0);
   });
-  it('Sequenz aus dem Protokoll: zweites ended mit t=0 dur=0 nach 3 ms, Position zurück auf target, nie Abspielen ab 0, höchstens ein Neuaufbau', async () => {
+  it('Sequenz aus dem Protokoll: zweites ended mit t=0 dur=0 nach 3 ms, Runde 25: Warten, nie Abspielen ab 0, höchstens ein Neuaufbau', async () => {
     const t = setup();
     const c = clip('a');
     const el = await boot(t, c);
@@ -187,16 +191,17 @@ describe('falsches ended mit duration gleich currentTime', () => {
     el.ended = true;
     el.paused = true;
     el.emit('ended');
-    expect(posLines(t)).toHaveLength(1);
-    expect(el.currentTime).toBeCloseTo(c.start, 5);
+    // Runde 25: das Element wartet auf Daten, es springt nicht und baut nichts neu auf
     expect(el.loads).toBe(1);
-    // Die Dauer kommt zurück, die Abfrage läuft weiter
+    expect(t.lines.some((l) => l.startsWith('deck: rebuilding source'))).toBe(false);
+    // Die Dauer kommt zurück, die Abfrage läuft weiter: Daten da, die Stelle kommt zurück, play() ohne Sprung auf 0
     el.duration = 3000;
     for (let i = 0; i < 12; i++) {
       vi.advanceTimersByTime(150);
       t.deck.heartbeat(Date.now());
       await flush();
     }
+    expect(el.currentTime).toBeGreaterThan(c.start - 1);
     expect(el.jumps).toBe(0);
     expect(el.loads).toBeLessThanOrEqual(2);
     expect(t.lines.filter((l) => l.startsWith('deck: rebuilding source')).length).toBeLessThanOrEqual(1);

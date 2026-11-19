@@ -95,7 +95,7 @@ const KICK_INFLIGHT_MS = 1500;
  */
 export function skipKick(s: { inflightAt: number; readyState: number }, now: number, why: string): boolean {
   // Ein Neustart nach vorzeitigem ended ersetzt das stille play() des Starts (es bleibt auf iOS für immer offen), die Versuche bremsen sich selbst über ihre Zeitgeber
-  if (why === 'start' || why === 'swap' || why === 'restart') return false;
+  if (why === 'start' || why === 'swap' || why === 'restart' || why === 'wait') return false;
   if (s.inflightAt <= 0) return false;
   return s.readyState < 1 || now - s.inflightAt < KICK_INFLIGHT_MS;
 }
@@ -240,6 +240,38 @@ export function falseEndedGate(o: { times: readonly number[]; now: number; rebui
   return { times: o.rebuilt ? times : [], step: o.rebuilt ? 'broken' : 'rebuild' };
 }
 
+/**
+ * Runde 25 (Geräteprotokoll 18.11. 18:44): iOS setzte nach dem Sprung in einen noch nicht geladenen Bereich die duration auf currentTime und meldete ended, obwohl die Datei länger ist.
+ * Ein ended, dessen Position mehr als REAL_END_GAP vor der größten je gemeldeten Dauer liegt, ist kein Ende: das Element wartet auf Daten am Ziel.
+ */
+export const REAL_END_GAP = 2;
+/** Runde 25: so lange (ms) wartet ein Moment nach so einem Ende auf Daten, danach greift die bisherige Kette (Wiederherstellung, Neuaufbau, Schleifensicherung) */
+export const DATA_WAIT_MS = 6000;
+/** Runde 25: Abfrage der Daten am Ziel zusätzlich zu den Ereignissen (ms) */
+export const DATA_POLL_MS = 150;
+/** Runde 25: kamen bis dahin keine Daten (kein progress), folgt genau ein sanfter Anstoß (ms) */
+export const DATA_NUDGE_MS = 1500;
+/** Runde 25: so viele Wartevorgänge je Moment, danach gilt die bisherige Kette */
+export const DATA_WAIT_MAX = 3;
+/** Runde 25: so viele Sekunden Puffer hinter der Stelle gelten als "Daten da" */
+const DATA_AHEAD_S = 1;
+
+/** Runde 25: liegt die Position deutlich vor der echten Dauer? Ohne bekannte echte Dauer nie. */
+export function beforeRealEnd(o: { t: number; real: number | undefined }): boolean {
+  return o.real !== undefined && Number.isFinite(o.real) && Number.isFinite(o.t) && o.t < o.real - REAL_END_GAP;
+}
+
+/**
+ * Runde 25: sind am Ziel (at) Daten da? Entweder deckt ein Puffer-Bereich at plus DATA_AHEAD_S, oder das Element steht mit readyState 3 oder mehr nahe at und seine duration
+ * liegt wieder hinter at (iOS setzt sie beim falschen Ende auf die Position).
+ */
+export function dataReady(o: { at: number; t: number; dur: number; rs: number; buffered?: BufRanges | null }): boolean {
+  const end = bufferedEnd(o.buffered, o.at);
+  if (typeof end === 'number' && end >= o.at + DATA_AHEAD_S) return true;
+  const durOk = !Number.isFinite(o.dur) || o.dur - o.at >= 1;
+  return o.rs >= 3 && Math.abs(o.t - o.at) <= 1 && durOk;
+}
+
 /** Runde 18: so lange gilt das Netz nach "pool slow" oder langem Warten auf playing als schwach (ms) */
 export const WEAK_NET_MS = 5 * 60_000;
 /** Runde 18: braucht der aktive Moment so lange bis playing, gilt das Netz als schwach (ms) */
@@ -363,6 +395,8 @@ export interface DeckEl {
   removeAttribute?(name: string): void;
   readonly error?: { code: number } | null;
   readonly buffered?: BufRanges;
+  /** Runde 25: suchbarer Bereich (Ende gilt als untere Grenze der echten Dauer) */
+  readonly seekable?: BufRanges;
   /** Runde 20: ein Seek läuft noch (seeked kommt danach) */
   readonly seeking?: boolean;
   play(): Promise<void> | undefined;
@@ -550,6 +584,11 @@ export class AudioDeck {
   private fe = { key: '', times: [] as number[], rebuilt: false, dead: false };
   /** Runde 24: stumm bis die Position bestätigt ist (real: der Ton-Zustand, den Host und Entsperrung wollen) */
   private posHold: { el: DeckEl; key: string; id: string; target: number; real: boolean; t0: number; tick: ReturnType<typeof setInterval>; stop: ReturnType<typeof setTimeout> } | null = null;
+  /** Runde 25: größte je gemeldete endliche Dauer je Moment (Elementzeit), Momente, für die "duration dropped" schon steht, Wartevorgänge je Moment, der laufende Wartevorgang */
+  private realDur = new Map<string, number>();
+  private durDrop = new Set<string>();
+  private dw = { key: '', n: 0, timedOut: false };
+  private dataWait: { el: DeckEl; key: string; id: string; at: number; t0: number; prog0: number; nudged: boolean; tick: ReturnType<typeof setInterval>; stop: ReturnType<typeof setTimeout> } | null = null;
   /** Runde 24: für diesen Ausschnitt steht die Zeile "pos set" schon */
   private posLineKey = '';
   /** Runde 22: Metadaten da und Startsprung gesetzt, erst dann prüft der Positionswächter */
@@ -748,14 +787,20 @@ export class AudioDeck {
     });
     // Runde 18: Daten kommen an (Zähler für den Hänge-Wächter des Feeds, siehe bytes)
     el.addEventListener('progress', () => {
-      if (mine()) this.prog++;
+      if (mine()) {
+        this.prog++;
+        this.pollData();
+      }
       // Runde 20: neue Daten können einen Vorrats-Eintrag mit dünnem Puffer bereit machen
       const e = entry();
       if (e && !e.ready) this.checkEntry(e);
     });
     el.addEventListener('durationchange', () => {
       const e = entry();
+      const key = e?.clip.key ?? (mine() ? this.clip?.key : undefined);
+      if (key !== undefined) this.noteDur(el, key, e?.clip.id ?? this.clip?.id);
       if (e && !e.ready) this.checkEntry(e);
+      if (mine()) this.pollData();
     });
     el.addEventListener('pause', () => {
       const by = this.pauseBy.get(el);
@@ -794,10 +839,12 @@ export class AudioDeck {
       if (mine()) this.note(`ended event played=${this.played} hidden=${this.hidden()} ${this.stateText(el)}`);
       // Runde 17: ein ended zählt nur, wenn es plausibel ist (Ende des Ausschnitts oder der Quelle), sonst Wiederherstellung statt Weiter
       if (mine() && this.played) this.endedCheck(el, 'ended');
-      else if (mine()) this.earlyEnded(el);
+      // Runde 25: auch vor dem ersten playing: ein Ende vor der echten Dauer wartet auf Daten, kein Neustart
+      else if (mine() && !(this.clip && this.tryWait(el, this.clip))) this.earlyEnded(el);
     });
     el.addEventListener('timeupdate', () => {
       if (mine()) this.checkPosHold();
+      if (mine()) this.pollData();
       if (mine() && this.guardPos(el)) return;
       if (mine()) this.tick(el);
       const c = this.clip;
@@ -809,6 +856,8 @@ export class AudioDeck {
     });
     el.addEventListener('loadedmetadata', () => {
       const e = entry();
+      const key = e?.clip.key ?? (mine() ? this.clip?.key : undefined);
+      if (key !== undefined) this.noteDur(el, key);
       if (e) {
         e.meta = true;
         this.checkEntry(e);
@@ -840,6 +889,7 @@ export class AudioDeck {
       if (mine()) {
         this.samp = null;
         this.checkPosHold();
+        this.pollData();
       }
       const e = entry();
       if (e) this.checkEntry(e);
@@ -847,8 +897,10 @@ export class AudioDeck {
     el.addEventListener('canplay', () => {
       const e = entry();
       if (e) this.checkEntry(e);
-      if (mine()) this.loading(false);
-      if (mine() && this.clip && this.want && el.paused && !this.done && !this.nudged && this.refusedKey !== this.clip.key) {
+      if (mine()) this.pollData();
+      // Runde 25: während des Wartens auf Daten kein Ladeende und kein Anstoß von hier, das Warten entscheidet
+      if (mine() && !this.dataWait) this.loading(false);
+      if (mine() && !this.dataWait && this.clip && this.want && el.paused && !this.done && !this.nudged && this.refusedKey !== this.clip.key) {
         this.nudged = true;
         this.kick('canplay');
       }
@@ -883,6 +935,7 @@ export class AudioDeck {
 
   /** Runde 17: neuer Ausschnitt (oder neue Quelle desselben): Proben und Messung neu. Die Wiederherstellungen zählen je Ausschnitt, ein Neuaufbau selbst setzt sie nicht zurück. */
   private noteClip(key: string, fresh = false) {
+    this.endWait();
     this.guard = null;
     this.samp = null;
     this.froz = null;
@@ -894,6 +947,7 @@ export class AudioDeck {
     if (!this.rebuilding && (fresh || this.posFix.key !== key)) this.posFix = { key, n: 0 };
     if (!this.rebuilding && (fresh || this.recov.key !== key)) this.recov = { key, n: 0, at: 0, pending: false, gaveUp: false };
     if (!this.rebuilding && (fresh || this.fe.key !== key)) this.fe = { key, times: [], rebuilt: false, dead: false };
+    if (!this.rebuilding && (fresh || this.dw.key !== key)) this.dw = { key, n: 0, timedOut: false };
     this.posLineKey = '';
   }
 
@@ -958,6 +1012,8 @@ export class AudioDeck {
       this.releaseHold();
       return;
     }
+    // Runde 25: wartet das Element auf Daten, hält das Warten die Stummhaltung
+    if (this.dataWait?.el === el) return;
     if (!positionConfirmed({ t: el.currentTime, target: h.target, rs: el.readyState, seeking: !!el.seeking })) return;
     this.diag(`deck: pos confirmed ${h.id} t=${el.currentTime.toFixed(1)} after ${Date.now() - h.t0} ms, unmute`);
     this.releaseHold();
@@ -967,6 +1023,7 @@ export class AudioDeck {
     const h = this.posHold;
     if (!h) return;
     const el = h.el;
+    if (this.dataWait?.el === el) return;
     if (el === this.el && this.clip?.key === h.key && !this.done) {
       this.diag(`deck: pos unconfirmed ${h.id} t=${el.currentTime.toFixed(1)} target=${h.target.toFixed(1)} after ${POS_CONFIRM_MS} ms`);
       try {
@@ -1009,10 +1066,18 @@ export class AudioDeck {
     if (!c || this.done) return;
     // Runde 22: ein ended vor dem Schnittbeginn ist der Sprung auf 0: sofort zurück an die Stelle
     if (this.guardPos(el)) return;
+    // Runde 25: läuft schon ein Warten auf Daten, zählt dieses ended nicht (die Abfrage und das ended-Ereignis kommen weiter)
+    if (this.dataWait?.el === el && this.dataWait.key === c.key) return;
     const t = el.currentTime;
     const dur = el.duration;
     // Runde 18: Sekunden, die der Ausschnitt in diesem Element seit Start oder letztem Neuaufbau gelaufen ist (target ist die Startstelle der Elementzeit)
     const advanced = Number.isFinite(t) ? Math.max(0, t - this.target) : 0;
+    // Runde 25: erst das Ende des Ausschnitts (dort ist es immer ein Ende), dann das Warten auf Daten, dann die Dauer-Regel
+    if (plausibleEnd({ t, dur: Number.NaN, clipEnd: c.end, offset: this.offset, advanced })) {
+      this.clipEnd(via);
+      return;
+    }
+    if (this.tryWait(el, c)) return;
     if (plausibleEnd({ t, dur, clipEnd: c.end, offset: this.offset, advanced })) {
       this.clipEnd(via);
       return;
@@ -1048,6 +1113,143 @@ export class AudioDeck {
     if (this.recov.gaveUp) return;
     this.diag(`deck: false ended ${c.id} t=${t.toFixed(1)} dur=${Number.isFinite(dur) ? dur.toFixed(1) : String(dur)} adv=${advanced.toFixed(1)}, recovering`);
     this.recover(el, 'ended', t);
+  }
+
+  // ---- Runde 25: Warten auf Daten nach einem Ende vor der echten Dauer ----
+
+  /** Größte je gemeldete endliche Dauer dieses Moments merken (duration, suchbarer Bereich, Puffer-Ende). Einmal je Moment die Zeile "duration dropped", wenn die Dauer danach fällt. */
+  private noteDur(el: DeckEl, key: string, id?: string) {
+    const prev = this.realDur.get(key);
+    let best = prev ?? 0;
+    const d = el.duration;
+    const maxEnd = (b: BufRanges | null | undefined): number => {
+      let m = 0;
+      try {
+        for (let i = 0; b && i < b.length; i++) m = Math.max(m, b.end(i));
+      } catch {
+        /* kein Medium */
+      }
+      return m;
+    };
+    if (Number.isFinite(d) && d > best) best = d;
+    best = Math.max(best, maxEnd(el.seekable), maxEnd(el.buffered));
+    if (prev !== undefined && id && Number.isFinite(d) && d < prev - REAL_END_GAP && !this.durDrop.has(key)) {
+      this.durDrop.add(key);
+      this.diag(`deck: duration dropped ${id} from ${prev.toFixed(1)} to ${d.toFixed(1)} at t=${el.currentTime.toFixed(1)}`);
+    }
+    if (best > 0 && best !== prev) {
+      this.realDur.set(key, best);
+      if (this.realDur.size > 40) this.realDur.delete(this.realDur.keys().next().value as string);
+    }
+  }
+
+  /**
+   * Ein ended vor der echten Dauer (iOS setzte duration auf currentTime): kein Ende, das Element wartet stumm auf Daten am Ziel. Kein erneuter Sprung, kein Neustart.
+   * true: das ended ist behandelt (Warten läuft oder beginnt jetzt). false: nicht zuständig, die bisherige Kette entscheidet (lokale Quelle, echte Dauer unbekannt,
+   * Position vor dem Schnittbeginn, leeres ended, Wunsch pausiert, Warten schon abgelaufen oder zu oft).
+   */
+  private tryWait(el: DeckEl, c: DeckClip): boolean {
+    if (this.dataWait) return this.dataWait.el === el && this.dataWait.key === c.key;
+    if (this.isLocal || this.done || this.holding || !this.want || el !== this.el) return false;
+    if (this.dw.timedOut || this.dw.n >= DATA_WAIT_MAX) return false;
+    this.noteDur(el, c.key);
+    const t = el.currentTime;
+    const real = this.realDur.get(c.key);
+    if (!beforeRealEnd({ t, real })) return false;
+    if (positionBeforeStart({ t, target: this.target })) return false;
+    const dur = el.duration;
+    if ((!Number.isFinite(dur) || dur === 0) && t < 0.5) return false;
+    // Sind am Ziel schon Daten da (Puffer deckt die Stelle, Dauer echt), fehlt nichts: die bisherige Kette stellt wie vor Runde 25 her
+    if (dataReady({ at: t, t, dur, rs: el.readyState, buffered: el.buffered })) return false;
+    this.dw.n++;
+    this.diag(`deck: end before real end ${c.id} t=${t.toFixed(1)} dur=${Number.isFinite(dur) ? dur.toFixed(1) : String(dur)} real=${(real as number).toFixed(1)}, waiting for data`);
+    this.live = false;
+    this.samp = null;
+    this.froz = null;
+    // Stumm halten wie bei der Position (verdeckt nie: iOS verweigert dort das Entstummen vermutlich)
+    if (!this.hidden()) {
+      const h = this.posHold;
+      if (h && h.el === el) clearTimeout(h.stop);
+      else {
+        this.releaseHold();
+        this.posHold = { el, key: c.key, id: c.id, target: t, real: el.muted, t0: Date.now(), tick: setInterval(() => this.checkPosHold(), 100), stop: setTimeout(() => {}, 0) };
+        el.muted = true;
+      }
+    }
+    this.showLoading();
+    this.dataWait = {
+      el,
+      key: c.key,
+      id: c.id,
+      at: t,
+      t0: Date.now(),
+      prog0: this.prog,
+      nudged: false,
+      tick: setInterval(() => this.pollData(), DATA_POLL_MS),
+      stop: setTimeout(() => this.waitTimeout(), DATA_WAIT_MS),
+    };
+    this.pollData();
+    return true;
+  }
+
+  /** Warten beenden, ohne etwas zu tun (neuer Ausschnitt, Aufräumen, Ende des Wartens). Die Stummhaltung des Wartens geht mit. */
+  private endWait() {
+    const w = this.dataWait;
+    if (!w) return;
+    clearInterval(w.tick);
+    clearTimeout(w.stop);
+    this.dataWait = null;
+    if (this.posHold?.el === w.el) this.releaseHold();
+  }
+
+  /** Abfrage und Ereignisse (progress, canplay, durationchange, timeupdate, seeked): sind Daten am Ziel da, Position prüfen, play(), Ton an */
+  private pollData() {
+    const w = this.dataWait;
+    if (!w) return;
+    const el = w.el;
+    const c = this.clip;
+    if (el !== this.el || !c || c.key !== w.key || this.done) {
+      this.endWait();
+      return;
+    }
+    if (el.seeking) return;
+    if (!dataReady({ at: w.at, t: el.currentTime, dur: el.duration, rs: el.readyState, buffered: el.buffered })) {
+      // iOS stößt in diesem Zustand vermutlich kein Nachladen an (im Protokoll nicht belegt): bis dahin kein progress, dann genau ein sanfter Anstoß, ohne load()
+      if (!w.nudged && Date.now() - w.t0 >= DATA_NUDGE_MS && this.prog === w.prog0) {
+        w.nudged = true;
+        this.diag(`deck: data wait nudge ${w.id} no progress after ${DATA_NUDGE_MS} ms`);
+        try {
+          el.currentTime = stepBackPos(w.at, c.start - this.offset);
+        } catch {
+          /* iOS lehnt die Position ab */
+        }
+      }
+      return;
+    }
+    const ms = Date.now() - w.t0;
+    this.endWait();
+    try {
+      // im Ende-Zustand mit Rückschritt, sonst springt play() auf 0
+      const pos = restartPos({ ended: el.ended, dur: el.duration, at: w.at, startEl: c.start - this.offset });
+      if (Math.abs(el.currentTime - pos) > 0.05) el.currentTime = pos;
+    } catch {
+      /* iOS lehnt die Position ab */
+    }
+    this.diag(`deck: data ready ${w.id} t=${el.currentTime.toFixed(1)} after ${ms} ms, play`);
+    if (this.want) this.kick('wait');
+  }
+
+  private waitTimeout() {
+    const w = this.dataWait;
+    if (!w) return;
+    const el = w.el;
+    const alive = el === this.el && this.clip?.key === w.key && !this.done;
+    this.endWait();
+    if (!alive) return;
+    this.diag(`deck: data wait timeout ${w.id} after ${DATA_WAIT_MS} ms`);
+    this.dw.timedOut = true;
+    // ab jetzt die bisherige Kette: Wiederherstellung, Neuaufbau, Schleifensicherung
+    this.endedCheck(el, 'poll');
   }
 
   /**
@@ -1189,7 +1391,7 @@ export class AudioDeck {
    */
   private guardPos(el: DeckEl): boolean {
     const c = this.clip;
-    if (!c || el !== this.el || this.done || this.holding || this.rebuilding || !this.want || !this.armed) return false;
+    if (!c || el !== this.el || this.done || this.holding || this.rebuilding || !this.want || !this.armed || this.dataWait) return false;
     if (el.paused && !el.ended) return false;
     if (el.readyState < 1 || el.seeking || el.duration === Number.POSITIVE_INFINITY) return false;
     const t = el.currentTime;
@@ -1229,7 +1431,7 @@ export class AudioDeck {
    */
   private earlyEnded(el: DeckEl) {
     const c = this.clip;
-    if (el !== this.el || !c || this.done || !this.want || this.played || this.holding) return;
+    if (el !== this.el || !c || this.done || !this.want || this.played || this.holding || this.dataWait) return;
     if (this.earlyTimer) return;
     if (this.needTapKey === c.key) return;
     const at = el.currentTime + this.offset;
@@ -1256,7 +1458,7 @@ export class AudioDeck {
     this.earlyTimer = setTimeout(() => {
       this.earlyTimer = null;
       // Zwischenzeitlich pausiert, beendet, gespielt oder ein anderer Ausschnitt geladen: nichts tun
-      if (el !== this.el || this.clip !== c || this.done || !this.want || this.played || this.holding || this.needTapKey === c.key) return;
+      if (el !== this.el || this.clip !== c || this.done || !this.want || this.played || this.holding || this.dataWait || this.needTapKey === c.key) return;
       this.diag(`deck: early ended, restart ${n} rs=${el.readyState} t=${el.currentTime.toFixed(1)}`);
       try {
         // Runde 22: im Ende-Zustand mit Rückschritt, sonst springt play() auf 0
@@ -1406,6 +1608,8 @@ export class AudioDeck {
 
   private kick(why: string) {
     const el = this.element;
+    // Runde 25: wartet das Element auf Daten am Ziel, startet nur das Warten selbst (why wait) ein play()
+    if (this.dataWait && why !== 'wait') return;
     // Start oder Tausch wurde abgelehnt: sichtbar kein play() von selbst (soundGuard, canplay, resume). Nur ein Tipp (Geste in den letzten Millisekunden) startet wieder. Verdeckt bleibt die Rückkehr-Logik wie bisher.
     if (this.needTapKey && this.clip?.key === this.needTapKey && why !== 'start' && why !== 'swap' && !this.hidden() && Date.now() - this.actAt > GESTURE_WINDOW_MS) {
       if (!this.needTapNoted) {
@@ -1834,6 +2038,7 @@ export class AudioDeck {
     const clip = s.clip;
     const el = s.el;
     const play = via?.play ?? true;
+    this.noteDur(el, clip.key);
     this.entries = this.entries.filter((x) => x !== s);
     this.depleted = true;
     this.releaseHold();
@@ -2046,6 +2251,7 @@ export class AudioDeck {
 
   /** Aufräumen, wenn der Audio-Reiter verlassen wird: Ton aus, keine Rückrufe */
   release() {
+    this.endWait();
     this.holdToken++;
     this.holding = null;
     this.resetEarly();

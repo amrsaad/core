@@ -358,7 +358,9 @@ describe('Deck: falsches ended', () => {
     el.paused = true;
     el.emit('ended');
     expect(t.states).not.toContain(0);
-    expect(t.lines.some((l) => l.startsWith('deck: false ended a t=1405.9 dur=1405.9 adv=0.0, recovering'))).toBe(true);
+    // Runde 25: erst wartet das Element auf Daten (6 s), dann greift die Wiederherstellung wie bisher
+    vi.advanceTimersByTime(6000);
+    expect(t.lines.some((l) => /^deck: false ended a t=1405\.\d dur=1405\.9 adv=0\.0, recovering/.test(l))).toBe(true);
     expect(el.plays).toBe(plays + 1);
   });
   it('Runde 18: ended nahe duration nach 3 s Lauf ist ein echtes Ende', async () => {

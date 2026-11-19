@@ -35,6 +35,8 @@ class El implements DeckEl {
   playbackRate = 1;
   defaultPlaybackRate = 1;
   error: { code: number } | null = null;
+  /** Runde 25: Puffer-Bereiche (undefined: das Gerät liefert keine) */
+  buffered: { length: number; start(i: number): number; end(i: number): number } | undefined = undefined;
   plays = 0;
   loads = 0;
   private on = new Map<string, (() => void)[]>();
@@ -64,6 +66,23 @@ class El implements DeckEl {
   }
   removeAttribute(n: string) {
     if (n === 'src') this.src = '';
+  }
+  /** Runde 25 (Geräteprotokoll 18.11. 18:44): iOS setzt nach dem Sprung in einen nicht geladenen Bereich duration auf currentTime, pausiert und meldet ended */
+  iosFalseEnd() {
+    this.duration = this.t;
+    this.ended = true;
+    this.paused = true;
+    this.readyState = 4;
+    this.emit('pause');
+    this.emit('ended');
+  }
+  /** Runde 25: Daten kommen an (Puffer deckt bis real, Dauer wieder echt) */
+  dataArrives(real: number) {
+    this.duration = real;
+    this.buffered = { length: 1, start: () => 0, end: () => real };
+    this.emit('durationchange');
+    this.emit('progress');
+    this.emit('canplay');
   }
 }
 
@@ -330,5 +349,184 @@ describe('Schleifensicherung', () => {
     expect(t.calls.broken).toBe(1);
     // kein Aufbau trägt ein Fragment
     for (const e of t.els) expect(e.src).not.toContain('#t=');
+  });
+});
+
+describe('Runde 25: nach falschem Ende auf Daten warten', () => {
+  /** Kaltstart wie im Protokoll: Metadaten mit echter Dauer, Sprung bestätigt, dann das falsche Ende */
+  const coldThenFalseEnd = async (t: ReturnType<typeof setup>) => {
+    t.deck.load(clip('a'), t.sink, { play: true, muted: false });
+    await flush();
+    const el = t.els[0];
+    el.readyState = 1;
+    el.emit('loadedmetadata');
+    el.emit('seeked');
+    el.readyState = 4;
+    expect(el.currentTime).toBeCloseTo(303.6, 5);
+    el.iosFalseEnd();
+    return el;
+  };
+  const count = (t: ReturnType<typeof setup>, start: string) => t.lines.filter((l) => l.startsWith(start)).length;
+
+  it('(1) während des Wartens kein Neustart, kein Neuaufbau, kein Sprung außer einem sanften Anstoß; stumm; Ladezustand', async () => {
+    const states: number[] = [];
+    const t = setup();
+    const sink: DeckSink = { state: (s) => states.push(s), error: () => t.calls.error++, broken: () => t.calls.broken++ };
+    t.deck.load(clip('a'), sink, { play: true, muted: false });
+    await flush();
+    const el = t.els[0];
+    el.readyState = 1;
+    el.emit('loadedmetadata');
+    el.emit('seeked');
+    el.readyState = 4;
+    const plays = el.plays;
+    const loads = el.loads;
+    el.iosFalseEnd();
+    expect(t.lines.some((l) => /^deck: end before real end a t=303\.6 dur=303\.6 real=3000\.0, waiting for data$/.test(l))).toBe(true);
+    expect(el.muted).toBe(true);
+    expect(states[states.length - 1]).toBe(3);
+    for (let i = 0; i < 30; i++) {
+      vi.advanceTimersByTime(150);
+      t.deck.heartbeat(Date.now());
+      if (i % 7 === 0) el.emit('ended');
+    }
+    expect(el.plays).toBe(plays);
+    expect(el.loads).toBe(loads);
+    expect(t.lines.some((l) => l.includes('false ended') || l.includes('rebuilding') || l.includes('restart') || l.includes('early ended'))).toBe(false);
+    expect(states.includes(0)).toBe(false);
+    expect(t.calls.error + t.calls.broken).toBe(0);
+    expect(el.muted).toBe(true);
+    // genau ein sanfter Anstoß, ohne load()
+    expect(count(t, 'deck: data wait nudge a')).toBe(1);
+    expect(el.currentTime).toBeCloseTo(303.35, 5);
+  });
+
+  it('(2) Daten da: genau ein play(), Ton an, Position zurück vom Ende-Zustand', async () => {
+    const t = setup();
+    const el = await coldThenFalseEnd(t);
+    const plays = el.plays;
+    vi.advanceTimersByTime(2000);
+    expect(el.plays).toBe(plays);
+    el.dataArrives(3000);
+    expect(el.plays).toBe(plays + 1);
+    expect(el.muted).toBe(false);
+    expect(el.paused).toBe(false);
+    expect(el.currentTime).toBeGreaterThan(300);
+    expect(t.lines.filter((l) => /^deck: data ready a t=\d+\.\d after 2000 ms, play$/.test(l)).length).toBe(1);
+    // weitere Ereignisse und Zeit: kein zweites play(), keine zweite Zeile
+    el.emit('progress');
+    el.emit('canplay');
+    vi.advanceTimersByTime(8000);
+    t.deck.heartbeat(Date.now());
+    expect(el.plays).toBe(plays + 1);
+    expect(count(t, 'deck: data ready a')).toBe(1);
+    expect(count(t, 'deck: data wait timeout')).toBe(0);
+  });
+
+  it('(3) nach 6 s ohne Daten greift die bisherige Kette (Wiederherstellung), die Schleifensicherung bleibt', async () => {
+    const t = setup();
+    const el = await coldThenFalseEnd(t);
+    const plays = el.plays;
+    vi.advanceTimersByTime(5990);
+    expect(el.plays).toBe(plays);
+    expect(count(t, 'deck: data wait timeout')).toBe(0);
+    vi.advanceTimersByTime(20);
+    expect(t.lines.filter((l) => l === 'deck: data wait timeout a after 6000 ms').length).toBe(1);
+    expect(count(t, 'deck: false ended a')).toBe(1);
+    expect(el.plays).toBe(plays + 1);
+    // iOS meldet das Ende wieder: kein zweites Warten, die Kette läuft weiter bis gestört
+    for (let i = 0; i < 40; i++) {
+      el.iosFalseEnd();
+      vi.advanceTimersByTime(700);
+      t.deck.heartbeat(Date.now());
+    }
+    expect(count(t, 'deck: end before real end')).toBe(1);
+    expect(count(t, 'deck: data wait timeout')).toBe(1);
+    expect(t.lines.some((l) => l.startsWith('deck: moment broken a'))).toBe(true);
+    expect(t.calls.broken).toBe(1);
+  });
+
+  it('(4) echtes Ende am echten Ende und Ende des Ausschnitts bleiben Ende', async () => {
+    const states: number[] = [];
+    const t = setup();
+    const sink: DeckSink = { state: (s) => states.push(s), error: () => {}, broken: () => {} };
+    // Ausschnitt reicht über die Dauer der Datei hinaus: das Ende der Datei beendet ihn
+    t.deck.load(clip('a', 2900, 200), sink, { play: true, muted: false });
+    await flush();
+    const el = t.els[0];
+    el.readyState = 4;
+    el.emit('loadedmetadata');
+    el.emit('seeked');
+    el.currentTime = 2999.6;
+    el.ended = true;
+    el.paused = true;
+    el.emit('ended');
+    expect(states[states.length - 1]).toBe(0);
+    expect(count(t, 'deck: end before real end')).toBe(0);
+    // Ende des Ausschnitts mitten in der Datei
+    const t2 = setup();
+    const s2: number[] = [];
+    t2.deck.load(clip('b', 303.6, 48), { state: (s) => s2.push(s), error: () => {}, broken: () => {} }, { play: true, muted: false });
+    await flush();
+    const e2 = t2.els[0];
+    e2.readyState = 4;
+    e2.emit('loadedmetadata');
+    e2.emit('seeked');
+    e2.currentTime = 351.5;
+    e2.ended = true;
+    e2.paused = true;
+    e2.emit('ended');
+    expect(s2[s2.length - 1]).toBe(0);
+    expect(count(t2, 'deck: end before real end')).toBe(0);
+  });
+
+  it('(5) jede Zeile je Wartevorgang einmal, auch bei vielen ended-Ereignissen und Abfragen', async () => {
+    const t = setup();
+    const el = await coldThenFalseEnd(t);
+    for (let i = 0; i < 20; i++) {
+      el.emit('ended');
+      el.emit('pause');
+      el.emit('timeupdate');
+      vi.advanceTimersByTime(150);
+      t.deck.heartbeat(Date.now());
+    }
+    el.dataArrives(3000);
+    vi.advanceTimersByTime(10000);
+    expect(count(t, 'deck: end before real end')).toBe(1);
+    expect(count(t, 'deck: data ready')).toBe(1);
+    expect(count(t, 'deck: data wait timeout')).toBe(0);
+    // kein falsches Ende, kein Neuaufbau
+    expect(count(t, 'deck: false ended')).toBe(0);
+    // Timeout-Zeile ebenfalls einmal
+    const t2 = setup();
+    await coldThenFalseEnd(t2);
+    vi.advanceTimersByTime(30000);
+    expect(count(t2, 'deck: data wait timeout')).toBe(1);
+    expect(count(t2, 'deck: end before real end')).toBe(1);
+  });
+
+  it('Tausch auf Vorrats-Element: Dauer fiel auf die Startstelle, ein Ende danach wartet auf Daten', async () => {
+    const t = setup();
+    t.deck.load(clip('a', 10), t.sink, { play: true, muted: false });
+    await flush();
+    t.deck.fill([clip('b', 1923.5, 48)]);
+    const eb = t.els.find((x) => x.src.includes('/b.mp3'))!;
+    eb.duration = 2567.7;
+    eb.readyState = 4;
+    eb.emit('loadedmetadata');
+    eb.emit('canplaythrough');
+    expect(eb.currentTime).toBeCloseTo(1923.5, 5);
+    // vor dem Tausch fällt die Dauer auf die Startstelle (Protokoll: dur=1923.5 target=1923.5 buf=2567.7)
+    eb.duration = 1923.5;
+    eb.buffered = { length: 1, start: () => 0, end: () => 2567.7 };
+    t.deck.swapNext(t.sink);
+    await flush();
+    expect(t.lines.some((l) => l.startsWith('deck: swap at reported end b'))).toBe(true);
+    const plays = eb.plays;
+    eb.buffered = undefined;
+    eb.iosFalseEnd();
+    expect(t.lines.some((l) => /^deck: end before real end b t=\d+\.\d dur=\d+\.\d real=2567\.7, waiting for data$/.test(l))).toBe(true);
+    vi.advanceTimersByTime(3000);
+    expect(eb.plays).toBe(plays);
   });
 });
