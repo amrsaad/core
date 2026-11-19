@@ -1,5 +1,5 @@
 {
- "at": "2026-11-19T14:16:30.652Z",
+ "at": "2026-11-19T15:33:17.963Z",
  "runs": [
   {
    "browser": "webkit",
@@ -88,7 +88,7 @@
     "openCardBackOnReturn": true
    },
    "notes": {
-    "iosTapMs": 3,
+    "iosTapMs": 6,
     "iosGestureLines": [
      "deck: gesture pointerdown unlocked 6/6"
     ],
@@ -100,11 +100,12 @@
      "ready": [
       "atrdy7",
       "atrdy3",
-      "atrdy9"
+      "atrdy9",
+      "atrdy2"
      ],
-     "n": 40
+     "n": 42
     },
-    "rfSwipeMs": 509,
+    "rfSwipeMs": 441,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -144,70 +145,70 @@
      "bg: next atshort2:0"
     ],
     "tempoWaiting": 0,
-    "tempoPaused": 4,
+    "tempoPaused": 6,
     "cue": {
-     "worst": 1,
+     "worst": 0,
      "n": 622,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.41",
-       35,
-       35
+       "3.39",
+       34,
+       34
       ],
       [
-       "4.70",
+       "4.68",
        47,
        47
       ],
       [
-       "5.98",
+       "5.97",
        60,
        60
       ],
       [
-       "7.27",
+       "7.25",
        73,
        73
       ],
       [
-       "8.56",
+       "8.54",
        86,
        86
       ],
       [
-       "9.85",
+       "9.83",
        99,
        99
       ],
       [
-       "11.13",
+       "11.12",
        112,
        112
       ],
       [
-       "12.42",
+       "12.41",
        125,
        125
       ],
       [
-       "13.71",
-       138,
-       138
+       "13.70",
+       137,
+       137
       ],
       [
-       "14.99",
+       "14.98",
        150,
        150
       ],
       [
-       "16.28",
+       "16.27",
        163,
        163
       ],
       [
-       "17.57",
+       "17.56",
        176,
        176
       ]
@@ -215,8 +216,8 @@
      "rate": 2
     },
     "cueTempo": {
-     "worst": 1,
-     "n": 543,
+     "worst": 0,
+     "n": 547,
      "rates": [
       1,
       1.5,
@@ -228,7 +229,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805132
+       "dueAt": 1792756805125
       }
      ],
      "idx": 6,
@@ -358,7 +359,7 @@
     "openCardBackOnReturn": true
    },
    "notes": {
-    "iosTapMs": 2,
+    "iosTapMs": 1,
     "iosGestureLines": [
      "deck: gesture pointerdown unlocked 6/6"
     ],
@@ -375,7 +376,7 @@
      ],
      "n": 42
     },
-    "rfSwipeMs": 502,
+    "rfSwipeMs": 504,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -423,62 +424,62 @@
      "shownNow": 0,
      "gaps": [
       [
-       "3.42",
-       35,
-       35
+       "3.34",
+       34,
+       34
       ],
       [
-       "4.75",
-       48,
-       48
+       "4.67",
+       47,
+       47
       ],
       [
-       "6.09",
+       "6.00",
        61,
        61
       ],
       [
-       "7.42",
-       75,
-       75
+       "7.34",
+       74,
+       74
       ],
       [
-       "8.75",
-       88,
-       88
+       "8.67",
+       87,
+       87
       ],
       [
-       "10.09",
+       "10.00",
        101,
        101
       ],
       [
-       "11.42",
-       115,
-       115
+       "11.34",
+       114,
+       114
       ],
       [
-       "12.75",
-       128,
-       128
+       "12.67",
+       127,
+       127
       ],
       [
-       "14.09",
+       "14.00",
        141,
        141
       ],
       [
-       "15.42",
-       155,
-       155
+       "15.34",
+       154,
+       154
       ],
       [
-       "16.75",
-       168,
-       168
+       "16.67",
+       167,
+       167
       ],
       [
-       "18.09",
+       "18.00",
        181,
        181
       ]
@@ -499,7 +500,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804951
+       "dueAt": 1792756804942
       }
      ],
      "idx": 6,
@@ -586,7 +587,7 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "firstSoundMs": 2744,
+    "firstSoundMs": 2738,
     "diag": [
      "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
      "deck: src net pod-0006",
@@ -625,7 +626,7 @@
      "want": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
      "id": "pod-0013:82"
     },
-    "lockNextMs": 20,
+    "lockNextMs": 22,
     "lockNextLines": [
      "deck: swap pod-0013 ready=true pool=1",
      "deck play#3 swap rs=4 muted=false t=82.0",
