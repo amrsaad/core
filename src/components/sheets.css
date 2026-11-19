@@ -4,7 +4,7 @@
  */
 
 /* ---------- Abrufkarte: liegt unter dem Moment, die Bildkarte bleibt oben sichtbar, Einblenden mit Spring ----------
-   Runde 23: Maße über --rc-* je Stufe (data-fit 0 bis 6, gewählt in RecallCard.tsx nach Messung, Regeln in recallfit.ts). Nichts scrollt, nichts liegt unter der unteren Leiste. */
+   Runde 28: auf dem Handy trägt die Seite (.vrecall-page, feed.css) einen Block ohne Kasten, Maße je Stufe (data-fit 0 bis 3, gewählt in RecallCard.tsx, Regeln in recallfit.ts). Die Werte hier sind die des Desktop-Panels. */
 html {
   --rc-pt: var(--s-4);
   --rc-pb: var(--s-5);
@@ -23,44 +23,6 @@ html {
   --rc-hook-lines: 3;
   --rc-why-lh: var(--t-body-lh);
 }
-/* Stufe 1 und höher: Abstände kleiner, Tippflächen genau 44 px */
-:is(.vrecall-page, .recall):is([data-fit='1'], [data-fit='2'], [data-fit='3'], [data-fit='4'], [data-fit='5'], [data-fit='6']) {
-  --rc-pt: var(--s-2);
-  --rc-pb: var(--s-2);
-  --rc-gap: var(--s-2);
-  --rc-pad: var(--s-4);
-  --rc-cgap: var(--s-2);
-  --rc-qm: 0px;
-  --rc-o-minh: var(--hit);
-  --rc-o-py: var(--s-2);
-  --rc-ogap: var(--s-2);
-}
-/* Runde 24: Stufe 0 und 1 zeigen den Hook bis zu drei Zeilen, Stufe 2 zwei, ab Stufe 3 eine Zeile */
-:is(.vrecall-page, .recall):is([data-fit='2']) { --rc-hook-lines: 2; }
-:is(.vrecall-page, .recall):is([data-fit='3'], [data-fit='4'], [data-fit='5'], [data-fit='6']) { --rc-hook-lines: 1; }
-/* Stufe 3 und höher: Frage und Optionen eine Schriftstufe kleiner, Optionen nie unter 15 px */
-:is(.vrecall-page, .recall):is([data-fit='3'], [data-fit='4'], [data-fit='5'], [data-fit='6']) {
-  --rc-q: 19px;
-  --rc-q-lh: 24px;
-  --rc-o: 15px;
-  --rc-o-lh: 20px;
-}
-/* Stufe 4 und höher: Quelle, Bereichszeile und Kicker aus */
-:is(.vrecall-page, .recall):is([data-fit='4'], [data-fit='5'], [data-fit='6']) :is(.recall-hooksrc, .recall-source, .vtext-source, .vkicker) { display: none; }
-/* Stufe 5 und höher: Frage 17/22, engere Optionen */
-:is(.vrecall-page, .recall):is([data-fit='5'], [data-fit='6']) {
-  --rc-q: 17px;
-  --rc-q-lh: 22px;
-  --rc-o-py: 6px;
-  --rc-o-px: var(--s-3);
-  --rc-ogap: 6px;
-  --rc-cgap: 6px;
-  --rc-gap: 6px;
-  --rc-pad: var(--s-3);
-  --rc-why-lh: 20px;
-}
-/* Stufe 6 (nur nach der Antwort): Kennzeichnung und Hook aus, die Erklärung und "Next" behalten den Platz */
-:is(.vrecall-page, .recall)[data-fit='6'] :is(.recall-tag, .recall-origin, .vrecall-origin) { display: none; }
 .recall {
   position: absolute;
   z-index: 34;
@@ -118,13 +80,7 @@ html {
 .recall-option.wrong { background: var(--danger-bg); border-color: var(--danger); }
 .recall-option.rest { opacity: 0.55; }
 .recall-why { margin: var(--s-1) 0 0; font-size: var(--t-body); line-height: var(--rc-why-lh); color: var(--body); overflow-wrap: anywhere; }
-.recall-why[data-scroll], .recall-q[data-scroll] { touch-action: pan-y; }
-/* Runde 24: Platzhalter vor der Antwort, derselbe Text, nicht sichtbar, nicht lesbar für Hilfstechnik */
-.recall-ghost { visibility: hidden; pointer-events: none; }
-:is(.vrecall-page, .recall)[data-noghost] .recall-ghost { display: none; }
 .recall-tick { flex: none; width: var(--icon-sm); height: var(--icon-sm); }
-/* Ab Stufe 5 (sehr wenig Höhe) entfällt der Platz des Hakens: dort zählt jede Zeile, der Block darf nach der Antwort nach oben wachsen */
-:is(.vrecall-page, .recall):is([data-fit='5'], [data-fit='6']) .recall-tick { display: none; }
 .recall-primary {
   min-height: var(--rc-o-minh);
   border-radius: var(--r-btn);

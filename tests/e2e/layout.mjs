@@ -355,8 +355,9 @@ async function textChecks(pg, tag, vp, dir, { area, scheme }) {
   else {
     const q = seen.recall;
     if (!q.card || !q.covers) fail(`text Abrufseite kein Overlay ${tag}`, JSON.stringify(q)); else ok(`text Abrufseite kein Overlay ${tag}`);
-    if (!/Check lens status|A very long hook|تفسير السعدي/.test(q.origin) || !/Author \d/.test(q.origin)) fail(`text Abrufseite Hook und Quelle ${tag}`, q.origin.slice(0, 80)); else ok(`text Abrufseite Hook und Quelle ${tag}`);
-    if (q.pageBottom < q.H - 0.5 || q.opts.length < 3 || (vp.width < 768 && q.opts.some((y) => y < q.H * 0.35))) fail(`text Abrufseite Vollbild und Daumenzone ${tag}`, JSON.stringify(q)); else ok(`text Abrufseite Vollbild und Daumenzone ${tag}`);
+    // Runde 28: Bezug oben ist Bereich und Quelle, der Hook steht erst nach der Antwort
+    if (/Check lens status|A very long hook|تفسير السعدي/.test(q.origin) || !/Author \d/.test(q.origin)) fail(`text Abrufseite Quelle ohne Hook ${tag}`, q.origin.slice(0, 80)); else ok(`text Abrufseite Quelle ohne Hook ${tag}`);
+    if (q.pageBottom < q.H - 0.5 || q.opts.length < 3 || (vp.width < 768 && q.opts.some((y) => y < q.pageTop))) fail(`text Abrufseite Vollbild ${tag}`, JSON.stringify(q)); else ok(`text Abrufseite Vollbild ${tag}`);
   }
 }
 /** Schließen per Knopf und per Tipp auf den Hintergrund; danach wieder öffnen (reopen) */

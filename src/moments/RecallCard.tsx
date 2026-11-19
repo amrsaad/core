@@ -4,7 +4,7 @@ import { Icon } from '../components/Icon';
 import { recallTag, shuffleOrder } from './recall';
 import { isArabic, thumbOf, type Moment } from './types';
 import { sourceLine } from './source';
-import { ellipsizeWords, fitLevels, fitOverflow, pickRecallFit, recallSwipe } from './recallfit';
+import { FIT_LEVELS, pickRecallFit, recallSwipe, recallTop, recallTopDone } from './recallfit';
 
 /** Bezug oben auf der Abrufkarte (Issue 42): Hook und Quelle des Ursprungs-Moments, Sprache und Richtung folgen dem Moment */
 export function originOf(m: Moment): { hook: string; dir: 'rtl' | 'ltr'; source: string } {
@@ -17,13 +17,9 @@ export function RecallTag({ review, day, dir }: { review: boolean; day?: string 
   return <div className="recall-tag" data-testid="recall-tag" dir={dir} lang="en">{recallTag(review, day)}</div>;
 }
 
-/** Hook des Ursprungs-Moments. Der Text wird nach der Messung am Wortende gekürzt (siehe trimHooks), darum setzt ihn dieses Element selbst. */
+/** Hook des Ursprungs-Moments (Desktop-Panel). Auf dem Handy steht er erst nach der Antwort in der Karte (recall-hook-after). */
 export function RecallHook({ text, dir, className, as: Tag = 'p' }: { text: string; dir: string; className: string; as?: 'p' | 'h2' }) {
-  const ref = useRef<HTMLParagraphElement & HTMLHeadingElement>(null);
-  useLayoutEffect(() => {
-    if (ref.current) ref.current.textContent = text;
-  }, [text]);
-  return <Tag ref={ref} className={className} dir={dir} data-recall-hook="" data-full={text} />;
+  return <Tag className={className} dir={dir} data-recall-hook="">{text}</Tag>;
 }
 
 /** Knopf "Show text". Der Ursprungstext öffnet als Überlagerung über der Abrufseite (eigener scrollbarer Bereich mit "Close"), nie im Fluss. Tipp und Wisch bleiben im Bereich. */
@@ -51,33 +47,8 @@ export function RecallTextPeek({ text, dir }: { text: string; dir: 'rtl' | 'ltr'
   );
 }
 
-/** Zeilen des Hooks aus der Stufe (CSS-Variable --rc-hook-lines), Hook an Wortgrenzen kürzen, mit "…" am Ende, nie ein halbes Wort */
-function trimHooks(root: HTMLElement) {
-  for (const el of Array.from(root.querySelectorAll<HTMLElement>('[data-recall-hook]'))) {
-    const full = el.dataset.full ?? '';
-    const cs = getComputedStyle(el);
-    if (cs.display === 'none') continue;
-    const lines = Number(cs.getPropertyValue('--rc-hook-lines')) || 2;
-    const lh = parseFloat(cs.lineHeight) || 22;
-    const keep = ['display', '-webkit-line-clamp', 'max-height', 'overflow'].map((p) => [p, el.style.getPropertyValue(p)] as const);
-    el.style.setProperty('display', 'block');
-    el.style.setProperty('-webkit-line-clamp', 'none');
-    el.style.setProperty('max-height', 'none');
-    el.style.setProperty('overflow', 'visible');
-    const fits = (t: string) => {
-      el.textContent = t;
-      return el.getBoundingClientRect().height <= lines * lh + 1;
-    };
-    const out = ellipsizeWords(full, fits);
-    for (const [p, v] of keep) v ? el.style.setProperty(p, v) : el.style.removeProperty(p);
-    el.textContent = out;
-  }
-}
-
-/** Höhe, die der Inhalt braucht (oberste Oberkante bis unterste Unterkante der Kinder im Fluss), und die Höhe der Fläche ohne Innenabstand */
-function measure(root: HTMLElement): { needed: number; room: number } {
-  const cs = getComputedStyle(root);
-  const room = root.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+/** Höhe des Blocks (oberste Oberkante bis unterste Unterkante der Kinder im Fluss) */
+function blockBox(root: HTMLElement): { top: number; bottom: number } {
   let top = Infinity;
   let bottom = -Infinity;
   for (const el of Array.from(root.children) as HTMLElement[]) {
@@ -87,58 +58,44 @@ function measure(root: HTMLElement): { needed: number; room: number } {
     top = Math.min(top, r.top);
     bottom = Math.max(bottom, r.bottom);
   }
-  return { needed: bottom > top ? bottom - top : 0, room };
+  return bottom > top ? { top, bottom } : { top: 0, bottom: 0 };
 }
 
-const SCROLLERS = '.recall-why, .recall-q';
-const clearScroll = (root: HTMLElement) => {
-  for (const el of Array.from(root.querySelectorAll<HTMLElement>(SCROLLERS))) {
-    el.style.removeProperty('max-height');
-    el.style.removeProperty('overflow-y');
-    el.removeAttribute('data-scroll');
-  }
-};
+/** Höhe des Blocks nach der Antwort, auch vor der Antwort: Unterkante der letzten Antwort, dann Erklärung, Hook und "Next" aus der unsichtbaren Messkopie (.recall-probe, aus dem Fluss, ohne Höhe) */
+function doneHeight(root: HTMLElement, askBox: { top: number; bottom: number }): number {
+  const probe = root.querySelector<HTMLElement>('.recall-probe');
+  if (!probe) return askBox.bottom - askBox.top;
+  const opts = Array.from(root.querySelectorAll<HTMLElement>('[data-testid=recall-option]'));
+  const lastOpt = opts.length ? opts[opts.length - 1].getBoundingClientRect().bottom : askBox.bottom;
+  let h = lastOpt - askBox.top;
+  for (const el of Array.from(probe.children) as HTMLElement[]) h += parseFloat(getComputedStyle(el).marginTop) + el.getBoundingClientRect().height;
+  return h;
+}
 
 /**
- * Stufe wählen: jede Stufe setzen, messen, die kleinste nehmen, bei der alles in die Fläche passt (ab from, nach der Antwort nie kleiner als davor).
- * Passt auch die letzte nicht, scrollt nur die Erklärung (sonst die Frage) in sich, Optionen und "Next" bleiben sichtbar.
+ * Stufe wählen: jede Stufe setzen, Block vor und nach der Antwort messen, die kleinste nehmen, bei der beide in die Fläche passen (ab from).
+ * Setzt außerdem die Oberkante des Blocks (--rc-top an der Seite): beim ersten Anzeigen 40 Prozent des freien Platzes, nach der Antwort unverändert, nur so weit nach oben, wie nötig.
+ * top ist die beim ersten Anzeigen gemessene Oberkante (null: erstes Anzeigen).
  */
-export function fitRoot(root: HTMLElement, from = 0, answered = false): number {
-  clearScroll(root);
-  // Runde 24: der Block aus Frage und Antworten sitzt unten (margin-top: auto), gemessen wird der Bedarf ohne diese Verteilung (CSS: data-measuring)
-  root.setAttribute('data-measuring', '');
-  root.removeAttribute('data-noghost');
-  const pass = () => {
-    const needed: number[] = [];
-    const rooms: number[] = [];
-    for (let lv = 0; lv < fitLevels(answered); lv++) {
-      root.dataset.fit = String(lv);
-      const m = measure(root);
-      needed.push(m.needed);
-      rooms.push(m.room);
-    }
-    const level = pickRecallFit(needed, rooms, from);
-    root.dataset.fit = String(level);
-    return { level, over: fitOverflow(needed, rooms, level) };
-  };
-  let { level, over } = pass();
-  // Runde 24: der Platzhalter für die Erklärung (RecallCard, vor der Antwort) hält Raum frei, damit die Antworten danach nicht springen. Passt er auch auf der letzten Stufe
-  // nicht mehr, entfällt er: dann wächst der Block nach der Antwort nach oben, statt dass die Frage scrollt.
-  if (over > 0.5 && root.querySelector('.recall-ghost')) {
-    root.setAttribute('data-noghost', '');
-    ({ level, over } = pass());
+export function fitRoot(root: HTMLElement, answered = false, from = 0, top: number | null = null): { level: number; top: number } {
+  const ask: number[] = [];
+  const done: number[] = [];
+  const cs = getComputedStyle(root);
+  const room = root.clientHeight - parseFloat(cs.paddingBottom);
+  for (let lv = 0; lv < FIT_LEVELS; lv++) {
+    root.dataset.fit = String(lv);
+    const box = blockBox(root);
+    ask.push(box.bottom - box.top);
+    done.push(doneHeight(root, box));
   }
-  if (over > 0.5) {
-    const el = root.querySelector<HTMLElement>('.recall-why:not(.recall-ghost)') ?? root.querySelector<HTMLElement>('.recall-q');
-    if (el) {
-      el.style.maxHeight = `${Math.max(44, Math.floor(el.getBoundingClientRect().height - over))}px`;
-      el.style.overflowY = 'auto';
-      el.setAttribute('data-scroll', '');
-    }
-  }
-  trimHooks(root);
-  root.removeAttribute('data-measuring');
-  return level;
+  // Nach der Antwort zählt nur noch der Block nach der Antwort (die Oberkante ist schon festgelegt), samt 8 px Mindestabstand oben
+  const level = pickRecallFit(answered ? [] : ask, done, room, from);
+  root.dataset.fit = String(level);
+  const t0 = answered && top !== null ? top : recallTop(room, ask[level]);
+  const t = answered ? recallTopDone(t0, room, done[level]) : t0;
+  if (answered) root.setAttribute('data-answered', '');
+  root.style.setProperty('--rc-top', `${t}px`);
+  return { level, top: t0 };
 }
 
 /** Steuerung von außen, nur im Desktop-Modus: Antwort nach angezeigter Stelle (0 bis 2) wählen */
@@ -150,9 +107,10 @@ export interface RecallCtl {
  * Abrufkarte: Cover, Sprecher und Bereich, darunter die Frage, darunter die drei Antworten in zufälliger Reihenfolge.
  * Erst nach dem Tipp: richtige Antwort grün, falsch gewählte rot, dann recall.why und "Next".
  * Die Wertung zählt beim Tipp. Arabisch läuft rechtsläufig.
- * Runde 24: in allen drei Reitern steht die Karte auf der vollen Seite unter der Reiterleiste (Bezug oben, Block aus Frage und Antworten unten in der Daumenzone).
- * Runde 23: Die Karte passt sich der sichtbaren Höhe in Stufen an (recallfit.ts, data-fit), nichts scrollt. Vor der Antwort wechselt sie nie durch einen Wisch:
- * weiter geht es über "Skip" (ohne Wertung) oder nach der Antwort über "Next" oder einen Wisch nach oben.
+ * Runde 28: auf dem Handy (alle drei Reiter) kein Kasten. Die Seite unter der Reiterleiste trägt einen Block: Kennzeile, Bereich, Quelle, Frage, Antworten, "Skip".
+ * Der Hook steht erst nach der Antwort, unter der Erklärung. Der Block sitzt 40 zu 60 über der Mitte, seine Oberkante wird beim ersten Anzeigen gemessen und bleibt nach der Antwort stehen.
+ * Die Stufe (recallfit.ts, data-fit) wird so gewählt, dass der Block vor und nach der Antwort passt. Nichts scrollt.
+ * Weiter geht es vor der Antwort nur über "Skip" (ohne Wertung), nach der Antwort über "Next" oder einen Wisch nach oben.
  */
 export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, onDiag, keys, ctl, origin = true }: { m: Moment; review: boolean; read?: string | null; origin?: boolean; rng: () => number; onAnswer: (got: boolean) => void; onClose: () => void; onSkip?: () => void; onDiag?: (line: string) => void; keys?: boolean; ctl?: MutableRefObject<RecallCtl | null> }) {
   const r = m.recall!;
@@ -163,6 +121,7 @@ export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, on
   const blocked = useRef(false);
   const level = useRef<number | null>(null);
   const floor = useRef(0);
+  const top0 = useRef<number | null>(null);
   const diagRef = useRef(onDiag);
   diagRef.current = onDiag;
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
@@ -188,7 +147,9 @@ export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, on
     if (!card || keys) return;
     const root = (card.closest('.vrecall-page') as HTMLElement | null) ?? card;
     const fit = () => {
-      const lv = fitRoot(root, answered ? floor.current : 0, answered);
+      const res = fitRoot(root, answered, answered ? floor.current : 0, top0.current);
+      const lv = res.level;
+      if (!answered) top0.current = res.top;
       if (level.current === null) diagRef.current?.(`recall: shown ${m.id} fit=${lv} h=${window.innerHeight}`);
       else if (lv !== level.current) diagRef.current?.(`recall: refit ${m.id} fit=${lv} h=${window.innerHeight}`);
       level.current = lv;
@@ -215,8 +176,7 @@ export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, on
       onPointerDown={stop}
       onPointerUp={stop}
       onTouchStart={(e) => {
-        // Ein Wisch, der in einem scrollbaren Bereich der Karte beginnt (lange Erklärung), gehört dem Bereich
-        y.current = (e.target as Element).closest?.('[data-scroll]') ? null : e.touches[0].clientY;
+        y.current = e.touches[0].clientY;
       }}
       onTouchEnd={(e) => {
         if (y.current === null) return;
@@ -256,8 +216,14 @@ export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, on
           );
         })}
       </div>
-      {/* Runde 24: vor der Antwort hält ein unsichtbarer Platzhalter mit derselben Erklärung den Raum frei, damit die Antworten danach nicht springen */}
-      {chosen === null && !keys && <p className="recall-why recall-ghost" aria-hidden="true">{r.why}</p>}
+      {/* Runde 28: kein Platzhalter im Fluss. Die Messkopie hat keine Höhe und liegt nicht im Fluss, sie dient nur der Stufenwahl (Erklärung, Hook und "Next" nach der Antwort). */}
+      {chosen === null && !keys && (
+        <div className="recall-probe" aria-hidden="true">
+          <p className="recall-why">{r.why}</p>
+          <p className="recall-hook-after" dir={originOf(m).dir}>{originOf(m).hook}</p>
+          <div className="recall-primary">Next</div>
+        </div>
+      )}
       {chosen === null && !keys && onSkip && (
         <button type="button" className="recall-skip" data-testid="recall-skip" lang="en" onClick={onSkip}>
           Skip
@@ -266,6 +232,7 @@ export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, on
       {chosen !== null && (
         <>
           <p className="recall-why" data-testid="recall-why">{r.why}</p>
+          {!keys && <p className="recall-hook-after" data-testid="recall-hook" dir={originOf(m).dir}>{originOf(m).hook}</p>}
           <button className="recall-primary" data-testid="recall-next" onClick={onClose}>
             Next
             {keys && <kbd className="recall-key" aria-hidden="true">Enter</kbd>}

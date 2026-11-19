@@ -386,8 +386,7 @@ html {
 }
 .vtext-hook { flex: none; margin: 0 0 var(--s-5); font-size: var(--t-hook); line-height: var(--t-hook-lh); font-weight: var(--w-hook); letter-spacing: var(--tracking-title); overflow-wrap: anywhere; }
 /* Brain: Serif bleibt, aber eine Stufe (24/30), keine Riesenüberschrift mehr (Issue 41) */
-.vtext[data-area='brain'] .vtext-hook,
-.vrecall-page[data-area='brain'] .vtext-hook {
+.vtext[data-area='brain'] .vtext-hook {
   font-family: var(--font-brain);
   font-size: 24px;
   line-height: 30px;
@@ -414,42 +413,63 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 /* Abrufkarte im Text-Reiter (Ergänzung 35, Issue 42): eigener Vollbild-Moment auf dem Papier, deckt den Lesetext ganz ab, kein Overlay.
    Oben Hook und Quelle des Ursprungs-Moments, darunter die Karte im Fluss. Liegt über Text (12) und Leiste (20), unter Blättern (80). */
 .vrecall-page {
+  /* Runde 28: ein Block ohne Kasten, 24 px Rand links und rechts. Die Oberkante setzt RecallCard (--rc-top: 40 Prozent des freien Platzes, mindestens 16 px) und hält sie nach der Antwort. */
+  --rc-q: 22px; --rc-q-lh: 28px;
+  --rc-o: 16px; --rc-o-lh: 22px; --rc-o-py: 14px; --rc-o-px: 16px; --rc-ogap: 10px;
+  --rc-why-lh: 21px;
+  --rc-g-q: 20px; --rc-g-o: 16px; --rc-g-w: 14px; --rc-g-h: 12px; --rc-g-n: 16px;
   position: absolute;
   z-index: 34;
   left: 0;
   right: 0;
   top: calc(var(--safe-t) + var(--head-h));
   bottom: 0;
-  padding: var(--rc-pt) calc(var(--safe-r) + var(--margin)) calc(var(--safe-b) + var(--nav-h, 0px) + var(--rc-pb)) calc(var(--safe-l) + var(--margin));
+  padding: var(--rc-top, 16px) calc(var(--safe-r) + 24px) calc(var(--safe-b) + var(--nav-h, 0px) + var(--s-2)) calc(var(--safe-l) + 24px);
   background: var(--bg);
   color: var(--text);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: var(--rc-gap);
+  gap: 0;
   overflow: hidden;
 }
+/* Nach der Antwort rückt der Block nur dann nach oben, wenn der längere Inhalt es braucht: weiche Bewegung, höchstens 150 ms */
+.vrecall-page[data-answered] { transition: padding-top 150ms var(--ease); }
 .vrecall-page > * { flex: none; }
-/* Runde 24: Video und Audio liegen auf dunkler Bühne (Text-Token dort hell, --bg des hellen Geräts nicht), die Seite deckt das Bild mit der Bühne ab */
+/* Video und Audio liegen auf dunkler Bühne (Text-Token dort hell, --bg des hellen Geräts nicht), die Seite deckt das Bild mit der Bühne ab */
 .vfeed:not([data-surface='page']) .vrecall-page { background: var(--stage); }
-.vrecall-origin { display: flex; flex-direction: column; max-width: var(--desk-read); width: 100%; margin-inline: auto; }
-/* Hook: höchstens --rc-hook-lines Zeilen. Die Auslassung setzt RecallCard am Wortende (trimHooks), die Klammer hier ist nur das Netz darunter. */
-.vrecall-origin .vtext-hook { margin-bottom: var(--s-2); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--rc-hook-lines); line-clamp: var(--rc-hook-lines); overflow: hidden; }
-.vrecall-origin .vtext-source { min-height: 0; }
-/* Runde 24: Bezug (Kennzeichnung, Hook, Quelle) steht oben, der Block aus Frage, Antworten und "Skip" beziehungsweise "Next" sitzt unten in der Daumenzone.
-   Freier Platz liegt zwischen Hook und Frage. Gemessen wird ohne diese Verteilung (data-measuring, siehe fitRoot). */
-.vrecall-page .recall { position: relative; inset: auto; top: auto; bottom: auto; left: auto; right: auto; flex: none; min-height: 0; width: 100%; animation: none; margin-top: auto; overflow: visible; }
-.vrecall-page[data-measuring] .recall { margin-top: 0; }
-/* Kennzeichnung oben und "Show text": eine zusammenhängende Spalte mit Hook und Karte, ohne leere Fläche dazwischen */
-.vrecall-page > .recall-tag, .vrecall-page > .recall-peek { width: 100%; max-width: var(--desk-read); margin-inline: auto; }
-.vrecall-page .vkicker { margin-bottom: var(--s-1); }
-.recall-peek { margin-top: calc(-1 * var(--s-2)); display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-1); }
+.vrecall-page > .vrecall-head, .vrecall-page > .vrecall-origin, .vrecall-page > .recall { width: 100%; max-width: var(--desk-read); margin-inline: auto; }
+/* Kennzeile und (Text-Reiter) "Show text" in einer Zeile */
+.vrecall-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); min-height: var(--t-meta-lh); }
+.vrecall-head .recall-tag { margin: 0; }
+.vrecall-origin { display: flex; flex-direction: column; margin-top: var(--s-1); }
+.vrecall-origin .vkicker { margin: 0; width: fit-content; max-width: 100%; }
+.vrecall-origin .vtext-source { min-height: 0; margin: 6px 0 0; }
+.vrecall-page[data-fit='3'] .vtext-source { display: none; }
+.vrecall-head .recall-peek { margin: 0; display: block; }
+.vrecall-head .recall-showtext { margin-block: calc((var(--t-meta-lh) - var(--hit)) / 2); padding: 0 var(--s-2); }
+/* Stufen (recallfit.ts): 1 Frage 20/26, Antworten 15/20 mit 12. 2 Frage 18/23, Antworten 14/19 mit 10, Abstände je 4 px kleiner. 3 Quelle aus, Tastenabstand 8, Hook nach der Antwort höchstens 3 Zeilen. */
+.vrecall-page[data-fit='1'] { --rc-q: 20px; --rc-q-lh: 26px; --rc-o: 15px; --rc-o-lh: 20px; --rc-o-py: 12px; }
+.vrecall-page:is([data-fit='2'], [data-fit='3']) {
+  --rc-q: 18px; --rc-q-lh: 23px; --rc-o: 14px; --rc-o-lh: 19px; --rc-o-py: 10px; --rc-ogap: 6px;
+  --rc-g-q: 16px; --rc-g-o: 12px; --rc-g-w: 10px; --rc-g-h: 8px; --rc-g-n: 12px;
+}
+.vrecall-page[data-fit='3'] { --rc-ogap: 8px; }
+/* Karte: kein Kasten, kein Rahmen, kein eigener Hintergrund, kein Schatten */
+.vrecall-page .recall { position: relative; inset: auto; flex: none; min-height: 0; width: 100%; animation: none; overflow: visible; background: none; box-shadow: none; border: 0; border-radius: 0; padding: 0; gap: 0; }
+.vrecall-page .recall-q { margin: var(--rc-g-q) 0 var(--rc-g-o); }
+.vrecall-page .recall-option { min-height: var(--hit); border-radius: var(--r-card); padding: calc(var(--rc-o-py) - 1px) calc(var(--rc-o-px) - 1px); }
+.vrecall-page .recall-skip { margin-top: var(--rc-g-w); min-height: var(--hit); font-size: var(--t-body); line-height: var(--t-body-lh); }
+.vrecall-page .recall-why { margin: var(--rc-g-w) 0 0; }
+/* Hook nach der Antwort, in voller Länge, Serif im Bereich Brain wie bisher */
+.vrecall-page .recall-hook-after { margin: var(--rc-g-h) 0 0; font-size: 17px; line-height: 23px; font-weight: var(--w-hook); color: var(--text); overflow-wrap: anywhere; }
+.vrecall-page[data-area='brain'] .recall-hook-after { font-family: var(--font-brain); font-weight: var(--w-brain-hook); }
+.vrecall-page[data-fit='3'] .recall-hook-after { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+.vrecall-page .recall-primary { margin-top: var(--rc-g-n); min-height: max(var(--hit), calc(2 * var(--rc-o-py) + var(--rc-o-lh))); border-radius: var(--r-card); width: 100%; }
+/* Messkopie für die Stufenwahl: Erklärung, Hook und "Next" nach der Antwort, nicht sichtbar, ohne Höhe, nicht im Fluss */
+.recall-probe { position: absolute; left: 0; right: 0; top: 0; height: 0; overflow: hidden; visibility: hidden; pointer-events: none; }
+.recall-peek { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-1); }
 .recall-showtext { min-height: var(--hit); padding: 0; background: none; border: 0; color: var(--muted); font-size: var(--t-meta); line-height: var(--t-meta-lh); text-decoration: underline; text-underline-offset: 3px; }
-/* Stufe 5 (Text-Reiter): "Show text" aus */
-.vrecall-page:is([data-fit='5'], [data-fit='6']) > .recall-peek { display: none; }
-/* Stufe 5 und höher im Text-Reiter: die Karte ohne Rand, Schatten und Innenabstand, damit die Optionen die volle Breite haben */
-.vrecall-page:is([data-fit='5'], [data-fit='6']) > .recall { background: transparent; box-shadow: none; border-radius: 0; padding: 0; }
-.vrecall-page[data-fit='6'] > .recall-tag { display: none; }
 /* Der Ursprungstext liegt als Überlagerung in der Abrufseite (nicht im Fluss): eigener scrollbarer Bereich mit "Close", Optionen werden nie verschoben */
 .recall-peekov { position: absolute; z-index: 40; top: 0; left: 0; right: 0; bottom: calc(var(--safe-b) + var(--nav-h, 0px) + var(--s-2)); display: flex; flex-direction: column; gap: var(--s-1); padding: var(--s-1) calc(var(--safe-r) + var(--margin)) var(--s-4) calc(var(--safe-l) + var(--margin)); border-radius: 0 0 var(--r-sheet) var(--r-sheet); background: var(--surface); color: var(--text); box-shadow: var(--shadow-media), var(--inset-hair); }
 .recall-peekhead { flex: none; display: flex; justify-content: flex-end; }

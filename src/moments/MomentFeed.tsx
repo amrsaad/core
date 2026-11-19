@@ -34,7 +34,7 @@ import { captionLines, captionsShown } from './captions';
 import { CueClock, cueIndexAt } from './cueClock';
 import { countGotIt, countSeen, todayLine } from './today';
 import { answer, cardDue, lastReadDay, pickRecall, recallQuiet, type Recent } from './recall';
-import { RecallCard, RecallHook, RecallTag, RecallTextPeek, type RecallCtl } from './RecallCard';
+import { RecallCard, RecallTag, RecallTextPeek, type RecallCtl } from './RecallCard';
 import { canShowRecall, onReturn, onSwipe, requeueOpen, type QueueEntry } from './recallqueue';
 import { CaptionSheet } from './CaptionSheet';
 import { sourceLine } from './source';
@@ -4115,18 +4115,19 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
 
       {recall && !desk && (() => {
         // Ergänzung 35 (Issue 42), Runde 24: in allen drei Reitern (Text, Video, Audio) ist die Abrufkarte ein eigener Vollbild-Moment unter der Reiterleiste, nie ein Overlay über dem Lesetext oder dem Bild.
-        // Oben Hook und Quelle des Ursprungs-Moments als Bezug, darunter Frage und Antworten. Vor der Antwort schließt nur "Skip", nach der Antwort "Next" oder ein Wisch nach oben auf der Karte.
+        // Oben Kennzeile, Bereich und Quelle des Ursprungs-Moments, darunter Frage und Antworten, der Hook erst nach der Antwort (Runde 28). Vor der Antwort schließt nur "Skip", nach der Antwort "Next" oder ein Wisch nach oben auf der Karte.
         const src = sourceLine(recall.m);
         const peek = formOf(recall.m) === 'text' ? cleanText(momentText(recall.m)) : '';
         return (
           <div className="vrecall-page" data-testid="recall-page" data-area={recall.m.area} style={{ ['--area' as string]: AREA_COLOR[recall.m.area] }}>
-            <RecallTag review={recall.review} day={recall.read} dir={isArabic(recall.m.recall?.question ?? '') ? 'rtl' : 'ltr'} />
+            <div className="vrecall-head">
+              <RecallTag review={recall.review} day={recall.read} dir={isArabic(recall.m.recall?.question ?? '') ? 'rtl' : 'ltr'} />
+              {peek && <RecallTextPeek key={recall.m.id} text={peek} dir={isArabic(peek) ? 'rtl' : 'ltr'} />}
+            </div>
             <div className="vrecall-origin" data-testid="recall-origin">
               <div className="vkicker">{AREA_LABEL[recall.m.area]} · {topicLabel(recall.m.topic)}</div>
-              <RecallHook as="h2" className="vtext-hook" dir="auto" text={recall.m.hook} />
               {src && <p className="vtext-source" dir="auto">{src.prefix}{src.text}</p>}
             </div>
-            {peek && <RecallTextPeek key={recall.m.id} text={peek} dir={isArabic(peek) ? 'rtl' : 'ltr'} />}
             {recallEl}
           </div>
         );
