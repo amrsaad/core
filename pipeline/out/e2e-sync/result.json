@@ -1,10 +1,11 @@
 {
- "at": "2026-11-20T09:29:42.898Z",
+ "at": "2026-11-20T10:21:00.755Z",
  "runs": [
   {
    "browser": "webkit",
    "checks": {
     "aUnlocked": true,
+    "firstVideoLoadedA": true,
     "noTokenFieldShown": true,
     "invalidTokenRejected": true,
     "tokenSaved": true,
@@ -25,6 +26,7 @@
     "debounceOneWrite": true,
     "debounceFromLast": true,
     "bUnlocked": true,
+    "firstVideoLoadedB": true,
     "bHasTokenFromQr": true,
     "bGotCaptionsFromA": true,
     "bWrites": true,
@@ -49,12 +51,12 @@
    },
    "diagLines": 16,
    "diagSample": [
-    "3vqt slot0 sy3:1 state 2",
-    "3vqt sync: packed 1 kB to 1 kB",
-    "3vqt sync: PUT ok 1 kB in 0.0 s",
-    "3vqt app: hidden"
+    "ib7a slot0 sy4:1 state 2",
+    "ib7a sync: packed 1 kB to 1 kB",
+    "ib7a sync: PUT ok 1 kB in 0.0 s",
+    "ib7a app: hidden"
    ],
-   "writeDelayMs": 10044,
+   "writeDelayMs": 10038,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -67,6 +69,7 @@
    "browser": "chromium",
    "checks": {
     "aUnlocked": true,
+    "firstVideoLoadedA": true,
     "noTokenFieldShown": true,
     "invalidTokenRejected": true,
     "tokenSaved": true,
@@ -87,6 +90,7 @@
     "debounceOneWrite": true,
     "debounceFromLast": true,
     "bUnlocked": true,
+    "firstVideoLoadedB": true,
     "bHasTokenFromQr": true,
     "bGotCaptionsFromA": true,
     "bWrites": true,
@@ -111,10 +115,10 @@
    },
    "diagLines": 16,
    "diagSample": [
-    "gi9g slot0 sy1:1 state 2",
-    "gi9g sync: packed 1 kB to 1 kB",
-    "gi9g sync: PUT ok 1 kB in 0.0 s",
-    "gi9g app: hidden"
+    "kl1q slot0 sy0:1 state 2",
+    "kl1q sync: packed 1 kB to 1 kB",
+    "kl1q sync: PUT ok 1 kB in 0.0 s",
+    "kl1q app: hidden"
    ],
    "writeDelayMs": 10022,
    "hosts": [
