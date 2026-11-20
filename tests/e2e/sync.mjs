@@ -78,6 +78,13 @@ const APP = url + '?now=2026-10-22';
 const waitFor = (page, fn, arg, timeout = 15000) => page.waitForFunction(fn, arg, { timeout }).then(() => true).catch(() => false);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const poll = async (fn, timeout = 20000) => { const t = Date.now(); while (Date.now() - t < timeout) { if (await fn()) return true; await sleep(100); } return false; };
+// Der Player des ersten Moments muss geladen haben (Fake-Log), bevor Settings aufgeht. Wird er erst danach bereit, startet der Feed hinter Settings von selbst,
+// läuft im Zeitraffer durch den Pool und ändert den Sync-Stand etwa alle 0,5 s: die 10 s nach einer Änderung beginnen dann immer wieder von vorn
+// (rote Läufe vom 19. und 20.11., Chromium, writeDelayMs -790). Gilt für jedes Gerät, das gleich in Settings geht.
+const firstPlayerLoaded = async (page) => {
+  const v = await page.evaluate(() => window.__core.moment()?.videoId);
+  return !!v && (await waitFor(page, (id) => (window.__ytlog ?? []).some((x) => x.startsWith(`load ${id} `)), v, 20000));
+};
 const text = (page, id) => page.textContent(`[data-testid=${id}]`).catch(() => null);
 
 const results = { at: new Date().toISOString(), runs: [] };
@@ -108,6 +115,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const A = await ctxA.newPage();
     await A.goto(`${APP}#k=${k}`);
     c.aUnlocked = await waitFor(A, () => !!window.__core?.moment());
+    c.firstVideoLoadedA = await firstPlayerLoaded(A);
     await settings(A);
     c.noTokenFieldShown = (await A.locator('[data-testid=sync-token]').count()) === 1 && (await A.getAttribute('[data-testid=sync-token]', 'type')) === 'password';
     await A.screenshot({ path: `${out}/${name}-1-settings-ohne-token.png`, fullPage: true });
@@ -172,6 +180,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const B = await ctxB.newPage();
     await B.goto(link);
     c.bUnlocked = await waitFor(B, () => !!window.__core?.moment());
+    c.firstVideoLoadedB = await firstPlayerLoaded(B);
     await settings(B);
     c.bHasTokenFromQr = await waitFor(B, () => !!document.querySelector('[data-testid=sync-last]'));
     c.bGotCaptionsFromA = await poll(async () => (await B.inputValue('[data-testid=captions]').catch(() => '')) === 'auto' && api.gets >= 2);
