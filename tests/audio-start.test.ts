@@ -166,7 +166,7 @@ const clip = (id: string, start = 100, end: number | undefined = 147): DeckClip 
 
 function deckSetup(local: Record<string, { url: string; offset: number }> = {}) {
   const el = new FakeEl();
-  const deck = new AudioDeck({ local: (k) => local[k], dropLocal: () => {}, make: () => el, hidden: () => false });
+  const deck = new AudioDeck({ neverMuted: false, local: (k) => local[k], dropLocal: () => {}, make: () => el, hidden: () => false });
   const lines: string[] = [];
   deck.diag = (l) => lines.push(l);
   const sink: DeckSink = { state: () => {}, error: () => {} };

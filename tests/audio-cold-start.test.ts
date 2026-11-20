@@ -52,6 +52,7 @@ const clip: DeckClip = { key: 'pod-x|1819.22|1860', id: 'pod-x:1819.22', url: 'h
 function setup() {
   const els: Cold[] = [];
   const deck = new AudioDeck({
+    neverMuted: false,
     local: () => undefined,
     dropLocal: () => {},
     make: () => {

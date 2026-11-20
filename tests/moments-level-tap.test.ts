@@ -47,6 +47,7 @@ function setup(opts: { host?: 'ok' | 'bad' } = {}) {
   const level = new FakeEl();
   const state = { running: false, broken: [] as string[], chained: [] as number[], hosts: [] as string[] };
   const deck = new AudioDeck({
+    neverMuted: false,
     local: () => undefined,
     dropLocal: () => {},
     make: (lv) => (lv ? level : plain),

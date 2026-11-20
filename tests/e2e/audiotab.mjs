@@ -144,9 +144,13 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.iosTapAtStart = await waitFor(pi, () => !!document.querySelector('[data-testid=tap-to-play]'), undefined, 3000);
     r.notes.iosTapMs = Date.now() - tStart;
     const d0 = await pi.evaluate(() => window.__core.diag());
-    c.iosNeedsTapLine = d0.some((x) => /^audio: needs tap \S+ \(start\)$/.test(x));
-    // Runde 12 (Ziel B): solange der Start auf den Tipp wartet, läuft höchstens ein Vorlade-Abruf (weitere folgen alle 4 s), der Vorrat hält also mindestens den nächsten Moment bereit. Alle fünf nach dem Tipp.
-    c.iosPoolHoldsNextBeforeTap = await waitFor(pi, () => window.__core.deck().ready >= 1, undefined, 8000);
+    // Runde 30: ohne Geste spielt nichts, auch nicht stumm: der Start wartet pausiert auf den Tipp (Zeile "waiting for tap"), kein play() wurde verweigert, keins lief
+    c.iosWaitingForTapLine = d0.some((x) => /^deck: waiting for tap \S+ \(no gesture or sound off\)$/.test(x));
+    c.iosNoMutedPlayBlocked = !d0.some((x) => /^deck: muted play blocked/.test(x));
+    // Runde 30: vor der ersten Geste lädt der Vorrat nichts (kein Element mit Netzquelle ohne Freischaltung), erst der Tipp schaltet alle still frei und startet ihn
+    await pi.waitForTimeout(3000);
+    c.iosNoPoolBeforeTap = await pi.evaluate(() => window.__core.deck().ready === 0 && [...document.querySelectorAll('audio')].filter((e) => e.__src).length <= 1);
+    c.iosNoPlayBeforeTap = await pi.evaluate(() => [...document.querySelectorAll('audio')].every((e) => e.paused));
     // Länger als STILL_MS (6 s): keine Zeile "slow net", kein soundGuard, kein Watchdog, die Tippfläche bleibt
     await pi.waitForTimeout(7500);
     const d1 = await pi.evaluate(() => window.__core.diag());
@@ -171,8 +175,13 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
     const dEnd = await pi.evaluate(() => window.__core.diag());
     c.iosSwipesNoNeedsTap = dEnd.filter((x) => /needs tap|deck play refused/.test(x)).length === needsBefore;
-    c.iosGestureLine = dEnd.some((x) => /^deck: gesture \S+ unlocked \d+\/\d+$/.test(x));
-    r.notes.iosGestureLines = dEnd.filter((x) => /^deck: gesture/.test(x));
+    c.iosGestureLine = dEnd.some((x) => /^deck: gesture unlock \d+ elements ok=\d+ after \d+ ms$/.test(x));
+    // Runde 30: erst die Freischaltung, dann der Vorrat; nie ein stummes play() auf einer Netzquelle
+    const iU = dEnd.findIndex((x) => /^deck: gesture unlock /.test(x));
+    const iP = dEnd.indexOf('deck: pool start after unlock');
+    c.iosPoolStartsAfterUnlock = iU >= 0 && iP > iU;
+    c.iosNoMutedPlayBlockedEnd = !dEnd.some((x) => /^deck: muted play blocked/.test(x));
+    r.notes.iosGestureLines = dEnd.filter((x) => /^deck: (gesture|pool start|waiting)/.test(x));
     c.iosNoPageErrors = fi.errors.length === 0;
     if (!Object.entries(c).filter(([n]) => n.startsWith('ios')).every(([, v]) => v === true)) r.notes.iosDump = await dump(pi);
     await fi.cx.close();

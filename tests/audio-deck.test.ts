@@ -54,6 +54,7 @@ function setup(opts: { hidden?: boolean; local?: Record<string, { url: string; o
   let made = 0;
   let hidden = opts.hidden ?? true;
   const deck = new AudioDeck({
+    neverMuted: false,
     local: (k) => opts.local?.[k],
     dropLocal: () => {},
     make: () => {
@@ -94,9 +95,10 @@ function setupPool(opts: PoolOpts = {}) {
   const media: string[] = [];
   const chained: number[] = [];
   const deck = new AudioDeck({
+    neverMuted: false,
     standby: opts.standby ?? true,
-    // Runde 27: dieses Verhalten (Eintrag springt sofort) gilt mit probeParked: true; die neue Regel prüft audio-unlock-first.test.ts
-    probeParked: true,
+    // Runde 27: dieses Verhalten (Eintrag springt sofort) gilt mit unlockSilent: false (Verhalten von da2670a); die neue Regel prüfen audio-unlock-silent.test.ts und audio-play-after-jump.test.ts
+    unlockSilent: false,
     local: (k) => local[k],
     dropLocal: (k) => {
       dropped.push(k);
@@ -458,6 +460,7 @@ function setupLanes(opts: { noChain?: boolean; pool?: boolean } = {}) {
   const chained: number[] = [];
   const made: boolean[] = [];
   const deck = new AudioDeck({
+    neverMuted: false,
     standby: opts.pool,
     local: () => undefined,
     dropLocal: () => {},

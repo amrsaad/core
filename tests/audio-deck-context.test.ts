@@ -37,6 +37,7 @@ function setup(settleMs: number | null) {
   let wake: ((ok: boolean) => void) | null = null;
   const els: (El & { level: boolean })[] = [];
   const deck = new AudioDeck({
+    neverMuted: false,
     standby: false,
     local: () => undefined,
     dropLocal: () => {},

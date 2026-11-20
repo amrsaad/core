@@ -78,6 +78,7 @@ const flush = async () => {
 function setup() {
   const els: El[] = [];
   const deck = new AudioDeck({
+    neverMuted: false,
     standby: true,
     local: () => undefined,
     dropLocal: () => {},
@@ -142,7 +143,7 @@ describe('Ausweichen auf ein frisches Element (Runde 27, Teil 2)', () => {
     // genau ein Ausweichen, genau eine Zeile collapse (pause und ended kommen kurz nacheinander)
     expect(count(t, /^deck: collapse a /)).toBe(1);
     expect(t.lines.find((l) => l.startsWith('deck: collapse a '))).toMatch(
-      /^deck: collapse a dur=30\.0 t=30\.0 rs=4 ns=1 err=none seeking=0 buf=\[0\.0-600\.0\] seekable=\[0\.0-600\.0\] played=\[\] sinceSeek=\S+ sincePlay=\d+ sinceLoad=\d+ unlocked=1 probed=0 loading=\d+$/,
+      /^deck: collapse a dur=30\.0 t=30\.0 rs=4 ns=1 err=none seeking=0 buf=\[0\.0-600\.0\] seekable=\[0\.0-600\.0\] played=\[\] sinceSeek=\S+ sincePlay=\d+ sinceLoad=\d+ unlocked=1 unlockedBy=swipe playedBeforeSeek=[01] muted=\d probed=0 loading=\d+$/,
     );
     expect(count(t, /^deck: fresh element/)).toBe(0);
     // nach 2 s Spielzeit: ok, einmal

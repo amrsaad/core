@@ -67,6 +67,7 @@ function setup(opts: { local?: Record<string, { url: string; offset: number }>; 
   const level = new FakeEl();
   const made: boolean[] = [];
   const deck = new AudioDeck({
+    neverMuted: false,
     local: (k) => opts.local?.[k],
     dropLocal: () => {},
     make: (lv) => {
@@ -95,9 +96,10 @@ function setupPool() {
   const els: FakeEl[] = [];
   let hidden = false;
   const deck = new AudioDeck({
+    neverMuted: false,
     standby: true,
-    // Runde 27: dieses Verhalten (Eintrag springt sofort, Geste spielt jeden Eintrag an) gilt mit probeParked: true; die neue Regel prüft audio-unlock-first.test.ts
-    probeParked: true,
+    // Runde 27: dieses Verhalten (Eintrag springt sofort, Geste spielt jeden Eintrag an) gilt mit unlockSilent: false (Verhalten von da2670a); die neue Regel prüfen audio-unlock-silent.test.ts und audio-play-after-jump.test.ts
+    unlockSilent: false,
     local: () => undefined,
     dropLocal: () => {},
     make: () => {

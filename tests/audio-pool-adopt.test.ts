@@ -61,9 +61,10 @@ const flush = async () => {
 function setup(opts: { level?: boolean; local?: Record<string, LocalClip> } = {}) {
   const els: El[] = [];
   const deck = new AudioDeck({
+    neverMuted: false,
     standby: true,
-    // Runde 27: dieses Verhalten (Eintrag springt sofort, Geste spielt jeden Eintrag an) gilt mit probeParked: true; die neue Regel prüft audio-unlock-first.test.ts
-    probeParked: true,
+    // Runde 27: dieses Verhalten (Eintrag springt sofort, Geste spielt jeden Eintrag an) gilt mit unlockSilent: false (Verhalten von da2670a); die neue Regel prüfen audio-unlock-silent.test.ts und audio-play-after-jump.test.ts
+    unlockSilent: false,
     local: (k) => opts.local?.[k],
     dropLocal: () => {},
     make: () => {
@@ -199,6 +200,7 @@ describe('A: Eintrag des Vorrats wird übernommen, nie verworfen und neu geladen
     let running = true;
     const els: El[] = [];
     const deck = new AudioDeck({
+    neverMuted: false,
       standby: true,
       local: () => undefined,
       dropLocal: () => {},
