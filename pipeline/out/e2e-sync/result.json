@@ -1,5 +1,5 @@
 {
- "at": "2026-11-20T04:30:11.410Z",
+ "at": "2026-11-20T07:49:29.433Z",
  "runs": [
   {
    "browser": "webkit",
@@ -49,10 +49,10 @@
    },
    "diagLines": 16,
    "diagSample": [
-    "1r1i slot0 sy5:1 state 2",
-    "1r1i sync: packed 1 kB to 1 kB",
-    "1r1i sync: PUT ok 1 kB in 0.0 s",
-    "1r1i app: hidden"
+    "6u0i slot0 sy5:1 state 2",
+    "6u0i sync: packed 1 kB to 1 kB",
+    "6u0i sync: PUT ok 1 kB in 0.0 s",
+    "6u0i app: hidden"
    ],
    "writeDelayMs": 10029,
    "hosts": [
@@ -81,9 +81,9 @@
     "diagOneDevice": true,
     "diagNoSecrets": true,
     "noWriteBefore10s": true,
-    "writeAfter10s": true,
-    "writeDelayAbout10s": true,
-    "captionInFile": true,
+    "writeAfter10s": false,
+    "writeDelayAbout10s": false,
+    "captionInFile": false,
     "debounceOneWrite": true,
     "debounceFromLast": true,
     "bUnlocked": true,
@@ -109,14 +109,14 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "diagLines": 16,
+   "diagLines": 15,
    "diagSample": [
-    "jee9 slot0 sy3:1 state 2",
-    "jee9 sync: packed 1 kB to 1 kB",
-    "jee9 sync: PUT ok 1 kB in 0.0 s",
-    "jee9 app: hidden"
+    "3gmr yt: warm cue slot2 sy2:1",
+    "3gmr sync: packed 1 kB to 1 kB",
+    "3gmr sync: PUT ok 1 kB in 0.0 s",
+    "3gmr app: hidden"
    ],
-   "writeDelayMs": 10022,
+   "writeDelayMs": -790,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -126,6 +126,10 @@
    "errors": []
   }
  ],
- "failed": [],
+ "failed": [
+  "chromium.writeAfter10s",
+  "chromium.writeDelayAbout10s",
+  "chromium.captionInFile"
+ ],
  "exceptions": []
 }
