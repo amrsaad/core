@@ -61,6 +61,66 @@
    "urlChecks": {
     "https://quran.com/3/99": 200
    }
+  },
+  {
+   "sourceId": "quran:3:100",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/3/100",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/3:100?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Ali 'Imran 3:100",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوٓا۟ إِن تُطِيعُوا۟ فَرِيقًا مِّنَ ٱلَّذِينَ أُوتُوا۟ ٱلْكِتَـٰبَ يَرُدُّوكُم بَعْدَ إِيمَـٰنِكُمْ كَـٰفِرِينَ",
+    "translation": "O die ihr glaubt, wenn ihr einer Gruppe von denen gehorcht, denen die Schrift gegeben wurde, werden sie euch, nachdem ihr den Glauben (angenommen) habt, wieder zu Ungläubigen machen.",
+    "tafsir_muyassar": "يا أيها الذين صدَّقوا الله ورسوله وعملوا بشرعه، إن تطيعوا جماعة من اليهود والنصارى ممن آتاهم الله التوراة والإنجيل، يضلوكم، ويلقوا إليكم الشُّبَه في دينكم; لترجعوا جاحدين للحق بعد أن كنتم مؤمنين به، فلا تأمنوهم على دينكم، ولا تقبلوا لهم رأيًا أو مشورة.",
+    "tafsir_ibnkathir": "<h2>Warning Muslims Against Imitating People of the Scriptures</h2><p>Allah warns His believing servants against obeying the People of the Book, who envy the believers for the favor that Allah gave them by sending His Messenger . Similarly, Allah said,</p><div class=\"arabic uthmani\">وَدَّ كَثِيرٌ مِّنْ أَهْلِ الْكِتَـبِ لَوْ يَرُدُّونَكُم مِن بَعْدِ إِيمَـنِكُمْ كُفَّارًا حَسَدًا مِّنْ عِنْدِ أَنْفُسِهِمْ</div><p>(Many of the People of the Scripture (Jews and Christians) wish that they could turn you away as disbelievers after you have believed, out of their own envy) 2:109.</p><p>In this Ayah 3:100, Allah said,</p><div class=\"arabic uthmani\">إِن تُطِيعُواْ فَرِيقاً مِّنَ الَّذِينَ أُوتُواْ الْكِتَـبَ يَرُدُّوكُم بَعْدَ إِيمَـنِكُمْ كَـفِرِينَ</div><p>(If you obey a group of those who were given the Scripture (Jews and Christians), they would (indeed) render you disbelievers after you have believed!), then said,</p><div class=\"arabic uthmani\">وَكَيْفَ تَكْفُرُونَ وَأَنْتُمْ تُتْلَى عَلَيْكُمْ ءَايَـتُ اللَّهِ وَفِيكُمْ رَسُولُهُ</div><p>(And how would you disbelieve, while unto you are recited the verses of Allah, and among you is His Messenger), meaning, disbelief is far from touching you, since the Ayat of Allah are being sent down on His Messenger day and night, and he recites and conveys them to you. Similarly, Allah said,</p><div class=\"arabic uthmani\">وَمَا لَكُمْ لاَ تُؤْمِنُونَ بِاللَّهِ وَالرَّسُولُ يَدْعُوكُمْ لِتُؤْمِنُواْ بِرَبِّكُمْ وَقَدْ أَخَذَ مِيثَـقَكُمْ إِن كُنتُمْ مُّؤْمِنِينَ </div><p>(And what is the matter with you that you believe not in Allah! While the Messenger invites you to believe in your Lord; and He has indeed taken your covenant, if you are real believers) 57:8. A Hadith states that one day, the Prophet said to his Companions,</p><div class=\"arabic uthmani\">«أَيُّ الْمُؤْمِنِينَ أَعْجَبُ إِلَيْكُمْ إِيمَانًا؟»</div><p>قالوا: الملائكة. قال:</p><div class=\"arabic uthmani\">«وَكَيْفَ لَا يُؤْمِنُونَ وَهُمْ عِنْدَ رَبِّهِم»</div><p>؟ وذكروا الأنبياء، قال:</p><div class=\"arabic uthmani\">«وَكَيْفَ لَا يُؤْمِنُونَ وَالْوَحْيُ يَنْزِلُ عَلَيْهِمْ؟»</div><p>قالوا: فنحن. قال:</p><div class=\"arabic uthmani\">«وَكَيْفَ لَا تُؤْمِنُونَ وَأَنَا بَيْنَ أَظْهُرِكُمْ؟»</div><p>قالوا: فأي الناس أعجب إيمانًا؟ قال:</p><div class=\"arabic uthmani\">«قَوْمٌ يَجِيئُونَ مِنْ بَعْدِكُمْ يَجِدُونَ صُحُفًا يُؤْمِنُونَ بِمَا فِيهَا»</div><p>(\"Who among the faithful believers do you consider has the most amazing faith\" They said, \"The angels.\" He said, \"Why would they not believe, since they are with their Lord\" They mentioned the Prophets, and the Prophet said, \"Why would they not believe while the revelation is sent down to them\" They said, \"Then, we are.\" He said, \"Why would not you believe when I am among you\" They asked, \"Who has the most amazing faith\" The Prophet said, \"A people who will come after you and who will find only books that they will believe in.\")</p><p>Allah said next,</p><div class=\"arabic uthmani\">وَمَن يَعْتَصِم بِاللَّهِ فَقَدْ هُدِىَ إِلَى صِرَطٍ مّسْتَقِيمٍ</div><p>(And whoever depends upon Allah, then he is indeed guided to the right path) 3:101 for trusting and relying on Allah are the basis of achieving the right guidance and staying away from the path of wickedness. They also represent the tool to acquiring guidance and truth and achieving the righteous aims.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Ali 'Imran",
+    "surahNameDe": "Family of Imran",
+    "key": "3:100"
+   },
+   "fetchedAt": "2026-11-20T11:36:52.265Z",
+   "urlChecks": {
+    "https://quran.com/3/100": 200
+   }
+  },
+  {
+   "sourceId": "quran:3:101",
+   "source": "quran",
+   "area": "beat",
+   "topic": "koran",
+   "url": "https://quran.com/3/101",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.quran.com/api/v4/verses/by_key/3:101?translations=27&fields=text_uthmani",
+    "status": 200
+   },
+   "title": "Ali 'Imran 3:101",
+   "publisher": "Quran.com",
+   "content": {
+    "arabic": "وَكَيْفَ تَكْفُرُونَ وَأَنتُمْ تُتْلَىٰ عَلَيْكُمْ ءَايَـٰتُ ٱللَّهِ وَفِيكُمْ رَسُولُهُۥ ۗ وَمَن يَعْتَصِم بِٱللَّهِ فَقَدْ هُدِىَ إِلَىٰ صِرَٰطٍ مُّسْتَقِيمٍ",
+    "translation": "Wie aber könnt ihr (wieder) ungläubig werden, wo euch doch Allahs Zeichen verlesen werden und unter euch Sein Gesandter ist? Doch wer an Allah festhält, der wird gewiß auf einen geraden Weg geleitet.",
+    "tafsir_muyassar": "وكيف تكفرون بالله -أيها المؤمنون-، وآيات القرآن تتلى عليكم، وفيكم رسول الله محمد صلى الله عليه وسلم يبلغها لكم؟ ومَن يتوكل على الله ويستمسك بالقرآن والسنة فقد وُفِّق لطريق واضح، ومنهاج مستقيم.",
+    "tafsir_ibnkathir": "<h2>Warning Muslims Against Imitating People of the Scriptures</h2><p>Allah warns His believing servants against obeying the People of the Book, who envy the believers for the favor that Allah gave them by sending His Messenger . Similarly, Allah said,</p><div class=\"arabic uthmani\">وَدَّ كَثِيرٌ مِّنْ أَهْلِ الْكِتَـبِ لَوْ يَرُدُّونَكُم مِن بَعْدِ إِيمَـنِكُمْ كُفَّارًا حَسَدًا مِّنْ عِنْدِ أَنْفُسِهِمْ</div><p>(Many of the People of the Scripture (Jews and Christians) wish that they could turn you away as disbelievers after you have believed, out of their own envy) 2:109.</p><p>In this Ayah 3:100, Allah said,</p><div class=\"arabic uthmani\">إِن تُطِيعُواْ فَرِيقاً مِّنَ الَّذِينَ أُوتُواْ الْكِتَـبَ يَرُدُّوكُم بَعْدَ إِيمَـنِكُمْ كَـفِرِينَ</div><p>(If you obey a group of those who were given the Scripture (Jews and Christians), they would (indeed) render you disbelievers after you have believed!), then said,</p><div class=\"arabic uthmani\">وَكَيْفَ تَكْفُرُونَ وَأَنْتُمْ تُتْلَى عَلَيْكُمْ ءَايَـتُ اللَّهِ وَفِيكُمْ رَسُولُهُ</div><p>(And how would you disbelieve, while unto you are recited the verses of Allah, and among you is His Messenger), meaning, disbelief is far from touching you, since the Ayat of Allah are being sent down on His Messenger day and night, and he recites and conveys them to you. Similarly, Allah said,</p><div class=\"arabic uthmani\">وَمَا لَكُمْ لاَ تُؤْمِنُونَ بِاللَّهِ وَالرَّسُولُ يَدْعُوكُمْ لِتُؤْمِنُواْ بِرَبِّكُمْ وَقَدْ أَخَذَ مِيثَـقَكُمْ إِن كُنتُمْ مُّؤْمِنِينَ </div><p>(And what is the matter with you that you believe not in Allah! While the Messenger invites you to believe in your Lord; and He has indeed taken your covenant, if you are real believers) 57:8. A Hadith states that one day, the Prophet said to his Companions,</p><div class=\"arabic uthmani\">«أَيُّ الْمُؤْمِنِينَ أَعْجَبُ إِلَيْكُمْ إِيمَانًا؟»</div><p>قالوا: الملائكة. قال:</p><div class=\"arabic uthmani\">«وَكَيْفَ لَا يُؤْمِنُونَ وَهُمْ عِنْدَ رَبِّهِم»</div><p>؟ وذكروا الأنبياء، قال:</p><div class=\"arabic uthmani\">«وَكَيْفَ لَا يُؤْمِنُونَ وَالْوَحْيُ يَنْزِلُ عَلَيْهِمْ؟»</div><p>قالوا: فنحن. قال:</p><div class=\"arabic uthmani\">«وَكَيْفَ لَا تُؤْمِنُونَ وَأَنَا بَيْنَ أَظْهُرِكُمْ؟»</div><p>قالوا: فأي الناس أعجب إيمانًا؟ قال:</p><div class=\"arabic uthmani\">«قَوْمٌ يَجِيئُونَ مِنْ بَعْدِكُمْ يَجِدُونَ صُحُفًا يُؤْمِنُونَ بِمَا فِيهَا»</div><p>(\"Who among the faithful believers do you consider has the most amazing faith\" They said, \"The angels.\" He said, \"Why would they not believe, since they are with their Lord\" They mentioned the Prophets, and the Prophet said, \"Why would they not believe while the revelation is sent down to them\" They said, \"Then, we are.\" He said, \"Why would not you believe when I am among you\" They asked, \"Who has the most amazing faith\" The Prophet said, \"A people who will come after you and who will find only books that they will believe in.\")</p><p>Allah said next,</p><div class=\"arabic uthmani\">وَمَن يَعْتَصِم بِاللَّهِ فَقَدْ هُدِىَ إِلَى صِرَطٍ مّسْتَقِيمٍ</div><p>(And whoever depends upon Allah, then he is indeed guided to the right path) 3:101 for trusting and relying on Allah are the basis of achieving the right guidance and staying away from the path of wickedness. They also represent the tool to acquiring guidance and truth and achieving the righteous aims.</p>"
+   },
+   "meta": {
+    "kind": "verse",
+    "surahName": "Ali 'Imran",
+    "surahNameDe": "Family of Imran",
+    "key": "3:101"
+   },
+   "fetchedAt": "2026-11-20T11:36:52.265Z",
+   "urlChecks": {
+    "https://quran.com/3/101": 200
+   }
   }
  ]
 }
