@@ -76,7 +76,7 @@ function setup(probeParked?: boolean) {
   const els: El[] = [];
   const deck = new AudioDeck({
     standby: true,
-    probeParked,
+    probeParked: probeParked ?? false,
     local: () => undefined,
     dropLocal: () => {},
     make: () => {
@@ -125,7 +125,7 @@ async function coldPool(probeParked?: boolean) {
 
 describe('Freischalten vor dem Sprung (Runde 27, Nacharbeit)', () => {
   it('der Schalter steht auf false', () => {
-    expect(PROBE_PARKED).toBe(false);
+    expect(PROBE_PARKED).toBe(true); // 20.11.: am Gerät führte die Probe bei t=0 fast immer zum Kollaps, altes Verhalten bis Runde 29
   });
 
   it('(a) ein nicht freigeschaltetes Element springt ohne Geste nicht und meldet kein pool ready', async () => {

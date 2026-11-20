@@ -321,7 +321,7 @@ const UNLOCK_LINE_MS = 800;
  * false: ein geparktes Element (Position schon auf der Startstelle, Startstelle über 0) bekommt in der Geste kein play(). Ein Vorrats-Element wird stattdessen freigeschaltet, bevor es springt.
  * true: das alte Verhalten (Gegenprobe am Gerät).
  */
-export const PROBE_PARKED = false;
+export const PROBE_PARKED = true;
 /** Runde 27: Ausweichen auf ein frisches Element: so viel früher (Sekunden Elementzeit) liegt dort das Ziel */
 export const DODGE_BACK = 1;
 /** Runde 27: so viele Sekunden Spielzeit auf dem frischen Element, bis "fresh element ... ok" gilt */
