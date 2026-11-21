@@ -64,6 +64,7 @@ import { newSaved, resolveSaved } from './saved';
 import { focusTabText } from '../components/head';
 import { statusOf } from '../components/status';
 import { Ambient } from './Ambient';
+import { coverKey, coverStart, coverStep } from './coverState';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 import { ShareSheet } from '../components/ShareSheet';
 import { payloadOf, shareOf, type ShareBundle } from '../share/link';
@@ -4219,21 +4220,21 @@ function posterOf(mm: Moment | undefined) {
   );
 }
 
-/** Cover mit derselben Adresse nach einem Netzabbruch: Ein Bild, das ohne Netz nicht kam, lädt bei der Rückkehr noch einmal (Issue 9) */
+/**
+ * Cover: Ein Bild, das ohne Netz nicht kam, lädt bei der Rückkehr noch einmal (Issue 9). Bei neuer Adresse wird das Element neu aufgebaut (coverState),
+ * sonst zeigte es das Bild des vorigen Moments, bis das neue geladen ist. Bei Ladefehler bleibt die Fläche neutral (leeres alt, die Hintergrundfarbe der Kachel, kein Bildsymbol; das Element bleibt, es deckt den Player ab).
+ */
 function Cover({ src, className }: { src: string; className: string }) {
-  const [k, setK] = useState(0);
-  const failed = useRef(false);
+  const [st, setSt] = useState(() => coverStart(src));
+  // Neue Adresse: sofort neuer Zustand, noch im selben Aufbau (kein Bild der alten Adresse im DOM)
+  const cur = coverStep(st, { type: 'src', src });
+  if (cur !== st) setSt(cur);
   useEffect(() => {
-    failed.current = false;
-    const on = () => {
-      if (!failed.current) return;
-      failed.current = false;
-      setK((x) => x + 1);
-    };
+    const on = () => setSt((x) => coverStep(x, { type: 'online' }));
     window.addEventListener('online', on);
     return () => window.removeEventListener('online', on);
   }, [src]);
-  return <img key={k} className={className} src={src} alt="" draggable={false} onError={() => { failed.current = true; }} />;
+  return <img key={coverKey(cur)} className={className} src={cur.src} alt="" draggable={false} onError={() => setSt((x) => coverStep(x, { type: 'error' }))} />;
 }
 
 /** Ruhige Endseite: Satz, zweiter Satz, zwei Knöpfe zu den anderen Reitern. Wisch nach unten geht zurück (nur hinter dem letzten Moment). */

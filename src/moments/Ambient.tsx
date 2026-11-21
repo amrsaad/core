@@ -31,6 +31,8 @@ export function Ambient({ src }: { src: string }) {
     if (!ctx) return;
     let dead = false;
     failed.current = false;
+    // Neue Adresse: die Fläche des vorigen Moments sofort leeren, bis das neue Bild gezeichnet ist (bei Ladefehler bleibt sie neutral)
+    ctx.clearRect(0, 0, W, H);
     const img = new Image();
     img.onload = () => {
       if (dead || !img.naturalWidth) return;
