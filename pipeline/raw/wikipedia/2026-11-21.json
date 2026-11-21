@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-21",
+ "records": [
+  {
+   "sourceId": "wiki:de:Buddhismus in Burjatien",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Buddhismus_in_Burjatien",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/21",
+    "status": 200
+   },
+   "title": "Buddhismus in Burjatien",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Der Buddhismus spielt in Burjatien seit dem 17. Jahrhundert eine bedeutende Rolle unter dem mongolischen Volk der Burjaten in Russland, vor allem jedoch unter den Burjaten östlich des Baikalsees."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-21T04:13:02.008Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Buddhismus_in_Burjatien": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Materialwissenschaft und Werkstofftechnik",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Materialwissenschaft_und_Werkstofftechnik",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/21",
+    "status": 200
+   },
+   "title": "Materialwissenschaft und Werkstofftechnik",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Materialwissenschaft und Werkstofftechnik ist die deutsche Bezeichnung für das interdisziplinäre Fachgebiet, das sich mit der Erforschung und Entwicklung von Materialien und Werkstoffen befasst. Aus Werkstoffen werden technisch relevante Bauteile hergestellt."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-21T04:13:02.008Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Materialwissenschaft_und_Werkstofftechnik": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Hamburger Hafenarbeiterstreik 1896/97",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Hamburger_Hafenarbeiterstreik_1896%2F97",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/21",
+    "status": 200
+   },
+   "title": "Hamburger Hafenarbeiterstreik 1896/97",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Der Hamburger Hafenarbeiterstreik von 1896/97 gilt als einer der größten Arbeitskämpfe im Deutschen Kaiserreich. Er begann am 21. November 1896, dauerte elf Wochen, umfasste auf dem Höhepunkt fast 17.000 Arbeiter und endete am 6. Februar 1897 mit der vollständigen Niederlage der Streikenden. Die Auseinandersetzung hatte erhebliche Auswirkungen auf die Hamburger Wirtschaft und erregte auch außerhalb Deutschlands Aufsehen. Getragen wurde der Streik vor allem von Arbeitergruppen, die kaum gewerkschaftlich organisiert und deren Arbeitsverhältnisse durch Unstetigkeit gekennzeichnet waren. Ihnen standen gut organisierte Unternehmer gegenüber. Die Geschehnisse waren für Konservative und die Reichsregierung Anlass, zwei Jahre später mit der Zuchthausvorlage eine verstärkte Repressionspolitik gegenüber der Sozialdemokratie zu versuchen."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-21T04:13:02.008Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Hamburger_Hafenarbeiterstreik_1896%2F97": 200
+   }
+  }
+ ]
+}
