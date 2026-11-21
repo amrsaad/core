@@ -1,5 +1,5 @@
 {
- "at": "2026-11-21T07:32:12.733Z",
+ "at": "2026-11-21T11:06:18.448Z",
  "runs": [
   {
    "browser": "webkit",
@@ -94,7 +94,7 @@
     "openCardBackOnReturn": true
    },
    "notes": {
-    "iosTapMs": 4,
+    "iosTapMs": 3,
     "iosGestureLines": [
      "deck: waiting for tap atshort1 (no gesture or sound off)",
      "deck: probe done spare ok=0 dur=600.0 t=0.0",
@@ -109,7 +109,7 @@
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
-     "deck: gesture unlock 5 elements ok=5 rejected=0 timeout=0 after 303 ms",
+     "deck: gesture unlock 5 elements ok=5 rejected=0 timeout=0 after 306 ms",
      "deck: pool start after unlock ok=5/10",
      "deck: gesture pointerup unlocked 6/6"
     ],
@@ -126,7 +126,7 @@
      ],
      "n": 42
     },
-    "rfSwipeMs": 414,
+    "rfSwipeMs": 505,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -165,12 +165,12 @@
      "bg: started atshort2:0",
      "bg: next atshort2:0",
      "bg: refill atshort8 (pool 0)",
-     "bg: refill ready atshort8 after 30 ms"
+     "bg: refill ready atshort8 after 31 ms"
     ],
     "tempoWaiting": 0,
-    "tempoPaused": 10,
+    "tempoPaused": 5,
     "cue": {
-     "worst": 0,
+     "worst": 1,
      "n": 622,
      "shownLate": 0,
      "shownNow": 0,
@@ -186,12 +186,12 @@
        47
       ],
       [
-       "5.97",
+       "5.96",
        60,
        60
       ],
       [
-       "7.25",
+       "7.26",
        73,
        73
       ],
@@ -201,37 +201,37 @@
        86
       ],
       [
-       "9.82",
+       "9.83",
        99,
        99
       ],
       [
-       "11.11",
+       "11.12",
        112,
        112
       ],
       [
        "12.40",
-       124,
-       124
+       125,
+       125
       ],
       [
-       "13.68",
+       "13.69",
        137,
        137
       ],
       [
-       "14.97",
+       "14.98",
        150,
        150
       ],
       [
-       "16.26",
+       "16.27",
        163,
        163
       ],
       [
-       "17.54",
+       "17.56",
        176,
        176
       ]
@@ -239,8 +239,8 @@
      "rate": 2
     },
     "cueTempo": {
-     "worst": 0,
-     "n": 550,
+     "worst": 1,
+     "n": 531,
      "rates": [
       1,
       1.5,
@@ -252,7 +252,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756805070
+       "dueAt": 1792756805129
       }
      ],
      "idx": 6,
@@ -388,7 +388,7 @@
     "openCardBackOnReturn": true
    },
    "notes": {
-    "iosTapMs": 3,
+    "iosTapMs": 2,
     "iosGestureLines": [
      "deck: waiting for tap atshort1 (no gesture or sound off)",
      "deck: probe done spare ok=0 dur=600.0 t=0.0",
@@ -403,7 +403,7 @@
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
-     "deck: gesture unlock 5 elements ok=5 rejected=0 timeout=0 after 301 ms",
+     "deck: gesture unlock 5 elements ok=5 rejected=0 timeout=0 after 302 ms",
      "deck: pool start after unlock ok=5/10",
      "deck: gesture pointerup unlocked 6/6"
     ],
@@ -420,7 +420,7 @@
      ],
      "n": 42
     },
-    "rfSwipeMs": 409,
+    "rfSwipeMs": 502,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -462,7 +462,7 @@
      "bg: refill ready atshort8 after 30 ms"
     ],
     "tempoWaiting": 0,
-    "tempoPaused": 4,
+    "tempoPaused": 10,
     "cue": {
      "worst": 0,
      "n": 601,
@@ -470,62 +470,62 @@
      "shownNow": 0,
      "gaps": [
       [
-       "3.41",
-       35,
-       35
+       "3.34",
+       34,
+       34
       ],
       [
-       "4.74",
-       48,
-       48
+       "4.67",
+       47,
+       47
       ],
       [
-       "6.08",
+       "6.00",
        61,
        61
       ],
       [
-       "7.41",
-       75,
-       75
+       "7.34",
+       74,
+       74
       ],
       [
-       "8.74",
-       88,
-       88
+       "8.67",
+       87,
+       87
       ],
       [
-       "10.08",
+       "10.00",
        101,
        101
       ],
       [
-       "11.41",
-       115,
-       115
+       "11.34",
+       114,
+       114
       ],
       [
-       "12.74",
-       128,
-       128
+       "12.67",
+       127,
+       127
       ],
       [
-       "14.08",
+       "14.00",
        141,
        141
       ],
       [
-       "15.41",
-       155,
-       155
+       "15.34",
+       154,
+       154
       ],
       [
-       "16.74",
-       168,
-       168
+       "16.67",
+       167,
+       167
       ],
       [
-       "18.08",
+       "18.00",
        181,
        181
       ]
@@ -546,7 +546,7 @@
       {
        "id": "atrecall4:0",
        "review": false,
-       "dueAt": 1792756804925
+       "dueAt": 1792756804957
       }
      ],
      "idx": 6,
@@ -633,7 +633,7 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "firstSoundMs": 2694,
+    "firstSoundMs": 2747,
     "diag": [
      "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
      "deck: src net pod-0006",
@@ -672,9 +672,9 @@
      "want": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
      "id": "pod-0013:82"
     },
-    "lockNextMs": 15,
+    "lockNextMs": 31,
     "lockNextLines": [
-     "deck: swap pod-0013 ready=true pool=1",
+     "deck: swap pod-0013 ready=true pool=0",
      "deck play#3 swap rs=4 muted=false t=82.0",
      "deck play#3 ok"
     ],
