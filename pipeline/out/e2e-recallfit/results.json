@@ -1,5 +1,5 @@
 {
- "at": "2026-11-21T15:15:30.266Z",
+ "at": "2026-11-21T16:55:59.647Z",
  "runs": [
   {
    "tag": "webkit 390x844",
@@ -319,7 +319,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -479,7 +479,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -639,7 +639,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -960,7 +960,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -1120,7 +1120,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -1280,7 +1280,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -1601,7 +1601,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -1761,7 +1761,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -1921,7 +1921,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -2242,7 +2242,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -2402,7 +2402,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -2562,7 +2562,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -2883,7 +2883,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -3043,7 +3043,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -3203,7 +3203,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -3524,7 +3524,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -3684,7 +3684,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -3844,7 +3844,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -4165,7 +4165,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -4325,7 +4325,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -4485,7 +4485,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -4806,7 +4806,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -4966,7 +4966,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -5126,7 +5126,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -5447,7 +5447,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -5607,7 +5607,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -5767,7 +5767,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -6088,7 +6088,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -6248,7 +6248,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -6408,7 +6408,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -6729,7 +6729,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -6889,7 +6889,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -7049,7 +7049,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -7370,7 +7370,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -7530,7 +7530,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -7690,7 +7690,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -8013,7 +8013,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -8175,7 +8175,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -8337,7 +8337,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -8660,7 +8660,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -8822,7 +8822,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -8984,7 +8984,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -9305,7 +9305,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -9465,7 +9465,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -9625,7 +9625,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -9946,7 +9946,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -10106,7 +10106,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -10266,7 +10266,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -10587,7 +10587,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -10747,7 +10747,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -10907,7 +10907,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -11228,7 +11228,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -11388,7 +11388,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -11548,7 +11548,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -11869,7 +11869,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -12029,7 +12029,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -12189,7 +12189,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -12510,7 +12510,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -12670,7 +12670,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -12830,7 +12830,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -13151,7 +13151,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -13311,7 +13311,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -13471,7 +13471,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -13792,7 +13792,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -13952,7 +13952,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -14112,7 +14112,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -14433,7 +14433,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -14593,7 +14593,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -14753,7 +14753,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -15074,7 +15074,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -15234,7 +15234,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -15394,7 +15394,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -15715,7 +15715,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -15875,7 +15875,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -16035,7 +16035,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -16356,7 +16356,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -16516,7 +16516,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -16676,7 +16676,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -16999,7 +16999,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -17161,7 +17161,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -17323,7 +17323,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   },
   {
@@ -17646,7 +17646,7 @@
     "text arabic Next schließt": true,
     "text arabic Diag shown": true,
     "text arabic Diag answered": true,
-    "text Skip schließt ohne Wertung": true,
+    "text Skip schließt ohne Wertung, frühestens morgen": true,
     "video normal vor der Antwort alles im sichtbaren Bereich": true,
     "video normal vor der Antwort nichts überlappt": true,
     "video normal vor der Antwort Tippflächen 44 px": true,
@@ -17808,7 +17808,7 @@
     "video arabic Next schließt": true,
     "video arabic Diag shown": true,
     "video arabic Diag answered": true,
-    "video Skip schließt ohne Wertung": true,
+    "video Skip schließt ohne Wertung, frühestens morgen": true,
     "audio normal vor der Antwort alles im sichtbaren Bereich": true,
     "audio normal vor der Antwort nichts überlappt": true,
     "audio normal vor der Antwort Tippflächen 44 px": true,
@@ -17970,7 +17970,7 @@
     "audio arabic Next schließt": true,
     "audio arabic Diag shown": true,
     "audio arabic Diag answered": true,
-    "audio Skip schließt ohne Wertung": true
+    "audio Skip schließt ohne Wertung, frühestens morgen": true
    }
   }
  ],
