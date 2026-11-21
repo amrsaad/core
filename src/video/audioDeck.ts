@@ -2255,6 +2255,9 @@ export class AudioDeck {
     );
     // Ein Element, das nach play() nicht mehr spielt (iOS hat das play() vor den Metadaten still verworfen), gibt den Anstoß wieder frei
     if (p === undefined || el.paused) this.inflightAt = 0;
+    // Runde 33: höchstens ein Element gibt Ton. Der Tausch hält das alte Element erst nach diesem Aufruf an, darum erst im nächsten Mikroschritt prüfen.
+    queueMicrotask(() => this.enforceSingle('play'));
+    this.watchSingle();
   }
 
   // ---- Vorrat (Entscheidung 52, Brief 14): fünf Elemente halten die nächsten fünf Momente fertig geladen, gesperrt tauscht Weiter nur noch die Rollen ----
@@ -3029,6 +3032,37 @@ export class AudioDeck {
     };
   }
 
+  /**
+   * Runde 33: Invariante "höchstens ein Element gibt Ton". Jedes andere Element des Decks (alle Spuren), das nicht pausiert ist und eine Netzquelle trägt, wird pausiert
+   * (nie stummgeschaltet, NEVER_MUTED bleibt). Elemente mit der stillen Inline-Quelle sind unhörbar und bleiben unberührt (laufende Freischaltung).
+   * Aufruf nach jedem play(), beim Sichtbarwerden und einmal je Sekunde solange sichtbar. Rolle für die Diag: probe, refill, kept, pool, unknown.
+   */
+  private enforceSingle(why: string) {
+    const act = this.el;
+    if (!act) return;
+    for (const el of this.all()) {
+      if (el === act || el.paused || this.silentEl(el)) continue;
+      const role = this.probes.has(el) ? 'probe' : this.bgRef?.el === el ? 'refill' : this.keptOf(el) ? 'kept' : this.entryOf(el) ? 'pool' : 'unknown';
+      this.halt(el, 'app: second element');
+      const last = this.secondAt.get(el) ?? 0;
+      this.secondAt.set(el, Date.now());
+      if (Date.now() - last < 5000) continue;
+      this.diag(`deck: second element playing ${role} ${this.idOf(el)} t=${this.num(el.currentTime)}, paused (${why})`);
+    }
+  }
+
+  private secondAt = new WeakMap<DeckEl, number>();
+  private singleTimer: ReturnType<typeof setInterval> | null = null;
+
+  /** Runde 33: Wächter einmal je Sekunde, solange die App sichtbar ist (startet beim ersten play() und beim Sichtbarwerden, endet mit release) */
+  private watchSingle() {
+    if (this.singleTimer) return;
+    this.singleTimer = setInterval(() => {
+      if (!this.hidden()) this.enforceSingle('tick');
+    }, 1000);
+    (this.singleTimer as unknown as { unref?: () => void }).unref?.();
+  }
+
   /** Runde 32: die App ist wieder sichtbar: verdächtige Elemente (verdecktes Laden verloren) hart zurücksetzen, neue Hintergrund-Phase */
   private bgResume() {
     this.bgLost = 0;
@@ -3058,6 +3092,8 @@ export class AudioDeck {
     this.nextClips = null;
     if (this.inl) clearTimeout(this.inl.timer);
     this.inl = null;
+    if (this.singleTimer) clearInterval(this.singleTimer);
+    this.singleTimer = null;
     if (this.bgRef) clearTimeout(this.bgRef.timer);
     this.bgRef = null;
     this.onMedia = null;
@@ -3401,7 +3437,11 @@ export class AudioDeck {
    * Bei visible eine Zeile mit den Ereignissen, die im Hintergrund kamen.
    */
   pageEvent(kind: string) {
-    if (kind === 'visible') this.bgResume();
+    if (kind === 'visible') {
+      this.bgResume();
+      this.enforceSingle('visible');
+      this.watchSingle();
+    }
     const el = this.el;
     if (!el) return;
     const line = (tag: string) => {
