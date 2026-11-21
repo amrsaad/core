@@ -33,9 +33,10 @@ import { addSample } from './latency';
 import { captionLines, captionsShown } from './captions';
 import { CueClock, cueIndexAt } from './cueClock';
 import { countGotIt, countSeen, todayLine } from './today';
-import { answer, cardDue, lastReadDay, pickRecall, recallQuiet, type Recent } from './recall';
+import { answer, lastReadDay, pickRecall, RECALL_EVERY, recallQuiet, skipCard, type Recent } from './recall';
 import { RecallCard, RecallTag, RecallTextPeek, type RecallCtl } from './RecallCard';
-import { canShowRecall, onReturn, onSwipe, requeueOpen, type QueueEntry } from './recallqueue';
+import { gateBack, gateLeave, gateShown, newGate, type Gate } from './recallgate';
+import { canShowRecall, type QueueEntry } from './recallqueue';
 import { CaptionSheet } from './CaptionSheet';
 import { sourceLine } from './source';
 import { askUrl, markAsked } from './ask';
@@ -302,7 +303,11 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const forYouRef = useRef(false);
   /** Abrufkarte offen: Player bleibt angehalten */
   const recallRef = useRef(false);
-  const sessionSeen = useRef(0);
+  /** Abstand der Abrufkarten (Runde 34, recallgate.ts), nur diese Sitzung */
+  const gate = useRef<Gate>(newGate());
+  /** Momente, bei denen die Seite irgendwann verdeckt war: zählen nicht für den Kartenabstand */
+  const bgTouched = useRef(new Set<string>());
+  const heldLogged = useRef(false);
   const sessionT0 = useRef(Date.now());
   const attention = useRef<Attention>(newAttention());
   /** Paare aufeinanderfolgender Momente dieser Sitzung, die schon gezählt sind (mixClump) */
@@ -1270,7 +1275,18 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       });
     }
   };
+  /** Karte ohne Antwort beendet (Wegwischen, Esc, Hintergrund): keine Wertung, frühestens morgen wieder (Runde 34) */
+  const postponeOpen = () => {
+    const e = recallEntry.current;
+    if (!e || recallAnswered.current) return;
+    const at = clockNow().getTime();
+    const next = skipCard(stateRef.current.recall ?? {}, e.id, at);
+    stateRef.current = { ...stateRef.current, recall: next };
+    update((s) => ({ ...s, recall: skipCard(s.recall ?? {}, e.id, at) }));
+    diag.current.push(`recall: skipped ${e.id}, back ${dayKey(new Date(next[e.id].due ?? at))}`);
+  };
   const closeRecall = () => {
+    postponeOpen();
     recallRef.current = false;
     recallAnswered.current = false;
     recallEntry.current = null;
@@ -1281,11 +1297,9 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     applyRate();
   };
 
-  /** "Skip" auf der unbeantworteten Karte: wie das frühere Wegwischen, keine Wertung (Treffer und Fehler bleiben aus, die Karte kommt nach der bestehenden Regel wieder) */
+  /** "Skip" auf der unbeantworteten Karte: keine Wertung, Lernstufe bleibt, die Karte kommt frühestens morgen wieder (Runde 34) */
   const skipRecallCard = () => {
     if (recallAnswered.current) return;
-    const r = recall;
-    if (r) diag.current.push(`recall: skipped ${r.m.id}`);
     closeRecall();
   };
 
@@ -1512,7 +1526,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
 
   /** Darf jetzt eine Abrufkarte erscheinen? Feed-Reiter offen, Seite sichtbar, kein Blatt, keine Übersicht (Pfeiler 19) */
   const recallCtx = () => ({ active: activeRef.current, visible: !isBackground(document.visibilityState), note: !!noteRef.current, sheet: !!(deskRef.current?.help || deskRef.current?.sheet) });
-  const openRecall = (e: QueueEntry, fromQueue: boolean) => {
+  const openRecall = (e: QueueEntry) => {
     const rm = findMoment(e.id);
     if (!rm) return false;
     recallRef.current = true;
@@ -1520,37 +1534,17 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     recallEntry.current = e;
     current().player?.pauseVideo();
     setRecall({ m: rm, review: e.review, read: lastReadDay(stateRef.current.momentLog, stateRef.current.momentSeen, rm.id, (ms) => dayKey(new Date(ms))) });
-    if (fromQueue) diag.current.push(`recall: shown ${e.id} from queue`);
     return true;
   };
-  /** Warteschlange und Wiedervorlage in den State, sofort auch in stateRef (mehrere Schritte im selben Takt) */
-  const putQueue = (queue: QueueEntry[], recall: AppState['recall']) => {
-    stateRef.current = { ...stateRef.current, recallQueue: queue, recall };
-    update((s) => ({ ...s, recallQueue: queue, recall }));
-  };
-  /** Ein Wisch nach vorn: neue Karte (oder keine) und Warteschlange in einem Schritt */
+  /**
+   * Eine Karte an dieser Stelle zeigen (Runde 34): nur im Vordergrund. Geht es gerade nicht (Hintergrund, Einstellungen, Blatt), wird nichts
+   * vorgemerkt: der Zähler bleibt, die nächste Gelegenheit nach einem weiteren Wisch zeigt sie.
+   */
   const stepRecall = (pick: { id: string; review: boolean } | null) => {
-    const s0 = stateRef.current;
-    const q0 = s0.recallQueue ?? [];
-    if (!pick && !q0.length) return;
-    let step = onSwipe(q0, s0.recall ?? {}, pick, canShowRecall(recallCtx()), clockNow().getTime());
-    // Eine Karte, deren Moment nicht mehr im Pool ist, kann nicht erscheinen: nächste aus der Warteschlange
-    while (step.show && !findMoment(step.show.id)) step = onSwipe(step.queue, step.recall, null, true, clockNow().getTime());
-    if (pick && step.queue.some((x) => x.id === pick.id)) diag.current.push(`recall: queued ${pick.id}${isBackground(document.visibilityState) ? ' (bg)' : ''}`);
-    if (step.queue !== q0 || step.recall !== (s0.recall ?? {})) putQueue(step.queue, step.recall);
-    if (step.show) openRecall(step.show, step.fromQueue);
-  };
-  /** Zurück im Feed: eine Karte sofort, vor dem nächsten Wisch */
-  const showFromQueue = () => {
-    if (recallRef.current || forYouRef.current) return;
-    let q = stateRef.current.recallQueue ?? [];
-    while (q.length) {
-      const r = onReturn(q, canShowRecall(recallCtx()));
-      if (!r.show) return;
-      q = r.queue;
-      putQueue(q, stateRef.current.recall ?? {});
-      if (openRecall(r.show, true)) return;
-    }
+    if (!pick || !canShowRecall(recallCtx()) || !findMoment(pick.id)) return;
+    diag.current.push(`recall: shown ${pick.id} after ${gate.current.played} played`);
+    gate.current = gateShown(gate.current);
+    openRecall({ id: pick.id, review: pick.review, dueAt: clockNow().getTime() });
   };
 
   const goTo = useCallback(
@@ -1628,17 +1622,27 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       setLoading(false);
       // Für die Abrufkarte: geschauter Anteil des verlassenen Moments (Video: Position, Text: Ende erreicht)
       let recallNow: { id: string; review: boolean } | null = null;
-      if (next > prev && prevM && !counted.current.has(prevM.id)) {
-        counted.current.add(prevM.id);
-        const len = prevM.end - prevM.start;
-        const pos = (current().player?.getCurrentTime?.() ?? prevM.start) - prevM.start;
-        const watched = endedAt.current === prev ? 1 : textRef.current ? (textSeen.current === prev ? 1 : 0) : Math.max(0, Math.min(1, pos / len));
-        recent.current = [...recent.current, { id: prevM.id, watched }].slice(-8);
-        sessionSeen.current += 1;
-        if (cardDue(sessionSeen.current) && !recallQuiet(rateRef.current, Date.now() - sessionT0.current)) {
+      if (next > prev && isBackground(document.visibilityState) && queue.current[next]) bgTouched.current.add(queue.current[next].id);
+      if (next > prev && prevM) {
+        // Zählt nur ein Moment, der im Vordergrund gehört wurde (Seite nie verdeckt): Video und Audio mit mindestens PLAYED_MIN_MS Spielzeit,
+        // Text, wenn das Textende erreicht wurde (wie die bestehende Regel für "gesehen")
+        const heard = !counted.current.has(prevM.id) && !bgTouched.current.has(prevM.id) && (textRef.current ? textSeen.current === prev : played.current.enough(prevM.id));
+        if (heard) {
+          counted.current.add(prevM.id);
+          const len = prevM.end - prevM.start;
+          const pos = (current().player?.getCurrentTime?.() ?? prevM.start) - prevM.start;
+          const watched = endedAt.current === prev ? 1 : textRef.current ? (textSeen.current === prev ? 1 : 0) : Math.max(0, Math.min(1, pos / len));
+          recent.current = [...recent.current, { id: prevM.id, watched }].slice(-RECALL_EVERY);
+        }
+        const g = gateLeave(gate.current, heard);
+        gate.current = g.gate;
+        if (g.held && !recallQuiet(rateRef.current, Date.now() - sessionT0.current)) {
+          if (!heldLogged.current) diag.current.push('recall: held (just back from bg)');
+          heldLogged.current = true;
+        }
+        if (g.due && !recallQuiet(rateRef.current, Date.now() - sessionT0.current)) {
           const s0 = stateRef.current;
-          const queued = new Set((s0.recallQueue ?? []).map((x) => x.id));
-          recallNow = pickRecall(s0.recall ?? {}, recent.current, clockNow().getTime(), (id) => !queued.has(id) && !s0.momentRejected?.[id] && !!findMoment(id)?.recall);
+          recallNow = pickRecall(s0.recall ?? {}, recent.current, clockNow().getTime(), (id) => !s0.momentRejected?.[id] && !!findMoment(id)?.recall);
         }
       }
       if (prevM && endedAt.current !== prev) log(prevM, {});
@@ -1701,7 +1705,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       textSeen.current = -1;
       if (textBox.current) textBox.current.scrollTop = 0;
       if (!textRef.current) soundGuard(next);
-      // Pfeiler 19: nie eine Karte, solange der Feed nicht im Vordergrund und sichtbar ist. Dann Warteschlange, je eine Karte pro Wisch.
+      // Runde 34: nie eine Karte, solange der Feed nicht im Vordergrund und sichtbar ist, nichts wird vorgemerkt
       if (next > prev && prevM) stepRecall(recallNow);
       fillPoolRef.current();
       syncHint();
@@ -3405,13 +3409,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     const m = queue.current[idxRef.current];
     if (!m) return;
     if (isBackground(vis) && recallRef.current) {
-      // Eine offene Karte hielte den Ton an, und im gesperrten Telefon beantwortet sie niemand: zurück in die Warteschlange (Rückkehr zeigt sie), Ton läuft weiter
-      const e = recallEntry.current;
-      if (e && !recallAnswered.current) {
-        const r = requeueOpen(stateRef.current.recallQueue ?? [], stateRef.current.recall ?? {}, e);
-        putQueue(r.queue, r.recall);
-        diag.current.push(`recall: queued ${e.id} (bg)`);
-      }
+      // Eine offene Karte hielte den Ton an, und im gesperrten Telefon beantwortet sie niemand: wie Wegwischen, frühestens morgen wieder, Ton läuft weiter
+      postponeOpen();
       recallRef.current = false;
       recallAnswered.current = false;
       recallEntry.current = null;
@@ -3420,6 +3419,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     }
     const playable = !textRef.current && !forYouRef.current && !recallRef.current;
     if (isBackground(vis)) {
+      bgTouched.current.add(m.id);
       diag.current.push(`bg: left ${m.id}`);
       if (playable && onLeave(formOf(m), !HLS.has(m.videoId)) === 'pause' && !userPaused.current) {
         current().player?.pauseVideo();
@@ -3428,6 +3428,9 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       return;
     }
     diag.current.push(`bg: back ${m.id}`);
+    // Runde 34: bei der Rückkehr keine Karte, erst nach einem im Vordergrund gehörten Moment
+    gate.current = gateBack(gate.current);
+    heldLogged.current = false;
     // Issue 44: Zeigt die Oberfläche nicht den Moment, auf dem Deck und Index stehen (Rendern verdeckt nicht gelaufen), sofort nachziehen, noch vor dem ersten Bild nach dem Entsperren
     if (shownId.current && shownId.current !== m.id) {
       try {
@@ -3447,13 +3450,6 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     }
     // Der laufende Moment ist jetzt zu sehen: gesehen (einmal), dann Karte oder Ton wieder aufnehmen
     if (!textRef.current && played.current.enough(m.id)) markSeen(m, 'return');
-    if (!recallRef.current && (stateRef.current.recallQueue?.length ?? 0) > 0) {
-      showFromQueue();
-      if (recallRef.current) {
-        leftPaused.current = false;
-        return;
-      }
-    }
     const wasLeft = leftPaused.current;
     leftPaused.current = false;
     // Der Moment endete verdeckt ohne bereites Element: jetzt mit dem nächsten weiter, sichtbar und mit der normalen Ladeanzeige
@@ -3472,11 +3468,6 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     // Tempo nach Rückkehr erneut setzen, YouTube fällt nach App-Wechsel auf 1x zurück (Max 31.10.)
     applyRate();
   };
-  // Pfeiler 19: Settings, Saved, Feedback-Blatt oder Übersicht zu: eine Karte aus der Warteschlange sofort, vor dem nächsten Wisch
-  useEffect(() => {
-    if (queue.current.length) showFromQueue();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active, !!note, !!desk?.help, !!desk?.sheet, queue.current.length > 0]);
   useEffect(() => {
     const on = () => visRef.current(document.visibilityState);
     document.addEventListener('visibilitychange', on);
@@ -3660,8 +3651,10 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       tapMs: () => stateRef.current.tapMs ?? [],
       swipeFrames: () => stateRef.current.swipeFrames ?? [],
       skipRecall: () => closeRecall(),
+      /** Nur Tests (Runde 34): Zähler der gespielten Momente seit der letzten Karte setzen */
+      setRecallPlayed: (n: number) => { gate.current = { ...gate.current, played: n }; },
       /** Nur Tests (Runde 23): Abrufkarte zu einem Moment des Pools sofort zeigen */
-      showRecall: (id: string, review = false) => { if (recallRef.current) return false; return openRecall({ id, review, dueAt: clockNow().getTime() }, false); },
+      showRecall: (id: string, review = false) => { if (recallRef.current) return false; return openRecall({ id, review, dueAt: clockNow().getTime() }); },
       sound: () => soundOn.current,
       rate: () => rateRef.current,
       closeCaption: () => setCapOpen(false),
@@ -3670,7 +3663,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       taps: () => stateRef.current.tapLog ?? {},
       openNote: () => openNote(),
       recallQueue: () => stateRef.current.recallQueue ?? [],
-      recall: () => ({ open: recallRef.current, state: stateRef.current.recall ?? {}, sessionSeen: sessionSeen.current }),
+      recall: () => ({ open: recallRef.current, state: stateRef.current.recall ?? {}, played: gate.current.played, hold: gate.current.hold }),
       queue: () => queue.current.map((x) => x.id),
       /** Nur Tests (Brief 14): die genannten Momente an idx+1, idx+2 ... legen und den Vorrat neu füllen */
       arrange: (ids: string[]) => {

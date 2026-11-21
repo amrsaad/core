@@ -1,17 +1,19 @@
 /**
  * Abrufkarte (Bauliste Runde 1, Punkt 5, Fundament R7, R8, R9, R10, R22), neu am 27.10.2026 (Max):
- * Multiple Choice aus dem Feld recall des Moments. Fest nach jedem 4. Moment, Kandidat aus den letzten 4 mit mindestens
- * 80 % geschaut und mit Feld recall. Moment ohne recall bekommt nie eine Karte.
+ * Multiple Choice aus dem Feld recall des Moments. Runde 34: eine Karte nach je 10 im Vordergrund gespielten Momenten, Kandidat aus den
+ * letzten 10 gespielten mit mindestens 80 % geschaut und mit Feld recall. Moment ohne recall bekommt nie eine Karte.
  * Wiedervorlage: Fehler nach 2 Tagen, Treffer nach 7 Tagen, zweiter Treffer in Folge nach 21 Tagen, dritter beendet.
- * Wischen überspringt ohne Wertung. Keine Punkte, keine Streaks.
+ * Wischen überspringt ohne Wertung, die Karte kommt dann frühestens 24 Stunden später wieder (skipCard), die Lernstufe bleibt. Keine Punkte, keine Streaks.
  * Reine Funktionen, gleiche Regeln für ios/Core.
  */
-export const RECALL_EVERY = 4;
+export const RECALL_EVERY = 10;
 export const MIN_WATCHED = 0.8;
 export const DAY_MS = 86_400_000;
 export const MISS_GAP_DAYS = 2;
 export const HIT_GAP_DAYS = 7;
 export const SECOND_HIT_GAP_DAYS = 21;
+/** Weggewischte Karte: frühestens nach einem Tag wieder (24 h wie alle Abstände, so nie am selben Kalendertag) */
+export const SKIP_GAP_DAYS = 1;
 /** Core Digest (Know oder Rule, recallBoost): kürzere Abstände 1, 4 und 14 Tage statt 2, 7 und 21 */
 export const BOOST_MISS_GAP_DAYS = 1;
 export const BOOST_HIT_GAP_DAYS = 4;
@@ -37,28 +39,38 @@ export interface Recent {
   watched: number;
 }
 
-/** Nach jedem 4. gesehenen Moment kommt eine Karte */
 /** Tempo 2x (Issue 26, Entscheidung 34): in den ersten 5 Minuten der Sitzung keine Abrufkarte */
 export const FAST_RATE = 2;
 export const FAST_QUIET_MS = 5 * 60_000;
 export const recallQuiet = (rate: number, sessionMs: number): boolean => rate >= FAST_RATE && sessionMs < FAST_QUIET_MS;
 
-export const cardDue = (seenInSession: number) => seenInSession > 0 && seenInSession % RECALL_EVERY === 0;
+/** Nach je RECALL_EVERY im Vordergrund gespielten Momenten seit der letzten Karte (Zähler setzt der Aufrufer bei jeder gezeigten Karte zurück) */
+export const cardDue = (playedSinceCard: number) => playedSinceCard >= RECALL_EVERY;
 
 /**
  * Welcher Moment wird abgefragt. Zuerst eine fällige Wiedervorlage, sonst der zuletzt gesehene
- * der letzten 4 mit mindestens 80 % geschaut, der noch nie abgefragt wurde. null = keine Karte.
+ * der letzten 10 gespielten mit mindestens 80 % geschaut, der noch nie abgefragt wurde. null = keine Karte.
  */
 export function pickRecall(recall: RecallState, recent: Recent[], now: number, available: (id: string) => boolean): { id: string; review: boolean } | null {
   const due = Object.values(recall)
     .filter((x) => x.due !== null && x.due <= now && available(x.id))
     .sort((a, b) => (a.due ?? 0) - (b.due ?? 0))[0];
-  if (due) return { id: due.id, review: true };
+  if (due) return { id: due.id, review: due.results.length > 0 };
   const fresh = recent
     .slice(-RECALL_EVERY)
     .reverse()
     .find((r) => r.watched >= MIN_WATCHED && !recall[r.id] && available(r.id));
   return fresh ? { id: fresh.id, review: false } : null;
+}
+
+/**
+ * Karte weggewischt oder geschlossen ohne Antwort (Runde 34): keine Wertung, Lernstufe (results) bleibt, Fälligkeit frühestens jetzt plus 1 Tag.
+ * Eine nie beantwortete Erstkarte wird so zur Wiedervorlage für morgen. Eine spätere Fälligkeit wird nie vorgezogen.
+ */
+export function skipCard(recall: RecallState, id: string, now: number): RecallState {
+  const prev = recall[id] ?? { id, due: null, results: [] };
+  const due = Math.max(prev.due ?? 0, now + SKIP_GAP_DAYS * DAY_MS);
+  return { ...recall, [id]: { id, due, results: prev.results } };
 }
 
 /** Treffer in Folge am Ende der Ergebnisse */

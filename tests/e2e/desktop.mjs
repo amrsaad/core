@@ -71,6 +71,13 @@ const swipe = async (pg, dx, dy) => {
 };
 // Wiedergabe abwarten, sonst zählt Pause nicht
 const settle = async (pg) => { await waitFor(pg, () => window.__core.state() === 1); };
+// Runde 34: eine Karte nach 10 gespielten Momenten. Neun sind vorgezählt, der aktuelle Moment spielt echte 1,3 s (played.ts), springt kurz vor sein Ende und blättert selbst weiter.
+const cardViaPlay = async (pg, timeout = 40000) => {
+  await pg.evaluate(() => { window.__ytSlow = true; window.__core.setRecallPlayed(9); });
+  await pg.waitForTimeout(1300);
+  await pg.evaluate(() => { for (const d of document.querySelectorAll('div')) if (d.__player) d.__player.seekTo((window.__core.moment()?.end ?? 60) - 1); });
+  return waitFor(pg, () => !!document.querySelector('[data-testid=recall-card]'), undefined, timeout);
+};
 // Abrufkarte schließen, falls offen (Esc)
 const dismissRecall = async (pg) => {
   if (await has(pg, 'recall-card')) { await press(pg, 'Escape', 120); }
@@ -328,10 +335,9 @@ try {
   c.tab1Video = (await E(pg, 'desk-tab-video').getAttribute('aria-checked')) === 'true';
   await settle(pg);
 
-  // Abrufkarte: kommt nach dem 4. Moment, im Panel, 1 2 3 antworten, Enter Next
+  // Abrufkarte: kommt nach dem 10. gespielten Moment, im Panel, 1 2 3 antworten, Enter Next
   // Die Karte zählt nur Momente, die zu mindestens 80 Prozent gesehen wurden. Darum Zeitraffer an und die Momente laufen lassen.
-  await pg.evaluate(() => { window.__ytSlow = false; });
-  const sawCard = await waitFor(pg, () => !!document.querySelector('[data-testid=recall-card]'), undefined, 40000);
+  const sawCard = await cardViaPlay(pg);
   c.recallAppears = sawCard;
   if (sawCard) {
     c.recallInPanel = (await E(pg, 'desk-panel').locator('[data-testid=recall-card]').count()) === 1;
@@ -356,8 +362,7 @@ try {
     c.recallEnterNext = !(await has(pg, 'recall-card')) && (await idx(pg)) === ri && (await waitFor(pg, () => window.__core.state() === 1));
   }
   // Esc schließt die Abrufkarte ohne Wertung
-  await waitFor(pg, () => !!document.querySelector('[data-testid=recall-card]'), undefined, 40000);
-  await pg.evaluate(() => { window.__ytSlow = true; });
+  await cardViaPlay(pg);
   if (await has(pg, 'recall-card')) {
     await press(pg, 'Escape', 250);
     c.escClosesRecall = !(await has(pg, 'recall-card'));

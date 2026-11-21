@@ -28,7 +28,7 @@ window.YT = { PlayerState: { ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED
   const paint = () => { f.textContent = `${vid} t=${t.toFixed(0)} state ${st}${muted ? ' stumm' : ' TON'}`; };
   const set = (s) => { st = s; paint(); ev.onStateChange && ev.onStateChange({ data: s }); };
   const arg = (a) => (typeof a === 'string' ? { videoId: a } : a);
-  const run = () => { clearInterval(timer); timer = setInterval(() => { t += window.__ytSlow ? 0.1 : 10; paint(); if (t >= endAt) { clearInterval(timer); t = endAt; set(0); } }, 100); set(1); };
+  const run = () => { clearInterval(timer); timer = setInterval(() => { t += window.__ytStep ?? (window.__ytSlow ? 0.1 : 10); paint(); if (t >= endAt) { clearInterval(timer); t = endAt; set(0); } }, 100); set(1); };
   // Wie bei YouTube: Zustandswechsel kommt erst nach dem Start, ein pauseVideo im Callback stoppt den Lauf
   const play = () => {
     // Issue 54 (nur Tests, window.__ytStartHang): der Start kommt nie auf PLAYING, wie in Max' Diag 10.11. (state 3, dann -1, 35 s lang). Gilt für jeden
@@ -136,7 +136,7 @@ window.onYouTubeIframeAPIReady && window.onYouTubeIframeAPIReady();
     if (window.__cont) {
       this.__at = performance.now();
       timers.set(this, setInterval(() => emit(this, 'timeupdate'), window.__tuMs ?? 250));
-    } else timers.set(this, setInterval(() => { this.__t = (this.__t || 0) + (window.__ytSlow ? 0.1 : 10); emit(this, 'timeupdate'); }, 100));
+    } else timers.set(this, setInterval(() => { this.__t = (this.__t || 0) + (window.__ytStep ?? (window.__ytSlow ? 0.1 : 10)); emit(this, 'timeupdate'); }, 100));
     emit(this, 'playing');
     return Promise.resolve();
   };

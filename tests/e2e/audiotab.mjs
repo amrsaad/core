@@ -391,50 +391,58 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await f4b.cx.close();
     }
 
-    // 5. Fällige Abrufkarte im Auto-Weiter des Audio-Reiters (Pfeiler 19, Issue 11): im Hintergrund nur in recallQueue, Ton läuft durch, Karte erst bei Rückkehr
+    // 5. Abstand erreicht, dann Auto-Weiter im Hintergrund (Runde 34): keine Karte, nichts vorgemerkt, Ton läuft durch, bei der Rückkehr keine Karte.
+    // Erst nach einem im Vordergrund gehörten Moment kommt sie.
     if (want('recall')) {
       const f5 = await freshPage(browser, poolRecall);
       const p5 = f5.pg;
       await startAudio(p5);
-      for (let i = 0; i < 3; i++) { await p5.evaluate(() => window.__core.next()); await sleep(350); }
-      c.recallThreeSwiped = (await p5.evaluate(() => window.__core.recall().sessionSeen)) === 3;
-      c.recallNoCardYet = (await p5.locator('[data-testid=recall-card]').count()) === 0;
+      await p5.evaluate(() => window.__core.setRecallPlayed(10));
       await waitFor(p5, () => window.__core.state() === 1, undefined, 4000);
       await setVisibility(p5, 'hidden');
       c.recallBgThree = await waitFor(p5, () => window.__core.diag().filter((x) => x.startsWith('bg: next ')).length >= 3 && window.__core.state() === 1, undefined, 40000);
-      const st = await p5.evaluate(() => ({ q: window.__core.recallQueue(), open: window.__core.recall().open, card: !!document.querySelector('[data-testid=recall-card]'), state: window.__core.state(), idx: window.__core.idx(), playing: [...document.querySelectorAll('audio')].filter((a) => !a.paused).length, diag: window.__core.diag() }));
-      r.notes.recall = { q: st.q, idx: st.idx, lines: st.diag.filter((x) => x.startsWith('recall:') || x.startsWith('bg: ')).slice(-40) };
-      c.recallQueuedOne = st.q.length === 1;
-      c.recallNotOpenInBg = !st.open && !st.card;
+      const st = await p5.evaluate(() => ({ q: window.__core.recallQueue(), open: window.__core.recall().open, played: window.__core.recall().played, card: !!document.querySelector('[data-testid=recall-card]'), state: window.__core.state(), idx: window.__core.idx(), playing: [...document.querySelectorAll('audio')].filter((a) => !a.paused).length, diag: window.__core.diag() }));
+      r.notes.recall = { q: st.q, idx: st.idx, played: st.played, lines: st.diag.filter((x) => x.startsWith('recall:') || x.startsWith('bg: ')).slice(-40) };
+      c.recallNothingQueuedInBg = st.q.length === 0 && !st.diag.some((x) => x.startsWith('recall: queued'));
+      c.recallNotOpenInBg = !st.open && !st.card && !st.diag.some((x) => x.startsWith('recall: shown'));
+      c.recallBgNotCounted = st.played === 10;
       // Brief 14: das aktive Element spielt, die Elemente des Vorrats sind pausiert: genau eines spielt
       c.recallAudioKeepsPlaying = st.state === 1 && st.playing === 1;
-      c.recallDiagBg = st.diag.some((x) => /^recall: queued \S+ \(bg\)$/.test(x));
       c.recallNoStall = !st.diag.some((x) => x.startsWith('bg: stalled'));
-      const idBg = st.q[0]?.id;
       await setVisibility(p5, 'visible');
-      c.recallCardOnReturn = await waitFor(p5, () => !!document.querySelector('[data-testid=recall-card]'), undefined, 3000);
-      c.recallQueueEmptiedOnReturn = (await p5.evaluate(() => window.__core.recallQueue())).length === 0;
-      c.recallCardIsQueued = !!idBg && (await p5.evaluate(() => document.querySelector('[data-testid=recall-question]')?.textContent ?? '')).length > 0;
+      c.recallNoCardOnReturn = !(await waitFor(p5, () => !!document.querySelector('[data-testid=recall-card]'), undefined, 2000));
+      c.recallAudioContinuesOnReturn = await waitFor(p5, () => window.__core.state() === 1, undefined, 4000);
+      // Der Moment, der verdeckt lief, zählt nicht: weiter ohne Karte (gehalten). Dann einen Moment im Vordergrund zu Ende hören: jetzt kommt die Karte
+      await p5.evaluate(() => window.__core.next());
+      await sleep(500);
+      c.recallHeldAfterReturn = !(await p5.locator('[data-testid=recall-card]').count()) && (await p5.evaluate(() => window.__core.diag())).filter((x) => x === 'recall: held (just back from bg)').length === 1;
+      await waitFor(p5, () => window.__core.state() === 1, undefined, 4000);
+      // Der Moment endet im Vordergrund von selbst (zu 100 % gehört), beim Weiter kommt die Karte
+      c.recallCardAfterHeard = await waitFor(p5, () => !!document.querySelector('[data-testid=recall-card]'), undefined, 20000);
+      if (!c.recallCardAfterHeard) r.notes.recallAfter = await p5.evaluate(() => ({ rc: window.__core.recall(), st: window.__core.state(), idx: window.__core.idx(), diag: window.__core.diag().slice(-25) }));
       await f5.cx.close();
     }
 
-    // 6. Karte ist im Vordergrund schon offen (Ton angehalten), dann Sperren: Karte zurück in die Warteschlange, Ton läuft weiter, Rückkehr zeigt sie
+    // 6. Karte ist im Vordergrund schon offen (Ton angehalten), dann Sperren: Karte gilt als weggewischt (frühestens morgen wieder), Ton läuft weiter, Rückkehr zeigt keine Karte
     if (want('recall')) {
       const f6 = await freshPage(browser, poolRecall);
       const p6 = f6.pg;
       await startAudio(p6);
-      for (let i = 0; i < 3; i++) { await p6.evaluate(() => window.__core.next()); await sleep(350); }
-      // Der vierte Moment endet im Vordergrund von selbst, die Karte erscheint
-      c.openCardAppears = await waitFor(p6, () => !!document.querySelector('[data-testid=recall-card]'), undefined, 15000);
+      // Der neunte gespielte Moment steht, der zehnte endet im Vordergrund von selbst, die Karte erscheint
+      await p6.evaluate(() => window.__core.setRecallPlayed(9));
+      c.openCardAppears = await waitFor(p6, () => !!document.querySelector('[data-testid=recall-card]'), undefined, 30000);
       c.openCardHoldsAudio = (await p6.evaluate(() => window.__core.state())) !== 1;
       const idx0 = await p6.evaluate(() => window.__core.idx());
       await setVisibility(p6, 'hidden');
       c.openCardGoneInBg = await waitFor(p6, () => !document.querySelector('[data-testid=recall-card]') && !window.__core.recall().open, undefined, 2000);
       c.openCardAudioResumes = await waitFor(p6, () => window.__core.state() === 1, undefined, 4000);
-      c.openCardQueued = (await p6.evaluate(() => window.__core.recallQueue())).length === 1 && (await p6.evaluate(() => window.__core.diag())).some((x) => /^recall: queued \S+ \(bg\)$/.test(x));
+      const sk = await p6.evaluate(() => ({ q: window.__core.recallQueue().length, diag: window.__core.diag(), st: window.__core.recall().state }));
+      const line = sk.diag.find((x) => /^recall: skipped \S+, back \d{4}-\d{2}-\d{2}$/.test(x));
+      const sid = /skipped (\S+),/.exec(line ?? '')?.[1];
+      c.openCardSkippedTomorrow = !!sid && sk.q === 0 && sk.st[sid]?.results.length === 0 && sk.st[sid].due - Date.parse('2026-10-23') > 20 * 3_600_000 && !sk.diag.some((x) => x.startsWith('recall: queued'));
       c.openCardBgAdvances = await waitFor(p6, (i) => window.__core.idx() >= i + 2 && window.__core.state() === 1, idx0, 30000);
       await setVisibility(p6, 'visible');
-      c.openCardBackOnReturn = await waitFor(p6, () => !!document.querySelector('[data-testid=recall-card]'), undefined, 3000);
+      c.openCardNotBackOnReturn = !(await waitFor(p6, () => !!document.querySelector('[data-testid=recall-card]'), undefined, 2000));
       await f6.cx.close();
     }
   } catch (e) {

@@ -101,7 +101,7 @@ const poolTabs = await encPool(tabMoments);
 const k = Buffer.from(raw).toString('base64url');
 
 const results = { at: new Date().toISOString(), runs: [] };
-// Abrufkarte kommt nach jedem 4. Moment. Wo der Test etwas anderes prüft, wird sie über den Knopf "Skip" ohne Wertung geschlossen.
+// Abrufkarte kommt nach je 10 gespielten Momenten (Runde 34). Wo der Test etwas anderes prüft, wird sie über den Knopf "Skip" ohne Wertung geschlossen.
 // Beim ersten Mal dient eine spätere Karte dem Treffer-Test (richtig wählen, 7 Tage), siehe hitState.
 const swipeUpCard = async (page) => {
   // Runde 23: Eine unbeantwortete Karte wechselt nie durch einen Wisch. Überspringen geht über den Knopf "Skip" (ohne Wertung), wie früher das Wegwischen.
@@ -140,11 +140,15 @@ const skipRecall = async (page, name = 'x', out = 'pipeline/out/e2e-moments') =>
     await page.screenshot({ path: `${out}/${name}-13-abruf-treffer.png` });
     await page.click('[data-testid=recall-next]');
   } else {
-    const before = await page.evaluate(() => Object.keys(window.__core.recall().state).length);
+    // Runde 34: Skip wertet nicht (keine neuen Ergebnisse), die Karte ist aber erst morgen wieder fällig (Wiedervorlage mit due, ohne Ergebnis)
+    const results = () => page.evaluate(() => Object.values(window.__core.recall().state).reduce((n, x) => n + x.results.length, 0));
+    const before = await results();
+    const t0 = Date.parse('2026-10-23');
     const how = await swipeUpCard(page);
     await page.waitForFunction(() => !document.querySelector('[data-testid=recall-card]'));
-    const after = await page.evaluate(() => Object.keys(window.__core.recall().state).length);
-    if (hitState.skipped === null) hitState.skipped = { how, noRating: before === after };
+    const after = await results();
+    const tomorrow = await page.evaluate((t) => Object.values(window.__core.recall().state).some((x) => x.results.length === 0 && x.due !== null && x.due - t >= 20 * 3_600_000), t0);
+    if (hitState.skipped === null) hitState.skipped = { how, noRating: before === after && tomorrow };
   }
   await page.waitForFunction(() => !document.querySelector('[data-testid=recall-card]'));
 };
@@ -239,7 +243,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // Tipp irgendwo: Ton an, Symbol verschwindet
     await page.mouse.click(vp.width / 2, vp.height / 2);
     c.soundOn = await waitFor(page, () => window.__ytlog.includes('unmute'));
-    await page.evaluate(() => { window.__ytSlow = false; });
+    // Runde 34: eine Karte kommt nach 10 im Vordergrund gespielten Momenten (je mindestens 1 s echte Spielzeit). Der Zeitraffer läuft darum mit 2 s je 100 ms
+    // (statt 10), sechs Momente sind vorgezählt: der vierte Moment dieses Laufs bringt die Karte.
+    await page.evaluate(() => { window.__ytSlow = false; window.__ytStep = 2; window.__core.setRecallPlayed(6); });
     c.soundIconGoneAfterTap = await waitFor(page, () => !document.querySelector('[data-testid=sound-off]'));
 
     // 4 Momente durchlaufen: Für dich genau dann, wenn forYou gesetzt ist; Ende genau bei end
@@ -265,8 +271,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.sawBothKinds = seen.some((x) => x.has) && seen.some((x) => !x.has);
     c.stoppedAtEnd = seen.every((x) => x.stoppedAtEnd);
     c.autoNext = seen.length === 4;
-    // Punkt 5: nach dem 4. Moment kommt die Abrufkarte, Player steht, Hook erst nach dem Versuch
-    c.recallAfter4 = await waitFor(page, () => !!document.querySelector('[data-testid=recall-card]'));
+    // Punkt 5: nach dem 10. gespielten Moment (sechs vorgezählt, vier gespielt) kommt die Abrufkarte, Player steht, Hook erst nach dem Versuch
+    c.recallAfter10Played = await waitFor(page, () => !!document.querySelector('[data-testid=recall-card]'));
+    // Der Wisch, der die Karte bringt, meldet sein erstes Bild erst nach dem Schließen der Karte: seine Latenz enthält die Zeit, die die Karte offen war (Punkt 1 zieht sie ab)
+    const cardLatIdx = await page.evaluate(() => window.__core.latency().length);
+    const cardT0 = Date.now();
     c.recallPlayerStopped = await waitFor(page, () => window.__core.state() !== 1);
     const card0 = await page.evaluate(() => {
       const card = document.querySelector('[data-testid=recall-card]');
@@ -315,9 +324,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     globalThis.__firstCardDone = true;
     c.recallClosed = await waitFor(page, () => !document.querySelector('[data-testid=recall-card]'));
     c.recallPlaysAgain = await waitFor(page, () => window.__core.state() === 1);
+    const cardDwell = Date.now() - cardT0;
     const rs = await page.evaluate(() => Object.values(window.__core.recall().state));
     r.recall = rs;
     c.recallMissed2d = rs.length === 1 && rs[0].results.length === 1 && rs[0].results[0].got === false && Math.round((rs[0].due - rs[0].results[0].at) / 86400000) === 2;
+    await page.evaluate(() => { window.__ytStep = undefined; });
     c.todayNoGotItForMiss = await waitFor(page, () => /, 0 got it$/.test(document.querySelector('[data-testid=today]')?.textContent ?? ''));
 
     // Punkt 6: Tageszahl oben, zählt jeden gespielten Moment (Entscheidung 45: erst nach einer Sekunde Wiedergabe, nicht beim Ankommen), kein Stopp
@@ -338,6 +349,14 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     for (let i = 1; i <= 5; i++) await page.mouse.move(vp.width / 2, vp.height * (0.7 - 0.09 * i));
     await page.mouse.up();
     c.swipeNext = await waitFor(page, (b) => window.__core.idx() === b + 1, before);
+    // Zweite und dritte Karte (Treffer-Test und Wegwisch-Test, hitState): über den Test-Hook an den nächsten zwei Momenten der Schlange, damit der Zeitraffer
+    // und die Latenzmessung unberührt bleiben. Der Abstand von 10 gespielten Momenten ist oben mit der ersten Karte und in recallqueue.mjs geprüft.
+    for (let n = 1; n <= 2; n++) {
+      const cardId = await page.evaluate((j) => window.__core.queue()[window.__core.idx() + j], n);
+      r[`extraDbg${n}`] = { cardId, open: await page.evaluate(() => window.__core.recall().open), idx: await page.evaluate(() => window.__core.idx()), q: await page.evaluate(() => window.__core.queue().length) };
+      c[`extraCard${n}Opens`] = !!cardId && (await page.evaluate((i) => window.__core.showRecall(i), cardId)) === true && (await waitFor(page, () => !!document.querySelector('[data-testid=recall-card]'), undefined, 4000));
+      await skipRecall(page, name, out);
+    }
     // Untertitel: das Menü gibt es nicht mehr, der Schalter steht in Settings. Immer an gilt auch für Englisch.
     await skipRecall(page, name, out);
     await page.keyboard.press(' ');
@@ -814,8 +833,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
 
     // Punkt 1: Wisch bis erstes Bild wird gemessen, gepufferte Momente unter 300 ms (Nachbau-Player, echte Werte nur auf dem Gerät)
     const lat = await page.evaluate(() => window.__core.latency());
-    const buf = lat.filter((x) => x.buffered).map((x) => x.ms).sort((a, b) => a - b);
-    r.latency = { n: lat.length, buffered: buf.length, median: buf[Math.floor((buf.length - 1) / 2)] ?? null };
+    const buf = lat.map((x, i) => ({ ...x, ms: i === cardLatIdx ? Math.max(0, x.ms - cardDwell) : x.ms })).filter((x) => x.buffered).map((x) => x.ms).sort((a, b) => a - b);
+    r.latency = { cardDwell, n: lat.length, buffered: buf.length, median: buf[Math.floor((buf.length - 1) / 2)] ?? null };
     c.latencyMeasured = lat.length >= 3 && buf.length >= 1;
     c.bufferedUnder300 = buf.length > 0 && r.latency.median < 300;
     c.latencyInDiag = (await page.evaluate(() => window.__core.diag())).some((x) => x.startsWith('first-frame'));

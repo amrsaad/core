@@ -255,6 +255,8 @@ const gone = (pg, sel) => pg.waitForSelector(sel, { state: 'detached', timeout: 
 async function textChecks(pg, tag, vp, dir, { area, scheme }) {
   const suffix = scheme === 'light' ? '-hell' : '';
   const seen = { cut: null, ar: null, ar60: null, recall: null, readMore: false, overflow: [], bar: [], fills: [] };
+  // Runde 34: eine Karte nach 10 gehörten Momenten, neun sind vorgezählt (Text zählt, wenn das Textende erreicht ist)
+  await pg.evaluate(() => window.__core.setRecallPlayed(9));
   for (let i = 0; i < 12; i++) {
     const r = await pg.evaluate(() => {
       const b = document.querySelector('[data-testid=text-body]');
@@ -351,7 +353,7 @@ async function textChecks(pg, tag, vp, dir, { area, scheme }) {
   // Issue 53: der arabische Moment mit etwa 60 Prozent Füllung bleibt in Stufe 0 und passt ganz
   if (!seen.ar60) fail(`text arabisch 60 Prozent in Stufe 0 ${tag}`, 'Moment test0000066 (60 Prozent Füllung) nicht gesehen');
   else if (seen.ar60.step !== '0' || seen.ar60.cut || seen.ar60.clamp || seen.ar60.overflow) fail(`text arabisch 60 Prozent in Stufe 0 ${tag}`, JSON.stringify({ step: seen.ar60.step, cut: seen.ar60.cut, clamp: seen.ar60.clamp, overflow: seen.ar60.overflow, empty: Math.round((seen.ar60.empty ?? 0) * 100) })); else ok(`text arabisch 60 Prozent in Stufe 0 ${tag}`);
-  if (!seen.recall) fail(`text Abrufseite ${tag}`, 'keine Abrufkarte im Text-Reiter nach 12 Momenten');
+  if (!seen.recall) fail(`text Abrufseite ${tag}`, 'keine Abrufkarte im Text-Reiter nach 12 Momenten (neun vorgezählt)');
   else {
     const q = seen.recall;
     if (!q.card || !q.covers) fail(`text Abrufseite kein Overlay ${tag}`, JSON.stringify(q)); else ok(`text Abrufseite kein Overlay ${tag}`);
@@ -457,18 +459,18 @@ for (const area of MOODS) {
             await pg.locator('[data-testid=note-chip-Wrong]').click(); await pg.waitForTimeout(300); if (await pg.locator('[data-testid=toast]').count()) await snap('toast'); await pg.waitForTimeout(1500); } catch (e) { fail(`more ${tag}`, String(e).slice(0, 80)); }
         }
         try {
-          // Abruf: nach dem ersten Tipp läuft die Nachbildung schnell, nach vier gesehenen Momenten kommt die Karte
+          // Abruf: nach dem ersten Tipp läuft die Nachbildung schnell, nach zehn gespielten Momenten kommt die Karte
           await pg.reload(); await pg.waitForFunction(() => !!window.__core?.moment(), null, { timeout: 8000 }); await pg.waitForTimeout(500);
           if (isDesk && (await pg.locator('[data-testid=desk-help]').count())) await pg.keyboard.press('Escape');
-          // drei Momente zu über 80 % geschaut, der vierte Wisch bringt die Karte (wie recallqueue.mjs)
-          for (let i = 0; i < 4; i++) {
-            await pg.evaluate(() => { for (const d of document.querySelectorAll('div')) if (d.__player) d.__player.seekTo(Math.max(0, (window.__core.moment()?.end ?? 60) - 1)); });
-            await pg.waitForTimeout(200);
-            await pg.evaluate(() => window.__core.next());
-            await pg.waitForTimeout(500);
-          }
+          // Runde 34: neun gespielte Momente sind vorgezählt, der zehnte läuft 1,3 s (played.ts) zu über 80 % und der Wisch bringt die Karte (wie recallqueue.mjs)
+          await pg.evaluate(() => window.__core.setRecallPlayed(9));
+          await pg.waitForTimeout(1300);
+          await pg.evaluate(() => { for (const d of document.querySelectorAll('div')) if (d.__player) d.__player.seekTo(Math.max(0, (window.__core.moment()?.end ?? 60) - 10)); });
+          await pg.waitForTimeout(200);
+          await pg.evaluate(() => window.__core.next());
+          await pg.waitForTimeout(500);
           const got = await pg.waitForSelector('[data-testid=recall-card]', { timeout: 6000 }).then(() => true, () => false);
-          if (got) { await pg.waitForTimeout(600); await snap('abruf'); } else fail(`abruf ${tag}`, 'keine Karte nach vier Wischen');
+          if (got) { await pg.waitForTimeout(600); await snap('abruf'); } else fail(`abruf ${tag}`, 'keine Karte nach dem zehnten gespielten Moment');
         } catch (e) { fail(`abruf ${tag}`, String(e).slice(0, 80)); }
         if (!isDesk) {
           // Issue 49 (Brief 18): neuer Tag mit der ungesendeten Notiz aus dem More-Test, Zeile "1 note, send?" im Video-Reiter nie über dem Bild, als Tippziel in den unteren 65 Prozent (54)

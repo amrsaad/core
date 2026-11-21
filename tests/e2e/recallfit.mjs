@@ -373,15 +373,17 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           if (!dg.some((x) => x === `recall: answered ${id} ok=true`)) fail(`${where} Diag answered`, JSON.stringify(dg)); else ok(`${where} Diag answered`);
           await sleep(200);
         }
-        // Skip: schließt ohne Wertung, die Karte kommt nach der bestehenden Regel wieder (kein Eintrag im Wiedervorlage-Stand)
+        // Skip (Runde 34): schließt ohne Wertung, Ergebnisse unverändert, die Karte ist frühestens morgen wieder fällig (Wiedervorlage mit due, Diag "skipped <id>, back <Datum>")
         const sk = moments.find((x) => x.f === form && x.c === 'normal').m;
         await page.evaluate((i) => window.__core.showRecall(i), sk.id);
         if (await waitFor(page, () => !!document.querySelector('[data-testid=recall-skip]'), undefined, 4000)) {
-          const rs0 = await page.evaluate(() => Object.keys(window.__core.recall().state).length);
+          const rs0 = await page.evaluate((i) => (window.__core.recall().state[i]?.results ?? []).length, sk.id);
+          const t0 = Date.parse('2026-10-22');
           await page.locator('[data-testid=recall-skip]').click();
           const gone = await waitFor(page, () => !document.querySelector('[data-testid=recall-card]'), undefined, 3000);
-          const sk1 = await page.evaluate((i) => ({ n: Object.keys(window.__core.recall().state).length, line: window.__core.diag().includes(`recall: skipped ${i}`), q: window.__core.recallQueue().length }), sk.id);
-          if (!gone || sk1.n !== rs0 || !sk1.line) fail(`${form} Skip schließt ohne Wertung`, JSON.stringify({ gone, rs0, ...sk1 })); else ok(`${form} Skip schließt ohne Wertung`);
+          const sk1 = await page.evaluate((i) => { const it = window.__core.recall().state[i]; return { n: (it?.results ?? []).length, due: it?.due ?? null, line: window.__core.diag().find((x) => x.startsWith(`recall: skipped ${i}, back `)) ?? null }; }, sk.id);
+          const tomorrow = sk1.due !== null && sk1.due - t0 >= 20 * 3_600_000;
+          if (!gone || sk1.n !== rs0 || !tomorrow || !/^recall: skipped \S+, back \d{4}-\d{2}-\d{2}$/.test(sk1.line ?? '')) fail(`${form} Skip schließt ohne Wertung, frühestens morgen`, JSON.stringify({ gone, rs0, ...sk1 })); else ok(`${form} Skip schließt ohne Wertung, frühestens morgen`);
         } else fail(`${form} Skip sichtbar`, 'kein Knopf');
       }
     } catch (e) {

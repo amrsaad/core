@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { answer, cardDue, DAY_MS, isKnown, pickRecall, shuffleOrder, type RecallState } from '../src/moments/recall';
+import { answer, cardDue, DAY_MS, isKnown, pickRecall, RECALL_EVERY, shuffleOrder, skipCard, type RecallState } from '../src/moments/recall';
 
 const all = () => true;
 const T = 1_800_000_000_000;
 
 describe('Abrufkarte (Runde 1, Punkt 5)', () => {
-  it('fest nach jedem 4. Moment', () => {
-    expect([1, 2, 3, 4, 5, 8, 12].map(cardDue)).toEqual([false, false, false, true, false, true, true]);
-    expect(cardDue(0)).toBe(false);
+  it('eine Karte nach je 10 gespielten Momenten', () => {
+    expect(RECALL_EVERY).toBe(10);
+    expect([0, 1, 4, 9, 10, 11].map(cardDue)).toEqual([false, false, false, false, true, true]);
   });
-  it('nimmt den zuletzt gesehenen der letzten 4 mit mindestens 80 %', () => {
+  it('nimmt den zuletzt gespielten der letzten 10 mit mindestens 80 %', () => {
     const recent = [
       { id: 'a', watched: 1 },
       { id: 'b', watched: 0.9 },
@@ -18,8 +18,8 @@ describe('Abrufkarte (Runde 1, Punkt 5)', () => {
     ];
     expect(pickRecall({}, recent, T, all)).toEqual({ id: 'b', review: false });
   });
-  it('ältere als die letzten 4 zählen nicht, ohne Kandidat keine Karte', () => {
-    const recent = [{ id: 'old', watched: 1 }, ...['w', 'x', 'y', 'z'].map((id) => ({ id, watched: 0.2 }))];
+  it('ältere als die letzten 10 zählen nicht, ohne Kandidat keine Karte', () => {
+    const recent = [{ id: 'old', watched: 1 }, ...Array.from({ length: 10 }, (_, i) => ({ id: `w${i}`, watched: 0.2 }))];
     expect(pickRecall({}, recent, T, all)).toBeNull();
   });
   it('schon abgefragte Momente kommen nicht als neue Karte', () => {
@@ -89,5 +89,35 @@ describe('Abrufkarte (Runde 1, Punkt 5)', () => {
     }
     expect(seen.size).toBe(6);
     expect(shuffleOrder(3, () => 0)).toEqual(shuffleOrder(3, () => 0));
+  });
+
+  describe('Wegwischen (Runde 34)', () => {
+    it('Erstkarte weggewischt: Wiedervorlage für morgen, nicht verworfen, ohne Ergebnis', () => {
+      const r = skipCard({}, 'm', T);
+      expect(r.m).toEqual({ id: 'm', due: T + DAY_MS, results: [] });
+      expect(isKnown(r, 'm')).toBe(false);
+    });
+    it('heute nicht wieder, morgen fällig (24 Stunden, nie am selben Kalendertag)', () => {
+      const r = skipCard({}, 'm', T);
+      expect(pickRecall(r, [], T, all)).toBeNull();
+      expect(pickRecall(r, [], T + DAY_MS - 1, all)).toBeNull();
+      expect(pickRecall(r, [], T + DAY_MS, all)).toEqual({ id: 'm', review: false });
+      // auch als frische Karte nicht noch einmal am selben Tag
+      expect(pickRecall(r, [{ id: 'm', watched: 1 }], T + 1000, all)).toBeNull();
+    });
+    it('Lernstufe bleibt: Ergebnisse unverändert, spätere Fälligkeit wird nicht vorgezogen', () => {
+      const learned = answer(answer({}, 'm', true, T - 7 * DAY_MS), 'm', true, T);
+      expect(learned.m.due).toBe(T + 21 * DAY_MS);
+      // fällig gewordene Wiedervorlage (Treffer vor 7 Tagen) weggewischt
+      const due = answer({}, 'x', true, T - 7 * DAY_MS);
+      const r = skipCard(due, 'x', T);
+      expect(r.x.results).toEqual(due.x.results);
+      expect(r.x.due).toBe(T + DAY_MS);
+      expect(pickRecall(r, [], T, all)).toBeNull();
+      expect(pickRecall(r, [], T + DAY_MS, all)).toEqual({ id: 'x', review: true });
+      // nach dem Wegwischen und einer Antwort morgen gelten die alten Abstände weiter
+      expect(answer(r, 'x', true, T + DAY_MS).x.due).toBe(T + DAY_MS + 21 * DAY_MS);
+      expect(skipCard(learned, 'm', T).m.due).toBe(T + 21 * DAY_MS);
+    });
   });
 });

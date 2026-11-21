@@ -188,7 +188,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
 
     const seen = [];
     for (let step = 0; step < 14; step++) {
-      // Abrufkarte (nach jedem 4. Moment) ohne Wertung schließen
+      // Abrufkarte (nach je 10 gespielten Momenten) ohne Wertung schließen
       if (await page.$('[data-testid=recall-card]')) await page.evaluate(() => window.__core.skipRecall());
       await waitFor(page, () => !document.querySelector('[data-testid=recall-card]'), undefined, 5000);
       // Momentwechsel abwarten, dann dem Slot einen Moment zum Anlaufen geben (Spurwahl und Kette entstehen beim Laden)

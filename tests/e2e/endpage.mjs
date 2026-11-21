@@ -41,7 +41,7 @@ const poolBody2 = await encPool(moments2);
 const waitFor = async (page, fn, arg, timeout = 15000) => { try { await page.waitForFunction(fn, arg, { timeout }); return true; } catch { return false; } };
 const results = { at: new Date().toISOString(), runs: [] };
 let failed = false;
-for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
+for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter(([n]) => (process.env.E2E_BROWSERS ?? 'webkit,chromium').split(',').includes(n))) {
   const r = { variant: name, checks: {} };
   const c = r.checks;
   results.runs.push(r);
@@ -59,8 +59,17 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     c.feedLoaded = await waitFor(page, () => !!window.__core?.moment());
     const vp = page.viewportSize();
     const shown = [];
-    // Alle vier Videos laufen bis zum Ende und blättern selbst weiter. Die Abrufkarte (alle 4 Momente) kommt vor der Endseite.
-    for (let guard = 0; guard < 200; guard++) {
+    // Alle vier Videos laufen bis zum Ende und blättern selbst weiter. Die Abrufkarte (Runde 34: nach 10 gespielten Momenten, sechs sind vorgezählt)
+    // kommt vor der Endseite. Jeder Moment spielt echte 1,3 s (played.ts), dann springt die Nachbildung ans Ende.
+    await page.evaluate(() => { window.__ytSlow = true; window.__core.setRecallPlayed(6); });
+    let lastSeeked = null;
+    for (let guard = 0; guard < 400; guard++) {
+      const cur = await page.evaluate(() => window.__core.moment()?.id ?? null);
+      if (cur && cur !== lastSeeked) {
+        lastSeeked = cur;
+        await page.waitForTimeout(1300);
+        await page.evaluate(() => { for (const d of document.querySelectorAll('div')) if (d.__player && d.textContent.startsWith(window.__core.moment()?.videoId ?? '')) d.__player.seekTo((window.__core.moment()?.end ?? 150) - 1); });
+      }
       const s = await page.evaluate(() => ({ i: window.__core.idx(), id: window.__core.moment()?.id, card: !!document.querySelector('[data-testid=recall-card]'), end: !!document.querySelector('[data-testid=end-page]') }));
       if (s.id && !shown.includes(s.id)) shown.push(s.id);
       if (s.card || s.end) break;
