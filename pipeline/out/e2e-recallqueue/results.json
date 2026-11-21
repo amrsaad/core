@@ -1,5 +1,5 @@
 {
- "at": "2026-11-21T11:05:36.005Z",
+ "at": "2026-11-21T15:05:54.382Z",
  "runs": [
   {
    "browser": "webkit",
@@ -24,7 +24,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402980
+      "dueAt": 1792670402695
      }
     ]
    }
@@ -32,62 +32,6 @@
   {
    "browser": "webkit",
    "scenario": "saved",
-   "checks": {
-    "feedUp": true,
-    "threeSeenNoCard": true,
-    "noCardWhileAway": true,
-    "queuedOne": true,
-    "diagQueued": true,
-    "soundAndFeedContinue": true,
-    "cardOnReturn": true,
-    "cardBeforeNextSwipe": true,
-    "cardIsTheQueuedMoment": true,
-    "queueEmptyAfterShow": true,
-    "diagShown": true,
-    "noSecondCard": true,
-    "noErrors": true
-   },
-   "notes": {
-    "queued": [
-     {
-      "id": "rq000000005:100",
-      "review": false,
-      "dueAt": 1792670402524
-     }
-    ]
-   }
-  },
-  {
-   "browser": "webkit",
-   "scenario": "note",
-   "checks": {
-    "feedUp": true,
-    "threeSeenNoCard": true,
-    "noCardWhileAway": true,
-    "queuedOne": true,
-    "diagQueued": true,
-    "soundAndFeedContinue": true,
-    "cardOnReturn": true,
-    "cardBeforeNextSwipe": true,
-    "cardIsTheQueuedMoment": true,
-    "queueEmptyAfterShow": true,
-    "diagShown": true,
-    "noSecondCard": true,
-    "noErrors": true
-   },
-   "notes": {
-    "queued": [
-     {
-      "id": "rq000000005:100",
-      "review": false,
-      "dueAt": 1792670402411
-     }
-    ]
-   }
-  },
-  {
-   "browser": "webkit",
-   "scenario": "background",
    "checks": {
     "feedUp": true,
     "threeSeenNoCard": true,
@@ -114,6 +58,62 @@
    }
   },
   {
+   "browser": "webkit",
+   "scenario": "note",
+   "checks": {
+    "feedUp": true,
+    "threeSeenNoCard": true,
+    "noCardWhileAway": true,
+    "queuedOne": true,
+    "diagQueued": true,
+    "soundAndFeedContinue": true,
+    "cardOnReturn": true,
+    "cardBeforeNextSwipe": true,
+    "cardIsTheQueuedMoment": true,
+    "queueEmptyAfterShow": true,
+    "diagShown": true,
+    "noSecondCard": true,
+    "noErrors": true
+   },
+   "notes": {
+    "queued": [
+     {
+      "id": "rq000000005:100",
+      "review": false,
+      "dueAt": 1792670402335
+     }
+    ]
+   }
+  },
+  {
+   "browser": "webkit",
+   "scenario": "background",
+   "checks": {
+    "feedUp": true,
+    "threeSeenNoCard": true,
+    "noCardWhileAway": true,
+    "queuedOne": true,
+    "diagQueued": true,
+    "soundAndFeedContinue": true,
+    "cardOnReturn": true,
+    "cardBeforeNextSwipe": true,
+    "cardIsTheQueuedMoment": true,
+    "queueEmptyAfterShow": true,
+    "diagShown": true,
+    "noSecondCard": true,
+    "noErrors": true
+   },
+   "notes": {
+    "queued": [
+     {
+      "id": "rq000000005:100",
+      "review": false,
+      "dueAt": 1792670402349
+     }
+    ]
+   }
+  },
+  {
    "browser": "chromium",
    "scenario": "settings",
    "checks": {
@@ -136,7 +136,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402326
+      "dueAt": 1792670402299
      }
     ]
    }
@@ -164,7 +164,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402320
+      "dueAt": 1792670402295
      }
     ]
    }
@@ -192,7 +192,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402257
+      "dueAt": 1792670402230
      }
     ]
    }
@@ -220,7 +220,7 @@
      {
       "id": "rq000000005:100",
       "review": false,
-      "dueAt": 1792670402259
+      "dueAt": 1792670402225
      }
     ]
    }
