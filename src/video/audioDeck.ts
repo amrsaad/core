@@ -330,8 +330,6 @@ export const UNLOCK_SILENT = true;
  * false (zusammen mit UNLOCK_SILENT = false): das Verhalten von da2670a.
  */
 export const NEVER_MUTED = true;
-/** Runde 30: so lange wartet die Öffnung des Vorrats auf die stillen Freischaltversuche (ms), danach öffnet er trotzdem */
-const POOL_OPEN_MS = 1500;
 /** Runde 29: so lange wartet der erste play() nach dem Sprung auf seeked (ms), danach spielt er trotzdem */
 export const JUMP_WAIT_MS = 1500;
 /** Runde 29: so lange wartet der erste play() auf die Metadaten (ms), danach spielt er trotzdem (Netz hängt, nie stehen bleiben) */
@@ -341,8 +339,36 @@ export const DODGE_BACK = 1;
 /** Runde 27: so viele Sekunden Spielzeit auf dem frischen Element, bis "fresh element ... ok" gilt */
 export const FRESH_OK_S = 2;
 
-/** Null Sekunden Stille: schaltet das Element durch eine Geste frei, bevor der erste echte Moment kommt */
-const SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+/**
+ * Runde 31: kurze echte Stille (WAV, 8 kHz, mono, 8 Bit, 0,2 s, 1644 Byte), schaltet das Element durch eine Geste frei. Die Quelle mit null Samples (Runde 29) lief auf iOS
+ * vermutlich spät oder nie an (Gerätelog 21.11.: Annahme nach über 3 s oder gar nicht, Arbeitshypothese). Die Datei entsteht im Code.
+ */
+function makeSilence(): string {
+  const n = 1600;
+  const b = new Uint8Array(44 + n);
+  const w = (o: number, v: number, len: number) => {
+    for (let i = 0; i < len; i++) b[o + i] = (v >>> (8 * i)) & 255;
+  };
+  [...'RIFF'].forEach((c, i) => (b[i] = c.charCodeAt(0)));
+  w(4, 36 + n, 4);
+  [...'WAVEfmt '].forEach((c, i) => (b[8 + i] = c.charCodeAt(0)));
+  w(16, 16, 4);
+  w(20, 1, 2);
+  w(22, 1, 2);
+  w(24, 8000, 4);
+  w(28, 8000, 4);
+  w(32, 1, 2);
+  w(34, 8, 2);
+  [...'data'].forEach((c, i) => (b[36 + i] = c.charCodeAt(0)));
+  w(40, n, 4);
+  b.fill(128, 44);
+  let bin = '';
+  for (const x of b) bin += String.fromCharCode(x);
+  return `data:audio/wav;base64,${btoa(bin)}`;
+}
+const SILENT = makeSilence();
+/** Runde 31: so lange darf eine stille Probe offen sein (ms), danach gilt das Element als nicht freigeschaltet (Wiederholung bei der nächsten Geste) */
+export const PROBE_MS = 800;
 
 /** Größe des Element-Vorrats (Entscheidung 52, Brief 14): so viele nächste Momente liegen fertig geladen in eigenen Elementen, plus das aktive */
 export const POOL = 5;
@@ -540,7 +566,11 @@ export class AudioDeck {
   /** Elemente, auf denen ein play() in einer Geste wirklich angenommen wurde (Promise erfüllt). iOS erlaubt nur ihnen später play() ohne Geste. Ein Versuch allein zählt nicht. */
   private unlockedEls = new WeakSet<DeckEl>();
   /** Laufende Freischaltversuche je Element: Zahl, und die Stummschaltung vor dem ersten Versuch (sie kommt zurück, sobald der letzte Versuch endet) */
-  private probes = new WeakMap<DeckEl, { n: number; muted: boolean }>();
+  private probes = new WeakMap<DeckEl, { n: number; muted: boolean; done: boolean; ev: boolean; settle: (k: 'ok' | 'rejected' | 'timeout' | 'aborted') => void }>();
+  /** Runde 31: Zahl der offenen stillen Proben (der vorrat lädt erst bei 0) und Summe aller Proben für die Zeile "pool start" */
+  private probeOpen = 0;
+  private probeTotal = { n: 0, ok: 0 };
+  private probeWired = new WeakSet<DeckEl>();
   /** Die Geste, die gerade freischaltet (Zähler und Ereignisname), und je Geste die Zahl der offenen Versuche, damit die Diag-Zeile erst nach den Ergebnissen kommt */
   private gid = 0;
   private lastGesture = '';
@@ -702,7 +732,6 @@ export class AudioDeck {
   private unlockWho = new WeakMap<DeckEl, 'silent' | 'swipe' | 'probe'>();
   /** Runde 29: wartet mit dem ersten play() auf den Sprung (Element, Ausschnitt, Zeitgeber) */
   private jump: { el: DeckEl; key: string; id: string; t0: number; why: 'start' | 'swap'; timer: ReturnType<typeof setTimeout> } | null = null;
-  private silentLast = '';
   /** Runde 29: Zähler der Ereignisse (erstes play, letzter Sprung) für playedBeforeSeek, unabhängig von der Uhr */
   private ev = 0;
   /** Runde 27: Ausweichen auf ein frisches Element: je Moment höchstens eins (Schlüssel, Zahl), das frische Element, solange es beobachtet wird */
@@ -813,7 +842,12 @@ export class AudioDeck {
   }
 
   private spare(lane: Lane): DeckEl {
-    return this.preferUnlocked(this.pool[lane].filter((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e))) ?? this.makeEl(lane);
+    const free = this.pool[lane].filter((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e));
+    // Runde 31: ein Element in laufender Probe bekommt keine Netzquelle (sie bräche die Probe ab). Gibt es kein anderes, wird die Probe vorher beendet.
+    const idle = free.filter((e) => !this.probes.has(e));
+    const el = this.preferUnlocked(idle) ?? (this.pool[lane].length < POOL + 1 ? this.makeEl(lane) : free[0]);
+    if (el) this.probes.get(el)?.settle('aborted');
+    return el ?? this.makeEl(lane);
   }
 
   /** Runde 29: aus freien Elementen zuerst ein freigeschaltetes */
@@ -867,7 +901,7 @@ export class AudioDeck {
 
   /** Runde 26: ein freies Element der Spur (weder aktiv noch Vorrat noch behalten), nötigenfalls vom Vorrat abgezweigt. null, wenn keins zu haben ist. */
   private freeEl(lane: Lane): DeckEl | null {
-    const find = () => this.preferUnlocked(this.pool[lane].filter((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e))) ?? null;
+    const find = () => this.preferUnlocked(this.pool[lane].filter((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e) && !this.probes.has(e))) ?? null;
     let el = find();
     if (!el && this.pool[lane].length < POOL + 1) {
       const made = this.makeEl(lane);
@@ -1448,7 +1482,7 @@ export class AudioDeck {
 
   /** Ein freies Element der Spur für das Ausweichen. Freigeschaltete zuerst, nötigenfalls gibt der am weitesten vorausliegende Eintrag seinen Platz ab (nie der nächste, nie der behaltene). */
   private freshEl(lane: Lane, old: DeckEl): DeckEl | null {
-    const free = this.pool[lane].filter((e) => e !== old && e !== this.el && !this.entryOf(e) && !this.keptOf(e));
+    const free = this.pool[lane].filter((e) => e !== old && e !== this.el && !this.entryOf(e) && !this.keptOf(e) && !this.probes.has(e));
     const far = this.entries.filter((e, i) => i > 0 && e.lane === lane).reverse();
     const take = (e: PoolEntry): DeckEl => {
       this.dropEntry(e, 'room for fresh');
@@ -2361,9 +2395,10 @@ export class AudioDeck {
 
   /** Runde 30: die stillen Freischaltversuche der ersten Geste sind entschieden (oder die Frist ist um): der Vorrat beginnt zu laden */
   private openPool() {
-    if (this.poolOpened || !this.gestSeen) return;
+    // Runde 31: erst wenn jede stille Probe entschieden ist (angenommen, abgelehnt, Zeitgrenze): ein Element in laufender Probe bekäme sonst eine Netzquelle
+    if (this.poolOpened || !this.gestSeen || this.probeOpen > 0) return;
     this.poolOpened = true;
-    this.diag('deck: pool start after unlock');
+    this.diag(`deck: pool start after unlock ok=${this.probeTotal.ok}/${this.probeTotal.n}`);
     this.refillDeferred();
   }
 
@@ -3020,36 +3055,46 @@ export class AudioDeck {
    * Danach: Stummschaltung zurück, Element anhalten (nie das aktive), ein Eintrag des Vorrats behält Quelle und Position, ein freies Element gibt die Quelle frei.
    * Runde 29 (UNLOCK_SILENT): nie auf einer Netzquelle, nur auf Elementen ohne Quelle (stille Inline-Quelle). Gibt zurück, ob ein Versuch gestartet wurde.
    */
-  private probe(el: DeckEl, done?: (ok: boolean) => void): boolean {
+  private probe(el: DeckEl, done?: (kind: 'ok' | 'rejected' | 'timeout' | 'aborted') => void): boolean {
     if (el === this.el || this.unlockedEls.has(el)) return false;
     // Ein Versuch ist unterwegs: kein zweiter (ein abgelehnter ist nach Millisekunden entschieden, der Tipp bringt pointerup, touchend und click kurz nacheinander)
     if (this.probes.has(el)) return false;
     if ((this.unlockSilent || this.neverMuted) && !this.silentEl(el)) return false;
-    const r = { n: 1, muted: el.muted };
+    const r = { n: 1, muted: el.muted, done: false, ev: false, settle: (_k: 'ok' | 'rejected' | 'timeout' | 'aborted') => {} };
     this.probes.set(el, r);
+    this.probeOpen++;
     this.st(el).probed = true;
     this.diag(`deck: probe ${this.idOf(el)} at t=${this.num(el.currentTime)} rs=${el.readyState} dur=${this.num(el.duration)}`);
     const gid = this.gid;
     const type = this.lastGesture;
     this.gestureOpen.set(gid, (this.gestureOpen.get(gid) ?? 0) + 1);
     let inline = false;
-    const settle = (ok: boolean) => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    // Runde 31: Annahme zählt bei erfülltem play() oder einem Ereignis playing, timeupdate, ended. Ablehnung nur bei NotAllowedError. Sonst Zeitgrenze PROBE_MS.
+    const settle = (kind: 'ok' | 'rejected' | 'timeout' | 'aborted') => {
+      if (r.done) return;
+      r.done = true;
+      clearTimeout(timer);
+      const ok = kind === 'ok';
       if (ok) {
         if (!this.unlockedEls.has(el)) this.unlockWho.set(el, inline ? 'silent' : 'probe');
         this.unlockedEls.add(el);
         this.noteAllUnlocked();
       }
+      this.probeTotal.n++;
+      if (ok) this.probeTotal.ok++;
       r.n--;
-      if (r.n <= 0 && this.probes.get(el) === r) {
+      if (this.probes.get(el) === r) {
         this.probes.delete(el);
-        this.diag(`deck: probe done ${this.idOf(el)} ok=${ok ? 1 : 0} dur=${this.num(el.duration)} t=${this.num(el.currentTime)}`);
+        this.diag(`deck: probe done ${this.idOf(el)} ${kind === 'ok' || kind === 'rejected' ? `ok=${ok ? 1 : 0}` : `${kind} ok=0`} dur=${this.num(el.duration)} t=${this.num(el.currentTime)}`);
         if (el !== this.el) {
           const e = this.entryOf(el);
           try {
             // Ein Eintrag oder ein behaltenes Element, das während der Probe eine Netzquelle bekam, bleibt unberührt (kein halt, keine Position)
             const mine = !inline || el.src === SILENT;
             if (mine && !el.paused) this.halt(el, 'app: gesture unlock');
-            if (mine) el.muted = r.muted;
+            // Runde 31: die Stummschaltung der Probe geht immer zurück, auch wenn das Element inzwischen eine Netzquelle trägt (Gerätelog 21.11. 05:46: "muted play blocked" beim ersten Wisch)
+            el.muted = r.muted;
             if (e) {
               // Die Position bleibt am Start des Ausschnitts (checkEntry zieht bei größerer Abweichung nach)
               if (mine && e.ready && Math.abs(el.currentTime - e.target) > SEEK_TOL / 2) el.currentTime = e.target;
@@ -3059,26 +3104,38 @@ export class AudioDeck {
           }
         }
       }
-      done?.(ok);
+      this.probeOpen--;
+      done?.(kind);
       const open = (this.gestureOpen.get(gid) ?? 1) - 1;
       this.gestureOpen.set(gid, open);
       // Kurz warten: das play() des aktiven Elements (unlock) endet im selben Atemzug und soll in der Zahl stehen
       if (open <= 0) setTimeout(() => this.unlockLine(gid, type), 50);
+      // Alle Proben sind entschieden: der Vorrat darf laden
+      this.openPool();
     };
+    r.settle = settle;
+    if (!this.probeWired.has(el)) {
+      this.probeWired.add(el);
+      // Ein Ereignis allein beendet die Probe nicht (ein sofort angehaltenes play() schaltet auf iOS vermutlich nichts frei): es gilt, wenn das Promise bis PROBE_MS nicht antwortet
+      for (const ev of ['playing', 'timeupdate', 'ended']) el.addEventListener(ev, () => { const q = this.probes.get(el); if (q) q.ev = true; });
+    }
     setTimeout(() => this.unlockLine(gid, type), UNLOCK_LINE_MS);
+    timer = setTimeout(() => settle(r.ev ? 'ok' : 'timeout'), PROBE_MS);
     try {
       el.muted = true;
       if (!this.entryOf(el) && !el.src) el.src = SILENT;
       inline = !!el.src && el.src.startsWith('data:');
       const p = el.play();
-      if (p === undefined) settle(true);
+      if (p === undefined) settle('ok');
       else
         p.then(
-          () => settle(true),
-          () => settle(false),
+          () => settle('ok'),
+          (e: unknown) => {
+            if ((e instanceof Error ? e.name : String((e as { name?: string } | null)?.name ?? e)) === 'NotAllowedError') settle('rejected');
+          },
         );
-    } catch {
-      settle(false);
+    } catch (e) {
+      settle((e instanceof Error ? e.name : '') === 'NotAllowedError' ? 'rejected' : 'timeout');
     }
     return true;
   }
@@ -3125,20 +3182,19 @@ export class AudioDeck {
   private silentUnlock() {
     let n = 0;
     let ok = 0;
+    let rej = 0;
+    let to = 0;
     let open = 0;
     let looping = true;
     const t = Date.now();
     const finish = () => {
       if (looping || open > 0) return;
-      if (n > 0) {
-        const key = `${n}/${ok}`;
-        if (key !== this.silentLast) {
-          this.silentLast = key;
-          this.diag(`deck: gesture unlock ${n} elements ok=${ok} after ${Date.now() - t} ms`);
-        }
-      }
+      // Eine Zeile je Geste mit Proben (Runde 31: mit abgelehnten und abgelaufenen)
+      if (n > 0) this.diag(`deck: gesture unlock ${n} elements ok=${ok} rejected=${rej} timeout=${to} after ${Date.now() - t} ms`);
       this.openPool();
     };
+    // Während die Schleife läuft, gilt der Vorrat als geschlossen (ein sofort entschiedener Versuch öffnet ihn sonst vor den übrigen)
+    this.probeOpen++;
     for (const el of this.all()) {
       if (el === this.el || this.unlockedEls.has(el) || this.entryOf(el) || this.keptOf(el) || this.probes.has(el)) continue;
       if (!this.silentEl(el)) {
@@ -3147,9 +3203,11 @@ export class AudioDeck {
       }
       n++;
       open++;
-      const started = this.probe(el, (good) => {
+      const started = this.probe(el, (kind) => {
         open--;
-        if (good) ok++;
+        if (kind === 'ok') ok++;
+        else if (kind === 'rejected') rej++;
+        else to++;
         finish();
       });
       if (!started) {
@@ -3158,6 +3216,7 @@ export class AudioDeck {
       }
     }
     looping = false;
+    this.probeOpen--;
     finish();
   }
 
@@ -3226,23 +3285,25 @@ export class AudioDeck {
     if (ACTIVATING.has(type)) this.actAt = Date.now();
     if (ACTIVATING.has(type) && !this.gestSeen) {
       this.gestSeen = true;
-      // Haken der Freischaltung: hängt ein Versuch, öffnet der Vorrat trotzdem
-      if (this.deps.standby) setTimeout(() => this.openPool(), POOL_OPEN_MS);
     }
+    // Runde 31: die stillen play()-Aufrufe laufen synchron in diesem Aufruf (unlock, unlockSpares, silentUnlock, probe), vor jedem await oder Zeitgeber
     if (this.deps.standby) this.unlockSpares();
+    if (this.deps.standby && this.unlockSilent) this.openPool();
     // Runde 30: ein Ausschnitt, der auf den Tipp wartet, startet mit der ersten aktivierenden Geste (auch wenn schon ein stilles play() angenommen wurde)
     if (this.neverMuted && this.waitTapKey && this.clip?.key === this.waitTapKey && !this.done && this.want && this.el?.paused && this.gestSeen && !this.soundOff) {
       this.kick('unlock');
       return;
     }
     if (this.unlocked) return;
-    const el = this.ensure('plain');
     // Läuft oder wartet schon ein echter Ausschnitt, kommt die Freischaltung von dessen play(). Ein vom Menschen angehaltener bleibt angehalten.
     if (this.clip && !this.done) {
       // Jede Geste ruft unlock: nur anstoßen, was wirklich steht
       if (this.want && this.el?.paused) this.kick('unlock');
       return;
     }
+    // Runde 31: mit Vorrat und stillem Freischalten erledigen das die Proben (ein weiteres play() auf einem Element der Proben bräche sie ab)
+    if (this.deps.standby && this.unlockSilent) return;
+    const el = this.ensure('plain');
     if (!el.src) el.src = SILENT;
     try {
       const p = el.play();

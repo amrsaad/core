@@ -159,11 +159,11 @@ describe('Audio spielt nie stumm (Runde 30)', () => {
     const a = t.deck.element as El;
     const free = t.els.filter((e) => e !== a);
     for (const e of free) expect(e.log.filter((l) => l === 'play:silence').length).toBeGreaterThanOrEqual(1);
-    const i = t.lines.findIndex((l) => /^deck: gesture unlock \d+ elements ok=\d+ after \d+ ms$/.test(l));
-    const j = t.lines.indexOf('deck: pool start after unlock');
+    const i = t.lines.findIndex((l) => /^deck: gesture unlock \d+ elements ok=\d+ rejected=\d+ timeout=\d+ after \d+ ms$/.test(l));
+    const j = t.lines.findIndex((l) => /^deck: pool start after unlock ok=\d+\/\d+$/.test(l));
     expect(i).toBeGreaterThanOrEqual(0);
     expect(j).toBeGreaterThan(i);
-    expect(t.lines.filter((l) => l === 'deck: pool start after unlock')).toHaveLength(1);
+    expect(t.lines.filter((l) => l.startsWith('deck: pool start after unlock'))).toHaveLength(1);
     expect(t.lines.findIndex((l) => l.startsWith('deck: pool load'))).toBeGreaterThan(j);
     expect(t.deck.poolInfo().map((p) => p.id)).toContain('b');
     // keine stumme Netz-Wiedergabe, kein Netzquellen-play() für die Freischaltung
@@ -171,7 +171,7 @@ describe('Audio spielt nie stumm (Runde 30)', () => {
     for (const e of t.els) expect(e.src.startsWith('data:')).toBe(false);
     // weitere Gesten wiederholen nichts
     await gesture(t, 'click');
-    expect(t.lines.filter((l) => l === 'deck: pool start after unlock')).toHaveLength(1);
+    expect(t.lines.filter((l) => l.startsWith('deck: pool start after unlock'))).toHaveLength(1);
   });
 
   it('(3) kein play() mit muted=true auf einer Netzquelle: Start, Tausch, Ausweichen, Neuaufbau, Warten', async () => {
@@ -242,7 +242,7 @@ describe('Audio spielt nie stumm (Runde 30)', () => {
     expect(a.muted).toBe(false);
     expect(t.lines.filter((l) => l.startsWith('deck: waiting for tap'))).toHaveLength(1);
     // andere Elemente wurden im selben Tipp still freigeschaltet
-    expect(t.lines.some((l) => /^deck: gesture unlock \d+ elements ok=\d+ after \d+ ms$/.test(l))).toBe(true);
+    expect(t.lines.some((l) => /^deck: gesture unlock \d+ elements ok=\d+ rejected=\d+ timeout=\d+ after \d+ ms$/.test(l))).toBe(true);
   });
 
   it('(4) nach der Geste, aber mit "Ton aus": Tippfläche, kein play(), der Tipp mit Ton an spielt', async () => {

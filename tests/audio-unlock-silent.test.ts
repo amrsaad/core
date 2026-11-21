@@ -153,7 +153,7 @@ describe('stilles Freischalten (Runde 29)', () => {
     for (const e of bc) expect(e.log.some((l) => l.startsWith('play'))).toBe(false);
     expect(netPlays(a)).toBe(aBefore);
     // und jedes play() lief auf einem Element, dessen Quelle zu diesem Zeitpunkt die Inline-Quelle war (der Nachbau trennt beides im Protokoll)
-    expect(t.lines.filter((l) => l.startsWith(`deck: gesture unlock ${POOL + 1 - 3} elements ok=${POOL + 1 - 3} after `))).toHaveLength(1);
+    expect(t.lines.filter((l) => l.startsWith(`deck: gesture unlock ${POOL + 1 - 3} elements ok=${POOL + 1 - 3} rejected=0 timeout=0 after `))).toHaveLength(1);
     expect(t.lines.some((l) => /^deck: probe (b|c) /.test(l))).toBe(false);
   });
 

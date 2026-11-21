@@ -1177,7 +1177,9 @@ describe('Vorrat: fünf Elemente (Brief 14, Entscheidung 52)', () => {
     expect(t.els).toHaveLength(POOL + 1);
     const spares = t.els.slice(1);
     for (const sp of spares) {
-      expect(sp.src.startsWith('data:audio/wav')).toBe(true);
+      // Runde 31: ein Ereignis playing entscheidet die Probe sofort, die Quelle ist dann schon wieder frei
+      expect(sp.src === '' || sp.src.startsWith('data:audio/wav')).toBe(true);
+      expect(sp.src.startsWith('https://')).toBe(false);
       expect(sp.calls.filter((c) => c === 'play')).toHaveLength(1);
     }
     t.deck.unlock();

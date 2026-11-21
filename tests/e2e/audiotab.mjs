@@ -123,10 +123,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const ok = this.__played || (ALLOWED.includes(window.__ev) && !window.__moved);
         if (!ok) { window.__refused++; return Promise.reject(new DOMException('play() needs a user gesture', 'NotAllowedError')); }
         const tok = (this.__ptok = (this.__ptok || 0) + 1);
+        // Runde 31: die stille Inline-Quelle wird verzögert angenommen (300 ms, wie auf dem Gerät beobachtet: spät), echte Quellen sofort
+        const slow = String(this.__src || '').startsWith('data:');
         return orig.call(this).then(() => {
           if (this.__p !== false || this.__ptok !== tok) throw new DOMException('aborted by pause', 'AbortError');
           this.__played = true;
-        });
+        }).then(() => (slow ? new Promise((res) => setTimeout(res, 300)) : undefined));
       };
     };
     const dump = (pg) => pg.evaluate(() => ({
@@ -175,13 +177,16 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
     const dEnd = await pi.evaluate(() => window.__core.diag());
     c.iosSwipesNoNeedsTap = dEnd.filter((x) => /needs tap|deck play refused/.test(x)).length === needsBefore;
-    c.iosGestureLine = dEnd.some((x) => /^deck: gesture unlock \d+ elements ok=\d+ after \d+ ms$/.test(x));
+    c.iosGestureLine = dEnd.some((x) => /^deck: gesture unlock \d+ elements ok=\d+ rejected=\d+ timeout=\d+ after \d+ ms$/.test(x));
     // Runde 30: erst die Freischaltung, dann der Vorrat; nie ein stummes play() auf einer Netzquelle
     const iU = dEnd.findIndex((x) => /^deck: gesture unlock /.test(x));
-    const iP = dEnd.indexOf('deck: pool start after unlock');
+    const iP = dEnd.findIndex((x) => /^deck: pool start after unlock ok=\d+\/\d+$/.test(x));
     c.iosPoolStartsAfterUnlock = iU >= 0 && iP > iU;
+    // Runde 31: mindestens ein Element wurde still freigeschaltet (ok größer 0), keine abgebrochene Probe auf einer Netzquelle
+    c.iosUnlockOkPositive = dEnd.some((x) => /^deck: gesture unlock \d+ elements ok=[1-9]\d* /.test(x));
+    c.iosNoAbortedProbe = !dEnd.some((x) => /^deck: probe done \S+ ok=0 dur=NaN t=[1-9]/.test(x));
     c.iosNoMutedPlayBlockedEnd = !dEnd.some((x) => /^deck: muted play blocked/.test(x));
-    r.notes.iosGestureLines = dEnd.filter((x) => /^deck: (gesture|pool start|waiting)/.test(x));
+    r.notes.iosGestureLines = dEnd.filter((x) => /^deck: (gesture|pool start|waiting|probe done)/.test(x));
     c.iosNoPageErrors = fi.errors.length === 0;
     if (!Object.entries(c).filter(([n]) => n.startsWith('ios')).every(([, v]) => v === true)) r.notes.iosDump = await dump(pi);
     await fi.cx.close();
