@@ -330,6 +330,20 @@ export const UNLOCK_SILENT = true;
  * false (zusammen mit UNLOCK_SILENT = false): das Verhalten von da2670a.
  */
 export const NEVER_MUTED = true;
+/**
+ * Runde 32 (Gerätelog 21.11.2026, zweimal "stalled (pool empty)", Stille nach so vielen Momenten, wie beim Verdecken vorgeladen waren): Hintergrund-Wiedergabe ohne bereiten Vorrat.
+ * BG_INLINE_NEXT = true: Endet verdeckt ein Moment und kein Eintrag ist bereit, übernimmt das aktive, bis eben spielende Element den nächsten Moment selbst (Quelle, load, Sprung, play() laut).
+ * Ob iOS das verdeckt erlaubt, ist unbelegt, die Zeilen "bg: inline next ..." messen es. Wo vorher sicher Stille war, gibt es nichts zu verlieren.
+ * BG_REFILL = true: nach einem Hintergrund-Wechsel wird, wenn kein Eintrag da ist, genau einer in ein freies freigeschaltetes Element geladen (Messung, mit Sicherungen:
+ * höchstens ein verdecktes Laden zugleich, Frist BG_REFILL_MS, nach zwei verlorenen Versuchen je Hintergrund-Phase keine weiteren, Element beim Sichtbarwerden hart zurückgesetzt).
+ * Beide false: das Verhalten vor Runde 32.
+ */
+export const BG_INLINE_NEXT = true;
+export const BG_REFILL = true;
+/** Runde 32: so lange darf ein verdecktes Laden dauern (ms), danach "bg: refill lost" */
+export const BG_REFILL_MS = 10000;
+/** Runde 32: so lange darf der nächste Moment im aktiven Element bis zum ersten Ton brauchen (ms), danach "bg: inline next timeout" */
+export const BG_INLINE_MS = 15000;
 /** Runde 29: so lange wartet der erste play() nach dem Sprung auf seeked (ms), danach spielt er trotzdem */
 export const JUMP_WAIT_MS = 1500;
 /** Runde 29: so lange wartet der erste play() auf die Metadaten (ms), danach spielt er trotzdem (Netz hängt, nie stehen bleiben) */
@@ -500,6 +514,10 @@ export interface DeckDeps {
   unlockSilent?: boolean;
   /** Runde 30: false gilt das Verhalten von da2670a (NEVER_MUTED), Standard die Konstante */
   neverMuted?: boolean;
+  /** Runde 32: false schaltet den Rückfall im aktiven Element ab, Standard BG_INLINE_NEXT */
+  bgInline?: boolean;
+  /** Runde 32: false schaltet das verdeckte Nachfüllen ab, Standard BG_REFILL */
+  bgRefill?: boolean;
   /** Runde 27: false schaltet das Ausweichen auf ein frisches Element ab (Tests der bestehenden Kette), Standard true */
   dodge?: boolean;
   /** Element-Vorrat (Entscheidung 47 und 52): fill() lädt die nächsten POOL Ausschnitte in eigene Elemente vor, swapNext() tauscht nur die Rollen. Aus: fill() tut nichts. */
@@ -743,6 +761,18 @@ export class AudioDeck {
   private t0 = Date.now();
   private unlockSilent: boolean;
   private neverMuted: boolean;
+  private bgInline: boolean;
+  private bgRefillOn: boolean;
+  /** Runde 32: der Host nennt die nächsten Momente der Warteschlange nach dem aktuellen (verdeckt kennt das Deck sie sonst nicht) */
+  nextClips: ((n: number) => DeckClip[]) | null = null;
+  /** Rückfall im aktiven Element: der Ausschnitt, die Startzeit, die Frist. Höchstens ein Versuch je Moment (inlineTried). */
+  private inl: { key: string; id: string; t0: number; timer: ReturnType<typeof setTimeout> } | null = null;
+  private inlineTried = new Set<string>();
+  private inlineStart = false;
+  /** Verdecktes Nachfüllen: der Eintrag in Arbeit, verlorene Versuche dieser Phase, verdächtige Elemente (beim Sichtbarwerden zurücksetzen) */
+  private bgRef: { key: string; id: string; el: DeckEl; t0: number; timer: ReturnType<typeof setTimeout> } | null = null;
+  private bgLost = 0;
+  private suspect = new Set<DeckEl>();
   /** Runde 30: "Ton aus" des Hosts (load, setMuted). Das Element selbst wird nie stumm geschaltet, bei Ton aus wartet der Ausschnitt auf den Tipp. */
   private soundOff = false;
   /** Runde 30: eine Geste, die iOS als Aktivierung zählt, hat es schon gegeben (unlock) */
@@ -756,6 +786,8 @@ export class AudioDeck {
   constructor(private deps: DeckDeps) {
     this.unlockSilent = deps.unlockSilent ?? UNLOCK_SILENT;
     this.neverMuted = deps.neverMuted ?? NEVER_MUTED;
+    this.bgInline = deps.bgInline ?? BG_INLINE_NEXT;
+    this.bgRefillOn = deps.bgRefill ?? BG_REFILL;
     this.dodgeOn = deps.dodge ?? true;
   }
 
@@ -844,7 +876,7 @@ export class AudioDeck {
   private spare(lane: Lane): DeckEl {
     const free = this.pool[lane].filter((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e));
     // Runde 31: ein Element in laufender Probe bekommt keine Netzquelle (sie bräche die Probe ab). Gibt es kein anderes, wird die Probe vorher beendet.
-    const idle = free.filter((e) => !this.probes.has(e));
+    const idle = free.filter((e) => !this.probes.has(e) && !this.suspect.has(e));
     const el = this.preferUnlocked(idle) ?? (this.pool[lane].length < POOL + 1 ? this.makeEl(lane) : free[0]);
     if (el) this.probes.get(el)?.settle('aborted');
     return el ?? this.makeEl(lane);
@@ -1015,6 +1047,11 @@ export class AudioDeck {
   /** Das Element spielt (Ereignis playing, oder aus fortschreitender Position abgeleitet, Runde 17) */
   private playingNow(el: DeckEl) {
     const mine = () => el === this.el;
+    if (this.inl && this.inl.key === this.clip?.key) {
+      this.diag(`bg: inline next playing ${this.inl.id} after ${Date.now() - this.inl.t0} ms`);
+      clearTimeout(this.inl.timer);
+      this.inl = null;
+    }
     if (this.adv && this.adv.to === this.clip?.id) {
       this.note(`advance to ${this.adv.to}: playing after ${Date.now() - this.adv.t0} ms, rate ${el.playbackRate}, ${this.stateText(el)}`);
       this.adv = null;
@@ -1964,7 +2001,7 @@ export class AudioDeck {
     let lane = pick.lane;
     let why = forcePlain && forceWhy ? forceWhy : pick.why;
     // Runde 26: der verlassene Moment bleibt in seinem Element, der Start lädt in ein freies (Zurückwischen ohne Kaltstart)
-    let prev = this.clip && this.clip.key !== clip.key ? this.snapActive() : null;
+    let prev = this.clip && this.clip.key !== clip.key && !this.inlineStart ? this.snapActive() : null;
     const pickEl = (l: Lane): DeckEl => {
       if (prev) {
         const f = this.freeEl(l);
@@ -2522,6 +2559,11 @@ export class AudioDeck {
     s.ready = true;
     s.rsAtReady = rs;
     this.fails.delete(s.clip.key);
+    if (this.bgRef && this.bgRef.key === s.clip.key) {
+      this.diag(`bg: refill ready ${s.clip.id} after ${Date.now() - this.bgRef.t0} ms`);
+      clearTimeout(this.bgRef.timer);
+      this.bgRef = null;
+    }
     // Der Host steht dabei: Max' Diag zeigt so, welche Quelle langsam lädt (Runde 8, Barbell 2 bis 5 s bis zum ersten Byte, Iron Culture 0,6 s)
     this.diag(`deck: pool ready ${s.clip.id} after ${Date.now() - s.t0} ms host=${s.local ? 'local' : hostOf(s.clip.url)}`);
     // Nach einem Tausch oder Verwerfen ist der Vorrat wieder voll
@@ -2771,6 +2813,11 @@ export class AudioDeck {
       this.diag(`bg: play rejected ${name}`);
     }
     this.diag(`deck play refused ${name} (${why}) ${c?.id ?? ''}`);
+    if (this.inl && c && this.inl.key === c.key) {
+      this.diag(`bg: inline next refused ${this.inl.id} ${name}`);
+      clearTimeout(this.inl.timer);
+      this.inl = null;
+    }
     // Abgelehnt heißt: dieses Element hat keine Freigabe. Ein Anstoß im Ereignis pointerdown (unlock) ist kein Anlass für die Tippfläche, der Tipp folgt gleich mit pointerup.
     if (name === 'NotAllowedError') {
       if (this.el) {
@@ -2853,6 +2900,7 @@ export class AudioDeck {
   /**
    * Ende des Ausschnitts (timeupdate oder ended), höchstens einmal je Ausschnitt. Verdeckt tauscht das Deck auf das nächste bereite Element des Vorrats
    * (Schritt 4), im selben Handler, nie mit einem Quellwechsel am Element. Ist keins bereit, hält das Element an und meldet das Ende.
+   * Ausnahme seit 21.11.2026 (Runde 32, Gerätelog: zweimal "stalled (pool empty)", danach Stille): bei leerem Vorrat wechselt das aktive Element selbst die Quelle (inlineNext, BG_INLINE_NEXT).
    */
   private clipEnd(why: string) {
     const el = this.el;
@@ -2881,13 +2929,118 @@ export class AudioDeck {
         } catch (e) {
           this.diag(`deck onAdvance failed ${e instanceof Error ? e.message : String(e)}`);
         }
+        this.bgRefill();
         return;
       }
     }
+    // Runde 32: verdeckt und nichts bereit: das aktive Element übernimmt den nächsten Moment selbst (die Quelle wechselt im Handler des Endes)
+    if (hid && this.bgInline && this.onAdvance && ready === 0 && this.inlineNext(el, c)) return;
     // Vordergrund oder kein bereites Element: anhalten und das Ende melden, die App entscheidet (Für-dich-Karte, Wisch)
     if (hid) this.diag(`bg: end without switch ${c.id} (pool ${ready}, onAdvance ${this.onAdvance ? 'yes' : 'no'}), element stops`);
     this.halt(el, 'app: clip end');
     this.sink?.state(ENDED);
+  }
+
+  /**
+   * Runde 32: Rückfall bei leerem Vorrat, verdeckt. Die Quelle des aktiven Elements wechselt auf den nächsten Moment (start im selben Element, ohne Merken des alten),
+   * play() laut nach dem Sprung (playAfterJump). Höchstens ein Versuch je Moment. Gelingt der Start nicht, bleibt es beim Verhalten davor (Anhalten, Ende melden).
+   * Die Buchführung der App läuft wie beim Tausch über onAdvance. Gibt zurück, ob der Versuch lief.
+   */
+  private inlineNext(el: DeckEl, from: DeckClip): boolean {
+    const to = this.nextClips?.(3).find((x) => x.key !== from.key && !this.inlineTried.has(x.key));
+    if (!to || !this.onAdvance || this.lane !== 'plain') return false;
+    this.inlineTried.add(to.key);
+    // Ein Eintrag desselben Moments, der noch lädt (verdecktes Nachfüllen): das aktive Element ist schneller, der Eintrag geht frei, sein Element gilt als verdächtig
+    const dup = this.entries.find((x) => x.clip.key === to.key);
+    if (dup) {
+      this.dropEntry(dup, 'inline next');
+      this.suspect.add(dup.el);
+      if (this.bgRef?.key === to.key) {
+        clearTimeout(this.bgRef.timer);
+        this.bgRef = null;
+      }
+    }
+    if (this.inlineTried.size > 100) this.inlineTried.delete(this.inlineTried.values().next().value as string);
+    this.diag(`bg: inline next ${to.id} (pool empty)`);
+    this.inlineStart = true;
+    try {
+      this.start(to, true, true);
+    } catch (e) {
+      this.diag(`bg: inline next refused ${to.id} ${e instanceof Error ? e.name : String(e)}`);
+      return false;
+    } finally {
+      this.inlineStart = false;
+    }
+    if (this.el !== el) this.diag(`bg: inline next took another element ${to.id}`);
+    this.deps.playbackState?.('playing', 'inline next');
+    // Wie beim Tausch: die App übernimmt den Besitz über load() (finish pausiert sonst das neue Element über die alte Senke)
+    this.sink = null;
+    if (this.inl) clearTimeout(this.inl.timer);
+    const t0 = Date.now();
+    this.inl = {
+      key: to.key,
+      id: to.id,
+      t0,
+      timer: setTimeout(() => {
+        if (this.inl?.key !== to.key) return;
+        const e = this.el;
+        this.diag(`bg: inline next timeout ${to.id} after ${Date.now() - t0} ms rs=${e?.readyState ?? '?'} ns=${e?.networkState ?? 'n/a'}`);
+        this.inl = null;
+      }, BG_INLINE_MS),
+    };
+    try {
+      this.onAdvance(from, to);
+    } catch (e) {
+      this.diag(`deck onAdvance failed ${e instanceof Error ? e.message : String(e)}`);
+    }
+    this.bgRefill();
+    return true;
+  }
+
+  /**
+   * Runde 32: verdecktes Nachfüllen als abgesicherte Messung. Nur wenn kein Eintrag da ist (bereit oder ladend): genau einer, in ein freies, freigeschaltetes, pausiertes
+   * Element (eine übrig gebliebene Quelle wird beim Laden ersetzt). Höchstens ein verdecktes Laden zugleich, Frist BG_REFILL_MS, nach zwei verlorenen Versuchen keine weiteren in dieser Phase.
+   */
+  private bgRefill() {
+    if (!this.bgRefillOn || !this.hidden() || !this.deps.standby || this.poolClosed() || this.bgRef || this.bgLost >= 2 || this.entries.length > 0) return;
+    const clip = this.nextClips?.(4).find((x) => x.key !== this.clip?.key && !this.entries.some((e) => e.clip.key === x.key));
+    if (!clip) return;
+    const free = this.pool.plain.find((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e) && !this.probes.has(e) && !this.suspect.has(e) && this.unlockedEls.has(e) && e.paused);
+    if (!free) return;
+    this.diag(`bg: refill ${clip.id} (pool ${this.entries.length})`);
+    const s = this.startEntry(clip, undefined, true);
+    if (s.el !== free && this.unlockedEls.has(s.el) === false) this.diag(`bg: refill element not unlocked ${clip.id}`);
+    this.bgRef = {
+      key: clip.key,
+      id: clip.id,
+      el: s.el,
+      t0: Date.now(),
+      timer: setTimeout(() => {
+        const r = this.bgRef;
+        if (!r || r.key !== clip.key) return;
+        this.bgRef = null;
+        const e = this.entries.find((x) => x.clip.key === clip.key);
+        if (e?.ready) return;
+        this.diag(`bg: refill lost ${clip.id} (timeout rs=${r.el.readyState} ns=${r.el.networkState ?? 'n/a'})`);
+        this.bgLost++;
+        this.suspect.add(r.el);
+        if (e) this.dropEntry(e, 'bg refill lost');
+      }, BG_REFILL_MS),
+    };
+  }
+
+  /** Runde 32: die App ist wieder sichtbar: verdächtige Elemente (verdecktes Laden verloren) hart zurücksetzen, neue Hintergrund-Phase */
+  private bgResume() {
+    this.bgLost = 0;
+    if (this.bgRef) {
+      clearTimeout(this.bgRef.timer);
+      this.bgRef = null;
+    }
+    for (const e of this.suspect) {
+      if (e === this.el || this.entryOf(e) || this.keptOf(e)) continue;
+      this.clearSrc(e);
+    }
+    this.suspect.clear();
   }
 
   /** Aufräumen, wenn der Audio-Reiter verlassen wird: Ton aus, keine Rückrufe */
@@ -2902,6 +3055,11 @@ export class AudioDeck {
     this.onLoading = null;
     this.pending = null;
     this.onAdvance = null;
+    this.nextClips = null;
+    if (this.inl) clearTimeout(this.inl.timer);
+    this.inl = null;
+    if (this.bgRef) clearTimeout(this.bgRef.timer);
+    this.bgRef = null;
     this.onMedia = null;
     this.onPlayed = null;
     this.onNeedFill = null;
@@ -3243,6 +3401,7 @@ export class AudioDeck {
    * Bei visible eine Zeile mit den Ereignissen, die im Hintergrund kamen.
    */
   pageEvent(kind: string) {
+    if (kind === 'visible') this.bgResume();
     const el = this.el;
     if (!el) return;
     const line = (tag: string) => {

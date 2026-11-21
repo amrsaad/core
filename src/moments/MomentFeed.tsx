@@ -1785,6 +1785,17 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       advancedTo.current = to.key;
       finishRef.current();
     };
+    // Runde 32: die nächsten Audio-Momente nach dem aktuellen, für den Rückfall im aktiven Element und das verdeckte Nachfüllen (das Deck kennt die Warteschlange nicht)
+    audioDeck.nextClips = (n) => {
+      const out: DeckClip[] = [];
+      for (let j = idxRef.current + 1; j < queue.current.length && out.length < n; j++) {
+        const m = queue.current[j];
+        if (bad.current.has(m.videoId) || formOf(m) !== 'audio') continue;
+        const c = deckClipOf(m);
+        if (c) out.push(c);
+      }
+      return out;
+    };
     // Nach jedem erfüllten play() den Vorrat auffüllen (Brief 14, Schritt 2). Verdeckt tut das nichts.
     audioDeck.onPlayed = () => fillPoolRef.current();
     audioDeck.onRefused = (id, why) => refusedRef.current(id, why);
