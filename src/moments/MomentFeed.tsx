@@ -9,7 +9,7 @@ import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL, topicLabel } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { AUDIO_ONLY, audioDeck, createPlayer, deckClipOf, HLS, isIOS, LOCAL, loadYT, offlineYT, setDeckForm, STATE, type YTPlayer } from '../video/ytApi';
-import { POOL, POOL_WINDOW, type DeckClip } from '../video/audioDeck';
+import { POOL, POOL_WINDOW, RESCUE_FAST, RESCUE_FAST_MS, type DeckClip } from '../video/audioDeck';
 import { canWarm, coverMs, onNonCurrentPlaying, roleOf, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx, type WarmState } from '../video/warmup';
 import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, isFlat, onGesture, tabAfterSwipe, tabSwipe, type Gesture } from './gesture';
 import { hintVisible, SOUND_NONE } from './soundHint';
@@ -183,7 +183,7 @@ const WATCHDOG_HIDDEN_MS = 12_000;
 /** Brief 12: ohne erstes Bild nach dieser Zeit gilt das Netz als schlecht, der Moment zeigt sein Standbild (Zeile "video: slow net, showing still") */
 const STILL_MS = 6_000;
 /** Runde 8: spielt ein Audio-Moment nach dieser Zeit nicht und steht ein anderer bereit im Vorrat, wechselt die App von selbst auf den bereiten (Zeile "ready first ... (rescue)") */
-const RESCUE_MS = 6_000;
+const RESCUE_MS = RESCUE_FAST ? RESCUE_FAST_MS : 6_000;
 /** Brief 12: Datensparmodus oder 2g: nur ein Nachbar wird vorgeladen, nicht zwei */
 const lowNet = (): boolean => {
   try {

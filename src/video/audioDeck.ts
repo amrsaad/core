@@ -344,6 +344,28 @@ export const BG_REFILL = true;
 export const BG_REFILL_MS = 10000;
 /** Runde 32: so lange darf der nächste Moment im aktiven Element bis zum ersten Ton brauchen (ms), danach "bg: inline next timeout" */
 export const BG_INLINE_MS = 15000;
+/**
+ * Runde 36 (Gerätelog 22.11.2026 06:30 bis 06:38, schwaches Netz): lädt der aktive Netz-Moment nach FRESH_RELOAD_MS noch ohne Metadaten (readyState 0), oder meldet sein Element
+ * einen Ladefehler, lädt das Deck einmal frisch neu (neues load() derselben Quelle, nur sichtbar, einmal je Moment). Statt bis JUMP_META_MS (8 s) zu warten. false: Verhalten von Runde 35.
+ * Zeilen: "deck: active has load error", "deck: active not loading", "deck: fresh reload ok/failed". FRESH_RELOAD_FAIL_MS: so lange bis "failed", wenn weder Metadaten noch Fehler kommen.
+ */
+export const FRESH_RELOAD = true;
+export const FRESH_RELOAD_MS = 3000;
+export const FRESH_RELOAD_FAIL_MS = 8000;
+/**
+ * Runde 36: der Host stellt auf einen fertigen Moment um ("ready first ... (rescue)"), wenn der aktive nach RESCUE_FAST_MS nicht spielt (vorher 6 s). Der Weg im Host existiert seit Runde 8,
+ * hier nur die Frist. false: 6 s.
+ */
+export const RESCUE_FAST = true;
+export const RESCUE_FAST_MS = 3000;
+/**
+ * Runde 36: verdeckt steht currentTime des aktiven Elements länger als BG_STUCK_MS, obwohl paused=false und der Moment nicht zu Ende ist: hängend. Genau ein Versuch je Hintergrund-Phase,
+ * die bestehende Fortsetzung (clipEnd: Tausch auf ein bereites Element, sonst BG_INLINE_NEXT mit BG_REFILL). Zeilen: "bg: stuck ... advancing", "bg: stuck advance ok/failed".
+ * Prüfung alle BG_STUCK_TICK_MS durch einen Zeitgeber. iOS friert die Seite verdeckt oft ein (Log 06:36:10 bis 06:37:52: kein Zeitgeber lief), dann prüft erst die Rückkehr (nur Diag, kein Wechsel). false: aus.
+ */
+export const BG_STUCK = true;
+export const BG_STUCK_MS = 10_000;
+export const BG_STUCK_TICK_MS = 2000;
 /** Runde 29: so lange wartet der erste play() nach dem Sprung auf seeked (ms), danach spielt er trotzdem */
 export const JUMP_WAIT_MS = 1500;
 /** Runde 29: so lange wartet der erste play() auf die Metadaten (ms), danach spielt er trotzdem (Netz hängt, nie stehen bleiben) */
@@ -518,6 +540,10 @@ export interface DeckDeps {
   bgInline?: boolean;
   /** Runde 32: false schaltet das verdeckte Nachfüllen ab, Standard BG_REFILL */
   bgRefill?: boolean;
+  /** Runde 36: false schaltet das frische Neuladen des aktiven Moments ab, Standard FRESH_RELOAD */
+  freshReload?: boolean;
+  /** Runde 36: false schaltet die Hänge-Erkennung verdeckt ab, Standard BG_STUCK */
+  bgStuck?: boolean;
   /** Runde 27: false schaltet das Ausweichen auf ein frisches Element ab (Tests der bestehenden Kette), Standard true */
   dodge?: boolean;
   /** Element-Vorrat (Entscheidung 47 und 52): fill() lädt die nächsten POOL Ausschnitte in eigene Elemente vor, swapNext() tauscht nur die Rollen. Aus: fill() tut nichts. */
@@ -719,7 +745,16 @@ export class AudioDeck {
   /** Wer ein Element zuletzt angehalten hat (Diagnose, Issue 13): "app: wo". Fehlt der Eintrag beim pause-Ereignis, kam die Pause vom System. */
   private pauseBy = new WeakMap<DeckEl, string>();
   /** Ereignisse, die kamen, während die Seite im Hintergrund stand (Diagnose: laufen die Handler dort überhaupt) */
-  private hiddenStats = { tu: 0, ended: 0, ends: 0, plays: 0, at: 0 };
+  private hiddenStats = { tu: 0, ended: 0, ends: 0, plays: 0, at: 0, chk: 0 };
+  /** Runde 36: frisches Neuladen des aktiven Moments (FRESH_RELOAD) */
+  private freshOn: boolean;
+  private freshTried = new Map<string, number>();
+  private frl: { key: string; id: string; el: DeckEl; t0: number; timer: ReturnType<typeof setTimeout> } | null = null;
+  /** Runde 36: Hänge-Erkennung verdeckt (BG_STUCK): letzter Stand der Zeit, Zeitgeber, einmal je Hintergrund-Phase */
+  private bgStuckOn: boolean;
+  private bgProg: { el: DeckEl; key: string; t: number; at: number } | null = null;
+  private bgStuckTimer: ReturnType<typeof setInterval> | null = null;
+  private bgStuckDone = false;
   /** Letzter Wechsel im Hintergrund, bis das Element des Nachfolgers spielt (Diagnose) */
   private adv: { to: string; t0: number } | null = null;
   /** Ton und Wiedergabe des aktuellen Elements, getrieben von volumechange, playing und pause (Hinweis "Ton aus") */
@@ -788,6 +823,8 @@ export class AudioDeck {
     this.neverMuted = deps.neverMuted ?? NEVER_MUTED;
     this.bgInline = deps.bgInline ?? BG_INLINE_NEXT;
     this.bgRefillOn = deps.bgRefill ?? BG_REFILL;
+    this.freshOn = deps.freshReload ?? FRESH_RELOAD;
+    this.bgStuckOn = deps.bgStuck ?? BG_STUCK;
     this.dodgeOn = deps.dodge ?? true;
   }
 
@@ -1210,6 +1247,7 @@ export class AudioDeck {
         else if (this.trialFailed === c.url) this.deps.host?.(c.url, 'bad');
       }
       this.trialFailed = null;
+      if (this.frl?.el === el) this.freshEnd(true);
       this.seek(true);
       this.armed = true;
       this.posSetLine(el);
@@ -1274,9 +1312,57 @@ export class AudioDeck {
         this.start(c, this.want, true, this.resumeFrom, 'skipped cors');
         return;
       }
+      // Runde 36: der aktive Netz-Moment meldet einen Ladefehler: einmal frisch neu laden, kam der Fehler nach dem frischen Laden, ist es gescheitert
+      if (this.frl?.el === el) this.freshEnd(false, 'error');
+      else if (this.freshReload('error')) return;
       this.diag(`deck error ${c.id}`);
       this.sink?.error();
     });
+  }
+
+  /**
+   * Runde 36: der aktive Netz-Moment hat einen Ladefehler oder lädt nach FRESH_RELOAD_MS ohne Metadaten noch. Einmal je Moment (30 s Sperre), nur sichtbar (verdeckt hängt load() das Element),
+   * nie für lokale Quellen. Gleiches Element, neues load() mit derselben Quelle über start() (wie der Weg "local failed"). Gibt zurück, ob neu geladen wurde.
+   */
+  private freshReload(why: 'error' | 'stale', ageMs = 0): boolean {
+    const el = this.el;
+    const c = this.clip;
+    if (!this.freshOn || !el || !c || this.done || this.holding || this.isLocal || this.hidden() || this.lane !== 'plain') return false;
+    const last = this.freshTried.get(c.key);
+    if (last !== undefined && Date.now() - last < 30_000) return false;
+    this.freshTried.set(c.key, Date.now());
+    if (this.freshTried.size > 100) this.freshTried.delete(this.freshTried.keys().next().value as string);
+    this.diag(why === 'error' ? `deck: active has load error ${c.id}, fresh reload` : `deck: active not loading ${c.id} rs=${el.readyState} after ${ageMs} ms, fresh reload`);
+    if (this.frl) clearTimeout(this.frl.timer);
+    this.frl = { key: c.key, id: c.id, el, t0: Date.now(), timer: setTimeout(() => this.freshEnd(false, 'no metadata'), FRESH_RELOAD_FAIL_MS) };
+    // rebuilding: Zeitpunkt des Starts (clipAt, Maß für das schwache Netz) und Zähler der Wiederherstellung bleiben
+    this.rebuilding = true;
+    try {
+      this.start(c, this.want, false, this.resumeFrom);
+    } finally {
+      this.rebuilding = false;
+    }
+    return true;
+  }
+
+  private freshEnd(ok: boolean, how = '') {
+    const f = this.frl;
+    if (!f) return;
+    clearTimeout(f.timer);
+    this.frl = null;
+    if (this.clip?.key !== f.key) return;
+    this.diag(`deck: fresh reload ${ok ? 'ok' : 'failed'} ${f.id} after ${Date.now() - f.t0} ms${how ? ` (${how})` : ''}`);
+  }
+
+  /** Runde 36: nach dem Laden des aktiven Netz-Moments prüfen, ob nach FRESH_RELOAD_MS Metadaten da sind (t0: Beginn des Ladens, bei einem übernommenen Eintrag der des Eintrags) */
+  private armFresh(el: DeckEl, c: DeckClip, t0: number) {
+    if (!this.freshOn || this.isLocal) return;
+    // Mindestens ein Zeitgeber-Schritt: ein Tausch läuft zu Ende, bevor neu geladen wird
+    const wait = Math.max(0, FRESH_RELOAD_MS - (Date.now() - t0));
+    setTimeout(() => {
+      if (this.el !== el || this.clip?.key !== c.key || this.done || this.holding || this.hidden() || el.readyState >= 1) return;
+      this.freshReload(el.error ? 'error' : 'stale', Date.now() - t0);
+    }, wait);
   }
 
   /** Runde 17: neuer Ausschnitt (oder neue Quelle desselben): Proben und Messung neu. Die Wiederherstellungen zählen je Ausschnitt, ein Neuaufbau selbst setzt sie nicht zurück. */
@@ -2082,6 +2168,7 @@ export class AudioDeck {
     if (el.readyState >= 1) this.posSetLine(el);
     this.beginPosHold(el, clip);
     if (play) this.playAfterJump(el, clip, 'start');
+    if (!loc) this.armFresh(el, clip, Date.now());
   }
 
   private hold(clip: DeckClip, play: boolean, forcePlain: boolean, from: number, forceWhy: string | undefined, wait: Promise<boolean>, what = 'storage') {
@@ -2759,6 +2846,7 @@ export class AudioDeck {
       this.diag(`deck: pool adopt ${clip.id} rs=${el.readyState} meta=${s.meta} after ${Date.now() - s.t0} ms`);
       if (s.meta) this.seek(true);
       this.loading(!s.local && el.readyState < 3);
+      if (!s.local && !s.meta) this.armFresh(el, clip, s.t0);
     }
     // Runde 13: ein Element, das im Vorrat schon "ended" war, spielte sonst von vorn (play() am Ende springt auf 0)
     // Runde 22: auch bei von iOS gemeldeter duration gleich Startstelle (Ende gemeldet), die Position allein hebt ended dort nicht auf: Rückschritt
@@ -3094,6 +3182,10 @@ export class AudioDeck {
     this.inl = null;
     if (this.singleTimer) clearInterval(this.singleTimer);
     this.singleTimer = null;
+    if (this.bgStuckTimer) clearInterval(this.bgStuckTimer);
+    this.bgStuckTimer = null;
+    if (this.frl) clearTimeout(this.frl.timer);
+    this.frl = null;
     if (this.bgRef) clearTimeout(this.bgRef.timer);
     this.bgRef = null;
     this.onMedia = null;
@@ -3431,6 +3523,56 @@ export class AudioDeck {
     return this.sink === sink && this.isLocal;
   }
 
+  /** Runde 36: Zeitgeber der Hänge-Erkennung verdeckt (alle BG_STUCK_TICK_MS), solange die Seite im Hintergrund steht */
+  private bgStuckStart() {
+    this.bgStuckStop(false);
+    if (!this.bgStuckOn) return;
+    this.bgStuckDone = false;
+    this.bgProg = null;
+    this.bgStuckWatch();
+    this.bgStuckTimer = setInterval(() => this.bgStuckWatch(), BG_STUCK_TICK_MS);
+    (this.bgStuckTimer as unknown as { unref?: () => void }).unref?.();
+  }
+
+  /** Runde 36: Rückkehr (oder Ende): Zeitgeber aus. Stand die Zeit seit der letzten Messung still, eine Zeile (nur Diag, sichtbar wechselt hier nichts). */
+  private bgStuckStop(report = true) {
+    if (this.bgStuckTimer) clearInterval(this.bgStuckTimer);
+    this.bgStuckTimer = null;
+    const p = this.bgProg;
+    this.bgProg = null;
+    const el = this.el;
+    const c = this.clip;
+    if (!report || !this.bgStuckOn || !p || !el || !c || p.el !== el || p.key !== c.key || this.done || el.paused || el.ended) return;
+    if (Math.abs(el.currentTime - p.t) > FROZEN_EPS || Date.now() - p.at < BG_STUCK_MS) return;
+    this.diag(`bg: stuck ${c.id} t=${el.currentTime.toFixed(1)} for ${Math.round((Date.now() - p.at) / 1000)} s, found at return, no advance (stuck checks ${this.hiddenStats.chk}) rs=${el.readyState} buf=${this.bufText(el, el.currentTime)}`);
+  }
+
+  /** Runde 36: eine Messung. Zeit des aktiven Elements bewegt sich nicht, obwohl es spielen soll: nach BG_STUCK_MS einmal je Phase weiter (clipEnd, die bestehende Fortsetzung). */
+  private bgStuckWatch() {
+    const el = this.el;
+    const c = this.clip;
+    if (!this.bgStuckOn || !this.hidden()) return;
+    this.hiddenStats.chk++;
+    if (!el || !c || this.done || this.holding || el.paused || el.ended || !el.src || el.src.startsWith('data:')) {
+      this.bgProg = null;
+      return;
+    }
+    const now = Date.now();
+    const cur = el.currentTime;
+    const p = this.bgProg;
+    if (!p || p.el !== el || p.key !== c.key || Math.abs(cur - p.t) > FROZEN_EPS) {
+      this.bgProg = { el, key: c.key, t: cur, at: now };
+      return;
+    }
+    if (now - p.at < BG_STUCK_MS || this.bgStuckDone || !this.onAdvance) return;
+    this.bgStuckDone = true;
+    this.diag(`bg: stuck ${c.id} t=${cur.toFixed(1)} for ${Math.round((now - p.at) / 1000)} s, advancing`);
+    this.clipEnd('stuck');
+    const to = this.clip;
+    const moved = !!to && to.key !== c.key && !this.done;
+    this.diag(`bg: stuck advance ${moved ? 'ok' : 'failed'} ${c.id}${moved ? ` to ${to.id}` : ''}`);
+  }
+
   /**
    * Seitenwechsel (visibilitychange hidden oder visible, pagehide, pageshow): Zustand des Elements und der Media Session ins Protokoll.
    * Bei hidden folgen Zeilen nach 1, 5 und 15 s, solange die Seite noch im Hintergrund steht (läuft die Zeit weiter, spielt das Element).
@@ -3438,6 +3580,7 @@ export class AudioDeck {
    */
   pageEvent(kind: string) {
     if (kind === 'visible') {
+      this.bgStuckStop();
       this.bgResume();
       this.enforceSingle('visible');
       this.watchSingle();
@@ -3452,11 +3595,12 @@ export class AudioDeck {
     };
     this.note(line(''));
     if (kind === 'hidden') {
-      this.hiddenStats = { tu: 0, ended: 0, ends: 0, plays: 0, at: Date.now() };
+      this.hiddenStats = { tu: 0, ended: 0, ends: 0, plays: 0, at: Date.now(), chk: 0 };
+      this.bgStuckStart();
       for (const sec of [1, 5, 15]) setTimeout(() => this.hidden() && this.note(line(` +${sec} s`)), sec * 1000);
     } else if (kind === 'visible' && this.hiddenStats.at) {
       const h = this.hiddenStats;
-      this.note(`while hidden ${Math.round((Date.now() - h.at) / 1000)} s: timeupdate ${h.tu}, ended ${h.ended}, clip ends ${h.ends}, play calls ${h.plays}`);
+      this.note(`while hidden ${Math.round((Date.now() - h.at) / 1000)} s: timeupdate ${h.tu}, ended ${h.ended}, clip ends ${h.ends}, play calls ${h.plays}, stuck checks ${h.chk}`);
       this.hiddenStats.at = 0;
     }
   }
