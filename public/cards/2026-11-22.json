@@ -273,6 +273,266 @@
    "arabic": "وَأَمَّا ٱلَّذِينَ ٱبْيَضَّتْ وُجُوهُهُمْ فَفِى رَحْمَةِ ٱللَّهِ هُمْ فِيهَا خَـٰلِدُونَ",
    "translation": "Was aber diejenigen angeht, deren Gesichter weiß sein werden, so werden sie sich in Allahs Erbarmen befinden. Ewig werden sie darin bleiben.",
    "reflection": "Was nimmst du heute aus diesem Vers mit?"
+  },
+  {
+   "id": "arxiv:2611.26492",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Multimodal Error Detection in Chest X-ray Reports",
+   "source": {
+    "id": "arxiv:2611.26492",
+    "title": "Multimodal Error Detection in Chest X-ray Reports: A Large Language Model Reading Image Evidence",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.26492",
+    "excerpt": "These controlled results show that, given the same image-derived scores, a trained language model detects report-score inconsistencies more accurately than the tested rule baseline, with the advantage concentrated in interpreting how findings are worded."
+   },
+   "createdAt": "2026-11-22T05:05:40.799Z"
+  },
+  {
+   "id": "pmid:42491176",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Association between SIRT1 gene polymorphisms and susceptibility to coronary artery disease",
+   "source": {
+    "id": "pmid:42491176",
+    "title": "Association between SIRT1 gene polymorphisms and susceptibility to coronary artery disease: a systematic review and meta-analysis.",
+    "publisher": "Frontiers in cardiovascular medicine",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42491176/",
+    "excerpt": "Current evidence suggests that certain SIRT1 polymorphisms may be associated with CAD susceptibility, but the observed associations appear to vary by SNP locus, genetic model, and population or disease subgroup."
+   },
+   "createdAt": "2026-11-22T05:05:40.799Z"
+  },
+  {
+   "id": "pmid:43060870",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Factors associated with cancer-related fatigue in breast cancer patients",
+   "source": {
+    "id": "pmid:43060870",
+    "title": "Factors associated with cancer-related fatigue in breast cancer patients: a systematic review and meta-analysis.",
+    "publisher": "Frontiers in oncology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/43060870/",
+    "excerpt": "The patients with cancer- related fatigue in breast cancer, pain, dyspnea, anxiety, depression, sleep disturbances (OR 2.02, 95% CI 1.05-3.87) and BMI ≥ 30 kg/m may be associated with fatigue and should be considered as potential related factors."
+   },
+   "createdAt": "2026-11-22T05:05:40.799Z"
+  },
+  {
+   "id": "arxiv:2611.26491",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "FLUID: Flexible, Evidence-Grounded Situated Task Guidance",
+   "source": {
+    "id": "arxiv:2611.26491",
+    "title": "FLUID: Flexible, Evidence-Grounded Situated Task Guidance",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.26491",
+    "excerpt": "Together, FLUID moves situated task guidance beyond rigid reference matching toward more natural and adaptive human-AI interaction. Project page: https://fluid-guidance.github.io."
+   },
+   "createdAt": "2026-11-22T05:05:40.799Z"
+  },
+  {
+   "id": "pmid:41682868",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Central Nervous System Involvement in Acute Myeloid Leukemia",
+   "source": {
+    "id": "pmid:41682868",
+    "title": "Central Nervous System Involvement in Acute Myeloid Leukemia: From Pathophysiology to Neuroradiologic Features and the Emerging Role of Artificial Intelligence.",
+    "publisher": "Journal of clinical medicine",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/41682868/",
+    "excerpt": "Combining AI-based image analysis with multimodal neuroimaging could significantly improve diagnostic accuracy and personalized treatment for CNS involvement in AML. Progress is still challenged by the rarity of the condition and the lack of large, annotated datasets."
+   },
+   "createdAt": "2026-11-22T05:05:40.799Z"
+  },
+  {
+   "id": "pmid:40983504",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "AI-empowered human microbiome research",
+   "source": {
+    "id": "pmid:40983504",
+    "title": "AI-empowered human microbiome research.",
+    "publisher": "Gut",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/40983504/",
+    "excerpt": "By critically evaluating the current capabilities and limitations of AI in this context, this review aims to chart a path forward for the integration of AI into microbiome research, ultimately accelerating innovations in personalised medicine and deepening our understanding of host-microbiome relationships."
+   },
+   "createdAt": "2026-11-22T05:05:40.799Z"
+  },
+  {
+   "id": "arxiv:2611.26475",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "A new algorithmic approach for finding flat minima: critically damped Polyak stepsizes",
+   "source": {
+    "id": "arxiv:2611.26475",
+    "title": "A new algorithmic approach for finding flat minima: critically damped Polyak stepsizes",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.26475",
+    "excerpt": "Empirically, CDP stepsizes produce a flattening effect similar to that of Sharpness-Aware Minimization (SAM, Foret et al., 2021), reducing sharpness even in settings beyond our theory, including nonlinear teacher-student networks and fine-tuning of pre-trained LLMs."
+   },
+   "createdAt": "2026-11-22T05:05:40.799Z"
+  },
+  {
+   "id": "pmid:40552997",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Navigating the AI Landscape in Medical Imaging",
+   "source": {
+    "id": "pmid:40552997",
+    "title": "Navigating the AI Landscape in Medical Imaging: A Critical Analysis of Technologies, Implementation, and Implications.",
+    "publisher": "Radiology",
+    "year": 2025,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/40552997/",
+    "excerpt": "This review addresses integration challenges, pathways for responsible progress, and the viewpoints of all stakeholders."
+   },
+   "createdAt": "2026-11-22T05:05:40.799Z"
+  },
+  {
+   "id": "pmid:42676525",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Safeguarding biomedical AI",
+   "source": {
+    "id": "pmid:42676525",
+    "title": "Safeguarding biomedical AI: a critical scoping review of privacy-enhancing technologies, hybrid approaches, and deployment models.",
+    "publisher": "Frontiers in digital health",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42676525/",
+    "excerpt": "Situating PETs within technical and operational contexts clarifies their capabilities, limitations, and deployment challenges. Residual risks persist, including fairness concerns, inference-time leakage, and overreliance on PETs as compliance proxies. Sustained technical innovation and institutional governance remain essential for the trustworthy integration of PETs in biomedical AI."
+   },
+   "createdAt": "2026-11-22T05:05:40.799Z"
+  },
+  {
+   "id": "arxiv:2611.26464",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "Monte Carlo Pass Search for Setpieces",
+   "source": {
+    "id": "arxiv:2611.26464",
+    "title": "Monte Carlo Pass Search for Setpieces",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.26464",
+    "excerpt": "We show how to keep such a search honest, and estimate how much more data each component needs before a club could rely on it."
+   },
+   "createdAt": "2026-11-22T05:05:40.799Z"
+  },
+  {
+   "id": "pmid:42542374",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "ChatGPT and Other Large Language Models in Inflammatory Arthritis",
+   "source": {
+    "id": "pmid:42542374",
+    "title": "ChatGPT and Other Large Language Models in Inflammatory Arthritis: A Systematic Review Across Clinical Tasks.",
+    "publisher": "The Journal of rheumatology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42542374/",
+    "excerpt": "LLMs may support patient education, factual medication queries, and structured guideline questions when used under clinician review, but should not be used for case-based reasoning, treatment selection, or autonomous clinical decisions. None of the 18 included studies evaluated retrieval-augmented or agent-based systems, and none prospectively validated LLMs in clinical workflows."
+   },
+   "createdAt": "2026-11-22T05:05:40.799Z"
+  },
+  {
+   "id": "pmid:43037704",
+   "area": "brain",
+   "topic": "ki-regulierung",
+   "type": "fact",
+   "headline": "Mobile pharmacovigilance: a comprehensive review",
+   "source": {
+    "id": "pmid:43037704",
+    "title": "Mobile pharmacovigilance: a comprehensive review.",
+    "publisher": "European journal of clinical pharmacology",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/43037704/",
+    "excerpt": "Emerging technologies such as artificial intelligence, electronic health record integration, blockchain, and advanced data analytics are expected to further transform mobile pharmacovigilance. Overall, mobile applications represent a promising strategy for strengthening global pharmacovigilance systems by enabling timely, accurate, patient-centered, and efficient drug safety monitoring."
+   },
+   "createdAt": "2026-11-22T05:05:40.799Z"
+  },
+  {
+   "id": "arxiv:2611.26450",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "type": "fresh",
+   "headline": "A CPU Inside an LLM: Zero-Gradient Compilation of Exact Circuits into Pretrained Weights",
+   "source": {
+    "id": "arxiv:2611.26450",
+    "title": "A CPU Inside an LLM: Zero-Gradient Compilation of Exact Circuits into Pretrained Weights",
+    "publisher": "arXiv",
+    "year": 2026,
+    "url": "https://arxiv.org/abs/2611.26450",
+    "excerpt": "A factorized block-sparse sidecar holds A100 memory at 7.89 / 10.65 GiB (4.60 / 8.14 GiB under INT8/INT4 + FP32 sidecar) while passing all 14/14 pre-registered $>2$K-token Tango splits ($N=4{,}392$; 0/11,134 OOD triggers)."
+   },
+   "createdAt": "2026-11-22T05:05:40.799Z"
+  },
+  {
+   "id": "pmid:42330177",
+   "area": "brain",
+   "topic": "ki-medizin",
+   "type": "fact",
+   "headline": "Hyaluronic Acid Enriched Medium for Embryo Transfer: A Systematic Review and Meta-analysis",
+   "source": {
+    "id": "pmid:42330177",
+    "title": "Hyaluronic Acid Enriched Medium for Embryo Transfer: A Systematic Review and Meta-analysis.",
+    "publisher": "JBRA assisted reproduction",
+    "year": 2026,
+    "url": "https://pubmed.ncbi.nlm.nih.gov/42330177/",
+    "excerpt": "Overall evidence quality was rated as very low due to high risk of bias, inconsistency, and imprecision, and current evidence does not support a clear benefit of HA-enriched ET medium, although ongoing trials may further clarify its role."
+   },
+   "createdAt": "2026-11-22T05:05:40.799Z"
+  },
+  {
+   "id": "quran:3:108",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Dies sind die Zeichen Allahs, die Wir der Wahrheit entsprechend verlesen.",
+   "source": {
+    "id": "quran:3:108",
+    "title": "Sure Ali 'Imran, 3:108",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/3/108",
+    "excerpt": "هذه آيات الله وبراهينه الساطعة، نتلوها ونقصُّها عليك -أيها الرسول- بالصدق واليقين. وما الله بظالم أحدًا من خلقه، ولا بمنقص شيئًا من أعمالهم; لأنه الحاكم العدل الذي لا يجور."
+   },
+   "createdAt": "2026-11-22T05:05:40.799Z",
+   "arabic": "تِلْكَ ءَايَـٰتُ ٱللَّهِ نَتْلُوهَا عَلَيْكَ بِٱلْحَقِّ ۗ وَمَا ٱللَّهُ يُرِيدُ ظُلْمًا لِّلْعَـٰلَمِينَ",
+   "translation": "Dies sind die Zeichen Allahs, die Wir der Wahrheit entsprechend verlesen. Und Allah will keine Ungerechtigkeit für die Weltenbewohner",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?"
+  },
+  {
+   "id": "quran:3:109",
+   "area": "beat",
+   "topic": "koran",
+   "type": "verse",
+   "headline": "Allah gehört (alles), was in den Himmeln und was auf der Erde ist …",
+   "source": {
+    "id": "quran:3:109",
+    "title": "Sure Ali 'Imran, 3:109",
+    "publisher": "Quran.com",
+    "url": "https://quran.com/3/109",
+    "excerpt": "ولله ما في السموات وما في الأرض، ملكٌ له وحده خلقًا وتدبيرًا، ومصير جميع الخلائق إليه وحده، فيجازي كلا على قدر استحقاقه."
+   },
+   "createdAt": "2026-11-22T05:05:40.799Z",
+   "arabic": "وَلِلَّهِ مَا فِى ٱلسَّمَـٰوَٰتِ وَمَا فِى ٱلْأَرْضِ ۚ وَإِلَى ٱللَّهِ تُرْجَعُ ٱلْأُمُورُ",
+   "translation": "Allah gehört (alles), was in den Himmeln und was auf der Erde ist, und zu Allah werden (all) die Angelegenheiten zurückgebracht.",
+   "reflection": "Was nimmst du heute aus diesem Vers mit?"
   }
  ]
 }
