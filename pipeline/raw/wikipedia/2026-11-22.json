@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-22",
+ "records": [
+  {
+   "sourceId": "wiki:de:Zwergohreule",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Zwergohreule",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/22",
+    "status": 200
+   },
+   "title": "Zwergohreule",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Zwergohreule ist nach dem Sperlingskauz die kleinste europäische Eule, sie erreicht knapp Amselgröße. Die Art ist in fünf Unterarten aufgeteilt, die jedoch recht wenig differenziert sind. Die früher als Unterart der Zwergohreule eingeordnete Zypern-Zwergohreule wird mittlerweile als eigene, auf Zypern endemische Art betrachtet."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-22T04:08:50.104Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Zwergohreule": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Mike Tyson",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Mike_Tyson",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/22",
+    "status": 200
+   },
+   "title": "Mike Tyson",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Michael Gerard „Mike“ Tyson ist ein ehemaliger US-amerikanischer Schwergewichtsboxer. Mit einem Alter von 20 Jahren und 144 Tagen war er 1986 der bislang jüngste Boxer, der einen Weltmeistertitel im Schwergewicht erringen konnte. Darüber hinaus war Tyson der erste Weltmeister, der gleichzeitig von den drei Boxverbänden WBC, WBA und IBF anerkannt wurde (Undisputed Heavyweight Champion of the World). Er wurde 2011 in die International Boxing Hall of Fame aufgenommen."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-22T04:08:50.104Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Mike_Tyson": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Melbourne",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Melbourne",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/22",
+    "status": 200
+   },
+   "title": "Melbourne",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Melbourne [ˈmɛɫbən]  ist die Hauptstadt des Bundesstaates Victoria in Australien. Sie ist mit etwa 5,207 Millionen Einwohnern nach Sydney die zweitgrößte Stadt Australiens. Die Einwohner von Melbourne werden im Englischen Melburnians genannt. Melbourne wurde 1837 nach dem damaligen britischen Premierminister Lord Melbourne benannt und ist katholischer sowie anglikanischer Erzbischofssitz."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-22T04:08:50.104Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Melbourne": 200
+   }
+  }
+ ]
+}
