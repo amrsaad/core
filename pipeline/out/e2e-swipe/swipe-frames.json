@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-21T17:22:52.742Z",
+  "at": "2026-11-22T04:17:53.194Z",
   "swipes": 10,
   "windowMs": "down bis 600 ms nach up",
   "runs": [
@@ -26,96 +26,96 @@
       },
       "samples": [
         {
-          "lost": 36,
-          "frames": 44,
-          "ms": 1221,
-          "longest": 82,
-          "longTasks": [],
-          "changed": true
-        },
-        {
-          "lost": 27,
-          "frames": 45,
-          "ms": 1217,
-          "longest": 62,
-          "longTasks": [],
-          "changed": true
-        },
-        {
-          "lost": 34,
-          "frames": 46,
-          "ms": 1246,
-          "longest": 71,
-          "longTasks": [],
-          "changed": true
-        },
-        {
-          "lost": 38,
-          "frames": 44,
-          "ms": 1248,
+          "lost": 33,
+          "frames": 38,
+          "ms": 1234,
           "longest": 73,
           "longTasks": [],
           "changed": true
         },
         {
-          "lost": 36,
-          "frames": 44,
-          "ms": 1231,
-          "longest": 68,
+          "lost": 38,
+          "frames": 37,
+          "ms": 1239,
+          "longest": 80,
           "longTasks": [],
           "changed": true
         },
         {
-          "lost": 31,
-          "frames": 48,
-          "ms": 1220,
+          "lost": 37,
+          "frames": 40,
+          "ms": 1243.999999999999,
+          "longest": 91,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 33,
+          "frames": 39,
+          "ms": 1231,
+          "longest": 79,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 38,
+          "frames": 36,
+          "ms": 1267,
+          "longest": 81,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 34,
+          "frames": 42,
+          "ms": 1245.0000000000018,
+          "longest": 82,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 35,
+          "frames": 43,
+          "ms": 1256,
           "longest": 64,
           "longTasks": [],
           "changed": true
         },
         {
           "lost": 35,
-          "frames": 46,
-          "ms": 1210,
-          "longest": 57,
+          "frames": 43,
+          "ms": 1244,
+          "longest": 73,
           "longTasks": [],
           "changed": true
         },
         {
-          "lost": 33,
+          "lost": 34,
           "frames": 44,
+          "ms": 1239,
+          "longest": 69,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 36,
+          "frames": 41,
           "ms": 1230,
-          "longest": 59,
-          "longTasks": [],
-          "changed": true
-        },
-        {
-          "lost": 31,
-          "frames": 47,
-          "ms": 1238,
-          "longest": 61,
-          "longTasks": [],
-          "changed": true
-        },
-        {
-          "lost": 37,
-          "frames": 46,
-          "ms": 1220.0000000000036,
-          "longest": 80,
+          "longest": 60,
           "longTasks": [],
           "changed": true
         }
       ],
       "idleFrameMs": 16,
       "hz": 63,
-      "lost": 338,
-      "frames": 454,
-      "lostPct": 42.7,
-      "worstSwipePct": 46.34146341463415,
-      "longestFrameMs": 82,
+      "lost": 353,
+      "frames": 403,
+      "lostPct": 46.7,
+      "worstSwipePct": 51.35135135135135,
+      "longestFrameMs": 91,
       "longTasks": [],
       "gated": true,
-      "floorPct": 23.4,
+      "floorPct": 28.8,
       "floorLimited": true,
       "midDrag": {
         "yMid": -264,
@@ -157,15 +157,7 @@
         {
           "lost": 0,
           "frames": 80,
-          "ms": 1353,
-          "longest": 17,
-          "longTasks": [],
-          "changed": true
-        },
-        {
-          "lost": 0,
-          "frames": 80,
-          "ms": 1353.3999999999069,
+          "ms": 1353.2000000000698,
           "longest": 17,
           "longTasks": [],
           "changed": true
@@ -173,7 +165,7 @@
         {
           "lost": 0,
           "frames": 79,
-          "ms": 1336.2000000000698,
+          "ms": 1342.6999999999534,
           "longest": 17,
           "longTasks": [],
           "changed": true
@@ -181,7 +173,23 @@
         {
           "lost": 0,
           "frames": 80,
-          "ms": 1352.8999999999069,
+          "ms": 1356.0999999999767,
+          "longest": 17,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 0,
+          "frames": 80,
+          "ms": 1351.5,
+          "longest": 17,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 0,
+          "frames": 80,
+          "ms": 1350.6000000000931,
           "longest": 17,
           "longTasks": [],
           "changed": true
@@ -189,7 +197,7 @@
         {
           "lost": 0,
           "frames": 79,
-          "ms": 1335.2000000000698,
+          "ms": 1337.1999999999534,
           "longest": 17,
           "longTasks": [],
           "changed": true
@@ -197,7 +205,7 @@
         {
           "lost": 0,
           "frames": 80,
-          "ms": 1353.1999999999534,
+          "ms": 1356.8000000000466,
           "longest": 17,
           "longTasks": [],
           "changed": true
@@ -205,7 +213,7 @@
         {
           "lost": 0,
           "frames": 80,
-          "ms": 1353.1999999999534,
+          "ms": 1360.8000000000466,
           "longest": 17,
           "longTasks": [],
           "changed": true
@@ -213,7 +221,7 @@
         {
           "lost": 0,
           "frames": 80,
-          "ms": 1352,
+          "ms": 1353.7000000000698,
           "longest": 17,
           "longTasks": [],
           "changed": true
@@ -221,15 +229,7 @@
         {
           "lost": 0,
           "frames": 80,
-          "ms": 1353.3000000000466,
-          "longest": 17,
-          "longTasks": [],
-          "changed": true
-        },
-        {
-          "lost": 0,
-          "frames": 80,
-          "ms": 1352.3000000000466,
+          "ms": 1351.5999999999767,
           "longest": 17,
           "longTasks": [],
           "changed": true
@@ -273,17 +273,33 @@
       },
       "samples": [
         {
-          "lost": 4,
-          "frames": 76,
-          "ms": 1363.8999999999069,
+          "lost": 3,
+          "frames": 78,
+          "ms": 1378,
+          "longest": 33,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 3,
+          "frames": 81,
+          "ms": 1413.0999999999767,
           "longest": 50,
           "longTasks": [],
           "changed": true
         },
         {
-          "lost": 4,
-          "frames": 76,
-          "ms": 1362.5999999999767,
+          "lost": 1,
+          "frames": 81,
+          "ms": 1392.6000000000931,
+          "longest": 33,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 1,
+          "frames": 81,
+          "ms": 1387.9000000000233,
           "longest": 33,
           "longTasks": [],
           "changed": true
@@ -291,74 +307,58 @@
         {
           "lost": 3,
           "frames": 77,
-          "ms": 1364.5,
+          "ms": 1361.1999999999534,
           "longest": 33,
           "longTasks": [],
           "changed": true
         },
         {
           "lost": 2,
-          "frames": 78,
-          "ms": 1361.2000000000698,
-          "longest": 33,
-          "longTasks": [],
-          "changed": true
-        },
-        {
-          "lost": 1,
-          "frames": 79,
-          "ms": 1358.5,
+          "frames": 80,
+          "ms": 1394.1999999999534,
           "longest": 33,
           "longTasks": [],
           "changed": true
         },
         {
           "lost": 2,
-          "frames": 78,
-          "ms": 1361.9000000000233,
-          "longest": 33,
-          "longTasks": [],
-          "changed": true
-        },
-        {
-          "lost": 3,
-          "frames": 77,
-          "ms": 1361.0999999999767,
-          "longest": 34,
+          "frames": 79,
+          "ms": 1379.2000000000698,
+          "longest": 50,
           "longTasks": [],
           "changed": true
         },
         {
           "lost": 2,
-          "frames": 78,
-          "ms": 1355.2000000000698,
+          "frames": 80,
+          "ms": 1386.3000000000466,
           "longest": 33,
           "longTasks": [],
           "changed": true
         },
         {
           "lost": 1,
-          "frames": 79,
-          "ms": 1359,
+          "frames": 81,
+          "ms": 1384.7999999999302,
           "longest": 33,
           "longTasks": [],
           "changed": true
         },
         {
-          "lost": 1,
-          "frames": 79,
-          "ms": 1358.1999999999534,
-          "longest": 33,
+          "lost": 0,
+          "frames": 81,
+          "ms": 1372.2000000000698,
+          "longest": 17,
           "longTasks": [],
           "changed": true
         }
       ],
       "idleFrameMs": 16.7,
       "hz": 60,
-      "lost": 23,
-      "frames": 777,
-      "lostPct": 2.9,
-      "worstSwipePct": 5,
+      "lost": 18,
+      "frames": 799,
+      "lostPct": 2.2,
+      "worstSwipePct": 3.75,
       "longestFrameMs": 50,
       "longTasks": [],
       "gated": false,
@@ -377,81 +377,81 @@
       },
       "samples": [
         {
-          "lost": 17,
-          "frames": 64,
-          "ms": 1377.5,
-          "longest": 100,
+          "lost": 14,
+          "frames": 77,
+          "ms": 1543,
+          "longest": 83,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 15,
+          "frames": 72,
+          "ms": 1480.2999999999302,
+          "longest": 50,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 13,
+          "frames": 75,
+          "ms": 1484.9000000000233,
+          "longest": 83,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 14,
+          "frames": 67,
+          "ms": 1372.3999999999069,
+          "longest": 83,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 11,
+          "frames": 77,
+          "ms": 1498,
+          "longest": 67,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 10,
+          "frames": 76,
+          "ms": 1456.4000000000233,
+          "longest": 50,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 13,
+          "frames": 79,
+          "ms": 1558.9000000000233,
+          "longest": 83,
+          "longTasks": [],
+          "changed": true
+        },
+        {
+          "lost": 11,
+          "frames": 80,
+          "ms": 1544.4000000000233,
+          "longest": 50,
           "longTasks": [],
           "changed": true
         },
         {
           "lost": 18,
           "frames": 65,
-          "ms": 1408.0999999999767,
+          "ms": 1408.9000000000233,
           "longest": 83,
-          "longTasks": [],
-          "changed": true
-        },
-        {
-          "lost": 19,
-          "frames": 63,
-          "ms": 1385.9000000000233,
-          "longest": 100,
-          "longTasks": [],
-          "changed": true
-        },
-        {
-          "lost": 13,
-          "frames": 69,
-          "ms": 1385.2000000000698,
-          "longest": 83,
-          "longTasks": [],
-          "changed": true
-        },
-        {
-          "lost": 16,
-          "frames": 65,
-          "ms": 1374.8000000000466,
-          "longest": 83,
-          "longTasks": [],
-          "changed": true
-        },
-        {
-          "lost": 15,
-          "frames": 67,
-          "ms": 1388.4000000000233,
-          "longest": 100,
           "longTasks": [],
           "changed": true
         },
         {
           "lost": 14,
-          "frames": 68,
-          "ms": 1381.5,
-          "longest": 83,
-          "longTasks": [],
-          "changed": true
-        },
-        {
-          "lost": 16,
-          "frames": 66,
-          "ms": 1392.6999999999534,
-          "longest": 67,
-          "longTasks": [],
-          "changed": true
-        },
-        {
-          "lost": 15,
-          "frames": 67,
-          "ms": 1385.0999999999767,
-          "longest": 83,
-          "longTasks": [],
-          "changed": true
-        },
-        {
-          "lost": 15,
-          "frames": 67,
-          "ms": 1390.4000000000233,
+          "frames": 74,
+          "ms": 1480.6000000000931,
           "longest": 83,
           "longTasks": [],
           "changed": true
@@ -459,11 +459,11 @@
       ],
       "idleFrameMs": 16.7,
       "hz": 60,
-      "lost": 158,
-      "frames": 661,
-      "lostPct": 19.3,
-      "worstSwipePct": 23.170731707317074,
-      "longestFrameMs": 100,
+      "lost": 133,
+      "frames": 742,
+      "lostPct": 15.2,
+      "worstSwipePct": 21.686746987951807,
+      "longestFrameMs": 83,
       "longTasks": [],
       "gated": false,
       "floorPct": 0,
