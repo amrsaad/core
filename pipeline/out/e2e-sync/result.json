@@ -1,5 +1,5 @@
 {
- "at": "2026-11-22T06:14:45.649Z",
+ "at": "2026-11-22T06:43:36.756Z",
  "runs": [
   {
    "browser": "webkit",
@@ -51,10 +51,10 @@
    },
    "diagLines": 16,
    "diagSample": [
-    "oug4 slot0 sy0:1 state 2",
-    "oug4 sync: packed 1 kB to 1 kB",
-    "oug4 sync: PUT ok 1 kB in 0.0 s",
-    "oug4 app: hidden"
+    "u5jm slot0 sy4:1 state 2",
+    "u5jm sync: packed 1 kB to 1 kB",
+    "u5jm sync: PUT ok 1 kB in 0.0 s",
+    "u5jm app: hidden"
    ],
    "writeDelayMs": 10033,
    "hosts": [
@@ -115,10 +115,10 @@
    },
    "diagLines": 16,
    "diagSample": [
-    "o1e4 slot0 sy6:1 state 2",
-    "o1e4 sync: packed 1 kB to 1 kB",
-    "o1e4 sync: PUT ok 1 kB in 0.0 s",
-    "o1e4 app: hidden"
+    "qupy slot0 sy7:1 state 2",
+    "qupy sync: packed 1 kB to 1 kB",
+    "qupy sync: PUT ok 1 kB in 0.0 s",
+    "qupy app: hidden"
    ],
    "writeDelayMs": 10018,
    "hosts": [
