@@ -417,7 +417,7 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
   --rc-q: 22px; --rc-q-lh: 28px;
   --rc-o: 16px; --rc-o-lh: 22px; --rc-o-py: 14px; --rc-o-px: 16px; --rc-ogap: 10px;
   --rc-why-lh: 21px;
-  --rc-g-q: 20px; --rc-g-o: 16px; --rc-g-w: 14px; --rc-g-h: 12px; --rc-g-n: 16px;
+  --rc-g-q: 20px; --rc-g-o: 16px; --rc-g-w: 14px; --rc-g-n: 16px;
   position: absolute;
   z-index: 34;
   left: 0;
@@ -448,11 +448,11 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 .vrecall-page[data-fit='3'] .vtext-source { display: none; }
 .vrecall-head .recall-peek { margin: 0; display: block; }
 .vrecall-head .recall-showtext { margin-block: calc((var(--t-meta-lh) - var(--hit)) / 2); padding: 0 var(--s-2); }
-/* Stufen (recallfit.ts): 1 Frage 20/26, Antworten 15/20 mit 12. 2 Frage 18/23, Antworten 14/19 mit 10, Abstände je 4 px kleiner. 3 Quelle aus, Tastenabstand 8, Hook nach der Antwort höchstens 3 Zeilen. */
+/* Stufen (recallfit.ts): 1 Frage 20/26, Antworten 15/20 mit 12. 2 Frage 18/23, Antworten 14/19 mit 10, Abstände je 4 px kleiner. 3 Quelle aus, Tastenabstand 8. */
 .vrecall-page[data-fit='1'] { --rc-q: 20px; --rc-q-lh: 26px; --rc-o: 15px; --rc-o-lh: 20px; --rc-o-py: 12px; }
 .vrecall-page:is([data-fit='2'], [data-fit='3']) {
   --rc-q: 18px; --rc-q-lh: 23px; --rc-o: 14px; --rc-o-lh: 19px; --rc-o-py: 10px; --rc-ogap: 6px;
-  --rc-g-q: 16px; --rc-g-o: 12px; --rc-g-w: 10px; --rc-g-h: 8px; --rc-g-n: 12px;
+  --rc-g-q: 16px; --rc-g-o: 12px; --rc-g-w: 10px; --rc-g-n: 12px;
 }
 .vrecall-page[data-fit='3'] { --rc-ogap: 8px; }
 /* Karte: kein Kasten, kein Rahmen, kein eigener Hintergrund, kein Schatten */
@@ -461,10 +461,6 @@ a.vtext-source { text-decoration: underline; text-underline-offset: 3px; }
 .vrecall-page .recall-option { min-height: var(--hit); border-radius: var(--r-card); padding: calc(var(--rc-o-py) - 1px) calc(var(--rc-o-px) - 1px); }
 .vrecall-page .recall-skip { margin-top: var(--rc-g-w); min-height: var(--hit); font-size: var(--t-body); line-height: var(--t-body-lh); }
 .vrecall-page .recall-why { margin: var(--rc-g-w) 0 0; }
-/* Hook nach der Antwort, in voller Länge, Serif im Bereich Brain wie bisher */
-.vrecall-page .recall-hook-after { margin: var(--rc-g-h) 0 0; font-size: 17px; line-height: 23px; font-weight: var(--w-hook); color: var(--text); overflow-wrap: anywhere; }
-.vrecall-page[data-area='brain'] .recall-hook-after { font-family: var(--font-brain); font-weight: var(--w-brain-hook); }
-.vrecall-page[data-fit='3'] .recall-hook-after { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
 .vrecall-page .recall-primary { margin-top: var(--rc-g-n); min-height: max(var(--hit), calc(2 * var(--rc-o-py) + var(--rc-o-lh))); border-radius: var(--r-card); width: 100%; }
 /* Messkopie für die Stufenwahl: Erklärung, Hook und "Next" nach der Antwort, nicht sichtbar, ohne Höhe, nicht im Fluss */
 .recall-probe { position: absolute; left: 0; right: 0; top: 0; height: 0; overflow: hidden; visibility: hidden; pointer-events: none; }

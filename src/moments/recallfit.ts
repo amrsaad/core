@@ -6,7 +6,7 @@
  *   0  Frage 22/28, Antworten 16/22 mit Innenabstand 14
  *   1  Frage 20/26, Antworten 15/20 mit Innenabstand 12
  *   2  Frage 18/23, Antworten 14/19 mit Innenabstand 10, Abstände je 4 px kleiner
- *   3  zusätzlich Quelle aus, Tastenabstand 8, der Hook nach der Antwort höchstens 3 Zeilen (nur hier mit "…")
+ *   3  zusätzlich Quelle aus, Tastenabstand 8
  * Gewählt wird die kleinste Stufe, bei der der Block vor UND nach der Antwort passt. Es wird nie gescrollt.
  */
 export const FIT_MAX = 3;

@@ -1,7 +1,7 @@
 // E2E Abrufkarte auf jede iPhone-Höhe. Runde 28: kein Kasten, ein Block auf der Seite unter der Reiterleiste (Kennzeile, Bereich, Quelle, Frage, Antworten, "Skip").
-// Der Hook steht erst nach der Antwort, unter der Erklärung. Für alle Prüfhöhen (sichtbarer Bereich, innerHeight) und beide Breiten, in Text, Video und Audio:
+// Runde 35: nach der Antwort steht nur die Erklärung, der Hook erscheint auf dem Handy nie. Für alle Prüfhöhen (sichtbarer Bereich, innerHeight) und beide Breiten, in Text, Video und Audio:
 //  - kein Kasten (kein Rahmen, kein eigener Hintergrund, kein Schatten, kein Innenabstand an der Karte), kein Platzhalter (.recall-ghost), Seitenrand 24 px,
-//  - Hook vor der Antwort nirgends sichtbar, nach der Antwort in voller Länge (Stufe 3: höchstens 3 Zeilen), Serif im Bereich Brain,
+//  - Hook weder vor noch nach der Antwort sichtbar, kein .recall-hook-after im DOM, nach der Antwort genau eine Erklärung,
 //  - Abstand letzte Antwort bis "Skip" höchstens 20 px, Frage höchstens 4 Zeilen ohne "…", Maße und Abstände je Stufe (recallfit.ts),
 //  - Position von Kennzeile, Frage und Antworten vor und nach der Antwort gleich (höchstens 1 px), sonst rückt der Block nur nach oben und nur, wenn er sonst überstünde,
 //  - freier Platz 40 zu 60 über und unter dem Block (Toleranz 12 px), nichts scrollt, nichts überlappt, nichts abgeschnitten, Kontrast mindestens 4,5,
@@ -97,7 +97,7 @@ const probe = ({ phase, hookTxt }) => {
   add('tag', q('[data-testid=recall-tag]'), phase === 'ask');
   add('skip', q('[data-testid=recall-skip]'), phase === 'ask');
   add('kicker', q('.vkicker'), false);
-  add('hook', q('[data-testid=recall-hook]'), phase === 'done');
+  add('hook', q('[data-testid=recall-hook]'), false);
   add('source', q('.vtext-source'), false);
   add('showtext', q('[data-testid=recall-showtext]'), false);
   add('question', q('[data-testid=recall-question]'), true);
@@ -148,8 +148,8 @@ const probe = ({ phase, hookTxt }) => {
     opt0: opts[0] ? { size: parseFloat(getComputedStyle(opts[0]).fontSize), lh: parseFloat(getComputedStyle(opts[0]).lineHeight), pt: parseFloat(getComputedStyle(opts[0]).paddingTop) + parseFloat(getComputedStyle(opts[0]).borderTopWidth), px: parseFloat(getComputedStyle(opts[0]).paddingLeft) + parseFloat(getComputedStyle(opts[0]).borderLeftWidth), r: getComputedStyle(opts[0]).borderTopLeftRadius, w: opts[0].getBoundingClientRect().width } : null,
     colW: root.getBoundingClientRect().width - parseFloat(pcs.paddingLeft) - parseFloat(pcs.paddingRight), sideL: opts[0] ? opts[0].getBoundingClientRect().left - rb0(root).left : null, sideR: opts[0] ? rb0(root).right - opts[0].getBoundingClientRect().right : null,
     whyEl: q('[data-testid=recall-why]') ? { size: parseFloat(getComputedStyle(q('[data-testid=recall-why]')).fontSize), lh: parseFloat(getComputedStyle(q('[data-testid=recall-why]')).lineHeight), top: q('[data-testid=recall-why]').getBoundingClientRect().top } : null,
-    hookTopGap: hook && q('[data-testid=recall-why]') ? hook.getBoundingClientRect().top - q('[data-testid=recall-why]').getBoundingClientRect().bottom : null,
-    nextGap: hook && q('[data-testid=recall-next]') ? q('[data-testid=recall-next]').getBoundingClientRect().top - hook.getBoundingClientRect().bottom : null,
+    nextGap: q('[data-testid=recall-why]') && q('[data-testid=recall-next]') ? q('[data-testid=recall-next]').getBoundingClientRect().top - q('[data-testid=recall-why]').getBoundingClientRect().bottom : null,
+    hookAfterInDom: !!root.querySelector('.recall-hook-after'),
     nextH: q('[data-testid=recall-next]') ? q('[data-testid=recall-next]').getBoundingClientRect().height : null,
     visibleHookText: hookTxt ? [...root.querySelectorAll('*')].some((e) => e.children.length === 0 && vis(e) && (e.textContent ?? '').includes(hookTxt)) : null,
     pageScroll: root.scrollHeight - root.clientHeight, anyScrollable: [...root.querySelectorAll('*')].filter((e) => { const o = getComputedStyle(e).overflowY; return (o === 'auto' || o === 'scroll') && e.scrollHeight > e.clientHeight + 1 && vis(e) && !e.closest('[data-testid=recall-peekov]'); }).length,
@@ -292,14 +292,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
               const want = Math.max(0, free < 16 ? free : Math.max(16, 0.4 * free));
               if (Math.abs(above - want) > 12) fail(`${t} Verteilung 40/60`, `oben ${above.toFixed(1)}, unten ${below.toFixed(1)}, erwartet oben ${want.toFixed(1)}`); else ok(`${t} Verteilung 40/60`);
             } else {
-              // Hook nach der Antwort voll sichtbar (ab Stufe 3 höchstens 3 Zeilen), Abstände 14/12/16, Next so hoch wie eine Antwort
-              const hk = p.hookInfo;
-              const lines = hk ? hk.h / hk.lh : 0;
-              if (!hk || hk.shown !== m.hook || (lv < 3 && hk.clipped) || (lv === 3 && lines > 3.05)) fail(`${t} Hook voll sichtbar`, JSON.stringify(hk)); else ok(`${t} Hook voll sichtbar`);
-              if (hk && (hk.size !== 17 || hk.lh !== 23)) fail(`${t} Hook 17/23`, `${hk.size}/${hk.lh}`); else ok(`${t} Hook 17/23`);
+              // Nach der Antwort genau eine Erklärung (recall-why), kein Hook auf dem Handy, Abstände Erklärung zu Next, Next so hoch wie eine Antwort
+              if (e.hookAfterInDom || p.hookInfo || e.visibleHookText) fail(`${t} kein Hook nach der Antwort`, 'recall-hook-after oder Hook-Text vorhanden'); else ok(`${t} kein Hook nach der Antwort`);
+              if (!e.whyEl) fail(`${t} Erklärung da`, 'recall-why fehlt'); else ok(`${t} Erklärung da`);
               if (e.whyEl && (e.whyEl.size !== 15 || e.whyEl.lh !== 21)) fail(`${t} Erklärung 15/21`, JSON.stringify(e.whyEl)); else ok(`${t} Erklärung 15/21`);
-              const gw = [14, 14, 10, 10][lv], gh = [12, 12, 8, 8][lv], gn = [16, 16, 12, 12][lv];
-              if (e.hookTopGap === null || Math.abs(e.hookTopGap - gh) > 0.6 || Math.abs(e.nextGap - gn) > 0.6) fail(`${t} Abstände Erklärung, Hook, Next`, `${e.hookTopGap}/${e.nextGap} erwartet ${gh}/${gn}`); else ok(`${t} Abstände Erklärung, Hook, Next`);
+              const gn = [16, 16, 12, 12][lv];
+              if (e.nextGap === null || Math.abs(e.nextGap - gn) > 0.6) fail(`${t} Abstand Erklärung zu Next`, `${e.nextGap} erwartet ${gn}`); else ok(`${t} Abstand Erklärung zu Next`);
             }
           };
           verify(before, 'vor der Antwort');

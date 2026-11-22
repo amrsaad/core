@@ -17,7 +17,7 @@ export function RecallTag({ review, day, dir }: { review: boolean; day?: string 
   return <div className="recall-tag" data-testid="recall-tag" dir={dir} lang="en">{recallTag(review, day)}</div>;
 }
 
-/** Hook des Ursprungs-Moments (Desktop-Panel). Auf dem Handy steht er erst nach der Antwort in der Karte (recall-hook-after). */
+/** Hook des Ursprungs-Moments (Desktop-Panel). Auf dem Handy erscheint er nicht (nach der Antwort steht nur die Erklärung). */
 export function RecallHook({ text, dir, className, as: Tag = 'p' }: { text: string; dir: string; className: string; as?: 'p' | 'h2' }) {
   return <Tag className={className} dir={dir} data-recall-hook="">{text}</Tag>;
 }
@@ -216,11 +216,10 @@ export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, on
           );
         })}
       </div>
-      {/* Runde 28: kein Platzhalter im Fluss. Die Messkopie hat keine Höhe und liegt nicht im Fluss, sie dient nur der Stufenwahl (Erklärung, Hook und "Next" nach der Antwort). */}
+      {/* Runde 28: kein Platzhalter im Fluss. Die Messkopie hat keine Höhe und liegt nicht im Fluss, sie dient nur der Stufenwahl (Erklärung und "Next" nach der Antwort). */}
       {chosen === null && !keys && (
         <div className="recall-probe" aria-hidden="true">
           <p className="recall-why">{r.why}</p>
-          <p className="recall-hook-after" dir={originOf(m).dir}>{originOf(m).hook}</p>
           <div className="recall-primary">Next</div>
         </div>
       )}
@@ -232,7 +231,6 @@ export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, on
       {chosen !== null && (
         <>
           <p className="recall-why" data-testid="recall-why">{r.why}</p>
-          {!keys && <p className="recall-hook-after" data-testid="recall-hook" dir={originOf(m).dir}>{originOf(m).hook}</p>}
           <button className="recall-primary" data-testid="recall-next" onClick={onClose}>
             Next
             {keys && <kbd className="recall-key" aria-hidden="true">Enter</kbd>}
