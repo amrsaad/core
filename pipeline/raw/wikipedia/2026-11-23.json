@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-23",
+ "records": [
+  {
+   "sourceId": "wiki:de:Georgische Rugby-Union-Nationalmannschaft",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Georgische_Rugby-Union-Nationalmannschaft",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/23",
+    "status": 200
+   },
+   "title": "Georgische Rugby-Union-Nationalmannschaft",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die georgische Rugby-Union-Nationalmannschaft ist die Nationalmannschaft Georgiens in der Sportart Rugby Union und repräsentiert das Land bei allen Länderspielen der Männer. Ihr Spitzname „Lelos“ leitet sich von einem dem Rugby ähnlichen traditionellen Sport ab. Ein weiterer Spitzname, Bordschghalosnebi, leitet sich von der Bordschghali ab, dem traditionellen georgischen Symbol der Sonne. Die organisatorische Verantwortung trägt der 1964 gegründete und seit 1991 eigenständig agierende Verband Sakartwelos ragbis kawschiri. Vom Weltverband World Rugby wird die georgische Nationalmannschaft in die zweite Stärkeklasse (second tier) eingeteilt. Damit gehört sie zu den stärkeren europäischen Teams außerhalb der Six Nations."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-23T04:02:42.862Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Georgische_Rugby-Union-Nationalmannschaft": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Jacques Mayol",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Jacques_Mayol",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/23",
+    "status": 200
+   },
+   "title": "Jacques Mayol",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Jacques Mayol war ein französischer Apnoetaucher. Da er beruflich und privat viel mit Delfinen schwamm, war er auch als Delfin-Mann bekannt."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-23T04:02:42.862Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Jacques_Mayol": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Max Hachenburg",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Max_Hachenburg",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/23",
+    "status": 200
+   },
+   "title": "Max Hachenburg",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Max Hachenburg war ein deutscher Jurist und Rechtspublizist. Er galt als führender Handels- und Gesellschaftsrechtler seiner Zeit, veröffentlichte unter anderem einflussreiche Kommentare zum Handelsgesetzbuch und zum GmbH-Gesetz. Des Weiteren engagierte er sich in den juristischen berufsständischen Vereinigungen. Ab 1933 wurde er in Deutschland als Jude verfolgt und emigrierte 1939 nach Zürich, 1940 nach Oswestry und 1946 nach Berkeley."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-23T04:02:42.862Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Max_Hachenburg": 200
+   }
+  }
+ ]
+}
