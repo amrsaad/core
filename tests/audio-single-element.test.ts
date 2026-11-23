@@ -115,7 +115,7 @@ const clip = (id: string): DeckClip => ({ key: `${id}|10|14`, id, url: `https://
 
 const ALL = ['a', 'b', 'c', 'd', 'e', 'f', 'g'].map(clip);
 
-function setup(opts: { bgInline?: boolean; bgRefill?: boolean } = {}) {
+function setup(opts: { bgInline?: boolean; bgRefill?: boolean; bgSingle?: boolean } = {}) {
   const els: El[] = [];
   const hid = { v: false };
   const deck = new AudioDeck({
@@ -196,8 +196,8 @@ describe('höchstens ein Element gibt Ton (Runde 33)', () => {
     expect(has(t, /^deck: second element playing/)).toBe(1);
   });
 
-  it('einmal je Sekunde, aber nur solange sichtbar', async () => {
-    const t = setup();
+  it('einmal je Sekunde, aber nur solange sichtbar (bgSingle aus, Verhalten von Runde 33)', async () => {
+    const t = setup({ bgSingle: false });
     await boot(t);
     t.hid.v = false;
     t.deck.pageEvent('visible');

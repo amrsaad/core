@@ -51,7 +51,7 @@ import { makeRng } from './rng';
 import { addTap, CONFIRM_MS, HEART_MS, nextLiked, swipeOf } from './actions';
 import { addFrames, atRest, commitVelocity, dragY, frameSample, release, SPRING_BACK, SPRING_COMMIT, stepSpring, Velocity, type Spring, type SpringState } from './swipe';
 import { saveGate } from '../lib/useAppState';
-import { blockedCount, emptyFormLine, END_SUB, endButtonLabel, endLine, filterPool, formOf, FORM_LABEL, FORMS, measuresWait, momentText, otherForms, textEndReached, unseenCount, waitingLine, type Form } from './form';
+import { blockedCount, emptyFormLine, END_SUB, endButtonLabel, endLine, filterPool, formOf, FORM_LABEL, FORMS, measuresWait, momentText, restartWait, otherForms, textEndReached, unseenCount, waitingLine, type Form } from './form';
 import { atEnd, EndLedger, isBackground, onLeave } from './background';
 import { PlayTracker } from './played';
 import { setMood } from '../design/mood';
@@ -803,6 +803,12 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
    */
   const measureWait = (id: string, st: number, c: number) => {
     const now = performance.now();
+    // Runde 37 (D): solange die Abrufkarte offen steht, läuft keine Wartezeit. Die Messung beginnt neu, wenn die Karte schließt (closeRecall), "wait:" zeigt die echte Zeit bis zum Ton.
+    if (recallRef.current) {
+      waitRef.current = restartWait(waitRef.current, now);
+      gapRef.current = null;
+      return;
+    }
     if (userPaused.current || !activeRef.current || isBackground(document.visibilityState) || tapRef.current === id) {
       waitRef.current = null;
       gapRef.current = null;
@@ -1292,6 +1298,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     recallEntry.current = null;
     setRecall(null);
     since.current = Date.now();
+    waitRef.current = restartWait(waitRef.current, performance.now());
     if (!textRef.current && active && !userPaused.current) current().player?.playVideo();
     // Tempo nach der Karte erneut setzen, YouTube fällt nach Pause auf 1x zurück (Max 31.10.)
     applyRate();

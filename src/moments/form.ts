@@ -16,6 +16,11 @@ export const FORM_LABEL: Record<Form, string> = { video: 'Video', audio: 'Audio'
 export const formOf = (m: Pick<Moment, 'audio' | 'form'>): Form => m.form ?? (m.audio ? 'audio' : 'video');
 /** Runde 21: die Messung "wait:" und "gap:" gilt nur für Audio und Video. Im Text-Reiter wäre sie die Lesezeit. */
 export const measuresWait = (m: Pick<Moment, 'audio' | 'form'> | null | undefined): boolean => !!m && formOf(m) !== 'text';
+/**
+ * Runde 37: Messung der Wartezeit "wait:" im Host. Steht die Abrufkarte offen, läuft keine Wartezeit (Gerätelog 23.11. 07:55: "16179 ms to play", davon 15 s Karte).
+ * Die Messung beginnt neu (t0 = jetzt, kein Zeitfortschritt gemerkt), solange die Karte offen ist und wenn sie schließt. Ohne laufende Messung bleibt null.
+ */
+export const restartWait = <W extends { t0: number; last: number | null }>(w: W | null, now: number): W | null => (w ? { ...w, t0: now, last: null } : null);
 export const inForm = (m: Pick<Moment, 'audio' | 'form'>, f: Form): boolean => formOf(m) === f;
 export const filterPool = <T extends Pick<Moment, 'audio' | 'form'>>(pool: T[], f: Form): T[] => pool.filter((m) => inForm(m, f));
 /** Zeile, wenn der Filter leer ist */

@@ -366,6 +366,27 @@ export const RESCUE_FAST_MS = 3000;
 export const BG_STUCK = true;
 export const BG_STUCK_MS = 10_000;
 export const BG_STUCK_TICK_MS = 2000;
+/**
+ * Runde 37 (A): höchstens ein Element gibt Ton, auch verdeckt. Gerätelog 23.11. 07:46 bis 07:48: nach fünf verdeckten Wechseln standen vier Elemente (behalten, Vorrat, zwei freie)
+ * auf paused=false, erst die Rückkehr fand sie. Verdeckt lief enforceSingle nie. Jetzt: Wächter im Takt von einer Sekunde auch verdeckt, dazu eine Prüfung kurz nach jedem verdeckten Tausch.
+ * Zeile "deck: second element playing <rolle> <id> t=<t>, paused (hidden)" mit Stand (Zeit seit halt, seit play-Ereignis, readyState).
+ * false: Wächter nur sichtbar wie in Runde 33.
+ */
+export const BG_SINGLE = true;
+/** Runde 37 (A): Prüfung nach einem verdeckten Tausch (ms), einmal früh, einmal spät */
+export const BG_SINGLE_SOON_MS = [300, 2500];
+/**
+ * Runde 37 (A): bleibt ein Fremdelement (behalten oder frei) trotz pause() nicht pausiert (paused=false direkt danach, oder zum zweiten Mal innerhalb von 10 s gefunden), geht seine Zeit ans
+ * Ende der Quelle (nur Zeit, kein load(), keine Quelle lösen: load() verdeckt kann hängen). Nie bei Vorrat, Probe oder Nachfüllen. Zeile "deck: second element forced to end".
+ * false: nur pause().
+ */
+export const BG_SINGLE_ESCALATE = true;
+/**
+ * Runde 37 (B): ein Element ohne bestätigte Freischaltung bekommt keinen Vorrats-Eintrag, solange es dafür nicht frei und freigeschaltet ist (Vorrat wartet, bis eine Geste das Element
+ * freischaltet), verdeckt tauscht nichts auf so ein Element, ein behaltenes nicht freigeschaltetes Element wird bei der nächsten Geste freigegeben und neu probiert.
+ * Zeilen: "deck: pool fill held", "deck: unlock catch-up", "deck: swap skips element not unlocked (hidden)", "deck: refusal element". false: wie Runde 36.
+ */
+export const UNLOCK_GUARD = true;
 /** Runde 29: so lange wartet der erste play() nach dem Sprung auf seeked (ms), danach spielt er trotzdem */
 export const JUMP_WAIT_MS = 1500;
 /** Runde 29: so lange wartet der erste play() auf die Metadaten (ms), danach spielt er trotzdem (Netz hängt, nie stehen bleiben) */
@@ -544,6 +565,12 @@ export interface DeckDeps {
   freshReload?: boolean;
   /** Runde 36: false schaltet die Hänge-Erkennung verdeckt ab, Standard BG_STUCK */
   bgStuck?: boolean;
+  /** Runde 37: false schaltet den verdeckten Wächter ab (nur sichtbar), Standard BG_SINGLE */
+  bgSingle?: boolean;
+  /** Runde 37: false schaltet das Ans-Ende-Setzen eines trotz pause() spielenden Fremdelements ab, Standard BG_SINGLE_ESCALATE */
+  bgSingleEscalate?: boolean;
+  /** Runde 37: false schaltet die Freischalt-Sperre ab (Vorrat, verdeckter Tausch, behaltene Elemente), Standard UNLOCK_GUARD */
+  unlockGuard?: boolean;
   /** Runde 27: false schaltet das Ausweichen auf ein frisches Element ab (Tests der bestehenden Kette), Standard true */
   dodge?: boolean;
   /** Element-Vorrat (Entscheidung 47 und 52): fill() lädt die nächsten POOL Ausschnitte in eigene Elemente vor, swapNext() tauscht nur die Rollen. Aus: fill() tut nichts. */
@@ -817,8 +844,14 @@ export class AudioDeck {
   private waitTapKey = '';
   private mutedBlockNoted = false;
   private dodgeOn: boolean;
+  private bgSingleOn: boolean;
+  private bgSingleEsc: boolean;
+  private guardOn: boolean;
 
   constructor(private deps: DeckDeps) {
+    this.bgSingleOn = deps.bgSingle ?? BG_SINGLE;
+    this.bgSingleEsc = deps.bgSingleEscalate ?? BG_SINGLE_ESCALATE;
+    this.guardOn = deps.unlockGuard ?? UNLOCK_GUARD;
     this.unlockSilent = deps.unlockSilent ?? UNLOCK_SILENT;
     this.neverMuted = deps.neverMuted ?? NEVER_MUTED;
     this.bgInline = deps.bgInline ?? BG_INLINE_NEXT;
@@ -1047,8 +1080,12 @@ export class AudioDeck {
   /** Element anhalten und merken, wer es war: kommt das pause-Ereignis ohne diesen Eintrag, hat das System pausiert */
   private halt(el: DeckEl, by: string) {
     if (!el.paused) this.pauseBy.set(el, by);
+    this.haltAt.set(el, { by, at: Date.now() });
     el.pause();
   }
+
+  /** Runde 37: wann und von wem ein Element zuletzt angehalten wurde (für die Zeile "second element playing") */
+  private haltAt = new WeakMap<DeckEl, { by: string; at: number }>();
 
   /** Runde 20: liegt hinter der Position des Elements Puffer (mehr als AHEAD_MIN_S)? Ohne Bereiche auf dem Gerät: ja (kein Maßstab). */
   private aheadOk(el: DeckEl): boolean {
@@ -2497,15 +2534,30 @@ export class AudioDeck {
         waitMs > 0 ? waitMs + 50 : FILL_DEFER_MS,
       );
     }
+    // Runde 37 (B): ein Eintrag braucht ein freies, freigeschaltetes Element. Fehlt es, wartet er auf die nächste Geste (silentUnlock), dann holt probe() den Vorrat nach.
+    // Ist gar keins bestätigt (iOS beantwortet keine Probe), gilt das Verhalten davor: der Vorrat lädt trotzdem.
+    let slots = this.guardOn && this.neverMuted && this.unlockSilent && this.all().some((e) => this.unlockedEls.has(e)) ? this.freeUnlocked() : Number.POSITIVE_INFINITY;
+    let held = 0;
     this.inFill = true;
     try {
       for (const c of order) {
+        if (slots <= 0) {
+          held++;
+          continue;
+        }
+        slots--;
         this.startEntry(c, loc.get(c.key));
         changed = true;
       }
     } finally {
       this.inFill = false;
     }
+    this.fillHeld = held > 0;
+    if (held > 0 && held !== this.heldNoted) {
+      this.heldNoted = held;
+      const all = this.all();
+      this.diag(`deck: pool fill held ${held} (no unlocked element free, ${all.filter((e) => !this.unlockedEls.has(e)).length}/${all.length} not unlocked)`);
+    } else if (held === 0) this.heldNoted = 0;
     // Reihenfolge der Warteschlange herstellen (neue Einträge kamen hinten dazu)
     const rank = new Map(want.map((c, i) => [c.key, i] as const));
     this.entries.sort((a, b) => (rank.get(a.clip.key) ?? 0) - (rank.get(b.clip.key) ?? 0));
@@ -2515,6 +2567,15 @@ export class AudioDeck {
     }
     return this.entries.length;
   }
+
+  /** Runde 37 (B): freie Elemente (weder aktiv, Vorrat, behalten, Probe noch verdächtig), die eine bestätigte Freischaltung haben */
+  private freeUnlocked(): number {
+    return this.all().filter((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e) && !this.probes.has(e) && !this.suspect.has(e) && this.unlockedEls.has(e)).length;
+  }
+  private fillHeld = false;
+  private heldNoted = 0;
+  private lockSkipNoted = new Set<DeckEl>();
+  private lastCatch = '';
 
   private poolClosed(): boolean {
     return this.neverMuted && this.unlockSilent && !this.poolOpened;
@@ -2714,6 +2775,14 @@ export class AudioDeck {
     const order = this.entries.map((e, i) => ({ e, i })).sort((a, b) => tier(a.e) - tier(b.e) || a.i - b.i);
     for (const { e } of order) {
       if (!e.ready) continue;
+      // Runde 37 (B): verdeckt tauscht nichts auf ein Element ohne bestätigte Freischaltung (iOS lehnt das play() ab, niemand tippt). Der Rückfall im aktiven Element übernimmt.
+      if (hid && this.guardOn && this.neverMuted && this.unlockSilent && !this.unlockedEls.has(e.el)) {
+        if (!this.lockSkipNoted.has(e.el)) {
+          this.lockSkipNoted.add(e.el);
+          this.diag(`deck: swap skips element not unlocked ${e.clip.id} (hidden)`);
+        }
+        continue;
+      }
       if (!this.usable(e)) {
         // Verworfen, seit es bereit wurde: nicht abspielbar
         this.evict(e);
@@ -2834,6 +2903,10 @@ export class AudioDeck {
     // Der Sink steht vor dem play(): ein Element meldet "playing" auch synchron, der neue Player soll den Zustand nie verpassen
     if (!via?.keepSink) this.sink = sink;
     this.applyRate(el);
+    if (this.neverMuted && this.unlockSilent && play && !this.unlockedEls.has(el)) {
+      const all = this.all();
+      this.diag(`deck: swap onto element not unlocked ${clip.id} (unlocked ${all.filter((e) => this.unlockedEls.has(e)).length}/${all.length}, hidden=${this.hidden() ? 1 : 0})`);
+    }
     if (s.ready) {
       this.diag(`deck: swap ${clip.id} ready=true pool=${this.readyCount()}`);
       // Runde 20: der Eintrag war bereit, hat hinter der Startstelle aber zu wenig Puffer: Zeile, getauscht wird trotzdem
@@ -2896,6 +2969,11 @@ export class AudioDeck {
       return;
     }
     if (name === 'NotAllowedError' && this.el) {
+      // Runde 37: Stand der Freischaltung beim Ablehnen (vor dem Löschen unten): beantwortet, ob ein "freigeschaltetes" Element trotzdem abgelehnt wird
+      const all = this.all();
+      this.diag(
+        `deck: refusal element ${this.idOf(this.el)} unlocked=${this.unlockedEls.has(this.el) ? 1 : 0} via=${this.unlockWho.get(this.el) ?? 'none'} unlockedAll=${all.filter((e) => this.unlockedEls.has(e)).length}/${all.length} probing=${this.probes.has(this.el) ? 1 : 0} sinceGesture=${this.gestAt ? Date.now() - this.gestAt : 'none'} ms hidden=${this.hidden() ? 1 : 0} why=${why}`,
+      );
       this.snd = reduceSound(this.snd, 'refused', this.soundView(this.el));
       this.sink?.sound?.();
     }
@@ -3021,6 +3099,7 @@ export class AudioDeck {
           this.diag(`deck onAdvance failed ${e instanceof Error ? e.message : String(e)}`);
         }
         this.bgRefill();
+        this.singleSoon();
         return;
       }
     }
@@ -3128,27 +3207,67 @@ export class AudioDeck {
   private enforceSingle(why: string) {
     const act = this.el;
     if (!act) return;
+    // Runde 37: verdeckt heißt der Grund immer "hidden", egal wer prüft (play, Takt, nach dem Tausch)
+    const tag = this.hidden() ? 'hidden' : why;
     for (const el of this.all()) {
       if (el === act || el.paused || this.silentEl(el)) continue;
       const role = this.probes.has(el) ? 'probe' : this.bgRef?.el === el ? 'refill' : this.keptOf(el) ? 'kept' : this.entryOf(el) ? 'pool' : 'unknown';
+      const h = this.haltAt.get(el);
       this.halt(el, 'app: second element');
+      const now = Date.now();
       const last = this.secondAt.get(el) ?? 0;
-      this.secondAt.set(el, Date.now());
-      if (Date.now() - last < 5000) continue;
-      this.diag(`deck: second element playing ${role} ${this.idOf(el)} t=${this.num(el.currentTime)}, paused (${why})`);
+      this.secondAt.set(el, now);
+      // Runde 37: Wiederholung innerhalb von 10 s zählt (pause() allein hat nicht gehalten)
+      const prev = this.secondN.get(el);
+      const n = prev && now - prev.at < 10_000 ? prev.n + 1 : 1;
+      this.secondN.set(el, { n, at: now });
+      const ignored = !el.paused;
+      // Zeilen höchstens alle 5 s je Element, der Eingriff selbst läuft bei jedem Fund
+      const say = now - last >= 5000;
+      if (say) {
+        const detail = tag === 'hidden' ? ` rs=${el.readyState} sincePlay=${this.since(this.st(el).playAt)} lastHalt=${h ? `${h.by} ${now - h.at} ms` : 'none'} n=${n}` : '';
+        this.diag(`deck: second element playing ${role} ${this.idOf(el)} t=${this.num(el.currentTime)}, paused (${tag})${detail}`);
+        if (ignored) this.diag(`deck: second element ignores pause ${role} ${this.idOf(el)} (${tag}) paused=${el.paused}`);
+      }
+      // Runde 37: pause() hat nicht gehalten, oder zum zweiten Mal gefunden: Zeit ans Ende (nur kept und unknown, nie Vorrat, Probe, Nachfüllen)
+      if (this.bgSingleEsc && (ignored || n >= 2) && (role === 'kept' || role === 'unknown')) {
+        try {
+          const d = el.duration;
+          if (Number.isFinite(d) && d > 0) {
+            el.currentTime = Math.max(0, d - 0.05);
+            this.halt(el, 'app: second element');
+            if (now - (this.forcedAt.get(el) ?? 0) >= 5000) {
+              this.forcedAt.set(el, now);
+              this.diag(`deck: second element forced to end ${role} ${this.idOf(el)} (${tag}) paused=${el.paused}`);
+            }
+          }
+        } catch {
+          /* Zeit nicht setzbar */
+        }
+      }
     }
   }
 
   private secondAt = new WeakMap<DeckEl, number>();
+  private forcedAt = new WeakMap<DeckEl, number>();
+  private secondN = new WeakMap<DeckEl, { n: number; at: number }>();
   private singleTimer: ReturnType<typeof setInterval> | null = null;
 
-  /** Runde 33: Wächter einmal je Sekunde, solange die App sichtbar ist (startet beim ersten play() und beim Sichtbarwerden, endet mit release) */
+  /** Runde 33: Wächter einmal je Sekunde (startet beim ersten play() und beim Sichtbarwerden, endet mit release). Runde 37: auch verdeckt (BG_SINGLE). */
   private watchSingle() {
     if (this.singleTimer) return;
     this.singleTimer = setInterval(() => {
       if (!this.hidden()) this.enforceSingle('tick');
+      else if (this.bgSingleOn) this.enforceSingle('hidden');
     }, 1000);
     (this.singleTimer as unknown as { unref?: () => void }).unref?.();
+  }
+
+  /** Runde 37: nach einem verdeckten Tausch prüfen, ob das alte Element wirklich steht (früh und spät, die Takt-Prüfung folgt ohnehin) */
+  private singleSoon() {
+    if (!this.bgSingleOn) return;
+    this.watchSingle();
+    for (const ms of BG_SINGLE_SOON_MS) setTimeout(() => this.hidden() && this.enforceSingle('hidden'), ms);
   }
 
   /** Runde 32: die App ist wieder sichtbar: verdächtige Elemente (verdecktes Laden verloren) hart zurücksetzen, neue Hintergrund-Phase */
@@ -3398,6 +3517,11 @@ export class AudioDeck {
       if (open <= 0) setTimeout(() => this.unlockLine(gid, type), 50);
       // Alle Proben sind entschieden: der Vorrat darf laden
       this.openPool();
+      // Runde 37 (B): ein Element ist freigeschaltet, ein wartender Vorrat darf es jetzt nehmen
+      if (ok && this.fillHeld && this.probeOpen === 0 && !this.hidden()) {
+        this.fillHeld = false;
+        this.refillDeferred();
+      }
     };
     r.settle = settle;
     if (!this.probeWired.has(el)) {
@@ -3481,6 +3605,18 @@ export class AudioDeck {
     };
     // Während die Schleife läuft, gilt der Vorrat als geschlossen (ein sofort entschiedener Versuch öffnet ihn sonst vor den übrigen)
     this.probeOpen++;
+    // Runde 37 (B): fehlende Freischaltungen bei jeder Geste nachholen. Ein behaltenes Element ohne Freischaltung wird freigegeben (sichtbar), dann probt es wie ein freies.
+    const missing = this.all().filter((e) => e !== this.el && !this.unlockedEls.has(e));
+    if (this.guardOn && missing.length > 0) {
+      const line = `deck: unlock catch-up ${missing.length} not unlocked (pool ${missing.filter((e) => this.entryOf(e)).length}, kept ${missing.filter((e) => this.keptOf(e)).length}, probing ${missing.filter((e) => this.probes.has(e)).length})`;
+      if (line !== this.lastCatch) {
+        this.lastCatch = line;
+        this.diag(line);
+      }
+    } else this.lastCatch = '';
+    if (this.guardOn && !this.hidden()) {
+      for (const k of [...this.kept]) if (!this.unlockedEls.has(k.el) && k.el !== this.el && !this.probes.has(k.el)) this.releaseKept(k);
+    }
     for (const el of this.all()) {
       if (el === this.el || this.unlockedEls.has(el) || this.entryOf(el) || this.keptOf(el) || this.probes.has(el)) continue;
       if (!this.silentEl(el)) {
@@ -3597,6 +3733,7 @@ export class AudioDeck {
     if (kind === 'hidden') {
       this.hiddenStats = { tu: 0, ended: 0, ends: 0, plays: 0, at: Date.now(), chk: 0 };
       this.bgStuckStart();
+      if (this.bgSingleOn) this.watchSingle();
       for (const sec of [1, 5, 15]) setTimeout(() => this.hidden() && this.note(line(` +${sec} s`)), sec * 1000);
     } else if (kind === 'visible' && this.hiddenStats.at) {
       const h = this.hiddenStats;
