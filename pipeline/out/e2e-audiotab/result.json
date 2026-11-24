@@ -1,5 +1,5 @@
 {
- "at": "2026-11-24T07:34:43.795Z",
+ "at": "2026-11-24T13:50:26.769Z",
  "runs": [
   {
    "browser": "webkit",
@@ -101,7 +101,7 @@
      "deck: probe done spare ok=0 dur=600.0 t=0.0",
      "deck: probe done spare ok=0 dur=600.0 t=0.0",
      "deck: probe done spare ok=0 dur=600.0 t=0.0",
-     "deck: gesture unlock 5 elements ok=0 rejected=5 timeout=0 after 0 ms",
+     "deck: gesture unlock 5 elements ok=0 rejected=5 timeout=0 after 1 ms",
      "deck: gesture pointerdown unlocked 1/6",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
@@ -125,7 +125,7 @@
      ],
      "n": 42
     },
-    "rfSwipeMs": 424,
+    "rfSwipeMs": 423,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -158,7 +158,7 @@
      "bg: started atshort9:0",
      "bg: next atshort9:0",
      "bg: refill atshort8 (pool 1/0, target 2)",
-     "bg: refill ready atshort8 after 30 ms",
+     "bg: refill ready atshort8 after 31 ms",
      "bg: deck advance to atshort9: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
      "bg: deck clip end via timeupdate hidden=true pool=2 onAdvance=true advance=yes rs=0 muted=false t=4.0",
      "bg: deck advance atshort9 to atshort2: swap and play() in this handler, new element true, next from storage false, readyState 0",
@@ -166,73 +166,73 @@
      "bg: started atshort2:0",
      "bg: next atshort2:0",
      "bg: refill atshort13 (pool 1/0, target 2)",
-     "bg: refill ready atshort13 after 30 ms"
+     "bg: refill ready atshort13 after 31 ms"
     ],
     "tempoWaiting": 0,
     "tempoPaused": 10,
     "cue": {
      "worst": 1,
-     "n": 622,
+     "n": 623,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.36",
+       "3.38",
        34,
        34
       ],
       [
-       "4.65",
+       "4.66",
        47,
        47
       ],
       [
-       "0.93",
+       "0.90",
        10,
        10
       ],
       [
-       "2.21",
-       23,
-       23
+       "2.19",
+       22,
+       22
       ],
       [
-       "3.50",
+       "3.47",
        35,
        35
       ],
       [
-       "4.78",
+       "4.76",
        48,
        48
       ],
       [
-       "6.07",
+       "6.05",
        61,
        61
       ],
       [
-       "7.36",
+       "7.33",
        74,
        74
       ],
       [
-       "8.64",
+       "8.62",
        87,
        87
       ],
       [
-       "9.93",
+       "9.91",
        100,
        100
       ],
       [
-       "11.21",
-       113,
-       113
+       "11.19",
+       112,
+       112
       ],
       [
-       "12.50",
+       "12.48",
        125,
        125
       ]
@@ -241,7 +241,7 @@
     },
     "cueTempo": {
      "worst": 0,
-     "n": 549,
+     "n": 552,
      "rates": [
       1,
       1.5,
@@ -381,14 +381,14 @@
      "deck: probe done spare ok=0 dur=600.0 t=0.0",
      "deck: probe done spare ok=0 dur=600.0 t=0.0",
      "deck: probe done spare ok=0 dur=600.0 t=0.0",
-     "deck: gesture unlock 5 elements ok=0 rejected=5 timeout=0 after 1 ms",
+     "deck: gesture unlock 5 elements ok=0 rejected=5 timeout=0 after 0 ms",
      "deck: gesture pointerdown unlocked 1/6",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
-     "deck: gesture unlock 5 elements ok=5 rejected=0 timeout=0 after 301 ms",
+     "deck: gesture unlock 5 elements ok=5 rejected=0 timeout=0 after 302 ms",
      "deck: pool start after unlock ok=5/10",
      "deck: gesture pointerup unlocked 6/6"
     ],
@@ -400,11 +400,12 @@
      "ready": [
       "atrdy7",
       "atrdy3",
-      "atrdy9"
+      "atrdy9",
+      "atrdy2"
      ],
-     "n": 40
+     "n": 42
     },
-    "rfSwipeMs": 405,
+    "rfSwipeMs": 504,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -444,7 +445,8 @@
      "bg: ended atshort9:0",
      "bg: started atshort2:0",
      "bg: next atshort2:0",
-     "bg: refill atshort13 (pool 1/0, target 2)"
+     "bg: refill atshort13 (pool 1/0, target 2)",
+     "bg: refill ready atshort13 after 30 ms"
     ],
     "tempoWaiting": 0,
     "tempoPaused": 0,
@@ -603,7 +605,7 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "firstSoundMs": 2674,
+    "firstSoundMs": 2691,
     "diag": [
      "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
      "deck: src net pod-0006",
@@ -626,7 +628,7 @@
      "state": "playing",
      "pos": {
       "duration": 25,
-      "position": 0,
+      "position": 0.0012889999999998736,
       "playbackRate": 1
      },
      "cold": 1,
@@ -642,7 +644,7 @@
      "want": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
      "id": "pod-0013:82"
     },
-    "lockNextMs": 14,
+    "lockNextMs": 19,
     "lockNextLines": [
      "deck: swap pod-0013 ready=true pool=1",
      "deck play#3 swap rs=4 muted=false t=82.0",
