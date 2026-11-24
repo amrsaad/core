@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-24",
+ "records": [
+  {
+   "sourceId": "wiki:de:Molybdän",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Molybd%C3%A4n",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/24",
+    "status": 200
+   },
+   "title": "Molybdän",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Molybdän [molʏpˈdɛːn] ist ein chemisches Element mit dem Elementsymbol Mo und der Ordnungszahl 42. Es zählt zu den Übergangsmetallen, im Periodensystem steht es in der 5. Periode sowie der 6. Nebengruppe."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-24T04:11:42.205Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Molybd%C3%A4n": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Crossair-Flug 3597",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Crossair-Flug_3597",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/24",
+    "status": 200
+   },
+   "title": "Crossair-Flug 3597",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Der Crossair-Flug 3597  war ein planmässiger Passagierflug von Berlin-Tegel nach Zürich. Das eingesetzte Flugzeug des Typs Avro RJ100 wurde am 24. November 2001 etwa fünf Kilometer vor dem Erreichen der Landebahn 28 in der Nähe von Bassersdorf, Kanton Zürich, in den Boden geflogen, als es im Landeanflug Bäume berührt hatte. Als Hauptursache des Unfalls gilt laut dem schweizerischen Büro für Flugunfalluntersuchungen (BFU) das absichtliche Unterschreiten der Mindestsinkflughöhe. Von den 33 Insassen starben 24, darunter der Kapitän und der Kopilot."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-24T04:11:42.205Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Crossair-Flug_3597": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Freddie Mercury",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Freddie_Mercury",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/24",
+    "status": 200
+   },
+   "title": "Freddie Mercury",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Freddie Mercury war ein britischer Musiker und ein bedeutender Rocksänger der 1970er und 1980er Jahre. Er wurde als Mitbegründer, Songwriter und Leadsänger der Band Queen bekannt. Mercury schrieb Welthits wie Bohemian Rhapsody (1975), We Are the Champions (1977), Don’t Stop Me Now (1978) und Living on My Own (1985/1993)."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-24T04:11:42.205Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Freddie_Mercury": 200
+   }
+  }
+ ]
+}

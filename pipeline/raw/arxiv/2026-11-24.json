@@ -1,0 +1,783 @@
+{
+ "source": "arxiv",
+ "date": "2026-11-24",
+ "records": [
+  {
+   "sourceId": "arxiv:2611.29793",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29793",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "When Does Fine-Tuning Beat Prompting for Qiskit-to-CUDA-Q Translation? An Execution-Verified Study",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "When Does Fine-Tuning Beat Prompting for Qiskit-to-CUDA-Q Translation? An Execution-Verified Study",
+    "abstract": "Moving quantum code from Qiskit to NVIDIA CUDA-Q is a practical adoption cost that language models are starting to automate. We ask whether a small open model can learn this translation, and how to measure it so that the result can be trusted. Both programs can be executed and their state vectors compared, so a kernel counts as correct only if it prepares the same state as the Qiskit reference (fidelity >= 0.999), with no text matching and no LLM judge. We build a 640-task benchmark with three test sets (larger circuits, an unseen circuit family, an unseen Qiskit coding style) and a QuantumKatas regression probe, and we test the evaluator before training. Measurement counts miss every phase-only error; a surface rule-based translator solves two of three original splits (text substitution); a converter that executes the Qiskit input and maps the circuit solves all 640 tasks -- so the benchmark measures source-level translation, not whether a circuit can be ported after running it. No base model emits a valid CUDA-Q kernel zero-shot. On Nemotron 3 Nano 4B, LoRA reaches 83.9%, tying a 4-shot prompt (83.1%), but generalizes worse to unseen style (48.5% vs. 65.5%) and cuts QuantumKatas from 23.8% to 8.9%; on Qwen2.5-Coder 7B, LoRA beats the prompt overall (92.0% vs. 82.8%) and on unseen style (78.5% vs. 65.0%), and on the 1.5B model as well, so whether fine-tuning pays off depends on the base model, while the Qiskit regression appears in all three. Mixing two replay formats is the best mitigation trade-off (84.4% translation, Katas 21.5%). On 48 parametric functions that must become kernels with arguments -- where executing the input cannot yield a parametric kernel -- models reach up to 83%; on 27 real QED-C kernels, every model scores 0%. Language models can do source-level translation of simple parametric code, but not yet of real programs."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T21:50:27Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z"
+  },
+  {
+   "sourceId": "arxiv:2611.29792",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29792",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "A Cascaded Framework with a Cross-Attention-Guided Mamba-CNN Model for Pre- and Post-Treatment Glioma Segmentation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "A Cascaded Framework with a Cross-Attention-Guided Mamba-CNN Model for Pre- and Post-Treatment Glioma Segmentation",
+    "abstract": "Accurate glioma segmentation is vital for diagnosis and follow-up, but manual segmentation is time-consuming, subjective, and variable across interpreters. Gliomas are heterogeneous in size, shape, and location. Deep learning has therefore emerged as a potential solution. CNNs excel at local features but may struggle with long-range dependencies, whereas Vision Transformers capture global context efficiently but incur higher computational complexity. Most previous studies focused on pre-treatment gliomas; post-treatment cases with resection cavities (RCs) remain less explored. This study proposes a Cross-Attention-Guided Mamba-CNN (CMC-Seg) model within a cascaded framework for pre- and post-treatment diffuse glioma segmentation, aiming to balance accuracy and computational cost. Experiments used BraTS 2025 mpMRI of diffuse glioma patients. After preprocessing, a coarse segmentation model extracted tumor-centered patches, which were fed to CMC-Seg for fine-grained segmentation. CMC-Seg was compared with 3D U-Net, SegResNet, SwinUNETR, UNETR, nnFormer, and SegMamba. On the test set, CMC-Seg achieved the highest mean Dice (81.20%) and non-enhancing tumor core (NETC) Dice (77.09%). It also achieved an RC Dice of 78.63% and the lowest 95% Hausdorff distance (HD95; 4.39 mm). Results were comparable to CNN and Mamba baselines and significantly better than Transformer-based baselines (P < 0.05). CMC-Seg required the fewest inference GFLOPs (381.49). Ablation experiments indicated that multi-direction scanning and cross-attention improved performance, particularly for RC (P < 0.05). Grad-CAM explainability experiments showed that CMC-Seg focuses on diagnostically relevant tumor regions."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T21:50:14Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z"
+  },
+  {
+   "sourceId": "arxiv:2611.29775",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29775",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "ComplexIF: A Challenging Multi-Turn, Multi-Constraint Instruction-Following Benchmark",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "ComplexIF: A Challenging Multi-Turn, Multi-Constraint Instruction-Following Benchmark",
+    "abstract": "As frontier LLMs saturate existing instruction-following benchmarks, measuring further progress requires harder tests that remain faithful to real use. In practice, users often combine several constraints, add them at different turns of a conversation, and expect all of them to hold in the assistant's response. We introduce ComplexIF, a challenging benchmark for this setting, together with the automatic pipeline that generates it. The pipeline expands seed requests into multi-turn conversations, weaves constraints into their turns, and keeps only tasks that a strong model can solve, so difficulty can be raised by adding constraints or turns while every task stays solvable. ComplexIF's two splits test complementary sides of instruction following: a verifiable split of format constraints, checked by programs, and a rubric split of semantic instructions, such as a tone or an audience, checked with an LLM judge. Across 14 proprietary and open-weight models, even the strongest satisfies every constraint on fewer than half of the verifiable tasks, and no model leads on both splits."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T21:16:00Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29775": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29773",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29773",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "S1Arena-MM: Which Multimodal Decisions Can Be Left to System 1?",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "S1Arena-MM: Which Multimodal Decisions Can Be Left to System 1?",
+    "abstract": "Perception systems often make discrete decisions: flag a hateful meme, predict whether a pedestrian will cross, detect a spoofed voice, or select the next move in a game. System-1 models, such as OneJev and Jev-Omni, read the media and return probabilities over the options in a single forward pass, while multimodal large language models (MLLMs) generate text. Which multimodal decisions can System-1 models handle, and where do MLLMs perform better? We introduce S1Arena-MM, a benchmark that gives every model the same decision requests and scores the probabilities it returns. It contains 51,060 questions across 94 tasks with image, video, and audio input, drawn from 94 public datasets and three program-generated ones. It also includes 102 closed-loop game environments that a model plays from screenshots; in real-time mode, the game continues while the model decides. We evaluate 33 open models: 12 System-1 models and 21 MLLMs read at the answer token. On static decisions, the best System-1 model leads the best MLLM by 4.9 percentage points on images and is within one point of it on video and audio. Post-training for decisions mainly improves the probabilities: on video, a System-1 model has a lower Brier score than the MLLM that it is post-trained from in 10 of 12 pairs. With up to 2,048 thought tokens per question, the most accurate MLLMs pass the best System-1 models only slightly, and thinking raises the Brier score of most MLLMs. Closed loops separate the models: three System-1 models built on a 27B MLLM reach 22.0-33.3% progression in BALROG, and no other model exceeds 9.7% with thinking off. In real-time GameWorld, latencies of up to 1.1 s per decision cause no measurable loss of progress for System-1 models. Code and data: https://github.com/zhaoyang02/S1Arena-MM."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T21:08:30Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29773": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29771",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29771",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Into My Arms: Structured reinforcement learning for autonomous transport of objects and humans",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Into My Arms: Structured reinforcement learning for autonomous transport of objects and humans",
+    "abstract": "Whole-body humanoid manipulation remains bottlenecked by high-dimensional state-action spaces, contact-rich environments, and long task horizons. This trilemma is a challenge that state-of-the-art reinforcement learning (RL) methods are yet to resolve reliably. We address it with three contributions that add just enough structure to guide exploration: Sparse Interaction Edges (SIE) for whole-body manipulation, Interaction Gated Transport (IGT) for sustained transport over long horizons, and a Hinted Object Path (HOP) that resolves collision and search complexity bottlenecks. Across all three, the policy remains free to discover its own manipulation strategy. The method generalises from rigid object to human transport. As a flagship demonstration, we show, to our knowledge, the first bed-to-wheelchair transfer of a medical mannequin by a humanoid robot completed with no human intervention during execution. In the domain of human transfer, we show that a single policy can adapt across substantial variations in body mass, size, and random force perturbations, all while training on a single GPU in under an hour. Our approach offers a pathway to fully RL-driven humanoid manipulation, enabling assistive robots that can help humans. Website: https://elle-miller.github.io/into_my_arms"
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T21:03:09Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z"
+  },
+  {
+   "sourceId": "arxiv:2611.29768",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29768",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Estimating a Transition Point from Gibbs and Ground States",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Estimating a Transition Point from Gibbs and Ground States",
+    "abstract": "We study how observed many-body system size affects the number of state copies needed to estimate a zero-temperature first-order transition point. The unknown Hamiltonian has bounded, translation-invariant on-site and nearest-neighbour interactions on a 3D cubic lattice with local dimension three. The field coupling is known, and all models share a known boundary field penalizing one local level. The limiting order parameter is uniformly separated across the transition. Each query returns an independently prepared Gibbs or ground state at an adaptive field and system size. For error $ε$ and fixed confidence, we prove an exponential separation between two size caps at the same temperature. There are absolute constants $0<c_0<C$ and $c_1>0$ such that, at inverse temperature $β=c_1/ε$, restricting side lengths to $L\\le c_0/ε$ requires $\\exp(Ω(1/ε))$ copies in worst-case expectation, even with collective measurements. Allowing $L\\le C/ε$ permits $O(\\log^2(1/ε))$ copies and $O(ε^{-3})$ total spins, using local measurements and polynomial classical postprocessing. The minimax expected total spin count is $Θ(ε^{-3})$ uniformly for $β\\ge c_1/ε$. At fixed positive temperature it is $Θ_β(ε^{-2})$, attained from one- and eight-site Gibbs states followed by exponential classical computation. For ground-state copies it is $Θ(ε^{-3})$. The lower bound uses a three-state ferromagnet whose boundary suppresses the sector carrying transition information. A spanning-forest argument and edge-boundary counting control its Gibbs weight uniformly over fields and allowed sizes, and a trace-distance hybrid argument handles adaptive learners with quantum memory. The upper bound combines finite-volume free-energy estimates, concavity and local order-parameter measurements."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T21:00:58Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29768": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29765",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29765",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Sánchez, Feijóo, or Abascal? Speaker Attribution and Ideological Congruence in LLM Personas Reading Posts on X of the Leaders of the Three Main Parties of the 29N General Election in Spain",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Sánchez, Feijóo, or Abascal? Speaker Attribution and Ideological Congruence in LLM Personas Reading Posts on X of the Leaders of the Three Main Parties of the 29N General Election in Spain",
+    "abstract": "Source cues are central to political communication, yet reception studies with large language model (LLM) personas as synthetic audiences have not tested whether personas respond to who speaks and not only to what is said. With Spain's general election of 29 November 2026 in mind, we run a speaker-attribution experiment using 1,075 anonymised X posts by the leaders of PSOE, PP and VOX on four topics (the economy and employment, household costs, immigration and corruption) and 791 distinct value-grounded, LLM-generated personas. Each post was assigned to 300 topic-selected persona profiles, 150 grounded in the Inglehart-Welzel cultural map and 150 in Moral Foundations Theory, under four conditions: no author, Sánchez, Feijóo or Abascal, yielding 322,470 complete persona-post quartets. Naming any leader lowered support for identical text, with the penalty for Abascal nearly twice as large as those for Sánchez and Feijóo. The penalty follows the persona's elicited left-right self-placement (ideological congruence): left personas spare Sánchez and right personas spare Feijóo, although ideology was never in the message-evaluation prompt. Corruption posts were penalised under every name, whereas on other topics the ideologically closest leader generally produced little or no penalty. The leader order matches public opinion in 48 CIS barometers (2022-2026) in all three groups and the sign of all twelve differences, but fits barometers before the model's 2024 knowledge cutoff better than recent ones. Our findings demonstrate that LLM personas evaluate political speakers through systematic, value-congruent priors: however, while they replicate human candidate rank-orders across survey barometers, this alignment is ordinal rather than quantitative, highlighting their utility for controlled source-effect experiments though not as substitutes for empirical public opinion surveys."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T20:55:14Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z"
+  },
+  {
+   "sourceId": "arxiv:2611.29764",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29764",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Selecting Stable Sampling Dynamics for Compositional Diffusion: A Feynman-Kac Weight Reduction",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Selecting Stable Sampling Dynamics for Compositional Diffusion: A Feynman-Kac Weight Reduction",
+    "abstract": "Given $K$ separately trained diffusion models, how should one sample from a $β_k$-weighted product of their terminal laws without jointly retraining the experts? Existing Feynman--Kac constructions provide many weighted stochastic differential equations (SDEs) with the correct target marginal. The consequential question is how to select useful proposal dynamics among them. We study an explicit family of weighted diffusions that realizes the same product-of-intermediate-experts trajectory. A scalar parameter $λ$ controls how strongly the proposal drift follows the composed expert score, while an additional Langevin component can be varied independently. Writing $B=\\sum_{k=1}^{K}β_k>0$, we identify the distinguished choice $λ=1/B$. At this value, the aggregate squared-score term in the instantaneous Feynman--Kac log-weight rate cancels exactly. For positive expert exponents, the remaining score-disagreement contribution is non-positive. We call this structural cancellation Feynman--Kac reduction. Under bounded-divergence assumptions, it yields an upper bound on the instantaneous unnormalized log-weight rate for all $λ\\leq 1/B$. For linear diffusion protocols with compactly supported expert data, $λ=1/B$ yields two-sided bounds at every nonterminal time, for exponents of either sign. A corresponding result holds for a single expert under the same divergence assumption. In these two-sided settings, the selected value is unique within the specified family in a universal worst-case sense. Experiments on Gaussian mixtures and molecular sampling compare the analytically predicted stability with actual sampling quality, including instances in which parameter choices different from $λ=1/B$ perform better empirically."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T20:52:46Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29764": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29752",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29752",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Why Units Die in the Layer After a Frozen Random Encoder, and What the Number of Live Units Measures",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Why Units Die in the Layer After a Frozen Random Encoder, and What the Number of Live Units Measures",
+    "abstract": "Reinforcement-learning agents can learn Atari games through a convolutional encoder whose random weights are never trained. They reach expert play in Pong and, without random action repeats, in Breakout, but training takes far longer and few ReLU units in the layer after the encoder stay alive. A dead unit outputs zero for every input and cannot learn. In earlier work we took the number of live units to measure the game's complexity. Here we ask why units die and correct that conclusion. We find that more units die as the layer's inputs lie farther from zero relative to how much they vary. We call this ratio the offset. Earlier work showed this in sparse autoencoders at the start of training. We saw it after training in agents, image classifiers, a reservoir computer and sparse autoencoders on GPT-2. A random encoder leaves the offset of its input roughly unchanged, and a formula predicted its median offset within 25 percent in all 44 cases. So a game with a bright, mostly unchanging screen gives the next layer a large offset. In Pong, subtracting the average screen raised the number of live units from between 3 and 6 of 64 to between 59 and 63, so the number alone cannot show a game's complexity. On unaltered screens none of the agents reached a training score of 18 in 50 million steps. With the subtraction all did within 5 million, about as fast as a trained encoder on unaltered screens. In Breakout the subtraction left more units alive, but average training scores did not clearly improve, and a large gap to a trained encoder remained. So we do not treat their number as something to raise for its own sake. The evidence is from small networks and three games, and in agents and image classifiers changing the offset also changed the size of the inputs. We suggest measuring the offset before training a layer on a fixed front end and, if it is large, trying to subtract the mean input."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T20:32:35Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z"
+  },
+  {
+   "sourceId": "arxiv:2611.29750",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29750",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Refine, Don't Reinvent: RASA-Bench for Source-Grounded Hindi Prose Refinement",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Refine, Don't Reinvent: RASA-Bench for Source-Grounded Hindi Prose Refinement",
+    "abstract": "For a producer of Hindi creative prose, drafting is cheap and editing is not: a machine-written episode, story, or essay reads as under-written and flat, laced with translationese, and it sometimes quietly alters what the source says. RASA-Bench targets that editing task across three Hindi prose forms, measuring how well a model refines an under-written AI draft, a task distinct from writing from scratch. Across 2,050 drafts and eight refiners (16,400 rewrites), a four-layer protocol credits a rewrite only after it passes a faithfulness check against its own source, then ranks the survivors by holistic editorial preference through per-form Bradley-Terry fits whose centered coefficients are standardized before equal-weight averaging. Staying faithful proves to be a decisive test that behaves differently by form: gate-failure rates range from 9.1% on short stories to 29.5% on audio fiction, and the drift that disqualifies a rewrite shifts from events and identity in narrative to claims and evidence in essays. A 600-case human audit puts gate agreement at 0.925 (0.91 to 0.94 across forms), whereas subjective preference is form-sensitive and least settled for essays, among human readers no less than the model judge. The benchmark, evaluation protocol, and Hindi prose diagnostics are available at https://abdur75648.github.io/rasa-bench."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T20:25:42Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29750": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29744",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29744",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Who Sent It or How It Moved? Sender Shortcuts in Cryptocurrency Anti-Money-Laundering Benchmarks, Audited on Elliptic2 and Elliptic++",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Who Sent It or How It Moved? Sender Shortcuts in Cryptocurrency Anti-Money-Laundering Benchmarks, Audited on Elliptic2 and Elliptic++",
+    "abstract": "Two public benchmarks dominate graph-based anti-money-laundering (AML) research on Bitcoin: the transaction-level Elliptic dataset, extended as Elliptic++, and the subgraph-level Elliptic2. In both, a label is assigned according to the entity that sends the funds. We ask whether models trained on these benchmarks learn how laundering moves or merely who sent the money, and we propose a diagnostic protocol to tell the two apart: a sender lookup baseline, a novelty baseline, a sender-disjoint split with a leakage check, and a decomposition of performance into sender, receiver and intrinsic signal. On Elliptic2 the task largely reduces to classifying the sender. Under the standard random split, a no-learning lookup of sender history reaches a PR-AUC of 0.954, against 0.975 for gradient boosting on 456 features; our reimplementation of RevClassify reproduces its reported 0.97 and falls to 0.126 without sender information. When senders are held out, performance drops to 0.746, and the subgraph's own structure, transactions and receivers fall from 0.619 to 0.186. On Elliptic++ the same protocol finds the shortcut negligible: sender history reaches only 0.340 against 0.986 for the full model (3.5 against 10.1 times the test prevalence), adding it to the full model raises PR-AUC by less than 0.004 in every seed, and the transaction's own features keep 0.883 when sending addresses are held out. We trace the difference to the unit of sender identity: Elliptic2 senders are entity clusters that recur across many labeled subgraphs, whereas Elliptic++ senders are individual addresses, and fewer than half of test transactions have a sending address seen in training. A shared sender-based label rule thus produces a severe shortcut in one benchmark and a negligible one in the other, so the diagnostic must be run on each benchmark."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T20:18:30Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z"
+  },
+  {
+   "sourceId": "arxiv:2611.29734",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29734",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Lightweight Spectral Subspace Filtering for Trojan-Resilient AI Inference Engines",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Lightweight Spectral Subspace Filtering for Trojan-Resilient AI Inference Engines",
+    "abstract": "Backdoor attacks pose a significant security threat to deep neural networks (DNNs) deployed on AI inference engines and hardware accelerators. By embedding hidden triggers during training, these attacks induce malicious behavior while maintaining high accuracy on benign inputs. Multi-trigger backdoor attacks are particularly challenging to detect and mitigate because of the distributed and stealthy nature of their effects. To address this challenge, this paper proposes a training-free Spectral Subspace Filtering framework that detects and suppresses backdoor-induced activations by analyzing latent feature representations. Exploiting the geometric separation between benign and malicious feature distributions, the framework employs Singular Value Decomposition (SVD) to identify the dominant malicious subspace and performs inference-time spectral scrubbing through activation projection. This approach suppresses backdoor effects without model retraining, requiring only a small set of triggered samples collected offline. Experimental evaluation across CNN and transformer architectures, including AlexNet, ResNet18, VGG16, MobileNetV2, and Vision Transformer (ViT), demonstrates that the proposed method reduces the attack success rate (ASR) from 94.2-99.8% to an average of 2.07%, while preserving clean accuracy of up to 98.54% with low inference overhead. The framework also demonstrates robustness across varying poisoning rates and multiple concurrent triggers, highlighting its potential as a lightweight runtime defense for enhancing the security and reliability of AI inference engines against backdoor attacks."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T20:03:21Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29734": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29732",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29732",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Reinforcement Learning from LLM-Generated (Suboptimal) Demonstrations",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Reinforcement Learning from LLM-Generated (Suboptimal) Demonstrations",
+    "abstract": "Reinforcement learning (RL) has achieved substantial progress across many domains, but training an agent \\textit{tabula rasa} remains highly sample-inefficient. A common remedy is to initialize the agent using a neural network pretrained on demonstrations. However, collecting demonstrations is expensive, and the demonstrations themselves can be suboptimal. In this work, we use a large language model (LLM) to generate an advice policy that produces demonstration data with effectively no human cost. We use this data to warmstart a DQN agent, and use the advice policy itself to guide exploration during training. Because LLM-generated advice is often suboptimal, we further introduce a value warmstart method that initializes the agent to recognize promising states from the advice policy's behavior, without directly copying its actions. To characterize the robustness of this method, we systematically perturb individual sub-skills of an LLM-generated advice policy for a long-horizon, sparse-reward task. Degraded advice still meaningfully accelerates learning relative to unaided baselines. These results suggest that LLM-generated advice, though suboptimal, can be a cheap alternative to costly human demonstrations."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T19:56:10Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29732": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29729",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29729",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Rethinking Discovery Research with AI: The promise of transdisciplinarity and the danger of reductionism",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Rethinking Discovery Research with AI: The promise of transdisciplinarity and the danger of reductionism",
+    "abstract": "In theory, transdisciplinary research focuses on solving real-world problems without being constrained by disciplinary boundaries and methodologies. In practice, doing so is challenging, as recognized by the phrase \"The world has problems; universities have departments.\" As a powerful integrative tool, AI may help overcome traditional reductionist approaches and enable genuine transdisciplinarity. In this essay, we discuss how this could happen and why, within the current system of incentives, it is not happening."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T19:48:57Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29729": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29727",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29727",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Admitted Is Not Effective: Lessons from a Notary-Gated Retrospective Loop in an Agentic Pipeline",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Admitted Is Not Effective: Lessons from a Notary-Gated Retrospective Loop in an Agentic Pipeline",
+    "abstract": "Agentic software development pipelines with frozen prompts can repeat the same mistakes across pull requests (PRs), yet ungoverned additions to instruction files grow without bound and do not generally improve task success. We present a retrospective loop for a four-stage large language model (LLM) pipeline in which a Retrospective agent proposes edits to learned rules every ten PRs and a Notary admits, merges, or rejects them while recording each decision in a provenance ledger. In a pre-registered study of 880 PRs on two Python repositories, the loop ran end to end and the Notary admitted 55 of 89 proposals, rejecting 8 that cited nonexistent evidence. However, held-out review comments and hidden-test resolution did not improve after ten retrospectives. Tracing each step of the loop, we found that sparse review signal (0.45 comments/PR) left little to learn from and that rules admitted on their stated evidence did not show measurable held-out effects. We derive six lessons and argue that governed loops should admit and retire every learned rule as a testable hypothesis."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T19:45:52Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29727": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29722",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29722",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "ReqSeek: Transformer-Based Automatic Requirements Identification for Building Large Requirements Datasets",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "ReqSeek: Transformer-Based Automatic Requirements Identification for Building Large Requirements Datasets",
+    "abstract": "Large, diverse, and high-quality datasets are significant for advancing AI in requirements engineering, yet automated identification of requirements from Software Requirement Specifications (SRS) remains a challenge. Automatic Requirements Identification (ARI) methods demonstrate limited generalization to unseen documents across heterogeneous SRSs. This work presents ReqSeek, a transformer-based, domain-agnostic ARI model for recognizing ISO 29148-style requirements in SRS documents, supporting dataset construction. We curated the Automatic Requirements Identification Dataset (ARID), comprising 2,396 training instances from 23 heterogeneous SRSs, and fine-tuned four transformer architectures. RoBERTa was selected as the base model for ReqSeek and achieved 95% precision, recall, F1, and F0.89 on the held-out evaluation set. Exploratory human-model benchmarking showed performance comparable to humans while requiring substantially less prediction time than manual annotation. Post-hoc evaluation on out-of-domain (OoD) SRSs provided evidence of requirement identification beyond ARID. Robustness analysis demonstrated ReqSeek's insensitivity to minor linguistic variations while maintaining sensitivity to major ISO 29148-style violations. We applied ReqSeek to construct the Software Requirements Dataset (SwaRD), identifying 10,201 ISO 29148-style requirements from 231 industrial SRSs. SwaRD aligns with textual and semantic properties of human-curated datasets while exceeding them in scale and domain diversity. Our results suggest that transformer-based ARI can provide precise and generalizable requirements identification."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T19:41:50Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z"
+  },
+  {
+   "sourceId": "arxiv:2611.29716",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29716",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Fin-RSI: A Unified Library of Financial Skills, Checks, and Self-Improvement for LLM Agents",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Fin-RSI: A Unified Library of Financial Skills, Checks, and Self-Improvement for LLM Agents",
+    "abstract": "As large language models (LLMs) become more capable, financial agents need tools they can readily discover and use. Yet financial software is fragmented across libraries with different interfaces and conventions, making it difficult to build reliable agent workflows. We present Fin-RSI, a unified Python library of financial skills, checks, and self-improvement designed for LLM agents. It brings together tools for market analysis, forecasting, portfolio construction, and trading research through shared interfaces across models and agent frameworks. Agents can find suitable tools from natural-language requests, reuse tested implementations, and improve generated programs through checking and feedback. Developers can extend the library with new tools without rebuilding integrations for each model. Across 20 open-weight models on six trading-position tasks, tool discovery increased the proportion of episodes producing valid programs from 9.7% to 29.2%; for models with at least 14 billion parameters, it rose from 23.6% to 64.6%. We release the library and benchmark as a shared resource for the community and plan to expand its tools and task coverage as financial agents evolve."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T19:28:28Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z"
+  },
+  {
+   "sourceId": "arxiv:2611.29704",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29704",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Loop-Count Schedules in Looped Transformers: An Empirical Study",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Loop-Count Schedules in Looped Transformers: An Empirical Study",
+    "abstract": "Looped transformers apply one block of layers several times with shared weights, trading parameters for repeated computation. We study how the schedule of the loop iteration count R during training determines whether each extra pass acts as a full layer or as a small correction, using a controlled ladder of 46M-110M-parameter models trained on 2B tokens with learned residual gates on every loop pass and three schedules: R fixed to 2, R sampled uniformly from {1,...,6}, and R sampled from {2,3,4}. We find that the lower bound of the sampling range is the decisive choice. If the sampled range includes R=1, so that some training steps run the block only once and compute the loss on that single pass, the gates collapse to 0.1-0.5 and each additional pass becomes a small correction to the first; if the range starts at R=2, so that every training step runs the block at least twice, the gates stay at 0.6-0.9 and each pass keeps the strength of a full layer, while the model can still be run at any R from 2 up to twice the largest trained value with validation loss within a few hundredths of a nat of its best. The {2, 3, 4} schedule gives the best looped model, 2.909 nats against 2.951 for the parameter-matched plain model, and degrades by only 0.038 nats when run at twice its trained depth. We further show that under a fixed R the direction of the residual stream converges geometrically beyond the trained depth while the loss diverges, which refines a recent finding that static-depth training does not converge, and that reusing the first pass's keys and values on later passes costs 0.01-0.03 nats in every regime while making the per-token iteration uniformly contractive and halving the inference cache. The loop recovers about a third of what real depth provides at equal parameters. The code, trained weights, and per-token traces are released."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T19:08:22Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29704": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29697",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29697",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Where Do Fact-Checking Errors Arise? Separating Retrieval, Search Control and Judgement in Evidence-Grounded Verification",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Where Do Fact-Checking Errors Arise? Separating Retrieval, Search Control and Judgement in Evidence-Grounded Verification",
+    "abstract": "An evidence-grounded fact-checker can fail because it does not find the evidence or because it does not use it; end-to-end accuracy does not tell the two apart. We present a protocol that follows the reference evidence from the store to the verdict and separates retrieval, search control, judgement and verdict validation. We assess 293 claims from FEVER, FEVER 2.0 and AVeriTeC with one open-weights 9B model under two evidence conditions: small stores of annotated evidence, where discovery is easy, and the full source collections. In the control condition a single hybrid retrieval pass delivers complete reference evidence for 226 of 228 evidence-bearing claims, and adaptive controllers and a tool agent spend two to nine times as many model calls without a consistent gain. Of 34 decisive claims labelled as lacking evidence, 33 have the complete evidence in the packet: in 15 the judge abstains, and in 18 validation rules overturn a decisive verdict. On AVeriTeC these rules lower single-pass accuracy by six points, to 65.0% (balanced accuracy 57.6%). Ten judges from eight model families also show abstentions and validation conversions on fixed packets. Against the full stores hybrid single-pass accuracy falls by 17 to 29 points. Wikipedia evidence recovery declines; AVeriTeC recovery changes from annotated answers to cited pages and is measured separately. No controller recovers the accuracy loss. The agent also shows no resolved gain on 714 further Wikipedia claims. Evidence recovery, judgement and validation should be measured separately before an error is attributed to search."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T18:58:15Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z"
+  },
+  {
+   "sourceId": "arxiv:2611.29693",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29693",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "HandiVid: A High-Quality Dataset for Hand-Driven Interactive Video Generation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "HandiVid: A High-Quality Dataset for Hand-Driven Interactive Video Generation",
+    "abstract": "Hand-driven egocentric interactive video generation aims to generate dynamic scenes with realistic interaction responses conditioned on hand movements and camera motion. However, existing egocentric video datasets struggle to provide scene diversity, meaningful hand-object interactions, and reliable motion annotations simultaneously. To address these limitations, we introduce HandiVid, a high-quality dataset comprising 200K curated and annotated egocentric interaction video clips for hand-driven interactive video generation. We develop a unified data processing pipeline that integrates public datasets, online videos and synthetic videos. Through video quality assessment, hand detection filtering, and multi-stage interaction validation using vision-language models (VLMs), we select high-quality video clips with meaningful hand-object interactions. Since 3D hand reconstruction relies on initial hand detections, we integrate SAM 3 into the hand detection pipeline to reduce missed detections and improve the completeness of 3D hand annotations. Each video clip is provided with high-quality hand renderings, camera trajectories, and interaction descriptions. Comprehensive dataset analysis and downstream video generation experiments demonstrate the effectiveness of HandiVid in terms of data diversity, annotation quality, and controllable video generation."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T18:55:46Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29693": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29692",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29692",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Grammar Sparsity Sets How Transformers Learn Random Languages",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Grammar Sparsity Sets How Transformers Learn Random Languages",
+    "abstract": "We study language acquisition by transformers trained on the Random Language Model: a synthetic hierarchical grammar with random production rules, whose sparsity is controlled by a single parameter and whose conditional entropies are known exactly. On depth-two grammars, we find that sparsity sets both the order and the speed of learning. Dense grammars are learnt one level at a time: a token is predicted from its sibling after $t\\propto V$ steps and from the full context only after $t\\propto V^{3}$, so the two stages are separated by a plateau that widens with $V$. Sparse grammars are learnt all at once, at $t\\propto\\sqrt V$, with a smaller exponent than even the first stage of a dense one. The exponents $1$ and $1/2$ already appear at depth one, where we derive them for a linear model trained with Adam."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T18:54:54Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29692": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29687",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29687",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Do More Roles or Larger Models Improve LLM Fact-Checking? A Controlled Study on Fixed Evidence",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Do More Roles or Larger Models Improve LLM Fact-Checking? A Controlled Study on Fixed Evidence",
+    "abstract": "A fact-checking system can spend more computation on a claim by using a larger model, by asking the same model several times, or by a multi-role Tribunal: two roles propose quoted findings, code checks the quotations, an auditor that does not see the proposed relation judges each one, and code derives the verdict or abstains. We compare these options on identical fixed evidence, without retrieval: 300 AVeriTeC claims, each with its annotated question--answer items mixed with items written for other claims, read by judges of four open-weights models from three families, a vote of five, and six assignments of models to the Tribunal's roles. The 9B judge was right on 186 claims and the 27B judge of the same family on 156; the larger judges declined to decide far more often and were no more accurate when they decided. The vote reached 196 and the 9B judge with its verdict replaced by Tribunal certificates 195, at a similar cost; the Tribunal alone reached 153 to 164, because it abstained on almost half of the claims. A hearing's outcome followed the auditor's model and was nearly indifferent to the proposers'. A larger auditor, or one of another family, made certificates neither more often correct (77% to 81%) nor more independent of the judge. As a replacement, certificates improved every judge by 3 to 10 points and overturned four to five in a hundred of its correct verdicts. With the annotated evidence withheld, judges and Tribunal still decided on 7% to 14% of the claims."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T18:47:32Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z"
+  },
+  {
+   "sourceId": "arxiv:2611.29679",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29679",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "MERIT: Experience-Guided Memory for Long-Horizon Persona-Specific Persuasive Dialogue",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "MERIT: Experience-Guided Memory for Long-Horizon Persona-Specific Persuasive Dialogue",
+    "abstract": "Effective long-horizon persuasion in recurring goal-oriented settings requires more than factual memory: it must track how a user's trust, negotiation behavior, and strategic receptiveness evolve across interactions. Existing persuasive dialogue systems are largely single-session, static, and unimodal, while cross-session memory systems, though temporally aware, retain only factual content and overlook persuasion-specific dynamics. We propose MERIT (Memory-augmented Experience-Rationale for Iterative Temporal persuasion), which pairs a graph-based memory of four persuasion-specific memory types with a per-persona experience rationale library that records which strategies succeed for each user and why. Together they enable adaptive persuasion through prompt composition alone, with no parameter updates. To support this setting, we introduce PERSIST (PERSona-driven InSurance Interactions over Time), a dataset of 60 curated personas spanning 10+ years of motor insurance renewal interactions, with probabilistic life events that shift negotiation behavior and receptiveness across sessions, verified through strict human-in-the-loop annotation. MERIT surpasses memory and experience-based baselines on every metric across two policy backbones, reaching persuasive-appeal scores of 4.10 and 4.74 (out of 5)."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T18:33:17Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29679": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29678",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29678",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Ref2Light: From One Image to Interactive Glasses-Free 3D Characters",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Ref2Light: From One Image to Interactive Glasses-Free 3D Characters",
+    "abstract": "Animating character illustrations on light-field displays demands coherent binocular parallax, real-time pose articulation, and fine-grained expression control. However, existing 2D animation and 3D reconstruction pipelines cannot combine these with rapid character switching. We present Ref2Light, a feed-forward framework that maps a single A-pose illustration and continuous pose and expression controls to display-native light-field animation, without per-character 3D reconstruction, rigging, or test-time optimization. Our key insight is to decompose light-field synthesis into static identity, view-dependent parallax, and control-driven articulation. A shared encoder caches multi-scale identity features once per character for rapid switching. A conditional decoder then synthesizes ordered angular anchors from these features via backward texture transport and direct color synthesis. A global-local control scheme deforms the anchors with head-body controls and uses the updated correspondence fields to track facial regions across views for masked local facial refinement. Finally, calibrated differentiable subpixel interlacing converts the anchors into the native panel raster, enabling end-to-end native supervision without rendering all views at full resolution. On held-out VRoid identities, Ref2Light reduces head-body LPIPS by 20.1%-55.6% over 2D and 3D baselines and lowers non-target change MAE in mouth closure by 95.6%-96.5% versus monolithic decoding, while running at 34.0-40.1 FPS for 1440x2560 native rasters on a consumer GPU. Code and demo are in the Supplementary Material."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T18:32:33Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29678": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29664",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29664",
+   "urlStatus": 404,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Position-Skipped Distillation of Sparse-Attention Indexers: Train Short, Serve Long",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Position-Skipped Distillation of Sparse-Attention Indexers: Train Short, Serve Long",
+    "abstract": "Top-k sparse attention relies on an indexer, a lightweight per-layer module that ranks cached tokens so attention covers only the k highest-scoring ones. Indexers are usually distilled from dense attention at the full serving length, so every training step pays for long-context dense attention. We show that when an indexer is distilled on short sequences, its failure to generalise to longer contexts is driven mainly by rotary positional encoding (RoPE), not by degraded content matching. We propose position-skipped distillation: the indexer and the frozen teacher see short sequences whose position IDs contain a randomly placed gap, so neither ever processes more than the short training length. On DeepSeek-V2-Lite and Qwen3-30B-A3B, an indexer distilled on 8K tokens this way matches a 32K-distilled indexer to within about 0.5 perplexity up to 32K, and on DeepSeek-V2-Lite matches a 64K-distilled indexer at 64K with roughly 6x less training compute per token. On Llama-3.1-8B it trails the stronger 32K run by 0.6 perplexity, and at 64K simple position compression is often as good, so the main gain is training cost rather than quality. We also quantise indexer keys to 3-4 bits without retraining and score them with a fused integer kernel: at 4 bits, perplexity changes by at most 0.05 and the scan is 1.6-2.2x faster than half precision. In a current serving engine, the indexer speeds up decoding only for long contexts with multiple concurrent streams."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T18:12:28Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29664": 404
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29658",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29658",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "How Reliable is AI-Generated Audio Description? A Multilingual Expert Evaluation",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "How Reliable is AI-Generated Audio Description? A Multilingual Expert Evaluation",
+    "abstract": "Audio description (AD) makes visual media, such as video, accessible to blind or low-vision (BLV) audiences, but the high cost of professional production limits coverage. Due to recent advances in AI, numerous approaches to automatically generate intermediate AD scripts and/or final AD audios have been proposed. We present an expert evaluation of AI-generated AD scripts for movies in Italian and German that compares two AI systems, a GPT-4o- and a Qwen-based pipeline, against human-authored descriptions. Professional audio describers rated description quality and annotated errors using a detailed error taxonomy that includes content, character, fluency and coherence errors. The results show that while GPT-4o outperforms the Qwen models, both AI systems still fall short of human professional quality: the generated descriptions show substantially higher error rates and lower quality ratings. Based on the error annotations, we identify two key areas that require improvement: 1) character references, which includes both issues with identification and coherent naming, and 2) content errors and hallucinations, where the AD misrepresents or invents events. These error types are particularly critical, as they directly affect the viewer's ability to follow the narrative."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T18:01:37Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29658": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29651",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29651",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Which Loopholes Get Found? Predicting Reward Hacking of LLM Judges Before RL Training",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Which Loopholes Get Found? Predicting Reward Hacking of LLM Judges Before RL Training",
+    "abstract": "A policy trained against an LLM judge can learn to exploit its loopholes. Static probes show that such judges accept degenerate answers like a lone \"{\" or \"Thought process:\", but not which flaw a policy will find. In GRPO the first loophole to be exploited can be predicted before training from each pattern's exposure, the product of the starting policy's propensity to produce it and the judge's false-positive rate (FPR). To test exposure causally, we seed the patterns into fine-tuning at three doses in a Latin square. Across 36 GRPO runs with seven judges, the first exploited pattern had the highest exposure in all 12 runs with exploitation and the highest FPR in only 6. Predictions recorded before training held in three of four runs with one pattern masked by rule. When only two patterns were seeded, at 3% to 3.8% of the fine-tuning data and chosen so that exposure disagreed with FPR alone or propensity alone, exposure named the first exploited pattern and its onset window in all six runs. Exploitation occurred only on hard prompts, where an accepted exploit gets a large group-normalized advantage. Auditing exposure before RL therefore identifies the loophole a policy will likely exploit first."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T17:52:26Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29651": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29642",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29642",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Reducing Authorship Attribution Risk in Student Texts Through Style-Conditioned Rewriting",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Reducing Authorship Attribution Risk in Student Texts Through Style-Conditioned Rewriting",
+    "abstract": "Building NLP applications for education is constrained by data scarcity due to student privacy concerns and data regulations. To address this, we propose a style-aware approach to rewriting student forum posts that retains analytical value while reducing identifiability. Our method isolates content, structure, and style as separate conditioning channels and aggregates over student-disjoint exemplar partitions within style clusters, extending Differentially Private In-context Learning (DP-ICL) with cluster-restricted retrieval. Across three educational NLP datasets, our approach achieves high style fidelity, preserves downstream task performance, and reduces authorship attribution risk relative to the original student-written texts, including against a dedicated authorship-attribution model."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T17:41:11Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29642": 200
+   }
+  },
+  {
+   "sourceId": "arxiv:2611.29637",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29637",
+   "urlStatus": 0,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "TASC: Time-to-Collision Anticipation and Selective Crowd Attention for Non-Holonomic Service Robots",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "TASC: Time-to-Collision Anticipation and Selective Crowd Attention for Non-Holonomic Service Robots",
+    "abstract": "Service robots that share corridors and lobbies with people must keep moving without endangering them. Reactive planners can stop indefinitely in dense crowds (the freezing robot problem), whereas the attention-based learned navigators that dominate the standard crowd benchmark assume holonomic motion or emit discrete actions unsuited to a differential-drive base. This paper presents TASC, a navigation system for a non-holonomic service robot that integrates an attention-based crowd encoder, an anticipatory collision feature, and a continuous-control policy. We adapt the dual-selection attention module, originally developed for discrete-action value learning, to proximal policy optimization for continuous velocity control, and add a closing-speed time-to-collision feature, a conservative estimate of the time to contact that serves as both an observation and a reward term. The policy is trained on a high-fidelity 3D robot model in NVIDIA Isaac Lab with 10,000 parallel environments, social-force-model pedestrians, and randomized crowd sizes. In 30,000 evaluation episodes, each run to its end, the policy timed out in fewer than 0.5% at every tested crowd density. This liveness comes at a cost: pedestrian collisions rise from 4.5% with five pedestrians to 17.4% with ten. In an ablation with four seeds per variant, policies retrained without the time-to-collision feature succeed 4 to 7 percentage points less often. The policy runs in Gazebo without retraining and on a commercial differential-drive service robot through a ROS 2 package with an inference latency below 10 ms, verified in a hardware-in-the-loop test with virtual pedestrians."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T17:36:15Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z"
+  },
+  {
+   "sourceId": "arxiv:2611.29635",
+   "source": "arxiv",
+   "area": "brain",
+   "topic": "ki-allgemein",
+   "url": "https://arxiv.org/abs/2611.29635",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
+    "status": 200
+   },
+   "title": "Diversity in Unity, Theory in Practice: Hierarchical Multitask Benchmarks for Chinese Minority Languages",
+   "publisher": "arXiv",
+   "year": 2026,
+   "content": {
+    "title": "Diversity in Unity, Theory in Practice: Hierarchical Multitask Benchmarks for Chinese Minority Languages",
+    "abstract": "Despite the rapid advancement of LLMs, their performance on linguistically and culturally diverse minority languages within a unified national context remains underexplored. We present CMiLBench, a collection of hierarchical multitask benchmarks designed to translate theoretical notions of \"diversity in unity\" into practical evaluation for three representative Chinese minority languages: Tibetan, Mongolian, and Uyghur. CMiLBench comprises 24,663 instances across 5 difficulty levels and 17 tasks spanning foundational ability, cultural specificity, and safety alignment. We adopt existing dataset adaptation, minority knowledge construction, and high-resource benchmark translation to construct CMiLBench. We assess 14 state-of-the-art commercial and open-source LLMs with a hybrid framework that integrates automatic metrics and LLM-as-a-Judge scoring. The comparative experimental results reveal the gap between theoretical capability and practical utility. CMiLBench serves as a foundational and scalable evaluation resource to bridge the digital language divide and promote the informatization and intelligentization of low-resource Chinese minority languages."
+   },
+   "meta": {
+    "kind": "fresh",
+    "published": "2026-11-22T17:32:26Z"
+   },
+   "fetchedAt": "2026-11-24T04:11:35.896Z",
+   "urlChecks": {
+    "https://arxiv.org/abs/2611.29635": 200
+   }
+  }
+ ]
+}
