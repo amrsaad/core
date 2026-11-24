@@ -1,5 +1,5 @@
 {
- "at": "2026-11-24T07:35:32.752Z",
+ "at": "2026-11-24T13:51:24.289Z",
  "runs": [
   {
    "browser": "webkit",
@@ -51,10 +51,10 @@
    },
    "diagLines": 16,
    "diagSample": [
-    "w4hg slot0 sy2:1 state 2",
-    "w4hg sync: packed 1 kB to 1 kB",
-    "w4hg sync: PUT ok 1 kB in 0.0 s",
-    "w4hg app: hidden"
+    "288w slot0 sy6:1 state 2",
+    "288w sync: packed 1 kB to 1 kB",
+    "288w sync: PUT ok 1 kB in 0.0 s",
+    "288w app: hidden"
    ],
    "writeDelayMs": 10029,
    "hosts": [
@@ -115,12 +115,12 @@
    },
    "diagLines": 16,
    "diagSample": [
-    "u6i1 slot0 sy6:1 state 2",
-    "u6i1 sync: packed 1 kB to 1 kB",
-    "u6i1 sync: PUT ok 1 kB in 0.0 s",
-    "u6i1 app: hidden"
+    "t3l1 slot0 sy2:1 state 2",
+    "t3l1 sync: packed 1 kB to 1 kB",
+    "t3l1 sync: PUT ok 1 kB in 0.0 s",
+    "t3l1 app: hidden"
    ],
-   "writeDelayMs": 10023,
+   "writeDelayMs": 10022,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
