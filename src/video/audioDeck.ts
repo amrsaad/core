@@ -401,6 +401,74 @@ export const BG_REFILL_TARGET = 2;
 export const BG_REFILL_PARALLEL = 2;
 /** Runde 38: so viele Kandidaten voraus fragt das Deck den Host (mindestens 4) */
 export const BG_REFILL_CAND = 6;
+/**
+ * Runde 39 (Gerätelog 24.11.2026 07:47 bis 07:58, Befund 1): toter Start, rund 85 s ohne Ton. Nach "fresh reload failed" (Laden verdeckt gescheitert) und dem Fehlerereignis stand das Element
+ * im Fehlerzustand (error.code 4). Nach der HTML-Spezifikation lehnt play() dann jedes Mal mit NotSupportedError ab, ohne je zu laden. Jeder Anlass (Rückkehr, Tipp, "net: recover") rief nur wieder play().
+ * DEAD_RELOAD = true: meldet play() NotSupportedError, hat das Element einen Ladefehler, oder ist "fresh reload" ohne Metadaten gescheitert, lädt das Deck die Quelle sichtbar einmal sauber neu
+ * (neues load() derselben Quelle über start()), beim nächsten Anlass (Rückkehr, Geste, Takt, abgelehntes play, "net: recover"), höchstens alle DEAD_RELOAD_MIN_MS und DEAD_RELOAD_MAX mal je Moment.
+ * Nie verdeckt (load() verdeckt hängt das Element), nie für lokale Quellen, nie nach einem ersten playing des Moments. Zeilen: "deck: dead source ...", "deck: dead reload ok/failed".
+ * false: Verhalten von Runde 38.
+ */
+export const DEAD_RELOAD = true;
+export const DEAD_RELOAD_MIN_MS = 5000;
+export const DEAD_RELOAD_MAX = 4;
+export const DEAD_RELOAD_FAIL_MS = 8000;
+/**
+ * Runde 39 (Befund 1): die Rettung ("ready first ... (rescue)" im Host) hing an waitSince des Hosts. Das setzt ein Netzfehler im Slot (sl.broken) oder ein Netzwechsel in den letzten 20 s auf eine
+ * Sekunde zurück, dann wurde die Schwelle nie erreicht, und jeder Moment wurde nur einmal gerettet. RESCUE_RETRY = true: das Deck misst selbst, wie lange der aktive Moment ohne Ton ist
+ * (silentFor, seit Start des Moments, Zeit im Hintergrund zählt mit). Ab RESCUE_MS ohne Ton geht der Host sichtbar auf einen bereiten Moment, unabhängig von sl.broken und Netzwechsel,
+ * auch direkt nach der Rückkehr (der Takt läuft alle 150 ms), und ein Moment, der schon einmal ersetzt wurde, darf bis RESCUE_RETRY_MAX mal wieder ersetzt werden. false: Verhalten von Runde 38.
+ */
+export const RESCUE_RETRY = true;
+export const RESCUE_RETRY_MAX = 3;
+/**
+ * Runde 39 (Befund 2): die Media Session (Sperrbildschirm, Kontrollzentrum) folgt dem aktiven Element. Bisher setzten drei Stellen playbackState nach Absicht, nicht nach Zustand: der Host aus
+ * userPaused (nach jedem playing und loadedmetadata, und bei jedem Wechsel von paused), das Deck "playing" bei Tausch und Rückfall (inline next) sobald play() gerufen ist, und der Host aus den
+ * Zuständen PLAYING und PAUSED. Puffern und ein abgelehntes play() änderten nichts. MS_FOLLOW = true: das Deck gleicht die Anzeige mit dem Element ab (Ereignisse play, playing, pause, waiting, ended, error
+ * des aktiven Elements, Sekundentakt sichtbar und verdeckt, Rückkehr), und setzt Dauer, Position und Tempo des Clips neu, wenn sie abweichen. Der Host schreibt über msTruth.
+ * Absicht, die bleibt: verdeckt hält ein Tausch oder Rückfall die Anzeige auf "playing", bis das neue Element spielt (MS_HANDOVER_MS, bei inline next bis zu dessen Frist), damit iOS die Sitzung
+ * nicht beendet. Zeile "bg: ms state fixed <alt> to <neu> (element paused=<..>)". false: Verhalten von Runde 38.
+ */
+export const MS_FOLLOW = true;
+export const MS_HANDOVER_MS = 4000;
+/**
+ * Runde 39 (Befund 3): bei der Rückkehr melden mehrere Elemente "spielt", obwohl die App kein play() rief. Sichtbar hält das Deck sofort alle nicht aktiven Elemente an (wie bisher) und prüft danach
+ * dreimal im Abstand von RETURN_SILENCE_GAP_MS noch einmal. Dazu Diagnose: die Zeile "second element playing" trägt jetzt auch sichtbar rs=, sincePlay=, sinceCall= (App rief play()), lastHalt=, n=,
+ * und eine Zeile "deck: element play event ..." wenn ein nicht aktives Element ein play-Ereignis meldet. false: Verhalten von Runde 38.
+ */
+export const RETURN_SILENCE = true;
+export const RETURN_SILENCE_GAP_MS = 150;
+export const RETURN_SILENCE_CHECKS = 3;
+
+/**
+ * Runde 39: welchen Zustand soll die Media Session zeigen? 'playing', 'paused' oder null (keine Meinung, nichts ändern).
+ * Das Element zählt: läuft es (nicht pausiert, nicht am Ende), steht playing, auch beim Puffern. Pausiert es, steht paused, außer in der Übergabe (handover, MS_HANDOVER_MS nach Start, Tausch
+ * oder Rückfall, bei inline next bis zu dessen Frist): der Moment soll spielen, das Element hat noch keinen Ton, die Anzeige bleibt auf playing (kein Blitz auf Pause beim Laden, und verdeckt
+ * beendet iOS die Sitzung nicht). Ein abgelehntes play() beendet die Übergabe.
+ */
+export function decideMsState(o: { has: boolean; paused: boolean; ended: boolean; done: boolean; want: boolean; handover: boolean }): 'playing' | 'paused' | null {
+  if (!o.has) return null;
+  if (o.done) return 'paused';
+  if (o.handover && o.want) return 'playing';
+  // Ende der Quelle (ended, noch nicht abgeschlossen): keine Meinung, der Ende-Handler startet gleich den nächsten Moment (kein Pause-Blitz auf dem Sperrbildschirm)
+  if (o.ended) return null;
+  if (!o.paused) return 'playing';
+  return 'paused';
+}
+
+/**
+ * Runde 39: ist die Quelle des aktiven Moments tot? Ladefehler am Element (error), oder als tot vermerkt (NotSupportedError beim play(), "fresh reload" gescheitert) und noch ohne Metadaten.
+ * Nie nach einem ersten playing des Moments (dort greifen die Wiederherstellungen) und nie für lokale Quellen.
+ */
+export function deadSource(o: { errorCode: number | null; marked: boolean; rs: number; played: boolean; local: boolean }): boolean {
+  if (o.played || o.local) return false;
+  return o.errorCode !== null || (o.marked && o.rs < 1);
+}
+
+/** Runde 39: darf jetzt neu geladen werden? Mindestabstand seit dem letzten Versuch, Höchstzahl je Moment */
+export function reviveDue(o: { now: number; last: number; n: number }): boolean {
+  return o.n < DEAD_RELOAD_MAX && (o.last <= 0 || o.now - o.last >= DEAD_RELOAD_MIN_MS);
+}
 /** Runde 29: so lange wartet der erste play() nach dem Sprung auf seeked (ms), danach spielt er trotzdem */
 export const JUMP_WAIT_MS = 1500;
 /** Runde 29: so lange wartet der erste play() auf die Metadaten (ms), danach spielt er trotzdem (Netz hängt, nie stehen bleiben) */
@@ -587,6 +655,16 @@ export interface DeckDeps {
   unlockGuard?: boolean;
   /** Runde 38: false schaltet das frühere Nachladen verdeckt ab (Ziel 1, ein Abruf, nur bei leerem Vorrat), Standard BG_REFILL_EARLY */
   bgRefillEarly?: boolean;
+  /** Runde 39: false schaltet das saubere Neuladen einer toten Quelle ab, Standard DEAD_RELOAD */
+  deadReload?: boolean;
+  /** Runde 39: false schaltet die Rettung nach Zeit ohne Ton im Deck ab (der Host fällt auf waitSince zurück), Standard RESCUE_RETRY */
+  rescueRetry?: boolean;
+  /** Runde 39: false schaltet den Abgleich der Media Session mit dem Element ab, Standard MS_FOLLOW */
+  msFollow?: boolean;
+  /** Runde 39: liest playbackState der Media Session (Standard: navigator.mediaSession.playbackState, undefined ohne Media Session) */
+  msRead?: () => 'playing' | 'paused' | 'none' | undefined;
+  /** Runde 39: false schaltet die Wiederholung des Haltens bei der Rückkehr und die zusätzliche Diagnose ab, Standard RETURN_SILENCE */
+  returnSilence?: boolean;
   /** Runde 27: false schaltet das Ausweichen auf ein frisches Element ab (Tests der bestehenden Kette), Standard true */
   dodge?: boolean;
   /** Element-Vorrat (Entscheidung 47 und 52): fill() lädt die nächsten POOL Ausschnitte in eigene Elemente vor, swapNext() tauscht nur die Rollen. Aus: fill() tut nichts. */
@@ -816,6 +894,7 @@ export class AudioDeck {
   onMedia: ((ev: 'playing' | 'loadedmetadata') => void) | null = null;
   /** Letzter Stand, den setPositionState bekam (Tests, Diagnose) */
   lastPos: { duration: number; position: number; playbackRate: number } | null = null;
+  private lastPosAt = 0;
   /** Ausschnitt, der auf die Blob-URL aus dem Vorrat wartet */
   private holding: DeckClip | null = null;
   private holdToken = 0;
@@ -823,7 +902,7 @@ export class AudioDeck {
   diag: (line: string) => void = () => {};
 
   /** Runde 27: Messpunkte je Element (Zeitpunkte von Sprung, play und Laden, ob ein Freischaltversuch lief, letzte endliche Dauer) für die Diag-Zeilen collapse und dur drop */
-  private stat = new WeakMap<DeckEl, { seekAt: number; playAt: number; playN: number; seekN: number; loadAt: number; probed: boolean; dur: number }>();
+  private stat = new WeakMap<DeckEl, { seekAt: number; playAt: number; callAt: number; playN: number; seekN: number; loadAt: number; probed: boolean; dur: number }>();
   /** Runde 29: womit das Element freigeschaltet wurde (Diagnose): stille Inline-Quelle, ein echtes play() im Wisch oder Tipp, Probe auf einer Netzquelle */
   private unlockWho = new WeakMap<DeckEl, 'silent' | 'swipe' | 'probe'>();
   /** Runde 29: wartet mit dem ersten play() auf den Sprung (Element, Ausschnitt, Zeitgeber) */
@@ -867,8 +946,23 @@ export class AudioDeck {
   private bgSingleOn: boolean;
   private bgSingleEsc: boolean;
   private guardOn: boolean;
+  /** Runde 39: Schalter und Zustand (tote Quelle, Rettung, Media Session, Rückkehr) */
+  private deadOn: boolean;
+  private rescueOn: boolean;
+  private msOn: boolean;
+  private retSilOn: boolean;
+  private dead: { key: string; why: string } | null = null;
+  private revive = { key: '', n: 0, at: 0 };
+  private rvv: { key: string; id: string; el: DeckEl; t0: number; timer: ReturnType<typeof setTimeout> } | null = null;
+  /** Media Session: bis wann verdeckt "playing" gilt, obwohl das neue Element noch nicht spielt (Tausch), und die letzte Korrekturzeile */
+  private msHoldUntil = 0;
+  private msFixLine = { line: '', at: 0 };
 
   constructor(private deps: DeckDeps) {
+    this.deadOn = deps.deadReload ?? DEAD_RELOAD;
+    this.rescueOn = deps.rescueRetry ?? RESCUE_RETRY;
+    this.msOn = deps.msFollow ?? MS_FOLLOW;
+    this.retSilOn = deps.returnSilence ?? RETURN_SILENCE;
     this.bgSingleOn = deps.bgSingle ?? BG_SINGLE;
     this.bgSingleEsc = deps.bgSingleEscalate ?? BG_SINGLE_ESCALATE;
     this.guardOn = deps.unlockGuard ?? UNLOCK_GUARD;
@@ -885,7 +979,7 @@ export class AudioDeck {
   private st(el: DeckEl) {
     let r = this.stat.get(el);
     if (!r) {
-      r = { seekAt: 0, playAt: 0, playN: 0, seekN: 0, loadAt: 0, probed: false, dur: Number.NaN };
+      r = { seekAt: 0, playAt: 0, callAt: 0, playN: 0, seekN: 0, loadAt: 0, probed: false, dur: Number.NaN };
       this.stat.set(el, r);
     }
     return r;
@@ -897,6 +991,7 @@ export class AudioDeck {
     r.loadAt = Date.now();
     r.seekAt = 0;
     r.playAt = 0;
+    r.callAt = 0;
     r.playN = 0;
     r.seekN = 0;
     r.probed = false;
@@ -1091,6 +1186,7 @@ export class AudioDeck {
     const position = Math.min(duration, Math.max(0, el.currentTime + this.offset - c.start));
     const playbackRate = el.playbackRate > 0 ? el.playbackRate : 1;
     this.lastPos = { duration, position, playbackRate };
+    this.lastPosAt = Date.now();
     try {
       if (typeof navigator !== 'undefined' && 'mediaSession' in navigator && navigator.mediaSession.setPositionState) navigator.mediaSession.setPositionState(this.lastPos);
     } catch {
@@ -1239,6 +1335,8 @@ export class AudioDeck {
       this.pauseBy.delete(el);
       if (mine()) this.note(`pause event by=${by ?? (el.ended ? 'media end' : 'system')} hidden=${this.hidden()} done=${this.done} ${this.stateText(el)}`);
       if (!mine()) return;
+      // Runde 39: eine Pause des aktiven Elements beendet die Übergabe der Media Session (sie zeigt den Zustand des Elements)
+      this.msHoldUntil = 0;
       this.samp = null;
       this.snd = reduceSound(this.snd, 'pause', this.soundView(el));
       this.sink?.sound?.();
@@ -1306,6 +1404,8 @@ export class AudioDeck {
       }
       this.trialFailed = null;
       if (this.frl?.el === el) this.freshEnd(true);
+      if (this.rvv?.el === el) this.reviveEnd(true);
+      if (this.dead?.key === this.clip?.key) this.dead = null;
       this.seek(true);
       this.armed = true;
       this.posSetLine(el);
@@ -1373,9 +1473,35 @@ export class AudioDeck {
       // Runde 36: der aktive Netz-Moment meldet einen Ladefehler: einmal frisch neu laden, kam der Fehler nach dem frischen Laden, ist es gescheitert
       if (this.frl?.el === el) this.freshEnd(false, 'error');
       else if (this.freshReload('error')) return;
+      // Runde 39: tote Quelle vermerken, sichtbar sofort sauber neu laden (der Host muss dann nichts tun), verdeckt beim nächsten Anlass
+      if (this.rvv?.el === el) this.reviveEnd(false);
+      this.markDead('load error');
+      if (this.reviveDead('error')) return;
       this.diag(`deck error ${c.id}`);
       this.sink?.error();
     });
+    // Runde 39: die Media Session folgt dem aktiven Element (nach den übrigen Handlern, damit deren Meldungen an den Host schon draußen sind)
+    for (const ev of ['play', 'playing', 'pause', 'waiting', 'ended', 'emptied']) {
+      el.addEventListener(ev, () => {
+        if (mine()) this.msSync(ev);
+      });
+    }
+    // Runde 39: ein nicht aktives Element meldet play (iOS setzt es bei der Rückkehr fort, oder ein Probe-play): Zeile mit Stand, damit die Zeit zwischen Ereignis und Anhalten messbar wird
+    el.addEventListener('play', () => {
+      if (!this.retSilOn || mine() || this.silentEl(el)) return;
+      const r = this.st(el);
+      const last = this.playEvAt.get(el) ?? 0;
+      const now = Date.now();
+      this.playEvAt.set(el, now);
+      if (now - last < 5000 || this.probes.has(el)) return;
+      const h = this.haltAt.get(el);
+      this.diag(`deck: element play event ${this.deckRole(el)} ${this.idOf(el)} hidden=${this.hidden() ? 1 : 0} rs=${el.readyState} sinceCall=${this.since(r.callAt)} lastHalt=${h ? `${h.by} ${now - h.at} ms` : 'none'}`);
+    });
+  }
+
+  private playEvAt = new WeakMap<DeckEl, number>();
+  private deckRole(el: DeckEl): string {
+    return this.probes.has(el) ? 'probe' : this.bgRefs.some((r) => r.el === el) ? 'refill' : this.keptOf(el) ? 'kept' : this.entryOf(el) ? 'pool' : 'unknown';
   }
 
   /**
@@ -1389,6 +1515,9 @@ export class AudioDeck {
     const last = this.freshTried.get(c.key);
     if (last !== undefined && Date.now() - last < 30_000) return false;
     this.freshTried.set(c.key, Date.now());
+    // Runde 39: das frische Neuladen zählt für den Mindestabstand des sauberen Neuladens einer toten Quelle (reviveDead) mit
+    if (this.revive.key !== c.key) this.revive = { key: c.key, n: 0, at: 0 };
+    this.revive.at = Date.now();
     if (this.freshTried.size > 100) this.freshTried.delete(this.freshTried.keys().next().value as string);
     this.diag(why === 'error' ? `deck: active has load error ${c.id}, fresh reload` : `deck: active not loading ${c.id} rs=${el.readyState} after ${ageMs} ms, fresh reload`);
     if (this.frl) clearTimeout(this.frl.timer);
@@ -1410,6 +1539,151 @@ export class AudioDeck {
     this.frl = null;
     if (this.clip?.key !== f.key) return;
     this.diag(`deck: fresh reload ${ok ? 'ok' : 'failed'} ${f.id} after ${Date.now() - f.t0} ms${how ? ` (${how})` : ''}`);
+    if (!ok && how === 'no metadata') this.markDead('fresh reload failed');
+  }
+
+  // ---- Runde 39: tote Quelle sauber neu laden, Zeit ohne Ton, Media Session ----
+
+  /** Der aktive Moment hat eine tote Quelle (siehe deadSource): vermerken, damit der nächste Anlass neu lädt */
+  private markDead(why: string) {
+    const c = this.clip;
+    if (!this.deadOn || !c || this.done || this.isLocal) return;
+    if (this.dead?.key !== c.key) this.dead = { key: c.key, why };
+  }
+
+  private isDead(el: DeckEl): boolean {
+    const c = this.clip;
+    if (!this.deadOn || !c || el !== this.el || this.done || this.holding) return false;
+    return deadSource({ errorCode: el.error ? (el.error.code ?? 0) : null, marked: this.dead?.key === c.key, rs: el.readyState, played: this.played, local: this.isLocal });
+  }
+
+  /**
+   * Runde 39: tote Quelle des aktiven Moments einmal sauber neu laden (load() derselben Quelle über start(), wie freshReload, aber ohne dessen 30-s-Sperre). Nur sichtbar, nur mit Wunsch zu spielen,
+   * höchstens alle DEAD_RELOAD_MIN_MS und DEAD_RELOAD_MAX mal je Moment. Gibt zurück, ob neu geladen wurde.
+   */
+  private reviveDead(why: string): boolean {
+    const el = this.el;
+    const c = this.clip;
+    if (!this.deadOn || !el || !c || !this.want || this.hidden() || !this.isDead(el)) return false;
+    if (this.revive.key !== c.key) this.revive = { key: c.key, n: 0, at: 0 };
+    const now = Date.now();
+    if (!reviveDue({ now, last: this.revive.at, n: this.revive.n })) return false;
+    this.revive.n++;
+    this.revive.at = now;
+    this.diag(`deck: dead source ${c.id} (${why}) rs=${el.readyState} error=${el.error?.code ?? 'none'} ns=${el.networkState ?? 'n/a'} ${this.dead?.why ?? 'load error'}, reload ${this.revive.n}/${DEAD_RELOAD_MAX}`);
+    this.dead = null;
+    if (this.frl) {
+      clearTimeout(this.frl.timer);
+      this.frl = null;
+    }
+    if (this.rvv) clearTimeout(this.rvv.timer);
+    this.rvv = { key: c.key, id: c.id, el, t0: now, timer: setTimeout(() => this.reviveEnd(false), DEAD_RELOAD_FAIL_MS) };
+    this.rebuilding = true;
+    try {
+      this.start(c, this.want, false, this.resumeFrom);
+    } finally {
+      this.rebuilding = false;
+    }
+    return true;
+  }
+
+  private reviveEnd(ok: boolean) {
+    const r = this.rvv;
+    if (!r) return;
+    clearTimeout(r.timer);
+    this.rvv = null;
+    if (this.clip?.key !== r.key) return;
+    this.diag(`deck: dead reload ${ok ? 'ok' : 'failed'} ${r.id} after ${Date.now() - r.t0} ms`);
+    if (!ok) this.markDead('dead reload failed');
+  }
+
+  /**
+   * Runde 39: wie lange der aktive Moment seit seinem Start ohne Ton ist (ms), 0 wenn er schon einmal gespielt hat, nicht spielen soll, auf den Tipp wartet oder verdeckt ist.
+   * Der Host rettet sichtbar auf einen bereiten Moment, sobald der Wert RESCUE_MS erreicht (RESCUE_RETRY).
+   */
+  silentFor(): number {
+    const c = this.clip;
+    if (!this.rescueOn || !c || this.done || this.holding || !this.want || this.played || this.clipAt <= 0 || this.hidden()) return 0;
+    if (this.waitTapKey === c.key || this.needTapKey === c.key) return 0;
+    return Math.max(0, Date.now() - this.clipAt);
+  }
+
+  /** Runde 39: Schalter für den Host (Rettung nach Zeit ohne Ton) */
+  get rescueRetry(): boolean {
+    return this.rescueOn;
+  }
+
+  private readMs(): 'playing' | 'paused' | 'none' | undefined {
+    try {
+      if (this.deps.msRead) return this.deps.msRead();
+      if (typeof navigator === 'undefined' || !('mediaSession' in navigator) || !navigator.mediaSession) return undefined;
+      return navigator.mediaSession.playbackState;
+    } catch {
+      return undefined;
+    }
+  }
+
+  /** Runde 39: das Ziel der Anzeige aus dem Zustand des aktiven Elements (decideMsState), null ohne Meinung */
+  private msTarget(): 'playing' | 'paused' | null {
+    const el = this.el;
+    const c = this.clip;
+    if (!this.msOn || !el || !c || this.holding) return null;
+    return decideMsState({
+      has: true,
+      paused: el.paused,
+      ended: el.ended,
+      done: this.done,
+      want: this.want,
+      handover: !!this.inl || Date.now() < this.msHoldUntil,
+    });
+  }
+
+  /** Runde 39: der Host schreibt playbackState nach Absicht (userPaused, Zustandsmeldung): hier kommt der Zustand des Elements dazwischen. Ohne Meinung gilt die Absicht. */
+  msTruth(intended: 'playing' | 'paused'): 'playing' | 'paused' {
+    return this.msTarget() ?? intended;
+  }
+
+  /**
+   * Runde 39: Anzeige der Media Session mit dem aktiven Element abgleichen (Ereignisse des Elements, Sekundentakt, Rückkehr) und Dauer, Position und Tempo des Clips neu setzen, wenn sie abweichen.
+   * Schreibt nur bei Abweichung. Verdeckt zählt die Übergabe (Tausch, inline next): die Anzeige bleibt auf playing, bis das neue Element spielt (decideMsState).
+   */
+  private msSync(why: string) {
+    if (!this.msOn) return;
+    const el = this.el;
+    const want = this.msTarget();
+    if (!el || !want) return;
+    const cur = this.readMs();
+    // none: die Seite hat noch nie einen Zustand gesetzt (der Host setzt ihn beim Einhängen), nichts zu korrigieren
+    if (cur === undefined || cur === 'none') return;
+    if (cur !== want) {
+      const line = `bg: ms state fixed ${cur} to ${want} (element paused=${el.paused})`;
+      const now = Date.now();
+      if (line !== this.msFixLine.line || now - this.msFixLine.at >= 3000) {
+        this.msFixLine = { line, at: now };
+        this.diag(`${line} via ${why}`);
+      }
+      this.deps.playbackState?.(want, `ms follow ${why}`);
+    }
+    this.positionSync(el);
+  }
+
+  /** Runde 39: Dauer und Tempo des Clips stimmen mit dem, was die Media Session zuletzt bekam? Sonst neu setzen (der erste timeupdate des neuen Clips kommt oft erst Sekunden später). */
+  private positionSync(el: DeckEl) {
+    const c = this.clip;
+    if (!c || this.done || this.posHold?.el === el) return;
+    const raw = c.end !== undefined ? c.end - c.start : (el.duration || 0) + this.offset - c.start;
+    const duration = Number.isFinite(raw) && raw > 0 ? raw : 0;
+    if (!duration) return;
+    const rate = el.playbackRate > 0 ? el.playbackRate : 1;
+    const p = this.lastPos;
+    const pos = Math.min(duration, Math.max(0, el.currentTime + this.offset - c.start));
+    const expect = p ? p.position + (this.lastPosAt > 0 && !el.paused ? ((Date.now() - this.lastPosAt) / 1000) * p.playbackRate : 0) : -1;
+    if (!p || Math.abs(p.duration - duration) > 0.5 || Math.abs(p.playbackRate - rate) > 0.01 || Math.abs(expect - pos) > 2.5) {
+      if (p && (Math.abs(p.duration - duration) > 0.5 || Math.abs(p.playbackRate - rate) > 0.01)) {
+        this.diag(`bg: ms position fixed duration ${p.duration.toFixed(1)} to ${duration.toFixed(1)}, rate ${p.playbackRate} to ${rate}`);
+      }
+      this.position(el);
+    }
   }
 
   /** Runde 36: nach dem Laden des aktiven Netz-Moments prüfen, ob nach FRESH_RELOAD_MS Metadaten da sind (t0: Beginn des Ladens, bei einem übernommenen Eintrag der des Eintrags) */
@@ -1957,6 +2231,8 @@ export class AudioDeck {
       this.froz = null;
       return;
     }
+    // Runde 39: tote Quelle (Ladefehler, NotSupportedError, "fresh reload" gescheitert): sichtbar sauber neu laden
+    if (this.reviveDead('tick')) return;
     // Ein vertagter Neuaufbau kommt zurück, sobald die Seite wieder sichtbar ist
     if (this.recov.pending && this.want && !this.recov.gaveUp) {
       this.recover(el, 'frozen', el.currentTime);
@@ -2227,6 +2503,9 @@ export class AudioDeck {
     this.beginPosHold(el, clip);
     if (play) this.playAfterJump(el, clip, 'start');
     if (!loc) this.armFresh(el, clip, Date.now());
+    // Runde 39: der Moment soll spielen, bis zum ersten Ton (höchstens MS_HANDOVER_MS) kein Blitz auf Pause
+    this.msHoldUntil = play ? Date.now() + MS_HANDOVER_MS : 0;
+    this.msSync('start');
   }
 
   private hold(clip: DeckClip, play: boolean, forcePlain: boolean, from: number, forceWhy: string | undefined, wait: Promise<boolean>, what = 'storage') {
@@ -2370,6 +2649,7 @@ export class AudioDeck {
     let p: Promise<void> | undefined;
     const sr = this.st(el);
     sr.playAt = Date.now();
+    sr.callAt = Date.now();
     if (!sr.playN) sr.playN = ++this.ev;
     try {
       p = el.play();
@@ -2978,7 +3258,12 @@ export class AudioDeck {
       this.halt(old, 'app: swap');
       if (prev) this.addKept(prev);
     }
-    if (play) this.deps.playbackState?.('playing', 'swap');
+    if (play) {
+      this.deps.playbackState?.('playing', 'swap');
+      // Runde 39: verdeckt bleibt "playing" bis das neue Element spielt (Übergabe, damit iOS die Sitzung nicht beendet)
+      this.msHoldUntil = Date.now() + MS_HANDOVER_MS;
+    }
+    this.msSync('swap');
     return clip;
   }
 
@@ -3033,6 +3318,13 @@ export class AudioDeck {
     }
     // Kein Stopp-Zeitgeber: der Zustand ist Pause, bei der Rückkehr startet die App den Ton sofort wieder
     this.sink?.state(PAUSED);
+    // Runde 39: NotSupportedError heißt Element im Fehlerzustand (kein weiteres play() hilft): tote Quelle, sichtbar sauber neu laden (höchstens alle 5 s)
+    this.msHoldUntil = 0;
+    if (name === 'NotSupportedError' && c && this.clip?.key === c.key) {
+      this.markDead('NotSupportedError');
+      this.reviveDead('refused');
+    }
+    this.msSync('refused');
   }
 
   /** Von der geregelten Spur zurück auf die unveränderte, an der aktuellen Stelle */
@@ -3166,6 +3458,7 @@ export class AudioDeck {
     }
     if (this.el !== el) this.diag(`bg: inline next took another element ${to.id}`);
     this.deps.playbackState?.('playing', 'inline next');
+    this.msHoldUntil = Date.now() + MS_HANDOVER_MS;
     // Wie beim Tausch: die App übernimmt den Besitz über load() (finish pausiert sonst das neue Element über die alte Senke)
     this.sink = null;
     if (this.inl) clearTimeout(this.inl.timer);
@@ -3279,7 +3572,7 @@ export class AudioDeck {
     const tag = this.hidden() ? 'hidden' : why;
     for (const el of this.all()) {
       if (el === act || el.paused || this.silentEl(el)) continue;
-      const role = this.probes.has(el) ? 'probe' : this.bgRefs.some((r) => r.el === el) ? 'refill' : this.keptOf(el) ? 'kept' : this.entryOf(el) ? 'pool' : 'unknown';
+      const role = this.deckRole(el);
       const h = this.haltAt.get(el);
       this.halt(el, 'app: second element');
       const now = Date.now();
@@ -3293,7 +3586,13 @@ export class AudioDeck {
       // Zeilen höchstens alle 5 s je Element, der Eingriff selbst läuft bei jedem Fund
       const say = now - last >= 5000;
       if (say) {
-        const detail = tag === 'hidden' ? ` rs=${el.readyState} sincePlay=${this.since(this.st(el).playAt)} lastHalt=${h ? `${h.by} ${now - h.at} ms` : 'none'} n=${n}` : '';
+        // Runde 39: auch sichtbar (Rückkehr), dazu sinceCall: wann die App zuletzt selbst play() auf dem Element rief (none: nie seit dem Laden)
+        const detail =
+          tag === 'hidden'
+            ? ` rs=${el.readyState} sincePlay=${this.since(this.st(el).playAt)} lastHalt=${h ? `${h.by} ${now - h.at} ms` : 'none'} n=${n}`
+            : this.retSilOn
+              ? ` rs=${el.readyState} sincePlay=${this.since(this.st(el).playAt)} sinceCall=${this.since(this.st(el).callAt)} lastHalt=${h ? `${h.by} ${now - h.at} ms` : 'none'} n=${n}`
+              : '';
         this.diag(`deck: second element playing ${role} ${this.idOf(el)} t=${this.num(el.currentTime)}, paused (${tag})${detail}`);
         if (ignored) this.diag(`deck: second element ignores pause ${role} ${this.idOf(el)} (${tag}) paused=${el.paused}`);
       }
@@ -3327,6 +3626,8 @@ export class AudioDeck {
     this.singleTimer = setInterval(() => {
       if (!this.hidden()) this.enforceSingle('tick');
       else if (this.bgSingleOn) this.enforceSingle('hidden');
+      // Runde 39: Media Session im Sekundentakt mit dem Element abgleichen, sichtbar und verdeckt
+      this.msSync('tick');
     }, 1000);
     (this.singleTimer as unknown as { unref?: () => void }).unref?.();
   }
@@ -3433,6 +3734,8 @@ export class AudioDeck {
     this.applyMuted(el, opts.muted);
     if (this.holds(clip.key) && el.src) {
       this.want = opts.play;
+      // Runde 39: "net: recover" und jeder Wiedereinstieg des Hosts auf einem toten Element: neu laden statt wieder nur play()
+      if (opts.play && this.reviveDead('resume')) return;
       if (opts.play) {
         if (el.paused) this.kick('resume');
         else if (this.live) sink.state(PLAYING);
@@ -3452,6 +3755,7 @@ export class AudioDeck {
     if (this.sink !== sink || !this.clip) return;
     this.want = true;
     if (this.done) return;
+    if (this.reviveDead('play')) return;
     this.kick('play');
   }
 
@@ -3786,7 +4090,17 @@ export class AudioDeck {
       this.bgStuckStop();
       this.bgResume();
       this.enforceSingle('visible');
+      // Runde 39: iOS setzt bei der Rückkehr Elemente auf "spielt", die verdeckt standen: sofort gehalten (oben), danach dreimal im Abstand von 150 ms nachgeprüft
+      if (this.retSilOn) {
+        for (let i = 1; i <= RETURN_SILENCE_CHECKS; i++) {
+          const ms = i * RETURN_SILENCE_GAP_MS;
+          setTimeout(() => !this.hidden() && this.enforceSingle(`visible+${ms}`), ms);
+        }
+      }
       this.watchSingle();
+      // Runde 39: tote Quelle des aktiven Moments bei der Rückkehr sauber neu laden, Media Session abgleichen
+      this.reviveDead('return');
+      this.msSync('visible');
     }
     const el = this.el;
     if (!el) return;
@@ -3839,6 +4153,8 @@ export class AudioDeck {
     // Runde 31: die stillen play()-Aufrufe laufen synchron in diesem Aufruf (unlock, unlockSpares, silentUnlock, probe), vor jedem await oder Zeitgeber
     if (this.deps.standby) this.unlockSpares();
     if (this.deps.standby && this.unlockSilent) this.openPool();
+    // Runde 39: eine Geste ist ein Anlass, eine tote Quelle des aktiven Moments sauber neu zu laden
+    if (this.reviveDead('gesture')) return;
     // Runde 30: ein Ausschnitt, der auf den Tipp wartet, startet mit der ersten aktivierenden Geste (auch wenn schon ein stilles play() angenommen wurde)
     if (this.neverMuted && this.waitTapKey && this.clip?.key === this.waitTapKey && !this.done && this.want && this.el?.paused && this.gestSeen && !this.soundOff) {
       this.kick('unlock');

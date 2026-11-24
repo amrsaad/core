@@ -9,7 +9,7 @@ import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL, topicLabel } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { AUDIO_ONLY, audioDeck, createPlayer, deckClipOf, HLS, isIOS, LOCAL, loadYT, offlineYT, setDeckForm, STATE, type YTPlayer } from '../video/ytApi';
-import { POOL, POOL_WINDOW, RESCUE_FAST, RESCUE_FAST_MS, type DeckClip } from '../video/audioDeck';
+import { POOL, POOL_WINDOW, RESCUE_FAST, RESCUE_FAST_MS, RESCUE_RETRY_MAX, type DeckClip } from '../video/audioDeck';
 import { canWarm, coverMs, onNonCurrentPlaying, roleOf, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx, type WarmState } from '../video/warmup';
 import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, isFlat, onGesture, tabAfterSwipe, tabSwipe, type Gesture } from './gesture';
 import { hintVisible, SOUND_NONE } from './soundHint';
@@ -1365,6 +1365,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
 
   /** Runde 8: Momente, von denen die App schon einmal von selbst auf einen bereiten gewechselt ist (je Moment höchstens ein Wechsel, nichts pendelt) */
   const rescued = useRef(new Set<string>());
+  /** Runde 39 (RESCUE_RETRY): wie oft ein Moment als aktueller ersetzt wurde. Mit dem Schalter darf er bis RESCUE_RETRY_MAX mal wieder ersetzt werden (Zurückwischen auf einen toten Moment). */
+  const rescueN = useRef(new Map<string, number>());
   /**
    * Runde 8, fertig zuerst (Audio-Reiter): der Moment an der Stelle `at` soll jetzt spielen. Ist er nicht im Vorrat bereit, ein späterer aber schon, rückt der bereite
    * an die Stelle `at`, der übergangene steht direkt dahinter und lädt im Vorrat weiter (sein Eintrag bleibt, nichts wird gezählt, gesehen oder gesperrt).
@@ -1379,7 +1381,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     if (!m || formOf(m) !== 'audio') return false;
     // Ein Moment, den das Deck schon spielt (verdeckter Tausch, lockNext), ist gesetzt
     if (why === 'go' && audioDeck.holds(keyOf(m))) return false;
-    if (why === 'rescue' && (!cur || rescued.current.has(cur.id))) return false;
+    if (why === 'rescue' && (!cur || (rescued.current.has(cur.id) && !(audioDeck.rescueRetry && (rescueN.current.get(cur.id) ?? 0) < RESCUE_RETRY_MAX)))) return false;
     // start und rescue: der Kopf hat in seinem Element schon Daten (abgelehnter Start, nur der Tipp fehlt), dann startet er selbst
     if (why !== 'go' && audioDeck.holds(keyOf(m)) && audioDeck.readyState() >= 3) return false;
     const unlockedOnly = why === 'rescue' && IOS;
@@ -1391,7 +1393,10 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     applyQueue(r.queue);
     if (why === 'go') return true;
     // start und rescue: der aktuelle Moment wird ersetzt. Der Kopf ist nie weggewischt worden, er zählt weder als gesehen noch als übersprungen.
-    if (why === 'rescue' && cur) rescued.current.add(cur.id);
+    if (why === 'rescue' && cur) {
+      rescued.current.add(cur.id);
+      rescueN.current.set(cur.id, (rescueN.current.get(cur.id) ?? 0) + 1);
+    }
     const nm = queue.current[at];
     const sl = current();
     clearTapPlay();
@@ -1518,6 +1523,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   /** Media Session: Zustand setzen und jeden Wechsel mit Grund ins Protokoll (Issue 13: pausiert die App die Session im Hintergrund?) */
   const setPlaybackState = (s: 'playing' | 'paused', why: string) => {
     const ms = navigator.mediaSession;
+    // Runde 39 (MS_FOLLOW): im Audio-Reiter entscheidet der Zustand des aktiven Elements, nicht die Absicht (userPaused, Zustandsmeldung)
+    if (form === 'audio' && audioDeck.exists) s = audioDeck.msTruth(s);
     if (ms.playbackState !== s) diag.current.push(`bg: mediasession ${ms.playbackState} to ${s} (${why}) hidden=${isBackground(document.visibilityState)}`);
     ms.playbackState = s;
   };
@@ -2329,7 +2336,12 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       const p = sl.player;
       const m = queue.current[idxRef.current];
       // Runde 17: Takt des Audio-Decks (läuft-Ableitung, falsches Ende, Schnitt ohne timeupdate, stehende Zeit), nur sichtbar und nur im Audio-Reiter
-      if (form === 'audio' && m && audioDeck.exists && audioDeck.holds(keyOf(m)) && !forYouRef.current && !textRef.current && !recallRef.current && !isBackground(document.visibilityState)) audioDeck.heartbeat();
+      if (form === 'audio' && m && audioDeck.exists && audioDeck.holds(keyOf(m)) && !forYouRef.current && !textRef.current && !recallRef.current && !isBackground(document.visibilityState)) {
+        audioDeck.heartbeat();
+        // Runde 39 (RESCUE_RETRY): das Deck misst die Zeit ohne Ton selbst (Start des Moments, Hintergrund zählt mit). Ab RESCUE_MS geht es auf einen bereiten Moment, auch direkt nach der
+        // Rückkehr und unabhängig von sl.broken und Netzwechsel (die setzen waitSince unten zurück, die Schwelle wurde dann nie erreicht).
+        if (audioDeck.rescueRetry && !userPaused.current && audioDeck.silentFor() > RESCUE_MS && readyFirst(idxRef.current, 'rescue')) return;
+      }
       if (!p || !sl.ready || !m || forYouRef.current || textRef.current || recallRef.current) {
         // Runde 18: kein Moment mit Player im Blick: nichts lädt, der Sync darf schreiben
         setFeedLoading(false);
