@@ -115,11 +115,13 @@ const clip = (id: string): DeckClip => ({ key: `${id}|10|14`, id, url: `https://
 
 const ALL = ['a', 'b', 'c', 'd', 'e', 'f', 'g'].map(clip);
 
-function setup(opts: { bgInline?: boolean; bgRefill?: boolean } = {}) {
+function setup(opts: { bgInline?: boolean; bgRefill?: boolean; bgRefillEarly?: boolean } = {}) {
   const els: El[] = [];
   const hid = { v: false };
   const deck = new AudioDeck({
     standby: true,
+    // Runde 38: diese Tests prüfen das Verhalten von Runde 32 bis 37, das frühere Nachladen hat tests/audio-round38.test.ts
+    bgRefillEarly: false,
     ...opts,
     local: () => undefined,
     dropLocal: () => {},

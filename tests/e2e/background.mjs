@@ -188,7 +188,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bgRowAtMostPoolElements = row.count <= 6;
     c.bgRowSwapsNotSources = row.after.filter((x) => /^deck: swap \S+ ready=true pool=\d$/.test(x)).length >= 5 && new Set(row.history).size >= 6;
     // Runde 32: verdeckt lädt nur noch das abgesicherte Nachfüllen (ein Eintrag je Wechsel bei leerem Vorrat, Zeile "bg: refill")
-    c.bgRowNoLoadWhileHidden = !row.after.some((x) => /^deck: src /.test(x)) && row.after.filter((x) => /^deck: pool load /.test(x)).length <= row.after.filter((x) => /^bg: refill \S+ \(pool \d\)$/.test(x)).length;
+    c.bgRowNoLoadWhileHidden = !row.after.some((x) => /^deck: src /.test(x)) && row.after.filter((x) => /^deck: pool load /.test(x)).length <= row.after.filter((x) => /^bg: refill \S+ \(pool \d(\/\d, target \d)?\)$/.test(x)).length;
     c.bgRowEndedNext = row.diag.filter((x) => x.startsWith('bg: ended ')).length >= 5 && row.diag.filter((x) => x.startsWith('bg: next ')).length >= 5;
     // Issue 35: nach mehreren Trackwechseln sind Weiter und Zurück noch registriert, keine Sprung-Aktionen, Handler wurden nach playing neu gesetzt
     const lh = await pr.evaluate(() => ({ h: window.__core.lockHandlers(), d: window.__core.diag().filter((x) => x.startsWith('lock: handlers set')), prevNull: window.__ms ? Object.keys(window.__ms).sort() : null }));
@@ -196,7 +196,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.bgRowHandlersReset = lh.d.some((x) => x === 'lock: handlers set (mount)') && lh.d.some((x) => x === 'lock: handlers set (playing)');
     // Runde 32: verdeckt laufen mindestens 7 Momente nacheinander durch (5 aus dem Vorrat, danach über das verdeckte Nachfüllen), nie "stalled"
     c.bgSevenInARow = await waitFor(pr, () => window.__core.diag().filter((x) => x.startsWith('bg: next ')).length >= 7 && window.__core.state() === 1, undefined, 45000);
-    c.bgSevenRefilled = await pr.evaluate(() => window.__core.diag().some((x) => /^bg: refill \S+ \(pool 0\)$/.test(x)) && window.__core.diag().some((x) => /^bg: refill ready \S+ after \d+ ms$/.test(x)));
+    c.bgSevenRefilled = await pr.evaluate(() => window.__core.diag().some((x) => /^bg: refill \S+ \(pool \d(\/\d, target \d)?\)$/.test(x)) && window.__core.diag().some((x) => /^bg: refill ready \S+ after \d+ ms$/.test(x)));
     r.notes = { ...(r.notes ?? {}), bgSevenLog: await pr.evaluate(() => window.__core.diag().filter((x) => /refill|inline|stalled|deck: swap|pool (fill|load)|clip end/.test(x)).slice(-40)) };
     c.bgSevenNoStall = !(await pr.evaluate(() => window.__core.diag().some((x) => x.startsWith('bg: stalled'))));
     c.bgRowNoRejected = !row.diag.some((x) => x.startsWith('bg: play rejected'));

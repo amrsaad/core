@@ -387,6 +387,20 @@ export const BG_SINGLE_ESCALATE = true;
  * Zeilen: "deck: pool fill held", "deck: unlock catch-up", "deck: swap skips element not unlocked (hidden)", "deck: refusal element". false: wie Runde 36.
  */
 export const UNLOCK_GUARD = true;
+/**
+ * Runde 38 (Gerätelog 23.11.2026 07:48 bis 07:53, schwaches Netz): im Hintergrund stand der Vorrat dauerhaft bei 0 oder 1, jeder langsame Abruf führte in die Stille.
+ * BG_REFILL_EARLY = true: verdeckt lädt das Deck früher und mit mehr Vorlauf nach. Es startet, solange weniger als BG_REFILL_TARGET bereite oder ladende Einträge da sind (nicht erst bei 0),
+ * mit bis zu BG_REFILL_PARALLEL gleichzeitigen Abrufen (im schwachen Netz einer, das Ziel bleibt, die Abrufe laufen nacheinander). Auslöser: Clip-Ende und Wechsel (wie bisher), Verdecken,
+ * ein fertiger oder verlorener Abruf. Ein verlorener Abruf wird einmal sofort mit dem nächsten Kandidaten ersetzt (anderer Clip), derselbe Clip erst in der nächsten Hintergrund-Phase.
+ * Fehlt ein freies, freigeschaltetes Element, gibt das Deck verdeckt ein behaltenes, freigeschaltetes frei (die Rückkehr zum vorigen Moment ist verdeckt nicht nötig).
+ * Kein neuer Ladeweg: derselbe Mechanismus wie bgRefill seit Runde 32 (startEntry, Frist BG_REFILL_MS). false: Verhalten von Runde 37 (Ziel 1, ein Abruf, nur bei leerem Vorrat).
+ * Zeilen: "bg: refill <id> (pool <bereit>/<ladend>, target 2)", "bg: refill lost <id> (...), trying next <id>", "bg: refill releases kept <id>", in "bg: deck while hidden ..." "refills <gestartet>/<bereit>/<verloren>".
+ */
+export const BG_REFILL_EARLY = true;
+export const BG_REFILL_TARGET = 2;
+export const BG_REFILL_PARALLEL = 2;
+/** Runde 38: so viele Kandidaten voraus fragt das Deck den Host (mindestens 4) */
+export const BG_REFILL_CAND = 6;
 /** Runde 29: so lange wartet der erste play() nach dem Sprung auf seeked (ms), danach spielt er trotzdem */
 export const JUMP_WAIT_MS = 1500;
 /** Runde 29: so lange wartet der erste play() auf die Metadaten (ms), danach spielt er trotzdem (Netz hängt, nie stehen bleiben) */
@@ -571,6 +585,8 @@ export interface DeckDeps {
   bgSingleEscalate?: boolean;
   /** Runde 37: false schaltet die Freischalt-Sperre ab (Vorrat, verdeckter Tausch, behaltene Elemente), Standard UNLOCK_GUARD */
   unlockGuard?: boolean;
+  /** Runde 38: false schaltet das frühere Nachladen verdeckt ab (Ziel 1, ein Abruf, nur bei leerem Vorrat), Standard BG_REFILL_EARLY */
+  bgRefillEarly?: boolean;
   /** Runde 27: false schaltet das Ausweichen auf ein frisches Element ab (Tests der bestehenden Kette), Standard true */
   dodge?: boolean;
   /** Element-Vorrat (Entscheidung 47 und 52): fill() lädt die nächsten POOL Ausschnitte in eigene Elemente vor, swapNext() tauscht nur die Rollen. Aus: fill() tut nichts. */
@@ -832,8 +848,12 @@ export class AudioDeck {
   private inlineTried = new Set<string>();
   private inlineStart = false;
   /** Verdecktes Nachfüllen: der Eintrag in Arbeit, verlorene Versuche dieser Phase, verdächtige Elemente (beim Sichtbarwerden zurücksetzen) */
-  private bgRef: { key: string; id: string; el: DeckEl; t0: number; timer: ReturnType<typeof setTimeout> } | null = null;
+  private bgRefs: { key: string; id: string; el: DeckEl; t0: number; retry: boolean; timer: ReturnType<typeof setTimeout> }[] = [];
   private bgLost = 0;
+  /** Runde 38: in dieser Hintergrund-Phase verlorene Clips (derselbe Clip erst in der nächsten Phase wieder) und Zähler für die Zeile "while hidden" */
+  private bgLostKeys = new Set<string>();
+  private bgStat = { s: 0, r: 0, l: 0 };
+  private bgEarlyOn: boolean;
   private suspect = new Set<DeckEl>();
   /** Runde 30: "Ton aus" des Hosts (load, setMuted). Das Element selbst wird nie stumm geschaltet, bei Ton aus wartet der Ausschnitt auf den Tipp. */
   private soundOff = false;
@@ -856,6 +876,7 @@ export class AudioDeck {
     this.neverMuted = deps.neverMuted ?? NEVER_MUTED;
     this.bgInline = deps.bgInline ?? BG_INLINE_NEXT;
     this.bgRefillOn = deps.bgRefill ?? BG_REFILL;
+    this.bgEarlyOn = deps.bgRefillEarly ?? BG_REFILL_EARLY;
     this.freshOn = deps.freshReload ?? FRESH_RELOAD;
     this.bgStuckOn = deps.bgStuck ?? BG_STUCK;
     this.dodgeOn = deps.dodge ?? true;
@@ -2710,10 +2731,12 @@ export class AudioDeck {
     s.ready = true;
     s.rsAtReady = rs;
     this.fails.delete(s.clip.key);
-    if (this.bgRef && this.bgRef.key === s.clip.key) {
-      this.diag(`bg: refill ready ${s.clip.id} after ${Date.now() - this.bgRef.t0} ms`);
-      clearTimeout(this.bgRef.timer);
-      this.bgRef = null;
+    const bgDone = this.bgRefs.find((r) => r.key === s.clip.key);
+    if (bgDone) {
+      this.diag(`bg: refill ready ${s.clip.id} after ${Date.now() - bgDone.t0} ms`);
+      clearTimeout(bgDone.timer);
+      this.bgRefs = this.bgRefs.filter((r) => r !== bgDone);
+      this.bgStat.r++;
     }
     // Der Host steht dabei: Max' Diag zeigt so, welche Quelle langsam lädt (Runde 8, Barbell 2 bis 5 s bis zum ersten Byte, Iron Culture 0,6 s)
     this.diag(`deck: pool ready ${s.clip.id} after ${Date.now() - s.t0} ms host=${s.local ? 'local' : hostOf(s.clip.url)}`);
@@ -2732,6 +2755,8 @@ export class AudioDeck {
     if (!s.local) this.noteFast(Date.now() - s.t0, WEAK_OK_READY_MS, 'pool ready');
     // Runde 18: ein Abruf ist fertig, der nächste zurückgestellte darf starten
     if (this.deferNoted && !this.inFill) this.refillDeferred();
+    // Runde 38: ein verdeckter Abruf ist fertig, der nächste (Ziel 2, im schwachen Netz nacheinander) darf starten
+    if (bgDone && this.bgEarlyOn) this.bgRefill();
   }
 
   /** Die Quelle eines Eintrags lud nicht: aus dem Vorrat einmal vom Netz, in der geregelten Spur einmal unverändert. Sichtbar füllt der Host neu. */
@@ -3125,10 +3150,8 @@ export class AudioDeck {
     if (dup) {
       this.dropEntry(dup, 'inline next');
       this.suspect.add(dup.el);
-      if (this.bgRef?.key === to.key) {
-        clearTimeout(this.bgRef.timer);
-        this.bgRef = null;
-      }
+      for (const r of this.bgRefs.filter((x) => x.key === to.key)) clearTimeout(r.timer);
+      this.bgRefs = this.bgRefs.filter((x) => x.key !== to.key);
     }
     if (this.inlineTried.size > 100) this.inlineTried.delete(this.inlineTried.values().next().value as string);
     this.diag(`bg: inline next ${to.id} (pool empty)`);
@@ -3168,35 +3191,80 @@ export class AudioDeck {
   }
 
   /**
-   * Runde 32: verdecktes Nachfüllen als abgesicherte Messung. Nur wenn kein Eintrag da ist (bereit oder ladend): genau einer, in ein freies, freigeschaltetes, pausiertes
-   * Element (eine übrig gebliebene Quelle wird beim Laden ersetzt). Höchstens ein verdecktes Laden zugleich, Frist BG_REFILL_MS, nach zwei verlorenen Versuchen keine weiteren in dieser Phase.
+   * Runde 32: verdecktes Nachfüllen als abgesicherte Messung. Ein Abruf läuft in ein freies, freigeschaltetes, pausiertes Element (eine übrig gebliebene Quelle wird beim Laden ersetzt),
+   * Frist BG_REFILL_MS, nach zwei verlorenen Versuchen keine weiteren in dieser Phase.
+   * Runde 37: nur bei leerem Vorrat, ein Abruf. Runde 38 (BG_REFILL_EARLY): solange weniger als BG_REFILL_TARGET Einträge (bereit oder ladend) da sind, bis zu BG_REFILL_PARALLEL Abrufe zugleich
+   * (schwaches Netz: einer, nacheinander). Mehr als das Ziel wird nie geladen.
    */
   private bgRefill() {
-    if (!this.bgRefillOn || !this.hidden() || !this.deps.standby || this.poolClosed() || this.bgRef || this.bgLost >= 2 || this.entries.length > 0) return;
-    const clip = this.nextClips?.(4).find((x) => x.key !== this.clip?.key && !this.entries.some((e) => e.clip.key === x.key));
-    if (!clip) return;
-    const free = this.pool.plain.find((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e) && !this.probes.has(e) && !this.suspect.has(e) && this.unlockedEls.has(e) && e.paused);
-    if (!free) return;
-    this.diag(`bg: refill ${clip.id} (pool ${this.entries.length})`);
+    if (!this.bgRefillOn || !this.hidden() || !this.deps.standby || this.poolClosed()) return;
+    const early = this.bgEarlyOn;
+    const target = early ? BG_REFILL_TARGET : 1;
+    const par = early && !this.weakNet() ? BG_REFILL_PARALLEL : 1;
+    while (this.bgRefs.length < par && this.bgLost < 2 && this.entries.length < target) {
+      const clip = this.bgPick();
+      if (!clip || !this.bgStart(clip, false)) return;
+    }
+  }
+
+  /** Runde 38: der nächste Kandidat, der weder aktiv noch im Vorrat noch in dieser Phase verloren ist */
+  private bgPick(): DeckClip | undefined {
+    const n = this.bgEarlyOn ? BG_REFILL_CAND : 4;
+    return this.nextClips?.(n).find((x) => x.key !== this.clip?.key && !this.entries.some((e) => e.clip.key === x.key) && !this.bgRefs.some((r) => r.key === x.key) && !this.bgLostKeys.has(x.key));
+  }
+
+  /** Runde 38: freies, freigeschaltetes, pausiertes Element für ein verdecktes Nachladen. Fehlt es, wird ein behaltenes, freigeschaltetes, pausiertes Element freigegeben (nur Zuordnung, kein load()). */
+  private bgFree(): DeckEl | undefined {
+    const find = () => this.pool.plain.find((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e) && !this.probes.has(e) && !this.suspect.has(e) && this.unlockedEls.has(e) && e.paused);
+    let free = find();
+    if (!free && this.bgEarlyOn && this.guardOn) {
+      const k = this.kept.find((x) => x.el !== this.el && x.lane === 'plain' && this.unlockedEls.has(x.el) && x.el.paused && !this.probes.has(x.el) && !this.suspect.has(x.el));
+      if (k) {
+        this.diag(`bg: refill releases kept ${k.clip.id}`);
+        this.releaseKept(k);
+        free = find();
+      }
+    }
+    return free;
+  }
+
+  /** Runde 38: ein verdeckter Abruf, mit Frist. Ein verlorener wird (wenn es ein erster Versuch war) einmal sofort durch den nächsten Kandidaten ersetzt. */
+  private bgStart(clip: DeckClip, retry: boolean): boolean {
+    if (!this.bgFree()) return false;
+    const ready = this.entries.filter((e) => e.ready).length;
+    this.diag(this.bgEarlyOn ? `bg: refill ${clip.id} (pool ${ready}/${this.entries.length - ready}, target ${BG_REFILL_TARGET})` : `bg: refill ${clip.id} (pool ${this.entries.length})`);
     const s = this.startEntry(clip, undefined, true);
-    if (s.el !== free && this.unlockedEls.has(s.el) === false) this.diag(`bg: refill element not unlocked ${clip.id}`);
-    this.bgRef = {
+    this.bgStat.s++;
+    if (this.unlockedEls.has(s.el) === false) this.diag(`bg: refill element not unlocked ${clip.id}`);
+    const r = {
       key: clip.key,
       id: clip.id,
       el: s.el,
       t0: Date.now(),
+      retry,
       timer: setTimeout(() => {
-        const r = this.bgRef;
-        if (!r || r.key !== clip.key) return;
-        this.bgRef = null;
+        if (!this.bgRefs.includes(r)) return;
+        this.bgRefs = this.bgRefs.filter((x) => x !== r);
         const e = this.entries.find((x) => x.clip.key === clip.key);
         if (e?.ready) return;
-        this.diag(`bg: refill lost ${clip.id} (timeout rs=${r.el.readyState} ns=${r.el.networkState ?? 'n/a'})`);
         this.bgLost++;
+        this.bgStat.l++;
         this.suspect.add(r.el);
+        this.bgLostKeys.add(clip.key);
         if (e) this.dropEntry(e, 'bg refill lost');
+        const why = `timeout rs=${r.el.readyState} ns=${r.el.networkState ?? 'n/a'}`;
+        const next = this.bgEarlyOn && !retry && this.hidden() ? this.bgPick() : undefined;
+        if (!next) {
+          this.diag(`bg: refill lost ${clip.id} (${why})`);
+        } else {
+          this.diag(`bg: refill lost ${clip.id} (${why}), trying next ${next.id}`);
+          this.bgStart(next, true);
+        }
+        if (this.bgEarlyOn) this.bgRefill();
       }, BG_REFILL_MS),
     };
+    this.bgRefs.push(r);
+    return true;
   }
 
   /**
@@ -3211,7 +3279,7 @@ export class AudioDeck {
     const tag = this.hidden() ? 'hidden' : why;
     for (const el of this.all()) {
       if (el === act || el.paused || this.silentEl(el)) continue;
-      const role = this.probes.has(el) ? 'probe' : this.bgRef?.el === el ? 'refill' : this.keptOf(el) ? 'kept' : this.entryOf(el) ? 'pool' : 'unknown';
+      const role = this.probes.has(el) ? 'probe' : this.bgRefs.some((r) => r.el === el) ? 'refill' : this.keptOf(el) ? 'kept' : this.entryOf(el) ? 'pool' : 'unknown';
       const h = this.haltAt.get(el);
       this.halt(el, 'app: second element');
       const now = Date.now();
@@ -3273,10 +3341,9 @@ export class AudioDeck {
   /** Runde 32: die App ist wieder sichtbar: verdächtige Elemente (verdecktes Laden verloren) hart zurücksetzen, neue Hintergrund-Phase */
   private bgResume() {
     this.bgLost = 0;
-    if (this.bgRef) {
-      clearTimeout(this.bgRef.timer);
-      this.bgRef = null;
-    }
+    this.bgLostKeys.clear();
+    for (const r of this.bgRefs) clearTimeout(r.timer);
+    this.bgRefs = [];
     for (const e of this.suspect) {
       if (e === this.el || this.entryOf(e) || this.keptOf(e)) continue;
       this.clearSrc(e);
@@ -3305,8 +3372,8 @@ export class AudioDeck {
     this.bgStuckTimer = null;
     if (this.frl) clearTimeout(this.frl.timer);
     this.frl = null;
-    if (this.bgRef) clearTimeout(this.bgRef.timer);
-    this.bgRef = null;
+    for (const r of this.bgRefs) clearTimeout(r.timer);
+    this.bgRefs = [];
     this.onMedia = null;
     this.onPlayed = null;
     this.onNeedFill = null;
@@ -3732,12 +3799,15 @@ export class AudioDeck {
     this.note(line(''));
     if (kind === 'hidden') {
       this.hiddenStats = { tu: 0, ended: 0, ends: 0, plays: 0, at: Date.now(), chk: 0 };
+      this.bgStat = { s: 0, r: 0, l: 0 };
       this.bgStuckStart();
       if (this.bgSingleOn) this.watchSingle();
+      // Runde 38: schon beim Verdecken auf das Ziel auffüllen, nicht erst am Clip-Ende
+      if (this.bgEarlyOn) this.bgRefill();
       for (const sec of [1, 5, 15]) setTimeout(() => this.hidden() && this.note(line(` +${sec} s`)), sec * 1000);
     } else if (kind === 'visible' && this.hiddenStats.at) {
       const h = this.hiddenStats;
-      this.note(`while hidden ${Math.round((Date.now() - h.at) / 1000)} s: timeupdate ${h.tu}, ended ${h.ended}, clip ends ${h.ends}, play calls ${h.plays}, stuck checks ${h.chk}`);
+      this.note(`while hidden ${Math.round((Date.now() - h.at) / 1000)} s: timeupdate ${h.tu}, ended ${h.ended}, clip ends ${h.ends}, play calls ${h.plays}, stuck checks ${h.chk}, refills ${this.bgStat.s}/${this.bgStat.r}/${this.bgStat.l}`);
       this.hiddenStats.at = 0;
     }
   }
