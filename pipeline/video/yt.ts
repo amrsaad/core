@@ -9,20 +9,35 @@ const HEADERS = {
   Cookie: 'CONSENT=YES+cb; SOCS=CAI',
 };
 
-export async function ytGet(url: string, opts: { redirect?: RequestRedirect; method?: string } = {}): Promise<{ status: number; text: string; location?: string }> {
-  for (let i = 0; i < 3; i++) {
+export interface GetOpts {
+  redirect?: RequestRedirect;
+  method?: string;
+  /** Versuche je Abruf (Standard 3) */
+  tries?: number;
+  /** Zeitgrenze je Versuch in ms (Standard 30000) */
+  timeoutMs?: number;
+  /** Absolute Frist (Date.now()-Wert). Danach kein Abruf und kein Warten mehr. */
+  deadline?: number;
+}
+
+export async function ytGet(url: string, opts: GetOpts = {}): Promise<{ status: number; text: string; location?: string }> {
+  const tries = opts.tries ?? 3;
+  const left = () => (opts.deadline ?? Infinity) - Date.now();
+  for (let i = 0; i < tries; i++) {
+    if (left() <= 0) return { status: 0, text: 'Zeitbudget erschöpft' };
     try {
-      const res = await fetch(url, { headers: HEADERS, redirect: opts.redirect ?? 'follow', method: opts.method ?? 'GET', signal: AbortSignal.timeout(30_000) });
+      const res = await fetch(url, { headers: HEADERS, redirect: opts.redirect ?? 'follow', method: opts.method ?? 'GET', signal: AbortSignal.timeout(Math.max(1, Math.min(opts.timeoutMs ?? 30_000, left()))) });
       const text = opts.method === 'HEAD' ? '' : await res.text();
       if (res.status === 429 || res.status >= 500) {
-        await sleep(3000 * (i + 1));
+        if (i === tries - 1) return { status: res.status, text, location: res.headers.get('location') ?? undefined };
+        await sleep(Math.min(3000 * (i + 1), Math.max(0, left())));
         continue;
       }
       return { status: res.status, text, location: res.headers.get('location') ?? undefined };
     } catch (e) {
       const cause = (e as { cause?: { code?: string; message?: string } }).cause;
-      if (i === 2) return { status: 0, text: `${String(e)} ${cause?.code ?? ''} ${cause?.message ?? ''}`.trim() };
-      await sleep(4000 * (i + 1));
+      if (i === tries - 1) return { status: 0, text: `${String(e)} ${cause?.code ?? ''} ${cause?.message ?? ''}`.trim() };
+      await sleep(Math.min(4000 * (i + 1), Math.max(0, left())));
     }
   }
   return { status: 429, text: '' };
@@ -85,15 +100,27 @@ export function shortsTabIds(html: string): string[] {
   return [...ids];
 }
 
-/** 200 = Short. Normale Videos leitet /shorts/<id> per 3xx auf /watch um. */
-export async function isShort(id: string): Promise<boolean> {
-  let r = await ytGet(`https://www.youtube.com/shorts/${id}`, { redirect: 'manual', method: 'HEAD' });
-  if (r.status === 405 || r.status === 0) r = await ytGet(`https://www.youtube.com/shorts/${id}`, { redirect: 'manual' });
-  return r.status === 200;
+export type ShortCheck = 'short' | 'no' | 'unknown';
+
+/**
+ * 200 = Short. Normale Videos leitet /shorts/<id> per 3xx auf /watch um (404 = Video weg).
+ * Alles andere (429, 5xx, Timeout, Fristende) ist "unknown": das Ergebnis darf nicht als "kein Short" gemerkt werden.
+ */
+export async function isShortCheck(id: string, o: { deadline?: number } = {}): Promise<ShortCheck> {
+  const opts = { redirect: 'manual' as const, tries: 2, timeoutMs: 10_000, deadline: o.deadline };
+  let r = await ytGet(`https://www.youtube.com/shorts/${id}`, { ...opts, method: 'HEAD' });
+  if (r.status === 405 || r.status === 0) r = await ytGet(`https://www.youtube.com/shorts/${id}`, opts);
+  if (r.status === 200) return 'short';
+  if ((r.status >= 300 && r.status < 400) || r.status === 404) return 'no';
+  return 'unknown';
 }
 
-export async function oembed(id: string): Promise<{ title: string; author: string; thumb: string } | null> {
-  const r = await ytGet(`https://www.youtube.com/oembed?url=${encodeURIComponent(`https://www.youtube.com/shorts/${id}`)}&format=json`);
+export async function isShort(id: string): Promise<boolean> {
+  return (await isShortCheck(id)) === 'short';
+}
+
+export async function oembed(id: string, deadline?: number): Promise<{ title: string; author: string; thumb: string } | null> {
+  const r = await ytGet(`https://www.youtube.com/oembed?url=${encodeURIComponent(`https://www.youtube.com/shorts/${id}`)}&format=json`, { tries: 2, timeoutMs: 10_000, deadline });
   if (r.status !== 200) return null;
   try {
     const d = JSON.parse(r.text) as { title: string; author_name: string; thumbnail_url: string };
@@ -104,8 +131,8 @@ export async function oembed(id: string): Promise<{ title: string; author: strin
 }
 
 /** Veröffentlichungsdatum aus der Seite eines Shorts (für den Aktivitätscheck) */
-export async function shortPublished(id: string): Promise<string | null> {
-  const r = await ytGet(`https://www.youtube.com/shorts/${id}`);
+export async function shortPublished(id: string, deadline?: number): Promise<string | null> {
+  const r = await ytGet(`https://www.youtube.com/shorts/${id}`, { tries: 2, timeoutMs: 15_000, deadline });
   if (r.status !== 200) return null;
   return r.text.match(/"publishDate":"([^"]+)"/)?.[1] ?? r.text.match(/itemprop="datePublished" content="([^"]+)"/)?.[1] ?? r.text.match(/"uploadDate":"([^"]+)"/)?.[1] ?? null;
 }

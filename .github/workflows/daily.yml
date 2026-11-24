@@ -333,7 +333,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment_retry.outputs.page_url || steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -364,5 +364,17 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+      # Die Artefaktliste des Laufs ist direkt nach dem Upload manchmal noch leer ("Found 0 artifact(s)", Läufe 44926191325 und 45322859387),
+      # obwohl der Upload fertig ist. Deshalb: ein Versuch ohne Abbruch, bei Fehlschlag kurz warten und genau einmal wiederholen.
+      # Der Retry läuft nur, wenn der erste Versuch fehlschlägt. Bedingungen und Reihenfolge der Jobs bleiben unverändert.
       - id: deployment
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+      - name: Warten vor zweitem Deploy-Versuch
+        if: steps.deployment.outcome == 'failure'
+        run: |
+          echo "::warning::Deploy-Versuch 1 fehlgeschlagen, zweiter Versuch in 30 s"
+          sleep 30
+      - id: deployment_retry
+        if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v4
