@@ -626,7 +626,7 @@
    "area": "brain",
    "topic": "ki-allgemein",
    "url": "https://arxiv.org/abs/2611.29664",
-   "urlStatus": 404,
+   "urlStatus": 200,
    "api": {
     "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
     "status": 200
@@ -644,7 +644,7 @@
    },
    "fetchedAt": "2026-11-24T04:11:35.896Z",
    "urlChecks": {
-    "https://arxiv.org/abs/2611.29664": 404
+    "https://arxiv.org/abs/2611.29664": 200
    }
   },
   {

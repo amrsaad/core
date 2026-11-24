@@ -12,7 +12,8 @@
    "resolvedTitle": "Yaqeen Institute",
    "verified": true,
    "status": "active",
-   "lastShort": "2026-10-29"
+   "lastShort": "2026-10-29",
+   "checked": []
   },
   {
    "name": "Omar Suleiman",
@@ -24,7 +25,8 @@
    "resolvedBy": "https://www.youtube.com/c/OmarSuleimanOfficial",
    "resolvedTitle": "Omar Suleiman Personal",
    "status": "active",
-   "lastShort": "2026-10-29"
+   "lastShort": "2026-10-29",
+   "checked": []
   },
   {
    "name": "Nouman Ali Khan / Bayyinah",
@@ -38,7 +40,9 @@
    "verified": false,
    "status": "inactive",
    "lastShort": "2022-03-25",
-   "note": "kein neues Short seit 2022-03-25"
+   "checked": [],
+   "note": "kein neues Short seit 2022-03-25",
+   "lastRun": "2026-11-24T13:32:09.039Z"
   },
   {
    "name": "Yasir Qadhi",
@@ -51,7 +55,8 @@
    "resolvedTitle": "Yasir Qadhi",
    "verified": true,
    "status": "active",
-   "lastShort": "2026-10-28"
+   "lastShort": "2026-10-28",
+   "checked": []
   },
   {
    "name": "Mufti Menk",
@@ -64,7 +69,8 @@
    "resolvedTitle": "Mufti Menk",
    "verified": true,
    "status": "active",
-   "lastShort": "2026-10-30"
+   "lastShort": "2026-10-30",
+   "checked": []
   },
   {
    "name": "Ahmad Al Shugairi",
@@ -77,7 +83,7 @@
    "resolvedTitle": "أحمد الشقيري",
    "verified": false,
    "status": "inactive",
-   "note": "keine Shorts gefunden (UUSH 404, channel-feed 200, shorts-tab 0 (0))"
+   "checked": []
   },
   {
    "name": "Omar Abdelkafy",
@@ -90,7 +96,8 @@
    "resolvedTitle": "عمر عبد الكافي",
    "verified": true,
    "status": "active",
-   "lastShort": "2026-10-29"
+   "lastShort": "2026-10-29",
+   "checked": []
   },
   {
    "name": "Jeff Nippard",
@@ -102,7 +109,8 @@
    "resolvedBy": "https://www.youtube.com/@JeffNippard",
    "resolvedTitle": "Jeff Nippard",
    "status": "active",
-   "lastShort": "2026-10-28"
+   "lastShort": "2026-10-28",
+   "checked": []
   },
   {
    "name": "Stronger By Science",
@@ -116,7 +124,9 @@
    "verified": false,
    "status": "inactive",
    "lastShort": "2025-02-28",
-   "note": "kein neues Short seit 2025-02-28"
+   "checked": [],
+   "note": "kein neues Short seit 2025-02-28",
+   "lastRun": "2026-11-24T13:34:02.275Z"
   },
   {
    "name": "Renaissance Periodization",
@@ -129,7 +139,8 @@
    "resolvedTitle": "Renaissance Periodization",
    "verified": true,
    "status": "active",
-   "lastShort": "2026-10-29"
+   "lastShort": "2026-10-29",
+   "checked": []
   },
   {
    "name": "Jeremy Ethier",
@@ -143,7 +154,7 @@
    "verified": true,
    "status": "inactive",
    "lastShort": "2026-03-15",
-   "note": "kein neues Short seit 2026-03-15"
+   "checked": []
   },
   {
    "name": "Layne Norton",
@@ -156,7 +167,9 @@
    "resolvedTitle": "Dr. Layne Norton",
    "verified": true,
    "status": "active",
-   "lastShort": "2026-10-09"
+   "lastShort": "2026-10-09",
+   "checked": [],
+   "lastRun": "2026-11-24T13:34:50.078Z"
   },
   {
    "name": "Peter Attia MD",
@@ -169,7 +182,8 @@
    "resolvedTitle": "Peter Attia MD",
    "verified": true,
    "lastShort": "2026-10-26",
-   "status": "active"
+   "status": "active",
+   "checked": []
   },
   {
    "name": "Squat University",
@@ -182,7 +196,8 @@
    "resolvedTitle": "Squat University",
    "verified": true,
    "lastShort": "2026-10-30",
-   "status": "active"
+   "status": "active",
+   "checked": []
   },
   {
    "name": "Andy Galpin",
@@ -196,7 +211,9 @@
    "verified": true,
    "lastShort": "2026-07-10",
    "status": "inactive",
-   "note": "kein neues Short seit 2026-07-10"
+   "checked": [],
+   "note": "kein neues Short seit 2026-07-10",
+   "lastRun": "2026-11-24T13:35:37.440Z"
   },
   {
    "name": "Cataract Coach",
@@ -206,7 +223,9 @@
    "lang": "en",
    "channelId": null,
    "status": "unresolved",
-   "note": "Suche HTTP 0 (TypeError: fetch failed UND_ERR_HEADERS_OVERFLOW Headers Overflow Error), Treffer: keine"
+   "note": "Suche HTTP 0 (TypeError: fetch failed UND_ERR_HEADERS_OVERFLOW Headers Overflow Error), Treffer: keine",
+   "resolveFails": 1,
+   "resolveTried": "2026-11-24T13:31:07.902Z"
   },
   {
    "name": "American Academy of Ophthalmology",
@@ -218,7 +237,9 @@
    "resolvedBy": "https://www.youtube.com/user/AAOtv",
    "resolvedTitle": "American Academy of Ophthalmology",
    "status": "active",
-   "lastShort": "2026-10-07"
+   "lastShort": "2026-10-07",
+   "checked": [],
+   "lastRun": "2026-11-24T13:35:42.061Z"
   },
   {
    "name": "Shannon Wong MD",
@@ -231,7 +252,9 @@
    "resolvedTitle": "Shannon Wong, MD",
    "status": "inactive",
    "lastShort": "2026-02-28",
-   "note": "kein neues Short seit 2026-02-28"
+   "checked": [],
+   "note": "kein neues Short seit 2026-02-28",
+   "lastRun": "2026-11-24T13:35:46.717Z"
   },
   {
    "name": "glaucomavids",
@@ -245,7 +268,9 @@
    "verified": false,
    "lastShort": "2024-06-27",
    "status": "inactive",
-   "note": "kein neues Short seit 2024-06-27"
+   "checked": [],
+   "note": "kein neues Short seit 2024-06-27",
+   "lastRun": "2026-11-24T13:35:51.418Z"
   },
   {
    "name": "Ophthalminute",
@@ -258,7 +283,9 @@
    "resolvedTitle": "Ophthalminute",
    "verified": false,
    "lastShort": "2026-10-19",
-   "status": "active"
+   "status": "active",
+   "checked": [],
+   "lastRun": "2026-11-24T13:35:56.076Z"
   },
   {
    "name": "Two Minute Papers",
@@ -272,7 +299,9 @@
    "verified": true,
    "lastShort": "2026-06-05",
    "status": "inactive",
-   "note": "kein neues Short seit 2026-06-05"
+   "checked": [],
+   "note": "kein neues Short seit 2026-06-05",
+   "lastRun": "2026-11-24T13:36:00.713Z"
   },
   {
    "name": "AI Explained",
@@ -285,7 +314,7 @@
    "resolvedTitle": "AI Explained",
    "verified": true,
    "status": "inactive",
-   "note": "keine Shorts gefunden (UUSH 404, channel-feed 200, shorts-tab 0 (0))"
+   "checked": []
   },
   {
    "name": "Anthropic",
@@ -299,7 +328,9 @@
    "verified": false,
    "lastShort": "2026-09-01",
    "status": "inactive",
-   "note": "kein neues Short seit 2026-09-01"
+   "checked": [],
+   "note": "kein neues Short seit 2026-09-01",
+   "lastRun": "2026-11-24T13:36:18.967Z"
   },
   {
    "name": "Dwarkesh Patel",
@@ -312,7 +343,8 @@
    "resolvedTitle": "Dwarkesh Patel",
    "verified": true,
    "lastShort": "2026-10-29",
-   "status": "active"
+   "status": "active",
+   "checked": []
   },
   {
    "name": "Fireship",
@@ -326,7 +358,9 @@
    "verified": true,
    "lastShort": "2024-09-21",
    "status": "inactive",
-   "note": "kein neues Short seit 2024-09-21"
+   "checked": [],
+   "note": "kein neues Short seit 2024-09-21",
+   "lastRun": "2026-11-24T13:36:49.796Z"
   },
   {
    "name": "3Blue1Brown",
@@ -339,7 +373,8 @@
    "resolvedTitle": "3Blue1Brown",
    "verified": true,
    "lastShort": "2026-10-25",
-   "status": "active"
+   "status": "active",
+   "checked": []
   },
   {
    "name": "Chris Voss",
@@ -352,7 +387,8 @@
    "resolvedTitle": "Chris Voss & The Black Swan Group",
    "verified": false,
    "lastShort": "2026-10-29",
-   "status": "active"
+   "status": "active",
+   "checked": []
   },
   {
    "name": "Big Think",
@@ -364,7 +400,8 @@
    "resolvedBy": "channel-url",
    "resolvedTitle": "Big Think",
    "status": "active",
-   "lastShort": "2026-10-28"
+   "lastShort": "2026-10-28",
+   "checked": []
   },
   {
    "name": "Y Combinator",
