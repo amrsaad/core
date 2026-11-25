@@ -1,5 +1,5 @@
 {
- "at": "2026-11-24T13:50:26.769Z",
+ "at": "2026-11-25T04:15:38.600Z",
  "runs": [
   {
    "browser": "webkit",
@@ -125,7 +125,7 @@
      ],
      "n": 42
     },
-    "rfSwipeMs": 423,
+    "rfSwipeMs": 408,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -169,79 +169,79 @@
      "bg: refill ready atshort13 after 31 ms"
     ],
     "tempoWaiting": 0,
-    "tempoPaused": 10,
+    "tempoPaused": 9,
     "cue": {
      "worst": 1,
-     "n": 623,
+     "n": 621,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.38",
+       "3.40",
        34,
        34
       ],
       [
-       "4.66",
+       "4.68",
        47,
        47
       ],
       [
-       "0.90",
+       "0.92",
        10,
        10
       ],
       [
-       "2.19",
-       22,
-       22
+       "2.21",
+       23,
+       23
       ],
       [
-       "3.47",
+       "3.49",
        35,
        35
       ],
       [
-       "4.76",
+       "4.78",
        48,
        48
       ],
       [
-       "6.05",
+       "6.07",
        61,
        61
       ],
       [
-       "7.33",
+       "7.36",
        74,
        74
       ],
       [
-       "8.62",
+       "8.64",
        87,
        87
       ],
       [
-       "9.91",
+       "9.93",
        100,
        100
       ],
       [
-       "11.19",
-       112,
-       112
+       "11.21",
+       113,
+       113
       ],
       [
-       "12.48",
-       125,
-       125
+       "12.50",
+       126,
+       126
       ]
      ],
      "rate": 2
     },
     "cueTempo": {
      "worst": 0,
-     "n": 552,
+     "n": 540,
      "rates": [
       1,
       1.5,
@@ -381,7 +381,7 @@
      "deck: probe done spare ok=0 dur=600.0 t=0.0",
      "deck: probe done spare ok=0 dur=600.0 t=0.0",
      "deck: probe done spare ok=0 dur=600.0 t=0.0",
-     "deck: gesture unlock 5 elements ok=0 rejected=5 timeout=0 after 0 ms",
+     "deck: gesture unlock 5 elements ok=0 rejected=5 timeout=0 after 1 ms",
      "deck: gesture pointerdown unlocked 1/6",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
@@ -405,7 +405,7 @@
      ],
      "n": 42
     },
-    "rfSwipeMs": 504,
+    "rfSwipeMs": 509,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -449,7 +449,7 @@
      "bg: refill ready atshort13 after 30 ms"
     ],
     "tempoWaiting": 0,
-    "tempoPaused": 0,
+    "tempoPaused": 4,
     "cue": {
      "worst": 0,
      "n": 601,
@@ -457,64 +457,64 @@
      "shownNow": 0,
      "gaps": [
       [
-       "3.42",
-       35,
-       35
+       "3.33",
+       34,
+       34
       ],
       [
-       "4.75",
-       48,
-       48
+       "4.66",
+       47,
+       47
       ],
       [
-       "1.05",
-       11,
-       11
+       "0.88",
+       9,
+       9
       ],
       [
-       "2.38",
-       24,
-       24
+       "2.21",
+       23,
+       23
       ],
       [
-       "3.72",
-       38,
-       38
+       "3.54",
+       36,
+       36
       ],
       [
-       "5.05",
-       51,
-       51
+       "4.88",
+       49,
+       49
       ],
       [
-       "6.38",
-       64,
-       64
+       "6.21",
+       63,
+       63
       ],
       [
-       "7.72",
-       78,
-       78
+       "7.54",
+       76,
+       76
       ],
       [
-       "9.05",
-       91,
-       91
+       "8.88",
+       89,
+       89
       ],
       [
-       "10.38",
-       104,
-       104
+       "10.21",
+       103,
+       103
       ],
       [
-       "11.72",
-       118,
-       118
+       "11.54",
+       116,
+       116
       ],
       [
-       "13.05",
-       131,
-       131
+       "12.88",
+       129,
+       129
       ]
      ],
      "rate": 2
@@ -605,7 +605,7 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "firstSoundMs": 2691,
+    "firstSoundMs": 2684,
     "diag": [
      "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
      "deck: src net pod-0006",
@@ -628,7 +628,7 @@
      "state": "playing",
      "pos": {
       "duration": 25,
-      "position": 0.0012889999999998736,
+      "position": 0.001079000000004271,
       "playbackRate": 1
      },
      "cold": 1,
@@ -644,7 +644,7 @@
      "want": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
      "id": "pod-0013:82"
     },
-    "lockNextMs": 19,
+    "lockNextMs": 17,
     "lockNextLines": [
      "deck: swap pod-0013 ready=true pool=1",
      "deck play#3 swap rs=4 muted=false t=82.0",
