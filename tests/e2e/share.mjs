@@ -8,6 +8,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { deflateRawSync, inflateRawSync } from 'node:zlib';
 import { chromium, devices, webkit } from 'playwright';
+import { onPageError } from './pageerrors.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-share'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -88,7 +89,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
       Object.defineProperty(navigator, 'share', { value: undefined, configurable: true });
     });
     const errors = [];
-    page.on('pageerror', (e) => errors.push(String(e)));
+    page.on('pageerror', onPageError(errors));
 
     // ---- App: Share-Knopf, Blatt, Link, Kopieren ----
     // Wie moments.mjs: erst ohne Schlüssel laden, dann mit #k=, sonst kommt WebKit beim Kaltstart nicht bis zum Feed
@@ -165,7 +166,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     // ---- Clip-Seite ----
     const clip = await ctx.newPage();
     const clipErrors = [];
-    clip.on('pageerror', (e) => clipErrors.push(String(e)));
+    clip.on('pageerror', onPageError(clipErrors));
     await clip.emulateMedia({ colorScheme: 'dark' });
     await clip.goto(`${url}clip/#${b64url(clipAudio)}`);
     // Issue 55: der Inhalt kommt asynchron aus dem Hash (Issue 52). Gewartet wird, bis Hook und Titel da sind, nicht nur bis das Element steht.

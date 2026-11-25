@@ -2,6 +2,7 @@
 // Aufruf: node tests/e2e/video.mjs http://localhost:4173/core/ pipeline/out/e2e
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { chromium, devices, webkit } from 'playwright';
+import { onPageError } from './pageerrors.mjs';
 
 const [url = 'http://localhost:4173/core/', out = 'pipeline/out/e2e'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -46,7 +47,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const ctx = await browser.newContext({ ...devices['iPhone 15'], hasTouch: false });
     const page = await ctx.newPage();
     const errors = [];
-    page.on('pageerror', (e) => errors.push(String(e)));
+    page.on('pageerror', onPageError(errors));
     const t0 = Date.now();
     await page.goto(url, { waitUntil: 'domcontentloaded' });
     run.steps.feedReady = await waitFor(page, () => !!window.__core?.video());

@@ -9,6 +9,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices } from 'playwright';
+import { onPageError } from './pageerrors.mjs';
 
 const [url = 'http://127.0.0.1:4177/core/', out = 'pipeline/out/e2e-preload'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -90,7 +91,7 @@ try {
   await routes(ctx);
   const page = await ctx.newPage();
   const errors = [];
-  page.on('pageerror', (e) => errors.push(String(e)));
+  page.on('pageerror', onPageError(errors));
 
   // ---- 1. Kalter Start im gedrosselten Netz ----
   await page.goto(`${url}?now=2026-10-23&seed=3#k=${k}`);
@@ -240,7 +241,7 @@ try {
   net.down = true;
   net.ytDown = true;
   const reqBefore2 = net.log.length;
-  page2.on('pageerror', (e) => errors.push(String(e)));
+  page2.on('pageerror', onPageError(errors));
   await page2.goto(`${url}?now=2026-10-23&seed=3`);
   c.offlineRestartFeed = await waitFor(page2, () => !!window.__core?.moment(), null, 20000);
   c.noErrorPage = await page2.evaluate(() => !/Moments need internet/.test(document.body.innerText));

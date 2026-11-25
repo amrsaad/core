@@ -5,6 +5,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices, webkit } from 'playwright';
+import { onPageError } from './pageerrors.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-loudness'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -83,7 +84,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await cx.route(/^https:\/\/nocors\.test\//, (x) => (x.request().resourceType() === 'fetch' && x.request().headers().range ? x.abort() : x.fulfill(media)));
       await cx.route(/^https:\/\/trial\.test\//, (x) => (x.request().resourceType() === 'fetch' ? x.abort() : x.fulfill(media)));
       const pg = await cx.newPage();
-      pg.on('pageerror', (e) => errors.push(String(e)));
+      pg.on('pageerror', onPageError(errors));
       // Angleichen ist seit 30.10.2026 standardmäßig aus (Issue 13), der Test schaltet es ein
       await pg.addInitScript(() => { window.__ytSlow = true; try { if (!sessionStorage.getItem('t.off')) localStorage.setItem('core.level.on', '1'); } catch {} });
       // Nachbau der CORS-Absage von Anfang an (seit Issue 11 entsteht der AudioContext schon mit dem Tipp auf den Reiter, der erste Moment läuft sofort geregelt):

@@ -9,6 +9,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices, webkit } from 'playwright';
+import { onPageError } from './pageerrors.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-audiotab'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -33,7 +34,7 @@ const freshPage = async (browser, poolBody, extraInit) => {
   await cx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
   const pg = await cx.newPage();
   const errors = [];
-  pg.on('pageerror', (e) => errors.push(String(e)));
+  pg.on('pageerror', onPageError(errors));
   await pg.addInitScript(() => { window.__ytSlow = true; window.__cont = true; window.__tuMs = 250; });
   await pg.addInitScript(FAKE_MEDIA);
   if (extraInit) await pg.addInitScript(extraInit);
@@ -502,7 +503,7 @@ window.onYouTubeIframeAPIReady&&window.onYouTubeIframeAPIReady();`;
     const open = async (cx, query) => {
       const pg = await cx.newPage();
       const errors = [];
-      pg.on('pageerror', (e) => errors.push(String(e)));
+      pg.on('pageerror', onPageError(errors));
       await pg.addInitScript(MS_SPY);
       await pg.goto(`${url}?${query}#k=${k}`);
       await pg.waitForSelector('[data-testid=form-switch]', { timeout: 20000 });

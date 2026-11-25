@@ -11,6 +11,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices, webkit } from 'playwright';
+import { onPageError } from './pageerrors.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-tempoperf'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -147,7 +148,7 @@ async function scenario(type, name, form, lane, rate) {
     });
     const page = await ctx.newPage();
     const errors = [];
-    page.on('pageerror', (e) => errors.push(String(e)));
+    page.on('pageerror', onPageError(errors));
     await page.addInitScript(({ lane }) => { try { if (lane === 'on') localStorage.setItem('core.level.on', '1'); else localStorage.removeItem('core.level.on'); } catch {} }, { lane });
     await page.addInitScript(PROBE);
     await page.goto(`${url}?now=2026-10-23&seed=3#k=${k}`);

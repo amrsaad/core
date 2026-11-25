@@ -4,6 +4,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices, webkit } from 'playwright';
+import { onPageError } from './pageerrors.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-moments'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -191,7 +192,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // Der Nachbau spielt 100-fach schnell: ein 60-s-Moment endet nach 0,6 s. Bis zum ersten Tipp läuft die Uhr in Echtzeit, sonst kippt der Tipp auf einem langsamen Runner in die Für-dich-Karte.
     await page.addInitScript(() => { window.__ytSlow = true; });
     const errors = [];
-    page.on('pageerror', (e) => errors.push(String(e)));
+    page.on('pageerror', onPageError(errors));
     // Nur zum Suchen von Ursachen (E2E_DEBUG_SCROLL=1): wer scrollt den Feed? Protokoll in window.__scrollLog
     if (process.env.E2E_DEBUG_SCROLL) await page.addInitScript(() => {
       window.__scrollLog = [];
@@ -1093,7 +1094,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const errors8 = [];
     const f8 = await freshPage(browser, url, k, poolBad, '?now=2026-10-23&seed=3');
     const p8 = f8.pg;
-    p8.on('pageerror', (e) => errors8.push(String(e)));
+    p8.on('pageerror', onPageError(errors8));
     c.badFeedStarts = await waitFor(p8, () => !!window.__core?.moment());
     c.badFirstPlays = await waitFor(p8, () => window.__core.state() === 1 && !/^errorvid/.test(window.__core.moment().videoId));
     if (!c.badFirstPlays) r.badStartDiag = await p8.evaluate(() => ({ idx: window.__core.idx(), id: window.__core.moment()?.videoId, st: window.__core.state(), diag: window.__core.diag().slice(-40) }));
@@ -1123,7 +1124,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const errors9 = [];
     const f9 = await freshPage(browser, url, k, poolThrow, '?now=2026-10-23&seed=3');
     const p9 = f9.pg;
-    p9.on('pageerror', (e) => errors9.push(String(e)));
+    p9.on('pageerror', onPageError(errors9));
     c.throwFeedStarts = await waitFor(p9, () => !!window.__core?.moment());
     c.throwNoErrorPage = await p9.evaluate(() => !/Moments need internet|Invalid video id/.test(document.body.innerText));
     c.throwLogged = await waitFor(p9, () => window.__core.diag().some((x) => / player failed /.test(x)), undefined, 3000);

@@ -6,6 +6,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices, webkit } from 'playwright';
+import { onPageError } from './pageerrors.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-swipe'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -106,7 +107,7 @@ for (const v of variants) {
     await ctx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
     const page = await ctx.newPage();
     const errors = [];
-    page.on('pageerror', (e) => errors.push(String(e)));
+    page.on('pageerror', onPageError(errors));
     await page.addInitScript(() => { window.__ytSlow = true; });
     await page.addInitScript(METER);
     await page.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBody }));

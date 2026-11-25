@@ -11,6 +11,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices, webkit } from 'playwright';
+import { onPageError } from './pageerrors.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-video4g'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -132,7 +133,7 @@ const runScenario = async (browser, sc) => {
   await ctx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
   const page = await ctx.newPage();
   const errors = [];
-  page.on('pageerror', (e) => errors.push(String(e)));
+  page.on('pageerror', onPageError(errors));
   await page.addInitScript(() => {
     window.__ytSlow = true;
     Object.defineProperty(navigator, 'connection', { value: { effectiveType: '4g', downlink: 9, rtt: 85 }, configurable: true });
@@ -329,7 +330,7 @@ const runSlow3G = async (browser) => {
   await ctx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
   const page = await ctx.newPage();
   const errors = [];
-  page.on('pageerror', (e) => errors.push(String(e)));
+  page.on('pageerror', onPageError(errors));
   await page.addInitScript((hangSrc) => {
     window.__ytSlow = true;
     window.__hang = new Function('return (' + hangSrc + ')')();
@@ -414,7 +415,7 @@ const runSlow3GNoSkip = async (browser, ios) => {
   await ctx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
   const page = await ctx.newPage();
   const errors = [];
-  page.on('pageerror', (e) => errors.push(String(e)));
+  page.on('pageerror', onPageError(errors));
   await page.addInitScript((hangSrc) => {
     window.__ytSlow = true;
     window.__trickle = true;
@@ -507,7 +508,7 @@ const runIosSwipes = async (browser, name) => {
   await ctx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
   const page = await ctx.newPage();
   const errors = [];
-  page.on('pageerror', (e) => errors.push(String(e)));
+  page.on('pageerror', onPageError(errors));
   await page.addInitScript(() => {
     window.__ytSlow = true;
     window.__ytIos = true;

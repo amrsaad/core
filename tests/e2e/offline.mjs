@@ -6,6 +6,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices, webkit } from 'playwright';
+import { onPageError } from './pageerrors.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-offline'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -95,7 +96,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await ctx.route('https://api.github.com/**', (route, request) => api.handle(route, request));
       const page = await ctx.newPage();
       const errors = [];
-      page.on('pageerror', (e) => errors.push(String(e)));
+      page.on('pageerror', onPageError(errors));
       await page.addInitScript(() => {
         window.__ytSlow = true; window.__netFaults = true;
         // Copy diagnostics: Text abfangen (kein Teilen-Blatt, keine Zwischenablage-Rechte nötig)

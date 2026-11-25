@@ -10,6 +10,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, webkit, devices } from 'playwright';
+import { onPageError } from './pageerrors.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-layout', block = 'run'] = process.argv.slice(2);
 const dir = `${out}/${block}`;
@@ -201,7 +202,7 @@ async function open(area, vp, scheme, p) {
   await cx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
   const pg = await cx.newPage();
   const errors = [];
-  pg.on('pageerror', (e) => errors.push(String(e)));
+  pg.on('pageerror', onPageError(errors));
   await pg.addInitScript(() => { window.__ytSlow = true; });
   await pg.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: p.body }));
   await pg.goto(`${url}?now=2026-10-23&seed=3#k=${p.k}`);

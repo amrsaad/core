@@ -4,6 +4,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium } from 'playwright';
+import { onPageError } from './pageerrors.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-desktop'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -43,7 +44,7 @@ const freshPage = async (browser, size, opts = {}) => {
   await cx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
   const pg = await cx.newPage();
   const errors = [];
-  pg.on('pageerror', (e) => errors.push(String(e)));
+  pg.on('pageerror', onPageError(errors));
   await pg.addInitScript(() => {
     window.__ytSlow = true;
     // Medientasten kommen im Browser als Media-Session-Handler an. Hier werden sie abgefangen und direkt aufgerufen.
