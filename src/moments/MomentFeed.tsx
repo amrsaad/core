@@ -65,6 +65,7 @@ import { newSaved, resolveSaved } from './saved';
 import { focusTabText } from '../components/head';
 import { statusOf } from '../components/status';
 import { Ambient } from './Ambient';
+import { auditCovers, isCover, measureLayers } from '../lib/overlayAudit';
 import { coverKey, coverStart, coverStep } from './coverState';
 import { fullVideoUrl, isArabic, thumbOf, type Feedback, type Moment } from './types';
 import { ShareSheet } from '../components/ShareSheet';
@@ -1297,6 +1298,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     recallAnswered.current = false;
     recallEntry.current = null;
     setRecall(null);
+    // Runde 40: nach dem Schließen der Karte protokollieren, ob eine Vollbild-Ebene stehen bleibt
+    window.setTimeout(() => auditCovers(`${formRef.current}/recall-closed`), 450);
     since.current = Date.now();
     waitRef.current = restartWait(waitRef.current, performance.now());
     if (!textRef.current && active && !userPaused.current) current().player?.playVideo();
@@ -3622,6 +3625,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       motion: () => ({ busy: mot.current.busy, drag: dragging.current, raf: mot.current.raf, y: mot.current.y }),
       markStart: () => { since.current = Date.now(); },
       diag: () => diag.current.slice(-400),
+      overlays: () => measureLayers().filter(isCover),
       /** Angewendete Lautheit je Slot (Tests, Entscheidung 16) */
       /** Nur Tests: der Web-Audio-Kontext, um ihn anzuhalten (iOS-Unterbrechung nachstellen) */
       ctx: () => contextForTest(),

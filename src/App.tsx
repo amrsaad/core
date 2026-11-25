@@ -19,6 +19,7 @@ import { Settings } from './screens/Settings';
 import type { Form } from './moments/form';
 import { nextRate, rateOf } from './lib/state';
 import { diagLog } from './lib/diag';
+import { auditCovers } from './lib/overlayAudit';
 import { countSlimmable, slimSaved } from './moments/saved';
 import { takeawayCounts, takeawayLine } from './moments/takeaways';
 
@@ -115,6 +116,13 @@ export default function App() {
   }, [state, review]);
 
   const onPausedChange = useCallback((p: boolean) => setPaused(p), []);
+
+  // Runde 40: nach jedem Reiterwechsel (Video, Audio, Text, Saved, Settings) protokollieren, welche Vollbild-Ebenen sichtbar stehen ("ui: overlay ..."), erst nach der Überblendung (400 ms)
+  const formKey = state?.settings.form ?? 'video';
+  useEffect(() => {
+    const t = window.setTimeout(() => auditCovers(`${tab}/${formKey}`), 500);
+    return () => window.clearTimeout(t);
+  }, [tab, formKey]);
 
   // Übersicht der Tasten genau einmal, beim ersten Start im Desktop-Modus (nicht über Entsperren oder Wochenrückblick)
   const helpDue = !!state && vault.status === 'open' && review === false && desk && deskHelpDue(state.deskHelpSeen);
