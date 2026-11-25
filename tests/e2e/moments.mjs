@@ -596,7 +596,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.noteSheetClosed = await waitFor(page, () => !document.querySelector('[data-testid=note-sheet]'));
     c.noteGoesToNext = await waitFor(page, (i) => window.__core.idx() === i + 1, idxBefore);
     const n1 = await notes();
-    c.noteSavedLocally = n1.length === 1 && n1[0].id === nm.id && n1[0].chips.join() === 'Weak' && n1[0].hook === nm.hook && n1[0].tab === 'Video' && /^[0-9a-f]{7}$|^dev$/.test(n1[0].commit) && n1[0].sent === undefined;
+    c.noteSavedLocally = n1.length === 1 && n1[0].id === nm.id && n1[0].chips.join() === 'Weak' && n1[0].hook === nm.hook && n1[0].tab === 'Video' && /^[0-9a-f]{7,12}$|^dev$/.test(n1[0].commit) && n1[0].sent === undefined;
     c.noteWeakWeakensChannel = Math.abs((wWeak.channel[nm.channel] ?? 1) - 0.9 * (wWeak0.channel[nm.channel] ?? 1)) < 0.001 && (wWeak.topic[nm.topic] ?? 1) === (wWeak0.topic[nm.topic] ?? 1);
     c.noteWeakNoToastNoHeart = !(await page.evaluate(() => !!document.querySelector('.flash'))) && (await page.evaluate((id) => window.__core.liked(id), nm.id)) === likedBefore;
     c.noteNothingOpened = (await page.evaluate(() => window.__opened)).length === 0 && gh.length === 0;
@@ -894,7 +894,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // Landet der Feed bei einem späteren Chip noch einmal auf demselben Moment (gesehen zählt erst am Ende), führt die App dessen Notiz zu einer Zeile zusammen: dann prüft die Zeile Chip und Text einzeln
     const distinctN = new Set([nm.id, nm2.id, mutedMoment.id]).size === 3;
     c.issueRowsHaveAllFields = [[nm, 'Weak', '-'], [nm2, '-', 'The cut is two seconds late & the "hook" repeats.'], [mutedMoment, 'Mute speaker', '-']].every(([m, chipsCell, textCell]) =>
-      lines.some((l) => /\| ([0-9a-f]{7}|dev) \|$/.test(l) && (distinctN ? l.startsWith(`| ${m.id} | ${m.hook} | ${chipsCell} | ${textCell} | Video | `) : l.startsWith(`| ${m.id} | ${m.hook} | `) && (chipsCell === '-' || l.includes(chipsCell)) && (textCell === '-' || l.includes(textCell)) && l.includes('| Video | '))));
+      lines.some((l) => /\| ([0-9a-f]{7,12}|dev) \|$/.test(l) && (distinctN ? l.startsWith(`| ${m.id} | ${m.hook} | ${chipsCell} | ${textCell} | Video | `) : l.startsWith(`| ${m.id} | ${m.hook} | `) && (chipsCell === '-' || l.includes(chipsCell)) && (textCell === '-' || l.includes(textCell)) && l.includes('| Video | '))));
     c.issueTitleCount = (uN?.searchParams.get('title') ?? '') === `Core feedback 2026-10-25, ${momentsN.size} moments`;
     c.promptMarksSent = await waitFor(p2, () => window.__core.notes().every((x) => typeof x.sent === 'number') && !document.querySelector('[data-testid=notes-prompt]'));
     // Nach dem Senden: neue Notiz bleibt ungesendet, und am selben Tag kommt die Zeile nicht noch einmal

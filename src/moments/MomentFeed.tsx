@@ -1,5 +1,5 @@
 import { describeMedia, holdsNeighbor, needsLoad, type MediaItem } from './slotplan';
-import { isWeakNet, neighborCall, recoverCall, slowStart, START_POLL_MS, startWatchCall, weakUntil, youtubeObs, type ActiveObs } from './neighborGate';
+import { hlsBehindYt, isWeakNet, neighborCall, recoverCall, slowStart, START_POLL_MS, startWatchCall, SWITCH_MS, switchCall, VIDEO_SWITCH, weakUntil, youtubeObs, type ActiveObs } from './neighborGate';
 import { notesRow } from './notesrow';
 import { diagLog, netType } from '../lib/diag';
 import { markFirstPlay, setFeedLoading, setWeakNet } from '../lib/sync/firstPlay';
@@ -344,6 +344,11 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const played = useRef(new PlayTracker());
   const seenMarked = useRef(new Set<string>());
   const unplayedNoted = useRef(new Set<string>());
+  /** Runde 41: Momente, für die "kein bereiter Nachbar nach 3 s" schon in der Diag steht, und der Moment, auf den die App von selbst gewechselt hat (Erfolg oder Misserfolg wird gemeldet) */
+  const switchNoted = useRef(new Set<string>());
+  const switchTo = useRef<{ id: string; at: number; logged: boolean } | null>(null);
+  /** Runde 41: letzter Wechsel der Sichtbarkeit, die Wartezeit für den Wechsel zählt nur sichtbare Zeit */
+  const visAt = useRef(Date.now());
   /** Verdeckt hängende Momente, für die schon "lock: stuck, stay" im Protokoll steht (Brief 14b): eine Zeile je Moment */
   const stuckNoted = useRef(new Set<string>());
   /** Brief 22: Weiter am Sperrbildschirm kam, als kein Pool-Element bereit war. Es wird eingelöst, sobald sichtbar das erste Element bereit ist. */
@@ -932,6 +937,11 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const frameDone = (slot: Slot) => {
     const fm = queue.current[slot.index];
     if (fm && slot.index === idxRef.current) played.current.markReady(fm.id);
+    const stw = switchTo.current;
+    if (stw && fm && stw.id === fm.id && slot.index === idxRef.current) {
+      if (!stw.logged) diag.current.push(`video: switch ok ${fm.id} first frame ${Math.round(performance.now() - stw.at)} ms after the switch`);
+      switchTo.current = null;
+    }
     const sw = swipe.current;
     if (sw && slot.index === sw.j && sw.j === idxRef.current) {
       swipe.current = null;
@@ -1023,7 +1033,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       return;
     }
     syncWeak();
-    const a: ActiveObs = { ...activeObs(), weak: weakNow() };
+    const a: ActiveObs = { ...activeObs(), weak: weakNow(), deadlineMs: VIDEO_SWITCH ? SWITCH_MS : undefined };
     for (const [id] of n.started) {
       const k = queue.current.findIndex((x) => x.id === id);
       if (k < idxRef.current - 1 || k > idxRef.current + 2) n.started.delete(id);
@@ -1038,17 +1048,20 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       const startedAt = n.started.get(m.id) ?? 0;
       const loading = !parked && startedAt > 0 && sl.mid === m.id;
       const prevStartedAt = rank === 2 ? n.started.get(queue.current[j - 1]?.id ?? '') ?? 0 : 0;
+      // Runde 41 (HLS_BEHIND_YT): im schwachen Netz lädt ein HLS-Moment hinter einem YouTube-Nachbarn wie ein nächster Nachbar
+      const hung = VIDEO_SWITCH && !a.playedBefore && a.sinceMs >= SWITCH_MS;
+      const eff: 1 | 2 = hlsBehindYt({ weak: !!a.weak || hung, rank, rank1IsYoutube: rank === 2 && !!queue.current[idxRef.current + 1] && streamKind(queue.current[idxRef.current + 1]) === 'youtube', selfIsHls: HLS.has(m.videoId) }) ? 1 : rank;
       const c = neighborCall(a, {
-        rank,
+        rank: eff,
         started: loading,
         canplay: sl.preloadLogged && sl.mid === m.id,
-        prevCanplay: rank === 1 || nbrReady(j - 1),
+        prevCanplay: eff === 1 || nbrReady(j - 1),
         prevStartedMs: prevStartedAt ? Math.round(performance.now() - prevStartedAt) : 0,
       });
       if (c.call === 'start' && parked) {
         n.wait.delete(sl);
         n.started.set(m.id, performance.now());
-        diag.current.push(`video: neighbor preload start ${m.id}${c.why === 'deadline' ? ' (deadline 6 s, ' + (activeIsYoutube() ? 'youtube not playing)' : 'active not stable)') : c.why === 'paused' ? ' (active paused)' : ''}`);
+        diag.current.push(`video: neighbor preload start ${m.id}${c.why === 'deadline' ? ` (deadline ${(a.deadlineMs ?? 6000) / 1000} s, ` + (activeIsYoutube() ? 'youtube not playing)' : 'active not stable)') : c.why === 'paused' ? ' (active paused)' : eff !== rank ? ' (hls behind youtube, weak net)' : ''}`);
         assign(sl, j, false);
       } else if (c.call === 'pause' && loading && sl.player?.unloadPreload?.()) {
         // Stockt der aktive Moment, hört der ladende Nachbar auf: Quelle frei, später neu cuen
@@ -1092,7 +1105,9 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     }
     // Brief 12: im Datensparmodus oder bei 2g lädt nur der nächste Moment vor. Der übernächste bleibt frei (index -1), der Wisch holt ihn dann als nächsten nach.
     // Runde 19: dasselbe im schwachen Netz (Merker), außer für einen YouTube-Moment auf iOS: sein cue lädt nur Metadaten und muss bereit sein, wenn der Wisch kommt
-    const weakRank2 = !iosYt(m) && weakNow();
+    // Runde 41: ein HLS-Moment hinter einem YouTube-Nachbarn bleibt im schwachen Netz nicht ausgeschlossen (HLS_BEHIND_YT)
+    const rank1Yt = !!queue.current[idxRef.current + 1] && streamKind(queue.current[idxRef.current + 1]!) === 'youtube';
+    const weakRank2 = !iosYt(m) && weakNow() && !hlsBehindYt({ weak: true, rank: 2, rank1IsYoutube: rank1Yt, selfIsHls: HLS.has(m.videoId) });
     if (!play && j - idxRef.current >= 2 && (lowNet() || weakRank2)) {
       if (slot.mid !== m.id) diag.current.push(`video: preload ${m.id} deferred (${lowNet() ? 'save data or 2g' : 'weak net'})`);
       slot.index = -1;
@@ -2051,7 +2066,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                     syncCover(slot);
                     if (st === STATE.BUFFERING && slot.playedAt) {
                       slot.stalls++;
-                      diag.current.push(`video: stall #${slot.stalls} ${slot.mid} after ${Math.round((performance.now() - slot.playedAt) / 100) / 10}s, net ${netType()}`);
+                      const ho = slot.player?.hlsObs?.();
+                      diag.current.push(`video: stall #${slot.stalls} ${slot.mid} after ${Math.round((performance.now() - slot.playedAt) / 100) / 10}s, net ${netType()}${ho ? `, rs=${ho.rs} ahead=${ho.ahead.toFixed(1)}s` : ''}${document.visibilityState === 'hidden' ? ', app hidden' : ''}`);
                     }
                   }
                 }
@@ -2244,6 +2260,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       if (cancelled) return;
       // Ohne erreichbare YouTube-API (offline, blockiert) laufen Streams, Podcasts und Text trotzdem. Es gibt keine Fehlerseite mehr.
       const ready = loadYT();
+      const apiT0 = performance.now();
       let YT: Awaited<ReturnType<typeof loadYT>> | null = null;
       try {
         YT = poorRef.current ? await Promise.race([ready, new Promise<null>((r) => window.setTimeout(() => r(null), 4000))]) : await ready;
@@ -2251,6 +2268,9 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         YT = null;
       }
       if (cancelled) return;
+      // Runde 41: so lange hielt das Warten auf die YouTube-API den Start des Video-Reiters auf (auch wenn der erste Moment ein HLS-Stream ist). Nur eine Messung, kein Eingriff.
+      const apiMs = Math.round(performance.now() - apiT0);
+      if (apiMs > 300) diag.current.push(`video: youtube api ${YT ? 'ready' : 'missing'} after ${apiMs} ms, net ${netType()}`);
       if (YT) ytStub.current = false;
       else {
         ytStub.current = true;
@@ -2384,6 +2404,36 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         const hidden = isBackground(document.visibilityState);
         // Runde 8: Rettung nach kaltem Start. Spielt der Moment nach 6 s nicht und steht ein anderer bereit im Vorrat, wechselt die App auf den bereiten.
         if (!hidden && waited > RESCUE_MS && readyFirst(idxRef.current, 'rescue')) return;
+        // Runde 41 (VIDEO_SWITCH): Video wartet nicht länger als SWITCH_MS auf einen Moment, der kein erstes Bild bekommt. Ist der nächste (oder übernächste) HLS-Moment bereit,
+        // wechselt die App auf ihn (ohne Wertung als Skip, der verlassene Moment bleibt ungesehen). Ist keiner bereit, steht eine Zeile in der Diag, und der nächste Nachbar lädt (neighborTick).
+        if (!hidden && form !== 'audio' && !m.audio && m.form !== 'text') {
+          const waitedSw = Math.min(Date.now() - since.current, Date.now() - visAt.current);
+          const readyAt = (k: number): boolean => {
+            const nm = queue.current[k];
+            const ns = slotFor(k);
+            return !!nm && nm.form !== 'text' && !nm.audio && !AUDIO_ONLY.has(nm.videoId) && HLS.has(nm.videoId) && !bad.current.has(nm.videoId) && ns.index === k && ns.mid === nm.id && ns.ready && !ns.broken && (ns.preloadLogged || !!ns.player?.isBuffered?.());
+          };
+          const sw = switchCall({ waitedMs: waitedSw, playedBefore: sl.playedAt > 0, userPaused: userPaused.current, ready1: readyAt(idxRef.current + 1), ready2: readyAt(idxRef.current + 2) });
+          if (sw.call === 'go') {
+            const to = queue.current[idxRef.current + sw.offset];
+            diag.current.push(`video: switch ${m.id} -> ${to.id} after ${waitedSw} ms without first frame (${streamKind(m)}, next+${sw.offset} ready, net ${netType()})`);
+            switchTo.current = { id: to.id, at: performance.now(), logged: false };
+            silentLeave.current = true;
+            goTo(idxRef.current + sw.offset);
+            return;
+          }
+          if (sw.call === 'no-ready' && !switchNoted.current.has(m.id)) {
+            switchNoted.current.add(m.id);
+            const n1 = queue.current[idxRef.current + 1];
+            diag.current.push(`video: no ready neighbor after ${Math.round(waitedSw / 100) / 10} s ${m.id} (${streamKind(m)}), next ${n1 ? `${n1.id} ${n1.form === 'text' ? 'text' : HLS.has(n1.videoId) ? (nbr.current.wait.has(slotFor(idxRef.current + 1)) ? 'hls waiting' : 'hls loading') : 'youtube'}` : 'none'}`);
+          }
+          // Misserfolg des Wechsels: der Zielmoment hat auch nach SWITCH_MS kein Bild
+          const st = switchTo.current;
+          if (st && !st.logged && st.id === m.id && performance.now() - st.at > SWITCH_MS) {
+            st.logged = true;
+            diag.current.push(`video: switch target ${m.id} still no frame after ${Math.round((performance.now() - st.at) / 100) / 10} s`);
+          }
+        }
         // Brief 12: nach 6 s ohne erstes Bild zeigt der Moment sein Standbild mit Hook, darunter die Zeile "Loading" (22E). Der IFrame ist dabei unsichtbar (data-hold).
         if (!hidden && waited > STILL_MS && !sl.stillLogged) {
           sl.stillLogged = true;
@@ -2393,6 +2443,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
             diag.current.push(`audio: ready but not playing, showing still ${m.id}, rs=${audioDeck.readyState()} paused=${audioDeck.paused()}`);
           } else {
             diag.current.push(`${m.audio || m.form === 'audio' ? 'audio' : 'video'}: slow net, showing still ${m.id}, net ${netType()}, ${sl.bytesAt ? 'bytes arriving' : 'no bytes yet'}`);
+            // Runde 41: Vollbild-Ebenen im Zustand "Standbild bei schwachem Netz" messen (grauer Schleier, Geräteaufnahme 25.11.)
+            window.setTimeout(() => auditCovers(`${formRef.current}/still`), 300);
             // Runde 19: Anlass für den Merker "schwaches Netz" im Video-Reiter
             if (!m.audio && m.form !== 'audio' && weakForm.current !== 'audio') markWeakVideo();
           }
@@ -3278,7 +3330,11 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     }
   };
   playRef.current = setPlaying;
-  const togglePause = () => setPlaying(userPaused.current || current().st !== STATE.PLAYING);
+  const togglePause = () => {
+    setPlaying(userPaused.current || current().st !== STATE.PLAYING);
+    // Runde 41: Vollbild-Ebenen in der Pausen-Ansicht messen (grauer Schleier, Geräteaufnahme 25.11.)
+    window.setTimeout(() => auditCovers(`${formRef.current}/pause`), 400);
+  };
 
   /** M: Ton an oder aus. Die Taste ist selbst die Geste, die der Browser für den Ton verlangt. */
   const toggleMute = () => {
@@ -3491,7 +3547,10 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     applyRate();
   };
   useEffect(() => {
-    const on = () => visRef.current(document.visibilityState);
+    const on = () => {
+      visAt.current = Date.now();
+      visRef.current(document.visibilityState);
+    };
     document.addEventListener('visibilitychange', on);
     return () => document.removeEventListener('visibilitychange', on);
   }, []);

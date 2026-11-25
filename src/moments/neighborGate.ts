@@ -35,6 +35,48 @@ export interface ActiveObs {
   sinceMs: number;
   /** Runde 19: schwaches Netz (isWeakNet): nur der nächste Nachbar, erst nach WEAK_STABLE_MS stabilem Spiel, keine Frist. Fehlt: Netz gut. */
   weak?: boolean;
+  /**
+   * Runde 41 (Schalter VIDEO_SWITCH): Frist, nach der der nächste Nachbar bei einem aktiven Moment ohne erstes Bild laden darf (ms), auch im schwachen Netz.
+   * Fehlt: DEADLINE_MS, im schwachen Netz keine Frist. Der Feed setzt SWITCH_MS, wenn VIDEO_SWITCH an ist.
+   */
+  deadlineMs?: number;
+}
+
+/**
+ * Runde 41, Schalter: Video wartet nicht mehr auf einen Moment, der kein erstes Bild bekommt (Gerätediag 25.11.: vier Wechsel 4334, 3551, 314, 5224 ms, zwei YouTube-Momente
+ * kamen nie zum Laufen, während kein Nachbar bereit war, weil "active not stable" das Vorladen sperrte). Aus: false, dann gilt das Verhalten von Runde 40.
+ * Was er einschaltet: (1) der nächste Nachbar lädt nach SWITCH_MS vor, auch im schwachen Netz, (2) ein bereiter HLS-Nachbar ersetzt nach SWITCH_MS einen aktiven Moment
+ * ohne erstes Bild (switchCall), (3) im schwachen Netz lädt ein HLS-Moment hinter einem YouTube-Nachbarn mit vor (hlsBehindYt).
+ */
+export const VIDEO_SWITCH = true;
+/** Ohne erstes Bild nach so langer Zeit wechselt die App auf einen bereiten Nachbarn und lässt den Nachbarn vorladen (ms). Die Messgröße des Nutzers: kein Wechsel über 3 s. */
+export const SWITCH_MS = 3000;
+/** Schalter nur für (3): im schwachen Netz zählt ein HLS-Moment hinter einem YouTube-Moment als nächster Vorlade-Kandidat (YouTube lädt auf iOS nur per cue und startet im Weak-Netz unsicher) */
+export const HLS_BEHIND_YT = true;
+
+export type SwitchCall =
+  /** Nichts tun */
+  | { call: 'none' }
+  /** Kein Nachbar bereit (Zeile in der Diag, einmal je Moment) */
+  | { call: 'no-ready' }
+  /** Auf den Moment idx + offset wechseln */
+  | { call: 'go'; offset: 1 | 2 };
+
+/**
+ * Wann ein Moment ohne erstes Bild ersetzt wird. waitedMs: Zeit ohne Bild seit dem Wechsel auf ihn. playedBefore: er hat schon gespielt (dann nie ersetzen, eine Stockung
+ * mitten im Spiel ist kein nie startender Moment). ready1, ready2: der nächste und der übernächste Moment haben ihr erstes Bild (HLS mit Daten). Der nächste hat Vorrang.
+ * Ein Moment, den der Nutzer angehalten hat, bleibt stehen.
+ */
+export function switchCall(o: { enabled?: boolean; waitedMs: number; playedBefore: boolean; userPaused: boolean; ready1: boolean; ready2: boolean }): SwitchCall {
+  if (!(o.enabled ?? VIDEO_SWITCH) || o.playedBefore || o.userPaused || o.waitedMs < SWITCH_MS) return { call: 'none' };
+  if (o.ready1) return { call: 'go', offset: 1 };
+  if (o.ready2) return { call: 'go', offset: 2 };
+  return { call: 'no-ready' };
+}
+
+/** Runde 41 (3): im schwachen Netz ist ein HLS-Moment auf Rang 2 hinter einem YouTube-Moment auf Rang 1 der eigentliche nächste Kandidat und lädt wie ein Rang-1-Nachbar */
+export function hlsBehindYt(o: { enabled?: boolean; weak: boolean; rank: 1 | 2; rank1IsYoutube: boolean; selfIsHls: boolean }): boolean {
+  return (o.enabled ?? HLS_BEHIND_YT) && o.weak && o.rank === 2 && o.rank1IsYoutube && o.selfIsHls;
 }
 
 /** Runde 19: so lange gilt das Netz nach einem Anlass als schwach (ms) */
@@ -174,10 +216,12 @@ export function neighborCall(a: ActiveObs, n: NeighborObs): NeighborCall {
   if (n.rank === 2 && !n.prevCanplay && n.prevStartedMs < DEADLINE_MS) return n.started ? { call: 'keep' } : { call: 'defer' };
   if (n.started) return { call: 'keep' };
   if (a.userPaused) return { call: 'start', why: 'paused' };
+  // Runde 41: ein aktiver Moment ohne erstes Bild lässt den nächsten Nachbarn nach deadlineMs laden, auch im schwachen Netz (sonst gäbe es nie einen bereiten Nachbarn zum Wechseln)
+  if (a.deadlineMs !== undefined && n.rank === 1 && !a.playedBefore && a.sinceMs >= a.deadlineMs) return { call: 'start', why: 'deadline' };
   // Runde 19: schwaches Netz: erst nach 3 s stabilem Spiel, keine Frist (ein hängender aktiver Moment bekäme sonst noch einen Konkurrenten)
   if (a.weak) return isWeakStable(a) ? { call: 'start', why: 'stable' } : { call: 'defer' };
   if (isStable(a)) return { call: 'start', why: 'stable' };
-  if (!a.playedBefore && a.sinceMs >= DEADLINE_MS) return { call: 'start', why: 'deadline' };
+  if (!a.playedBefore && a.sinceMs >= (a.deadlineMs ?? DEADLINE_MS)) return { call: 'start', why: 'deadline' };
   return { call: 'defer' };
 }
 

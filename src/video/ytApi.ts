@@ -146,6 +146,8 @@ export const HLS = new Map<string, string>();
 export { isYtId } from '../moments/contract';
 /** Momente der Audio-Form laufen auf dem dauerhaften <audio>-Element des audioDeck: iOS Safari spielt es bei gesperrtem Bildschirm weiter (Entscheidung 13, Issue 11) */
 export const AUDIO_ONLY = new Set<string>();
+/** Runde 41, Schalter: ein Slot mit Stream-Moment meldet sich sofort bereit, ohne auf onReady des YouTube-IFrames zu warten. Aus: false (Verhalten bis Runde 40). */
+export const HLS_READY_NOW = true;
 export const registerHls = (items: { videoId: string; hls?: string; audio?: boolean; form?: 'video' | 'audio' | 'text' }[]) => {
   for (const m of items) {
     if (!m.hls) continue;
@@ -576,7 +578,10 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
   });
   // Ein Audio-Moment läuft im Audio-Deck und braucht den IFrame nicht. Wird die App während des Starts verdeckt, kommt sein onReady oft nie
   // (iOS lädt den IFrame nicht): der Slot bliebe ohne Start und ohne Zeile in der Diag. Darum gilt der Player sofort als bereit.
-  if (mode === 'hls' && AUDIO_ONLY.has(videoId)) setTimeout(fireReady, 0);
+  // Runde 41 (Schalter HLS_READY_NOW): dasselbe für jeden Stream-Moment mit Bild (TED). Sein <video> braucht den IFrame nicht, der Slot wartete aber auf dessen onReady
+  // (Gerätediag 25.11.: 1,6 s zwischen "yt: ios mode" und "hls load play" beim ersten Moment im Mobilnetz). Ein YouTube-Moment, der später in diesen Slot kommt,
+  // wartet über ytLater auf die Methoden des IFrames (route).
+  if (mode === 'hls' && (AUDIO_ONLY.has(videoId) || HLS_READY_NOW)) setTimeout(fireReady, 0);
   const iframe = () => host.querySelector('iframe') as HTMLElement | null;
   const show = (m: 'yt' | 'hls') => {
     mode = m;
@@ -737,9 +742,17 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
         } catch { /* iOS setzt erst nach loadedmetadata */ }
       }
     };
+    const loadedAt = performance.now();
+    const aheadNow = (): string => {
+      try {
+        const r: [number, number][] = [];
+        for (let i = 0; i < el.buffered.length; i++) r.push([el.buffered.start(i), el.buffered.end(i)]);
+        return aheadOf(r, el.currentTime).toFixed(1);
+      } catch { return '?'; }
+    };
     const onMeta = () => {
       if (el !== media) return; // inzwischen auf das andere Element gewechselt
-      diag(`hls loadedmetadata ${vstate()}`);
+      diag(`hls loadedmetadata ${vstate()} +${Math.round(performance.now() - loadedAt)}ms`);
       // Die Quelle lud in der geregelten Spur: der Host erlaubt CORS. Lud sie erst nach einem Fehler dort unverändert: er erlaubt es nicht.
       if (!loc) {
         if (isLevel(el)) markHost(src, 'ok');
@@ -754,7 +767,7 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     // Zweiter Anstoß, wenn Daten da sind und das erste play() nichts bewirkt hat (iOS verwirft play() vor den Metadaten manchmal still)
     const onCanPlay = () => {
       if (el !== media) return;
-      diag(`hls canplay ${vstate()}`);
+      diag(`hls canplay ${vstate()} +${Math.round(performance.now() - loadedAt)}ms ahead=${aheadNow()}s`);
       seek();
       if ((play || wantPlay) && el.paused && hlsState !== STATE.PAUSED) tryPlay('canplay');
     };
