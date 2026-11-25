@@ -222,10 +222,10 @@
    "topic": "augen",
    "lang": "en",
    "channelId": null,
-   "resolveFails": 2,
-   "resolveTried": "2026-11-25T03:53:26.508Z",
+   "resolveFails": 3,
+   "resolveTried": "2026-11-25T12:31:28.610Z",
    "status": "unresolved",
-   "note": "Suche HTTP 0 (TypeError: fetch failed UND_ERR_HEADERS_OVERFLOW Headers Overflow Error), Treffer: keine"
+   "note": "Suche HTTP 0 (TypeError: fetch failed UND_ERR_HEADERS_OVERFLOW Headers Overflow Error), Treffer: keine (Fehlversuch 3, jetzt nur noch woechentlich)"
   },
   {
    "name": "American Academy of Ophthalmology",
