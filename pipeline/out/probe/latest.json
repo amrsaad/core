@@ -1,28 +1,28 @@
 {
-  "startedAt": "2026-11-24T14:30:01.323Z",
+  "startedAt": "2026-11-25T13:50:08.193Z",
   "url": "https://amrsaad.github.io/core/",
   "browser": "chromium",
   "ok": true,
-  "firstImageMs": 339,
+  "firstImageMs": 305,
   "tabsOk": true,
   "tabs": {
     "audio": {
       "ok": true,
-      "ms": 120
+      "ms": 88
     },
     "text": {
       "ok": true,
-      "ms": 79
+      "ms": 56
     },
     "video": {
       "ok": true,
-      "ms": 81
+      "ms": 93
     }
   },
   "errors": [],
   "failedRequests": [],
   "pageStatus": 200,
-  "pageLastModified": "Tue, 24 Nov 2026 14:13:33 GMT",
+  "pageLastModified": "Wed, 25 Nov 2026 08:41:28 GMT",
   "poolStatus": 200,
   "note": "",
   "problems": []
