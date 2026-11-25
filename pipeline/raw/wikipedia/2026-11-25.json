@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-25",
+ "records": [
+  {
+   "sourceId": "wiki:de:Wieslauftalbahn",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Wieslauftalbahn",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/25",
+    "status": 200
+   },
+   "title": "Wieslauftalbahn",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Wieslauftalbahn, auch Wieslaufbahn oder Wiesel genannt, ist eine normalspurige, eingleisige und nicht elektrifizierte Nebenbahn in Baden-Württemberg. Sie beginnt in Schorndorf im Remstal, wo sie von der Bahnstrecke Stuttgart-Bad Cannstatt–Nördlingen abzweigt. Der Abschnitt im Tal der Wieslauf bis Rudersberg-Oberndorf wird vom Zweckverband Verkehrsverband Wieslauftalbahn (ZVVW) betrieben und im Schienenpersonennahverkehr durch die Regionalbahn-Linie RB 61 der Württembergischen Eisenbahn-Gesellschaft (WEG) bedient. Das auch Obere Wieslauftalbahn oder Bergstrecke genannte Teilstück hinauf nach Welzheim mit einer Maximalsteigung von 25 Promille und mehreren Viadukten wird seit 2010 von der Schwäbische Waldbahn GmbH als Museumsbahn betrieben, wobei teils Dampflokomotiven eingesetzt werden."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-25T04:08:10.520Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Wieslauftalbahn": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Edwin Meese",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Edwin_Meese",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/25",
+    "status": 200
+   },
+   "title": "Edwin Meese",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Edwin Meese III ist ein US-amerikanischer Politiker. Er war unter Ronald Reagan von 1985 bis 1988 der 75. Justizminister der Vereinigten Staaten."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-25T04:08:10.520Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Edwin_Meese": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Thanksgiving",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Thanksgiving",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/25",
+    "status": 200
+   },
+   "title": "Thanksgiving",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Thanksgiving ist ein in den Vereinigten Staaten und Kanada gefeiertes Erntedankfest, dessen Form stark von der europäischen Tradition dieses Festes abweicht."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-25T04:08:10.520Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Thanksgiving": 200
+   }
+  }
+ ]
+}

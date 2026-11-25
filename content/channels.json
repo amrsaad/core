@@ -222,10 +222,10 @@
    "topic": "augen",
    "lang": "en",
    "channelId": null,
+   "resolveFails": 2,
+   "resolveTried": "2026-11-25T03:53:26.508Z",
    "status": "unresolved",
-   "note": "Suche HTTP 0 (TypeError: fetch failed UND_ERR_HEADERS_OVERFLOW Headers Overflow Error), Treffer: keine",
-   "resolveFails": 1,
-   "resolveTried": "2026-11-24T13:31:07.902Z"
+   "note": "Suche HTTP 0 (TypeError: fetch failed UND_ERR_HEADERS_OVERFLOW Headers Overflow Error), Treffer: keine"
   },
   {
    "name": "American Academy of Ophthalmology",
@@ -414,7 +414,8 @@
    "resolvedTitle": "Y Combinator",
    "verified": true,
    "lastShort": "2026-10-30",
-   "status": "active"
+   "status": "active",
+   "checked": []
   },
   {
    "name": "Alex Hormozi",
@@ -427,7 +428,8 @@
    "resolvedTitle": "Alex Hormozi",
    "verified": true,
    "lastShort": "2026-10-30",
-   "status": "active"
+   "status": "active",
+   "checked": []
   },
   {
    "name": "Lenny's Podcast",
@@ -440,7 +442,8 @@
    "resolvedTitle": "Lenny's Podcast",
    "verified": true,
    "status": "active",
-   "lastShort": "2026-10-30"
+   "lastShort": "2026-10-30",
+   "checked": []
   },
   {
    "name": "Harvard Business Review",
