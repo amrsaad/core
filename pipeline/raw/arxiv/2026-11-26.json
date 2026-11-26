@@ -105,7 +105,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:59:28Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34934": 200
    }
@@ -132,7 +132,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:59:11Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34928": 200
    }
@@ -143,7 +143,7 @@
    "area": "brain",
    "topic": "ki-allgemein",
    "url": "https://arxiv.org/abs/2611.34923",
-   "urlStatus": 404,
+   "urlStatus": 200,
    "api": {
     "url": "https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&start=0&max_results=30",
     "status": 200
@@ -159,9 +159,9 @@
     "kind": "fresh",
     "published": "2026-11-25T18:58:53Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
-    "https://arxiv.org/abs/2611.34923": 404
+    "https://arxiv.org/abs/2611.34923": 200
    }
   },
   {
@@ -186,7 +186,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:58:42Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34920": 200
    }
@@ -213,7 +213,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:51:36Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34899": 200
    }
@@ -240,7 +240,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:45:35Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34887": 200
    }
@@ -267,7 +267,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:37:06Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z"
+   "fetchedAt": "2026-11-26T12:29:08.851Z"
   },
   {
    "sourceId": "arxiv:2611.34870",
@@ -291,7 +291,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:34:46Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34870": 200
    }
@@ -318,7 +318,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:33:07Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34868": 200
    }
@@ -345,7 +345,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:30:43Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34864": 200
    }
@@ -372,7 +372,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:29:36Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z"
+   "fetchedAt": "2026-11-26T12:29:08.851Z"
   },
   {
    "sourceId": "arxiv:2611.34858",
@@ -396,7 +396,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:27:48Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34858": 200
    }
@@ -423,7 +423,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:25:30Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34852": 200
    }
@@ -450,7 +450,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:20:18Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34843": 200
    }
@@ -477,7 +477,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:19:02Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34841": 200
    }
@@ -504,7 +504,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:12:23Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34832": 200
    }
@@ -531,7 +531,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:12:20Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34831": 200
    }
@@ -558,7 +558,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:11:49Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34830": 200
    }
@@ -585,7 +585,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:07:44Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34823": 200
    }
@@ -612,7 +612,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:03:09Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34819": 200
    }
@@ -639,7 +639,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:01:49Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34816": 200
    }
@@ -666,7 +666,7 @@
     "kind": "fresh",
     "published": "2026-11-25T18:01:22Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34813": 200
    }
@@ -693,7 +693,7 @@
     "kind": "fresh",
     "published": "2026-11-25T17:59:24Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34811": 200
    }
@@ -720,7 +720,7 @@
     "kind": "fresh",
     "published": "2026-11-25T17:42:31Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34785": 200
    }
@@ -747,7 +747,7 @@
     "kind": "fresh",
     "published": "2026-11-25T17:38:00Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34777": 200
    }
@@ -774,7 +774,7 @@
     "kind": "fresh",
     "published": "2026-11-25T17:37:49Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z"
+   "fetchedAt": "2026-11-26T12:29:08.851Z"
   },
   {
    "sourceId": "arxiv:2611.34770",
@@ -798,7 +798,7 @@
     "kind": "fresh",
     "published": "2026-11-25T17:35:27Z"
    },
-   "fetchedAt": "2026-11-26T04:05:56.993Z",
+   "fetchedAt": "2026-11-26T12:29:08.851Z",
    "urlChecks": {
     "https://arxiv.org/abs/2611.34770": 200
    }
