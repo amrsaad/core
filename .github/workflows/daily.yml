@@ -239,6 +239,14 @@ jobs:
           npx vite preview --host 127.0.0.1 --port 4181 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4181/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/swipe.mjs http://127.0.0.1:4181/core/ pipeline/out/e2e-swipe
+      - name: Wischübergang mit alter Handy-Ansicht zum Vergleich (nur Information, gleicher Runner, phone=0)
+        if: always() && matrix.group == 2
+        continue-on-error: true
+        timeout-minutes: 8
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4197 --strictPort &
+          node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4197/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
+          E2E_QS="&phone=0" node tests/e2e/swipe.mjs http://127.0.0.1:4197/core/ pipeline/out/e2e-swipe-old
       - name: Abrufkarte auf jede iPhone-Höhe testen (Runde 23; alles sichtbar vor und nach der Antwort, Hook mit Auslassung am Wortende, kein Wechsel durch Wischen, Skip; Text, Video, Audio; WebKit und Chromium)
         if: always() && matrix.group == 2
         timeout-minutes: 15
