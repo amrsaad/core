@@ -1,12 +1,12 @@
 {
- "at": "2026-11-26T17:36:31.957Z",
+ "at": "2026-11-26T19:44:13.351Z",
  "runs": [
   {
    "variant": "webkit",
    "checks": {
     "feedLoaded": true,
-    "columnUnchanged": false,
-    "shareEnabled": false,
+    "columnUnchanged": true,
+    "shareEnabled": true,
     "sheetOpens": true,
     "linkUnderBase": true,
     "linkShownShort": true,
@@ -47,6 +47,45 @@
     "clipBadZ": true,
     "appLinkOpens": true,
     "pageErrors": 0
+   },
+   "column": {
+    "col": [
+     {
+      "id": "like",
+      "dis": false,
+      "primary": "true",
+      "w": 85.25,
+      "h": 52
+     },
+     {
+      "id": "save",
+      "dis": false,
+      "primary": "true",
+      "w": 85.25,
+      "h": 52
+     },
+     {
+      "id": "share",
+      "dis": false,
+      "primary": "true",
+      "w": 85.25,
+      "h": 52
+     },
+     {
+      "id": "more",
+      "dis": false,
+      "primary": "true",
+      "w": 85.25,
+      "h": 52
+     }
+    ],
+    "src": {
+     "n": 1,
+     "dis": false,
+     "primary": "true",
+     "w": 44,
+     "h": 44
+    }
    },
    "sheet": {
     "url": "http://127.0.0.1:4191/core/clip/#zq1YqU7Iy1FFKU7JSKstMSc1X0lEqBrKLMxKLDCAAKJIIVG",
@@ -94,8 +133,8 @@
     "fg": "rgb(255, 255, 255)",
     "nothingLocked": true
    },
-   "audioT0": 3.020327882,
-   "audioT1": 5.006481446,
+   "audioT0": 3.012165769,
+   "audioT1": 5.009635272,
    "ar": {
     "dir": "rtl",
     "html": "rtl",
@@ -116,14 +155,14 @@
     "title": "Clip hook from the hash · 127.0.0.1"
    },
    "errors": [],
-   "ok": false
+   "ok": true
   },
   {
    "variant": "chromium",
    "checks": {
     "feedLoaded": true,
-    "columnUnchanged": false,
-    "shareEnabled": false,
+    "columnUnchanged": true,
+    "shareEnabled": true,
     "sheetOpens": true,
     "linkUnderBase": true,
     "linkShownShort": true,
@@ -164,6 +203,45 @@
     "clipBadZ": true,
     "appLinkOpens": true,
     "pageErrors": 0
+   },
+   "column": {
+    "col": [
+     {
+      "id": "like",
+      "dis": false,
+      "primary": "true",
+      "w": 85.25,
+      "h": 52
+     },
+     {
+      "id": "save",
+      "dis": false,
+      "primary": "true",
+      "w": 85.25,
+      "h": 52
+     },
+     {
+      "id": "share",
+      "dis": false,
+      "primary": "true",
+      "w": 85.25,
+      "h": 52
+     },
+     {
+      "id": "more",
+      "dis": false,
+      "primary": "true",
+      "w": 85.25,
+      "h": 52
+     }
+    ],
+    "src": {
+     "n": 1,
+     "dis": false,
+     "primary": "true",
+     "w": 44,
+     "h": 44
+    }
    },
    "sheet": {
     "url": "http://127.0.0.1:4191/core/clip/#zJcExDoAgDEDRq5A_dyiLQ6_hCTBgaiSSgGEx3t3B9x4mFo",
@@ -212,7 +290,7 @@
     "nothingLocked": true
    },
    "audioT0": 3,
-   "audioT1": 5.021819,
+   "audioT1": 5.009967,
    "ar": {
     "dir": "rtl",
     "html": "rtl",
@@ -233,7 +311,7 @@
     "title": "Clip hook from the hash · 127.0.0.1"
    },
    "errors": [],
-   "ok": false
+   "ok": true
   }
  ]
 }
