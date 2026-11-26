@@ -1,0 +1,101 @@
+{
+ "at": "2026-11-26T11:31:19.112Z",
+ "runs": [
+  {
+   "browser": "webkit",
+   "checks": {
+    "audioPlays": true,
+    "audioWallUnder3s": true,
+    "audioApiStillPending": true,
+    "audioStartLine": true,
+    "audioFirstSoundUnder1500": true,
+    "audioApiWaitedZero": true,
+    "audioSrcLine": true,
+    "audioNoApiWaitLine": true,
+    "audioStartWithoutApiLine": true,
+    "audioNoStub": true,
+    "audioStillPlayingAfterApi": true,
+    "audioNoErrors": true,
+    "hlsPlays": true,
+    "hlsStartLine": true,
+    "hlsFirstSoundUnder1500": true,
+    "hlsApiWaitedZero": true,
+    "hlsNoStub": true,
+    "hlsStillPlayingAfterApi": true,
+    "hlsNoErrors": true,
+    "ytLateLine": true,
+    "ytLateBetween3and5s": true,
+    "ytPlaysAfterApi": true,
+    "ytStartLine": true,
+    "ytNoStub": true,
+    "ytNoErrors": true
+   },
+   "notes": {
+    "audioWallMs": 147,
+    "audioStartLine": "start: snaudio0:0 first sound 88 ms after tab open (yt api waited 0 ms)",
+    "audioFirstSoundMs": 88,
+    "audioDiag": [
+     "deck: start order none first=snaudio0:0 heads=0 usable=0 stock=0",
+     "video: start without youtube api (snaudio0:0 needs none)",
+     "deck: src net snaudio0",
+     "start: snaudio0:0 first sound 88 ms after tab open (yt api waited 0 ms)",
+     "deck: src net snaudio0"
+    ],
+    "hlsWallMs": 30,
+    "hlsStartLine": "start: snhls0:0 first sound 121 ms after tab open (yt api waited 0 ms)",
+    "hlsFirstSoundMs": 121,
+    "ytLateMs": 3042,
+    "ytStartLine": "start: snyt00000ab:0 first sound 6126 ms after tab open (yt api waited 3001 ms)"
+   },
+   "ok": true
+  },
+  {
+   "browser": "chromium",
+   "checks": {
+    "audioPlays": true,
+    "audioWallUnder3s": true,
+    "audioApiStillPending": true,
+    "audioStartLine": true,
+    "audioFirstSoundUnder1500": true,
+    "audioApiWaitedZero": true,
+    "audioSrcLine": true,
+    "audioNoApiWaitLine": true,
+    "audioStartWithoutApiLine": true,
+    "audioNoStub": true,
+    "audioStillPlayingAfterApi": true,
+    "audioNoErrors": true,
+    "hlsPlays": true,
+    "hlsStartLine": true,
+    "hlsFirstSoundUnder1500": true,
+    "hlsApiWaitedZero": true,
+    "hlsNoStub": true,
+    "hlsStillPlayingAfterApi": true,
+    "hlsNoErrors": true,
+    "ytLateLine": true,
+    "ytLateBetween3and5s": true,
+    "ytPlaysAfterApi": true,
+    "ytStartLine": true,
+    "ytNoStub": true,
+    "ytNoErrors": true
+   },
+   "notes": {
+    "audioWallMs": 80,
+    "audioStartLine": "start: snaudio0:0 first sound 24 ms after tab open (yt api waited 0 ms)",
+    "audioFirstSoundMs": 24,
+    "audioDiag": [
+     "deck: start order none first=snaudio0:0 heads=0 usable=0 stock=0",
+     "video: start without youtube api (snaudio0:0 needs none)",
+     "deck: src net snaudio0",
+     "start: snaudio0:0 first sound 24 ms after tab open (yt api waited 0 ms)",
+     "deck: src net snaudio0"
+    ],
+    "hlsWallMs": 20,
+    "hlsStartLine": "start: snhls0:0 first sound 52 ms after tab open (yt api waited 0 ms)",
+    "hlsFirstSoundMs": 52,
+    "ytLateMs": 3019,
+    "ytStartLine": "start: snyt00000ab:0 first sound 6050 ms after tab open (yt api waited 3000 ms)"
+   },
+   "ok": true
+  }
+ ]
+}
