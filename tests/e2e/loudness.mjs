@@ -6,6 +6,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices, webkit } from 'playwright';
 import { onPageError } from './pageerrors.mjs';
+import { navTo } from './phonenav.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-loudness'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -124,7 +125,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     });
     const storeOf = (pg) => pg.evaluate(() => localStorage.getItem('core.level.cors') ?? '');
     const copyDiag = async (pg) => {
-      await pg.click('nav [aria-label=Settings]');
+      await navTo(pg, 'Settings');
       await pg.waitForSelector('[data-testid=copy-diagnostics]');
       await pg.click('[data-testid=copy-diagnostics]');
       return pg.evaluate(() => navigator.clipboard.readText());
@@ -238,7 +239,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.noPageErrors = errors.length === 0;
 
     // ---------- Diagnose in Settings ----------
-    await page.click('nav [aria-label=Settings]');
+    await navTo(page, 'Settings');
     await page.waitForSelector('[data-testid=loudness]');
     const lines = await page.$$eval('[data-testid=loud-line]', (els) => els.map((e) => e.textContent));
     r.settingsLines = lines;

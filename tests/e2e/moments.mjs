@@ -5,6 +5,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices, webkit } from 'playwright';
 import { onPageError } from './pageerrors.mjs';
+import { navTo } from './phonenav.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-moments'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -216,8 +217,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.firstArea = await page.evaluate(() => window.__core.moment().area);
     c.firstPlaying = await waitFor(page, () => window.__core.state() === 1);
     // Kurzer Hook: Normalgröße, nicht gekürzt, keine drei Punkte
-    const h0 = await page.evaluate(() => { const e = document.querySelector('[data-testid=hook]'); return { step: e.dataset.step, clipped: e.scrollHeight > e.clientHeight + 1, ellipsis: getComputedStyle(e).textOverflow === 'ellipsis', clamp: getComputedStyle(e).webkitLineClamp, size: parseFloat(getComputedStyle(e).fontSize), text: e.textContent }; });
-    c.hookShortNormal = h0.step === '0' && !h0.clipped && h0.size === 22 && (h0.clamp === 'none' || h0.clamp === '' || h0.clamp === undefined);
+    const h0 = await page.evaluate(() => { const e = document.querySelector('[data-testid=hook]'); return { step: e.dataset.step, clipped: e.scrollHeight > e.clientHeight + 1, ellipsis: getComputedStyle(e).textOverflow === 'ellipsis', clamp: getComputedStyle(e).webkitLineClamp, size: parseFloat(getComputedStyle(e).fontSize), text: e.textContent, phone: !!document.querySelector('.vfeed[data-phone]') }; });
+    c.hookShortNormal = h0.step === '0' && !h0.clipped && h0.size === (h0.phone ? 24 : 22) && (h0.clamp === 'none' || h0.clamp === '' || h0.clamp === undefined);
     const capState = () => page.evaluate(() => {
       const m = window.__core.moment();
       const el = document.querySelector('[data-testid=caption] span');
@@ -330,10 +331,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     r.recall = rs;
     c.recallMissed2d = rs.length === 1 && rs[0].results.length === 1 && rs[0].results[0].got === false && Math.round((rs[0].due - rs[0].results[0].at) / 86400000) === 2;
     await page.evaluate(() => { window.__ytStep = undefined; });
-    c.todayNoGotItForMiss = await waitFor(page, () => /, 0 got it$/.test(document.querySelector('[data-testid=today]')?.textContent ?? ''));
+    c.todayNoGotItForMiss = await waitFor(page, () => /, 0 got it$/.test((() => { const e = document.querySelector('[data-testid=today]'); return e?.dataset.line ?? e?.textContent ?? ''; })()));
 
     // Punkt 6: Tageszahl oben, zählt jeden gespielten Moment (Entscheidung 45: erst nach einer Sekunde Wiedergabe, nicht beim Ankommen), kein Stopp
-    const todayTxt = await page.evaluate(() => document.querySelector('[data-testid=today]')?.textContent ?? '');
+    const todayTxt = await page.evaluate(() => (() => { const e = document.querySelector('[data-testid=today]'); return e?.dataset.line ?? e?.textContent ?? ''; })());
     r.today = todayTxt;
     c.todayCount = /^today ([3-9]|\d\d) seen, \d+ got it$/.test(todayTxt);
     // Punkt 4: auto heißt Englisch aus, Arabisch an, rechtsläufig, mindestens 20 px
@@ -361,9 +362,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // Untertitel: das Menü gibt es nicht mehr, der Schalter steht in Settings. Immer an gilt auch für Englisch.
     await skipRecall(page, name, out);
     await page.keyboard.press(' ');
-    await page.click('nav [aria-label=Settings]');
+    await navTo(page, 'Settings');
     await page.selectOption('[data-testid=captions]', 'on');
-    await page.click('nav [aria-label=Feed]');
+    await navTo(page, 'Feed');
     await page.keyboard.press(' ');
     c.captionsSettingsOn = await waitFor(page, () => !!document.querySelector('[data-testid=caption] span')?.textContent);
     await page.screenshot({ path: `${out}/${name}-7-untertitel-an.png` });
@@ -383,11 +384,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       band.appendChild(f);
       const a = band.getBoundingClientRect(), b = f.getBoundingClientRect();
       f.remove();
-      return { bw: a.width, bh: a.height, fw: b.width, fh: b.height, dx: b.left - a.left, dy: b.top - a.top, vw: innerWidth };
+      return { bw: a.width, bh: a.height, fw: b.width, fh: b.height, dx: b.left - a.left, dy: b.top - a.top, vw: innerWidth, phone: !!document.querySelector('.vfeed[data-phone]') };
     });
     c.embedNoZoom = Math.abs(r.band.fw - r.band.bw) < 1 && Math.abs(r.band.fh - r.band.bh) < 1 && Math.abs(r.band.dx) < 1 && Math.abs(r.band.dy) < 1;
     // Brief 06 (Board 03.11.): Karte mit 16 px Rand links und rechts, 16:9, höchstens 640 px (ersetzt die volle Breite von E3)
-    c.embed16by9FullWidth = Math.abs(r.band.bw - Math.min(r.band.vw - 32, 640)) < 1 && Math.abs(r.band.bh - (r.band.bw * 9) / 16) < 1;
+    c.embed16by9FullWidth = Math.abs(r.band.bw - (r.band.phone ? r.band.vw : Math.min(r.band.vw - 32, 640))) < 1 && Math.abs(r.band.bh - (r.band.bw * 9) / 16) < 1;
 
     // Pfeiler 17: Standard 1x, nach dem langen Drücken 1.5x, nie über 2x
     const rates = await page.evaluate(() => window.__ytlog.filter((x) => x.startsWith('rate ')).map((x) => Number(x.slice(5))));
@@ -514,11 +515,13 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.saveFills = await page.evaluate((id) => window.__core.saved(id) && document.querySelector('[data-testid=save]').getAttribute('aria-pressed') === 'true', op.id);
     // Spalte: fünf Knöpfe (Brief 16: More öffnet das Blatt, der Wisch nach links gehört dem Reiterwechsel), Ziele mindestens 48 pt, Abstände, Beschriftung.
     // Issue 51: Abstand --s-2 (8 px) statt 16, damit die fünf Knöpfe nicht bis unter die Videokarte reichen
-    const col = await page.evaluate(() => [...document.querySelectorAll('.vactions button')].map((b) => { const r = b.getBoundingClientRect(); return { id: b.dataset.testid, w: r.width, h: r.height, top: r.top, bottom: r.bottom, text: b.textContent, primary: b.dataset.primary }; }));
-    c.columnOrder = col.map((x) => x.id).join() === 'like,save,share,source,more';
-    c.columnTargets48 = col.every((x) => x.w >= 48 && x.h >= 48);
-    c.columnSpacing = col.slice(1).every((x, i) => x.top - col[i].bottom >= 8);
-    c.columnLabels = col.map((x) => x.text).join('|') === 'Like|Save|Share|Source|More';
+    const col = await page.evaluate(() => [...document.querySelectorAll('.vactions button, .ph-actions button')].map((b) => { const r = b.getBoundingClientRect(); return { id: b.dataset.testid, w: r.width, h: r.height, top: r.top, bottom: r.bottom, text: b.textContent, primary: b.dataset.primary }; }));
+    // Runde 45: Handy-Ansicht: Aktionsreihe mit vier Tasten (Source ist dort ein kleines Symbol am Kopf), alle mindestens 44 pt
+    const phoneRow = await page.evaluate(() => !!document.querySelector('.vfeed[data-phone]'));
+    c.columnOrder = col.map((x) => x.id).join() === (phoneRow ? 'like,save,share,more' : 'like,save,share,source,more');
+    c.columnTargets48 = col.every((x) => x.w >= (phoneRow ? 44 : 48) && x.h >= (phoneRow ? 44 : 48));
+    c.columnSpacing = phoneRow ? true : col.slice(1).every((x, i) => x.top - col[i].bottom >= 8);
+    c.columnLabels = col.map((x) => x.text).join('|') === (phoneRow ? 'Like|Save|Share|More' : 'Like|Save|Share|Source|More');
     // Entscheidung 54: jeder Knopf der Leiste ist ein Pflicht-Tippziel (data-primary). Die Daumenzone selbst prüft das Layout-Gate bei 390x844 und 430x932,
     // hier ist das Fenster nur 659 px hoch (Safari-Profil mit Leiste)
     c.columnPrimary = col.every((x) => x.primary === 'true');
@@ -775,9 +778,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.waitForTimeout(400);
     await skipRecall(page, name, out);
     const poster = (st) => page.evaluate(() => [...document.querySelectorAll('.vslot')].map((sl) => {
+      const bw = document.querySelector('.vfeed[data-phone]') ? innerWidth : Math.min(innerWidth - 32, 640); // Runde 45: Handy-Ansicht, Player randlos über die volle Breite
       const p = sl.querySelector('.vposter'); const host = sl.querySelector('.vframe > div'); const pr = p?.getBoundingClientRect(); const hr = host?.getBoundingClientRect();
       const vis = !!p && getComputedStyle(p).visibility !== 'hidden' && getComputedStyle(p).display !== 'none' && +getComputedStyle(p).opacity > 0;
-      return { rects: { p: pr && [pr.left, pr.top, pr.width, pr.height].map(Math.round), h: hr && [hr.left, hr.top, hr.width, hr.height].map(Math.round), iw: innerWidth }, current: sl.getAttribute('aria-hidden') === 'false', vis, live: sl.hasAttribute('data-live'), covers: !!pr && (!hr || (pr.left <= hr.left + 0.5 && pr.right >= hr.right - 0.5 && pr.top <= hr.top + 0.5 && pr.bottom >= hr.bottom - 0.5)), noZoom: !!pr && Math.abs(pr.width - Math.min(innerWidth - 32, 640)) < 1.5 && Math.abs(pr.height - (Math.min(innerWidth - 32, 640) * 9) / 16) < 1.5 };
+      return { rects: { p: pr && [pr.left, pr.top, pr.width, pr.height].map(Math.round), h: hr && [hr.left, hr.top, hr.width, hr.height].map(Math.round), iw: innerWidth }, current: sl.getAttribute('aria-hidden') === 'false', vis, live: sl.hasAttribute('data-live'), covers: !!pr && (!hr || (pr.left <= hr.left + 0.5 && pr.right >= hr.right - 0.5 && pr.top <= hr.top + 0.5 && pr.bottom >= hr.bottom - 0.5)), noZoom: !!pr && Math.abs(pr.width - bw) < 1.5 && Math.abs(pr.height - (bw * 9) / 16) < 1.5 };
     }));
     // ENDED am aktuellen Slot blättert weiter (finish), also wird er dort von der Schleife oben abgedeckt (endedSeen) und hier nur an den Nachbarn erzwungen
     const force = (st) => page.evaluate((s) => { for (const sl of document.querySelectorAll('.vslot')) if (s !== 0 || sl.getAttribute('aria-hidden') !== 'false') sl.querySelector('.vframe > div')?.firstChild?.__player?.__force(s); }, st);
@@ -842,7 +846,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // In den Einstellungen sichtbar
     await skipRecall(page, name, out);
     await page.keyboard.press(' ');
-    await page.click('nav [aria-label=Settings]');
+    await navTo(page, 'Settings');
     await page.locator('[data-testid=unlock-device]').scrollIntoViewIfNeeded();
     await page.click('text=Show QR code');
     c.unlockQr = await waitFor(page, () => !!document.querySelector('[data-testid=unlock-qr] svg'));
@@ -853,7 +857,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.latencyInSettings = await waitFor(page, () => /Preloaded: median \d+ ms/.test(document.querySelector('[data-testid=latency]')?.textContent ?? ''));
     await page.locator('[data-testid=latency]').scrollIntoViewIfNeeded();
     await page.screenshot({ path: `${out}/${name}-5-einstellungen.png` });
-    await page.click('nav [aria-label=Feed]');
+    await navTo(page, 'Feed');
 
     // Simulierter Sonntag: kein Wochenrückblick mehr, Feed startet direkt.
     // Erste Seite schließen: zwei offene Tabs würden sich gegenseitig den gespeicherten Zustand überschreiben.
@@ -1005,7 +1009,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.skipWorks = await waitFor(p5, () => !!window.__core?.moment());
     c.noPrevPlan = !(await p5.$('[data-testid=prev-plan]'));
     // Karte "What Core learned" (App-Zeit 1.11.): Zeilen mit Gewicht und Pfeil, laufende Fristen, Reset mit Rückfrage
-    await p5.click('nav [aria-label=Settings]');
+    await navTo(p5, 'Settings');
     await p5.locator('[data-testid=learned-card]').scrollIntoViewIfNeeded();
     const cardRows = async (pg) => pg.evaluate(() => ({
       empty: !!document.querySelector('[data-testid=learned-empty]'),
@@ -1039,7 +1043,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await pCard.goto(url + '?now=2026-12-05');
     await waitFor(pCard, () => !!window.__core?.moment());
     await skipRecall(pCard, name, out);
-    await pCard.click('nav [aria-label=Settings]');
+    await navTo(pCard, 'Settings');
     await pCard.locator('[data-testid=learned-card]').scrollIntoViewIfNeeded();
     const k7 = await cardRows(pCard);
     c.cardExpiryLifted = !k7.lists['topic-down'].some((x) => x.w === 0.2) && !k7.lists['channel-down'].some((x) => x.w === 0.2) && !/until/.test(await pCard.textContent('[data-testid=learned-card]'));
@@ -1115,7 +1119,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.badNeverLoaded = await p8.evaluate(() => !window.__ytlog.some((x) => /^(load|cue) (txt-|pod-)/.test(x)));
     c.badNeverShown = (await p8.evaluate(() => window.__core.diag().length)) >= 0 && badWalk.every((x) => !/^(txt|pod)-/.test(x.id));
     // Diagnose: drei aussortiert
-    await p8.click('[aria-label=Settings]');
+    await navTo(p8, 'Settings');
     c.badSkippedLine = await waitFor(p8, () => document.querySelector('[data-testid=moments-skipped]')?.textContent === 'Moments skipped: 3');
     await p8.screenshot({ path: `${out}/${name}-20-moments-skipped.png` });
     c.badPageErrors = errors8.length === 0;
@@ -1147,7 +1151,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const hk = await p7.evaluate(() => { const e = document.querySelector('[data-testid=hook]'); const m = window.__core.moment(); return { step: e.dataset.step, clipped: e.scrollHeight > e.clientHeight + 1, full: e.textContent === m.hook, size: parseFloat(getComputedStyle(e).fontSize), lines: Math.round(e.scrollHeight / parseFloat(getComputedStyle(e).lineHeight)), id: m.id }; });
       capLogs.push({ hk });
       if (n === 0) await p7.screenshot({ path: `${out}/${name}-17-hook-lang.png` });
-      if (await p7.$('[data-testid=sound-off]') || (await p7.evaluate(() => window.__core.state())) !== 1) await p7.mouse.click(vp.width / 2, vp.height / 2);
+      if (await p7.$('[data-testid=sound-off]') || (await p7.evaluate(() => window.__core.state())) !== 1) await p7.mouse.click(...(await p7.evaluate(() => { const bd = document.querySelector('.vfeed[data-phone] .vslot[aria-hidden=false] .vframe > div'); if (!bd) return [innerWidth / 2, innerHeight / 2]; const r = bd.getBoundingClientRect(); return [innerWidth / 2, r.top + r.height / 2]; }))); // Runde 45: in der Handy-Ansicht liegt die Mitte des Fensters auf der Infozeile (Tipp dort öffnet das Blatt), der Tipp zum Pausieren und Fortsetzen geht aufs Bild
       await waitFor(p7, () => window.__core.state() === 1);
       await p7.click(n % 2 === 0 ? '[data-testid=hook]' : '[data-testid=speaker-line]');
       const open = await waitFor(p7, () => !!document.querySelector('[data-testid=caption-sheet]'));
@@ -1202,7 +1206,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // Falls ein Wischer nicht griff: weiter wischen, bis fünf Momente durch sind
     for (let extra = 0; extra < 6 && (await p7.evaluate(() => window.__core.idx())) < 5; extra++) {
       const b = await p7.evaluate(() => window.__core.idx());
-      if (await p7.$('[data-testid=sound-off]')) await p7.mouse.click(vp.width / 2, vp.height / 2);
+      if (await p7.$('[data-testid=sound-off]')) await p7.mouse.click(...(await p7.evaluate(() => { const bd = document.querySelector('.vfeed[data-phone] .vslot[aria-hidden=false] .vframe > div'); if (!bd) return [innerWidth / 2, innerHeight / 2]; const r = bd.getBoundingClientRect(); return [innerWidth / 2, r.top + r.height / 2]; }))); // Runde 45: in der Handy-Ansicht liegt die Mitte des Fensters auf der Infozeile (Tipp dort öffnet das Blatt), der Tipp zum Pausieren und Fortsetzen geht aufs Bild
       await p7.mouse.move(vp.width / 2, vp.height * 0.7);
       await p7.mouse.down();
       for (let i = 1; i <= 5; i++) await p7.mouse.move(vp.width / 2, vp.height * (0.7 - 0.09 * i));
@@ -1212,7 +1216,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       if (await p7.$('[data-testid=recall-card]')) cardSeen = true;
     }
     r.capLogs = capLogs;
-    c.hookLongSmallerNeverCut = capLogs.every((x) => x.hk.step === '1' && !x.hk.clipped && x.hk.full && x.hk.size === 17);
+    // Runde 45: die Handy-Ansicht hat bis zu zwei Stufen (Video 24, 21, 18 px), der lange Hook ist dort kleiner, nie gekürzt
+    const phoneHook = await p7.evaluate(() => !!document.querySelector('.vfeed[data-phone]'));
+    c.hookLongSmallerNeverCut = capLogs.every((x) => (phoneHook ? (x.hk.step === '1' || x.hk.step === '2') && x.hk.size < 24 : x.hk.step === '1' && x.hk.size === 17) && !x.hk.clipped && x.hk.full);
     c.captionOpensWithContent = capLogs.every((x) => x.open && x.hook && x.exLen > 50 && x.speaker && x.ep && x.at);
     // Brief 06, Block 7: unter der Meta-Zeile stehen jetzt Ask und Later (Later ist ein grauer Platzhalter, Entscheidung 49)
     c.captionOrder = capLogs.every((x) => x.order.filter((t) => t !== 'caption-context').join() === 'DIV,caption-hook,caption-excerpt,caption-meta,caption-ask,caption-later');
@@ -1251,7 +1257,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         });
         const stage = (n) => pT.evaluate((x) => { window.__stage = x; }, n);
         const vp2 = pT.viewportSize();
-        await pT.mouse.click(vp2.width / 2, vp2.height / 2);
+        await pT.mouse.click(...(await pT.evaluate(() => { const bd = document.querySelector('.vfeed[data-phone] .vslot[aria-hidden=false] .vframe > div'); if (!bd) return [innerWidth / 2, innerHeight / 2]; const r = bd.getBoundingClientRect(); return [innerWidth / 2, r.top + r.height / 2]; }))); // Runde 45: Tipp aufs Bild (die Mitte des Fensters liegt in der Handy-Ansicht auf der Infozeile)
         await pT.waitForTimeout(800);
         const sw = async (label, f, stg) => {
           await stage(stg);

@@ -6,6 +6,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices, webkit } from 'playwright';
 import { onPageError } from './pageerrors.mjs';
+import { navTo } from './phonenav.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-tempo'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -47,7 +48,7 @@ const stored = (page) =>
         };
       }),
   );
-const chip = (page) => page.evaluate(() => { const b = document.querySelector('[data-testid=rate]'); if (!b) return null; const r = b.getBoundingClientRect(); return { text: b.textContent, w: r.width, h: r.height, onScreen: r.left >= 0 && r.right <= innerWidth && r.top >= 0 }; });
+const chip = (page) => page.evaluate(() => { const b = document.querySelector('[data-testid=rate]'); if (!b || b.textContent === '1x') return null; /* Runde 45: die Tempo-Taste der Handy-Ansicht steht immer da und zeigt bei 1x "1x": das gilt wie keine Anzeige */ const r = b.getBoundingClientRect(); return { text: b.textContent, w: r.width, h: r.height, onScreen: r.left >= 0 && r.right <= innerWidth && r.top >= 0 }; });
 /** Alle laufenden Player stehen auf dem Tempo: YouTube über __ytlog, Streams über das Media-Element */
 const playersAt = (page, kind, want) =>
   waitFor(page, ([kd, w]) => {
@@ -99,7 +100,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await page.evaluate(() => {
         window.__t = { down: 0, seen: 0 };
         addEventListener('pointerdown', () => { window.__t.down = performance.now(); }, true);
-        new MutationObserver(() => { if (!window.__t.seen && document.querySelector('[data-testid=rate]')) window.__t.seen = performance.now(); }).observe(document.body, { childList: true, subtree: true });
+        new MutationObserver(() => { if (!window.__t.seen && (document.querySelector('[data-testid=rate]')?.textContent ?? '1x') !== '1x') window.__t.seen = performance.now(); }).observe(document.body, { childList: true, subtree: true, characterData: true });
       });
       await longPress(page);
       c.longPress15 = await waitFor(page, () => window.__core.rate() === 1.5, null, 3000);
@@ -141,7 +142,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         await waitFor(page, () => window.__core.idx() === 1 && window.__core.state() === 1, null, 8000);
         await sleep(500);
         const idx0 = await page.evaluate(() => window.__core.idx());
-        const b = await page.evaluate(() => { const r = document.querySelector('[data-testid=rate]').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+        // Runde 45: in der Handy-Ansicht ist die Tempo-Taste eine echte Taste (nimmt Zeiger an, wischt nicht): dort beginnt der Wisch daneben, in der Mitte der Fläche
+        const b = await page.evaluate(() => { if (document.querySelector('.vfeed[data-phone]')) return { x: innerWidth / 2, y: innerHeight * 0.45 }; const r = document.querySelector('[data-testid=rate]').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
         await page.mouse.move(b.x, b.y);
         await page.mouse.down();
         await page.mouse.move(b.x, b.y + 260, { steps: 8 });
@@ -160,12 +162,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       c.playersAfterTab = await playersAt(page, kind, 1.5);
 
       // Settings: Wert steht dort, nach dem Zurückgehen unverändert, kein Hinweistext zum Halten
-      await page.click('nav [aria-label=Settings]');
+      await navTo(page, 'Settings');
       await page.waitForSelector('[data-testid=speed]');
       c.settingsShows15 = (await page.inputValue('[data-testid=speed]')) === '1.5';
       c.settingsOptions = await page.evaluate(() => [...document.querySelectorAll('[data-testid=speed] option')].map((o) => o.value).join(',') === '1,1.5,2');
       c.settingsNoHoldText = !(await page.evaluate(() => document.body.innerText.includes('Hold the video')));
-      await page.click('nav [aria-label=Feed]');
+      await navTo(page, 'Feed');
       c.backFromSettings = await waitFor(page, () => window.__core.state() === 1);
       c.settingsKeeps15 = (await rate(page)) === 1.5;
       c.playersAfterSettings = await playersAt(page, kind, 1.5);

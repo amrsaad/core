@@ -44,6 +44,10 @@ import { NoteSheet, type NoteCtl } from './NoteSheet';
 import { createWheel, deskKey, TAB_KEYS, wheelPx, type DeskAction } from './desktop';
 import { DeskCenter, DeskTextFoot, DeskTextHead } from './desk/DeskCenter';
 import { DeskQueue } from './desk/DeskQueue';
+import { PhoneActions } from './phone/PhoneActions';
+import { PhoneTransport, PhoneTextBar } from './phone/PhoneTransport';
+import { PhoneAudio, PhoneVideo } from './phone/PhoneContent';
+import { PhoneTextHead } from './phone/PhoneText';
 import { DeskSide } from './desk/DeskSide';
 import { coverLetter, fracOf, lyricLines, scrolledToEnd, queuedAfter, seekBy, seekPos, upNext, SEEK_S } from './desk/model';
 import { speakerLine } from './speaker';
@@ -85,6 +89,12 @@ export interface DeskProps {
   onCloseSheet: () => void;
 }
 
+/** Runde 45: iPhone-Ansicht (unter 768 px, Schalter in phone/flags.ts). Fehlt das Feld, gilt die Ansicht wie vor Runde 45. */
+export interface PhoneProps {
+  /** Taste oben rechts (Tageszahl): öffnet Settings, von dort führt die Navigation zu Saved und zurück zum Feed */
+  onMenu: () => void;
+}
+
 interface Props {
   pool: Moment[];
   state: AppState;
@@ -94,6 +104,7 @@ interface Props {
   /** Fehlertext des letzten Syncs, für die Status-Zeile */
   syncError?: string | null;
   desk?: DeskProps;
+  phone?: PhoneProps;
 }
 
 interface Slot {
@@ -233,7 +244,7 @@ const mediaItems = (roleOf?: (el: Element) => string | null): MediaItem[] => {
 };
 const mediaWithSrc = (): number => mediaItems().length;
 
-export function MomentFeed({ pool: rawPool, state, update, active, onPausedChange, syncError = null, desk }: Props) {
+export function MomentFeed({ pool: rawPool, state, update, active, onPausedChange, syncError = null, desk, phone }: Props) {
   const single = state.settings.playerMode === 'single';
   const SLOTS = single ? 1 : 3;
   const stateRef = useRef(state);
@@ -242,6 +253,10 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   activeRef.current = active;
   const deskRef = useRef(desk);
   deskRef.current = desk;
+  /** Runde 45: iPhone-Ansicht. Der Text scrollt dort wie am Desktop (Lesefläche, Wisch erst am Textende). */
+  const ph = !!phone && !desk;
+  const phoneRef = useRef(ph);
+  phoneRef.current = ph;
   /** Abrufkarte beantwortet (Enter ist dann Next) */
   const recallAnswered = useRef(false);
   /** Eintrag der offenen Abrufkarte (für den Wechsel in den Hintergrund) */
@@ -2675,7 +2690,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     if (!textRef.current || !el || textSeen.current === idxRef.current) return;
     // Handy: der Text steht auf einem Bildschirm. Das Ende ist sichtbar, wenn nichts gekürzt wurde, sonst erst am Ende des Blatts mit dem ganzen Text (Tipp auf den Text).
     // Desktop: der Text scrollt, gesehen am Ende des Scrollwegs.
-    if (deskRef.current ? textEndReached(el.scrollTop, el.clientHeight, el.scrollHeight) : !truncRef.current) markTextSeen();
+    if (deskRef.current || phoneRef.current ? textEndReached(el.scrollTop, el.clientHeight, el.scrollHeight) : !truncRef.current) markTextSeen();
   };
   useEffect(() => {
     if (form !== 'text') return;
@@ -3144,6 +3159,32 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     setNote(null);
   };
 
+  /**
+   * Brief 23 (iOS, Variante c): Tipp auf "Tap to play". Der Startbefehl geht synchron aus dem Handler der Berührung ab, damit die Geste über postMessage im IFrame ankommt.
+   * Unverändert aus onUp herausgelöst (Runde 45), damit die Play-Taste der iPhone-Leiste denselben Weg geht wie ein Tipp auf die Fläche.
+   */
+  const startFromTap = () => {
+    const au = form === 'audio';
+    // Runde 8: der Kopf ist beim Tipp noch nicht da, ein anderer Moment liegt bereit im Vorrat: der bereite startet, im Tipp (Geste), der Kopf bleibt direkt dahinter
+    if (au) readyFirst(idxRef.current, 'start');
+    const sl = current();
+    try {
+      if (soundOn.current) sl.player?.unMute();
+      sl.player?.playVideo();
+      sl.gestureAt = performance.now();
+      sl.gestureLogged = false;
+    } catch {
+      /* Player nicht bereit */
+    }
+    diag.current.push(au ? `audio: play in gesture ${sl.mid} (tap)` : `yt: play in gesture ${sl.mid} (tap)`);
+    clearTapPlay();
+    startWait(queue.current[idxRef.current]);
+    // Issue 54: auch dieser Start wird überwacht (ein Wiederholungsstart, dann wieder die Tippfläche), nie ein Watchdog-Skip.
+    // Audio: lehnt das Element den Start ab, meldet das Deck es sofort wieder und die Tippfläche steht erneut.
+    if (!au) watchStart(sl);
+    userPaused.current = false;
+    setPaused(false);
+  };
   /** Der Griff begann auf der Infozeile (Hook): ein Tipp öffnet den Kontext, ein Wisch oder langes Drücken gilt wie überall */
   const infoDown = useRef(false);
   /** Der Griff begann auf der Steuerzeile des Audio-Reiters (Brief 17 legt sie in die Mitte der Spalte): Wisch und langes Drücken gelten wie überall,
@@ -3298,26 +3339,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     // Brief 23 (iOS, Variante c): Tipp auf "Tap to play". Der Startbefehl geht synchron hier ab, damit die Geste über postMessage im IFrame ankommt
     // (ein Zeitgeber wie beim Pausentipp trüge sie nicht). Kein Pausentipp, kein Doppeltipp.
     if (tapRef.current && current().mid === tapRef.current) {
-      const au = form === 'audio';
-      // Runde 8: der Kopf ist beim Tipp noch nicht da, ein anderer Moment liegt bereit im Vorrat: der bereite startet, im Tipp (Geste), der Kopf bleibt direkt dahinter
-      if (au) readyFirst(idxRef.current, 'start');
-      const sl = current();
-      try {
-        if (soundOn.current) sl.player?.unMute();
-        sl.player?.playVideo();
-        sl.gestureAt = performance.now();
-        sl.gestureLogged = false;
-      } catch {
-        /* Player nicht bereit */
-      }
-      diag.current.push(au ? `audio: play in gesture ${sl.mid} (tap)` : `yt: play in gesture ${sl.mid} (tap)`);
-      clearTapPlay();
-      startWait(queue.current[idxRef.current]);
-      // Issue 54: auch dieser Start wird überwacht (ein Wiederholungsstart, dann wieder die Tippfläche), nie ein Watchdog-Skip.
-      // Audio: lehnt das Element den Start ab, meldet das Deck es sofort wieder und die Tippfläche steht erneut.
-      if (!au) watchStart(sl);
-      userPaused.current = false;
-      setPaused(false);
+      startFromTap();
       infoDown.current = false;
       return;
     }
@@ -3465,6 +3487,48 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   }, []);
   // Die Untertitel-Wahl (C) gilt für den Reiter, bei einem Reiterwechsel folgt wieder die Regel des Moments
   useEffect(() => setDeskCaps(null), [form]);
+
+  // ---- Runde 45: iPhone-Ansicht. Die Tasten rufen nur vorhandene Funktionen, synchron im Klick (iOS wertet nur Klick und touchend als Geste für Ton). ----
+  /** Die Berührung der Play-Taste war die erste Geste der Seite (gesetzt im pointerdown, gelesen im Klick) */
+  const phoneFirst = useRef(false);
+  const phonePlayDown = () => {
+    phoneFirst.current = Date.now() - firstGestureAt.current < 80;
+  };
+  /**
+   * Play und Pause der Leiste. Dieselben Wege wie ein Tipp auf die Fläche (onUp), alles synchron im Klick:
+   * steht "Tap to play", startet startFromTap den Moment in der Geste. War die Berührung die erste Geste der Seite, hat das Dokument den Ton schon freigeschaltet
+   * (gesture.ts, der Deck-Unlock läuft über ytApi); sie pausiert dann nie, sie startet nur (wie firstTouch in onUp). Sonst schaltet togglePlay um.
+   */
+  const phonePlay = () => {
+    if (textRef.current) return;
+    const first = phoneFirst.current || Date.now() - firstGestureAt.current < 400;
+    phoneFirst.current = false;
+    if (first) clearFirstGesturePointer();
+    if (tapRef.current && current().mid === tapRef.current) {
+      startFromTap();
+      return;
+    }
+    if (first && !recallRef.current && !forYouRef.current) {
+      const p = current().player;
+      soundOn.current = true;
+      unlockLevel();
+      for (const sl of slots.current) sl.player?.unMute();
+      p?.playVideo();
+      userPaused.current = false;
+      setPaused(false);
+      syncHint();
+      return;
+    }
+    togglePlay();
+  };
+  /** Voriger und Nächster: wie das Ende eines Wischs (der Zielmoment startet in der Geste, dann goTo) */
+  const phoneGo = (to: number) => {
+    if (to < 0) return;
+    if (!textRef.current) playInGesture(to);
+    goTo(to);
+  };
+  /** Taste CC: kehrt die Regel des Moments um (wie die Taste C am Desktop) */
+  const toggleCaps = () => setDeskCaps((c) => !(c ?? deskCapsRule.current));
 
   /** M: Ton an oder aus. Die Taste ist selbst die Geste, die der Browser für den Ton verlangt. */
   const toggleMute = () => {
@@ -3622,7 +3686,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   // Desktop, Text-Reiter: weicher Auslauf am unteren Rand der Lesefläche, solange noch Text darunter liegt (data-end blendet ihn aus)
   useLayoutEffect(() => {
     const el = textBox.current;
-    if (!desk || form !== 'text' || !el) return;
+    if (!(desk || ph) || form !== 'text' || !el) return;
     const upd = () => el.toggleAttribute('data-end', scrolledToEnd(el.scrollTop, el.clientHeight, el.scrollHeight));
     upd();
     el.addEventListener('scroll', upd, { passive: true });
@@ -3634,7 +3698,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       el.removeEventListener('scroll', upd);
       ro.disconnect();
     };
-  }, [!!desk, form, queue.current[idx]?.id]);
+  }, [!!desk, ph, form, queue.current[idx]?.id]);
 
   // Seite verlassen oder zurück (Entscheidung 13). Eigene Streams spielen weiter, YouTube und Text halten an.
   visRef.current = (vis) => {
@@ -3716,7 +3780,10 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   // Brief 23 (iOS): pointerdown ist auf iOS keine Aktivierung für Ton. Ein unMute dort hielte den stumm laufenden Kaltstart-Moment an (Selbstpause).
   // Die erste Freischaltung wartet auf das Ende derselben Berührung (pointerup, touchend, click) oder eine Taste.
   const firstPending = useRef(false);
+  /** Runde 45: Zeitpunkt der ersten Geste dieser Seite (die Play-Taste der iPhone-Leiste erkennt daran, dass ihr Tipp die erste Geste war) */
+  const firstGestureAt = useRef(0);
   gestureRef.current = (g) => {
+    if (g.first) firstGestureAt.current = Date.now();
     let first = g.first;
     if (IOS && first && g.type === 'pointerdown') {
       firstPending.current = true;
@@ -3938,7 +4005,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   // die dieselbe Fläche und Schrift hat wie der sichtbare Text. Erst die drei Schriftstufen, passt keine, der Schnitt am letzten sichtbaren Satzende.
   // Kein Satzende sichtbar (ein einziger langer Satz): Notnagel per Zeilenzahl. Die Messung hängt nicht vom Ergebnis ab, darum keine Schleife.
   useLayoutEffect(() => {
-    if (form !== 'text' || deskRef.current) {
+    if (form !== 'text' || deskRef.current || phoneRef.current) {
       truncRef.current = false;
       setTextFit(FIT_FULL);
       return;
@@ -4047,7 +4114,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
 
   const focusOn = focusActive(focus, clockNow().getTime());
   const headEl = (
-    <Head form={form} setForm={setForm} rate={rateOf(state.settings)} onRate={cycleRate} focusText={focusOn && focus ? focusTabText(focus, clockNow().getTime()) : null} onClearFocus={() => clearFocus()} onFocusSheet={() => setFocusSheet(true)} />
+    <Head form={form} setForm={setForm} rate={rateOf(state.settings)} onRate={cycleRate} focusText={focusOn && focus ? focusTabText(focus, clockNow().getTime()) : null} onClearFocus={() => clearFocus()} onFocusSheet={() => setFocusSheet(true)} phone={ph ? { text: `Today ${state.dayCount?.[today]?.seen ?? 0}`, line: todayLine(state.dayCount?.[today], true), onMenu: phone!.onMenu } : undefined} />
   );
   // Entscheidung 45: sind alle ungesehenen Momente der Form in dieser Sitzung gesperrt, wartet die Endseite aufs Netz (Video und Audio)
   const unseenHere = unseenCount(allPool, form, state.momentSeen, state.mutedChannels);
@@ -4088,9 +4155,9 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const captionsRule = !!m && form !== 'text' && captionsShown(form === 'audio' ? 'on' : state.settings.captionMode, m);
   deskCapsRule.current = captionsRule;
   // Mac-Ansicht: Taste C kehrt die Regel um (nur mit Cues)
-  const captionsOn = desk ? !!m && form !== 'text' && hasCues(m) && (deskCaps ?? captionsRule) : captionsRule;
+  const captionsOn = desk || ph ? !!m && form !== 'text' && hasCues(m) && (deskCaps ?? captionsRule) : captionsRule;
   /** Audio-Reiter (Handy): Untertitel, Fortschritt, Transport, Quellzeile und Hook stehen in einer Spalte im Fluss, jede Ebene mit eigenem Platz (Brief 17, Issue 38) */
-  const stackOn = form === 'audio' && !desk && !!m && !forYou;
+  const stackOn = form === 'audio' && !desk && !ph && !!m && !forYou;
   const audioRtl = form === 'audio' && !!m?.cues?.some((c) => isArabic(c[1]));
 
   const captionEl = !desk && captionsOn && caption && !forYou ? (
@@ -4102,7 +4169,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         </div>
       
   ) : null;
-  const ctrlEl = m && !forYou && form === 'audio' && !desk ? (
+  const ctrlEl = m && !forYou && form === 'audio' && !desk && !ph ? (
 
         <div
           className="vctrl"
@@ -4124,7 +4191,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         </div>
       
   ) : null;
-  const infoEl = m && !forYou && form !== 'text' && !desk ? (
+  const infoEl = m && !forYou && form !== 'text' && !desk && !ph ? (
 
         <div className="vinfo pointer-events-none">
           <div
@@ -4145,8 +4212,12 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       
   ) : null;
 
+  /** Runde 45: Kopf der iPhone-Ansicht (Chip, Kanal, Hook): ein Tipp öffnet den Kontext, Wisch und langes Drücken gelten wie überall (wie infoEl) */
+  const phInfo = { onPointerDown: (e: React.PointerEvent) => { onDown(e); infoDown.current = true; }, onPointerMove: onMove, onPointerCancel: cancelGesture };
+  const phNotes = ph && notesRow(prompt, form, !forYou, unsent(state.feedbackNotes).length);
+
   return (
-    <div className="vfeed" ref={dragEl} data-form={form} data-rtl={audioRtl ? '' : undefined} data-notes={notesRow(prompt, form, !forYou, unsent(state.feedbackNotes).length) ? '' : undefined} data-surface={form === 'text' ? 'page' : 'media'} style={{ ['--area' as string]: m ? AREA_COLOR[m.area] : 'var(--on-media)' }}>
+    <div className="vfeed" ref={dragEl} data-form={form} data-phone={ph ? '' : undefined} data-rtl={audioRtl ? '' : undefined} data-notes={notesRow(prompt, form, !forYou, unsent(state.feedbackNotes).length) ? '' : undefined} data-surface={form === 'text' && !ph ? 'page' : 'media'} style={{ ['--area' as string]: m ? AREA_COLOR[m.area] : 'var(--on-media)' }}>
       <div className="vstage" ref={stageEl}>
       {slots.current.slice(0, SLOTS).map((slot, s) => {
         const j = slot.index;
@@ -4210,7 +4281,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       )}
       </div>
 
-      {!stackOn && <div className="vtrack" />}
+      {!stackOn && !ph && <div className="vtrack" />}
       {headEl}
       {form === 'text' && m && !forYou && (
         <div
@@ -4222,7 +4293,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
           onScroll={checkTextEnd}
           onTouchStart={(e) => {
             const el = e.currentTarget;
-            tt.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, top: !desk || el.scrollTop <= 0, end: !desk || textEndReached(el.scrollTop, el.clientHeight, el.scrollHeight) };
+            tt.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, top: !(desk || ph) || el.scrollTop <= 0, end: !(desk || ph) || textEndReached(el.scrollTop, el.clientHeight, el.scrollHeight) };
           }}
           onTouchEnd={(e) => {
             const dx = e.changedTouches[0].clientX - tt.current.x;
@@ -4239,7 +4310,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
           onClick={(e) => {
             // Gekürzter Text (Brief 18): ein Tipp auf den Text öffnet das Blatt mit dem ganzen Text. Der Doppeltipp (Herz) fängt ihn in den ersten 300 ms ab.
             // Die Quellenzeile (Link) und Knöpfe gehören sich selbst.
-            if (desk || !truncRef.current || (e.target as Element).closest('a, button')) return;
+            if (desk || ph || !truncRef.current || (e.target as Element).closest('a, button')) return;
             window.clearTimeout(textTap.current);
             textTap.current = window.setTimeout(() => setCapOpen(true), 300);
           }}
@@ -4248,13 +4319,14 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
             const t = cleanText(momentText(m));
             const ar = isArabic(t);
             const sl = desk ? null : sourceLine(m);
+            const deskText = !!desk || ph;
             const label = sl ? `${sl.prefix}${sl.text}` : '';
             // Arabisch (Entscheidung 22, Issue 43): Verse in { } in Amiri, Erklärtext in Noto Sans Arabic. Lateinisch bleibt ein Stück.
             const pieces = (txt: string) => (ar ? versePieces(txt).map((pc, k) => (pc.verse ? <span key={k} className="verse" data-testid="verse">{pc.text}</span> : <Fragment key={k}>{pc.text}</Fragment>)) : txt);
             const bodyCls = `vtext-body ${ar ? 'vtext-rtl' : ''}`;
-            const shown = desk ? t : cutText(t, textFit.cut);
+            const shown = deskText ? t : cutText(t, textFit.cut);
             const body = t ? (
-              <p className={bodyCls} dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'} data-cut={!desk && isTruncated(textFit) ? '' : undefined} data-clamp={!desk && textFit.clamp ? '' : undefined} data-testid="text-body">
+              <p className={bodyCls} dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'} data-cut={!deskText && isTruncated(textFit) ? '' : undefined} data-clamp={!deskText && textFit.clamp ? '' : undefined} data-testid="text-body">
                 {pieces(shown)}
               </p>
             ) : (
@@ -4262,14 +4334,15 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
             );
             const content = (
               <>
-                {!desk && (
+                {!deskText && (
                   <>
                     <div className="vkicker">{AREA_LABEL[m.area]} · {topicLabel(m.topic)}</div>
                     <h2 className="vtext-hook">{m.hook}</h2>
                   </>
                 )}
                 {desk && <DeskTextHead m={m} speaker={speakerLine(m.channel)} />}
-                {desk ? (
+                {ph && <PhoneTextHead m={m} speaker={speakerLine(m.channel)} />}
+                {deskText ? (
                   <div className="dtx-quote">{body}</div>
                 ) : (
                   /* Lesefläche: sichtbarer Text und darunter die unsichtbare Messkopie mit dem ganzen Text (gleiche Fläche, gleiche Stufe) */
@@ -4288,19 +4361,19 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                   ) : (
                     <p className="vtext-source" data-testid="text-source">{label}</p>
                   ))}
-                {desk && <DeskTextFoot m={m} />}
+                {deskText && <DeskTextFoot m={m} />}
               </>
             );
-            return desk ? content : <div className="vtext-col" data-step={textFit.step}>{content}</div>;
+            return deskText ? content : <div className="vtext-col" data-step={textFit.step}>{content}</div>;
           })()}
         </div>
       )}
-      {!forYou && !statusKind && !(prompt && unsent(state.feedbackNotes).length > 0) && (
+      {!forYou && !ph && !statusKind && !(prompt && unsent(state.feedbackNotes).length > 0) && (
         <div className="vtoday pointer-events-none" data-testid="today">
           {todayLine(state.dayCount?.[today], true)}
         </div>
       )}
-      {!stackOn && <div className="vprogress" style={{ transform: `scaleX(${progress})` }} />}
+      {!stackOn && !ph && <div className="vprogress" style={{ transform: `scaleX(${progress})` }} />}
       {!forYou && <Status kind={statusKind} audio={form === 'audio'} />}
 
       <div
@@ -4313,13 +4386,13 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       />
 
       <div className="vui" ref={uiEl}>
-      {m && !forYou && form === 'video' && !desk && (
+      {m && !forYou && form === 'video' && !desk && !ph && (
         <div className="vsource pointer-events-none" data-testid="source-line">
           <span>{m.videoTitle}</span>
           <span>This cut {atTime(m.start)} to {atTime(m.end)}</span>
         </div>
       )}
-      {stackOn ? (
+      {ph ? null : stackOn ? (
         <div className="vaudio-stack" data-testid="audio-stack">
           <div className="vaudio-sub" data-testid="audio-sub">{captionEl}</div>
           <div className="vaudio-bar">
@@ -4335,6 +4408,23 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
           {ctrlEl}
           {infoEl}
         </>
+      )}
+
+      {ph && m && !forYou && form === 'audio' && (
+        <PhoneAudio
+          m={m}
+          speaker={speakerLine(m.channel)}
+          info={phInfo}
+          onSource={fullVideoUrl(m) ? openFull : undefined}
+          captionsOn={captionsOn}
+          hasCaptions={hasCues(m)}
+          lyric={lyricLines(m.cues, shownCue.current)}
+          fallbackText={hasCues(m) ? '' : momentText(m)}
+          notes={phNotes}
+        />
+      )}
+      {ph && m && !forYou && form === 'video' && (
+        <PhoneVideo m={m} speaker={speakerLine(m.channel)} info={phInfo} onSource={fullVideoUrl(m) ? openFull : undefined} caption={captionEl} notes={phNotes} />
       )}
 
       {desk && m && !forYou && (
@@ -4362,7 +4452,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         />
       )}
 
-      {!forYou && !desk && (
+      {!forYou && !desk && !ph && (
         <div className="vactions">
           {/* Leiste (Entscheidung 50, 54): alle Knöpfe sind Pflicht-Tippziele (data-primary) und liegen in den unteren 65 Prozent. Das Blatt More öffnet der letzte Knopf,
               der Wisch nach links gehört seit Brief 16 dem Reiterwechsel. Herz heißt Like, damit More eindeutig das Blatt meint. */}
@@ -4378,6 +4468,37 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         <EndPage form={form} counts={endCounts} waiting={waiting} setForm={setForm} focus={focusOn} onClearFocus={() => clearFocus()} onBack={() => navRef.current(queue.current.length - 1)} />
       )}
       </div>
+
+      {ph && m && !forYou && (
+        <>
+          <PhoneActions
+            liked={liked}
+            saved={!!saved}
+            shared={!!share}
+            onLike={(e) => { const t0 = e.timeStamp; like('button'); recordTap(t0); }}
+            onSave={(e) => { const t0 = e.timeStamp; toggleSave(); recordTap(t0); }}
+            onShare={(e) => { const t0 = e.timeStamp; openShare(); recordTap(t0); }}
+            onMore={() => openNote()}
+          />
+          {form === 'text' ? (
+            <PhoneTextBar canPrev={idx > 0} onPrev={() => phoneGo(idxRef.current - 1)} onNext={() => phoneGo(idxRef.current + 1)} />
+          ) : (
+            <PhoneTransport
+              m={m}
+              frac={progress}
+              paused={paused || !!tapPlay}
+              rate={rateOf(state.settings)}
+              canPrev={idx > 0}
+              cc={hasCues(m) ? { on: captionsOn, onToggle: toggleCaps } : undefined}
+              onPlay={phonePlay}
+              onPlayDown={phonePlayDown}
+              onPrev={() => phoneGo(idxRef.current - 1)}
+              onNext={() => phoneGo(idxRef.current + 1)}
+              onRate={cycleRate}
+            />
+          )}
+        </>
+      )}
 
       {capOpen && m && !forYou && !desk && <CaptionSheet m={m} speaker={speakerLine(m.channel)} onClose={() => setCapOpen(false)} onEnd={form === 'text' ? markTextSeen : undefined} />}
 

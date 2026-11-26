@@ -8,6 +8,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { gunzipSync } from 'node:zlib';
 import { chromium, devices, webkit } from 'playwright';
+import { navTo } from './phonenav.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-digest'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -128,8 +129,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       ctx.on('weberror', (e) => errors.push(String(e.error())));
       return ctx;
     };
-    const saved = async (page) => { await page.click('nav [aria-label=Saved]'); await page.waitForSelector('h1:has-text("Saved")'); };
-    const settings = async (page) => { await page.click('nav [aria-label=Settings]'); await page.waitForSelector('[data-testid=sync-card]'); };
+    const saved = async (page) => { await navTo(page, 'Saved'); await page.waitForSelector('h1:has-text("Saved")'); };
+    const settings = async (page) => { await navTo(page, 'Settings'); await page.waitForSelector('[data-testid=sync-card]'); };
     const link = `${APP}#k=${k}&t=${await encToken(TOKEN)}`;
 
     // Gerät A: Token per Link, noch keine Wochenkarte auf GitHub

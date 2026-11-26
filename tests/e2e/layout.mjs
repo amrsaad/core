@@ -29,6 +29,8 @@ const IPHONES = [
 ];
 const SAFE_TOP = 59;
 const SAFE_BOTTOM = 34;
+// Runde 45: dieses Tor prüft auf dem Handy den alten Aufbau (Schalter PHONE_V2 aus, ?phone=0) und ist damit der Nachweis, dass bei ausgeschaltetem Schalter nichts anders ist. Die neue Handy-Ansicht prüft phoneview.mjs. LAYOUT_PHONE=1 lässt das Tor auf der neuen Ansicht laufen (dort gelten die alten Textmaße nicht).
+const PH = process.env.LAYOUT_PHONE === '1' ? '' : '&phone=0';
 const ENGINES = (process.env.LAYOUT_ENGINES ?? 'chromium,webkit').split(',');
 const RUNS = [
   { engine: 'chromium', type: chromium, viewports: VIEWPORTS, launch: process.env.E2E_CHROME ? { headless: true, executablePath: process.env.E2E_CHROME } : { headless: true } },
@@ -205,7 +207,7 @@ async function open(area, vp, scheme, p) {
   pg.on('pageerror', onPageError(errors));
   await pg.addInitScript(() => { window.__ytSlow = true; });
   await pg.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: p.body }));
-  await pg.goto(`${url}?now=2026-10-23&seed=3#k=${p.k}`);
+  await pg.goto(`${url}?now=2026-10-23&seed=3${PH}#k=${p.k}`);
   try { await pg.waitForFunction(() => !!window.__core?.moment(), null, { timeout: 8000 }); } catch { fail(`load ${area} ${vp.name}`, 'Feed lädt nicht'); }
   await pg.waitForTimeout(700);
   // Erststart-Übersicht der Tasten (Desktop) zu, sie deckt sonst den Feed
@@ -476,7 +478,7 @@ for (const area of MOODS) {
         if (!isDesk) {
           // Issue 49 (Brief 18): neuer Tag mit der ungesendeten Notiz aus dem More-Test, Zeile "1 note, send?" im Video-Reiter nie über dem Bild, als Tippziel in den unteren 65 Prozent (54)
           try {
-            await pg.goto(`${url}?now=2026-10-24&seed=3#k=${p.k}`); await pg.waitForFunction(() => !!window.__core?.moment(), null, { timeout: 8000 }); await pg.waitForTimeout(700);
+            await pg.goto(`${url}?now=2026-10-24&seed=3${PH}#k=${p.k}`); await pg.waitForFunction(() => !!window.__core?.moment(), null, { timeout: 8000 }); await pg.waitForTimeout(700);
             const np = await pg.evaluate(() => {
               const n = document.querySelector('[data-testid=notes-prompt]');
               const card = document.querySelector('.vslot[aria-hidden=false] .vframe > div');
@@ -497,7 +499,7 @@ for (const area of MOODS) {
               for (const [form2, label2, day2] of [['audio', 'Audio', '2026-10-25'], ['text', 'Text', '2026-10-26']]) {
                 try {
                   await pg.locator(`[data-testid=form-switch] button:has-text("${label2}")`).first().click({ timeout: 2500 }); await pg.waitForTimeout(1200);
-                  await pg.goto(`${url}?now=${day2}&seed=3#k=${p.k}`); await pg.waitForFunction(() => !!window.__core?.moment() || !!document.querySelector('.vfeed'), null, { timeout: 8000 }); await pg.waitForTimeout(900);
+                  await pg.goto(`${url}?now=${day2}&seed=3${PH}#k=${p.k}`); await pg.waitForFunction(() => !!window.__core?.moment() || !!document.querySelector('.vfeed'), null, { timeout: 8000 }); await pg.waitForTimeout(900);
                   const nf = await pg.evaluate(() => {
                     const n = document.querySelector('[data-testid=notes-prompt]');
                     if (!n) return null;
@@ -515,7 +517,7 @@ for (const area of MOODS) {
               }
               try { await pg.locator('[data-testid=form-switch] button:has-text("Video")').first().click({ timeout: 2500 }); await pg.waitForTimeout(1200); } catch { /* Reiter bleibt */ }
             }
-            await pg.goto(`${url}?now=2026-10-23&seed=3#k=${p.k}`); await pg.waitForFunction(() => !!window.__core?.moment(), null, { timeout: 8000 }); await pg.waitForTimeout(500);
+            await pg.goto(`${url}?now=2026-10-23&seed=3${PH}#k=${p.k}`); await pg.waitForFunction(() => !!window.__core?.moment(), null, { timeout: 8000 }); await pg.waitForTimeout(500);
           } catch (e) { fail(`notiz-zeile ${tag}`, String(e).slice(0, 80)); }
         }
       }
@@ -611,7 +613,7 @@ if (R.engine === 'chromium') {
   }, [sel, y0, dy]);
   const open = () => pg.evaluate(() => window.__core.openNote());
   try {
-    await pg.goto(`${url}?now=2026-10-23&seed=3#k=${p.k}`);
+    await pg.goto(`${url}?now=2026-10-23&seed=3${PH}#k=${p.k}`);
     await pg.waitForFunction(() => !!window.__core?.moment(), null, { timeout: 8000 });
     await pg.waitForTimeout(600);
     await open(); await pg.waitForSelector('[data-testid=note-sheet]'); await pg.waitForTimeout(400);

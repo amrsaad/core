@@ -1,0 +1,276 @@
+/* ---------- iPhone-Ansicht, Schritt 1 (Runde 45) ----------
+   Alles hängt an [data-phone] am .vfeed (gesetzt nur mit PHONE_V2 und unter 768 px, siehe flags.ts) und an den Klassen .ph-*. Ohne den Schalter fehlt beides, nichts davon greift.
+   Aufbau von oben nach unten: Reiterleiste (44 px unter der Statusleiste), Inhalt, Aktionsreihe (Like, Save, Share, More), Abspielleiste (Zeitleiste, Tempo, Voriger, Play, Nächster, CC).
+   Die drei festen Bänder haben eine volle Fläche in der Farbe der Bühne: beim Wischen gleitet der Inhalt darunter durch. Alle Farben, Abstände und Rundungen aus tokens.css.
+   Die Fläche ist immer dunkel (auch bei hellem Gerät): Text und Papier-Stimmung gelten hier nicht, wie in der Mac-Ansicht. */
+.vfeed[data-phone] {
+  --head-h: 44px;
+  --ph-top: calc(var(--safe-t) + var(--head-h));
+  /* Unterkante: die Home-Anzeige, mindestens 16 px */
+  --ph-pb: max(var(--s-4), var(--safe-b));
+  /* Höhe der Aktionsreihe: Taste 52 px mit Abstand oben und unten, auf kurzen Geräten (iPhone SE) enger */
+  --ph-act-pt: 14px;
+  --ph-act-pb: var(--s-3);
+  --ph-act-h: calc(52px + var(--ph-act-pt) + var(--ph-act-pb));
+  --ph-bar-h: calc(var(--s-2) + 16px + 10px + 68px + var(--ph-pb));
+  --ph-notes: 0px;
+  --ph-dock-h: calc(var(--ph-bar-h) + var(--ph-act-h));
+  --notes-row: calc(var(--hit) + var(--s-2));
+  /* Video: Player randlos über die volle Breite, 16:9, direkt unter der Reiterleiste */
+  --band-w: calc(100vw - var(--safe-l) - var(--safe-r));
+  --band-left: var(--safe-l);
+  --band-top: var(--ph-top);
+  --ink: var(--on-media);
+  --ink-2: var(--on-media-muted);
+  background: var(--stage);
+}
+@media (max-height: 740px) {
+  .vfeed[data-phone] { --ph-act-pt: var(--s-2); --ph-act-pb: var(--s-1); }
+}
+.vfeed[data-phone][data-form='text'] { --ph-bar-h: calc(var(--s-2) + 56px + var(--ph-pb)); }
+.vfeed[data-phone][data-notes] { --ph-notes: var(--notes-row); }
+
+.vfeed[data-phone] .vframe > div,
+.vfeed[data-phone] .vposter,
+.vfeed[data-phone] .vcover { border-radius: 0; }
+.vfeed[data-phone] .vambient { display: none; }
+/* Audio: kein Cover in dieser Ansicht, die Elemente bleiben im DOM (Wiederladen, Sperrbildschirm), nur unsichtbar. Die Fläche .vaudio bleibt und deckt wie bisher den Player ab. */
+.vfeed[data-phone][data-form='audio'] .vaudio-art,
+.vfeed[data-phone][data-form='audio'] .vplay { display: none; }
+.vfeed[data-phone][data-form='audio'] .vtap { top: calc(var(--ph-top) + (100dvh - var(--ph-top) - var(--ph-dock-h)) * 0.7); }
+
+/* ---------- Reiterleiste oben ---------- */
+.head.ph-head {
+  top: 0;
+  height: calc(var(--safe-t) + 44px);
+  box-sizing: border-box;
+  padding: var(--safe-t) var(--margin) 0;
+  justify-content: space-between;
+  background: var(--stage);
+}
+.ph-tabs {
+  gap: 0;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--inset-hair);
+}
+.ph-tabs button {
+  position: relative;
+  min-width: 0;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 14px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: var(--w-tab);
+  color: var(--on-media-muted);
+}
+/* Das Segment (38 px hoch) ist ein Pseudo-Element, die Berührfläche der Taste bleibt 44 px */
+.ph-tabs button::before { content: ''; position: absolute; inset: 3px 1px; border-radius: 11px; background: transparent; transition: background var(--dur-ui) var(--ease); }
+.ph-tabs button.on::before { background: var(--text); }
+.ph-tabs button.on::after { display: none; }
+.ph-tabs button > * { position: relative; }
+.ph-tabs button.on { color: var(--stage); }
+.ph-tabs .head-focus { color: var(--stage); max-width: 112px; overflow: hidden; text-overflow: ellipsis; }
+.ph-today {
+  pointer-events: auto;
+  height: 44px;
+  min-width: 44px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-btn);
+  border: 1px solid color-mix(in srgb, var(--on-media) 16%, transparent);
+  background: transparent;
+  color: var(--text);
+  font-size: var(--t-meta);
+  line-height: 18px;
+  font-weight: var(--w-tab);
+  white-space: nowrap;
+}
+
+/* ---------- Inhalt: Audio und Video ---------- */
+.ph-audio, .ph-video {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--ph-dock-h) + var(--ph-notes));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  pointer-events: none;
+  color: var(--text);
+}
+.ph-audio { top: var(--ph-top); padding: var(--s-6) var(--s-5) var(--s-3); gap: var(--s-4); }
+.ph-video { top: calc(var(--ph-top) + var(--band-h)); padding: var(--s-4) var(--s-5) var(--s-2); gap: var(--s-3); }
+.ph-audio > *, .ph-video > * { flex: none; }
+.ph-chiprow { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); min-height: 24px; }
+.ph-tap { pointer-events: auto; cursor: pointer; min-width: 0; }
+.ph-chips { display: flex; align-items: center; gap: 10px; min-width: 0; font-size: var(--t-meta); line-height: 18px; color: var(--on-media-muted); }
+.ph-chip { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--ad) 14%, transparent); color: var(--ad); font-weight: var(--w-tab); }
+.ph-chip i { width: 7px; height: 7px; border-radius: var(--r-pill); background: var(--ad); }
+.ph-speaker { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Source: kleine Taste am Ende der Chip-Zeile (die Aktionsreihe hat vier Tasten), 44 px Berührfläche ohne die Zeile zu strecken */
+.ph-src { pointer-events: auto; flex: none; width: 44px; height: 44px; margin: -10px -12px -10px 0; display: flex; align-items: center; justify-content: center; border-radius: var(--r-pill); color: var(--on-media-muted); }
+.ph-hooktap { min-width: 0; }
+.ph-hook { margin: 0; color: var(--text); font-weight: 700; overflow-wrap: anywhere; font-size: 28px; line-height: 35px; letter-spacing: -0.015em; }
+.ph-hook[data-step='1'] { font-size: 24px; line-height: 31px; }
+.ph-hook[data-step='2'] { font-size: 21px; line-height: 27px; }
+.ph-video .ph-hook { font-size: 24px; line-height: 31px; letter-spacing: -0.01em; }
+.ph-video .ph-hook[data-step='1'] { font-size: 21px; line-height: 27px; }
+.ph-video .ph-hook[data-step='2'] { font-size: 18px; line-height: 24px; }
+.ph-hook[lang='ar'], .ph-hook:dir(rtl) { font-family: var(--font-ar); }
+
+/* Video: Untertitel wie bisher (Element des Feeds), jetzt im Fluss unter dem Hook statt unter dem Bild */
+.ph-cap .vcaption { position: static; display: block; width: auto; }
+.ph-cap .vcaption span { color: var(--on-media-muted); font-size: 16px; line-height: 24px; }
+.ph-cap .vcaption-rtl span { font-size: var(--t-caption); line-height: var(--t-ar-lh); }
+
+/* Audio: Feld mit dem mitlaufenden Text. Drei Zeilen auf festem Raster: die aktuelle Zeile bleibt beim Wechsel an ihrem Platz (Mitte, Platz für drei Zeilen). */
+.ph-lyrics {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: var(--s-5);
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) minmax(96px, auto) minmax(0, 1fr);
+  overflow: hidden;
+}
+.ph-lyrics { container-type: size; }
+.ph-lyrics p { margin: 0; overflow-wrap: anywhere; }
+.ph-lyric-prev, .ph-lyric-next { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; color: var(--muted); }
+.ph-lyric-prev { grid-row: 1; align-self: end; padding-bottom: var(--s-2); font-size: 17px; line-height: 25px; }
+.ph-lyric-cur { grid-row: 2; align-self: center; font-size: 24px; line-height: 32px; font-weight: 600; color: var(--text); }
+.ph-lyric-next { grid-row: 3; align-self: start; padding-top: var(--s-2); font-size: 15px; line-height: 22px; }
+/* Wird das Feld niedrig (kleines Gerät, langer Hook), bleibt nur die aktuelle Zeile, in kleinerer Schrift, nichts wird halb angeschnitten */
+@container (max-height: 210px) {
+  .ph-lyric-prev, .ph-lyric-next { display: none; }
+  .ph-lyric-cur { grid-row: 1 / -1; align-self: safe center; font-size: 20px; line-height: 26px; }
+}
+.ph-lyrics > :is(.ph-lyric-prev, .ph-lyric-cur, .ph-lyric-next) { animation: ph-fade 120ms ease-out; }
+@keyframes ph-fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ph-lyrics > :is(.ph-lyric-prev, .ph-lyric-cur, .ph-lyric-next) { animation: none; } }
+.ph-lyrics:has(> .ph-lyric-text, > .ph-lyric-note) { display: flex; flex-direction: column; justify-content: center; }
+.ph-lyric-text { font-size: 17px; line-height: 26px; color: var(--body); white-space: pre-line; }
+.ph-lyric-note { font-size: var(--t-body); line-height: var(--t-body-lh); color: var(--on-media-muted); text-align: center; }
+/* Langer Auszug: der Rest läuft unten weich aus */
+.ph-lyrics:has(> .ph-lyric-text)::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: var(--s-8); border-radius: 0 0 18px 18px; background: linear-gradient(to bottom, transparent, var(--surface)); pointer-events: none; }
+.ph-lyrics [lang='ar'] { font-family: var(--font-ar); line-height: 1.8; }
+
+/* ---------- Aktionsreihe ---------- */
+.ph-actions {
+  position: absolute;
+  z-index: calc(var(--z-ui) + 1);
+  left: 0;
+  right: 0;
+  bottom: var(--ph-bar-h);
+  height: var(--ph-act-h);
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-1);
+  padding: var(--ph-act-pt) var(--s-5) var(--ph-act-pb);
+  background: var(--stage);
+}
+.ph-act {
+  flex: 1 1 0;
+  min-width: var(--hit);
+  height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-radius: var(--r-btn);
+  color: var(--body);
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: var(--w-meta);
+}
+.ph-act[data-on] { color: var(--accent); }
+.ph-act[data-on] .icon { animation: vpop var(--dur-cut) var(--ease); }
+
+/* ---------- Abspielleiste unten ---------- */
+.ph-bar {
+  position: absolute;
+  z-index: calc(var(--z-ui) + 1);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--ph-bar-h);
+  box-sizing: border-box;
+  padding: var(--s-2) var(--s-5) var(--ph-pb);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+  background: var(--surface);
+  border-top: 1px solid var(--hairline);
+}
+.ph-time { display: flex; align-items: center; gap: 10px; font-size: var(--t-status); line-height: 16px; color: var(--on-media-muted); font-variant-numeric: tabular-nums; }
+.ph-time > span { min-width: 3em; }
+.ph-time > span:last-child { text-align: right; }
+.ph-line { flex: 1; height: 5px; border-radius: 3px; overflow: hidden; background: color-mix(in srgb, var(--on-media) 18%, transparent); }
+.ph-fill { height: 100%; border-radius: 3px; background: var(--area, var(--accent)); }
+.ph-ctl { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
+.ph-bar-text .ph-ctl { gap: var(--s-3); }
+.ph-main { display: flex; align-items: center; gap: 18px; }
+.ph-pill { flex: none; width: 64px; height: 44px; border-radius: var(--r-btn); border: 1px solid color-mix(in srgb, var(--on-media) 16%, transparent); color: var(--text); font-size: 15px; line-height: 20px; font-weight: var(--w-tab); }
+.ph-cc { font-size: 14px; font-weight: 700; letter-spacing: 0.04em; color: var(--on-media-muted); }
+/* An: Rand und Schrift hell in der Bereichsfarbe des Rands, aus: gedämpft (der Zustand steht auch in aria-pressed) */
+.ph-cc[aria-pressed='true'] { color: var(--text); border-color: var(--area, var(--accent)); box-shadow: inset 0 0 0 1px var(--area, var(--accent)); }
+.ph-end { flex: none; width: 64px; height: 44px; }
+.ph-round { flex: none; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: var(--r-pill); color: var(--text); }
+.ph-round:disabled, .ph-wide:disabled { opacity: 0.4; }
+.ph-play { width: 68px; height: 68px; background: var(--text); color: var(--stage); }
+.ph-wide { flex: 1 1 0; height: 56px; display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2); border-radius: var(--r-group); border: 1px solid color-mix(in srgb, var(--on-media) 16%, transparent); color: var(--text); font-size: var(--t-row); line-height: 22px; font-weight: var(--w-tab); }
+
+/* ---------- Text: Chip, Serifen-Überschrift, Lesetext (scrollt), Herkunft, Apply today ---------- */
+.vfeed[data-phone] .vtext {
+  --read-ar: 18px;
+  inset: var(--ph-top) 0 calc(var(--ph-dock-h) + var(--ph-notes)) 0;
+  box-sizing: border-box;
+  padding: var(--s-6) var(--s-6) var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  background: var(--stage);
+  color: var(--text);
+}
+.vfeed[data-phone] .vtext > * { flex: none; }
+.vfeed[data-phone] .vtext:not([data-end]) { -webkit-mask-image: linear-gradient(to bottom, var(--stage) calc(100% - 32px), transparent); mask-image: linear-gradient(to bottom, var(--stage) calc(100% - 32px), transparent); }
+.ptx-head { display: flex; flex-direction: column; gap: var(--s-4); }
+.ptx-hook { margin: 0; font-family: var(--font-brain); font-weight: 600; letter-spacing: var(--tracking-title); font-size: 32px; line-height: 40px; color: var(--text); overflow-wrap: anywhere; }
+.ptx-hook[data-size='m'] { font-size: 26px; line-height: 33px; }
+.ptx-hook[data-size='s'] { font-size: 22px; line-height: 29px; }
+.ptx-hook[lang='ar'], .ptx-hook:dir(rtl) { font-family: var(--font-ar); }
+.vfeed[data-phone] .dtx-quote { margin: 0; padding-left: var(--s-4); border-left: 2px solid color-mix(in srgb, var(--on-media) 22%, transparent); }
+.vfeed[data-phone] .vtext-body { overflow: visible; font-family: var(--font-brain); font-size: 19px; line-height: 29px; color: var(--body); }
+.vfeed[data-phone] .vtext-rtl { font-family: var(--font-ar); font-size: var(--read-ar); line-height: 32px; }
+.vfeed[data-phone] .dtx-origin { margin: 0; }
+.vfeed[data-phone] .dtx-apply { margin: 0; padding: var(--s-4) 18px; }
+.vfeed[data-phone] .dtx-apply p { font-size: var(--t-row); line-height: 25px; }
+.vfeed[data-phone] .vtext .vtext-source { margin: 0; }
+
+/* ---------- Status, Rückmeldung ---------- */
+.vfeed[data-phone] .status { top: calc(var(--ph-top) + var(--s-1)); }
+.vfeed[data-phone][data-form='video'] .status { top: calc(var(--ph-top) + var(--s-2)); left: var(--s-3); right: auto; width: fit-content; max-width: calc(100% - var(--s-6)); padding: 2px var(--s-2); border-radius: var(--r-pill); background: var(--media-shade); }
+/* "N notes, send?": eigene Reihe unten über der Aktionsreihe, Tippziel in der Daumenzone */
+.vfeed[data-phone] .vnotes { top: auto; right: auto; left: var(--s-5); bottom: calc(var(--ph-dock-h) + var(--s-1)); }
+
+/* Wischen von überall: Aktionsreihe und Leiste selbst nehmen keine Zeiger an, nur ihre Tasten und die Zeitanzeige. Ein Finger, der in einer Lücke aufsetzt, erreicht die Fläche darunter (Wisch und Tipp wie auf dem Inhalt). */
+.vfeed[data-phone] .ph-actions, .vfeed[data-phone] .ph-bar, .vfeed[data-phone] .ph-ctl { pointer-events: none; }
+.vfeed[data-phone] .ph-actions button, .vfeed[data-phone] .ph-bar button, .vfeed[data-phone] .ph-time { pointer-events: auto; }
+
+/* Die Abrufkarte liegt über Aktionsreihe und Leiste und behält ihr Maß von vorher (Kopf 52 px, unten die Höhe der früheren Navigation): ihre Größenstufen (recallfit) sind darauf abgestimmt. */
+.vfeed[data-phone] .vrecall-page { --head-h: 52px; --nav-h: 56px; }
+/* Die 8 px zwischen Reiterleiste (44) und Karte (52) bleiben nicht offen: sonst scheint der Inhalt darunter durch */
+.vfeed[data-phone] .vrecall-page { box-shadow: 0 -8px 0 var(--stage); }

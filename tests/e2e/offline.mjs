@@ -7,6 +7,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices, webkit } from 'playwright';
 import { onPageError } from './pageerrors.mjs';
+import { navTo } from './phonenav.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-offline'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -111,7 +112,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await page.mouse.click(190, 420);
       c.soundOn = await waitFor(page, () => window.__core.sound() === true, null, 5000);
       // Token einlegen (Settings), erster Lauf legt die Datei an. Danach zurück in den Feed.
-      await page.click('nav [aria-label=Settings]');
+      await navTo(page, 'Settings');
       await page.waitForSelector('[data-testid=sync-card]');
       await page.fill('[data-testid=sync-token]', TOKEN);
       await page.click('[data-testid=sync-save]');
@@ -124,7 +125,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       }
       c.firstSync = await waitFor(page, () => !!window.__sync?.status().lastSync);
       await page.selectOption('[data-testid=captions]', 'on');
-      await page.click('nav [aria-label=Feed]');
+      await navTo(page, 'Feed');
       c.backInFeed = await waitFor(page, () => window.__core.state() === 1);
       for (const sec of DURATIONS) {
         const key = `off${sec}`;
@@ -159,7 +160,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         await page.click('[data-testid=save]');
       }
       // Settings: Token und Last sync stehen noch, Copy diagnostics enthält den Wechsel
-      await page.click('nav [aria-label=Settings]');
+      await navTo(page, 'Settings');
       await page.waitForSelector('[data-testid=sync-card]');
       c.settingsTokenField = (await page.locator('[data-testid=sync-token]').count()) === 0;
       c.settingsLastSync = /^Last sync: (just now|\d+ min ago)/.test((await page.textContent('[data-testid=sync-last]')) ?? '');

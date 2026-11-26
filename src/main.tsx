@@ -12,6 +12,7 @@ import './components/saved.css';
 import './components/settings.css';
 import './components/clip.css';
 import './components/desk.css';
+import './moments/phone/phone.css';
 import './index.css';
 
 registerSW({ immediate: true });

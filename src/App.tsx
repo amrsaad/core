@@ -12,6 +12,7 @@ import { MomentFeed } from './moments/MomentFeed';
 import { DeskBar, DeskHelp, DeskSheet } from './moments/DeskShell';
 import { deskHelpDue } from './moments/desktop';
 import { useDesktop } from './moments/useDesktop';
+import { usePhone } from './moments/phone/usePhone';
 import { SavedMoments } from './moments/SavedMoments';
 import type { MomentPool } from './moments/types';
 import { Settings } from './screens/Settings';
@@ -42,6 +43,8 @@ export default function App() {
   const [review, setReview] = useState<boolean | null>(null);
   // Desktop-Modus ab 1181 px: Leiste oben, Panel rechts, Settings und Saved als Seitenblatt
   const desk = useDesktop();
+  // Runde 45: iPhone-Ansicht unter 768 px (Schalter in moments/phone/flags.ts). Im Feed ersetzt die Abspielleiste die untere Navigation, Settings und Saved liegen hinter der Taste oben rechts.
+  const phone = usePhone() && !desk;
   const [panel, setPanel] = useState<HTMLElement | null>(null);
   // Runde 44: linke Spalte der Mac-Ansicht (Up next), der Feed zeichnet sie per Portal
   const [queueEl, setQueueEl] = useState<HTMLElement | null>(null);
@@ -145,7 +148,7 @@ export default function App() {
   const form: Form = state.settings.form ?? 'video';
   const setForm = (f: Form) => update((s) => ({ ...s, settings: { ...s.settings, form: f } }));
   return (
-    <div className={desk ? 'desk' : 'relative h-[100dvh] overflow-hidden'} data-form={desk ? form : undefined} style={{ ['--nav-h' as string]: !desk && tab === 'feed' && showBar ? `${NAV_H}px` : '0px' }}>
+    <div className={desk ? 'desk' : 'relative h-[100dvh] overflow-hidden'} data-form={desk ? form : undefined} style={{ ['--nav-h' as string]: !desk && !phone && tab === 'feed' && showBar ? `${NAV_H}px` : '0px' }}>
       {desk && <DeskBar form={form} setForm={setForm} tab={tab} setTab={setTab} onHelp={() => setHelp((h) => !h)} />}
       {desk && <aside ref={setQueueEl} className="dq" data-testid="desk-queue-aside" data-nowheel aria-label="Up next" />}
       <div className={desk ? 'dmain' : tab === 'feed' ? '' : 'hidden'}>
@@ -158,6 +161,7 @@ export default function App() {
           onPausedChange={onPausedChange}
           syncError={sync.status.error}
           desk={desk ? { panel, queue: queueEl, help, sheet: tab !== 'feed', onHelp: () => setHelp((h) => !h), onCloseSheet: () => setTab('feed') } : undefined}
+          phone={phone ? { onMenu: () => setTab('settings') } : undefined}
         />
       </div>
       {desk && <aside ref={setPanel} className="dpanel" data-testid="desk-aside" data-nowheel aria-label="Source and actions" />}
@@ -169,7 +173,7 @@ export default function App() {
         </DeskSheet>
       )}
       {desk && help && <DeskHelp onClose={() => setHelp(false)} />}
-      {!desk && (
+      {!desk && !(phone && tab === 'feed') && (
         <nav
           className={`absolute inset-x-0 bottom-0 z-[60] flex justify-around border-t transition-transform duration-200 ${showBar ? '' : 'translate-y-full'} ${dark ? 'border-[var(--hairline)] bg-[var(--stage)]' : 'border-[var(--line)] bg-[var(--bg)]'}`}
           style={{ paddingBottom: 'var(--safe-b)' }}

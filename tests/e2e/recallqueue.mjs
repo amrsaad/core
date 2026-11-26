@@ -6,6 +6,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices, webkit } from 'playwright';
 import { onPageError } from './pageerrors.mjs';
+import { navTo } from './phonenav.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-recallqueue'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -40,8 +41,8 @@ const watchAndNext = async (page) => {
 };
 
 const SCENARIOS = {
-  settings: { open: (p) => p.click('nav [aria-label=Settings]'), close: (p) => p.click('nav [aria-label=Feed]') },
-  saved: { open: (p) => p.click('nav [aria-label=Saved]'), close: (p) => p.click('nav [aria-label=Feed]') },
+  settings: { open: (p) => navTo(p, 'Settings'), close: (p) => navTo(p, 'Feed') },
+  saved: { open: (p) => navTo(p, 'Saved'), close: (p) => navTo(p, 'Feed') },
   note: { open: (p) => p.evaluate(() => window.__core.openNote()), close: (p) => p.mouse.click(190, 40) },
   background: { open: (p) => setVisibility(p, 'hidden'), close: (p) => setVisibility(p, 'visible') },
 };

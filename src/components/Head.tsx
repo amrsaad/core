@@ -10,7 +10,7 @@ type Rate = 1 | 1.5 | 2;
  * Die Tempo-Pille nimmt keine Zeiger an. Wische über ihr gehen zur Gesten-Ebene, die den Tipp erkennt (MomentFeed, data-testid=rate).
  */
 export function Head({
-  form, setForm, rate, onRate, focusText, onClearFocus, onFocusSheet,
+  form, setForm, rate, onRate, focusText, onClearFocus, onFocusSheet, phone,
 }: {
   form: Form;
   setForm: (f: Form) => void;
@@ -20,6 +20,8 @@ export function Head({
   focusText?: string | null;
   onClearFocus?: () => void;
   onFocusSheet?: () => void;
+  /** Runde 45 (iPhone-Ansicht): Reiter als Segmente, rechts die Taste mit der Tageszahl (öffnet Settings), keine Tempo-Pille (das Tempo steht in der Abspielleiste). Fehlt das Feld, bleibt alles wie vorher. */
+  phone?: { text: string; line: string; onMenu: () => void };
 }) {
   const timer = useRef(0);
   const fired = useRef(false);
@@ -30,8 +32,8 @@ export function Head({
   };
   const up = () => window.clearTimeout(timer.current);
   return (
-    <div className="head" data-focus={focusText ? 'on' : undefined} onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
-      <div className="head-tabs" role="radiogroup" aria-label="Form" data-testid="form-switch">
+    <div className={phone ? 'head ph-head' : 'head'} data-focus={focusText ? 'on' : undefined} onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
+      <div className={phone ? 'head-tabs ph-tabs' : 'head-tabs'} role="radiogroup" aria-label="Form" data-testid="form-switch">
         {FORMS.map((f) => {
           const on = form === f;
           return (
@@ -65,7 +67,12 @@ export function Head({
           );
         })}
       </div>
-      {rate > 1 && form !== 'text' && (
+      {phone && (
+        <button type="button" className="ph-today" data-testid="today" data-line={phone.line} aria-label={`${phone.text}, open settings`} onClick={phone.onMenu}>
+          {phone.text}
+        </button>
+      )}
+      {!phone && rate > 1 && form !== 'text' && (
         <button type="button" className="head-rate" data-testid="rate" aria-label={`Speed ${rate}x, tap to change`} onClick={onRate}>
           {rate}x
         </button>

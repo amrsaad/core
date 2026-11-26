@@ -10,6 +10,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices } from 'playwright';
 import { onPageError } from './pageerrors.mjs';
+import { navTo } from './phonenav.mjs';
 
 const [url = 'http://127.0.0.1:4177/core/', out = 'pipeline/out/e2e-preload'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -195,7 +196,7 @@ try {
   c.noMediaStreamRequests = mediaLike;
 
   // ---- 4. Settings ----
-  await page.click('nav [aria-label=Settings]');
+  await navTo(page, 'Settings');
   c.settingsLine = await waitFor(page, () => /^Preloaded: \d+ moments?, \d+\.\d MB$/.test(document.querySelector('[data-testid=preloaded]')?.textContent ?? ''));
   num.settingsText = await page.evaluate(() => document.querySelector('[data-testid=preloaded]')?.textContent);
   await page.locator('[data-testid=preloaded]').scrollIntoViewIfNeeded();

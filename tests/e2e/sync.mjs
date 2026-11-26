@@ -6,6 +6,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { gunzipSync } from 'node:zlib';
 import { chromium, devices, webkit } from 'playwright';
+import { navTo } from './phonenav.mjs';
 
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-sync'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
@@ -108,7 +109,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       ctx.on('weberror', (e) => errors.push(String(e.error())));
       return ctx;
     };
-    const settings = async (page) => { await page.click('nav [aria-label=Settings]'); await page.waitForSelector('[data-testid=sync-card]'); };
+    const settings = async (page) => { await navTo(page, 'Settings'); await page.waitForSelector('[data-testid=sync-card]'); };
 
     // Gerät A: freischalten, Token einfügen
     const ctxA = await mkCtx();
@@ -193,7 +194,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await B.screenshot({ path: `${out}/${name}-3-geraet-b.png`, fullPage: true });
 
     // Konflikt: ein drittes Gerät schreibt zwischen Lesen und Schreiben von A
-    await A.click('nav [aria-label=Feed]');
+    await navTo(A, 'Feed');
     await A.evaluate(() => window.__core.next());
     // Im Zeitraffer kann der kleine Pool schon bis zur Endseite durchgelaufen sein (dann gibt es keinen aktuellen Moment): dann zählt der zuletzt gesehene
     const seenId = await A.evaluate(() => window.__core.moment()?.id ?? Object.keys(JSON.parse(localStorage.getItem('core.state') ?? '{}').momentSeen ?? {}).at(-1) ?? 'seen');
