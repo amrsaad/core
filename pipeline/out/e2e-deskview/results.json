@@ -1,0 +1,845 @@
+{
+ "at": "2026-11-26T13:47:18.458Z",
+ "runs": [
+  {
+   "browser": "webkit",
+   "checks": {
+    "videoThreeColumns": true,
+    "videoNoColumnOverlap": true,
+    "videoNothingAboveBar": true,
+    "videoTransportInWindow": true,
+    "videoNoKidOverlap": true,
+    "videoQueueAtLeast3": true,
+    "videoHookInCenter": true,
+    "videoQueueClickSwitches": true,
+    "videoArrowDownSwitches": true,
+    "videoArrowUpSwitches": true,
+    "videoSpacePausesAndResumes": true,
+    "videoTimelineMoves": true,
+    "videoTimesShown": true,
+    "videoRateButton": true,
+    "videoNextButton": true,
+    "videoPrevButton": true,
+    "videoArrowRightSeeks": true,
+    "videoArrowLeftSeeks": true,
+    "videoSeekClampedAtStart": true,
+    "videoSeekClampedAtEnd": true,
+    "videoTimelineClickSeeks": true,
+    "videoSubtitleInFrameBottom": true,
+    "videoFullscreenButton": true,
+    "videoFullscreenToggles": true,
+    "audioThreeColumns": true,
+    "audioNoColumnOverlap": true,
+    "audioNothingAboveBar": true,
+    "audioTransportInWindow": true,
+    "audioNoKidOverlap": true,
+    "audioQueueAtLeast3": true,
+    "audioHookInCenter": true,
+    "audioQueueClickSwitches": true,
+    "audioArrowDownSwitches": true,
+    "audioArrowUpSwitches": true,
+    "audioSpacePausesAndResumes": true,
+    "audioTimelineMoves": true,
+    "audioTimesShown": true,
+    "audioRateButton": true,
+    "audioNextButton": true,
+    "audioPrevButton": true,
+    "audioCover176": true,
+    "audioLyricsField": true,
+    "audioTimelineReadOnly": true,
+    "audioCaptionsOff": true,
+    "textThreeColumns": true,
+    "textNoColumnOverlap": true,
+    "textNothingAboveBar": true,
+    "textTransportInWindow": true,
+    "textNoKidOverlap": true,
+    "textQueueAtLeast3": true,
+    "textHookInCenter": true,
+    "textQueueClickSwitches": true,
+    "textArrowDownSwitches": true,
+    "textArrowUpSwitches": true,
+    "textNoPlayerControls": true,
+    "textSerifHook": true,
+    "keysLikeSave": true,
+    "noKeysWhileTyping": true,
+    "helpKey": true,
+    "noErrors1440": true,
+    "1280videoClean": true,
+    "1280audioClean": true,
+    "1280textClean": true,
+    "noErrors1280": true,
+    "1920videoClean": true,
+    "1920audioClean": true,
+    "1920textClean": true,
+    "noErrors1920": true,
+    "mobileNoDeskElements": true,
+    "mobileNoErrors": true
+   },
+   "notes": {
+    "geo-video": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 6,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 273.59375,
+       "b": 900,
+       "w": 273.59375,
+       "h": 844
+      },
+      "main": {
+       "l": 273.59375,
+       "t": 56,
+       "r": 1108.8125,
+       "b": 900,
+       "w": 835.21875,
+       "h": 844
+      },
+      "side": {
+       "l": 1108.8125,
+       "t": 56,
+       "r": 1440,
+       "b": 900,
+       "w": 331.1875,
+       "h": 844
+      }
+     }
+    },
+    "fullscreen": true,
+    "geo-audio": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 6,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 273.59375,
+       "b": 900,
+       "w": 273.59375,
+       "h": 844
+      },
+      "main": {
+       "l": 273.59375,
+       "t": 56,
+       "r": 1108.8125,
+       "b": 900,
+       "w": 835.21875,
+       "h": 844
+      },
+      "side": {
+       "l": 1108.8125,
+       "t": 56,
+       "r": 1440,
+       "b": 900,
+       "w": 331.1875,
+       "h": 844
+      }
+     }
+    },
+    "geo-text": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 6,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 273.59375,
+       "b": 900,
+       "w": 273.59375,
+       "h": 844
+      },
+      "main": {
+       "l": 273.59375,
+       "t": 56,
+       "r": 1108.8125,
+       "b": 900,
+       "w": 835.21875,
+       "h": 844
+      },
+      "side": {
+       "l": 1108.8125,
+       "t": 56,
+       "r": 1440,
+       "b": 900,
+       "w": 331.1875,
+       "h": 844
+      }
+     }
+    },
+    "geo-1280-video": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 5,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 272,
+       "b": 800,
+       "w": 272,
+       "h": 744
+      },
+      "main": {
+       "l": 272,
+       "t": 56,
+       "r": 960,
+       "b": 800,
+       "w": 688,
+       "h": 744
+      },
+      "side": {
+       "l": 960,
+       "t": 56,
+       "r": 1280,
+       "b": 800,
+       "w": 320,
+       "h": 744
+      }
+     }
+    },
+    "geo-1280-audio": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 5,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 272,
+       "b": 800,
+       "w": 272,
+       "h": 744
+      },
+      "main": {
+       "l": 272,
+       "t": 56,
+       "r": 960,
+       "b": 800,
+       "w": 688,
+       "h": 744
+      },
+      "side": {
+       "l": 960,
+       "t": 56,
+       "r": 1280,
+       "b": 800,
+       "w": 320,
+       "h": 744
+      }
+     }
+    },
+    "geo-1280-text": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 5,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 272,
+       "b": 800,
+       "w": 272,
+       "h": 744
+      },
+      "main": {
+       "l": 272,
+       "t": 56,
+       "r": 960,
+       "b": 800,
+       "w": 688,
+       "h": 744
+      },
+      "side": {
+       "l": 960,
+       "t": 56,
+       "r": 1280,
+       "b": 800,
+       "w": 320,
+       "h": 744
+      }
+     }
+    },
+    "geo-1920-video": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 6,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 296,
+       "b": 1080,
+       "w": 296,
+       "h": 1024
+      },
+      "main": {
+       "l": 296,
+       "t": 56,
+       "r": 1576,
+       "b": 1080,
+       "w": 1280,
+       "h": 1024
+      },
+      "side": {
+       "l": 1576,
+       "t": 56,
+       "r": 1920,
+       "b": 1080,
+       "w": 344,
+       "h": 1024
+      }
+     }
+    },
+    "geo-1920-audio": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 6,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 296,
+       "b": 1080,
+       "w": 296,
+       "h": 1024
+      },
+      "main": {
+       "l": 296,
+       "t": 56,
+       "r": 1576,
+       "b": 1080,
+       "w": 1280,
+       "h": 1024
+      },
+      "side": {
+       "l": 1576,
+       "t": 56,
+       "r": 1920,
+       "b": 1080,
+       "w": 344,
+       "h": 1024
+      }
+     }
+    },
+    "geo-1920-text": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 6,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 296,
+       "b": 1080,
+       "w": 296,
+       "h": 1024
+      },
+      "main": {
+       "l": 296,
+       "t": 56,
+       "r": 1576,
+       "b": 1080,
+       "w": 1280,
+       "h": 1024
+      },
+      "side": {
+       "l": 1576,
+       "t": 56,
+       "r": 1920,
+       "b": 1080,
+       "w": 344,
+       "h": 1024
+      }
+     }
+    }
+   }
+  },
+  {
+   "browser": "chromium",
+   "checks": {
+    "videoThreeColumns": true,
+    "videoNoColumnOverlap": true,
+    "videoNothingAboveBar": true,
+    "videoTransportInWindow": true,
+    "videoNoKidOverlap": true,
+    "videoQueueAtLeast3": true,
+    "videoHookInCenter": true,
+    "videoQueueClickSwitches": true,
+    "videoArrowDownSwitches": true,
+    "videoArrowUpSwitches": true,
+    "videoSpacePausesAndResumes": true,
+    "videoTimelineMoves": true,
+    "videoTimesShown": true,
+    "videoRateButton": true,
+    "videoNextButton": true,
+    "videoPrevButton": true,
+    "videoArrowRightSeeks": true,
+    "videoArrowLeftSeeks": true,
+    "videoSeekClampedAtStart": true,
+    "videoSeekClampedAtEnd": true,
+    "videoTimelineClickSeeks": true,
+    "videoSubtitleInFrameBottom": true,
+    "videoFullscreenButton": true,
+    "videoFullscreenToggles": true,
+    "audioThreeColumns": true,
+    "audioNoColumnOverlap": true,
+    "audioNothingAboveBar": true,
+    "audioTransportInWindow": true,
+    "audioNoKidOverlap": true,
+    "audioQueueAtLeast3": true,
+    "audioHookInCenter": true,
+    "audioQueueClickSwitches": true,
+    "audioArrowDownSwitches": true,
+    "audioArrowUpSwitches": true,
+    "audioSpacePausesAndResumes": true,
+    "audioTimelineMoves": true,
+    "audioTimesShown": true,
+    "audioRateButton": true,
+    "audioNextButton": true,
+    "audioPrevButton": true,
+    "audioCover176": true,
+    "audioLyricsField": true,
+    "audioTimelineReadOnly": true,
+    "audioCaptionsOff": true,
+    "textThreeColumns": true,
+    "textNoColumnOverlap": true,
+    "textNothingAboveBar": true,
+    "textTransportInWindow": true,
+    "textNoKidOverlap": true,
+    "textQueueAtLeast3": true,
+    "textHookInCenter": true,
+    "textQueueClickSwitches": true,
+    "textArrowDownSwitches": true,
+    "textArrowUpSwitches": true,
+    "textNoPlayerControls": true,
+    "textSerifHook": true,
+    "keysLikeSave": true,
+    "noKeysWhileTyping": true,
+    "helpKey": true,
+    "noErrors1440": true,
+    "1280videoClean": true,
+    "1280audioClean": true,
+    "1280textClean": true,
+    "noErrors1280": true,
+    "1920videoClean": true,
+    "1920audioClean": true,
+    "1920textClean": true,
+    "noErrors1920": true,
+    "mobileNoDeskElements": true,
+    "mobileNoErrors": true
+   },
+   "notes": {
+    "geo-video": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 6,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 273.59375,
+       "b": 900,
+       "w": 273.59375,
+       "h": 844
+      },
+      "main": {
+       "l": 273.59375,
+       "t": 56,
+       "r": 1108.8125,
+       "b": 900,
+       "w": 835.21875,
+       "h": 844
+      },
+      "side": {
+       "l": 1108.8125,
+       "t": 56,
+       "r": 1440,
+       "b": 900,
+       "w": 331.1875,
+       "h": 844
+      }
+     }
+    },
+    "fullscreen": true,
+    "geo-audio": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 6,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 273.59375,
+       "b": 900,
+       "w": 273.59375,
+       "h": 844
+      },
+      "main": {
+       "l": 273.59375,
+       "t": 56,
+       "r": 1108.8125,
+       "b": 900,
+       "w": 835.21875,
+       "h": 844
+      },
+      "side": {
+       "l": 1108.8125,
+       "t": 56,
+       "r": 1440,
+       "b": 900,
+       "w": 331.1875,
+       "h": 844
+      }
+     }
+    },
+    "geo-text": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 6,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 273.59375,
+       "b": 900,
+       "w": 273.59375,
+       "h": 844
+      },
+      "main": {
+       "l": 273.59375,
+       "t": 56,
+       "r": 1108.8125,
+       "b": 900,
+       "w": 835.21875,
+       "h": 844
+      },
+      "side": {
+       "l": 1108.8125,
+       "t": 56,
+       "r": 1440,
+       "b": 900,
+       "w": 331.1875,
+       "h": 844
+      }
+     }
+    },
+    "geo-1280-video": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 5,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 272,
+       "b": 800,
+       "w": 272,
+       "h": 744
+      },
+      "main": {
+       "l": 272,
+       "t": 56,
+       "r": 960,
+       "b": 800,
+       "w": 688,
+       "h": 744
+      },
+      "side": {
+       "l": 960,
+       "t": 56,
+       "r": 1280,
+       "b": 800,
+       "w": 320,
+       "h": 744
+      }
+     }
+    },
+    "geo-1280-audio": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 5,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 272,
+       "b": 800,
+       "w": 272,
+       "h": 744
+      },
+      "main": {
+       "l": 272,
+       "t": 56,
+       "r": 960,
+       "b": 800,
+       "w": 688,
+       "h": 744
+      },
+      "side": {
+       "l": 960,
+       "t": 56,
+       "r": 1280,
+       "b": 800,
+       "w": 320,
+       "h": 744
+      }
+     }
+    },
+    "geo-1280-text": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 5,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 272,
+       "b": 800,
+       "w": 272,
+       "h": 744
+      },
+      "main": {
+       "l": 272,
+       "t": 56,
+       "r": 960,
+       "b": 800,
+       "w": 688,
+       "h": 744
+      },
+      "side": {
+       "l": 960,
+       "t": 56,
+       "r": 1280,
+       "b": 800,
+       "w": 320,
+       "h": 744
+      }
+     }
+    },
+    "geo-1920-video": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 6,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 296,
+       "b": 1080,
+       "w": 296,
+       "h": 1024
+      },
+      "main": {
+       "l": 296,
+       "t": 56,
+       "r": 1576,
+       "b": 1080,
+       "w": 1280,
+       "h": 1024
+      },
+      "side": {
+       "l": 1576,
+       "t": 56,
+       "r": 1920,
+       "b": 1080,
+       "w": 344,
+       "h": 1024
+      }
+     }
+    },
+    "geo-1920-audio": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 6,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 296,
+       "b": 1080,
+       "w": 296,
+       "h": 1024
+      },
+      "main": {
+       "l": 296,
+       "t": 56,
+       "r": 1576,
+       "b": 1080,
+       "w": 1280,
+       "h": 1024
+      },
+      "side": {
+       "l": 1576,
+       "t": 56,
+       "r": 1920,
+       "b": 1080,
+       "w": 344,
+       "h": 1024
+      }
+     }
+    },
+    "geo-1920-text": {
+     "overlapCols": false,
+     "aboveBar": false,
+     "outOfMain": false,
+     "inWindow": true,
+     "kidsOverlap": false,
+     "noHScroll": true,
+     "queueWhole": true,
+     "sideFits": true,
+     "queueShown": 6,
+     "barB": 56,
+     "cols": {
+      "queue": {
+       "l": 0,
+       "t": 56,
+       "r": 296,
+       "b": 1080,
+       "w": 296,
+       "h": 1024
+      },
+      "main": {
+       "l": 296,
+       "t": 56,
+       "r": 1576,
+       "b": 1080,
+       "w": 1280,
+       "h": 1024
+      },
+      "side": {
+       "l": 1576,
+       "t": 56,
+       "r": 1920,
+       "b": 1080,
+       "w": 344,
+       "h": 1024
+      }
+     }
+    }
+   }
+  }
+ ]
+}
