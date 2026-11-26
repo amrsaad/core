@@ -97,8 +97,13 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]]) {
     await page.goto('about:blank');
     await page.goto(`${url}?now=2026-10-23&seed=3#k=${k}`);
     c.feedLoaded = await waitFor(page, () => !!window.__core?.moment(), undefined, 30000);
-    const col = await page.evaluate(() => [...document.querySelectorAll('.vactions button')].map((b) => ({ id: b.dataset.testid, dis: b.disabled, primary: b.dataset.primary, w: b.getBoundingClientRect().width, h: b.getBoundingClientRect().height })));
-    c.columnUnchanged = col.map((x) => x.id).join() === 'like,save,share,source,more' && col.every((x) => x.primary === 'true' && x.w >= 48 && x.h >= 48);
+    // Runde 45: unter 768 px zeigt die App die iPhone-Ansicht (iPhone 15, 393 px). Die Aktionsspalte ist dort eine Reihe unter dem Inhalt (.ph-actions, Like, Save, Share, More),
+    // die Quelle sitzt als eigene Taste in der Chipzeile. Der Schutz bleibt: genau diese Tasten in dieser Reihenfolge, alle als Haupttasten markiert, mindestens 44 px, Share aktiv.
+    const col = await page.evaluate(() => [...document.querySelectorAll('[data-testid=ph-actions] button')].map((b) => ({ id: b.dataset.testid, dis: b.disabled, primary: b.dataset.primary, w: b.getBoundingClientRect().width, h: b.getBoundingClientRect().height })));
+    const src = await page.evaluate(() => { const b = document.querySelector('[data-testid=source]'); const r = b?.getBoundingClientRect(); return { n: document.querySelectorAll('[data-testid=source]').length, dis: b?.disabled, primary: b?.dataset.primary, w: r?.width ?? 0, h: r?.height ?? 0 }; });
+    r.column = { col, src };
+    c.columnUnchanged = col.map((x) => x.id).join() === 'like,save,share,more' && col.every((x) => x.primary === 'true' && x.w >= 43.5 && x.h >= 43.5)
+      && src.n === 1 && src.dis === false && src.primary === 'true' && src.w >= 43.5 && src.h >= 43.5 && (await page.locator('.vactions').count()) === 0;
     c.shareEnabled = col.find((x) => x.id === 'share')?.dis === false;
     const m0 = await page.evaluate(() => window.__core.moment());
     await page.click('[data-testid=share]');

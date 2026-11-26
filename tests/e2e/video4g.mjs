@@ -281,7 +281,9 @@ const runScenario = async (browser, sc) => {
   c.pauseOverlayMeasured = pz.checked > 0;
   // Geometrie seit Brief 06: Handy und Tablet zeigen die Karte mit 16 px Rand links und rechts (--margin), höchstens 640 px breit und mittig, Verhältnis 16:9
   // (iPhone 15 mit 393 px: 361 x 203 bei x = 16). Desktop: Video höchstens 1280 px breit.
-  c.band16by9 = !!pz.band && Math.abs(pz.band[0] / pz.band[1] - 16 / 9) < 0.03 && (sc.desk ? pz.band[0] <= 1280 : Math.abs(pz.band[0] - Math.min(pz.vw - 32, 640)) <= 1 && Math.abs(pz.left - (pz.vw - pz.band[0]) / 2) <= 1 && (pz.vw > 672 || Math.abs(pz.left - 16) <= 1));
+  // Runde 45: unter 768 px (iPhone-Ansicht) ist das Video randlos, volle Fensterbreite bei x = 0, Verhältnis weiter 16:9 (390 x 219). Tablet behält die Karte mit 16 px Rand.
+  const phoneBand = !sc.desk && pz.vw < 768;
+  c.band16by9 = !!pz.band && Math.abs(pz.band[0] / pz.band[1] - 16 / 9) < 0.03 && (sc.desk ? pz.band[0] <= 1280 : phoneBand ? Math.abs(pz.band[0] - pz.vw) <= 1 && Math.abs(pz.left) <= 1 : Math.abs(pz.band[0] - Math.min(pz.vw - 32, 640)) <= 1 && Math.abs(pz.left - (pz.vw - pz.band[0]) / 2) <= 1 && (pz.vw > 672 || Math.abs(pz.left - 16) <= 1));
   await page.screenshot({ path: `${out}/${sc.name}-pause.png` });
   // Issue 46 (iPhone): Das Standbild deckt die Karte bei Pause auch dann ab, wenn data-live noch steht (Player-Callback kam nicht oder zu spät).
   // Darunter pausiert der Player unsichtbar, die YouTube-Einblendung (Logo, Titel, Avatar, nächste Folge) bleibt verdeckt.
@@ -299,8 +301,9 @@ const runScenario = async (browser, sc) => {
       const zp = Number(getComputedStyle(poster).zIndex), zi = Number(getComputedStyle(cur.querySelector('.vplay') ?? poster).zIndex);
       return { paused: cur?.hasAttribute('data-paused'), poster: vis(poster), covers, exposed: ex.n, checked: ex.checked, playAbove: zi > zp, w: Math.round(pr?.width ?? 0), h: Math.round(pr?.height ?? 0), x: Math.round(pr?.left ?? 0), vw: innerWidth };
     }, EXPOSED.toString());
+    const mx = nz.vw < 768 ? 0 : 16; // Runde 45: iPhone-Ansicht randlos (x = 0, 390 x 219), Tablet mit 16 px Rand
     r.noOverlay = nz;
-    c.noOverlayWhenPaused = !!nz.paused && nz.poster && nz.covers && nz.exposed === 0 && nz.checked > 0 && nz.playAbove && nz.x === 16 && Math.abs(nz.w - (nz.vw - 32)) <= 1 && Math.abs(nz.h - (nz.vw - 32) * 9 / 16) <= 1; // iPhone 15 mit 393 px Viewport: 361 x 203 bei x = 16, hier 390 px: 358 x 201
+    c.noOverlayWhenPaused = !!nz.paused && nz.poster && nz.covers && nz.exposed === 0 && nz.checked > 0 && nz.playAbove && Math.abs(nz.x - mx) <= 1 && Math.abs(nz.w - (nz.vw - 2 * mx)) <= 1 && Math.abs(nz.h - (nz.vw - 2 * mx) * 9 / 16) <= 1; // Handy 390 px: 390 x 219 bei x = 0 (iPhone-Ansicht), mit ?phone=0 oder auf dem Tablet 16 px Rand
   }
   // Brief 20: Weiterspielen macht das IFrame wieder sichtbar (data-hold weg, data-paused weg)
   await page.evaluate(() => document.querySelector('.vslot[aria-hidden=false]')?.removeAttribute('data-live'));

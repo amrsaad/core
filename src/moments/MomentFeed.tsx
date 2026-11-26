@@ -3492,7 +3492,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   /** Die Berührung der Play-Taste war die erste Geste der Seite (gesetzt im pointerdown, gelesen im Klick) */
   const phoneFirst = useRef(false);
   const phonePlayDown = () => {
-    phoneFirst.current = Date.now() - firstGestureAt.current < 80;
+    phoneFirst.current = firstOpen.current;
   };
   /**
    * Play und Pause der Leiste. Dieselben Wege wie ein Tipp auf die Fläche (onUp), alles synchron im Klick:
@@ -3501,8 +3501,9 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
    */
   const phonePlay = () => {
     if (textRef.current) return;
-    const first = phoneFirst.current || Date.now() - firstGestureAt.current < 400;
+    const first = phoneFirst.current || firstOpen.current;
     phoneFirst.current = false;
+    firstOpen.current = false;
     if (first) clearFirstGesturePointer();
     if (tapRef.current && current().mid === tapRef.current) {
       startFromTap();
@@ -3780,10 +3781,12 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   // Brief 23 (iOS): pointerdown ist auf iOS keine Aktivierung für Ton. Ein unMute dort hielte den stumm laufenden Kaltstart-Moment an (Selbstpause).
   // Die erste Freischaltung wartet auf das Ende derselben Berührung (pointerup, touchend, click) oder eine Taste.
   const firstPending = useRef(false);
-  /** Runde 45: Zeitpunkt der ersten Geste dieser Seite (die Play-Taste der iPhone-Leiste erkennt daran, dass ihr Tipp die erste Geste war) */
-  const firstGestureAt = useRef(0);
+  /** Runde 45: die erste Geste dieser Seite läuft noch (ohne Uhr: sie endet mit dem nächsten Griff oder der nächsten Taste, nie nach einer Zeit). Die Play-Taste der iPhone-Leiste
+   *  erkennt daran, dass ihr Tipp die erste Geste war, auch bei langem Drücken, langsamem Gerät, reinem Klick oder touchend plus Klick. */
+  const firstOpen = useRef(false);
   gestureRef.current = (g) => {
-    if (g.first) firstGestureAt.current = Date.now();
+    if (g.first) firstOpen.current = true;
+    else if (g.type === 'pointerdown' || g.type === 'keydown') firstOpen.current = false;
     let first = g.first;
     if (IOS && first && g.type === 'pointerdown') {
       firstPending.current = true;

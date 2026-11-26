@@ -182,12 +182,22 @@ async function swipe(pg, x, y0, y1) {
   for (let i = 1; i <= 8; i++) { await pg.mouse.move(x, y0 + ((y1 - y0) * i) / 8); await pg.waitForTimeout(16); }
   await pg.mouse.up();
 }
-/** Wisch per Touch-Ereignissen auf einem Element (Text-Reiter: dort gelten onTouchStart und onTouchEnd) */
+/** Wisch per Touch-Ereignissen auf einem Element (Text-Reiter: dort gelten onTouchStart und onTouchEnd).
+ *  Playwright-WebKit hat auf dem Desktop weder Touch noch TouchEvent (Illegal constructor), darum einfache Event-Objekte mit den Feldern touches und changedTouches:
+ *  React liest nur e.touches[0].clientX und clientY. Dieselben Objekte laufen in Chromium und WebKit. */
 const touchSwipe = (pg, sel, x, y0, y1) => pg.evaluate(([q, px, a, b]) => {
-  const el = document.querySelector(q); const mk = (y) => new Touch({ identifier: 1, target: el, clientX: px, clientY: y });
-  el.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, cancelable: true, touches: [mk(a)], changedTouches: [mk(a)] }));
-  el.dispatchEvent(new TouchEvent('touchmove', { bubbles: true, cancelable: true, touches: [mk(b)], changedTouches: [mk(b)] }));
-  el.dispatchEvent(new TouchEvent('touchend', { bubbles: true, cancelable: true, touches: [], changedTouches: [mk(b)] }));
+  const el = document.querySelector(q);
+  const pt = (y) => ({ identifier: 1, target: el, clientX: px, clientY: y, pageX: px, pageY: y, screenX: px, screenY: y });
+  const fire = (type, touches, changed) => {
+    const ev = new Event(type, { bubbles: true, cancelable: true });
+    Object.defineProperty(ev, 'touches', { value: touches });
+    Object.defineProperty(ev, 'targetTouches', { value: touches });
+    Object.defineProperty(ev, 'changedTouches', { value: changed });
+    el.dispatchEvent(ev);
+  };
+  fire('touchstart', [pt(a)], [pt(a)]);
+  fire('touchmove', [pt(b)], [pt(b)]);
+  fire('touchend', [], [pt(b)]);
 }, [sel, x, y0, y1]);
 const center = async (pg, sel) => { const b = await pg.locator(sel).first().boundingBox(); return { x: b.x + b.width / 2, y: b.y + b.height / 2, b }; };
 
@@ -534,6 +544,35 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       c.nachErsterGesteKeinTippNoetig = !(await pg.evaluate(() => window.__core.diag())).slice(-30).some((x) => /needs tap|deck play refused/.test(x));
       c['Erste Geste keine Seitenfehler'] = o.errors.length === 0;
       if (o.errors.length) r.notes['Erste Geste Fehler'] = o.errors.slice(0, 3);
+      await o.browser.close();
+    }
+    // Dieselbe erste Geste in drei weiteren Formen (ohne Uhr: der Tipp startet genau einmal und pausiert danach nie von selbst):
+    // reiner Klick (Tastatur, Bedienungshilfe), touchend plus Klick (iPhone ohne Zeigerereignisse davor, einfache Ereignisobjekte, kein TouchEvent), langes Drücken (0,9 s zwischen Aufsetzen und Loslassen,
+    // länger als jedes Zeitfenster, das ein Langsamer-Runner oder ein ruhiger Daumen überschreitet).
+    for (const mode of ['reinerKlick', 'touchendPlusKlick', 'langesDruecken']) {
+      const o = await open(type, SIZES[0], { init: IOS_RULE });
+      const pg = o.pg;
+      await gotoTab(pg, 'audio');
+      await pg.waitForTimeout(2000);
+      await pg.reload();
+      await waitFor(pg, () => !!window.__core?.moment()?.audio, undefined, 10000);
+      await waitFor(pg, () => !!document.querySelector('[data-testid=tap-to-play]'), undefined, 4000);
+      const play = '[data-testid=ctl-play]';
+      // Zähler: wie oft pausiert ein tatsächlich spielendes Medienelement nach dem Start (der Tipp darf nie starten und gleich wieder anhalten)
+      await pg.evaluate(() => { window.__pausedWhilePlaying = 0; const P = HTMLMediaElement.prototype; const orig = P.pause; P.pause = function () { if (!this.paused) window.__pausedWhilePlaying++; return orig.apply(this, arguments); }; });
+      if (mode === 'reinerKlick') await pg.evaluate((q) => document.querySelector(q).click(), play);
+      else if (mode === 'touchendPlusKlick') await pg.evaluate((q) => { const b = document.querySelector(q); b.dispatchEvent(new Event('touchend', { bubbles: true, cancelable: true })); b.click(); }, play);
+      else { const b = await center(pg, play); await pg.mouse.move(b.x, b.y); await pg.mouse.down(); await pg.waitForTimeout(900); await pg.mouse.up(); }
+      c[`ersteGeste ${mode} startet`] = await waitFor(pg, () => window.__core.state() === 1, undefined, 6000);
+      await pg.evaluate(() => { window.__pausedWhilePlaying = 0; }); // das Freischalten der Reserve-Elemente (play, pause) ist vorbei, ab hier zählt jedes Anhalten
+      // Danach 2 s lang jede 100 ms: nie wieder pausiert, die Taste zeigt Pause
+      let steady = true;
+      for (let n = 0; n < 20; n++) { await pg.waitForTimeout(100); if ((await pg.evaluate(() => window.__core.state())) !== 1) steady = false; }
+      c[`ersteGeste ${mode} bleibt an`] = steady && (await pg.locator(play).getAttribute('aria-label')) === 'Pause';
+      const d = await pg.evaluate(() => window.__core.diag());
+      c[`ersteGeste ${mode} genau ein Start`] = (await pg.evaluate(() => window.__pausedWhilePlaying)) === 0 && d.some((x) => /^deck play#1 ok/.test(x)) && !d.some((x) => /needs tap|deck play refused|muted play blocked/.test(x));
+      if (!c[`ersteGeste ${mode} bleibt an`] || !c[`ersteGeste ${mode} genau ein Start`]) r.notes[`ersteGeste ${mode}`] = { pausiert: await pg.evaluate(() => window.__pausedWhilePlaying), diag: d.filter((x) => !/probe done|pool/.test(x)).slice(-14) };
+      c[`ersteGeste ${mode} keine Seitenfehler`] = o.errors.length === 0;
       await o.browser.close();
     }
     // Zweiter Fall: eine erste Geste auf Nächster (nicht auf Play) schaltet ebenfalls frei und der Ton läuft
