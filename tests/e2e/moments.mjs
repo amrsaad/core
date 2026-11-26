@@ -1260,6 +1260,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const vp2 = pT.viewportSize();
         await pT.mouse.click(...(await pT.evaluate(() => { const bd = document.querySelector('.vfeed[data-phone] .vslot[aria-hidden=false] .vframe > div'); if (!bd) return [innerWidth / 2, innerHeight / 2]; const r = bd.getBoundingClientRect(); return [innerWidth / 2, r.top + r.height / 2]; }))); // Runde 45: Tipp aufs Bild (die Mitte des Fensters liegt in der Handy-Ansicht auf der Infozeile)
         await pT.waitForTimeout(800);
+        // Runde 47: das Tippen dient nur als erste Geste. Landet es je nach Moment auf der Infozeile (Handy-Ansicht), öffnet es das Blatt, dessen Hintergrund den Reiterwechsel verdeckte (tabsBlockError, schon in Runde 46 gelegentlich rot): schließen
+        if (await pT.$('[data-testid=caption-sheet]')) {
+          await pT.locator('[data-testid=caption-close]').click().catch(() => {});
+          await pT.waitForTimeout(400);
+        }
         const sw = async (label, f, stg) => {
           await stage(stg);
           await pT.click(`[data-testid=form-switch] >> text=${label}`);

@@ -190,10 +190,12 @@ export function endSessionFocus(s: Storage | null = store()): boolean {
     const f = parseFocus(s.getItem(FOCUS_KEY));
     if (f?.until !== 'session') return false;
     s.removeItem(FOCUS_KEY);
-    return true;
   } catch {
     return false;
   }
+  // Runde 47: pagehide ohne Entladen (App im Hintergrund, Seite bleibt im Speicher): Pille, Filter und Warteschlange müssen es erfahren
+  notify();
+  return true;
 }
 
 if (typeof window !== 'undefined') window.addEventListener('pagehide', () => void endSessionFocus());

@@ -25,7 +25,8 @@ import { cursorFor, historyBefore, parseSaved, POOL_AHEAD, pruneAndHeal, pruneOn
 import { leaveOf, newMomentCursor, nextMoment, sessionSkip, SIGNAL, type MomentCursor } from './mix';
 import { attentionStep, makeCtx, newAttention, readConn, type Attention } from './context';
 import { addMissed, bumpCell, bumpColdNetStart, bumpPair, hourKey } from './signals';
-import { clearFocus, focusActive, focusFilter, inFocus, readFocus, subscribeFocus, type Focus } from './focus';
+import { clearFocus, focusActive, focusFilter, focusLabel, inFocus, readFocus, subscribeFocus, type Focus } from './focus';
+import { discardedIds, endDiagLine, endStats, focusDiagLine, focusReplanMode, freeCount, mixNullLine } from './endState';
 import { bumpStart, dropOverStarted, isQuickSkip, markRejected, quickSkip, resumeSaved, setTabCursor, START_MAX } from './tabs';
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
 import { blockedIds, canMarkSeen, clampRate, clearSwipe, DEFAULT_RATE, dropBlocked, nextRate, rateOf, swipeBlocked, swipeIfReady, SWIPE_BLOCK_DAYS, type Rate } from '../lib/state';
@@ -112,6 +113,8 @@ interface Slot {
   /** Rahmen des Slots, trägt data-live, solange der Player wirklich abspielt (Vorschaubild wird synchron ausgeblendet) */
   el: HTMLDivElement | null;
   player: YTPlayer | null;
+  /** Runde 47: Slot ohne Moment beim Start (Warteschlange kürzer als drei): legt den Player an, sobald ihm ein Moment zugewiesen wird */
+  lateMount: ((id: string) => YTPlayer) | null;
   ready: boolean;
   index: number;
   st: number;
@@ -167,7 +170,7 @@ interface Slot {
   recoveries: number;
   recoveredAt: number;
 }
-const newSlot = (): Slot => ({ host: null, el: null, player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', loadStart: -1, broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, cover: null, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0, bytesSeen: 0, bytesAt: 0, cueAt: 0, preloadLogged: false, stillLogged: false, startTimer: 0, startRetried: false, recoveries: 0, recoveredAt: 0 });
+const newSlot = (): Slot => ({ host: null, el: null, player: null, lateMount: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', loadStart: -1, broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, cover: null, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0, bytesSeen: 0, bytesAt: 0, cueAt: 0, preloadLogged: false, stillLogged: false, startTimer: 0, startRetried: false, recoveries: 0, recoveredAt: 0 });
 /**
  * Brief 23 (Issue 48): Auf iOS laufen YouTube-Momente nicht stumm vorgewärmt (WebKit hält sie beim Lautschalten ohne Geste an). Sie werden nur
  * per cue vorbereitet und beim Wisch direkt im Handler der Berührung laut gestartet (Variante a des Briefs). Eigene Streams sind nicht betroffen.
@@ -281,12 +284,21 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   useEffect(() => subscribeFocus(() => setFocus(readFocus(clockNow().getTime()))), []);
   // Fokus gesetzt, geändert oder gelöscht: der Rest hinter dem laufenden Moment wird aus dem neuen Pool gewählt (Gewichte und Anteile bleiben)
   const focusFirst = useRef(true);
+  const focusPrev = useRef<Focus | null>(focus);
   useEffect(() => {
+    const before = focusPrev.current;
+    focusPrev.current = focus;
     if (focusFirst.current) {
       focusFirst.current = false;
       return;
     }
-    if (queue.current.length) replanRef.current(Math.min(queue.current.length, idxRef.current + 1));
+    // Runde 47: steht hinter dem laufenden Moment nichts mehr (Endseite, letzter Moment), gab es nichts zu planen und die Warteschlange blieb leer
+    // (die Endseite stand mit "Nothing left in your focus" oder "seen every" weiter, obwohl der neue Pool Momente hatte). Dann wird neu aufgebaut.
+    const from = Math.min(queue.current.length, idxRef.current + 1);
+    const mode = focusReplanMode(queue.current.length, idxRef.current);
+    diag.current.push(focusDiagLine(before ? focusLabel(before) : null, focus ? focusLabel(focus) : null, from, queue.current.length - from, mode));
+    if (mode === 'refill') refillRef.current();
+    else replanRef.current(from);
     rerender();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focus]);
@@ -354,6 +366,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   /** Stelle, an der ein Moment nach dem Neuaufbau der Player weiterläuft */
   const resume = useRef<{ mid: string; pos: number } | null>(null);
   const bad = useRef(new Set<string>());
+  /** Runde 47: Lage der letzten Zeile "mix: null" (eine Zeile je Lage) */
+  const mixNullKey = useRef('');
   // Hintergrund-Wiedergabe (Entscheidung 13)
   const ledger = useRef(new EndLedger());
   /** Beim Verlassen der Seite angehalten (YouTube, Text), nicht vom Menschen */
@@ -575,7 +589,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const ctxOf = (s: AppState) => makeCtx({ signals: s.signals, today, hour: clockNow().getHours(), attention: attention.current, position: () => queue.current.length, conn: readConn() });
 
   const ensureQueue = useCallback(
-    (upTo: number) => {
+    (upTo: number, need?: number) => {
       const s = stateRef.current;
       const firstBuild = !cursor.current;
       if (!cursor.current) {
@@ -597,10 +611,34 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       const rank = poorRef.current && pre ? netRank(pre.has) : undefined;
       const ctx = ctxOf(s);
       // Moment für Moment (Entscheidung 33): jeder Moment wird gegen die letzten 10 gewählt. Gescheiterte Momente verbrauchen eine Wahl, kommen aber nicht in die Schlange.
-      for (let guard = 0; queue.current.length < upTo && guard < upTo + pool.length; guard++) {
-        const m = nextMoment(pool, { areaShares: s.settings.areaShares, weights: s.momentWeights, seen: s.momentSeen, mutedChannels: s.mutedChannels, now: clockNow().getTime(), rank, ctx }, cursor.current, historyBefore(queue.current, queue.current.length, seedHist.current), rng.current);
-        if (!m) break;
-        if (!bad.current.has(m.videoId)) queue.current.push(m);
+      const fill = () => {
+        for (let guard = 0; queue.current.length < upTo && guard < upTo + pool.length; guard++) {
+          const m = nextMoment(pool, { areaShares: s.settings.areaShares, weights: s.momentWeights, seen: s.momentSeen, mutedChannels: s.mutedChannels, now: clockNow().getTime(), rank, ctx }, cursor.current!, historyBefore(queue.current, queue.current.length, seedHist.current), rng.current);
+          if (!m) {
+            // Runde 47: einmalige Zeile je Lage, wenn die Mischung nichts mehr liefert (kein freier Moment oder nur Folgen aus dem Verlauf der letzten 10)
+            const nf = freeCount(pool, s.momentSeen, s.mutedChannels, cursor.current!.used);
+            const key = `${pool.length}:${nf}`;
+            if (mixNullKey.current !== key) {
+              mixNullKey.current = key;
+              diag.current.push(mixNullLine(pool.length, nf));
+            }
+            break;
+          }
+          mixNullKey.current = '';
+          if (!bad.current.has(m.videoId)) queue.current.push(m);
+        }
+      };
+      fill();
+      // Runde 47 (Nebenbefund 3): reicht die Schlange nicht bis zum gefragten Moment (Endseite droht), fehlen ungesehene Momente vielleicht nur, weil nextMoment sie einmal
+      // gewählt und die Sitzung sie verworfen hat (gescheitert, Sitzungs-Sperre). Sie stehen dann zur Wahl wie am Sitzungsbeginn. Was in der Schlange steht
+      // (auch weggewischt) bleibt gesperrt. Höchstens ein Neuaufbau je Aufruf, die Mischregeln (Folge innerhalb 10) bleiben unberührt.
+      if (need !== undefined && queue.current.length <= need && cursor.current) {
+        const ids = discardedIds(pool, s.momentSeen, s.mutedChannels, cursor.current.used, new Set(queue.current.map((x) => x.id)), new Set(bad.current));
+        if (ids.length) {
+          for (const id of ids) cursor.current.used.delete(id);
+          diag.current.push(`mix: released ${ids.length} discarded picks (used ${cursor.current.used.size})`);
+          fill();
+        }
       }
       // Audio-Reiter, Start (Brief 02): der erste Moment kommt aus dem Vorrat. Innerhalb der nächsten 3 der Mischung wird ein lokaler vorgezogen,
       // sonst kommt ein gehaltener Kopf der letzten Sitzung an die erste Stelle.
@@ -1124,6 +1162,18 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const assign = useCallback((slot: Slot, j: number, play: boolean) => {
     const m = queue.current[j];
     slot.index = j;
+    // Runde 47: Slot ohne Player (beim Start fehlte sein Moment): jetzt anlegen, sein onReady weist den Moment dann zu und startet ihn (AUDIO_ONLY meldet sofort bereit)
+    if (m && m.form !== 'text' && !slot.player && slot.lateMount) {
+      const mnt = slot.lateMount;
+      slot.lateMount = null;
+      try {
+        slot.player = mnt(m.videoId);
+        diag.current.push(`slot: late player for ${m.id}`);
+      } catch (e) {
+        diag.current.push(`slot: late player failed ${m.id} ${e instanceof Error ? e.message : String(e)}`);
+        bad.current.add(m.videoId);
+      }
+    }
     // Text-Momente haben keinen Player
     if (!m || m.form === 'text' || !slot.player || !slot.ready) {
       // Runde 9: ein Wechsel, der keinen Abspielversuch auslöst, sagt es in der Diag (vorher still)
@@ -1613,20 +1663,21 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   };
 
   const goTo = useCallback(
-    (next: number) => {
-      if (next < 0 || next === idxRef.current) return;
+    // fromEnd (Runde 47): die Warteschlange wurde hinter der Endseite neu aufgebaut, der Moment an idx ist neu. Es gibt keinen verlassenen Moment, nichts wird gewertet.
+    (next: number, fromEnd = false) => {
+      if (next < 0 || (next === idxRef.current && !fromEnd)) return;
       // Ein abgelaufener Fokus endet bei jedem Wechsel (Entscheidung 39)
       if (focusRef.current && !focusActive(focusRef.current, clockNow().getTime())) clearFocus();
       closeForYou();
       pruneBad();
-      ensureQueue(next + queueAhead(rateRef.current));
+      ensureQueue(next + queueAhead(rateRef.current), next);
       // Genau hinter dem letzten Moment liegt die Endseite (idx = Länge). Weiter geht es nicht.
       if (next > queue.current.length) return;
       // Runde 8: fertig zuerst. Ist der geplante Nachfolger nicht im Vorrat bereit, ein späterer aber schon, spielt der bereite.
       if (next === idxRef.current + 1) readyFirst(next, 'go');
       syncPre(next);
-      const prev = idxRef.current;
-      diag.current.push(`go ${prev}->${next}`);
+      const prev = fromEnd ? -1 : idxRef.current;
+      diag.current.push(fromEnd ? `go end->${next}` : `go ${prev}->${next}`);
       // Jeder Wechsel löst ein vorgemerktes Weiter vom Sperrbildschirm ein oder macht es gegenstandslos (Brief 22)
       queuedNext.current = false;
       const prevM = queue.current[prev];
@@ -1975,6 +2026,27 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     fillPoolRef.current();
     rerender();
   };
+  /**
+   * Runde 47: Hinter dem laufenden Moment liegt nichts mehr (Endseite oder letzter Moment) und der Pool hat sich geändert (Fokus gesetzt, gewechselt, beendet):
+   * die Warteschlange wird aus dem jetzt gültigen Pool neu aufgebaut. Steht die App auf der Endseite und es kommt ein Moment, verschwindet sie und der Moment
+   * beginnt wie nach jedem Wechsel (Audio spielt, wenn die Geste-Regeln es erlauben, sonst "Tap to play"). Gibt es keinen, bleibt die Endseite.
+   */
+  const refillBehind = () => {
+    const at = idxRef.current;
+    const before = queue.current.length;
+    ensureQueue(at + queueAhead(rateRef.current), at);
+    if (queue.current.length > before) {
+      if (at >= before && queue.current[at]) goTo(at, true);
+      else {
+        if (!single) for (const j of [at + 1, at + 2]) if (j < queue.current.length && slotFor(j).index !== j) assign(slotFor(j), j, false);
+        syncPre(at);
+        fillPoolRef.current();
+      }
+    }
+    rerender();
+  };
+  const refillRef = useRef(refillBehind);
+  refillRef.current = refillBehind;
   const replanRef = useRef(replanTail);
   replanRef.current = replanTail;
   const reorderRef = useRef(reorderTail);
@@ -2054,9 +2126,14 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
           const base = idxRef.current;
           const j = single ? base : base + ((((s - base) % 3) + 3) % 3);
           const m = queue.current[j];
-          if (!slot.host || !m) continue;
-          slot.index = j;
-          slot.mid = '';
+          // Runde 47: ein Slot, dessen Moment beim Start fehlt (Warteschlange kürzer als drei, z.B. kleiner Fokus), legt seinen Player an, sobald ihm assign einen Moment gibt
+          // (lateMount). Sonst bliebe er für die Sitzung ohne Player und ein später nachgefüllter Moment spielte nie ("slot has no player").
+          if (!slot.host) continue;
+          slot.lateMount = null;
+          if (m) {
+            slot.index = j;
+            slot.mid = '';
+          }
           const mount = (id: string) => {
             const target = document.createElement('div');
             slot.host!.replaceChildren(target);
@@ -2278,6 +2355,10 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
             }
             return pl;
           };
+          if (!m) {
+            slot.lateMount = mount;
+            continue;
+          }
           try {
             slot.player = mount(m.videoId);
           } catch (e) {
@@ -2388,7 +2469,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         s.el?.removeAttribute('data-live');
         s.el?.removeAttribute('data-hold');
         window.clearTimeout(s.startTimer);
-        Object.assign(s, { player: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', loadStart: -1, broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0, bytesSeen: 0, bytesAt: 0, cueAt: 0, preloadLogged: false, stillLogged: false, startTimer: 0, startRetried: false, recoveries: 0, recoveredAt: 0 });
+        Object.assign(s, { player: null, lateMount: null, ready: false, index: -1, st: STATE.UNSTARTED, mid: '', loadStart: -1, broken: false, tries: 0, pos: 0, warm: 'idle', warmTimer: 0, warmAt: 0, visited: false, coverMs: 0, coverEnd: 0, coverTimer: 0, stalls: 0, playedAt: 0, ownPause: false, sentPlayAt: 0, gestureAt: 0, gestureLogged: false, selfPauses: 0, resumeAt: 0, resumeTimer: 0, bytesSeen: 0, bytesAt: 0, cueAt: 0, preloadLogged: false, stillLogged: false, startTimer: 0, startRetried: false, recoveries: 0, recoveredAt: 0 });
         if (s.cover) s.cover.style.visibility = 'hidden';
       }
     };
@@ -4131,6 +4212,35 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   }, [idx, form]);
 
   const focusOn = focusActive(focus, clockNow().getTime());
+  // Runde 47: eine Zeile je Ankunft auf der Endseite (Zahlen für die Frage, warum nichts mehr kommt)
+  const endShown = allPool.length > 0 && formPool.length > 0 && (!pool.length || !queue.current[idx]);
+  const endKey = endShown ? `${form}|${idx}|${focusOn && focus ? focusLabel(focus) : ''}` : '';
+  const endNoted = useRef('');
+  useEffect(() => {
+    // Der Fokus-Effekt davor kann die Warteschlange schon neu gefüllt haben: dann ist es keine Ankunft auf der Endseite
+    const key = endKey && (!pool.length || !queue.current[idxRef.current]) ? endKey : '';
+    if (endNoted.current === key) return;
+    endNoted.current = key;
+    if (!key) return;
+    diag.current.push(
+      endDiagLine(
+        endStats({
+          form,
+          formAll: filterPool(rawPool, form),
+          formPool,
+          focused: pool,
+          seen: stateRef.current.momentSeen,
+          muted: stateRef.current.mutedChannels,
+          rejected: stateRef.current.momentRejected,
+          badVideos: bad.current,
+          used: cursor.current?.used ?? new Set<string>(),
+          focus: focusOn && focus ? focusLabel(focus) : null,
+          queue: queue.current.length,
+          idx,
+        }),
+      ),
+    );
+  });
   const headEl = (
     <Head form={form} setForm={setForm} rate={rateOf(state.settings)} onRate={cycleRate} focusText={focusOn && focus ? focusTabText(focus, clockNow().getTime()) : null} onClearFocus={() => clearFocus()} onFocusSheet={() => setFocusSheet(true)} phone={ph ? { text: `Today ${state.dayCount?.[today]?.seen ?? 0}`, line: todayLine(state.dayCount?.[today], true), onMenu: phone!.onMenu } : undefined} />
   );
