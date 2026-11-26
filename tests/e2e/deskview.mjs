@@ -34,6 +34,22 @@ const waitFor = async (page, fn, arg, timeout = 6000) => { try { await page.wait
 const E = (pg, id) => pg.locator(`[data-testid="${id}"]`);
 const has = async (pg, id) => (await E(pg, id).count()) > 0;
 const idx = (pg) => pg.evaluate(() => window.__core.idx());
+// WebKit setzt :focus-visible bei focus() aus dem Skript nicht verlässlich (Safari wandert per Tab auch nicht über Tasten).
+// Dort gilt ersatzweise: Es gibt eine :focus-visible-Regel für genau dieses Element mit einem Rahmen ab 2 px.
+const focusRule = (pg, sel, on) => pg.evaluate(([sel, on]) => {
+  const el = document.querySelector(sel); const tgt = on ? document.querySelector(on) : el;
+  if (!el || !tgt) return false;
+  for (const sh of document.styleSheets) {
+    let rules; try { rules = sh.cssRules; } catch { continue; }
+    for (const r of rules) {
+      if (!r.selectorText || !r.selectorText.includes(':focus-visible')) continue;
+      const w = parseFloat(r.style.outlineWidth || (r.cssText.match(/outline(?:-width)?:\s*([\d.]+)px/) || [])[1] || '0');
+      if (w < 2) continue;
+      try { if (tgt.matches(r.selectorText.replaceAll(':focus-visible', ''))) return true; } catch { /* Selektor nicht prüfbar */ }
+    }
+  }
+  return false;
+}, [sel, on ?? null]);
 const press = async (pg, key, ms = 60) => { await pg.keyboard.press(key); await pg.waitForTimeout(ms); };
 
 const open = async (type, size) => {
@@ -170,7 +186,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           await pg.keyboard.press('Shift');
           await it.focus();
           const ring = await it.evaluate((e) => ({ st: getComputedStyle(e).outlineStyle, w: parseFloat(getComputedStyle(e).outlineWidth), m: e.matches(':focus-visible') }));
-          c[`${form}QueueFocusState`] = ring.m && ring.st !== 'none' && ring.w >= 2;
+          c[`${form}QueueFocusState`] = (ring.m && ring.st !== 'none' && ring.w >= 2) || (name === 'webkit' && await focusRule(pg, '.dq-list .dq-item:not([aria-current])'));
           await it.evaluate((e) => e.blur());
         }
         // Pfeil runter wechselt, Pfeil hoch zurück
@@ -262,7 +278,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           c.videoTimelineHandleDraggable = !!th && th.w >= 14 && th.cur === 'pointer' && th.role === 'slider';
           await pg.keyboard.press('Shift');
           await E(pg, 'desk-timeline').focus();
-          c.videoTimelineHandleFocusRing = await pg.evaluate(() => { const t = document.querySelector('.dt-thumb'); const cs = getComputedStyle(t); return document.activeElement?.matches(':focus-visible') && cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) >= 2; });
+          const thumbRing = await pg.evaluate(() => { const t = document.querySelector('.dt-thumb'); const cs = getComputedStyle(t); return document.activeElement?.matches(':focus-visible') && cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) >= 2; });
+          c.videoTimelineHandleFocusRing = !!thumbRing || (name === 'webkit' && await focusRule(pg, '[data-testid=desk-timeline]', '.dt-thumb'));
           await E(pg, 'desk-timeline').evaluate((e) => e.blur());
           // CC rechts in der Leiste, schaltet wie C
           const cc = E(pg, 'desk-cc');
