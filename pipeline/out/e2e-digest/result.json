@@ -1,5 +1,5 @@
 {
- "at": "2026-11-26T21:26:55.725Z",
+ "at": "2026-11-26T22:12:14.636Z",
  "runs": [
   {
    "browser": "webkit",
@@ -30,10 +30,27 @@
     "cardNotInSyncFile": true,
     "digestFileNeverWritten": true,
     "bUnlocked": true,
-    "bGetsCard": false,
-    "bGetsTaps": false
+    "bGetsCard": true,
+    "bGetsTaps": true,
+    "bWrites": true,
+    "aGetsBsTap": true,
+    "newWeekReplacesCard": true,
+    "oneActionNow": true,
+    "settingsLineNewWeek": true,
+    "oldTapsKept": true,
+    "brokenFileKeepsCard": true,
+    "onlyAllowedHosts": true,
+    "tokenNotInDom": true,
+    "noBadAuth": true,
+    "noPageErrors": true
    },
-   "exception": "page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=digest-a-0]')\n\n    at /__w/core/core/tests/e2e/digest.mjs:217:13"
+   "hosts": [
+    "127.0.0.1:4177",
+    "www.youtube.com",
+    "api.github.com"
+   ],
+   "stray": [],
+   "errors": []
   },
   {
    "browser": "chromium",
@@ -64,20 +81,29 @@
     "cardNotInSyncFile": true,
     "digestFileNeverWritten": true,
     "bUnlocked": true,
-    "bGetsCard": false,
-    "bGetsTaps": false
+    "bGetsCard": true,
+    "bGetsTaps": true,
+    "bWrites": true,
+    "aGetsBsTap": true,
+    "newWeekReplacesCard": true,
+    "oneActionNow": true,
+    "settingsLineNewWeek": true,
+    "oldTapsKept": true,
+    "brokenFileKeepsCard": true,
+    "onlyAllowedHosts": true,
+    "tokenNotInDom": true,
+    "noBadAuth": true,
+    "noPageErrors": true
    },
-   "exception": "page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=digest-a-0]')\n\n    at /__w/core/core/tests/e2e/digest.mjs:217:13"
+   "hosts": [
+    "127.0.0.1:4177",
+    "www.youtube.com",
+    "api.github.com"
+   ],
+   "stray": [],
+   "errors": []
   }
  ],
- "failed": [
-  "webkit.bGetsCard",
-  "webkit.bGetsTaps",
-  "chromium.bGetsCard",
-  "chromium.bGetsTaps"
- ],
- "exceptions": [
-  "webkit",
-  "chromium"
- ]
+ "failed": [],
+ "exceptions": []
 }
