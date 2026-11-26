@@ -66,6 +66,13 @@ export interface SyncDeps {
   firstPlay?: () => Promise<void>;
   /** Hat schon ein Moment gespielt? Dann wartet der erste Upload gar nicht. */
   firstPlayed?: () => boolean;
+  /**
+   * Runde 46 (SYNC_AFTER_STABLE): Beschriftung und Frist des Wartens vor dem ersten Upload. Ohne Angabe: "playback", "playing", FIRST_WRITE_MAX_MS (Verhalten bis Runde 45).
+   * Mit "stable playback" löst firstPlay erst nach 20 s am Stück spielen, die Frist ist 120 s, die Zeilen heißen "waits for stable playback" und "released (stable 20 s)".
+   */
+  firstWait?: { label: string; why: string; maxMs: number };
+  /** Runde 46: Wartezeit eines weiteren Uploads wegen des aktiven Moments (ms, 0: darf). Der Moment spielt noch keine 5 s oder stockt. Nie beim Verlassen der App und bei Sync now. */
+  playGate?: () => number;
   /** Runde 18: ein Audio- oder Video-Moment lädt und spielt noch nicht. Solange das so ist, startet kein Upload (außer beim Verlassen der App und bei Sync now). */
   uploadBusy?: () => boolean;
   /** Runde 18: Mindestabstand zwischen zwei Uploads bei sichtbarer App und schwachem Netz (ms), Standard UPLOAD_GAP_MS */
@@ -141,16 +148,17 @@ export function createSync(deps: SyncDeps): Sync {
       return false;
     }
     const t0 = now();
-    log('sync: first upload waits for first playback');
+    const fw = deps.firstWait ?? { label: 'playback', why: 'playing', maxMs: FIRST_WRITE_MAX_MS };
+    log(`sync: first upload waits for ${fw.label === 'playback' ? 'first playback' : fw.label}`);
     const why = await new Promise<string>((res) => {
-      const to = setTimeout(() => res('timeout'), FIRST_WRITE_MAX_MS);
+      const to = setTimeout(() => res('timeout'), fw.maxMs);
       const done = (w: string) => {
         clearTimeout(to);
         releaseFirstWrite = null;
         res(w);
       };
       releaseFirstWrite = done;
-      void deps.firstPlay!().then(() => done('playing'), () => done('error'));
+      void deps.firstPlay!().then(() => done(fw.why), () => done('error'));
     });
     firstWriteOpen = true;
     log(`sync: first upload released (${why}) after ${((now() - t0) / 1000).toFixed(1)} s`);
@@ -205,7 +213,7 @@ export function createSync(deps: SyncDeps): Sync {
       const cur = deps.getState();
       if (!cur) return;
       const local = withDiag(fix(toDoc(cur)), lines);
-      const merged = remoteDoc ? mergeDocs(local, remoteDoc) : local;
+      let merged = remoteDoc ? mergeDocs(local, remoteDoc) : local;
       const mergedKey = canon(merged);
       // Lokal fehlt etwas von GitHub: übernehmen. Die Funktion rechnet gegen den neuesten Zustand, nicht gegen den von eben.
       if (remoteDoc && mergedKey !== canon(local)) {
@@ -231,7 +239,12 @@ export function createSync(deps: SyncDeps): Sync {
         return;
       }
       // Runde 12: vor dem ersten Schreiben warten, bis der erste Moment spielt. Lesen und Zusammenführen sind schon geschehen und blieben davon unberührt.
-      if (await holdFirstWrite()) if (stopped) return;
+      if (await holdFirstWrite()) {
+        if (stopped) return;
+        // Runde 46: das Warten kann bis zu zwei Minuten dauern, der zusammengeführte Stand wird aus dem jetzigen lokalen neu gebildet (ohne Netz, derselbe Stand von GitHub)
+        const cur2 = deps.getState();
+        if (cur2) merged = remoteDoc ? mergeDocs(withDiag(fix(toDoc(cur2)), deps.diag?.() ?? []), remoteDoc) : withDiag(fix(toDoc(cur2)), deps.diag?.() ?? []);
+      }
       try {
         const stats = { bytes: 0 };
         const pack: PackStats = { raw: 0, packed: 0, compressed: false };
@@ -273,7 +286,16 @@ export function createSync(deps: SyncDeps): Sync {
 
   /** Runde 18: wie lange ein Upload jetzt noch warten muss (0: darf). Beim Verlassen der App und bei Sync now nie, ein ladender Moment hält ihn zurück. */
   let busySince = 0;
+  let gateSince = 0;
   const uploadWait = () => {
+    // Runde 46: ein Moment, der noch keine 5 s spielt oder stockt, bekommt das Netz für sich (höchstens UPLOAD_BUSY_MAX_MS am Stück, danach läuft der Upload trotzdem)
+    if (!urgent && !hidden && deps.playGate) {
+      const g = deps.playGate();
+      if (g > 0) {
+        gateSince ||= now();
+        if (now() - gateSince < UPLOAD_BUSY_MAX_MS) return g;
+      } else gateSince = 0;
+    } else gateSince = 0;
     // Runde 18b: nur im schwachen Netz. Sonst gilt das alte Verhalten (10 s nach der Änderung).
     if (urgent || hidden || !deps.weakNet?.()) {
       busySince = 0;

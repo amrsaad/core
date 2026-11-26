@@ -162,7 +162,7 @@ jobs:
           - group: 3
             dirs: pipeline/out/e2e-loudness pipeline/out/e2e-offline pipeline/out/e2e-tempo pipeline/out/e2e-tempoperf
           - group: 4
-            dirs: pipeline/out/e2e-recallqueue pipeline/out/e2e-audiotab pipeline/out/e2e-startnoyt pipeline/out/e2e-deskview pipeline/out/e2e-phoneview pipeline/out/e2e-video4g pipeline/out/e2e-share pipeline/out/e2e-layout/run/results.json
+            dirs: pipeline/out/e2e-recallqueue pipeline/out/e2e-audiotab pipeline/out/e2e-startnoyt pipeline/out/e2e-startrace pipeline/out/e2e-deskview pipeline/out/e2e-phoneview pipeline/out/e2e-video4g pipeline/out/e2e-share pipeline/out/e2e-layout/run/results.json
     runs-on: ubuntu-latest
     # Je Gruppe die Summe ihrer Schritt-Zeitlimits (Gruppe 4 mit dem Layout-Gate ist die längste)
     timeout-minutes: 128
@@ -303,6 +303,13 @@ jobs:
           npx vite preview --host 127.0.0.1 --port 4193 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4193/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           node tests/e2e/startnoyt.mjs http://127.0.0.1:4193/core/ pipeline/out/e2e-startnoyt
+      - name: Start bei langsamem Netz testen (Runde 46, Wettlauf der Quellen, zweites Element statt frischem Neuladen, Sync erst nach stabiler Wiedergabe, Audio-Reiter ohne YouTube; WebKit und Chromium)
+        if: always() && matrix.group == 4
+        timeout-minutes: 15
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4196 --strictPort &
+          node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4196/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
+          node tests/e2e/startrace.mjs http://127.0.0.1:4196/core/ pipeline/out/e2e-startrace
       - name: Mac-Ansicht testen (Runde 44, drei Spalten in Video, Audio und Text bei 1280, 1440 und 1920, Warteschlange, Abspielleiste, Tasten, Zeitleiste; bei 390 fehlen die Desk-Elemente; WebKit und Chromium)
         if: always() && matrix.group == 4
         timeout-minutes: 10

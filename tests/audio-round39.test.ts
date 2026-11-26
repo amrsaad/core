@@ -115,6 +115,8 @@ function setup(opts: { deadReload?: boolean; rescueRetry?: boolean; msFollow?: b
   const deck = new AudioDeck({
     standby: true,
     bgStuck: false,
+    // Runde 46: diese Tests prüfen den Weg "fresh reload" und die tote Quelle danach. START_HEDGE (zweites Element statt Abbruch) hat tests/audio-start-race.test.ts
+    startHedge: false,
     ...opts,
     local: () => undefined,
     dropLocal: () => {},

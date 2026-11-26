@@ -122,6 +122,8 @@ function setup(opts: { freshReload?: boolean; bgStuck?: boolean; bgInline?: bool
     // Runde 43: diese Tests prüfen die Hänge-Erkennung von Runde 36 (10 s, ein Versuch je Phase). Den Wechsel nach 8 s (stallSwitch) und das Weiterwechseln (bgDeadNext) hat tests/audio-round43.test.ts
     stallSwitch: false,
     bgDeadNext: false,
+    // Runde 46: diese Tests prüfen den Weg "fresh reload" (Abbruch und neues load() nach 3 s). Seit Runde 46 lädt START_HEDGE statt dessen ein zweites Element, wenn eines frei und freigeschaltet ist (tests/audio-start-race.test.ts)
+    startHedge: false,
     ...opts,
     local: () => undefined,
     dropLocal: () => {},

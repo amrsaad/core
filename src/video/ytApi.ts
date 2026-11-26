@@ -296,11 +296,13 @@ export function offlineYT(): YTNamespace {
  * API ein leerer Platzhalter (Methoden ohne Wirkung, Zustand UNSTARTED, onReady kommt nicht) und baut den echten IFrame in dasselbe Element, sobald loadYT fertig ist.
  * Ein YouTube-Moment, der vorher in den Slot kommt, wartet über ytLater (route) auf onReady des echten Players. Kommt die API nie, bleibt es beim Platzhalter.
  */
-export function lazyYT(): YTNamespace {
+export function lazyYT(real = true): YTNamespace {
   class Lazy implements YTPlayer {
     private real: YTPlayer | null = null;
     private dead = false;
     constructor(el: HTMLElement, opts: Record<string, unknown>) {
+      // Runde 46 (AUDIO_NO_YT): ohne real bleibt der Platzhalter dauerhaft, die API wird nie geladen und nie ein IFrame angelegt (Audio-Reiter, nur mp3 und Streams)
+      if (!real) return;
       const make = (YT: YTNamespace) => {
         if (this.dead) return;
         try {

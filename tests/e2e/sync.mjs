@@ -128,18 +128,15 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.tokenSaved = await waitFor(A, () => !!document.querySelector('[data-testid=sync-last]'));
     c.tokenFieldGone = (await A.locator('[data-testid=sync-token]').count()) === 0;
     c.tokenNotInDom = !(await A.content()).includes(TOKEN);
-    // Erster Lauf: keine Datei auf GitHub, A legt sie an
-    c.firstFileCreated = await poll(() => api.puts.length === 1);
-    c.lastSyncShown = await waitFor(A, () => /Last sync: (just now|\d+ min ago)/.test(document.querySelector('[data-testid=sync-last]')?.textContent ?? ''));
-    await A.screenshot({ path: `${out}/${name}-2-token-gespeichert.png`, fullPage: true });
-    const doc1 = api.file ? await decryptFile(api.file.text) : null;
-    c.fileEncrypted = !!api.file && !api.file.text.includes('captionMode') && doc1?.v === 1;
-    c.tokenNotInFile = !!api.file && !JSON.stringify(doc1).includes(TOKEN);
-
+    // Erster Lauf: keine Datei auf GitHub. Runde 46 (SYNC_AFTER_STABLE): der erste Upload wartet auf 20 s ruhige Wiedergabe, das Verlassen der App oder die Frist von 120 s. Hier spielt nichts:
+    // bis zum Verlassen der App darf nichts hochgeladen werden (der Abruf lief), mit dem Verlassen entsteht die Datei sofort (nichts geht verloren, die Diagnose-Zeilen sind dabei).
+    await sleep(3000);
+    c.firstUploadHeldWhileIdle = api.puts.length === 0 && api.gets >= 1;
+    c.firstUploadWaitLine = (await A.evaluate(() => window.__core.diag())).includes('sync: first upload waits for stable playback');
     // Diagnose im Sync-Stand (Entscheidung 31): Verlassen der App spült die Zeilen dieser Sitzung sofort in die Datei, eine Kennung für das Gerät, kein Token und kein Schlüssel darin
-    const putsDiag = api.puts.length;
     await A.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }); document.dispatchEvent(new Event('visibilitychange')); });
-    c.diagFlushedOnHide = await poll(() => api.puts.length === putsDiag + 1, 8000);
+    c.firstFileCreated = await poll(() => api.puts.length === 1, 8000);
+    c.diagFlushedOnHide = c.firstFileCreated;
     const diagDoc = await decryptFile(api.file.text);
     const diagLines = diagDoc.state.diag ?? [];
     r.diagLines = diagLines.length;
@@ -148,6 +145,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     c.diagOneDevice = new Set(diagLines.map((x) => x.d)).size === 1;
     c.diagNoSecrets = !JSON.stringify(diagLines).includes(TOKEN) && !JSON.stringify(diagLines).includes(k);
     await A.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' }); document.dispatchEvent(new Event('visibilitychange')); });
+    c.lastSyncShown = await waitFor(A, () => /Last sync: (just now|\d+ min ago)/.test(document.querySelector('[data-testid=sync-last]')?.textContent ?? ''));
+    await A.screenshot({ path: `${out}/${name}-2-token-gespeichert.png`, fullPage: true });
+    const doc1 = api.file ? await decryptFile(api.file.text) : null;
+    c.fileEncrypted = !!api.file && !api.file.text.includes('captionMode') && doc1?.v === 1;
+    c.tokenNotInFile = !!api.file && !JSON.stringify(doc1).includes(TOKEN);
     // Der Lauf bei der Rückkehr muss fertig sein, bevor die nächste Prüfung mit der Wartezeit von 10 s beginnt (sonst nähme er deren Änderung schon mit)
     await sleep(400);
     await waitFor(A, () => !window.__sync.status().running);
@@ -188,7 +190,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // B setzt Abdeckung: andere Einstellung, die A noch nicht hat
     await B.selectOption('[data-testid=speed]', '2');
     const p3 = api.puts.length;
+    // Runde 46: auch der erste Upload von B wartet (nichts spielt), bis B die App verlässt: dann geht die Änderung sofort hinaus, nichts geht verloren
+    await sleep(3000);
+    c.bFirstUploadHeld = api.puts.length === p3;
+    await B.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }); document.dispatchEvent(new Event('visibilitychange')); });
     c.bWrites = await poll(() => api.puts.length === p3 + 1, 16000);
+    await B.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' }); document.dispatchEvent(new Event('visibilitychange')); });
     await A.evaluate(() => window.__sync.syncNow());
     c.aGetsSpeedFromB = await poll(async () => (await A.inputValue('[data-testid=speed]').catch(() => '')) === '2');
     await B.screenshot({ path: `${out}/${name}-3-geraet-b.png`, fullPage: true });

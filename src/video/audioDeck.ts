@@ -308,6 +308,61 @@ export function reloadGate(o: { weakNet: boolean; fails: number; sinceMs: number
   return o.sinceMs >= RELOAD_WAIT_MS ? 'now' : 'wait';
 }
 
+/**
+ * Runde 46 (Gerätelog 26.11., ganzer Netzpfad langsam: "pool ready" Median 14 s statt 3 s, der Start hing an EINER Datei): Wettlauf beim Start.
+ * START_RACE = true: solange im Audio-Reiter seit dem Öffnen oder seit einem Wechsel noch kein Ton läuft, laden bis zu START_RACE_N Elemente zugleich (das aktive plus die nächsten
+ * Kandidaten als Vorrat). Das erste, das bereit ist, spielt (Host: "ready first ... (race)", sofort, ohne die 3 s der Rettung). Der Merker "schwaches Netz" drosselt diesen Zustand nicht.
+ * Der überholte Moment bleibt ungesehen, wie bei der Rettung. Sobald Ton läuft, gilt wieder poolBudget. false: Verhalten von Runde 45.
+ * START_RACE_N zählt das aktive Element mit: 2 ist der Stand von Runde 18 (aktiv plus ein Abruf), 3 ist aktiv plus zwei. Runde 18 (Mobilfunk) begründete den einzelnen Abruf mit der
+ * Bandbreite ("fünf parallele Abrufe ganzer Podcast-Dateien" nahmen dem aktiven Moment das Netz). Darum öffnet sich der dritte Platz erst nach RACE_STAGGER_MS, und nur wenn
+ * bis dahin keins der laufenden Ladevorgänge Metadaten hat (raceBudget). Ein Netz, das liefert, bekommt nie einen dritten Abruf.
+ */
+export const START_RACE = true;
+export const START_RACE_N = 3;
+export const RACE_STAGGER_MS = 3000;
+/**
+ * Runde 46: START_HEDGE = true: hat das aktive Element nach FRESH_RELOAD_MS noch readyState 0, bricht das Deck den Ladevorgang nicht mehr ab (fresh reload), sondern lädt dieselbe
+ * Quelle zusätzlich in ein freies, freigeschaltetes Element. Wer zuerst bereit ist, spielt, das andere wird freigegeben. Ohne freies freigeschaltetes Element bleibt es beim frischen
+ * Neuladen. Ladefehler ("error") gehen wie bisher den Weg fresh reload, die tote Quelle (Runde 39) bleibt unverändert. Wirkt nur mit FRESH_RELOAD = true (es ersetzt dessen Abbruch). false: Verhalten von Runde 45.
+ */
+export const START_HEDGE = true;
+/** Runde 46: so lange darf das zweite Element laden, ohne Metadaten und ohne dass das aktive welche hat, bevor die Quelle als tot gilt (wie FRESH_RELOAD_FAIL_MS) */
+export const HEDGE_FAIL_MS = 8000;
+
+/**
+ * Runde 46: wie viele Netz-Abrufe des Vorrats der Wettlauf jetzt starten darf. n zählt aktive Ladevorgänge mit. activeLoads: lädt das aktive Element (0 oder 1), inflight: Vorrats-Einträge
+ * mit Netz, weder bereit noch fehlgeschlagen. stuckMs: so lange hat keiner der laufenden Ladevorgänge Metadaten (0: einer macht Fortschritt oder es läuft keiner).
+ * Bis staggerMs gelten höchstens zwei zugleich (der Stand von Runde 18), danach n.
+ */
+export function raceBudget(o: { n: number; activeLoads: number; inflight: number; stuckMs: number; staggerMs?: number }): number {
+  const allowed = o.stuckMs >= (o.staggerMs ?? RACE_STAGGER_MS) ? o.n : Math.min(o.n, 2);
+  return Math.max(0, allowed - Math.max(0, o.activeLoads) - Math.max(0, o.inflight));
+}
+
+/**
+ * Runde 46: Entscheidung des Vorrats-Budgets im Zustand "noch kein Ton". racing: Wettlauf an und kein Ton (aktives Element lädt oder wird erwartet). Dann zählt raceBudget (nie weniger als
+ * poolBudget, der Merker "schwaches Netz" drosselt nicht), sonst poolBudget wie in Runde 18.
+ */
+export function startBudget(o: { race: boolean; n: number; activePlaying: boolean; weakNet: boolean; inflight: number; stuckMs: number; staggerMs?: number }): number {
+  const legacy = poolBudget({ activePlaying: o.activePlaying, weakNet: o.weakNet, inflight: o.inflight });
+  if (!o.race || o.activePlaying) return legacy;
+  return Math.max(legacy, raceBudget({ n: o.n, activeLoads: 1, inflight: o.inflight, stuckMs: o.stuckMs, staggerMs: o.staggerMs }));
+}
+
+/**
+ * Runde 46: nimmt das aktive Element nach FRESH_RELOAD_MS ohne Metadaten ein zweites Element für dieselbe Quelle (hedge) oder lädt es frisch neu (fresh)? hedge nur mit Schalter, ohne Ladefehler,
+ * Netzquelle, unveränderter Spur und einem freien, freigeschalteten Element. why nennt den Grund für fresh (Diagnose).
+ */
+export function hedgeChoice(o: { on: boolean; error: boolean; local: boolean; lane: 'plain' | 'level'; hasHedge: boolean; freeUnlocked: number }): { kind: 'hedge' | 'fresh'; why: string } {
+  if (!o.on) return { kind: 'fresh', why: 'off' };
+  if (o.error) return { kind: 'fresh', why: 'load error' };
+  if (o.local) return { kind: 'fresh', why: 'local source' };
+  if (o.lane !== 'plain') return { kind: 'fresh', why: 'level lane' };
+  if (o.hasHedge) return { kind: 'fresh', why: 'hedge running' };
+  if (o.freeUnlocked <= 0) return { kind: 'fresh', why: 'no unlocked element free' };
+  return { kind: 'hedge', why: 'ok' };
+}
+
 /** Ereignisse, in denen iOS ein play() annimmt (ein Tipp ohne Bewegung). pointerdown und das Ende eines Wischs gehören nicht dazu. */
 const ACTIVATING = new Set(['pointerup', 'touchend', 'click', 'keydown']);
 /** So lange nach einer solchen Geste (ms) darf ein Anstoß auch dann spielen, wenn die Tippfläche steht */
@@ -570,6 +625,20 @@ export const FILL_DEFER_MS = 4000;
 type Lane = 'plain' | 'level';
 
 /** Ein Element des Vorrats: hält den Anfang eines Ausschnitts fertig geladen (Entscheidung 47 und 52, Brief 11 und 14) */
+/** Runde 46: Messung eines Ladevorgangs (Zeile "load: ..."), Zeiten in ms ab Beginn, undefined bis das Ereignis kam */
+interface LoadRec {
+  id: string;
+  role: 'active' | 'pool' | 'hedge';
+  t0: number;
+  ls?: number;
+  fb?: number;
+  md?: number;
+  cp?: number;
+  sk?: number;
+  conc: number;
+  done: boolean;
+}
+
 interface PoolEntry {
   clip: DeckClip;
   el: DeckEl;
@@ -694,6 +763,12 @@ export interface DeckDeps {
   bgRefill?: boolean;
   /** Runde 36: false schaltet das frische Neuladen des aktiven Moments ab, Standard FRESH_RELOAD */
   freshReload?: boolean;
+  /** Runde 46: false schaltet den Wettlauf beim Start ab, Standard START_RACE */
+  startRace?: boolean;
+  /** Runde 46: so viele Ladevorgänge zugleich im Wettlauf (das aktive zählt mit), Standard START_RACE_N */
+  startRaceN?: number;
+  /** Runde 46: false schaltet das zweite Element statt des frischen Neuladens ab, Standard START_HEDGE */
+  startHedge?: boolean;
   /** Runde 36: false schaltet die Hänge-Erkennung verdeckt ab, Standard BG_STUCK */
   bgStuck?: boolean;
   /** Runde 37: false schaltet den verdeckten Wächter ab (nur sichtbar), Standard BG_SINGLE */
@@ -922,6 +997,17 @@ export class AudioDeck {
   private hiddenStats = { tu: 0, ended: 0, ends: 0, plays: 0, at: 0, chk: 0 };
   /** Runde 36: frisches Neuladen des aktiven Moments (FRESH_RELOAD) */
   private freshOn: boolean;
+  /** Runde 46: Wettlauf beim Start (START_RACE), Zahl der Ladevorgänge zugleich, zweites Element statt Neuladen (START_HEDGE) */
+  private raceOn: boolean;
+  private raceN: number;
+  private hedgeOn: boolean;
+  /** Runde 46: das zweite Element für die Quelle des aktiven Moments (hedge), Kennzeichen für den Tausch auf es, Messung je Ladevorgang, offener Wettlauf */
+  private hedge: { el: DeckEl; clip: DeckClip; t0: number; meta: boolean; cpt: boolean; ready: boolean; target: number; timer: ReturnType<typeof setTimeout> } | null = null;
+  private hedgeSwap = false;
+  private loads = new Map<DeckEl, LoadRec>();
+  private race: { t0: number; n: number } | null = null;
+  private raceDone = '';
+  private raceHeldNoted = false;
   private freshTried = new Map<string, number>();
   private frl: { key: string; id: string; el: DeckEl; t0: number; timer: ReturnType<typeof setTimeout> } | null = null;
   /** Runde 36: Hänge-Erkennung verdeckt (BG_STUCK): letzter Stand der Zeit, Zeitgeber, einmal je Hintergrund-Phase */
@@ -1036,6 +1122,9 @@ export class AudioDeck {
     this.bgRefillOn = deps.bgRefill ?? BG_REFILL;
     this.bgEarlyOn = deps.bgRefillEarly ?? BG_REFILL_EARLY;
     this.freshOn = deps.freshReload ?? FRESH_RELOAD;
+    this.raceOn = deps.startRace ?? START_RACE;
+    this.raceN = Math.max(2, Math.floor(deps.startRaceN ?? START_RACE_N));
+    this.hedgeOn = deps.startHedge ?? START_HEDGE;
     this.bgStuckOn = deps.bgStuck ?? BG_STUCK;
     this.bgDeadOn = deps.bgDeadNext ?? BG_DEAD_NEXT;
     this.stallOn = deps.stallSwitch ?? STALL_SWITCH;
@@ -1126,7 +1215,7 @@ export class AudioDeck {
   }
 
   private spare(lane: Lane): DeckEl {
-    const free = this.pool[lane].filter((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e));
+    const free = this.pool[lane].filter((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e) && e !== this.hedge?.el);
     // Runde 31: ein Element in laufender Probe bekommt keine Netzquelle (sie bräche die Probe ab). Gibt es kein anderes, wird die Probe vorher beendet.
     const idle = free.filter((e) => !this.probes.has(e) && !this.suspect.has(e));
     const el = this.preferUnlocked(idle) ?? (this.pool[lane].length < POOL + 1 ? this.makeEl(lane) : free[0]);
@@ -1185,7 +1274,7 @@ export class AudioDeck {
 
   /** Runde 26: ein freies Element der Spur (weder aktiv noch Vorrat noch behalten), nötigenfalls vom Vorrat abgezweigt. null, wenn keins zu haben ist. */
   private freeEl(lane: Lane): DeckEl | null {
-    const find = () => this.preferUnlocked(this.pool[lane].filter((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e) && !this.probes.has(e))) ?? null;
+    const find = () => this.preferUnlocked(this.pool[lane].filter((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e) && e !== this.hedge?.el && !this.probes.has(e))) ?? null;
     let el = find();
     if (!el && this.pool[lane].length < POOL + 1) {
       const made = this.makeEl(lane);
@@ -1328,6 +1417,8 @@ export class AudioDeck {
     const starved = this.starved(el);
     this.live = !starved;
     this.played = true;
+    // Runde 46: der erste Ton beendet die Messung des aktiven Ladevorgangs und den Wettlauf
+    this.activeReady();
     // Runde 12: der aktive Moment spielt, zurückgestellte Vorlade-Abrufe starten jetzt (bis POOL)
     if (this.deferNoted && !starved) this.refillDeferred();
     this.onMedia?.('playing');
@@ -1351,6 +1442,9 @@ export class AudioDeck {
     // Ereignisse des gerade nicht benutzten Elements zählen nicht, die eines Vorrats-Elements gehen nur an seine Bereitschaft (eine Verdrahtung je Element, nie doppelt)
     const mine = () => el === this.el;
     const entry = () => this.entryOf(el);
+    // Runde 46: Ereignisse des zweiten Elements (hedge) gehen nur an seine Bereitschaft, Messung je Ladevorgang
+    const hed = () => (this.hedge?.el === el ? this.hedge : null);
+    for (const ev of ['loadstart', 'progress', 'loadedmetadata', 'canplay', 'canplaythrough', 'seeked']) el.addEventListener(ev, () => this.noteLoadEv(el, ev));
     el.addEventListener('playing', () => {
       if (mine()) {
         this.checkPosHold();
@@ -1373,6 +1467,7 @@ export class AudioDeck {
       // Runde 20: neue Daten können einen Vorrats-Eintrag mit dünnem Puffer bereit machen
       const e = entry();
       if (e && !e.ready) this.checkEntry(e);
+      if (hed()) this.checkHedge();
     });
     el.addEventListener('seeking', () => {
       const r = this.st(el);
@@ -1398,6 +1493,7 @@ export class AudioDeck {
       r.dur = Number.isFinite(d) ? d : Number.NaN;
       if (key !== undefined) this.noteDur(el, key);
       if (e && !e.ready) this.checkEntry(e);
+      if (hed()) this.checkHedge();
       if (mine()) this.pollData();
     });
     el.addEventListener('pause', () => {
@@ -1464,6 +1560,12 @@ export class AudioDeck {
         this.checkEntry(e);
         return;
       }
+      const hh = hed();
+      if (hh) {
+        hh.meta = true;
+        this.checkHedge();
+        return;
+      }
       if (!mine()) return;
       this.diag(`deck loadedmetadata ${this.stateText(el)}`);
       // Die Quelle lud in der geregelten Spur: der Host erlaubt CORS. Lud sie erst nach einem Fehler dort unverändert: er erlaubt es nicht.
@@ -1490,6 +1592,12 @@ export class AudioDeck {
     });
     // Zweiter Anstoß, wenn Daten da sind und das erste play() nichts bewirkt hat (iOS verwirft play() vor den Metadaten manchmal still)
     el.addEventListener('canplaythrough', () => {
+      const hh = hed();
+      if (hh) {
+        hh.cpt = true;
+        this.checkHedge();
+        return;
+      }
       const e = entry();
       if (!e) return;
       e.cpt = true;
@@ -1504,10 +1612,12 @@ export class AudioDeck {
       }
       const e = entry();
       if (e) this.checkEntry(e);
+      if (hed()) this.checkHedge();
     });
     el.addEventListener('canplay', () => {
       const e = entry();
       if (e) this.checkEntry(e);
+      if (hed()) this.checkHedge();
       if (mine()) this.pollData();
       if (mine()) this.jumpCheck(el, 'canplay');
       // Runde 25: während des Wartens auf Daten kein Ladeende und kein Anstoß von hier, das Warten entscheidet
@@ -1521,6 +1631,10 @@ export class AudioDeck {
       const e = entry();
       if (e) {
         this.entryError(e);
+        return;
+      }
+      if (hed()) {
+        this.hedgeRelease('error', 'load error');
         return;
       }
       const c = this.clip;
@@ -1579,7 +1693,7 @@ export class AudioDeck {
 
   private playEvAt = new WeakMap<DeckEl, number>();
   private deckRole(el: DeckEl): string {
-    return this.probes.has(el) ? 'probe' : this.bgRefs.some((r) => r.el === el) ? 'refill' : this.keptOf(el) ? 'kept' : this.entryOf(el) ? 'pool' : 'unknown';
+    return this.probes.has(el) ? 'probe' : this.bgRefs.some((r) => r.el === el) ? 'refill' : this.keptOf(el) ? 'kept' : this.entryOf(el) ? 'pool' : this.hedge?.el === el ? 'hedge' : 'unknown';
   }
 
   /**
@@ -1618,6 +1732,222 @@ export class AudioDeck {
     if (this.clip?.key !== f.key) return;
     this.diag(`deck: fresh reload ${ok ? 'ok' : 'failed'} ${f.id} after ${Date.now() - f.t0} ms${how ? ` (${how})` : ''}`);
     if (!ok && how === 'no metadata') this.markDead('fresh reload failed');
+  }
+
+  // ---- Runde 46: Messung je Ladevorgang, Wettlauf beim Start, zweites Element für die Quelle des aktiven Moments ----
+
+  /** Zähler der Momente (Start eines neuen Ausschnitts), ein Wettlauf gehört zu einem Moment */
+  private epoch = 0;
+
+  /** Runde 46: Beginn eines Netz-Ladevorgangs (aktiv, Vorrat, hedge). Ein noch laufender Vorgänger desselben Elements wird als dropped gemeldet. */
+  private beginLoad(el: DeckEl, id: string, role: LoadRec['role']) {
+    const old = this.loads.get(el);
+    if (old && !old.done) this.endLoad(el, 'dropped');
+    const conc = [...this.loads.values()].filter((x) => !x.done).length + 1;
+    this.loads.set(el, { id, role, t0: Date.now(), conc, done: false });
+    // Ein Wettlauf beginnt, wenn ein Ladevorgang des aktiven Moments noch läuft und ein zweiter dazukommt (nur bis zum ersten Ton)
+    const activeLoading = [...this.loads.values()].some((x) => !x.done && (x.role === 'active' || x.role === 'hedge'));
+    if (this.raceOn && conc >= 2 && activeLoading && !this.played && this.raceDone !== String(this.epoch)) {
+      if (!this.race) this.race = { t0: Date.now(), n: conc };
+      else this.race.n = Math.max(this.race.n, conc);
+    }
+  }
+
+  /** Runde 46: ein Ereignis des Elements (loadstart, progress, loadedmetadata, canplay, seeked) trägt die Zeit in die Messung ein, jeweils das erste */
+  private noteLoadEv(el: DeckEl, ev: string) {
+    const r = this.loads.get(el);
+    if (!r || r.done) return;
+    const d = Date.now() - r.t0;
+    if (ev === 'loadstart') r.ls ??= d;
+    else if (ev === 'progress') r.fb ??= d;
+    else if (ev === 'loadedmetadata') r.md ??= d;
+    else if (ev === 'canplay' || ev === 'canplaythrough') r.cp ??= d;
+    else if (ev === 'seeked') r.sk ??= d;
+  }
+
+  /** Runde 46: Ende eines Ladevorgangs, eine Zeile "load: ...", höchstens einmal je Vorgang */
+  private endLoad(el: DeckEl, result: 'ready' | 'lost' | 'dropped' | 'error') {
+    const r = this.loads.get(el);
+    if (!r || r.done) return;
+    r.done = true;
+    const f = (n: number | undefined) => (n === undefined ? '-' : String(n));
+    this.diag(`load: ${r.id} ${r.role} ls=${f(r.ls)} fb=${f(r.fb)} md=${f(r.md)} cp=${f(r.cp)} sk=${f(r.sk)} total=${Date.now() - r.t0} conc=${r.conc} result=${result}`);
+  }
+
+  /** Runde 46: das erste bereite Element des Wettlaufs steht fest (Zeile "race: ..."), danach ist der Wettlauf dieses Moments entschieden */
+  private raceReady(el: DeckEl, id: string, role: 'active' | 'pool' | 'hedge') {
+    const rc = this.race;
+    if (!rc) return;
+    const losers = [...this.loads.entries()].filter(([e, x]) => e !== el && !x.done).length;
+    this.diag(`race: start n=${rc.n} first ready ${id} after ${Date.now() - rc.t0} ms (${role}), losers ${losers}`);
+    this.race = null;
+    this.raceDone = String(this.epoch);
+  }
+
+  /** Runde 46: der Moment wechselte, bevor ein Element bereit war */
+  private flushRace(why: string) {
+    const rc = this.race;
+    if (!rc) return;
+    this.race = null;
+    this.diag(`race: start n=${rc.n} no winner after ${Date.now() - rc.t0} ms (${why})`);
+  }
+
+  /** Runde 46: das aktive Element ist bereit (Sprung abgeschlossen) oder spielt: seine Messung endet, ein zweites Element für dieselbe Quelle gibt auf */
+  private activeReady() {
+    const el = this.el;
+    const c = this.clip;
+    if (!el || !c) return;
+    this.endLoad(el, 'ready');
+    this.raceReady(el, c.id, this.loads.get(el)?.role === 'hedge' ? 'hedge' : 'active');
+    if (this.hedge && this.hedge.el !== el) this.hedgeRelease('lost', 'active first');
+  }
+
+  /** Runde 46: wie lange hat keiner der laufenden Ladevorgänge (aktiv, Vorrat, hedge) Metadaten (ms)? -1: einer macht Fortschritt oder es läuft keiner. */
+  private stuckMs(): number {
+    const now = Date.now();
+    let min = Number.POSITIVE_INFINITY;
+    const a = this.el;
+    if (a && this.clip && !this.done && !this.isLocal && !this.holding) {
+      if (a.readyState >= 1 || this.armed) return -1;
+      // clipAt (Start des Moments) bleibt bei einem frischen Neuladen stehen, die Zeit "ohne Metadaten" beginnt dort nicht von vorn
+      const t = this.clipAt > 0 ? this.clipAt : this.st(a).loadAt;
+      if (t > 0) min = now - t;
+    }
+    for (const e of this.entries) {
+      if (e.local || e.ready) continue;
+      if (e.meta || e.el.readyState >= 1) return -1;
+      min = Math.min(min, now - e.t0);
+    }
+    if (this.hedge) {
+      // Das zweite Element desselben Moments setzt die Zeit nicht zurück (es lädt dieselbe Quelle, die schon wartet): nur Metadaten beenden sie
+      if (this.hedge.meta || this.hedge.el.readyState >= 1) return -1;
+    }
+    return Number.isFinite(min) ? min : -1;
+  }
+
+  /** Runde 46: läuft beim aktiven Moment der Wettlauf? Kein Ton seit dem Start, das Element hat noch keine Daten zum Spielen, es wartet nicht auf einen Tipp. Der Host stellt dann auf den ersten bereiten Moment um. */
+  startRacing(): boolean {
+    const c = this.clip;
+    if (!this.raceOn || !c || this.done || this.holding || !this.want || this.played || this.hidden()) return false;
+    if (this.waitTapKey === c.key || this.needTapKey === c.key) return false;
+    return (this.el?.readyState ?? 0) < 3;
+  }
+
+  /** Runde 46: ein zweites Element lädt die Quelle des aktiven Moments (hedge) */
+  private tryHedge(age: number): boolean {
+    const el = this.el;
+    const c = this.clip;
+    if (!this.hedgeOn || !el || !c || this.done || this.holding || this.hidden()) return false;
+    const last = this.freshTried.get(c.key);
+    if (last !== undefined && Date.now() - last < 30_000) return false;
+    const free = this.pool.plain.filter((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e) && e !== this.hedge?.el && !this.probes.has(e) && !this.suspect.has(e) && this.unlockedEls.has(e));
+    const ch = hedgeChoice({ on: this.hedgeOn, error: !!el.error, local: this.isLocal, lane: this.lane, hasHedge: !!this.hedge, freeUnlocked: free.length });
+    if (ch.kind !== 'hedge') {
+      // Ladefehler, lokale Quelle und geregelte Spur gehen den alten Weg ohne Zeile. Fehlt nur ein freies freigeschaltetes Element, steht der Grund im Protokoll.
+      if (ch.why === 'no unlocked element free') {
+        const all = this.all();
+        this.diag(`hedge: skipped ${c.id} (no unlocked element free, ${all.filter((e) => this.unlockedEls.has(e)).length}/${all.length} unlocked), fresh reload`);
+      }
+      return false;
+    }
+    const h = free[0];
+    this.freshTried.set(c.key, Date.now());
+    if (this.freshTried.size > 100) this.freshTried.delete(this.freshTried.keys().next().value as string);
+    const target = this.target;
+    this.markLoad(h);
+    h.src = c.url;
+    h.load();
+    this.applyRate(h);
+    try {
+      if (target > 0) h.currentTime = target;
+    } catch {
+      /* nach loadedmetadata */
+    }
+    this.hedge = { el: h, clip: c, t0: Date.now(), meta: false, cpt: false, ready: false, target, timer: setTimeout(() => this.hedgeFail(), HEDGE_FAIL_MS) };
+    this.beginLoad(h, c.id, 'hedge');
+    const all = this.all();
+    this.diag(`hedge: ${c.id} active rs=${el.readyState} after ${age} ms, second element loads the same source, active load kept (unlocked ${all.filter((e) => this.unlockedEls.has(e)).length}/${all.length})`);
+    return true;
+  }
+
+  /** Runde 46: das zweite Element gibt auf (der Wettlauf ist verloren, der Moment wechselte oder es kam ein Fehler). Sichtbar wird seine Quelle freigegeben, verdeckt nur angehalten. */
+  private hedgeRelease(result: 'lost' | 'dropped' | 'error', why: string) {
+    const h = this.hedge;
+    if (!h) return;
+    clearTimeout(h.timer);
+    this.hedge = null;
+    this.endLoad(h.el, result);
+    this.diag(`hedge: released ${h.clip.id} (${why})`);
+    try {
+      if (!this.hidden()) this.clearSrc(h.el);
+      else h.el.pause();
+    } catch {
+      /* Element schon weg */
+    }
+  }
+
+  /** Runde 46: auch das zweite Element hat nach HEDGE_FAIL_MS keine Metadaten, das aktive ebenso: wie "fresh reload failed", die Quelle gilt als tot (Runde 39 lädt sie beim nächsten Anlass sauber neu) */
+  private hedgeFail() {
+    const h = this.hedge;
+    if (!h) return;
+    const stillActive = this.clip?.key === h.clip.key && !this.done && !!this.el && this.el.readyState < 1;
+    this.hedgeRelease('lost', 'no metadata');
+    if (stillActive) {
+      this.diag(`hedge: failed ${h.clip.id} after ${HEDGE_FAIL_MS} ms, neither element has metadata`);
+      this.markDead('hedge failed');
+    }
+  }
+
+  /** Runde 46: Bereitschaft des zweiten Elements wie beim Vorrat (Metadaten, Sprung an die Startstelle, Daten dahinter) */
+  private checkHedge() {
+    const h = this.hedge;
+    if (!h || h.ready || !h.meta) return;
+    const el = h.el;
+    try {
+      if (Math.abs(el.currentTime - h.target) > SEEK_TOL) {
+        el.currentTime = h.target;
+        h.cpt = false;
+      }
+    } catch {
+      /* iOS lehnt die Position ab, solange keine Metadaten da sind */
+    }
+    if (el.seeking) return;
+    if (Math.abs(el.currentTime - h.target) > SEEK_TOL) return;
+    const rs = el.readyState;
+    if (!(h.cpt || rs >= 4)) return;
+    if (!poolEntryReady({ rs, target: h.target, dur: el.duration, buffered: el.buffered })) return;
+    h.ready = true;
+    this.hedgeReady();
+  }
+
+  /** Runde 46: das zweite Element ist bereit. Ist das aktive nicht schon bereit oder am Spielen, übernimmt es (Tausch wie bei der Rettung, ohne Quellwechsel), das aktive Element wird freigegeben. */
+  private hedgeReady() {
+    const h = this.hedge;
+    const c = this.clip;
+    const a = this.el;
+    if (!h) return;
+    if (!c || c.key !== h.clip.key || this.done || !a) {
+      this.hedgeRelease('dropped', 'moment changed');
+      return;
+    }
+    if (this.live || this.played || (a.readyState >= 3 && this.jumpDone(a))) {
+      this.activeReady();
+      return;
+    }
+    clearTimeout(h.timer);
+    this.hedge = null;
+    this.endLoad(h.el, 'ready');
+    this.raceReady(h.el, c.id, 'hedge');
+    this.diag(`hedge: won ${c.id} after ${Date.now() - h.t0} ms, active rs=${a.readyState} released`);
+    const s: PoolEntry = { clip: c, el: h.el, lane: 'plain', why: this.loudInfo.how.replace(/^unchanged: /, ''), chain: null, local: false, offset: this.offset, target: h.target, meta: true, cpt: true, ready: true, rsAtReady: h.el.readyState, thin: false, t0: h.t0 };
+    this.hedgeSwap = true;
+    this.rebuilding = true;
+    try {
+      this.swapEntry(s, null, { keepSink: true, play: this.want, from: this.resumeFrom });
+    } finally {
+      this.hedgeSwap = false;
+      this.rebuilding = false;
+    }
   }
 
   // ---- Runde 39: tote Quelle sauber neu laden, Zeit ohne Ton, Media Session ----
@@ -1689,6 +2019,11 @@ export class AudioDeck {
   /** Runde 39: Schalter für den Host (Rettung nach Zeit ohne Ton) */
   get rescueRetry(): boolean {
     return this.rescueOn;
+  }
+
+  /** Runde 46: Schalter für den Host (Wettlauf beim Start, "ready first ... (race)") */
+  get startRace(): boolean {
+    return this.raceOn;
   }
 
   private readMs(): 'playing' | 'paused' | 'none' | undefined {
@@ -1771,12 +2106,21 @@ export class AudioDeck {
     const wait = Math.max(0, FRESH_RELOAD_MS - (Date.now() - t0));
     setTimeout(() => {
       if (this.el !== el || this.clip?.key !== c.key || this.done || this.holding || this.hidden() || el.readyState >= 1) return;
+      // Runde 46 (START_HEDGE): ohne Ladefehler lädt ein zweites Element dieselbe Quelle mit, der laufende Ladevorgang bleibt. Sonst der alte Weg.
+      if (!el.error && this.tryHedge(Date.now() - t0)) return;
       this.freshReload(el.error ? 'error' : 'stale', Date.now() - t0);
     }, wait);
   }
 
   /** Runde 17: neuer Ausschnitt (oder neue Quelle desselben): Proben und Messung neu. Die Wiederherstellungen zählen je Ausschnitt, ein Neuaufbau selbst setzt sie nicht zurück. */
   private noteClip(key: string, fresh = false) {
+    // Runde 46: ein neuer Moment beginnt einen neuen Wettlauf, ein offener ohne Sieger wird gemeldet, ein zweites Element für den alten Moment gibt auf
+    if (!this.rebuilding) {
+      this.flushRace('left');
+      this.epoch++;
+      this.raceHeldNoted = false;
+      if (this.hedge && this.hedge.clip.key !== key) this.hedgeRelease('dropped', 'moment changed');
+    }
     this.endWait();
     this.endJump();
     this.guard = null;
@@ -2015,7 +2359,7 @@ export class AudioDeck {
 
   /** Ein freies Element der Spur für das Ausweichen. Freigeschaltete zuerst, nötigenfalls gibt der am weitesten vorausliegende Eintrag seinen Platz ab (nie der nächste, nie der behaltene). */
   private freshEl(lane: Lane, old: DeckEl): DeckEl | null {
-    const free = this.pool[lane].filter((e) => e !== old && e !== this.el && !this.entryOf(e) && !this.keptOf(e) && !this.probes.has(e));
+    const free = this.pool[lane].filter((e) => e !== old && e !== this.el && !this.entryOf(e) && !this.keptOf(e) && e !== this.hedge?.el && !this.probes.has(e));
     const far = this.entries.filter((e, i) => i > 0 && e.lane === lane).reverse();
     const take = (e: PoolEntry): DeckEl => {
       this.dropEntry(e, 'room for fresh');
@@ -2512,7 +2856,7 @@ export class AudioDeck {
     // Runde 29: läuft gerade eine Geste und das Element ist nicht freigeschaltet, nimmt der Start (Netz, ferne Startstelle) zuerst ein freigeschaltetes freies Element: dort greift "erst Sprung, dann play"
     const pickUnlocked = (l: Lane, cur: DeckEl): DeckEl => {
       if (!this.unlockSilent || loc || !(from > 0) || this.unlockedEls.has(cur) || Date.now() - this.gestAt > GESTURE_WINDOW_MS) return cur;
-      return this.pool[l].find((e) => e !== this.el && this.unlockedEls.has(e) && !this.entryOf(e) && !this.keptOf(e)) ?? cur;
+      return this.pool[l].find((e) => e !== this.el && this.unlockedEls.has(e) && !this.entryOf(e) && !this.keptOf(e) && e !== this.hedge?.el) ?? cur;
     };
     target = pickUnlocked(lane, target);
     let chain: { linear: () => number } | null = null;
@@ -2565,6 +2909,7 @@ export class AudioDeck {
     this.markLoad(el);
     el.src = loc?.url ?? clip.url;
     el.load();
+    if (!loc) this.beginLoad(el, clip.id, 'active');
     // Netzstart ohne Daten (readyState < 3 nach load() immer): die App zeigt "Loading" bis canplay, nie ein stiller Ausfall
     this.loading(!loc && el.readyState < 3);
     try {
@@ -2656,6 +3001,8 @@ export class AudioDeck {
     this.jump = null;
     if (j.el !== this.el || this.clip?.key !== j.key || this.done || !this.want || this.holding) return;
     this.diag(`deck: play after jump ${j.id} (${how}) t=${j.el.currentTime.toFixed(1)} after ${Date.now() - j.t0} ms`);
+    // Runde 46: der Sprung ist abgeschlossen (nicht die Frist): das aktive Element ist bereit
+    if (how !== 'timeout') this.activeReady();
     this.kick(j.why);
   }
 
@@ -2871,7 +3218,12 @@ export class AudioDeck {
     // Runde 26: ein Eintrag, der "pool slow" meldete und Daten hat (nur der Puffer ist zu dünn), hält das Budget nicht fest (Diag 19.11. 09:16:33: er blockierte jeden weiteren Abruf)
     const inflight = this.entries.filter((e) => !e.local && !e.ready && !(e.slow && e.el.readyState >= 3)).length;
     const nextKey = cand[0]?.key;
-    let room = idle && !this.weakNet() ? POOL : poolBudget({ activePlaying: !busy, weakNet: this.weakNet(), inflight });
+    // Runde 46 (START_RACE): solange kein Ton läuft (seit dem Öffnen oder seit einem Wechsel), laden bis zu raceN Elemente zugleich, der Merker "schwaches Netz" drosselt das nicht
+    // Im Hintergrund (Bildschirm aus) bleibt es beim Stand von Runde 18: ein Abruf neben dem aktiven, kein dritter Platz. Dort gibt es keinen Tausch (startRacing ist false), und mehr parallele Abrufe schadeten der Wiedergabe im Hintergrund nur.
+    const racing = this.raceOn && busy && !this.played && !this.hidden();
+    const legacyRoom = idle && !this.weakNet() ? POOL : poolBudget({ activePlaying: !busy, weakNet: this.weakNet(), inflight });
+    const stuck = racing ? this.stuckMs() : -1;
+    let room = idle && !this.weakNet() ? POOL : startBudget({ race: racing, n: this.raceN, activePlaying: !busy, weakNet: this.weakNet(), inflight, stuckMs: stuck });
     let deferred = 0;
     let waitMs = 0;
     order = order.filter((c) => {
@@ -2894,6 +3246,11 @@ export class AudioDeck {
       deferred++;
       return false;
     });
+    // Runde 46: der dritte Platz des Wettlaufs öffnet sich, sobald alle laufenden Ladevorgänge RACE_STAGGER_MS ohne Metadaten sind: dann noch einmal prüfen
+    if (racing && deferred > 0 && stuck >= 0 && stuck < RACE_STAGGER_MS) {
+      const left = RACE_STAGGER_MS - stuck;
+      waitMs = waitMs ? Math.min(waitMs, left) : left;
+    }
     if (deferred > 0) {
       if (!this.deferNoted) {
         this.deferNoted = true;
@@ -2917,19 +3274,37 @@ export class AudioDeck {
     // Ist gar keins bestätigt (iOS beantwortet keine Probe), gilt das Verhalten davor: der Vorrat lädt trotzdem.
     let slots = this.guardOn && this.neverMuted && this.unlockSilent && this.all().some((e) => this.unlockedEls.has(e)) ? this.freeUnlocked() : Number.POSITIVE_INFINITY;
     let held = 0;
+    // Runde 46: Netz-Abrufe über das Budget von Runde 18 hinaus (Wettlauf) gehen nur auf freigeschaltete freie Elemente, nie auf eines, dessen Freischaltung aussteht
+    let strict = this.freeUnlocked();
+    let netStarted = 0;
+    let raceHeld = 0;
     this.inFill = true;
     try {
       for (const c of order) {
+        const net = !loc.get(c.key);
+        if (racing && net && netStarted >= legacyRoom) {
+          if (strict <= 0) {
+            raceHeld++;
+            continue;
+          }
+        }
         if (slots <= 0) {
           held++;
           continue;
         }
         slots--;
+        strict = Math.max(0, strict - 1);
+        if (net) netStarted++;
         this.startEntry(c, loc.get(c.key));
         changed = true;
       }
     } finally {
       this.inFill = false;
+    }
+    if (raceHeld > 0 && !this.raceHeldNoted) {
+      this.raceHeldNoted = true;
+      const all = this.all();
+      this.diag(`race: extra load held (no unlocked element free, ${all.filter((e) => this.unlockedEls.has(e)).length}/${all.length} unlocked), n=${this.raceN}`);
     }
     this.fillHeld = held > 0;
     if (held > 0 && held !== this.heldNoted) {
@@ -2949,7 +3324,7 @@ export class AudioDeck {
 
   /** Runde 37 (B): freie Elemente (weder aktiv, Vorrat, behalten, Probe noch verdächtig), die eine bestätigte Freischaltung haben */
   private freeUnlocked(): number {
-    return this.all().filter((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e) && !this.probes.has(e) && !this.suspect.has(e) && this.unlockedEls.has(e)).length;
+    return this.all().filter((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e) && e !== this.hedge?.el && !this.probes.has(e) && !this.suspect.has(e) && this.unlockedEls.has(e)).length;
   }
   private fillHeld = false;
   private heldNoted = 0;
@@ -3008,6 +3383,7 @@ export class AudioDeck {
     this.markLoad(el);
     el.src = loc?.url ?? clip.url;
     el.load();
+    if (!loc) this.beginLoad(el, clip.id, 'pool');
     // load() setzt das Tempo zurück: Standard und aktuelles Tempo gemeinsam setzen
     this.applyRate(el);
     try {
@@ -3088,6 +3464,8 @@ export class AudioDeck {
     }
     s.ready = true;
     s.rsAtReady = rs;
+    this.endLoad(el, 'ready');
+    if (!s.local) this.raceReady(el, s.clip.id, 'pool');
     this.fails.delete(s.clip.key);
     const bgDone = this.bgRefs.find((r) => r.key === s.clip.key);
     if (bgDone) {
@@ -3120,6 +3498,7 @@ export class AudioDeck {
   /** Die Quelle eines Eintrags lud nicht: aus dem Vorrat einmal vom Netz, in der geregelten Spur einmal unverändert. Sichtbar füllt der Host neu. */
   private entryError(e: PoolEntry) {
     this.diag(`deck: pool failed ${e.clip.id} (${e.local ? 'local' : e.lane})`);
+    this.endLoad(e.el, 'error');
     const { clip, local, lane } = e;
     // Runde 18: Fehler je Ausschnitt zählen (Netz), im schwachen Netz lädt er erst nach RELOAD_WAIT_MS neu (reloadGate in fill)
     if (!local) this.fails.set(clip.key, { n: (this.fails.get(clip.key)?.n ?? 0) + 1, at: Date.now() });
@@ -3141,6 +3520,7 @@ export class AudioDeck {
   private dropEntry(e: PoolEntry, why: string) {
     this.entries = this.entries.filter((x) => x !== e);
     this.kept = this.kept.filter((x) => x !== e);
+    this.endLoad(e.el, 'dropped');
     this.diag(`deck: pool dropped ${e.clip.id} (${why})`);
     if (!this.hidden()) this.clearSrc(e.el);
   }
@@ -3236,7 +3616,7 @@ export class AudioDeck {
     const el = s.el;
     const play = via?.play ?? true;
     // Runde 26: der verlassene Moment, bevor die Felder des aktiven Moments überschrieben werden
-    const prev = old && old !== el ? this.snapActive() : null;
+    const prev = old && old !== el && !this.hedgeSwap ? this.snapActive() : null;
     const fromKept = this.kept.includes(s);
     this.noteDur(el, clip.key);
     this.entries = this.entries.filter((x) => x !== s);
@@ -3300,6 +3680,8 @@ export class AudioDeck {
     } else {
       // Runde 12: der Eintrag lädt noch. Sein Element behält Quelle und Bytes, nach den Metadaten springt seek(true) an die Position (loadedmetadata, mine).
       this.diag(`deck: pool adopt ${clip.id} rs=${el.readyState} meta=${s.meta} after ${Date.now() - s.t0} ms`);
+      const lr = this.loads.get(el);
+      if (lr && !lr.done) lr.role = 'active';
       if (s.meta) this.seek(true);
       this.loading(!s.local && el.readyState < 3);
       if (!s.local && !s.meta) this.armFresh(el, clip, s.t0);
@@ -3334,7 +3716,10 @@ export class AudioDeck {
     // Das alte Element geht frei in den Vorrat zurück: pausiert, Quelle bleibt bis zur nächsten Befüllung (kein load() verdeckt)
     if (old && old !== el) {
       this.halt(old, 'app: swap');
+      // Runde 46: das aktive Element hat den Wettlauf verloren (ein bereites hat überholt) oder wurde verlassen, bevor es bereit war
+      this.endLoad(old, s.ready ? 'lost' : 'dropped');
       if (prev) this.addKept(prev);
+      else if (this.hedgeSwap && !this.hidden()) this.clearSrc(old);
     }
     if (play) {
       this.deps.playbackState?.('playing', 'swap');
@@ -3590,7 +3975,7 @@ export class AudioDeck {
 
   /** Runde 38: freies, freigeschaltetes, pausiertes Element für ein verdecktes Nachladen. Fehlt es, wird ein behaltenes, freigeschaltetes, pausiertes Element freigegeben (nur Zuordnung, kein load()). */
   private bgFree(): DeckEl | undefined {
-    const find = () => this.pool.plain.find((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e) && !this.probes.has(e) && !this.suspect.has(e) && this.unlockedEls.has(e) && e.paused);
+    const find = () => this.pool.plain.find((e) => e !== this.el && !this.entryOf(e) && !this.keptOf(e) && e !== this.hedge?.el && !this.probes.has(e) && !this.suspect.has(e) && this.unlockedEls.has(e) && e.paused);
     let free = find();
     if (!free && this.bgEarlyOn && this.guardOn) {
       const k = this.kept.find((x) => x.el !== this.el && x.lane === 'plain' && this.unlockedEls.has(x.el) && x.el.paused && !this.probes.has(x.el) && !this.suspect.has(x.el));
@@ -3728,7 +4113,7 @@ export class AudioDeck {
     for (const r of this.bgRefs) clearTimeout(r.timer);
     this.bgRefs = [];
     for (const e of this.suspect) {
-      if (e === this.el || this.entryOf(e) || this.keptOf(e)) continue;
+      if (e === this.el || this.entryOf(e) || this.keptOf(e) || e === this.hedge?.el) continue;
       this.clearSrc(e);
     }
     this.suspect.clear();
@@ -4071,7 +4456,7 @@ export class AudioDeck {
       for (const k of [...this.kept]) if (!this.unlockedEls.has(k.el) && k.el !== this.el && !this.probes.has(k.el)) this.releaseKept(k);
     }
     for (const el of this.all()) {
-      if (el === this.el || this.unlockedEls.has(el) || this.entryOf(el) || this.keptOf(el) || this.probes.has(el)) continue;
+      if (el === this.el || this.unlockedEls.has(el) || this.entryOf(el) || this.keptOf(el) || this.probes.has(el) || el === this.hedge?.el) continue;
       if (!this.silentEl(el)) {
         if (this.hidden()) continue;
         this.clearSrc(el);

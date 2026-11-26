@@ -1,8 +1,8 @@
 import { describeMedia, holdsNeighbor, needsLoad, type MediaItem } from './slotplan';
-import { hlsBehindYt, isWeakNet, needsYtBeforeStart, neighborCall, recoverCall, slowStart, START_NO_YT_WAIT, START_POLL_MS, startWatchCall, SWITCH_MS, switchCall, VIDEO_SWITCH, weakUntil, YT_START_WAIT_MS, youtubeObs, type ActiveObs } from './neighborGate';
+import { audioNoYt, hlsBehindYt, isWeakNet, needsYtBeforeStart, neighborCall, recoverCall, slowStart, START_NO_YT_WAIT, START_POLL_MS, startWatchCall, SWITCH_MS, switchCall, VIDEO_SWITCH, weakUntil, YT_START_WAIT_MS, youtubeObs, type ActiveObs } from './neighborGate';
 import { notesRow } from './notesrow';
 import { diagLog, netType } from '../lib/diag';
-import { markFirstPlay, setFeedLoading, setWeakNet } from '../lib/sync/firstPlay';
+import { markFirstPlay, setFeedLoading, setPlayPhase, setWeakNet } from '../lib/sync/firstPlay';
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createPortal, flushSync } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
@@ -1421,27 +1421,30 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
    * rescue: der aktuelle Moment spielt nach RESCUE_MS nicht (at = idx), auf iOS nur mit einem Element, das schon freigeschaltet ist, höchstens einmal je Moment.
    * Gibt true zurück, wenn die Warteschlange umgestellt wurde. Verdeckt tut das nichts (dort tauscht das Deck selbst das erste bereite Element).
    */
-  const readyFirst = (at: number, why: 'go' | 'start' | 'rescue' | 'stall'): boolean => {
+  const readyFirst = (at: number, why: 'go' | 'start' | 'rescue' | 'stall' | 'race'): boolean => {
     if (form !== 'audio' || !pre || textRef.current || forYouRef.current || recallRef.current || isBackground(document.visibilityState)) return false;
     const cur = queue.current[idxRef.current];
     const m = queue.current[at];
     if (!m || formOf(m) !== 'audio') return false;
     // Ein Moment, den das Deck schon spielt (verdeckter Tausch, lockNext), ist gesetzt
     if (why === 'go' && audioDeck.holds(keyOf(m))) return false;
-    if ((why === 'rescue' || why === 'stall') && (!cur || (rescued.current.has(cur.id) && !(audioDeck.rescueRetry && (rescueN.current.get(cur.id) ?? 0) < RESCUE_RETRY_MAX)))) return false;
+    // Runde 46: race (Wettlauf beim Start) geht den Weg der Rettung (ein Wechsel je Moment, mit RESCUE_RETRY bis RESCUE_RETRY_MAX), nur ohne die Wartezeit von RESCUE_MS
+    const replaces = why === 'rescue' || why === 'stall' || why === 'race';
+    if (replaces && (!cur || (rescued.current.has(cur.id) && !(audioDeck.rescueRetry && (rescueN.current.get(cur.id) ?? 0) < RESCUE_RETRY_MAX)))) return false;
     // start und rescue: der Kopf hat in seinem Element schon Daten (abgelehnter Start, nur der Tipp fehlt), dann startet er selbst
     // (stall: das Element meldet readyState 4, steht aber, das ist der Anlass)
     if (why !== 'go' && why !== 'stall' && audioDeck.holds(keyOf(m)) && audioDeck.readyState() >= 3) return false;
-    const unlockedOnly = (why === 'rescue' || why === 'stall') && IOS;
-    const ready = (x: Moment) => formOf(x) === 'audio' && (LOCAL.has(keyOf(x)) || audioDeck.poolReady(keyOf(x), unlockedOnly));
-    const eligible = (x: Moment) => !bad.current.has(x.videoId) && !((why === 'rescue' || why === 'stall') && rescued.current.has(x.id));
+    const unlockedOnly = replaces && IOS;
+    // race: nur Einträge des Vorrats zählen (ein lokaler Moment, der nie geladen wurde, ist kein Ergebnis des Wettlaufs)
+    const ready = (x: Moment) => formOf(x) === 'audio' && ((why !== 'race' && LOCAL.has(keyOf(x))) || audioDeck.poolReady(keyOf(x), unlockedOnly));
+    const eligible = (x: Moment) => !bad.current.has(x.videoId) && !(replaces && rescued.current.has(x.id));
     const r = readyFirstPlan(queue.current, at, ready, eligible);
     if (r.how !== 'pulled') return false;
     diag.current.push(`deck: ready first ${r.id} over ${r.over} (${why})`);
     applyQueue(r.queue);
     if (why === 'go') return true;
     // start und rescue: der aktuelle Moment wird ersetzt. Der Kopf ist nie weggewischt worden, er zählt weder als gesehen noch als übersprungen.
-    if ((why === 'rescue' || why === 'stall') && cur) {
+    if (replaces && cur) {
       rescued.current.add(cur.id);
       rescueN.current.set(cur.id, (rescueN.current.get(cur.id) ?? 0) + 1);
     }
@@ -2096,6 +2099,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                 const vs0 = vstat.current;
                 if (vs0 && slot.index === vs0.j && vs0.readyAt === null && st !== STATE.UNSTARTED) vs0.readyAt = Math.round(performance.now() - vs0.t0);
                 if (slot.index === idxRef.current) {
+                  // Runde 46 (SYNC_AFTER_STABLE): der Sync sieht, ob der aktuelle Moment spielt, stockt oder nicht läuft
+                  setPlayPhase(st === STATE.PLAYING ? 'playing' : st === STATE.BUFFERING ? 'stalled' : 'idle');
                   if (st === STATE.PLAYING) {
                     slot.playedAt ||= performance.now();
                     // Runde 16: Zeit seit dem letzten Eintritt in PLAYING ohne Unterbrechung (Nachbar-Sperre bei YouTube)
@@ -2307,14 +2312,19 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       }
       if (cancelled) return;
       // Ohne erreichbare YouTube-API (offline, blockiert) laufen Streams, Podcasts und Text trotzdem. Es gibt keine Fehlerseite mehr.
-      const ready = loadYT();
+      // Runde 46 (AUDIO_NO_YT): im Audio-Reiter mit reiner mp3- und Stream-Warteschlange wird die API nicht geladen und kein IFrame angelegt
+      const noYt = audioNoYt(form, queue.current);
+      const ready: ReturnType<typeof loadYT> = noYt ? new Promise(() => {}) : loadYT();
       const apiT0 = performance.now();
       let YT: Awaited<ReturnType<typeof loadYT>> | null = null;
       const cm0 = queue.current[idxRef.current];
       // Runde 42 (START_NO_YT_WAIT): nur ein aktiver YouTube-Moment wartet auf die API, und das höchstens YT_START_WAIT_MS (fest, ohne navigator.connection). Audio, HLS und Text starten sofort,
       // die Slots bekommen ihren IFrame später (lazyYT). Die API lädt weiter im Hintergrund.
       const waitYt = needsYtBeforeStart(cm0, form);
-      if (START_NO_YT_WAIT) {
+      if (noYt) {
+        YT = lazyYT(false);
+        diag.current.push(`video: audio tab without youtube (${cm0 ? cm0.id : 'no moment'}, no api, no iframe)`);
+      } else if (START_NO_YT_WAIT) {
         if (window.YT?.Player) YT = window.YT;
         else if (!waitYt) {
           YT = lazyYT();
@@ -2429,6 +2439,9 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pre]);
 
+  // Runde 46: der Feed verschwindet (Reiterwechsel, Einstellungen): nichts spielt mehr, der Sync wartet nicht auf ihn
+  useEffect(() => () => setPlayPhase('idle'), []);
+
   // Runde 15: Vorrang für den aktiven Stream-Moment, Nachbarn freigeben oder anhalten
   useEffect(() => {
     const t = window.setInterval(() => neighborTickRef.current(), 250);
@@ -2451,6 +2464,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         // Runde 39 (RESCUE_RETRY): das Deck misst die Zeit ohne Ton selbst (Start des Moments, Hintergrund zählt mit). Ab RESCUE_MS geht es auf einen bereiten Moment, auch direkt nach der
         // Rückkehr und unabhängig von sl.broken und Netzwechsel (die setzen waitSince unten zurück, die Schwelle wurde dann nie erreicht).
         if (audioDeck.rescueRetry && !userPaused.current && audioDeck.silentFor() > RESCUE_MS && readyFirst(idxRef.current, 'rescue')) return;
+        // Runde 46 (START_RACE): kein Ton seit dem Start und ein Vorrats-Element ist schon bereit: Wechsel sofort, ohne die Wartezeit der Rettung. Der übergangene Moment bleibt ungesehen und kein Skip.
+        if (audioDeck.startRace && !userPaused.current && audioDeck.startRacing() && audioDeck.hasReady() && readyFirst(idxRef.current, 'race')) return;
         // Runde 43 (STALL_SWITCH): der Moment spielte schon, seine Zeit steht aber STALL_SWITCH_MS am Stück und ein Element ist bereit: Wechsel darauf, der verlassene Moment bleibt ungesehen, kein Skip.
         // Ohne bereites Element wird weiter gewartet (eine Zeile je Moment).
         if (!userPaused.current && audioDeck.stalledFor() >= STALL_SWITCH_MS) {

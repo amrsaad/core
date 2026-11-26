@@ -123,6 +123,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         await page.click('[data-testid=sync-save]').catch(() => {});
         c.tokenSaved = await waitFor(page, () => !!document.querySelector('[data-testid=sync-last]'));
       }
+      // Runde 46 (SYNC_AFTER_STABLE): der erste Upload wartet auf 20 s ruhige Wiedergabe oder das Verlassen der App. Hier spielt noch nichts, der Test verlässt die App kurz, damit der erste Abgleich sofort läuft (nichts geht verloren).
+      await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }); document.dispatchEvent(new Event('visibilitychange')); });
+      await page.waitForTimeout(300);
+      await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' }); document.dispatchEvent(new Event('visibilitychange')); });
       c.firstSync = await waitFor(page, () => !!window.__sync?.status().lastSync);
       await page.selectOption('[data-testid=captions]', 'on');
       await navTo(page, 'Feed');

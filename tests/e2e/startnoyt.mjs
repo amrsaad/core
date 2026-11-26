@@ -90,7 +90,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       c.audioApiWaitedZero = num(line, /waited (\d+) ms/) <= 50; // Messung kann 1 bis 2 ms zeigen, der Fehlerfall liegt bei Sekunden
       c.audioSrcLine = d.some((x) => /^deck: src net snaudio\d+/.test(x)) || d.some((x) => /^deck: src local snaudio\d+/.test(x));
       c.audioNoApiWaitLine = !d.some((x) => /^video: youtube api (ready|missing) after/.test(x));
-      c.audioStartWithoutApiLine = d.some((x) => /^video: start without youtube api /.test(x));
+      // Runde 46: eine reine Audio-Warteschlange im Audio-Reiter nimmt den Weg ohne API und ohne IFrame (AUDIO_NO_YT) und meldet das mit eigener Zeile, sonst bleibt es bei der Zeile von Runde 42
+      c.audioStartWithoutApiLine = d.some((x) => /^video: (start without youtube api|audio tab without youtube) /.test(x));
       c.audioNoStub = !d.includes('yt stub');
       // Die API kommt später und stört nichts: der Moment spielt weiter, keine Fehler
       await sleep(Math.max(0, API_DELAY + 1500 - (Date.now() - t0)));

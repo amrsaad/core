@@ -7,7 +7,7 @@ import { createSync, type Sync, type SyncStatus } from './controller';
 import { canon, onlyFeedTimeChanged, syncedChanged, type SyncDoc } from './merge';
 import type { DigestLatest } from '../../moments/digest';
 import { diagLog } from '../diag';
-import { hasFirstPlayed, isFeedLoading, isWeakNet, waitFirstPlay } from './firstPlay';
+import { hasFirstPlayed, hasStablePlayed, isFeedLoading, isWeakNet, playGateNow, SYNC_AFTER_STABLE, SYNC_FIRST_MAX_MS, SYNC_STABLE_MS, waitFirstPlay, waitStablePlay } from './firstPlay';
 
 export interface SyncUi {
   status: SyncStatus;
@@ -36,8 +36,11 @@ export function useSync(state: AppState | null, access: SyncAccess, enabled: boo
       resolve: (d) => (resolveRef.current ? resolveRef.current(d) : d),
       getKey: syncKey,
       getToken: loadToken,
-      firstPlay: waitFirstPlay,
-      firstPlayed: hasFirstPlayed,
+      // Runde 46 (SYNC_AFTER_STABLE): der erste Upload wartet auf 20 s stabiles Spielen statt auf das erste PLAYING, weitere Uploads nicht in den ersten 5 s eines Moments oder beim Stocken
+      firstPlay: SYNC_AFTER_STABLE ? waitStablePlay : waitFirstPlay,
+      firstPlayed: SYNC_AFTER_STABLE ? hasStablePlayed : hasFirstPlayed,
+      firstWait: SYNC_AFTER_STABLE ? { label: 'stable playback', why: `stable ${SYNC_STABLE_MS / 1000} s`, maxMs: SYNC_FIRST_MAX_MS } : undefined,
+      playGate: SYNC_AFTER_STABLE ? () => playGateNow() : undefined,
       uploadBusy: isFeedLoading,
       weakNet: isWeakNet,
       diag: () => diagLog.entries(),

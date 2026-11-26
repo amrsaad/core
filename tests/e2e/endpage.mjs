@@ -10,6 +10,8 @@ import { onPageError } from './pageerrors.mjs';
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-endpage'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
 const FAKE = readFileSync(new URL('./fakeyt.js', import.meta.url), 'utf8');
+// Runde 46 (AUDIO_NO_YT): der Audio-Reiter lädt die YouTube-API nicht mehr, deren Nachbau baute bisher nebenbei auch die Nachbildung der Audio-Elemente ein. Sie kommt jetzt direkt per Init-Skript.
+const FAKE_MEDIA = FAKE.slice(FAKE.indexOf('// Eigene Streams'));
 const NV = 4, NA = 5, NT = 2;
 const base = (i, extra) => ({
   id: `endp${String(i).padStart(7, '0')}:100`, videoId: `endp${String(i).padStart(7, '0')}`, start: 100, end: 150, channel: `Kanal ${i % 4}`, videoTitle: 'Testvideo',
@@ -53,6 +55,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await ctx.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
     await ctx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
     const page = await ctx.newPage();
+    await page.addInitScript(FAKE_MEDIA);
     const errors = [];
     page.on('pageerror', onPageError(errors));
     await page.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBody }));
@@ -118,7 +121,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await page.click('[data-testid=end-audio]');
     c.audioOpens = await waitFor(page, () => !!window.__core?.moment()?.audio);
     const firstAudio = await page.evaluate(() => window.__core.moment()?.id);
-    c.audioMarkedSeen = await waitFor(page, (id) => window.__core.seen(id), firstAudio, 3000);
+    // Runde 46 (START_RACE): ist ein späterer Audio-Moment des Vorrats vor dem ersten bereit, spielt er zuerst, der erste bleibt ungesehen und kommt als nächster. Gesehen zählt darum, dass irgendein Audio-Moment als gesehen markiert wird (die Zahl danach prüft countDropsAfterSeen genau).
+    const audioIdsAll = moments.filter((m) => m.form === 'audio').map((m) => m.id);
+    c.audioMarkedSeen = await waitFor(page, (ids) => ids.some((id) => window.__core.seen(id)), audioIdsAll, 3000);
+    void firstAudio;
     await page.waitForTimeout(1300); // Zustand wird verzögert gespeichert (der Moment läuft im Zeitraffer erst danach zu Ende)
     await page.screenshot({ path: `${out}/${name}-3b-audio.png` });
     await page.click('.head-tabs button:has-text("Video")', { timeout: 4000 });
@@ -145,6 +151,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await ctx2.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
     await ctx2.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
     const p2 = await ctx2.newPage();
+    await p2.addInitScript(FAKE_MEDIA);
     const errors2 = [];
     p2.on('pageerror', onPageError(errors2));
     await p2.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBody2 }));
@@ -249,6 +256,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await ctx3.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
     await ctx3.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
     const p3 = await ctx3.newPage();
+    await p3.addInitScript(FAKE_MEDIA);
     await p3.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: poolBody2 }));
     await p3.goto(`${url}?now=2026-10-23&seed=3#k=${k}`);
     c.b57FeedLoaded = await waitFor(p3, () => !!window.__core?.moment());

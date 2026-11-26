@@ -265,6 +265,18 @@ export const START_NO_YT_WAIT = true;
 /** Ein aktiver YouTube-Moment wartet höchstens so lange auf die API, bevor der Start ohne sie weiterläuft (ms). Fest, ohne navigator.connection (gibt es auf iOS nicht). Danach greift VIDEO_SWITCH. */
 export const YT_START_WAIT_MS = 3000;
 
+/**
+ * Runde 46 (Schalter AUDIO_NO_YT, Gerätelog 26.11.: im Audio-Reiter lud lazyYT iframe_api im Hintergrund und jeder der drei Slots baute einen YouTube-Player, obwohl Audio das nie braucht,
+ * "youtube api ready after 9334 ms" in derselben Zeit wie der Start): im Audio-Reiter wird die API nicht geladen und kein IFrame angelegt, die Slots bleiben beim Platzhalter.
+ * Nur für reine mp3- und Stream-Warteschlangen (jeder Audio-Moment hat nach contract.ts eine hls-Quelle). Steht ein Audio-Moment mit YouTube-Quelle in der Warteschlange, bleibt es beim Verhalten von Runde 45.
+ * Video- und Text-Reiter sind unberührt.
+ */
+export const AUDIO_NO_YT = true;
+export function audioNoYt(form: Form | undefined, queue: readonly Pick<Moment, 'form' | 'hls' | 'videoId'>[], enabled: boolean = AUDIO_NO_YT): boolean {
+  if (!enabled || form !== 'audio') return false;
+  return queue.every((m) => streamKind(m) !== 'youtube');
+}
+
 /** Braucht der aktive Moment die YouTube-API, bevor der Feed seine Player anlegen darf? Kein Moment: nein. Text: nein. Audio und HLS: nein. Aus (enabled false): immer ja. */
 export function needsYtBeforeStart(m: Pick<Moment, 'form' | 'hls' | 'videoId'> | undefined, form: Form | undefined, enabled: boolean = START_NO_YT_WAIT): boolean {
   if (!m) return false;

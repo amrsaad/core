@@ -474,7 +474,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await waitFor(page, () => window.__core.diag().some((l) => /deck loadedmetadata/.test(l)));
     const hlsDiag = await page.evaluate(() => window.__core.diag().filter((l) => /deck /.test(l)));
     r.hlsDiag = hlsDiag.slice(-6);
-    c.hlsDiagPerAttempt = hlsDiag.some((l) => /deck loadedmetadata rs=\d muted=\w+/.test(l)) && hlsDiag.some((l) => /deck play#\d+ start rs=\d muted=\w+/.test(l)) && hlsDiag.some((l) => /deck play#\d+ ok/.test(l));
+    // Runde 46: im Nachbau ist readyState immer 0, der Wettlauf (START_RACE) lässt den ersten bereiten Moment per Tausch (swap) spielen, der Startversuch heißt dann "swap" statt "start"
+    c.hlsDiagPerAttempt = hlsDiag.some((l) => /deck loadedmetadata rs=\d muted=\w+/.test(l)) && hlsDiag.some((l) => /deck play#\d+ (start|swap) rs=\d muted=\w+/.test(l)) && hlsDiag.some((l) => /deck play#\d+ ok/.test(l));
     c.audioCoverShown = await waitFor(page, () => !!document.querySelector('.vslot[aria-hidden=false] .vaudio-art'));
     c.audioBigCaption = await waitFor(page, () => { const el = document.querySelector('[data-testid=caption] span'); return !!el?.textContent && parseFloat(getComputedStyle(el).fontSize) >= 22; });
     await page.screenshot({ path: `${out}/${name}-10-audio.png` });

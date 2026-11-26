@@ -129,6 +129,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       ctx.on('weberror', (e) => errors.push(String(e.error())));
       return ctx;
     };
+    // Runde 46 (SYNC_AFTER_STABLE): der erste Upload einer Sitzung wartet auf 20 s ruhige Wiedergabe oder das Verlassen der App. Hier spielt nichts, also verlässt der Test die App kurz: so geht der erste Upload sofort hinaus (nichts geht verloren).
+    const leave = async (page) => {
+      await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }); document.dispatchEvent(new Event('visibilitychange')); });
+      await sleep(300);
+      await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' }); document.dispatchEvent(new Event('visibilitychange')); });
+    };
     const saved = async (page) => { await navTo(page, 'Saved'); await page.waitForSelector('h1:has-text("Saved")'); };
     const settings = async (page) => { await navTo(page, 'Settings'); await page.waitForSelector('[data-testid=sync-card]'); };
     const link = `${APP}#k=${k}&t=${await encToken(TOKEN)}`;
@@ -138,6 +144,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     const A = await ctxA.newPage();
     await A.goto(link);
     c.aUnlocked = await waitFor(A, () => !!window.__core?.moment());
+    await leave(A);
     c.aFirstSync = await poll(() => api.puts.length >= 1 && api.digestGets >= 1);
     await saved(A);
     c.noCardWithoutFile = (await A.locator('[data-testid=digest-card]').count()) === 0;
@@ -209,6 +216,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     // B ändert den Widerspruch auf Option A, A holt es
     await B.click('[data-testid=digest-a-0]');
     const p2 = api.puts.length;
+    await leave(B);
     c.bWrites = await poll(() => api.puts.length > p2, 25000);
     await A.evaluate(() => window.__sync.syncNow());
     c.aGetsBsTap = await poll(async () => (await pressed(A, 'digest-a-0')) === 'true' && (await pressed(A, 'digest-b-0')) === 'false', 15000);
