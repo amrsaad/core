@@ -136,6 +136,8 @@ export function createSync(deps: SyncDeps): Sync {
   let lastPut = -Infinity;
   let urgent = false;
   let deferredUpload = false;
+  /** Runde 46b: die Wochenkarte wurde in diesem Lauf schon vor dem Warten auf den ersten Upload geladen */
+  let digestLoaded = false;
   const openFirstWrite = (why: string) => {
     firstWriteOpen = true;
     releaseFirstWrite?.(why);
@@ -239,6 +241,12 @@ export function createSync(deps: SyncDeps): Sync {
         return;
       }
       // Runde 12: vor dem ersten Schreiben warten, bis der erste Moment spielt. Lesen und Zusammenführen sind schon geschehen und blieben davon unberührt.
+      // Runde 46b: die Wochenkarte wartet nicht hinter dem ersten Upload (das Warten dauert bis zu zwei Minuten, ein zweites Gerät bekäme die Karte sonst erst danach)
+      if (!firstWriteOpen && deps.firstPlay && !deps.firstPlayed?.()) {
+        await loadDigest();
+        digestLoaded = true;
+        if (stopped) return;
+      }
       if (await holdFirstWrite()) {
         if (stopped) return;
         // Runde 46: das Warten kann bis zu zwei Minuten dauern, der zusammengeführte Stand wird aus dem jetzigen lokalen neu gebildet (ohne Netz, derselbe Stand von GitHub)
@@ -333,8 +341,9 @@ export function createSync(deps: SyncDeps): Sync {
       set({ running: true });
       try {
         deferredUpload = false;
+        digestLoaded = false;
         await attempt();
-        await loadDigest();
+        if (!digestLoaded) await loadDigest();
         if (fails > 0) log(`sync: ok again after ${fails} failed ${fails === 1 ? 'run' : 'runs'}`);
         fails = 0;
         clearTimeout(retryTimer);

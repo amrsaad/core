@@ -16,7 +16,8 @@ import {
   waitStablePlay,
 } from '../src/lib/sync/firstPlay';
 import { emptyState } from '../src/lib/state';
-import { fakeApi } from './sync-fake-api';
+import { fakeApi, newSha } from './sync-fake-api';
+import { b64uEncode, encryptText } from '../src/lib/sync/crypto';
 
 const TOKEN = 'ghp_TESTTOKENTESTTOKEN1234';
 const key = () => crypto.subtle.importKey('raw', new Uint8Array(32).fill(5), 'AES-GCM', false, ['encrypt', 'decrypt']);
@@ -100,6 +101,44 @@ describe('Sync: erster Upload nach stabilem Spielen', () => {
     expect(t.api.puts).toBe(1);
     expect(t.lines.some((l) => /^sync: first upload released \(stable 20 s\) after \d+\.\d s$/.test(l))).toBe(true);
     expect(t.lines.some((l) => l.includes('released (playing)'))).toBe(false);
+  });
+
+  it('Runde 46b: die Wochenkarte kommt vor dem Warten auf den ersten Upload (CI-Lauf 45897964224: Gerät B bekam sie nicht)', async () => {
+    const api = fakeApi();
+    const plain = { v: 1, week: '2026-W44', generatedAt: '2026-10-29T17:19:16.000Z', saves: 1, counts: { action: 0, habit: 0, rule: 0, know: 0, research: 0, content: 0, script: 0, source: 0, contradiction: 0 }, actions: [], contradictions: [] };
+    const { iv, ct } = await encryptText(await key(), JSON.stringify(plain));
+    api.digest = { text: JSON.stringify({ v: 1, iv: b64uEncode(iv), ct: b64uEncode(ct) }), sha: newSha() };
+    const adopted: string[] = [];
+    const lines: string[] = [];
+    const d = { state: { ...emptyState(), momentSeen: { m1: 1_700_000_000_000 } as Record<string, number> } };
+    const s = createSync({
+      getState: () => d.state,
+      adopt: (fn) => (d.state = fn(d.state)),
+      adoptDigest: (l) => adopted.push(l.week),
+      getKey: key,
+      getToken: async () => TOKEN,
+      fetchImpl: api.fetch,
+      now: () => Date.now(),
+      log: (l) => lines.push(l),
+      firstPlay: waitStablePlay,
+      firstPlayed: hasStablePlayed,
+      firstWait: { label: 'stable playback', why: 'stable 20 s', maxMs: SYNC_FIRST_MAX_MS },
+      playGate: () => playGateNow(),
+    });
+    running.push(s);
+    void s.start();
+    await advance(500);
+    // nichts spielt, der Upload wartet noch, die Karte ist schon da
+    expect(api.puts).toBe(0);
+    expect(lines).toContain('sync: first upload waits for stable playback');
+    expect(adopted).toEqual(['2026-W44']);
+    // nach dem Upload wird sie nicht ein zweites Mal im selben Lauf geholt
+    const gets = () => api.calls.filter((c) => c.method === 'GET' && c.url.includes('digest')).length;
+    const before = gets();
+    await advance(SYNC_FIRST_MAX_MS + 1000);
+    expect(api.puts).toBe(1);
+    expect(gets()).toBe(before);
+    expect(adopted).toHaveLength(1);
   });
 
   it('ein Stall setzt die 20 s zurück', async () => {
