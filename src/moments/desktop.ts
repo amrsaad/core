@@ -3,8 +3,8 @@
  * Mobil bleibt unverändert. Was hier steht, gilt nur, wenn die Breite mindestens DESKTOP_MIN beträgt.
  *
  * Tasten: Pfeile oder J und K blättern, Leertaste Pause, M stumm, Shift+. schaltet das Tempo, L Herz, S Save, O Source,
- * F Rückmeldung (1 bis 6 Chips, Enter Text), A Ask (auch bei offenem Blatt), 1 2 3 Reiter, C Caption, Esc schließt, bei der Abrufkarte 1 2 3 Antwort und
- * Enter Next, ? zeigt die Übersicht.
+ * F Rückmeldung (1 bis 6 Chips, Enter Text), A Ask (auch bei offenem Blatt), 1 2 3 Reiter, C Untertitel an oder aus, Esc schließt, bei der Abrufkarte 1 2 3 Antwort und
+ * Enter Next, ? zeigt die Übersicht. Runde 44 (Mac-Ansicht): Pfeil rechts und links 10 s vor und zurück, T Teilen, V Vollbild im Video-Reiter (F bleibt die Rückmeldung).
  * Trackpad: zwei Finger senkrecht blättert (ein Wisch ist ein Schritt, der Nachlauf zählt nicht), zwei Finger nach links öffnet die Rückmeldung.
  */
 import { BP_DESKTOP } from '../design/breakpoints';
@@ -55,6 +55,10 @@ export type DeskAction =
   | 'note'
   | 'ask'
   | 'caption'
+  | 'seekFwd'
+  | 'seekBack'
+  | 'share'
+  | 'fullscreen'
   | 'close'
   | 'help'
   | 'tempo'
@@ -124,6 +128,14 @@ export function deskKey(ctx: DeskCtx, k: KeyIn): DeskAction | null {
       return 'ask';
     case 'c':
       return 'caption';
+    case 'ArrowRight':
+      return 'seekFwd';
+    case 'ArrowLeft':
+      return 'seekBack';
+    case 't':
+      return 'share';
+    case 'v':
+      return 'fullscreen';
     case '1':
     case '2':
     case '3':
@@ -149,7 +161,10 @@ export const HELP_ROWS: { keys: string; text: string }[] = [
   { keys: 'F', text: 'Feedback, then 1 to 6 for a chip or Enter for text' },
   { keys: 'A', text: 'Ask Claude about this moment' },
   { keys: '1 2 3', text: 'Video, Audio, Text' },
-  { keys: 'C', text: 'Caption' },
+  { keys: 'Right or Left', text: '10 seconds forward or back (video)' },
+  { keys: 'T', text: 'Share' },
+  { keys: 'V', text: 'Full screen (video)' },
+  { keys: 'C', text: 'Captions on or off' },
   { keys: 'Esc', text: 'Close' },
   { keys: '1 2 3', text: 'On a recall card: answer. Enter: Next' },
   { keys: '?', text: 'This list' },

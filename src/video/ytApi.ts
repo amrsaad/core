@@ -51,6 +51,11 @@ export interface YTPlayer {
   relevel?(): void;
   /** YouTube-Player: an eine Stelle springen */
   seekTo?(seconds: number, allowSeekAhead?: boolean): void;
+  /**
+   * Runde 44 (Mac-Ansicht): im laufenden Ausschnitt an eine Quellzeit springen (der Aufrufer klemmt auf den Ausschnitt). YouTube und eigene Streams ohne Deck.
+   * Das Audio-Deck hat keinen Sprung (audioDeck.ts bleibt unberührt): false, es geschieht nichts.
+   */
+  seekClip?(seconds: number): boolean;
   /** Nur YouTube: Qualität vorschlagen ('small', 'default' = Auto). YouTube darf den Vorschlag ignorieren (Issue 22). */
   setPlaybackQuality?(quality: string): void;
   /**
@@ -969,6 +974,21 @@ export function createPlayer(YT: YTNamespace, el: HTMLElement, videoId: string, 
     // Nur YouTube (Warmlauf, Issue 22): zurück auf den Start des Ausschnitts. Eigene Streams laufen nicht warm und brauchen es nicht.
     seekTo: (seconds, allowSeekAhead) => {
       if (mode !== 'hls') yt.seekTo?.(seconds, allowSeekAhead ?? true);
+    },
+    seekClip: (seconds) => {
+      try {
+        if (mode === 'yt') {
+          yt.seekTo?.(seconds, true);
+          return true;
+        }
+        if (!deckMode) {
+          media.currentTime = Math.max(0, seconds - offset);
+          return true;
+        }
+      } catch {
+        /* Player noch nicht bereit */
+      }
+      return false;
     },
     mute: () => {
       for (const e of all) if (!e.muted) e.muted = true;

@@ -153,20 +153,22 @@ try {
     return { main: r('.dmain'), panel: r('[data-testid=desk-panel]'), aside: r('[data-testid=desk-aside]'), bar: r('[data-testid=desk-bar]'), video: v && { x: v.x, y: v.y, w: v.width, h: v.height }, scrollW: document.documentElement.scrollWidth };
   });
   results.notes.geo = geo;
-  // Brief 06: Hauptbereich = Fenster minus Panel (400), Video min(1280, Platz, (Höhe - Leiste - Caption) * 16 / 9), bei 1440 über 1000 px
-  c.mainFillsLeftOfPanel = !!geo.main && Math.abs(geo.main.w - (1440 - 400)) < 1 && geo.main.x === 0;
-  c.videoIs16by9 = !!geo.video && Math.abs(geo.video.w / geo.video.h - 16 / 9) < 0.02 && geo.video.w > 1000 && geo.video.w <= 1280;
+  // Runde 44 (Mac-Ansicht): drei Spalten. Die Mitte ist Fenster minus Warteschlange (272 bis 296) minus rechte Spalte (320 bis 344), das Video höchstens 760 px breit.
+  const qa = await pg.evaluate(() => { const b = document.querySelector('[data-testid=desk-queue-aside]').getBoundingClientRect(); return { x: b.x, w: b.width }; });
+  c.mainFillsBetweenColumns = !!geo.main && qa.w >= 272 && qa.w <= 296 && Math.abs(geo.main.x - qa.w) < 1 && Math.abs(geo.main.w - (1440 - qa.w - geo.aside.w)) < 1;
+  c.videoIs16by9 = !!geo.video && Math.abs(geo.video.w / geo.video.h - 16 / 9) < 0.02 && geo.video.w > 700 && geo.video.w <= 760;
   c.videoCentered = !!geo.video && !!geo.main && Math.abs(geo.video.x + geo.video.w / 2 - (geo.main.x + geo.main.w / 2)) < 2;
-  c.panelFixedRight = !!geo.aside && geo.aside.x + geo.aside.w > 1439 && geo.aside.w >= 340;
+  c.panelFixedRight = !!geo.aside && geo.aside.x + geo.aside.w > 1439 && geo.aside.w >= 320 && geo.aside.w <= 344;
   c.barOnTop = !!geo.bar && geo.bar.y === 0 && geo.bar.h <= 60 && geo.bar.w >= 1439;
   c.noHorizontalScroll = geo.scrollW <= 1440;
   c.barOneRow = await pg.evaluate(() => { const ys = [...document.querySelectorAll('[data-testid=desk-bar] button')].map((b) => Math.round(b.getBoundingClientRect().y + b.getBoundingClientRect().height / 2)); return Math.max(...ys) - Math.min(...ys) <= 2; });
   c.barFitsWindow = await pg.evaluate(() => [...document.querySelectorAll('[data-testid=desk-bar] button')].every((b) => { const r = b.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth; }));
   const topbar = await E(pg, 'desk-bar').innerText();
-  c.barHasTabsAndDay = ['Video', 'Audio', 'Text'].every((x) => topbar.includes(x)) && (await E(pg, 'desk-today').innerText()).length > 0;
+  // Der Tageszähler steht seit Runde 44 unten in der Warteschlange, nicht mehr in der Leiste
+  c.barHasTabsAndDay = ['Video', 'Audio', 'Text'].every((x) => topbar.includes(x)) && /^today \d+ seen, \d+ got it$/.test(await E(pg, 'desk-today').innerText()) && (await E(pg, 'desk-queue').locator('[data-testid=desk-today]').count()) === 1;
   c.panelHasHookAndSource = (await E(pg, 'desk-hook').innerText()) === (await pg.evaluate(() => window.__core.moment().hook)) && (await has(pg, 'desk-source')) && (await has(pg, 'desk-open-source'));
   c.noMobileOverlays = !(await has(pg, 'hook')) && !(await has(pg, 'info-tap'));
-  c.compactButtons = await pg.evaluate(() => [...document.querySelectorAll('.vactions button')].every((b) => b.getBoundingClientRect().height <= 56 && b.getBoundingClientRect().height >= 32));
+  c.compactButtons = await pg.evaluate(() => [...document.querySelectorAll('.ds-act')].every((b) => b.getBoundingClientRect().height <= 56 && b.getBoundingClientRect().height >= 32));
   await pg.screenshot({ path: `${out}/02-video.png` });
 
   // Fenstertitel zeigt den Hook
@@ -212,11 +214,12 @@ try {
     await pg.keyboard.up('Shift');
   };
   await pressTempo();
-  c.tempo15 = await waitFor(pg, () => window.__core.rate() === 1.5 && document.querySelector('[data-testid=desk-rate]')?.textContent === '1.5x', undefined, 2000) && (await pg.evaluate(() => window.__ytlog.some((x) => x === 'rate 1.5')));
+  c.tempo15 = await waitFor(pg, () => window.__core.rate() === 1.5 && document.querySelector('[data-testid=desk-rate]')?.textContent === 'Speed 1.5x', undefined, 2000) && (await pg.evaluate(() => window.__ytlog.some((x) => x === 'rate 1.5')));
   await pressTempo();
-  c.tempo2 = await waitFor(pg, () => window.__core.rate() === 2 && document.querySelector('[data-testid=desk-rate]')?.textContent === '2x', undefined, 2000) && (await pg.evaluate(() => window.__ytlog.some((x) => x === 'rate 2')));
+  c.tempo2 = await waitFor(pg, () => window.__core.rate() === 2 && document.querySelector('[data-testid=desk-rate]')?.textContent === 'Speed 2x', undefined, 2000) && (await pg.evaluate(() => window.__ytlog.some((x) => x === 'rate 2')));
   await pg.click('[data-testid=desk-rate]');
-  c.tempoTapBackTo1 = await waitFor(pg, () => window.__core.rate() === 1 && !document.querySelector('[data-testid=desk-rate]'), undefined, 2000);
+  // Die Tempo-Taste steht seit Runde 44 immer in der Abspielleiste (vorher nur bei Tempo über 1 in der Leiste)
+  c.tempoTapBackTo1 = await waitFor(pg, () => window.__core.rate() === 1 && document.querySelector('[data-testid=desk-rate]')?.textContent === 'Speed 1x', undefined, 2000);
   await pressTempo();
   c.tempoKeyHeldDoesNotRepeat = await waitFor(pg, () => window.__core.rate() === 1.5, undefined, 2000);
   await pressTempo();
@@ -232,25 +235,17 @@ try {
   await press(pg, 's', 150);
   c.keySToggles = !(await pg.evaluate((id) => window.__core.saved(id), mid0));
 
-  // C Caption im Panel
-  const capBefore = await has(pg, 'desk-caption');
-  await press(pg, 'c', 150);
-  const capOpen = await has(pg, 'desk-caption');
-  c.keyC = !capBefore && capOpen && (await E(pg, 'desk-meta').innerText()).includes('Testvideo');
-  // Kontext im Panel, unter dem Ausschnitt, mit der Überschrift "Context"
-  const deskCtx = await pg.evaluate(() => {
-    const e = document.querySelector('[data-testid=desk-context]');
-    const m = window.__core.moment();
-    const ex = document.querySelector('[data-testid=desk-excerpt]');
-    return { text: e?.textContent ?? null, m: m.context, below: !!ex && !!e && !!(ex.compareDocumentPosition(e) & Node.DOCUMENT_POSITION_FOLLOWING), label: e?.querySelector('.vcap-ctx-label')?.textContent };
-  });
-  c.deskCaptionContext = deskCtx.label === 'Context' && deskCtx.text.includes(deskCtx.m) && deskCtx.below;
-  await pg.screenshot({ path: `${out}/03-panel-caption.png` });
+  // C Untertitel im Bild (Runde 44: vorher klappte C die Caption im Panel auf, die es nicht mehr gibt). Englisches Video hat standardmäßig keine, C schaltet sie ein und aus.
+  const subBefore = await has(pg, 'desk-subtitle');
+  await press(pg, 'c', 250);
+  const subOn = await waitFor(pg, () => !!document.querySelector('[data-testid=desk-subtitle]'), undefined, 3000);
+  c.keyC = !subBefore && subOn;
+  await pg.screenshot({ path: `${out}/03-untertitel.png` });
   await press(pg, 'j', 300);
-  c.captionStaysOpenOnNext = await has(pg, 'desk-caption');
-  await press(pg, 'Escape', 100);
-  c.escClosesCaption = !(await has(pg, 'desk-caption'));
+  c.captionsStayOnOnNext = await waitFor(pg, () => !!document.querySelector('[data-testid=desk-subtitle]'), undefined, 3000);
   await press(pg, 'k', 300);
+  await press(pg, 'c', 250);
+  c.keyCTogglesOff = !(await has(pg, 'desk-subtitle'));
 
   // O Quelle: neuer Tab mit youtube
   const popup = pg.waitForEvent('popup', { timeout: 3000 }).catch(() => null);
@@ -410,7 +405,7 @@ try {
   };
   c.hoverSettings = await hv('[data-testid=desk-settings]');
   c.hoverTab = await hv('[data-testid=desk-tab-audio]');
-  c.hoverAction = await hv('.vactions button');
+  c.hoverAction = await hv('.ds-act');
   c.hoverOpenSource = await hv('[data-testid=desk-open-source]');
   // Fokus per Tab: jeder Knopf bekommt einen sichtbaren Rahmen
   await pg.evaluate(() => document.activeElement?.blur());

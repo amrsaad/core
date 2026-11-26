@@ -1,6 +1,6 @@
 import { registerHls } from './video/ytApi';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { dayKey, now as clockNow } from './lib/clock';
+import { now as clockNow } from './lib/clock';
 import { useAppState } from './lib/useAppState';
 import { useSync } from './lib/sync/useSync';
 import { decryptJson, unlockKey } from './lib/vault';
@@ -11,13 +11,11 @@ import { validateMoments } from './moments/contract';
 import { MomentFeed } from './moments/MomentFeed';
 import { DeskBar, DeskHelp, DeskSheet } from './moments/DeskShell';
 import { deskHelpDue } from './moments/desktop';
-import { todayLine } from './moments/today';
 import { useDesktop } from './moments/useDesktop';
 import { SavedMoments } from './moments/SavedMoments';
 import type { MomentPool } from './moments/types';
 import { Settings } from './screens/Settings';
 import type { Form } from './moments/form';
-import { nextRate, rateOf } from './lib/state';
 import { diagLog } from './lib/diag';
 import { auditCovers } from './lib/overlayAudit';
 import { countSlimmable, slimSaved } from './moments/saved';
@@ -45,6 +43,8 @@ export default function App() {
   // Desktop-Modus ab 1181 px: Leiste oben, Panel rechts, Settings und Saved als Seitenblatt
   const desk = useDesktop();
   const [panel, setPanel] = useState<HTMLElement | null>(null);
+  // Runde 44: linke Spalte der Mac-Ansicht (Up next), der Feed zeichnet sie per Portal
+  const [queueEl, setQueueEl] = useState<HTMLElement | null>(null);
   const [help, setHelp] = useState(false);
   // Geräte-Sync: sobald Zustand und Pool-Schlüssel da sind
   // Alte Moment-IDs (aliases im Pool) auf aktuelle umstellen: Saves, Gesehen, Protokoll, Herzen, Notizen, Abrufplan. Auch für den Stand vom anderen Gerät.
@@ -146,7 +146,8 @@ export default function App() {
   const setForm = (f: Form) => update((s) => ({ ...s, settings: { ...s.settings, form: f } }));
   return (
     <div className={desk ? 'desk' : 'relative h-[100dvh] overflow-hidden'} data-form={desk ? form : undefined} style={{ ['--nav-h' as string]: !desk && tab === 'feed' && showBar ? `${NAV_H}px` : '0px' }}>
-      {desk && <DeskBar form={form} setForm={setForm} todayText={todayLine(state.dayCount?.[dayKey(clockNow())], true)} tab={tab} setTab={setTab} onHelp={() => setHelp((h) => !h)} rate={form === 'text' ? 1 : rateOf(state.settings)} onRate={() => update((s) => ({ ...s, settings: { ...s.settings, playbackRate: nextRate(rateOf(s.settings)) } }))} />}
+      {desk && <DeskBar form={form} setForm={setForm} tab={tab} setTab={setTab} onHelp={() => setHelp((h) => !h)} />}
+      {desk && <aside ref={setQueueEl} className="dq" data-testid="desk-queue-aside" data-nowheel aria-label="Up next" />}
       <div className={desk ? 'dmain' : tab === 'feed' ? '' : 'hidden'}>
         <MomentFeed
           key={state.settings.form ?? 'video'}
@@ -156,10 +157,10 @@ export default function App() {
           active={tab === 'feed'}
           onPausedChange={onPausedChange}
           syncError={sync.status.error}
-          desk={desk ? { panel, help, sheet: tab !== 'feed', onHelp: () => setHelp((h) => !h), onCloseSheet: () => setTab('feed') } : undefined}
+          desk={desk ? { panel, queue: queueEl, help, sheet: tab !== 'feed', onHelp: () => setHelp((h) => !h), onCloseSheet: () => setTab('feed') } : undefined}
         />
       </div>
-      {desk && <aside ref={setPanel} className="dpanel" data-testid="desk-aside" data-nowheel aria-label="Moment" />}
+      {desk && <aside ref={setPanel} className="dpanel" data-testid="desk-aside" data-nowheel aria-label="Source and actions" />}
       {!desk && tab === 'saved' && <SavedMoments state={state} update={update} pool={vault.pool.moments} />}
       {!desk && tab === 'settings' && <Settings state={state} update={update} replace={replace} moments={vault.pool} skipped={vault.skipped} sync={sync} />}
       {desk && tab !== 'feed' && (

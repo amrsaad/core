@@ -30,7 +30,7 @@ import { bumpStart, dropOverStarted, isQuickSkip, markRejected, quickSkip, resum
 import { applyEffect, confirmLine, signal, skip as skipRule, type Effect } from './learn';
 import { blockedIds, canMarkSeen, clampRate, clearSwipe, DEFAULT_RATE, dropBlocked, nextRate, rateOf, swipeBlocked, swipeIfReady, SWIPE_BLOCK_DAYS, type Rate } from '../lib/state';
 import { addSample } from './latency';
-import { captionLines, captionsShown } from './captions';
+import { captionLines, captionsShown, hasCues } from './captions';
 import { CueClock, cueIndexAt } from './cueClock';
 import { countGotIt, countSeen, todayLine } from './today';
 import { answer, lastReadDay, pickRecall, RECALL_EVERY, recallQuiet, skipCard, type Recent } from './recall';
@@ -42,7 +42,10 @@ import { sourceLine } from './source';
 import { askUrl, markAsked } from './ask';
 import { NoteSheet, type NoteCtl } from './NoteSheet';
 import { createWheel, deskKey, TAB_KEYS, wheelPx, type DeskAction } from './desktop';
-import { DeskPanel } from './DeskShell';
+import { DeskCenter, DeskTextFoot, DeskTextHead } from './desk/DeskCenter';
+import { DeskQueue } from './desk/DeskQueue';
+import { DeskSide } from './desk/DeskSide';
+import { fracOf, lyricLines, queuedAfter, seekBy, seekPos, upNext, SEEK_S } from './desk/model';
 import { speakerLine } from './speaker';
 import { chipEffect, CONFIRM_SHEET_MS, MUTE_UNDO_MS, firstOpenOfDay, inputConfirm, makeEntry, makeInputEntry, markSent, nextIssue, promptLine, unsent, type Chip, type InputChip } from './note';
 import { HOOK_LINE_PT, hookStep } from './hook';
@@ -74,6 +77,8 @@ import { payloadOf, shareOf, type ShareBundle } from '../share/link';
 /** Desktop-Modus ab 1181 px: Panel rechts, Übersicht, Seitenblatt. Fehlt das Feld, gilt das mobile Verhalten unverändert. */
 export interface DeskProps {
   panel: HTMLElement | null;
+  /** Runde 44: linke Spalte "Up next" */
+  queue: HTMLElement | null;
   help: boolean;
   sheet: boolean;
   onHelp: () => void;
@@ -451,6 +456,9 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const [forYou, setForYou] = useState<Moment | null>(null);
   /** Herz an der Tippstelle (400 ms) und kurze Bestätigung am Knopf (150 ms) */
   const [capOpen, setCapOpen] = useState(false);
+  /** Runde 44 (Mac-Ansicht): Taste C schaltet die Untertitel um. null heißt: die Regel des Moments (captionsShown) gilt. Nur Anzeige, nichts davon wandert in den Zustand. */
+  const [deskCaps, setDeskCaps] = useState<boolean | null>(null);
+  const [fullscreen, setFullscreen] = useState(false);
   /** Text-Reiter (Handy): Schriftstufe und Schnitt am Satzende, gemessen am Container (Brief 18, Issue 41). Gekürzt heißt: der Rest steht im Blatt mit dem ganzen Text. */
   const [textFit, setTextFit] = useState<TextFit>(FIT_FULL);
   const truncRef = useRef(false);
@@ -3392,6 +3400,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   // ---- Desktop ab 1181 px (Auftrag 28.10.2026). Mobil ist alles unten ohne Wirkung, solange desk fehlt. ----
   const capRef = useRef(false);
   capRef.current = capOpen;
+  /** Ergebnis der Untertitel-Regel für den laufenden Moment (für die Taste C, die sie umkehrt) */
+  const deskCapsRule = useRef(false);
 
   /** Abspielen oder anhalten, ohne den Ton zu berühren (anders als der erste Tipp mobil) */
   const setPlaying = (want: boolean) => {
@@ -3414,6 +3424,47 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     // Runde 41: Vollbild-Ebenen in der Pausen-Ansicht messen (grauer Schleier, Geräteaufnahme 25.11.)
     window.setTimeout(() => auditCovers(`${formRef.current}/pause`), 400);
   };
+
+  /** Runde 44: Sprung im Ausschnitt (Pfeiltasten und Zeitleiste). Nur Player mit seekClip (YouTube, eigene Streams), das Audio-Deck springt nicht. */
+  const seekTo = (pos: number) => {
+    const m = queue.current[idxRef.current];
+    const sl = current();
+    if (textRef.current || !m || !sl.player?.seekClip || recallRef.current || noteRef.current) return;
+    const at = seekPos(fracOf(pos, m.start, m.end), m.start, m.end);
+    if (!sl.player.seekClip(at)) return;
+    sl.pos = at;
+    clock.current.sample(at, performance.now(), clampRate(rateRef.current), sl.st === STATE.PLAYING);
+    setProgress(fracOf(at, m.start, m.end));
+  };
+  const seekDelta = (delta: number) => {
+    const m = queue.current[idxRef.current];
+    const p = current().player;
+    if (!m || !p?.seekClip) return;
+    seekTo(seekBy(p.getCurrentTime(), delta, m.start, m.end));
+  };
+  const seekFrac = (f: number) => {
+    const m = queue.current[idxRef.current];
+    if (m) seekTo(seekPos(f, m.start, m.end));
+  };
+  /** V: Vollbild des Video-Bereichs über die Fullscreen API (F bleibt die Rückmeldung) */
+  const toggleFullscreen = () => {
+    const el = dragEl.current as (HTMLElement & { webkitRequestFullscreen?: () => void }) | null;
+    const doc = document as Document & { webkitFullscreenElement?: Element | null; webkitExitFullscreen?: () => void };
+    if (formRef.current !== 'video' || !el) return;
+    if (document.fullscreenElement || doc.webkitFullscreenElement) void (document.exitFullscreen?.() ?? doc.webkitExitFullscreen?.());
+    else void (el.requestFullscreen?.() ?? el.webkitRequestFullscreen?.());
+  };
+  useEffect(() => {
+    const on = () => setFullscreen(!!document.fullscreenElement || !!(document as Document & { webkitFullscreenElement?: Element | null }).webkitFullscreenElement);
+    document.addEventListener('fullscreenchange', on);
+    document.addEventListener('webkitfullscreenchange', on);
+    return () => {
+      document.removeEventListener('fullscreenchange', on);
+      document.removeEventListener('webkitfullscreenchange', on);
+    };
+  }, []);
+  // Die Untertitel-Wahl (C) gilt für den Reiter, bei einem Reiterwechsel folgt wieder die Regel des Moments
+  useEffect(() => setDeskCaps(null), [form]);
 
   /** M: Ton an oder aus. Die Taste ist selbst die Geste, die der Browser für den Ton verlangt. */
   const toggleMute = () => {
@@ -3470,7 +3521,15 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       case 'ask':
         return ask(noteRef.current);
       case 'caption':
-        return setCapOpen((o) => !o);
+        return setDeskCaps((c) => !(c ?? deskCapsRule.current));
+      case 'seekFwd':
+        return seekDelta(SEEK_S);
+      case 'seekBack':
+        return seekDelta(-SEEK_S);
+      case 'share':
+        return openShare();
+      case 'fullscreen':
+        return toggleFullscreen();
       case 'tempo':
         if (textRef.current || recallRef.current) return;
         return cycleRate();
@@ -4009,12 +4068,15 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const recallEl = recall ? <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} read={recall.read} rng={rng.current!} onAnswer={answerRecall} onClose={closeRecall} onSkip={skipRecallCard} onDiag={(line) => diag.current.push(line)} keys={!!desk} ctl={recallCtl} origin={!!desk && form !== 'text'} /> : null;
   const saved = m && !!state.savedMoments[m.id];
   const liked = !!m && !!state.momentLiked?.[m.id];
-  const captionsOn = !!m && form !== 'text' && captionsShown(form === 'audio' ? 'on' : state.settings.captionMode, m);
+  const captionsRule = !!m && form !== 'text' && captionsShown(form === 'audio' ? 'on' : state.settings.captionMode, m);
+  deskCapsRule.current = captionsRule;
+  // Mac-Ansicht: Taste C kehrt die Regel um (nur mit Cues)
+  const captionsOn = desk ? !!m && form !== 'text' && hasCues(m) && (deskCaps ?? captionsRule) : captionsRule;
   /** Audio-Reiter (Handy): Untertitel, Fortschritt, Transport, Quellzeile und Hook stehen in einer Spalte im Fluss, jede Ebene mit eigenem Platz (Brief 17, Issue 38) */
   const stackOn = form === 'audio' && !desk && !!m && !forYou;
   const audioRtl = form === 'audio' && !!m?.cues?.some((c) => isArabic(c[1]));
 
-  const captionEl = captionsOn && caption && !forYou ? (
+  const captionEl = !desk && captionsOn && caption && !forYou ? (
 
         <div className={`vcaption pointer-events-none ${m?.audio ? 'vcaption-audio' : form === 'audio' ? 'vcaption-big' : ''} ${isArabic(caption) ? 'vcaption-rtl' : ''}`} data-testid="caption">
           {captionLines(caption).map((line, k) => (
@@ -4188,8 +4250,9 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                     <h2 className="vtext-hook">{m.hook}</h2>
                   </>
                 )}
+                {desk && <DeskTextHead m={m} speaker={speakerLine(m.channel)} />}
                 {desk ? (
-                  body
+                  <div className="dtx-quote">{body}</div>
                 ) : (
                   /* Lesefläche: sichtbarer Text und darunter die unsichtbare Messkopie mit dem ganzen Text (gleiche Fläche, gleiche Stufe) */
                   <div className="vtext-read">
@@ -4207,7 +4270,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                   ) : (
                     <p className="vtext-source" data-testid="text-source">{label}</p>
                   ))}
-                {desk && <div className="vtext-end" aria-hidden="true">Next moment: J, Down, or two fingers up</div>}
+                {desk && <DeskTextFoot m={m} />}
               </>
             );
             return desk ? content : <div className="vtext-col" data-step={textFit.step}>{content}</div>;
@@ -4256,7 +4319,31 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         </>
       )}
 
-      {!forYou && (
+      {desk && m && !forYou && (
+        <DeskCenter
+          m={m}
+          form={form}
+          speaker={speakerLine(m.channel)}
+          cover={form === 'audio' ? <Cover className="dc-cover-img" src={thumbOf(m)} /> : null}
+          captionsOn={captionsOn}
+          hasCaptions={hasCues(m)}
+          lyric={lyricLines(m.cues, shownCue.current)}
+          fallbackText={hasCues(m) ? '' : momentText(m)}
+          subtitle={caption}
+          frac={progress}
+          paused={paused}
+          rate={rateOf(state.settings)}
+          seekable={form === 'video'}
+          canPrev={idx > 0}
+          onPlay={togglePause}
+          onPrev={() => goTo(idxRef.current - 1)}
+          onNext={() => goTo(idxRef.current + 1)}
+          onRate={cycleRate}
+          onSeek={seekFrac}
+        />
+      )}
+
+      {!forYou && !desk && (
         <div className="vactions">
           {/* Leiste (Entscheidung 50, 54): alle Knöpfe sind Pflicht-Tippziele (data-primary) und liegen in den unteren 65 Prozent. Das Blatt More öffnet der letzte Knopf,
               der Wisch nach links gehört seit Brief 16 dem Reiterwechsel. Herz heißt Like, damit More eindeutig das Blatt meint. */}
@@ -4302,8 +4389,28 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       })()}
       {desk?.panel &&
         createPortal(
-          <DeskPanel m={m} speaker={m ? speakerLine(m.channel) : ''} form={form} capOpen={capOpen} onCaption={() => setCapOpen((o) => !o)} onSource={openFull} recall={recall ? recallEl : null} />,
+          <DeskSide
+            m={m}
+            form={form}
+            liked={liked}
+            saved={!!saved}
+            fullscreen={fullscreen}
+            hasCaptions={!!m && hasCues(m)}
+            seekable={form === 'video'}
+            recall={recall ? recallEl : null}
+            onLike={() => like('button')}
+            onSave={toggleSave}
+            onShare={openShare}
+            onMore={openNote}
+            onOpen={openFull}
+            onFullscreen={toggleFullscreen}
+          />,
           desk.panel,
+        )}
+      {desk?.queue &&
+        createPortal(
+          <DeskQueue rows={upNext(queue.current, idx)} queued={queuedAfter(queue.current, idx)} nowLabel={form === 'text' ? 'reading' : 'playing'} todayText={todayLine(state.dayCount?.[today], true)} onGo={(i) => goTo(i)} />,
+          desk.queue,
         )}
 
       {forYou && (

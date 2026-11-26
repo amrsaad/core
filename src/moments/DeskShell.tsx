@@ -1,15 +1,10 @@
 import type { ReactNode } from 'react';
-import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
-import { ContextLine } from './CaptionSheet';
 import { HELP_ROWS } from './desktop';
-import { FORM_LABEL, FORMS, momentText, type Form } from './form';
-import { atTime } from './hook';
-import { sourceLine } from './source';
-import { isArabic, type Moment } from './types';
+import { FORM_LABEL, FORMS, type Form } from './form';
 
 /**
- * Bausteine des Desktop-Modus ab 1181 px (Auftrag Max 28.10.2026): Leiste oben mit Reitern und Tageszahl, Seitenblatt für
- * Settings und Saved, Übersicht der Tasten, festes Panel rechts mit Hook, Caption, Quelle und Abrufkarte.
+ * Bausteine des Desktop-Modus ab 1181 px (Auftrag Max 28.10.2026): Leiste oben mit Reitern, Saved, Settings und Hilfe, Seitenblatt für
+ * Settings und Saved, Übersicht der Tasten. Runde 44: Warteschlange, Mitte und rechte Spalte stehen in src/moments/desk.
  * Mobil wird nichts davon gezeichnet.
  */
 
@@ -25,7 +20,7 @@ function Icon({ children }: { children: ReactNode }) {
   );
 }
 
-export function DeskBar({ form, setForm, todayText, tab, setTab, onHelp, rate, onRate }: { form: Form; setForm: (f: Form) => void; todayText: string; tab: DeskTab; setTab: (t: DeskTab) => void; onHelp: () => void; rate: number; onRate: () => void }) {
+export function DeskBar({ form, setForm, tab, setTab, onHelp }: { form: Form; setForm: (f: Form) => void; tab: DeskTab; setTab: (t: DeskTab) => void; onHelp: () => void }) {
   return (
     <header className="dbar" data-testid="desk-bar" data-nowheel>
       <div className="dbar-left">
@@ -40,14 +35,6 @@ export function DeskBar({ form, setForm, todayText, tab, setTab, onHelp, rate, o
         ))}
       </div>
       <div className="dbar-right">
-        {rate > 1 && (
-          <button type="button" className="dbar-rate" data-testid="desk-rate" aria-label={`Speed ${rate}x, tap to change`} title="Speed (Shift + .)" onClick={onRate}>
-            {rate}x
-          </button>
-        )}
-        <span className="dbar-today" data-testid="desk-today">
-          {todayText}
-        </span>
         <div className="dbar-actions">
           <button type="button" className={tab === 'saved' ? 'on' : ''} data-testid="desk-saved" aria-pressed={tab === 'saved'} onClick={() => setTab(tab === 'saved' ? 'feed' : 'saved')}>
             <Icon>
@@ -103,93 +90,6 @@ export function DeskHelp({ onClose }: { onClose: () => void }) {
           Close
         </button>
       </div>
-    </div>
-  );
-}
-
-/**
- * Panel rechts. Hook und Quelle stehen immer da. Die Caption klappt mit C auf (Lesetext und Angaben). Die Abrufkarte steht
- * darunter, kein Overlay über dem Video.
- */
-export function DeskPanel({ m, speaker, form, capOpen, onCaption, onSource, recall }: { m: Moment | undefined; speaker: string; form: Form; capOpen: boolean; onCaption: () => void; onSource: () => void; recall: ReactNode }) {
-  if (!m) return <div className="dp" data-testid="desk-panel" />;
-  const text = form === 'text' ? '' : momentText(m);
-  const ar = isArabic(text);
-  const sl = form === 'text' ? sourceLine(m) : null;
-  return (
-    <div className="dp" data-testid="desk-panel" style={{ ['--area' as string]: AREA_COLOR[m.area] }}>
-      <div className="dp-meta" data-testid="desk-speaker">
-        <span className="vdot" aria-hidden="true" />
-        <span style={{ color: AREA_COLOR[m.area] }}>{AREA_LABEL[m.area]}</span>
-        <span className="dp-speaker">{speaker}</span>
-      </div>
-      <h2 className="dp-hook" data-testid="desk-hook">
-        {m.hook}
-      </h2>
-
-      <section className="dp-sec">
-        <button type="button" className="dp-head" data-testid="desk-caption-toggle" aria-expanded={capOpen} onClick={onCaption}>
-          <span>Caption</span>
-          <kbd aria-hidden="true">C</kbd>
-        </button>
-        {capOpen && (
-          <div data-testid="desk-caption">
-            {text && (
-              <p className="dp-text" data-testid="desk-excerpt" dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'} style={ar ? { textAlign: 'right' } : undefined}>
-                {text}
-              </p>
-            )}
-            <ContextLine text={m.context} testid="desk-context" />
-            <dl className="vcap-meta" data-testid="desk-meta">
-              <div>
-                <dt>Speaker</dt>
-                <dd>{speaker}</dd>
-              </div>
-              <div>
-                <dt>Episode</dt>
-                <dd>{m.videoTitle}</dd>
-              </div>
-              <div>
-                <dt>At</dt>
-                <dd>{atTime(m.start)}</dd>
-              </div>
-              <div>
-                <dt>Area</dt>
-                <dd style={{ color: AREA_COLOR[m.area] }}>{AREA_LABEL[m.area]}</dd>
-              </div>
-            </dl>
-          </div>
-        )}
-      </section>
-
-      <section className="dp-sec">
-        <div className="dp-head dp-head-static">
-          <span>Source</span>
-        </div>
-        <div data-testid="desk-source">
-          {sl ? (
-            sl.url ? (
-              <a className="dp-source" data-testid="text-source" href={sl.url} target="_blank" rel="noopener noreferrer">
-                {`${sl.prefix}${sl.text}`}
-              </a>
-            ) : (
-              <p className="dp-source" data-testid="text-source">{`${sl.prefix}${sl.text}`}</p>
-            )
-          ) : (
-            <p className="dp-source">{`${m.videoTitle}, at ${atTime(m.start)}`}</p>
-          )}
-        </div>
-        <button type="button" className="dp-open" data-testid="desk-open-source" onClick={onSource}>
-          <span>Open source</span>
-          <kbd aria-hidden="true">O</kbd>
-        </button>
-      </section>
-
-      {recall && (
-        <section className="dp-sec" data-testid="desk-recall">
-          {recall}
-        </section>
-      )}
     </div>
   );
 }
