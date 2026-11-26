@@ -1,11 +1,11 @@
-import { useRef, useState, type PointerEvent as RPointerEvent, type ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState, type PointerEvent as RPointerEvent, type ReactNode, type RefObject } from 'react';
 import { Icon } from '../../components/Icon';
 import { captionLines } from '../captions';
 import type { Form } from '../form';
 import { atTime } from '../hook';
 import { isArabic, type Moment } from '../types';
 import { AREA_DK, AREA_LABEL } from './area';
-import { clipLen, fracAtPointer, hookSize } from './model';
+import { clipLen, fracAtPointer, groupTop, hookSize } from './model';
 
 /**
  * Mitte der Mac-Ansicht (Runde 44, Desktop ab 1181 px). Chip, Kanal, Hook, Untertitelfeld, Zeitleiste und Abspielleiste.
@@ -84,7 +84,7 @@ function Timeline({ m, frac, seekable, onSeek }: { m: Moment; frac: number; seek
   );
 }
 
-function Transport({ m, frac, paused, rate, seekable, canPrev, onPlay, onPrev, onNext, onRate, onSeek }: TransportProps) {
+function Transport({ m, frac, paused, rate, seekable, canPrev, cc, onPlay, onPrev, onNext, onRate, onSeek }: TransportProps) {
   return (
     <section className="dt" aria-label="Playback" data-testid="desk-transport">
       <Timeline m={m} frac={frac} seekable={seekable} onSeek={onSeek} />
@@ -103,7 +103,13 @@ function Transport({ m, frac, paused, rate, seekable, canPrev, onPlay, onPrev, o
             <Icon name="skip-forward" size="var(--icon)" />
           </button>
         </div>
-        <span className="dt-end" aria-hidden="true" />
+        {cc ? (
+          <button type="button" className="dt-cc" data-testid="desk-cc" aria-label="Captions" aria-pressed={cc.on} title="Captions (C)" onClick={cc.onToggle}>
+            CC
+          </button>
+        ) : (
+          <span className="dt-end" aria-hidden="true" />
+        )}
       </div>
     </section>
   );
@@ -116,6 +122,8 @@ interface TransportProps {
   rate: number;
   seekable: boolean;
   canPrev: boolean;
+  /** Video mit Untertiteln: Taste CC rechts in der Leiste (schaltet wie Taste C). Sonst bleibt der Platz frei. */
+  cc?: { on: boolean; onToggle: () => void };
   onPlay: () => void;
   onPrev: () => void;
   onNext: () => void;
@@ -132,16 +140,48 @@ export interface DeskCenterProps extends TransportProps {
   captionsOn: boolean;
   hasCaptions: boolean;
   /** Audio: aktuelle und vorige Zeile. Ohne Cues der geprüfte Text (excerpt). */
-  lyric: { prev: string; cur: string };
+  lyric: { prev: string; cur: string; next: string };
   fallbackText: string;
   /** Video: Untertitel im Bild, die aktuelle Zeile */
   subtitle: string;
+  onCaptions: () => void;
 }
 
 const lineProps = (s: string) => ({ dir: isArabic(s) ? ('rtl' as const) : ('ltr' as const), lang: isArabic(s) ? 'ar' : 'en' });
 
+/**
+ * Video: Player, Meta und Leiste bilden eine Gruppe mit gleichen Abständen, in der Spalte mittig. Der Player hängt per CSS an --dc-y (Feed), darum misst
+ * dieser Hook die Gruppe und setzt --dc-y. Die Höhe von Meta und Leiste hängt nicht von --dc-y ab, es gibt keine Rückkopplung.
+ */
+function useGroupTop(ref: RefObject<HTMLDivElement | null>, on: boolean) {
+  useLayoutEffect(() => {
+    const dc = ref.current;
+    const feed = dc?.closest<HTMLElement>('.vfeed');
+    if (!on || !dc || !feed) return;
+    const fit = () => {
+      const cs = getComputedStyle(dc);
+      const gap = parseFloat(cs.rowGap) || 0;
+      const kids = [...dc.children] as HTMLElement[];
+      const h = kids.reduce((n, k) => n + k.offsetHeight, 0) + gap * Math.max(0, kids.length - 1);
+      const min = parseFloat(getComputedStyle(feed).getPropertyValue('--dc-top')) || 40;
+      feed.style.setProperty('--dc-y', `${groupTop(dc.clientHeight, h, min)}px`);
+    };
+    fit();
+    if (typeof ResizeObserver === 'undefined') return () => feed.style.removeProperty('--dc-y');
+    const ro = new ResizeObserver(fit);
+    ro.observe(dc);
+    for (const k of dc.children) ro.observe(k);
+    return () => {
+      ro.disconnect();
+      feed.style.removeProperty('--dc-y');
+    };
+  });
+}
+
 export function DeskCenter(p: DeskCenterProps) {
   const { m, form } = p;
+  const dcRef = useRef<HTMLDivElement>(null);
+  useGroupTop(dcRef, form === 'video');
   if (form === 'text') return <DeskTextBar canPrev={p.canPrev} onPrev={p.onPrev} onNext={p.onNext} />;
   const meta = (
     <div className="dc-meta">
@@ -152,7 +192,7 @@ export function DeskCenter(p: DeskCenterProps) {
     </div>
   );
   return (
-    <div className="dc" data-form={form} data-testid="desk-center" style={{ ['--ad' as string]: AREA_DK[m.area] }}>
+    <div className="dc" ref={dcRef} data-form={form} data-testid="desk-center" style={{ ['--ad' as string]: AREA_DK[m.area] }}>
       {form === 'video' ? (
         <>
           <div className="dc-media" data-testid="desk-media">
@@ -184,13 +224,18 @@ export function DeskCenter(p: DeskCenterProps) {
             ) : p.hasCaptions ? (
               <>
                 {p.lyric.prev && (
-                  <p className="dc-lyric-prev" data-testid="desk-lyric-prev" {...lineProps(p.lyric.prev)}>
+                  <p key={`p${p.lyric.prev}`} className="dc-lyric-prev" data-testid="desk-lyric-prev" {...lineProps(p.lyric.prev)}>
                     {p.lyric.prev}
                   </p>
                 )}
-                <p className="dc-lyric-cur" data-testid="desk-lyric-cur" {...lineProps(p.lyric.cur)}>
+                <p key={`c${p.lyric.cur}`} className="dc-lyric-cur" data-testid="desk-lyric-cur" {...lineProps(p.lyric.cur)}>
                   {p.lyric.cur}
                 </p>
+                {p.lyric.next && (
+                  <p key={`n${p.lyric.next}`} className="dc-lyric-next" data-testid="desk-lyric-next" {...lineProps(p.lyric.next)}>
+                    {p.lyric.next}
+                  </p>
+                )}
               </>
             ) : (
               <p className="dc-lyric-text" data-testid="desk-lyric-text" {...lineProps(p.fallbackText)}>
@@ -200,7 +245,7 @@ export function DeskCenter(p: DeskCenterProps) {
           </section>
         </>
       )}
-      <Transport {...p} />
+      <Transport {...p} cc={form === 'video' && p.hasCaptions ? { on: p.captionsOn, onToggle: p.onCaptions } : undefined} />
     </div>
   );
 }

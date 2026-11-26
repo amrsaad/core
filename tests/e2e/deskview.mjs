@@ -20,7 +20,8 @@ const moments = [];
 for (let i = 0; i < 12; i++) moments.push(mk(i, 'beat'));
 for (let i = 12; i < 30; i++) moments.push(mk(i, 'brain'));
 for (let i = 30; i < 40; i++) moments.push(mk(i, 'body'));
-for (let i = 40; i < 46; i++) moments.push(mk(i, 'brain', { form: 'audio', audio: true, hls: `https://stream.test/${i}.m3u8` }));
+const LONG = ' und dazu ein langer zweiter Teil, der klar über drei Zeilen der schmalen Warteschlange hinausgeht, damit die Auslassungspunkte nötig werden';
+for (let i = 40; i < 46; i++) moments.push(mk(i, 'brain', { form: 'audio', audio: true, hls: `https://stream.test/${i}.m3u8`, ...(i === 42 || i === 44 ? { hook: `Testmoment ${i} brain, ein Satz${LONG}` } : {}) }));
 for (let i = 46; i < 56; i++) moments.push(mk(i, 'body', { form: 'text', videoId: `texto${String(i).padStart(5, '0')}`, author: `Author ${i}`, ref: `Ref ${i}`, sourceUrl: `https://example.org/s/${i}`, license: 'CC BY 4.0', ...(i === 46 ? { kind: 'takeaway', apply: 'Do the small thing today.', origin: 'Test entry 30' } : {}) }));
 const raw = crypto.getRandomValues(new Uint8Array(32));
 const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt']);
@@ -79,6 +80,45 @@ const GEOM = () => {
   return { overlapCols, aboveBar, outOfMain, inWindow, kidsOverlap, noHScroll, queueWhole, sideFits, queueShown: qItems.length, barB: bar.b, cols };
 };
 
+// Runde 44b: Zeilen des Audio-Felds, Raster der Gruppe, Warteschlange, Leiste
+const LYR = () => {
+  const q = (s) => document.querySelector(`[data-testid=${s}]`);
+  const f = q('desk-lyrics');
+  if (!f) return null;
+  const r = (e) => e.getBoundingClientRect();
+  const cur = q('desk-lyric-cur'), prev = q('desk-lyric-prev'), next = q('desk-lyric-next');
+  const fr = r(f);
+  const fs = (e) => (e ? parseFloat(getComputedStyle(e).fontSize) : 0);
+  const els = [prev, cur, next].filter(Boolean);
+  return {
+    cur: cur?.textContent ?? '', prev: prev?.textContent ?? '', next: next?.textContent ?? '', hasPrev: !!prev, hasNext: !!next,
+    curTop: cur ? r(cur).top : null, curFont: fs(cur), prevFont: fs(prev), nextFont: fs(next),
+    prevColor: prev ? getComputedStyle(prev).color : '', nextColor: next ? getComputedStyle(next).color : '', curColor: cur ? getComputedStyle(cur).color : '',
+    fieldH: fr.height, hscroll: f.scrollWidth > f.clientWidth + 1,
+    inside: els.every((e) => { const b = r(e); return b.left >= fr.left - 0.5 && b.right <= fr.right + 0.5 && b.top >= fr.top - 0.5 && b.bottom <= fr.bottom + 0.5; }),
+    ordered: (!prev || !cur || r(prev).bottom <= r(cur).top + 0.5) && (!next || !cur || r(cur).bottom <= r(next).top + 0.5),
+  };
+};
+const RASTER = () => {
+  const r = (s) => document.querySelector(s).getBoundingClientRect();
+  const head = r('.dc-head'), lyr = r('[data-testid=desk-lyrics]'), tr = r('[data-testid=desk-transport]'), main = r('.dmain');
+  const rate = r('[data-testid=desk-rate]'), play = r('[data-testid=desk-play]'), prev = r('[data-testid=desk-prev]'), next = r('[data-testid=desk-next]');
+  return { gap1: lyr.top - head.bottom, gap2: tr.top - lyr.bottom, top: head.top - main.top, bottom: main.bottom - tr.bottom, rateLeft: rate.left - tr.left, playCx: play.left + play.width / 2 - (tr.left + tr.width / 2), rateRightOfTrack: rate.right <= prev.left, ccAbsent: !document.querySelector('[data-testid=desk-cc]'),
+    order: rate.right <= prev.left && prev.right <= play.left && play.right <= next.left };
+};
+const QUEUE = async (pg) => {
+  const items = E(pg, 'desk-queue-item');
+  const n = await items.count();
+  const info = await pg.evaluate(() => {
+    const out = [...document.querySelectorAll('[data-testid=desk-queue-item]')].filter((e) => !e.parentElement.hidden).map((e) => {
+      const h = e.querySelector('.dq-hook'), cs = getComputedStyle(h), li = getComputedStyle(e.parentElement);
+      return { cur: e.hasAttribute('data-current'), clamp: cs.webkitLineClamp, h: h.clientHeight, sh: h.scrollHeight, len: h.textContent.length, sep: li.borderTopWidth, bg: getComputedStyle(e).backgroundColor, bd: getComputedStyle(e).borderTopColor };
+    });
+    return out;
+  });
+  return { n, info };
+};
+
 const results = { at: new Date().toISOString(), runs: [] };
 const targets = (process.env.E2E_BROWSERS ?? 'webkit,chromium').split(',');
 for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter(([n]) => targets.includes(n))) {
@@ -112,6 +152,27 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         await second.click();
         await waitFor(pg, (j) => window.__core.idx() === j, target);
         c[`${form}QueueClickSwitches`] = (await idx(pg)) === target && target === before + 1 && (await pg.evaluate(() => window.__core.moment().id)) !== id0;
+        {
+          // Runde 44b: Liste lesbar, laufender Eintrag klar, Hover und Fokus der übrigen, lange Hooks mit Auslassung
+          const qi = await QUEUE(pg);
+          const rows = qi.info;
+          r.notes[`queue-${form}`] = rows;
+          c[`${form}QueueCurrentMarked`] = rows.filter((x) => x.cur).length === 1 && rows[0].cur && rows[0].bd !== 'rgba(0, 0, 0, 0)' && rows[0].bg !== rows[1].bg;
+          c[`${form}QueueSeparators`] = rows.slice(1).every((x, k) => k === 0 || x.sep === '1px');
+          c[`${form}QueueLongHookClamped`] = rows.filter((x) => x.len > 150).every((x) => x.clamp === '3' && x.h <= 61 && x.sh > x.h) && (form !== 'audio' || rows.some((x) => x.len > 150));
+          const it = E(pg, 'desk-queue-item').nth(2);
+          const bg0 = await it.evaluate((e) => getComputedStyle(e).backgroundColor);
+          await it.hover();
+          await pg.waitForTimeout(250);
+          const hov = await it.evaluate((e) => ({ bg: getComputedStyle(e).backgroundColor, cur: getComputedStyle(e).cursor }));
+          c[`${form}QueueHoverState`] = hov.bg !== bg0 && hov.cur === 'pointer';
+          await pg.mouse.move(700, 450);
+          await pg.keyboard.press('Shift');
+          await it.focus();
+          const ring = await it.evaluate((e) => ({ st: getComputedStyle(e).outlineStyle, w: parseFloat(getComputedStyle(e).outlineWidth), m: e.matches(':focus-visible') }));
+          c[`${form}QueueFocusState`] = ring.m && ring.st !== 'none' && ring.w >= 2;
+          await it.evaluate((e) => e.blur());
+        }
         // Pfeil runter wechselt, Pfeil hoch zurück
         const i1 = await idx(pg);
         await press(pg, 'ArrowDown', 300);
@@ -183,6 +244,37 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           r.notes.fullscreen = fs;
           if (fs) { await press(pg, 'v', 500); c.videoFullscreenToggles = !(await pg.evaluate(() => !!document.fullscreenElement)); }
         }
+        if (form === 'video') {
+          // Runde 44b: Gruppe ohne Lücke, mittig, Player 16:9 und höchstens 760 px, Griff und CC
+          const g = await pg.evaluate(() => {
+            const r = (s) => document.querySelector(s).getBoundingClientRect();
+            const media = r('[data-testid=desk-media]'), hook = r('[data-testid=desk-hook]'), meta = r('.dc-meta'), tr = r('[data-testid=desk-transport]'), main = r('.dmain');
+            const players = [...document.querySelectorAll('.vframe > div, .vposter')].map((e) => e.getBoundingClientRect()).filter((b) => b.width > 0);
+            return { gap: tr.top - hook.bottom, gapTop: meta.top - media.bottom, top: media.top - main.top, bottom: main.bottom - tr.bottom, w: media.width, h: media.height, minTop: 40,
+              aligned: players.some((b) => Math.abs(b.left - media.left) < 1.5 && Math.abs(b.top - media.top) < 1.5 && Math.abs(b.width - media.width) < 1.5) };
+          });
+          r.notes.videoGroup = g;
+          c.videoHookToBarGap = g.gap >= 0 && g.gap <= 64 && Math.abs(g.gap - g.gapTop) <= 12;
+          c.videoGroupCentered = Math.abs(g.top - g.bottom) <= 3 || g.top <= g.minTop + 1;
+          c.videoPlayer169Max760 = Math.abs(g.w / g.h - 16 / 9) < 0.02 && g.w <= 760.5;
+          c.videoPlayerAlignsWithGroup = g.aligned;
+          const th = await pg.evaluate(() => { const t = document.querySelector('.dt-thumb'); const b = document.querySelector('[data-testid=desk-timeline]'); return t ? { w: t.getBoundingClientRect().width, cur: getComputedStyle(b).cursor, role: b.getAttribute('role') } : null; });
+          c.videoTimelineHandleDraggable = !!th && th.w >= 14 && th.cur === 'pointer' && th.role === 'slider';
+          await pg.keyboard.press('Shift');
+          await E(pg, 'desk-timeline').focus();
+          c.videoTimelineHandleFocusRing = await pg.evaluate(() => { const t = document.querySelector('.dt-thumb'); const cs = getComputedStyle(t); return document.activeElement?.matches(':focus-visible') && cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) >= 2; });
+          await E(pg, 'desk-timeline').evaluate((e) => e.blur());
+          // CC rechts in der Leiste, schaltet wie C
+          const cc = E(pg, 'desk-cc');
+          c.videoCcShown = (await cc.count()) === 1 && (await pg.evaluate(() => { const b = document.querySelector('[data-testid=desk-cc]').getBoundingClientRect(), t = document.querySelector('[data-testid=desk-transport]').getBoundingClientRect(), n = document.querySelector('[data-testid=desk-next]').getBoundingClientRect(); return b.left > n.right && b.right <= t.right; }));
+          const on0 = (await cc.getAttribute('aria-pressed')) === 'true' && (await has(pg, 'desk-subtitle'));
+          await cc.click();
+          await pg.waitForTimeout(200);
+          const off = (await cc.getAttribute('aria-pressed')) === 'false' && !(await has(pg, 'desk-subtitle'));
+          await press(pg, 'c', 200);
+          const on1 = (await cc.getAttribute('aria-pressed')) === 'true' && (await has(pg, 'desk-subtitle'));
+          c.videoCcTogglesLikeC = on0 && off && on1;
+        }
         if (form === 'audio') {
           const a = await pg.evaluate(() => { const cv = document.querySelector('[data-testid=desk-cover]').getBoundingClientRect(); return { w: cv.width, h: cv.height }; });
           c.audioCover176 = Math.round(a.w) === 176 && Math.round(a.h) === 176;
@@ -192,10 +284,76 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           await press(pg, 'c', 200);
           c.audioCaptionsOff = (await E(pg, 'desk-lyrics').innerText()).includes('Captions are off');
           await press(pg, 'c', 200);
+          // Runde 44b: kein Griff, kein Zeiger, Leiste links Tempo, mittig drei Tasten, rechts frei, Cover-Platzhalter bei abgebrochenem Bild
+          const tl = await pg.evaluate(() => { const b = document.querySelector('[data-testid=desk-timeline]'); return { thumb: !!document.querySelector('.dt-thumb'), cur: getComputedStyle(b).cursor, tab: b.hasAttribute('tabindex'), seekable: b.hasAttribute('data-seekable') }; });
+          c.audioTimelineNoHandle = !tl.thumb && tl.cur !== 'pointer' && !tl.tab && !tl.seekable;
+          const ra = await pg.evaluate(RASTER);
+          r.notes.audioRaster = ra;
+          c.audioTransportLayout = ra.order && ra.ccAbsent && Math.abs(ra.playCx) <= 2 && ra.rateLeft <= 32;
+          c.audioGridEven = Math.abs(ra.gap1 - ra.gap2) <= 1.5 && ra.gap1 > 0 && ra.gap1 <= 32 && Math.abs(ra.top - ra.bottom) <= 2;
+          const ph = await pg.evaluate(() => { const p = document.querySelector('[data-testid=desk-cover-ph]'); const cv = document.querySelector('[data-testid=desk-cover]'); return p ? { t: p.textContent, w: p.getBoundingClientRect().width, h: p.getBoundingClientRect().height, img: !!cv.querySelector('img'), bg: getComputedStyle(p).backgroundColor, ch: document.querySelector('.dc').textContent.length > 0 } : null; });
+          const chan = await pg.evaluate(() => window.__core.moment().channel);
+          r.notes.coverPh = { ph, chan };
+          c.audioCoverPlaceholder = !!ph && ph.t === chan.trim()[0].toUpperCase() && !ph.img && ph.w >= 174 && ph.w <= 176 && ph.h >= 174 && ph.h <= 176 && ph.bg !== 'rgba(0, 0, 0, 0)';
+          // Drei Zeilen: neues Moment von vorn, Zeilenwechsel eins, zwei, drei beobachten
+          await press(pg, 'ArrowDown', 100);
+          await waitFor(pg, () => window.__core.state() === 1);
+          const samples = [];
+          for (let n = 0; n < 60; n++) { const x = await pg.evaluate(LYR); if (x && x.cur) samples.push(x); await pg.waitForTimeout(150); if (samples.some((y) => y.cur.startsWith('Untertitel drei')) && n > 40) break; }
+          const texts = [...new Set(samples.map((x) => x.cur))];
+          r.notes.lyricTexts = texts;
+          const mid = samples.find((x) => x.cur.startsWith('Untertitel zwei'));
+          const first = samples.find((x) => x.cur.startsWith('Untertitel eins'));
+          const last = samples.find((x) => x.cur.startsWith('Untertitel drei'));
+          c.audioThreeLines = !!mid && mid.prev.startsWith('Untertitel eins') && mid.next.startsWith('Untertitel drei') && mid.hasPrev && mid.hasNext;
+          c.audioLineHierarchy = !!mid && mid.prevFont < mid.curFont && mid.nextFont < mid.prevFont && mid.prevColor !== mid.nextColor && mid.curColor !== mid.prevColor;
+          c.audioCurrentLineFixed = texts.length >= 3 && samples.every((x) => Math.abs(x.curTop - samples[0].curTop) <= 0.5);
+          c.audioNoInventedLines = !!first && !!last && !first.hasPrev && first.prev === '' && !last.hasNext && last.next === '';
+          c.audioLinesInsideField = samples.every((x) => x.inside && x.ordered && !x.hscroll);
+          c.audioFieldHeight = samples.length > 0 && samples.every((x) => x.fieldH <= 340 && x.fieldH >= 160);
+          // Überblendung höchstens 150 ms, bei reduzierter Bewegung keine
+          const an = await pg.evaluate(() => { const e = document.querySelector('[data-testid=desk-lyric-cur]'); const cs = getComputedStyle(e); return { name: cs.animationName, d: parseFloat(cs.animationDuration) * (cs.animationDuration.endsWith('ms') ? 0.001 : 1) }; });
+          c.audioFadeAtMost150ms = an.name !== 'none' && an.d > 0 && an.d <= 0.15;
+          await pg.emulateMedia({ reducedMotion: 'reduce' });
+          const an2 = await pg.evaluate(() => getComputedStyle(document.querySelector('[data-testid=desk-lyric-cur]')).animationName);
+          await pg.emulateMedia({ reducedMotion: 'no-preference' });
+          c.audioNoFadeWhenReducedMotion = an2 === 'none';
         }
         if (form === 'text') {
           c.textNoPlayerControls = !(await has(pg, 'desk-transport')) && (await has(pg, 'desk-textbar'));
           c.textSerifHook = (await E(pg, 'desk-hook').evaluate((e) => getComputedStyle(e).fontFamily)).includes('Source Serif');
+          // Runde 44b: Lesebereich scrollt, weicher Auslauf, Leiste bleibt, Rad und Seitentasten blättern nicht
+          const tv = E(pg, 'text-view');
+          const geo = () => pg.evaluate(() => { const v = document.querySelector('[data-testid=text-view]'), b = document.querySelector('[data-testid=desk-textbar]').getBoundingClientRect(), r = v.getBoundingClientRect(), cs = getComputedStyle(v); return { st: v.scrollTop, sh: v.scrollHeight, ch: v.clientHeight, end: v.hasAttribute('data-end'), mask: cs.maskImage !== 'none' && cs.maskImage !== '' ? cs.maskImage : cs.webkitMaskImage, vb: r.bottom, bt: b.top, bb: b.bottom, win: b.bottom <= innerHeight && b.top >= 0 }; });
+          await tv.evaluate((e) => { e.scrollTop = 0; });
+          await pg.waitForTimeout(150);
+          const g0 = await geo();
+          r.notes.textGeo = g0;
+          c.textScrollable = g0.sh > g0.ch + 100 && g0.vb <= g0.bt + 0.5 && g0.win;
+          c.textFadeAtBottom = !g0.end && !!g0.mask && g0.mask !== 'none' && g0.mask.includes('48px');
+          const iw = await idx(pg);
+          await pg.mouse.move(720, 450);
+          for (let n = 0; n < 3; n++) { await pg.mouse.wheel(0, 120); await pg.waitForTimeout(60); }
+          await pg.waitForTimeout(300);
+          const g1 = await geo();
+          c.textWheelScrollsNotNavigates = g1.st > 100 && (await idx(pg)) === iw && g1.win;
+          await tv.focus();
+          const st1 = g1.st;
+          await press(pg, 'PageDown', 400);
+          const g2 = await geo();
+          c.textPageDownDoesNotNavigate = (await idx(pg)) === iw && g2.st >= st1 && g2.win;
+          await press(pg, ' ', 200);
+          c.textSpaceDoesNotNavigate = (await idx(pg)) === iw;
+          await tv.evaluate((e) => { e.scrollTop = e.scrollHeight; });
+          await pg.waitForTimeout(250);
+          const g3 = await geo();
+          c.textFadeGoneAtEnd = g3.end && (g3.mask === 'none' || g3.mask === '' || g3.mask === undefined) && g3.win && g3.bb <= 900;
+          await pg.screenshot({ path: `${out}/${name}-text-scrolled.png` });
+          await press(pg, 'ArrowDown', 400);
+          const iNext = await idx(pg);
+          await press(pg, 'ArrowUp', 400);
+          c.textArrowKeysStillNavigate = iNext === iw + 1 && (await idx(pg)) === iw;
+          await tv.evaluate((e) => { e.scrollTop = 0; });
         }
         await pg.screenshot({ path: `${out}/${name}-${form}.png` });
       }

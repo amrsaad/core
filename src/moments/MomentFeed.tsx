@@ -3,7 +3,7 @@ import { hlsBehindYt, isWeakNet, needsYtBeforeStart, neighborCall, recoverCall, 
 import { notesRow } from './notesrow';
 import { diagLog, netType } from '../lib/diag';
 import { markFirstPlay, setFeedLoading, setWeakNet } from '../lib/sync/firstPlay';
-import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createPortal, flushSync } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL, topicLabel } from '../lib/labels';
@@ -45,7 +45,7 @@ import { createWheel, deskKey, TAB_KEYS, wheelPx, type DeskAction } from './desk
 import { DeskCenter, DeskTextFoot, DeskTextHead } from './desk/DeskCenter';
 import { DeskQueue } from './desk/DeskQueue';
 import { DeskSide } from './desk/DeskSide';
-import { fracOf, lyricLines, queuedAfter, seekBy, seekPos, upNext, SEEK_S } from './desk/model';
+import { coverLetter, fracOf, lyricLines, scrolledToEnd, queuedAfter, seekBy, seekPos, upNext, SEEK_S } from './desk/model';
 import { speakerLine } from './speaker';
 import { chipEffect, CONFIRM_SHEET_MS, MUTE_UNDO_MS, firstOpenOfDay, inputConfirm, makeEntry, makeInputEntry, markSent, nextIssue, promptLine, unsent, type Chip, type InputChip } from './note';
 import { HOOK_LINE_PT, hookStep } from './hook';
@@ -3619,6 +3619,23 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [!!desk, active, goTo]);
 
+  // Desktop, Text-Reiter: weicher Auslauf am unteren Rand der Lesefläche, solange noch Text darunter liegt (data-end blendet ihn aus)
+  useLayoutEffect(() => {
+    const el = textBox.current;
+    if (!desk || form !== 'text' || !el) return;
+    const upd = () => el.toggleAttribute('data-end', scrolledToEnd(el.scrollTop, el.clientHeight, el.scrollHeight));
+    upd();
+    el.addEventListener('scroll', upd, { passive: true });
+    if (typeof ResizeObserver === 'undefined') return () => el.removeEventListener('scroll', upd);
+    const ro = new ResizeObserver(upd);
+    ro.observe(el);
+    for (const c of el.children) ro.observe(c);
+    return () => {
+      el.removeEventListener('scroll', upd);
+      ro.disconnect();
+    };
+  }, [!!desk, form, queue.current[idx]?.id]);
+
   // Seite verlassen oder zurück (Entscheidung 13). Eigene Streams spielen weiter, YouTube und Text halten an.
   visRef.current = (vis) => {
     if (!active) return;
@@ -4198,6 +4215,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       {form === 'text' && m && !forYou && (
         <div
           ref={textBox}
+          tabIndex={desk ? 0 : undefined}
           className="vtext no-callout"
           data-area={m.area}
           data-testid="text-view"
@@ -4324,7 +4342,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
           m={m}
           form={form}
           speaker={speakerLine(m.channel)}
-          cover={form === 'audio' ? <Cover className="dc-cover-img" src={thumbOf(m)} /> : null}
+          cover={form === 'audio' ? <Cover className="dc-cover-img" src={thumbOf(m)} fallback={<div className="dc-cover-ph" data-testid="desk-cover-ph" aria-hidden="true">{coverLetter(m.channel)}</div>} /> : null}
           captionsOn={captionsOn}
           hasCaptions={hasCues(m)}
           lyric={lyricLines(m.cues, shownCue.current)}
@@ -4340,6 +4358,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
           onNext={() => goTo(idxRef.current + 1)}
           onRate={cycleRate}
           onSeek={seekFrac}
+          onCaptions={() => run('caption')}
         />
       )}
 
@@ -4496,7 +4515,8 @@ function posterOf(mm: Moment | undefined) {
  * Cover: Ein Bild, das ohne Netz nicht kam, lädt bei der Rückkehr noch einmal (Issue 9). Bei neuer Adresse wird das Element neu aufgebaut (coverState),
  * sonst zeigte es das Bild des vorigen Moments, bis das neue geladen ist. Bei Ladefehler bleibt die Fläche neutral (leeres alt, die Hintergrundfarbe der Kachel, kein Bildsymbol; das Element bleibt, es deckt den Player ab).
  */
-function Cover({ src, className }: { src: string; className: string }) {
+/** fallback (nur Desktop-Audio): nach einem Ladefehler statt der leeren Bildfläche, bei "online" wieder das Bild */
+function Cover({ src, className, fallback }: { src: string; className: string; fallback?: ReactNode }) {
   const [st, setSt] = useState(() => coverStart(src));
   // Neue Adresse: sofort neuer Zustand, noch im selben Aufbau (kein Bild der alten Adresse im DOM)
   const cur = coverStep(st, { type: 'src', src });
@@ -4506,6 +4526,7 @@ function Cover({ src, className }: { src: string; className: string }) {
     window.addEventListener('online', on);
     return () => window.removeEventListener('online', on);
   }, [src]);
+  if (cur.bad && fallback) return <>{fallback}</>;
   return <img key={coverKey(cur)} className={className} src={cur.src} alt="" draggable={false} onError={() => setSt((x) => coverStep(x, { type: 'error' }))} />;
 }
 

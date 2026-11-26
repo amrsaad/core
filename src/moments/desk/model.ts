@@ -66,11 +66,27 @@ export function upNext(queue: readonly Moment[], idx: number, max = QUEUE_SHOWN)
 /** Zahl der Momente hinter dem laufenden, die schon in der Warteschlange stehen */
 export const queuedAfter = (queue: readonly unknown[], idx: number): number => Math.max(0, queue.length - Math.max(0, idx) - 1);
 
-/** Untertitelfeld: aktuelle und vorige Zeile aus den Cues, nichts erfunden. Index -1 oder -2: noch keine Zeile. */
-export function lyricLines(cues: readonly [number, string][] | undefined, i: number): { prev: string; cur: string } {
-  if (!cues || i < 0 || i >= cues.length) return { prev: '', cur: '' };
+/** Untertitelfeld: vorige, aktuelle und nächste Zeile aus den Cues. Fehlende Zeilen bleiben leer, nichts wird erfunden. Index -1 oder -2: noch keine Zeile. */
+export function lyricLines(cues: readonly [number, string][] | undefined, i: number): { prev: string; cur: string; next: string } {
+  if (!cues || i < 0 || i >= cues.length) return { prev: '', cur: '', next: '' };
   const prev = i > 0 ? cues[i - 1][1].trim() : '';
-  return { prev, cur: cues[i][1].trim() };
+  const next = i + 1 < cues.length ? cues[i + 1][1].trim() : '';
+  return { prev, cur: cues[i][1].trim(), next };
+}
+
+/** Anfangsbuchstabe des Kanals für den Cover-Platzhalter: der erste Buchstabe oder die erste Ziffer, groß. Ohne beides ein Punkt. */
+export function coverLetter(channel: string): string {
+  const ch = Array.from(channel.trim()).find((c) => /[\p{L}\p{N}]/u.test(c));
+  return ch ? ch.toLocaleUpperCase() : '\u00b7';
+}
+
+/** Ob die Lesefläche am Ende des Scrollwegs steht oder gar nicht scrollt (dann entfällt der weiche Auslauf unten). Toleranz 2 px. */
+export const scrolledToEnd = (top: number, client: number, scroll: number): boolean => scroll - client <= 2 || top + client >= scroll - 2;
+
+/** Lage der Mediengruppe im Video-Reiter (Player, Meta, Leiste): oberer Rand so, dass die Gruppe in der Spalte mittig steht, nie unter dem Mindestabstand oben */
+export function groupTop(colH: number, groupH: number, minTop: number): number {
+  if (!(colH > 0) || !(groupH > 0)) return minTop;
+  return Math.max(minTop, Math.round((colH - groupH) / 2));
 }
 
 /** Kürzel in der Tastaturhilfe rechts, je Reiter. Text hat keinen Player, darum nur Blättern. */

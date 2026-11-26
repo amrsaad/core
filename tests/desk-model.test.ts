@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clipLen, fracAtPointer, fracOf, hookSize, inClip, keyHints, lyricLines, openLabel, queuedAfter, seekBy, seekPos, upNext, QUEUE_SHOWN, SEEK_S } from '../src/moments/desk/model';
+import { clipLen, coverLetter, groupTop, scrolledToEnd, fracAtPointer, fracOf, hookSize, inClip, keyHints, lyricLines, openLabel, queuedAfter, seekBy, seekPos, upNext, QUEUE_SHOWN, SEEK_S } from '../src/moments/desk/model';
 import { deskKey, HELP_ROWS, type DeskCtx, type KeyIn } from '../src/moments/desktop';
 import type { Moment } from '../src/moments/types';
 
@@ -60,11 +60,36 @@ describe('Warteschlange', () => {
 describe('Anzeige', () => {
   it('Untertitelfeld aus den Cues', () => {
     const cues: [number, string][] = [[0, ' a '], [2, 'b'], [4, 'c']];
-    expect(lyricLines(cues, 1)).toEqual({ prev: 'a', cur: 'b' });
-    expect(lyricLines(cues, 0)).toEqual({ prev: '', cur: 'a' });
-    expect(lyricLines(cues, -1)).toEqual({ prev: '', cur: '' });
-    expect(lyricLines(cues, -2)).toEqual({ prev: '', cur: '' });
-    expect(lyricLines(undefined, 0)).toEqual({ prev: '', cur: '' });
+    expect(lyricLines(cues, 1)).toEqual({ prev: 'a', cur: 'b', next: 'c' });
+    expect(lyricLines(cues, 0)).toEqual({ prev: '', cur: 'a', next: 'b' });
+    expect(lyricLines(cues, 2)).toEqual({ prev: 'b', cur: 'c', next: '' });
+    expect(lyricLines(cues, 3)).toEqual({ prev: '', cur: '', next: '' });
+    expect(lyricLines(cues, -1)).toEqual({ prev: '', cur: '', next: '' });
+    expect(lyricLines(cues, -2)).toEqual({ prev: '', cur: '', next: '' });
+    expect(lyricLines(undefined, 0)).toEqual({ prev: '', cur: '', next: '' });
+    expect(lyricLines([[0, 'only']], 0)).toEqual({ prev: '', cur: 'only', next: '' });
+  });
+  it('Cover-Platzhalter: Anfangsbuchstabe des Kanals', () => {
+    expect(coverLetter('Kanal beat (Dr. Test 0)')).toBe('K');
+    expect(coverLetter('  élan vital')).toBe('É');
+    expect(coverLetter('"7 Tage"')).toBe('7');
+    expect(coverLetter('القناة')).toBe('ا');
+    expect(coverLetter('')).toBe('\u00b7');
+    expect(coverLetter('--- ')).toBe('\u00b7');
+  });
+  it('Auslauf unten entfällt am Ende und ohne Scrollweg', () => {
+    expect(scrolledToEnd(0, 500, 2000)).toBe(false);
+    expect(scrolledToEnd(1499, 500, 2000)).toBe(true);
+    expect(scrolledToEnd(1000, 500, 2000)).toBe(false);
+    expect(scrolledToEnd(0, 500, 500)).toBe(true);
+    expect(scrolledToEnd(0, 500, 501)).toBe(true);
+  });
+  it('Mediengruppe mittig, nie über dem Mindestabstand', () => {
+    expect(groupTop(800, 600, 40)).toBe(100);
+    expect(groupTop(800, 790, 40)).toBe(40);
+    expect(groupTop(800, 900, 40)).toBe(40);
+    expect(groupTop(0, 100, 40)).toBe(40);
+    expect(groupTop(800, 0, 40)).toBe(40);
   });
   it('Hook wird nur kleiner gesetzt, nie gekürzt', () => {
     expect([hookSize('a'.repeat(80)), hookSize('a'.repeat(81)), hookSize('a'.repeat(150)), hookSize('a'.repeat(151))]).toEqual(['l', 'm', 'm', 's']);
