@@ -1,12 +1,12 @@
 {
- "at": "2026-11-26T15:50:06.549Z",
+ "at": "2026-11-26T17:36:31.957Z",
  "runs": [
   {
    "variant": "webkit",
    "checks": {
     "feedLoaded": true,
-    "columnUnchanged": true,
-    "shareEnabled": true,
+    "columnUnchanged": false,
+    "shareEnabled": false,
     "sheetOpens": true,
     "linkUnderBase": true,
     "linkShownShort": true,
@@ -94,8 +94,8 @@
     "fg": "rgb(255, 255, 255)",
     "nothingLocked": true
    },
-   "audioT0": 3.017310295,
-   "audioT1": 5.009563241,
+   "audioT0": 3.020327882,
+   "audioT1": 5.006481446,
    "ar": {
     "dir": "rtl",
     "html": "rtl",
@@ -116,14 +116,14 @@
     "title": "Clip hook from the hash · 127.0.0.1"
    },
    "errors": [],
-   "ok": true
+   "ok": false
   },
   {
    "variant": "chromium",
    "checks": {
     "feedLoaded": true,
-    "columnUnchanged": true,
-    "shareEnabled": true,
+    "columnUnchanged": false,
+    "shareEnabled": false,
     "sheetOpens": true,
     "linkUnderBase": true,
     "linkShownShort": true,
@@ -212,7 +212,7 @@
     "nothingLocked": true
    },
    "audioT0": 3,
-   "audioT1": 5.020106,
+   "audioT1": 5.021819,
    "ar": {
     "dir": "rtl",
     "html": "rtl",
@@ -233,7 +233,7 @@
     "title": "Clip hook from the hash · 127.0.0.1"
    },
    "errors": [],
-   "ok": true
+   "ok": false
   }
  ]
 }
