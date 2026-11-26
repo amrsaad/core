@@ -532,7 +532,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       // Die allererste Geste dieser Seite ist der Tipp auf die Play-Taste (nichts davor berührt)
       await pg.locator('[data-testid=ctl-play]').click();
       c.ersteGesteStartetTon = await waitFor(pg, () => window.__core.state() === 1, undefined, 5000);
-      c.ersteGesteKeinPause = await waitFor(pg, () => window.__core.state() === 1, undefined, 1500) && (await pg.locator('[data-testid=ctl-play]').getAttribute('aria-label')) === 'Pause';
+      // Die Beschriftung folgt dem Zustand erst nach dem nächsten Zeichnen: auf "Pause" warten statt sofort lesen (CI-Lauf 45892839836, Chromium), danach muss beides 800 ms halten (ein zweites Umschalten durch dieselbe Geste fiele hier auf)
+      const labelPause = await waitFor(pg, () => window.__core.state() === 1 && document.querySelector('[data-testid=ctl-play]')?.getAttribute('aria-label') === 'Pause', undefined, 1500);
+      await pg.waitForTimeout(800);
+      c.ersteGesteKeinPause = labelPause && (await pg.evaluate(() => window.__core.state() === 1 && document.querySelector('[data-testid=ctl-play]')?.getAttribute('aria-label') === 'Pause'));
       c.ersteGesteTippWeg = await waitFor(pg, () => !document.querySelector('[data-testid=tap-to-play]'), undefined, 3000);
       c.ersteGesteTonAn = await pg.evaluate(() => window.__core.sound() === true);
       // Runde 46: der Ton läuft sofort (die Quelle ist schon geladen), das stille Anspielen der Reserve-Elemente endet erst nach rund 300 ms. Die Zeile mit angenommenen Elementen erst abwarten (das Aufsetzen davor wird in der Nachbildung abgelehnt, ok=0), dann lesen.
