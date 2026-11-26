@@ -1,0 +1,385 @@
+{
+  "at": "2026-11-26T21:36:22.171Z",
+  "runs": [
+    {
+      "browser": "webkit",
+      "checks": {
+        "raceStarts": true,
+        "raceFirstSoundUnder6500": true,
+        "raceNotInstant": true,
+        "raceWinnerIsFirstCandidate": true,
+        "raceLine": true,
+        "raceLineNamesWinner": true,
+        "readyFirstRaceLine": true,
+        "loadLinePool": true,
+        "loadLineActiveLost": true,
+        "oneStartLine": true,
+        "raceOvertakenUnseen": true,
+        "raceOvertakenNext": true,
+        "raceNeverTwoAudible": true,
+        "raceNoFreshReload": true,
+        "raceOvertakenStillUnseenBeforeSwipe": true,
+        "raceOvertakenComesBack": true,
+        "raceNeverTwoAudibleAfter": true,
+        "raceNoErrors": true,
+        "thirdStarts": true,
+        "thirdFirstSoundUnder9500": true,
+        "thirdNotInstant": true,
+        "thirdWinnerIsThirdCandidate": true,
+        "thirdRaceLine": true,
+        "thirdOpensAfterStagger": true,
+        "thirdNeverTwoAudible": true,
+        "thirdNoErrors": true,
+        "hedgeStarts": true,
+        "hedgeSoundUnder6500": true,
+        "hedgeNotInstant": true,
+        "hedgeLine": true,
+        "hedgeWonLine": true,
+        "hedgeNoFreshReload": true,
+        "hedgeLoadLines": true,
+        "hedgeOneElementKeepsSource": true,
+        "hedgeStillPlaying": true,
+        "hedgeNeverTwoAudible": true,
+        "hedgeSameMomentPlays": true,
+        "hedgeNoErrors": true,
+        "syncTokenSaved": true,
+        "syncGetImmediate": true,
+        "syncPlays": true,
+        "syncNoPutIn15s": true,
+        "syncPutAfterStable": true,
+        "syncWaitsLine": true,
+        "syncReleasedStableLine": true,
+        "syncNoReleasedPlaying": true,
+        "syncStillPlaying": true,
+        "syncNoErrors": true,
+        "syncLeftTokenSaved": true,
+        "syncLeftGetImmediate": true,
+        "syncLeftPlays": true,
+        "syncLeftNoPutYet": true,
+        "syncLeftPutAtOnce": true,
+        "syncLeftLine": true,
+        "syncLeftNoErrors": true,
+        "noYtAudioPlays": true,
+        "noYtNoRequest": true,
+        "noYtNoIframe": true,
+        "noYtLine": true,
+        "noYtNoStub": true,
+        "noYtVideoPlays": true,
+        "noYtVideoApiLoaded": true,
+        "noYtVideoPlayerInDom": true,
+        "noYtVideoRequested": true,
+        "noYtBackAudioPlays": true,
+        "noYtBackNoPlayer": true,
+        "noYtNoErrors": true
+      },
+      "notes": {
+        "raceMs": 5360,
+        "raceLoads": [
+          {
+            "id": "srau0",
+            "off": 0,
+            "d": 12000
+          },
+          {
+            "id": "srau1",
+            "off": 1,
+            "d": 5000
+          },
+          {
+            "id": "srau7",
+            "off": 2,
+            "d": 9000
+          },
+          {
+            "id": "srau3",
+            "off": 3,
+            "d": 30
+          }
+        ],
+        "raceLine": "race: start n=4 first ready srau1 after 5000 ms (pool), losers 3",
+        "raceDiag": [
+          "deck: pool load srau1 src=net",
+          "deck: src net srau0",
+          "hedge: srau0 active rs=0 after 3001 ms, second element loads the same source, active load kept (unlocked 6/6)",
+          "deck: pool load srau7 src=net",
+          "load: srau1 pool ls=- fb=- md=5023 cp=5031 sk=- total=5031 conc=1 result=ready",
+          "race: start n=4 first ready srau1 after 5000 ms (pool), losers 3",
+          "deck: pool ready srau1 after 5031 ms host=stream.test",
+          "deck: ready first srau1:0 over srau0:0 (rescue)",
+          "load: srau0 hedge ls=- fb=- md=- cp=- sk=- total=2101 conc=3 result=dropped",
+          "hedge: released srau0 (moment changed)",
+          "deck: swap srau1 ready=true pool=0",
+          "deck: pool load srau3 src=net",
+          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=5104 conc=2 result=dropped",
+          "start: srau1:0 first sound 5245 ms after tab open (yt api waited 0 ms)",
+          "load: srau3 pool ls=- fb=- md=- cp=- sk=- total=2 conc=2 result=lost",
+          "deck: pool load srau0 src=net"
+        ],
+        "raceThirdMs": 8360,
+        "thirdOpenedAfterMs": 3025,
+        "thirdDiag": [
+          "deck: pool fill deferred (active not playing)",
+          "deck: pool load srau1 src=net",
+          "deck: pool fill 1/5 (local 0, net 1)",
+          "deck: src net srau0",
+          "hedge: srau0 active rs=0 after 3003 ms, second element loads the same source, active load kept (unlocked 6/6)",
+          "deck: pool load srau7 src=net",
+          "deck: pool fill 2/5 (local 0, net 2)",
+          "deck: pool slow srau1 8000 ms rs=0 meta=false",
+          "load: srau7 pool ls=- fb=- md=5022 cp=5034 sk=- total=5035 conc=4 result=ready",
+          "race: start n=4 first ready srau7 after 8060 ms (pool), losers 3",
+          "deck: pool ready srau7 after 5035 ms host=stream.test",
+          "deck: pool load srau3 src=net",
+          "deck: pool fill 3/5 (local 0, net 3)",
+          "deck: ready first srau7:0 over srau0:0 (rescue)",
+          "load: srau0 hedge ls=- fb=- md=- cp=- sk=- total=5111 conc=3 result=dropped",
+          "hedge: released srau0 (moment changed)",
+          "deck: swap srau7 ready=true pool=0",
+          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=8121 conc=2 result=lost",
+          "deck: pool load srau0 src=net",
+          "deck: pool fill 3/5 (local 0, net 3)",
+          "load: srau3 pool ls=- fb=- md=51 cp=63 sk=- total=63 conc=4 result=ready",
+          "deck: pool ready srau3 after 63 ms host=stream.test"
+        ],
+        "thirdLoads": [
+          {
+            "id": "srau0",
+            "off": 0,
+            "d": 12000,
+            "at": 489
+          },
+          {
+            "id": "srau1",
+            "off": 1,
+            "d": 12000,
+            "at": 461
+          },
+          {
+            "id": "srau7",
+            "off": 2,
+            "d": 5000,
+            "at": 3514
+          },
+          {
+            "id": "srau3",
+            "off": 3,
+            "d": 30,
+            "at": 8549
+          }
+        ],
+        "hedgeMs": 5274,
+        "hedgeDiag": [
+          "deck: src net srau0",
+          "hedge: srau0 active rs=0 after 3001 ms, second element loads the same source, active load kept (unlocked 6/6)",
+          "load: srau0 hedge ls=- fb=- md=2023 cp=2032 sk=- total=2032 conc=3 result=ready",
+          "race: start n=4 first ready srau0 after 5035 ms (hedge), losers 3",
+          "hedge: won srau0 after 2033 ms, active rs=0 released",
+          "deck: swap srau0 ready=true pool=0",
+          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=5042 conc=2 result=lost"
+        ],
+        "syncPutAfterMs": 20001,
+        "syncLeftPutMs": 29,
+        "noYtRequests": [
+          "i.ytimg.com",
+          "i.ytimg.com",
+          "i.ytimg.com"
+        ],
+        "noYtDom": {
+          "iframes": 0,
+          "players": 0,
+          "api": false,
+          "scripts": 0
+        }
+      }
+    },
+    {
+      "browser": "chromium",
+      "checks": {
+        "raceStarts": true,
+        "raceFirstSoundUnder6500": true,
+        "raceNotInstant": true,
+        "raceWinnerIsFirstCandidate": true,
+        "raceLine": true,
+        "raceLineNamesWinner": true,
+        "readyFirstRaceLine": true,
+        "loadLinePool": true,
+        "loadLineActiveLost": true,
+        "oneStartLine": true,
+        "raceOvertakenUnseen": true,
+        "raceOvertakenNext": true,
+        "raceNeverTwoAudible": true,
+        "raceNoFreshReload": true,
+        "raceOvertakenStillUnseenBeforeSwipe": true,
+        "raceOvertakenComesBack": true,
+        "raceNeverTwoAudibleAfter": true,
+        "raceNoErrors": true,
+        "thirdStarts": true,
+        "thirdFirstSoundUnder9500": true,
+        "thirdNotInstant": true,
+        "thirdWinnerIsThirdCandidate": true,
+        "thirdRaceLine": true,
+        "thirdOpensAfterStagger": true,
+        "thirdNeverTwoAudible": true,
+        "thirdNoErrors": true,
+        "hedgeStarts": true,
+        "hedgeSoundUnder6500": true,
+        "hedgeNotInstant": true,
+        "hedgeLine": true,
+        "hedgeWonLine": true,
+        "hedgeNoFreshReload": true,
+        "hedgeLoadLines": true,
+        "hedgeOneElementKeepsSource": true,
+        "hedgeStillPlaying": true,
+        "hedgeNeverTwoAudible": true,
+        "hedgeSameMomentPlays": true,
+        "hedgeNoErrors": true,
+        "syncTokenSaved": true,
+        "syncGetImmediate": true,
+        "syncPlays": true,
+        "syncNoPutIn15s": true,
+        "syncPutAfterStable": true,
+        "syncWaitsLine": true,
+        "syncReleasedStableLine": true,
+        "syncNoReleasedPlaying": true,
+        "syncStillPlaying": true,
+        "syncNoErrors": true,
+        "syncLeftTokenSaved": true,
+        "syncLeftGetImmediate": true,
+        "syncLeftPlays": true,
+        "syncLeftNoPutYet": true,
+        "syncLeftPutAtOnce": true,
+        "syncLeftLine": true,
+        "syncLeftNoErrors": true,
+        "noYtAudioPlays": true,
+        "noYtNoRequest": true,
+        "noYtNoIframe": true,
+        "noYtLine": true,
+        "noYtNoStub": true,
+        "noYtVideoPlays": true,
+        "noYtVideoApiLoaded": true,
+        "noYtVideoPlayerInDom": true,
+        "noYtVideoRequested": true,
+        "noYtBackAudioPlays": true,
+        "noYtBackNoPlayer": true,
+        "noYtNoErrors": true
+      },
+      "notes": {
+        "raceMs": 5191,
+        "raceLoads": [
+          {
+            "id": "srau0",
+            "off": 0,
+            "d": 12000
+          },
+          {
+            "id": "srau1",
+            "off": 1,
+            "d": 5000
+          },
+          {
+            "id": "srau7",
+            "off": 2,
+            "d": 9000
+          },
+          {
+            "id": "srau3",
+            "off": 3,
+            "d": 30
+          }
+        ],
+        "raceLine": "race: start n=4 first ready srau1 after 5020 ms (pool), losers 3",
+        "raceDiag": [
+          "deck: pool load srau1 src=net",
+          "deck: src net srau0",
+          "hedge: srau0 active rs=0 after 3000 ms, second element loads the same source, active load kept (unlocked 6/6)",
+          "deck: pool load srau7 src=net",
+          "load: srau1 pool ls=- fb=- md=5023 cp=5033 sk=- total=5033 conc=1 result=ready",
+          "race: start n=4 first ready srau1 after 5020 ms (pool), losers 3",
+          "deck: pool ready srau1 after 5034 ms host=stream.test",
+          "deck: ready first srau1:0 over srau0:0 (rescue)",
+          "load: srau0 hedge ls=- fb=- md=- cp=- sk=- total=2089 conc=3 result=dropped",
+          "hedge: released srau0 (moment changed)",
+          "deck: swap srau1 ready=true pool=0",
+          "deck: pool load srau3 src=net",
+          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=5092 conc=2 result=dropped",
+          "start: srau1:0 first sound 5123 ms after tab open (yt api waited 0 ms)",
+          "load: srau3 pool ls=- fb=- md=- cp=- sk=- total=1 conc=2 result=lost",
+          "deck: pool load srau0 src=net"
+        ],
+        "raceThirdMs": 8204,
+        "thirdOpenedAfterMs": 3040,
+        "thirdDiag": [
+          "deck: pool fill deferred (active not playing)",
+          "deck: pool load srau1 src=net",
+          "deck: pool fill 1/5 (local 0, net 1)",
+          "deck: src net srau0",
+          "hedge: srau0 active rs=0 after 3000 ms, second element loads the same source, active load kept (unlocked 6/6)",
+          "deck: pool load srau7 src=net",
+          "deck: pool fill 2/5 (local 0, net 2)",
+          "deck: pool slow srau1 8000 ms rs=0 meta=false",
+          "load: srau7 pool ls=- fb=- md=5021 cp=5030 sk=- total=5031 conc=4 result=ready",
+          "race: start n=4 first ready srau7 after 8071 ms (pool), losers 3",
+          "deck: pool ready srau7 after 5031 ms host=stream.test",
+          "deck: pool load srau3 src=net",
+          "deck: pool fill 3/5 (local 0, net 3)",
+          "deck: ready first srau7:0 over srau0:0 (rescue)",
+          "load: srau0 hedge ls=- fb=- md=- cp=- sk=- total=5090 conc=3 result=dropped",
+          "hedge: released srau0 (moment changed)",
+          "deck: swap srau7 ready=true pool=0",
+          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=8093 conc=2 result=lost",
+          "deck: pool load srau0 src=net",
+          "deck: pool fill 3/5 (local 0, net 3)"
+        ],
+        "thirdLoads": [
+          {
+            "id": "srau0",
+            "off": 0,
+            "d": 12000,
+            "at": 192
+          },
+          {
+            "id": "srau1",
+            "off": 1,
+            "d": 12000,
+            "at": 175
+          },
+          {
+            "id": "srau7",
+            "off": 2,
+            "d": 5000,
+            "at": 3232
+          },
+          {
+            "id": "srau3",
+            "off": 3,
+            "d": 30,
+            "at": 8263
+          }
+        ],
+        "hedgeMs": 5124,
+        "hedgeDiag": [
+          "deck: src net srau0",
+          "hedge: srau0 active rs=0 after 3005 ms, second element loads the same source, active load kept (unlocked 6/6)",
+          "load: srau0 hedge ls=- fb=- md=2020 cp=2030 sk=- total=2030 conc=3 result=ready",
+          "race: start n=4 first ready srau0 after 5036 ms (hedge), losers 3",
+          "hedge: won srau0 after 2030 ms, active rs=0 released",
+          "deck: swap srau0 ready=true pool=0",
+          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=5038 conc=2 result=lost"
+        ],
+        "syncPutAfterMs": 19994,
+        "syncLeftPutMs": 10,
+        "noYtRequests": [
+          "i.ytimg.com",
+          "i.ytimg.com",
+          "i.ytimg.com"
+        ],
+        "noYtDom": {
+          "iframes": 0,
+          "players": 0,
+          "api": false,
+          "scripts": 0
+        }
+      }
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 {
- "at": "2026-11-26T20:53:07.884Z",
+ "at": "2026-11-26T21:42:07.983Z",
  "runs": [
   {
    "browser": "webkit",
@@ -285,7 +285,7 @@
       "sh": 120,
       "len": 169,
       "sep": "1px",
-      "bg": "color(srgb 0.138824 0.145882 0.16)",
+      "bg": "rgba(0, 0, 0, 0)",
       "bd": "rgba(0, 0, 0, 0)"
      },
      {
@@ -971,7 +971,7 @@
       "sh": 120,
       "len": 169,
       "sep": "1px",
-      "bg": "color(srgb 0.138824 0.145882 0.16)",
+      "bg": "rgba(0, 0, 0, 0)",
       "bd": "rgba(0, 0, 0, 0)"
      },
      {
@@ -1025,7 +1025,7 @@
       "bg": "color(srgb 0.169412 0.168627 0.255529)",
       "ch": true
      },
-     "chan": "Kanal brain (Dr. Test 2)"
+     "chan": "Kanal brain (Dr. Test 3)"
     },
     "lyricTexts": [
      "Untertitel eins, a marketing message",
