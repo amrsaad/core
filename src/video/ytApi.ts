@@ -285,6 +285,52 @@ export function offlineYT(): YTNamespace {
   return { Player: Stub, PlayerState: { ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 } };
 }
 
+/**
+ * Runde 42 (Schalter START_NO_YT_WAIT, MomentFeed): YouTube-Namespace, der den Start nicht auf die IFrame-API warten lässt. Jeder Slot legt einen Player an, auch
+ * ein Slot mit Audio- oder Stream-Moment (er braucht den IFrame nicht). Ist window.YT schon da, entsteht der echte Player sofort. Sonst ist der Player bis zur
+ * API ein leerer Platzhalter (Methoden ohne Wirkung, Zustand UNSTARTED, onReady kommt nicht) und baut den echten IFrame in dasselbe Element, sobald loadYT fertig ist.
+ * Ein YouTube-Moment, der vorher in den Slot kommt, wartet über ytLater (route) auf onReady des echten Players. Kommt die API nie, bleibt es beim Platzhalter.
+ */
+export function lazyYT(): YTNamespace {
+  class Lazy implements YTPlayer {
+    private real: YTPlayer | null = null;
+    private dead = false;
+    constructor(el: HTMLElement, opts: Record<string, unknown>) {
+      const make = (YT: YTNamespace) => {
+        if (this.dead) return;
+        try {
+          this.real = new YT.Player(el, opts);
+        } catch {
+          /* Element schon abgebaut oder ungültige ID: der Platzhalter bleibt */
+        }
+      };
+      if (window.YT?.Player) make(window.YT);
+      else loadYT().then(make, () => {});
+    }
+    loadVideoById(a: YTLoad) { this.real?.loadVideoById?.(a); }
+    cueVideoById(a: YTLoad) { this.real?.cueVideoById?.(a); }
+    playVideo() { this.real?.playVideo?.(); }
+    pauseVideo() { this.real?.pauseVideo?.(); }
+    mute() { this.real?.mute?.(); }
+    unMute() { this.real?.unMute?.(); }
+    isMuted() { return this.real && typeof this.real.isMuted === 'function' ? this.real.isMuted() : true; }
+    getCurrentTime() { return this.real && typeof this.real.getCurrentTime === 'function' ? this.real.getCurrentTime() : 0; }
+    getDuration() { return this.real && typeof this.real.getDuration === 'function' ? this.real.getDuration() : 0; }
+    getPlayerState() { return this.real && typeof this.real.getPlayerState === 'function' ? this.real.getPlayerState() : STATE.UNSTARTED; }
+    setPlaybackRate(r: number) { this.real?.setPlaybackRate?.(r); }
+    getPlaybackRate() { return this.real && typeof this.real.getPlaybackRate === 'function' ? this.real.getPlaybackRate() : 1; }
+    getAvailablePlaybackRates() { return this.real && typeof this.real.getAvailablePlaybackRates === 'function' ? this.real.getAvailablePlaybackRates() : [1]; }
+    setVolume(v: number) { this.real?.setVolume?.(v); }
+    setPlaybackQuality(q: string) { this.real?.setPlaybackQuality?.(q); }
+    destroy() {
+      this.dead = true;
+      try { this.real?.destroy?.(); } catch { /* IFrame noch nicht bereit */ }
+      this.real = null;
+    }
+  }
+  return { Player: Lazy, PlayerState: { ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 } };
+}
+
 function ytPlayer(YT: YTNamespace, el: HTMLElement, videoId: string | undefined, events: { onReady?: () => void; onState?: (s: number) => void; onError?: (code: number) => void; onRate?: (rate: number) => void }): YTPlayer {
   return new YT.Player(el, {
     host: 'https://www.youtube-nocookie.com',

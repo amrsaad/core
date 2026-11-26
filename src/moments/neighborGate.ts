@@ -2,6 +2,10 @@
 // Nachbarn (idx+1, idx+2) laden erst, wenn der aktive Moment stabil spielt, einer nach dem anderen. Stockt der aktive Moment, wird das
 // laufende Vorladen angehalten. Hängt der aktive Moment schon am Start, darf der nächste Nachbar nach DEADLINE_MS trotzdem laden.
 
+import { streamKind } from './preload';
+import type { Form } from './form';
+import type { Moment } from './types';
+
 /** Spielt seit so langer Zeit ohne waiting: stabil (ms) */
 export const STABLE_PLAYING_MS = 2000;
 /** readyState 4 mit so viel Puffer vor der Abspielposition: stabil (Sekunden) */
@@ -250,4 +254,21 @@ export function recoverCall(s: { playedBefore: boolean; waitingMs: number; pause
  */
 export function skipsReload(prev: { id: string; start: number; end: number | undefined } | null, next: { id: string; start: number; end: number | undefined }, o: { sameEl: boolean; sameSrc: boolean; play: boolean; wantPlay: boolean; rs: number }): boolean {
   return !!prev && prev.id === next.id && prev.start === next.start && prev.end === next.end && o.sameEl && o.sameSrc && !o.play && !o.wantPlay && o.rs >= 1;
+}
+
+/**
+ * Runde 42, Schalter: der Start des Feeds (Reiterwechsel, App-Start) wartet nur auf die YouTube-IFrame-API, wenn der aktive Moment ein YouTube-Moment ist.
+ * Ein Audio-, Stream- (HLS) oder Text-Moment lädt sofort (Gerätediag 26.11.: 9334 ms Warten auf die API im Audio-Reiter, der aktive Moment bekam seine Quelle erst danach).
+ * Die API lädt im Hintergrund weiter, die Slots bekommen ihren IFrame nachträglich (lazyYT). Aus: false, dann wartet jeder Start auf die API (Verhalten bis Runde 41).
+ */
+export const START_NO_YT_WAIT = true;
+/** Ein aktiver YouTube-Moment wartet höchstens so lange auf die API, bevor der Start ohne sie weiterläuft (ms). Fest, ohne navigator.connection (gibt es auf iOS nicht). Danach greift VIDEO_SWITCH. */
+export const YT_START_WAIT_MS = 3000;
+
+/** Braucht der aktive Moment die YouTube-API, bevor der Feed seine Player anlegen darf? Kein Moment: nein. Text: nein. Audio und HLS: nein. Aus (enabled false): immer ja. */
+export function needsYtBeforeStart(m: Pick<Moment, 'form' | 'hls' | 'videoId'> | undefined, form: Form | undefined, enabled: boolean = START_NO_YT_WAIT): boolean {
+  if (!m) return false;
+  if (!enabled) return true;
+  if (form === 'text' || m.form === 'text') return false;
+  return streamKind(m) === 'youtube';
 }

@@ -1,6 +1,6 @@
 // Runde 15: Vorrang für den aktiven Stream-Moment. Wann darf welcher Nachbar laden, wann wird angehalten, Frist, Erholung, kein doppeltes Laden.
 import { describe, expect, it } from 'vitest';
-import { aheadOf, DEADLINE_MS, isStable, isStalled, neighborCall, recoverCall, skipsReload, youtubeObs, STABLE_PLAYING_MS, type ActiveObs, type NeighborObs } from '../src/moments/neighborGate';
+import { aheadOf, DEADLINE_MS, needsYtBeforeStart, START_NO_YT_WAIT, YT_START_WAIT_MS, isStable, isStalled, neighborCall, recoverCall, skipsReload, youtubeObs, STABLE_PLAYING_MS, type ActiveObs, type NeighborObs } from '../src/moments/neighborGate';
 
 const act = (o: Partial<ActiveObs> = {}): ActiveObs => ({ playedBefore: false, playing: false, playingMs: 0, waitingMs: 0, rs: 0, ahead: 0, userPaused: false, sinceMs: 0, ...o });
 const nb = (o: Partial<NeighborObs> = {}): NeighborObs => ({ rank: 1, started: false, canplay: false, prevCanplay: true, prevStartedMs: 0, ...o });
@@ -151,5 +151,31 @@ describe('youtubeObs (Runde 16)', () => {
   });
   it('Nutzerpause gibt frei', () => {
     expect(neighborCall(y({ userPaused: true }), nb())).toEqual({ call: 'start', why: 'paused' });
+  });
+});
+
+describe('needsYtBeforeStart (Runde 42)', () => {
+  const m = (o: Record<string, unknown>) => ({ form: 'video' as const, videoId: 'abcdefghijk', ...o }) as Parameters<typeof needsYtBeforeStart>[0];
+  it('YouTube-Moment wartet auf die API', () => {
+    expect(needsYtBeforeStart(m({}), 'video')).toBe(true);
+  });
+  it('Audio mit Stream startet ohne API', () => {
+    expect(needsYtBeforeStart(m({ form: 'audio', hls: 'https://stream.test/a.mp3' }), 'audio')).toBe(false);
+  });
+  it('HLS-Video startet ohne API', () => {
+    expect(needsYtBeforeStart(m({ videoId: 'ted-1', hls: 'https://stream.test/1.m3u8' }), 'video')).toBe(false);
+  });
+  it('Text und fehlender Moment brauchen die API nicht', () => {
+    expect(needsYtBeforeStart(m({ form: 'text' }), 'text')).toBe(false);
+    expect(needsYtBeforeStart(m({}), 'text')).toBe(false);
+    expect(needsYtBeforeStart(undefined, 'video')).toBe(false);
+  });
+  it('Schalter aus: jeder vorhandene Moment wartet (Verhalten bis Runde 41)', () => {
+    expect(needsYtBeforeStart(m({ form: 'audio', hls: 'https://stream.test/a.mp3' }), 'audio', false)).toBe(true);
+    expect(needsYtBeforeStart(m({ videoId: 'ted-1', hls: 'https://stream.test/1.m3u8' }), 'video', false)).toBe(true);
+  });
+  it('feste Obergrenze, unabhängig vom Netz', () => {
+    expect(YT_START_WAIT_MS).toBe(3000);
+    expect(START_NO_YT_WAIT).toBe(true);
   });
 });

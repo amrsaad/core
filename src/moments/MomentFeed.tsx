@@ -1,5 +1,5 @@
 import { describeMedia, holdsNeighbor, needsLoad, type MediaItem } from './slotplan';
-import { hlsBehindYt, isWeakNet, neighborCall, recoverCall, slowStart, START_POLL_MS, startWatchCall, SWITCH_MS, switchCall, VIDEO_SWITCH, weakUntil, youtubeObs, type ActiveObs } from './neighborGate';
+import { hlsBehindYt, isWeakNet, needsYtBeforeStart, neighborCall, recoverCall, slowStart, START_NO_YT_WAIT, START_POLL_MS, startWatchCall, SWITCH_MS, switchCall, VIDEO_SWITCH, weakUntil, YT_START_WAIT_MS, youtubeObs, type ActiveObs } from './neighborGate';
 import { notesRow } from './notesrow';
 import { diagLog, netType } from '../lib/diag';
 import { markFirstPlay, setFeedLoading, setWeakNet } from '../lib/sync/firstPlay';
@@ -8,7 +8,7 @@ import { createPortal, flushSync } from 'react-dom';
 import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL, topicLabel } from '../lib/labels';
 import type { AppState } from '../lib/state';
-import { AUDIO_ONLY, audioDeck, createPlayer, deckClipOf, HLS, isIOS, LOCAL, loadYT, offlineYT, setDeckForm, STATE, type YTPlayer } from '../video/ytApi';
+import { AUDIO_ONLY, audioDeck, createPlayer, deckClipOf, HLS, isIOS, LOCAL, lazyYT, loadYT, offlineYT, setDeckForm, STATE, type YTPlayer } from '../video/ytApi';
 import { POOL, POOL_WINDOW, RESCUE_FAST, RESCUE_FAST_MS, RESCUE_RETRY_MAX, type DeckClip } from '../video/audioDeck';
 import { canWarm, coverMs, onNonCurrentPlaying, roleOf, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx, type WarmState } from '../video/warmup';
 import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, isFlat, onGesture, tabAfterSwipe, tabSwipe, type Gesture } from './gesture';
@@ -292,6 +292,10 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const lastReplan = useRef(0);
   /** YouTube-API nicht ladbar (offline): Stub-Player, YouTube-Momente werden übersprungen */
   const ytStub = useRef(false);
+  /** Runde 42: Zeitpunkt, an dem dieser Feed entstand (Reiterwechsel oder App-Start, der Feed baut sich je Form neu auf), Wartezeit auf die YouTube-API vor dem Start, erste Startzeile geschrieben */
+  const openAt = useRef(performance.now());
+  const apiWaited = useRef(0);
+  const startLogged = useRef(false);
   const [ytEpoch, setYtEpoch] = useState(0);
   const [online, setOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
   const idxRef = useRef(0);
@@ -2060,6 +2064,11 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                     openGate('first playing');
                     // Runde 12: der erste Sync-Upload nach dem Öffnen wartet auf dieses erste PLAYING
                     markFirstPlay();
+                    // Runde 42: Zeit vom Öffnen des Reiters (bzw. App-Start) bis zum ersten Abspielen, mit der Wartezeit auf die YouTube-API darin
+                    if (!startLogged.current && slot.mid) {
+                      startLogged.current = true;
+                      diag.current.push(`start: ${slot.mid} first sound ${Math.round(performance.now() - openAt.current)} ms after tab open (yt api waited ${apiWaited.current} ms)`);
+                    }
                     startCover(slot);
                   } else {
                     if (nbr.current.yt.id === slot.mid) nbr.current.yt.at = 0;
@@ -2262,15 +2271,54 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       const ready = loadYT();
       const apiT0 = performance.now();
       let YT: Awaited<ReturnType<typeof loadYT>> | null = null;
-      try {
-        YT = poorRef.current ? await Promise.race([ready, new Promise<null>((r) => window.setTimeout(() => r(null), 4000))]) : await ready;
-      } catch {
-        YT = null;
+      const cm0 = queue.current[idxRef.current];
+      // Runde 42 (START_NO_YT_WAIT): nur ein aktiver YouTube-Moment wartet auf die API, und das höchstens YT_START_WAIT_MS (fest, ohne navigator.connection). Audio, HLS und Text starten sofort,
+      // die Slots bekommen ihren IFrame später (lazyYT). Die API lädt weiter im Hintergrund.
+      const waitYt = needsYtBeforeStart(cm0, form);
+      if (START_NO_YT_WAIT) {
+        if (window.YT?.Player) YT = window.YT;
+        else if (!waitYt) {
+          YT = lazyYT();
+          diag.current.push(`video: start without youtube api (${cm0 ? cm0.id : 'no moment'} needs none)`);
+        } else {
+          let failed = false;
+          try {
+            YT = await Promise.race([ready, new Promise<null>((r) => window.setTimeout(() => r(null), YT_START_WAIT_MS))]);
+          } catch {
+            failed = true;
+          }
+          if (cancelled) return;
+          if (!YT && !failed) {
+            YT = lazyYT();
+            diag.current.push(`video: youtube api late after ${YT_START_WAIT_MS} ms, start continues`);
+          }
+        }
+        // Kommt die API nie (Skript blockiert), gilt wie offline: YouTube-Momente werden übersprungen, die Rückkehr des Netzes baut neu auf
+        if (YT && !window.YT?.Player) {
+          ready.catch(() => {
+            if (cancelled) return;
+            ytStub.current = true;
+            diag.current.push('yt stub');
+            const cur = queue.current[idxRef.current];
+            if (cur && streamKind(cur) === 'youtube') {
+              bad.current.add(cur.videoId);
+              window.setTimeout(() => skipRef.current(), 0);
+            }
+          });
+        }
+      } else {
+        try {
+          YT = poorRef.current ? await Promise.race([ready, new Promise<null>((r) => window.setTimeout(() => r(null), 4000))]) : await ready;
+        } catch {
+          YT = null;
+        }
       }
       if (cancelled) return;
       // Runde 41: so lange hielt das Warten auf die YouTube-API den Start des Video-Reiters auf (auch wenn der erste Moment ein HLS-Stream ist). Nur eine Messung, kein Eingriff.
+      // Runde 42: gilt als Wartezeit vor dem Start (apiWaited), "start:"-Zeile beim ersten Abspielen nennt sie.
       const apiMs = Math.round(performance.now() - apiT0);
-      if (apiMs > 300) diag.current.push(`video: youtube api ${YT ? 'ready' : 'missing'} after ${apiMs} ms, net ${netType()}`);
+      apiWaited.current = apiMs;
+      if (apiMs > 300) diag.current.push(`video: youtube api ${window.YT?.Player || (!START_NO_YT_WAIT && YT) ? 'ready' : 'missing'} after ${apiMs} ms, net ${netType()}`);
       if (YT) ytStub.current = false;
       else {
         ytStub.current = true;
