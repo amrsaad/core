@@ -87,7 +87,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       r.notes.audioFirstSoundMs = num(line, /first sound (\d+) ms/);
       c.audioStartLine = !!line;
       c.audioFirstSoundUnder1500 = r.notes.audioFirstSoundMs < 1500;
-      c.audioApiWaitedZero = num(line, /waited (\d+) ms/) === 0;
+      c.audioApiWaitedZero = num(line, /waited (\d+) ms/) <= 50; // Messung kann 1 bis 2 ms zeigen, der Fehlerfall liegt bei Sekunden
       c.audioSrcLine = d.some((x) => /^deck: src net snaudio\d+/.test(x)) || d.some((x) => /^deck: src local snaudio\d+/.test(x));
       c.audioNoApiWaitLine = !d.some((x) => /^video: youtube api (ready|missing) after/.test(x));
       c.audioStartWithoutApiLine = d.some((x) => /^video: start without youtube api /.test(x));
@@ -113,7 +113,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       r.notes.hlsFirstSoundMs = num(line, /first sound (\d+) ms/);
       c.hlsStartLine = !!line;
       c.hlsFirstSoundUnder1500 = r.notes.hlsFirstSoundMs < 1500;
-      c.hlsApiWaitedZero = num(line, /waited (\d+) ms/) === 0;
+      c.hlsApiWaitedZero = num(line, /waited (\d+) ms/) <= 50;
       c.hlsNoStub = !d.includes('yt stub');
       await sleep(Math.max(0, API_DELAY + 1500 - (Date.now() - t0)));
       c.hlsStillPlayingAfterApi = (await f.pg.evaluate(() => window.__core.state())) === 1;
