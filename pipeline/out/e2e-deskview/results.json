@@ -1,5 +1,5 @@
 {
- "at": "2026-11-26T13:47:18.458Z",
+ "at": "2026-11-26T15:01:21.868Z",
  "runs": [
   {
    "browser": "webkit",
@@ -12,6 +12,11 @@
     "videoQueueAtLeast3": true,
     "videoHookInCenter": true,
     "videoQueueClickSwitches": true,
+    "videoQueueCurrentMarked": true,
+    "videoQueueSeparators": true,
+    "videoQueueLongHookClamped": true,
+    "videoQueueHoverState": true,
+    "videoQueueFocusState": false,
     "videoArrowDownSwitches": true,
     "videoArrowUpSwitches": true,
     "videoSpacePausesAndResumes": true,
@@ -28,6 +33,14 @@
     "videoSubtitleInFrameBottom": true,
     "videoFullscreenButton": true,
     "videoFullscreenToggles": true,
+    "videoHookToBarGap": true,
+    "videoGroupCentered": true,
+    "videoPlayer169Max760": true,
+    "videoPlayerAlignsWithGroup": true,
+    "videoTimelineHandleDraggable": true,
+    "videoTimelineHandleFocusRing": false,
+    "videoCcShown": true,
+    "videoCcTogglesLikeC": true,
     "audioThreeColumns": true,
     "audioNoColumnOverlap": true,
     "audioNothingAboveBar": true,
@@ -36,6 +49,11 @@
     "audioQueueAtLeast3": true,
     "audioHookInCenter": true,
     "audioQueueClickSwitches": true,
+    "audioQueueCurrentMarked": true,
+    "audioQueueSeparators": true,
+    "audioQueueLongHookClamped": true,
+    "audioQueueHoverState": true,
+    "audioQueueFocusState": false,
     "audioArrowDownSwitches": true,
     "audioArrowUpSwitches": true,
     "audioSpacePausesAndResumes": true,
@@ -48,6 +66,18 @@
     "audioLyricsField": true,
     "audioTimelineReadOnly": true,
     "audioCaptionsOff": true,
+    "audioTimelineNoHandle": true,
+    "audioTransportLayout": true,
+    "audioGridEven": true,
+    "audioCoverPlaceholder": true,
+    "audioThreeLines": true,
+    "audioLineHierarchy": true,
+    "audioCurrentLineFixed": true,
+    "audioNoInventedLines": true,
+    "audioLinesInsideField": true,
+    "audioFieldHeight": true,
+    "audioFadeAtMost150ms": true,
+    "audioNoFadeWhenReducedMotion": true,
     "textThreeColumns": true,
     "textNoColumnOverlap": true,
     "textNothingAboveBar": true,
@@ -56,10 +86,22 @@
     "textQueueAtLeast3": true,
     "textHookInCenter": true,
     "textQueueClickSwitches": true,
+    "textQueueCurrentMarked": true,
+    "textQueueSeparators": true,
+    "textQueueLongHookClamped": true,
+    "textQueueHoverState": true,
+    "textQueueFocusState": false,
     "textArrowDownSwitches": true,
     "textArrowUpSwitches": true,
     "textNoPlayerControls": true,
     "textSerifHook": true,
+    "textScrollable": true,
+    "textFadeAtBottom": true,
+    "textWheelScrollsNotNavigates": true,
+    "textPageDownDoesNotNavigate": true,
+    "textSpaceDoesNotNavigate": true,
+    "textFadeGoneAtEnd": true,
+    "textArrowKeysStillNavigate": true,
     "keysLikeSave": true,
     "noKeysWhileTyping": true,
     "helpKey": true,
@@ -114,7 +156,79 @@
       }
      }
     },
+    "queue-video": [
+     {
+      "cur": true,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 81,
+      "sep": "0px",
+      "bg": "color(srgb 0.107922 0.100549 0.08949)",
+      "bd": "color(srgb 0.647059 0.580392 1 / 0.45)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 80,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 81,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 80,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 79,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 81,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     }
+    ],
     "fullscreen": true,
+    "videoGroup": {
+     "gap": 24,
+     "gapTop": 24,
+     "top": 66,
+     "bottom": 66.5,
+     "w": 760,
+     "h": 427.5,
+     "minTop": 40,
+     "aligned": true
+    },
     "geo-audio": {
      "overlapCols": false,
      "aboveBar": false,
@@ -153,6 +267,85 @@
       }
      }
     },
+    "queue-audio": [
+     {
+      "cur": true,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 81,
+      "sep": "0px",
+      "bg": "color(srgb 0.100549 0.107922 0.122667)",
+      "bd": "color(srgb 0.647059 0.580392 1 / 0.45)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 120,
+      "len": 169,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 81,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 120,
+      "len": 169,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 81,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     }
+    ],
+    "audioRaster": {
+     "gap1": 24,
+     "gap2": 24,
+     "top": 87,
+     "bottom": 87,
+     "rateLeft": 21,
+     "playCx": 0,
+     "rateRightOfTrack": true,
+     "ccAbsent": true,
+     "order": true
+    },
+    "coverPh": {
+     "ph": {
+      "t": "K",
+      "w": 174,
+      "h": 174,
+      "img": false,
+      "bg": "color(srgb 0.169412 0.168627 0.255529)",
+      "ch": true
+     },
+     "chan": "Kanal brain (Dr. Test 2)"
+    },
+    "lyricTexts": [
+     "Untertitel eins, a marketing message",
+     "Untertitel zwei, noch eine Zeile.",
+     "Untertitel drei."
+    ],
     "geo-text": {
      "overlapCols": false,
      "aboveBar": false,
@@ -190,6 +383,79 @@
        "h": 844
       }
      }
+    },
+    "queue-text": [
+     {
+      "cur": true,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 80,
+      "sep": "0px",
+      "bg": "color(srgb 0.096863 0.111608 0.126353)",
+      "bd": "color(srgb 0.290196 0.870588 0.501961 / 0.45)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 80,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 80,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 80,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 80,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 80,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     }
+    ],
+    "textGeo": {
+     "st": 0,
+     "sh": 2350,
+     "ch": 732,
+     "end": false,
+     "mask": "linear-gradient(rgb(10, 14, 18) calc(100% - 48px), rgba(0, 0, 0, 0))",
+     "vb": 788,
+     "bt": 802,
+     "bb": 876,
+     "win": true
     },
     "geo-1280-video": {
      "overlapCols": false,
@@ -432,6 +698,11 @@
     "videoQueueAtLeast3": true,
     "videoHookInCenter": true,
     "videoQueueClickSwitches": true,
+    "videoQueueCurrentMarked": true,
+    "videoQueueSeparators": true,
+    "videoQueueLongHookClamped": true,
+    "videoQueueHoverState": true,
+    "videoQueueFocusState": true,
     "videoArrowDownSwitches": true,
     "videoArrowUpSwitches": true,
     "videoSpacePausesAndResumes": true,
@@ -448,6 +719,14 @@
     "videoSubtitleInFrameBottom": true,
     "videoFullscreenButton": true,
     "videoFullscreenToggles": true,
+    "videoHookToBarGap": true,
+    "videoGroupCentered": true,
+    "videoPlayer169Max760": true,
+    "videoPlayerAlignsWithGroup": true,
+    "videoTimelineHandleDraggable": true,
+    "videoTimelineHandleFocusRing": true,
+    "videoCcShown": true,
+    "videoCcTogglesLikeC": true,
     "audioThreeColumns": true,
     "audioNoColumnOverlap": true,
     "audioNothingAboveBar": true,
@@ -456,6 +735,11 @@
     "audioQueueAtLeast3": true,
     "audioHookInCenter": true,
     "audioQueueClickSwitches": true,
+    "audioQueueCurrentMarked": true,
+    "audioQueueSeparators": true,
+    "audioQueueLongHookClamped": true,
+    "audioQueueHoverState": true,
+    "audioQueueFocusState": true,
     "audioArrowDownSwitches": true,
     "audioArrowUpSwitches": true,
     "audioSpacePausesAndResumes": true,
@@ -468,6 +752,18 @@
     "audioLyricsField": true,
     "audioTimelineReadOnly": true,
     "audioCaptionsOff": true,
+    "audioTimelineNoHandle": true,
+    "audioTransportLayout": true,
+    "audioGridEven": true,
+    "audioCoverPlaceholder": true,
+    "audioThreeLines": true,
+    "audioLineHierarchy": true,
+    "audioCurrentLineFixed": true,
+    "audioNoInventedLines": true,
+    "audioLinesInsideField": true,
+    "audioFieldHeight": true,
+    "audioFadeAtMost150ms": true,
+    "audioNoFadeWhenReducedMotion": true,
     "textThreeColumns": true,
     "textNoColumnOverlap": true,
     "textNothingAboveBar": true,
@@ -476,10 +772,22 @@
     "textQueueAtLeast3": true,
     "textHookInCenter": true,
     "textQueueClickSwitches": true,
+    "textQueueCurrentMarked": true,
+    "textQueueSeparators": true,
+    "textQueueLongHookClamped": true,
+    "textQueueHoverState": true,
+    "textQueueFocusState": true,
     "textArrowDownSwitches": true,
     "textArrowUpSwitches": true,
     "textNoPlayerControls": true,
     "textSerifHook": true,
+    "textScrollable": true,
+    "textFadeAtBottom": true,
+    "textWheelScrollsNotNavigates": true,
+    "textPageDownDoesNotNavigate": true,
+    "textSpaceDoesNotNavigate": true,
+    "textFadeGoneAtEnd": true,
+    "textArrowKeysStillNavigate": true,
     "keysLikeSave": true,
     "noKeysWhileTyping": true,
     "helpKey": true,
@@ -534,7 +842,79 @@
       }
      }
     },
+    "queue-video": [
+     {
+      "cur": true,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 81,
+      "sep": "0px",
+      "bg": "color(srgb 0.107922 0.100549 0.0894902)",
+      "bd": "color(srgb 0.647059 0.580392 1 / 0.45)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 80,
+      "sep": "1px",
+      "bg": "color(srgb 0.145882 0.138824 0.128235)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 81,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 80,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 79,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 81,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     }
+    ],
     "fullscreen": true,
+    "videoGroup": {
+     "gap": 24,
+     "gapTop": 24,
+     "top": 66,
+     "bottom": 66.5,
+     "w": 760,
+     "h": 427.5,
+     "minTop": 40,
+     "aligned": true
+    },
     "geo-audio": {
      "overlapCols": false,
      "aboveBar": false,
@@ -573,6 +953,85 @@
       }
      }
     },
+    "queue-audio": [
+     {
+      "cur": true,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 81,
+      "sep": "0px",
+      "bg": "color(srgb 0.100549 0.107922 0.122667)",
+      "bd": "color(srgb 0.647059 0.580392 1 / 0.45)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 120,
+      "len": 169,
+      "sep": "1px",
+      "bg": "color(srgb 0.138824 0.145882 0.16)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 81,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 120,
+      "len": 169,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 81,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     }
+    ],
+    "audioRaster": {
+     "gap1": 24,
+     "gap2": 24,
+     "top": 87,
+     "bottom": 87,
+     "rateLeft": 21,
+     "playCx": 0,
+     "rateRightOfTrack": true,
+     "ccAbsent": true,
+     "order": true
+    },
+    "coverPh": {
+     "ph": {
+      "t": "K",
+      "w": 174,
+      "h": 174,
+      "img": false,
+      "bg": "color(srgb 0.169412 0.168627 0.255529)",
+      "ch": true
+     },
+     "chan": "Kanal brain (Dr. Test 2)"
+    },
+    "lyricTexts": [
+     "Untertitel eins, a marketing message",
+     "Untertitel zwei, noch eine Zeile.",
+     "Untertitel drei."
+    ],
     "geo-text": {
      "overlapCols": false,
      "aboveBar": false,
@@ -610,6 +1069,79 @@
        "h": 844
       }
      }
+    },
+    "queue-text": [
+     {
+      "cur": true,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 80,
+      "sep": "0px",
+      "bg": "color(srgb 0.0968627 0.111608 0.126353)",
+      "bd": "color(srgb 0.290196 0.870588 0.501961 / 0.45)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 80,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 80,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 80,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 80,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     },
+     {
+      "cur": false,
+      "clamp": "3",
+      "h": 60,
+      "sh": 60,
+      "len": 80,
+      "sep": "1px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "bd": "rgba(0, 0, 0, 0)"
+     }
+    ],
+    "textGeo": {
+     "st": 0,
+     "sh": 2350,
+     "ch": 732,
+     "end": false,
+     "mask": "linear-gradient(rgb(10, 14, 18) calc(100% - 48px), rgba(0, 0, 0, 0))",
+     "vb": 788,
+     "bt": 802,
+     "bb": 876,
+     "win": true
     },
     "geo-1280-video": {
      "overlapCols": false,
