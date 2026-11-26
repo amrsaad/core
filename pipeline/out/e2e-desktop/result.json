@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-26T13:05:49.588Z",
+  "at": "2026-11-26T13:41:25.323Z",
   "checks": {
     "below1181Mobile": true,
     "at1181Desktop": true,
@@ -12,7 +12,7 @@
     "helpBlocksKeys": true,
     "escClosesHelp": true,
     "helpOnlyOnce": true,
-    "mainFillsLeftOfPanel": true,
+    "mainFillsBetweenColumns": true,
     "videoIs16by9": true,
     "videoCentered": true,
     "panelFixedRight": true,
@@ -43,9 +43,8 @@
     "keyS": true,
     "keySToggles": true,
     "keyC": true,
-    "deskCaptionContext": true,
-    "captionStaysOpenOnNext": true,
-    "escClosesCaption": true,
+    "captionsStayOnOnNext": true,
+    "keyCTogglesOff": true,
     "keyO": true,
     "keyF": true,
     "noteShowsNumbers": true,
@@ -112,21 +111,21 @@
   "notes": {
     "geo": {
       "main": {
-        "x": 0,
+        "x": 273.59375,
         "y": 56,
-        "w": 1040,
+        "w": 835.21875,
         "h": 844
       },
       "panel": {
-        "x": 1065,
+        "x": 1125.8125,
         "y": 80,
-        "w": 351,
-        "h": 294
+        "w": 290.1875,
+        "h": 796
       },
       "aside": {
-        "x": 1040,
+        "x": 1108.8125,
         "y": 56,
-        "w": 400,
+        "w": 331.1875,
         "h": 844
       },
       "bar": {
@@ -136,17 +135,17 @@
         "h": 56
       },
       "video": {
-        "x": 0,
-        "y": 125.5,
-        "w": 1040,
-        "h": 585
+        "x": 311.203125,
+        "y": 96,
+        "w": 760,
+        "h": 427.5
       },
       "scrollW": 1440
     },
     "text": {
-      "w": 640,
+      "w": 638,
       "ch65": 640,
-      "col": 1040
+      "col": 835.21875
     },
     "ring": [
       {
@@ -182,10 +181,13 @@
         "ok": true
       },
       {
+        "tag": "DIV",
+        "ok": true
+      },
+      {
         "tag": "BUTTON",
         "ok": true
       },
-      null,
       {
         "tag": "BUTTON",
         "ok": true
