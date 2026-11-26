@@ -1,0 +1,54 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-26",
+ "records": [
+  {
+   "sourceId": "wiki:de:Liste der IPA-Zeichen",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Liste_der_IPA-Zeichen",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/26",
+    "status": 200
+   },
+   "title": "Liste der IPA-Zeichen",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Diese Liste der Zeichen des Internationalen Phonetischen Alphabets (IPA) ordnet die Lautschriftzeichen nach Ähnlichkeit mit Graphem bzw. Lautwert von Zeichen des lateinischen Alphabets."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-26T04:06:02.821Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Liste_der_IPA-Zeichen": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Regine Hildebrandt",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Regine_Hildebrandt",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/26",
+    "status": 200
+   },
+   "title": "Regine Hildebrandt",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Regine Hildebrandt war eine deutsche Politikerin (SPD). Sie war von 1990 bis 1999 Ministerin für Arbeit, Soziales, Gesundheit und Frauen des Landes Brandenburg."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-26T04:06:02.821Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Regine_Hildebrandt": 200
+   }
+  }
+ ]
+}
