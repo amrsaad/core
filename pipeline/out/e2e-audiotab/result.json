@@ -1,5 +1,5 @@
 {
- "at": "2026-11-26T19:23:04.502Z",
+ "at": "2026-11-26T20:47:16.114Z",
  "runs": [
   {
    "browser": "webkit",
@@ -93,7 +93,7 @@
     "openCardNotBackOnReturn": true
    },
    "notes": {
-    "iosTapMs": 107,
+    "iosTapMs": 4,
     "iosGestureLines": [
      "deck: waiting for tap atshort1 (no gesture or sound off)",
      "deck: probe done spare ok=0 dur=600.0 t=0.0",
@@ -108,7 +108,7 @@
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
-     "deck: gesture unlock 5 elements ok=5 rejected=0 timeout=0 after 309 ms",
+     "deck: gesture unlock 5 elements ok=5 rejected=0 timeout=0 after 310 ms",
      "deck: pool start after unlock ok=5/10",
      "deck: gesture pointerup unlocked 6/6"
     ],
@@ -120,11 +120,12 @@
      "ready": [
       "atrdy7",
       "atrdy3",
-      "atrdy9"
+      "atrdy9",
+      "atrdy2"
      ],
-     "n": 42
+     "n": 44
     },
-    "rfSwipeMs": 510,
+    "rfSwipeMs": 421,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -157,7 +158,7 @@
      "bg: started atshort9:0",
      "bg: next atshort9:0",
      "bg: refill atshort8 (pool 1/0, target 2)",
-     "bg: refill ready atshort8 after 31 ms",
+     "bg: refill ready atshort8 after 32 ms",
      "bg: deck advance to atshort9: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
      "bg: deck clip end via timeupdate hidden=true pool=2 onAdvance=true advance=yes rs=0 muted=false t=4.0",
      "bg: deck advance atshort9 to atshort2: swap and play() in this handler, new element true, next from storage false, readyState 0",
@@ -165,82 +166,82 @@
      "bg: started atshort2:0",
      "bg: next atshort2:0",
      "bg: refill atshort13 (pool 1/0, target 2)",
-     "bg: refill ready atshort13 after 31 ms"
+     "bg: refill ready atshort13 after 30 ms"
     ],
     "tempoWaiting": 0,
-    "tempoPaused": 7,
+    "tempoPaused": 8,
     "cue": {
      "worst": 1,
-     "n": 610,
+     "n": 614,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "3.45",
+       "3.36",
+       34,
+       34
+      ],
+      [
+       "4.66",
+       47,
+       47
+      ],
+      [
+       "0.83",
+       9,
+       9
+      ],
+      [
+       "2.14",
+       22,
+       22
+      ],
+      [
+       "3.44",
        35,
        35
       ],
       [
-       "4.75",
+       "4.74",
        48,
        48
       ],
       [
-       "1.00",
-       10,
-       10
+       "6.04",
+       61,
+       61
       ],
       [
-       "2.32",
-       24,
-       24
+       "7.34",
+       74,
+       74
       ],
       [
-       "3.61",
-       37,
-       37
+       "8.64",
+       87,
+       87
       ],
       [
-       "4.94",
-       50,
-       50
+       "9.93",
+       100,
+       100
       ],
       [
-       "6.25",
-       63,
-       63
+       "11.24",
+       113,
+       113
       ],
       [
-       "7.56",
-       76,
-       76
-      ],
-      [
-       "8.86",
-       89,
-       89
-      ],
-      [
-       "10.19",
-       102,
-       102
-      ],
-      [
-       "11.50",
-       115,
-       115
-      ],
-      [
-       "12.79",
-       128,
-       128
+       "12.53",
+       126,
+       126
       ]
      ],
      "rate": 2
     },
     "cueTempo": {
-     "worst": 0,
-     "n": 499,
+     "worst": 1,
+     "n": 518,
      "rates": [
       1,
       1.5,
@@ -372,7 +373,7 @@
     "openCardNotBackOnReturn": true
    },
    "notes": {
-    "iosTapMs": 2,
+    "iosTapMs": 5,
     "iosGestureLines": [
      "deck: waiting for tap atshort1 (no gesture or sound off)",
      "deck: probe done spare ok=0 dur=600.0 t=0.0",
@@ -387,7 +388,7 @@
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
-     "deck: gesture unlock 5 elements ok=5 rejected=0 timeout=0 after 305 ms",
+     "deck: gesture unlock 5 elements ok=5 rejected=0 timeout=0 after 303 ms",
      "deck: pool start after unlock ok=5/10",
      "deck: gesture pointerup unlocked 6/6"
     ],
@@ -403,7 +404,7 @@
      ],
      "n": 40
     },
-    "rfSwipeMs": 423,
+    "rfSwipeMs": 509,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -444,10 +445,10 @@
      "bg: started atshort2:0",
      "bg: next atshort2:0",
      "bg: refill atshort13 (pool 1/0, target 2)",
-     "bg: refill ready atshort13 after 31 ms"
+     "bg: refill ready atshort13 after 30 ms"
     ],
     "tempoWaiting": 0,
-    "tempoPaused": 0,
+    "tempoPaused": 9,
     "cue": {
      "worst": 0,
      "n": 601,
@@ -460,59 +461,59 @@
        34
       ],
       [
-       "4.68",
+       "4.67",
        47,
        47
       ],
       [
-       "0.90",
-       10,
-       10
+       "0.89",
+       9,
+       9
       ],
       [
-       "2.24",
+       "2.22",
        23,
        23
       ],
       [
-       "3.57",
+       "3.56",
        36,
        36
       ],
       [
-       "4.90",
-       50,
-       50
+       "4.89",
+       49,
+       49
       ],
       [
-       "6.24",
+       "6.22",
        63,
        63
       ],
       [
-       "7.57",
+       "7.56",
        76,
        76
       ],
       [
-       "8.90",
-       90,
-       90
+       "8.89",
+       89,
+       89
       ],
       [
-       "10.24",
+       "10.22",
        103,
        103
       ],
       [
-       "11.57",
+       "11.56",
        116,
        116
       ],
       [
-       "12.90",
-       130,
-       130
+       "12.89",
+       129,
+       129
       ]
      ],
      "rate": 2
@@ -605,7 +606,7 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "firstSoundMs": 2772,
+    "firstSoundMs": 2725,
     "diag": [
      "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
      "deck: src net pod-0006",
@@ -628,7 +629,7 @@
      "state": "playing",
      "pos": {
       "duration": 25,
-      "position": 0,
+      "position": 0.0017629999999968504,
       "playbackRate": 1
      },
      "cold": 1,
@@ -644,9 +645,9 @@
      "want": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
      "id": "pod-0013:82"
     },
-    "lockNextMs": 26,
+    "lockNextMs": 23,
     "lockNextLines": [
-     "deck: swap pod-0013 ready=true pool=0",
+     "deck: swap pod-0013 ready=true pool=1",
      "deck play#3 swap rs=4 muted=false t=82.0",
      "deck play#3 ok"
     ],

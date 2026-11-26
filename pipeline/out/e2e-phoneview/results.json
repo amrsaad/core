@@ -1,5 +1,5 @@
 {
- "at": "2026-11-26T19:30:37.692Z",
+ "at": "2026-11-26T20:54:44.207Z",
  "runs": [
   {
    "browser": "webkit",
@@ -336,20 +336,20 @@
      "form": "text"
     },
     "ersteGeste": [
-     "deck: all unlocked 6/6 after 1850 ms",
+     "deck: pool fill 1/5 (local 0, net 1)",
+     "deck play#1 unmute rs=0 muted=false t=100.0",
+     "deck: pool load test0000043 src=net",
+     "deck: pool fill 2/5 (local 0, net 2)",
+     "lock: handlers set (playing)",
+     "slot0 test0000041:100 state 1",
+     "start: test0000041:100 first sound 1776 ms after tab open (yt api waited 0 ms)",
+     "slot0 test0000041:100 loud: lufs none, gain 0.0 dB (unchanged: off)",
+     "deck: all unlocked 6/6 after 1817 ms",
      "deck play#1 ok",
      "deck play#2 play rs=0 muted=false t=100.0",
      "lock: handlers set (playing)",
      "slot0 test0000041:100 state 1",
-     "deck play#2 ok",
-     "deck: pool ready test0000042 after 30 ms host=stream.test",
-     "pool 1/5 ready",
-     "deck: pool load test0000044 src=net",
-     "deck: pool fill 3/5 (local 0, net 3)",
-     "deck: pool ready test0000043 after 30 ms host=stream.test",
-     "pool 2/5 ready",
-     "deck: pool load test0000045 src=net",
-     "deck: pool fill 4/5 (local 0, net 4)"
+     "deck play#2 ok"
     ],
     "aus video": {
      "phoneAttr": false,
@@ -646,7 +646,7 @@
     "startPlayTasteZeigtPlay": true,
     "startZeitleisteSteht": true,
     "ersteGesteStartetTon": true,
-    "ersteGesteKeinPause": true,
+    "ersteGesteKeinPause": false,
     "ersteGesteTippWeg": true,
     "ersteGesteTonAn": true,
     "ersteGesteDeckUnlock": true,
@@ -733,9 +733,9 @@
      "deck: pool fill 2/5 (local 0, net 2)",
      "lock: handlers set (playing)",
      "slot0 test0000041:100 state 1",
-     "start: test0000041:100 first sound 1734 ms after tab open (yt api waited 0 ms)",
+     "start: test0000041:100 first sound 1640 ms after tab open (yt api waited 0 ms)",
      "slot0 test0000041:100 loud: lufs none, gain 0.0 dB (unchanged: off)",
-     "deck: all unlocked 6/6 after 1773 ms",
+     "deck: all unlocked 6/6 after 1681 ms",
      "deck play#1 ok",
      "deck play#2 play rs=0 muted=false t=100.0",
      "lock: handlers set (playing)",
