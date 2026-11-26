@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-26T17:20:03.088Z",
+  "at": "2026-11-26T19:26:58.016Z",
   "delayMs": 1500,
   "runs": [
     {
@@ -21,7 +21,7 @@
         "pageErrors": true
       },
       "numbers": {
-        "coldStartMs": 1699,
+        "coldStartMs": 1694,
         "rangeFetchesAfterStart": 0,
         "requestsAfterStart": 6,
         "stockLines": [],
