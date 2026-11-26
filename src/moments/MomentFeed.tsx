@@ -9,7 +9,7 @@ import { dayKey, now as clockNow } from '../lib/clock';
 import { AREA_COLOR, AREA_LABEL, topicLabel } from '../lib/labels';
 import type { AppState } from '../lib/state';
 import { AUDIO_ONLY, audioDeck, createPlayer, deckClipOf, HLS, isIOS, LOCAL, lazyYT, loadYT, offlineYT, setDeckForm, STATE, type YTPlayer } from '../video/ytApi';
-import { POOL, POOL_WINDOW, RESCUE_FAST, RESCUE_FAST_MS, RESCUE_RETRY_MAX, type DeckClip } from '../video/audioDeck';
+import { POOL, POOL_WINDOW, RESCUE_FAST, RESCUE_FAST_MS, RESCUE_RETRY_MAX, STALL_SWITCH_MS, type DeckClip } from '../video/audioDeck';
 import { canWarm, coverMs, onNonCurrentPlaying, roleOf, swipePlan, videoStats, WARM_MS, type SlotView, type WarmCtx, type WarmState } from '../video/warmup';
 import { clearFirstGesturePointer, firstGesturePointer, gestureSeen, isFlat, onGesture, tabAfterSwipe, tabSwipe, type Gesture } from './gesture';
 import { hintVisible, SOUND_NONE } from './soundHint';
@@ -1387,6 +1387,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
 
   /** Runde 8: Momente, von denen die App schon einmal von selbst auf einen bereiten gewechselt ist (je Moment höchstens ein Wechsel, nichts pendelt) */
   const rescued = useRef(new Set<string>());
+  /** Runde 43: Momente, für die "stall ... no ready element, waiting" schon im Protokoll steht (eine Zeile je Moment) */
+  const stallWaitNoted = useRef(new Set<string>());
   /** Runde 39 (RESCUE_RETRY): wie oft ein Moment als aktueller ersetzt wurde. Mit dem Schalter darf er bis RESCUE_RETRY_MAX mal wieder ersetzt werden (Zurückwischen auf einen toten Moment). */
   const rescueN = useRef(new Map<string, number>());
   /**
@@ -1396,26 +1398,27 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
    * rescue: der aktuelle Moment spielt nach RESCUE_MS nicht (at = idx), auf iOS nur mit einem Element, das schon freigeschaltet ist, höchstens einmal je Moment.
    * Gibt true zurück, wenn die Warteschlange umgestellt wurde. Verdeckt tut das nichts (dort tauscht das Deck selbst das erste bereite Element).
    */
-  const readyFirst = (at: number, why: 'go' | 'start' | 'rescue'): boolean => {
+  const readyFirst = (at: number, why: 'go' | 'start' | 'rescue' | 'stall'): boolean => {
     if (form !== 'audio' || !pre || textRef.current || forYouRef.current || recallRef.current || isBackground(document.visibilityState)) return false;
     const cur = queue.current[idxRef.current];
     const m = queue.current[at];
     if (!m || formOf(m) !== 'audio') return false;
     // Ein Moment, den das Deck schon spielt (verdeckter Tausch, lockNext), ist gesetzt
     if (why === 'go' && audioDeck.holds(keyOf(m))) return false;
-    if (why === 'rescue' && (!cur || (rescued.current.has(cur.id) && !(audioDeck.rescueRetry && (rescueN.current.get(cur.id) ?? 0) < RESCUE_RETRY_MAX)))) return false;
+    if ((why === 'rescue' || why === 'stall') && (!cur || (rescued.current.has(cur.id) && !(audioDeck.rescueRetry && (rescueN.current.get(cur.id) ?? 0) < RESCUE_RETRY_MAX)))) return false;
     // start und rescue: der Kopf hat in seinem Element schon Daten (abgelehnter Start, nur der Tipp fehlt), dann startet er selbst
-    if (why !== 'go' && audioDeck.holds(keyOf(m)) && audioDeck.readyState() >= 3) return false;
-    const unlockedOnly = why === 'rescue' && IOS;
+    // (stall: das Element meldet readyState 4, steht aber, das ist der Anlass)
+    if (why !== 'go' && why !== 'stall' && audioDeck.holds(keyOf(m)) && audioDeck.readyState() >= 3) return false;
+    const unlockedOnly = (why === 'rescue' || why === 'stall') && IOS;
     const ready = (x: Moment) => formOf(x) === 'audio' && (LOCAL.has(keyOf(x)) || audioDeck.poolReady(keyOf(x), unlockedOnly));
-    const eligible = (x: Moment) => !bad.current.has(x.videoId) && !(why === 'rescue' && rescued.current.has(x.id));
+    const eligible = (x: Moment) => !bad.current.has(x.videoId) && !((why === 'rescue' || why === 'stall') && rescued.current.has(x.id));
     const r = readyFirstPlan(queue.current, at, ready, eligible);
     if (r.how !== 'pulled') return false;
     diag.current.push(`deck: ready first ${r.id} over ${r.over} (${why})`);
     applyQueue(r.queue);
     if (why === 'go') return true;
     // start und rescue: der aktuelle Moment wird ersetzt. Der Kopf ist nie weggewischt worden, er zählt weder als gesehen noch als übersprungen.
-    if (why === 'rescue' && cur) {
+    if ((why === 'rescue' || why === 'stall') && cur) {
       rescued.current.add(cur.id);
       rescueN.current.set(cur.id, (rescueN.current.get(cur.id) ?? 0) + 1);
     }
@@ -1821,7 +1824,20 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     audioDeck.diag = (line) => diag.current.push(line);
     // Brief 20: jedes Ergebnis des Vorrats-Ladens (+1, fail, 6 of 6) steht im Protokoll
     pre?.setDiag((line) => diag.current.push(line));
-    audioDeck.onAdvance = (_from, to) => {
+    audioDeck.onAdvance = (_from, to, unseen) => {
+      // Runde 43 (BG_DEAD_NEXT, STALL_SWITCH): der verlassene Moment lieferte keinen Ton (stumm oder stehende Zeit). Er bleibt ungesehen, zählt weder als Ende noch als Skip, kein Signal.
+      if (unseen) {
+        const m = queue.current[idxRef.current];
+        if (m) {
+          bad.current.add(m.videoId);
+          unplayedNoted.current.add(m.id);
+          diag.current.push(`bg: dead next ${m.id} not seen, switched to ${to.id}`);
+        }
+        silentLeave.current = true;
+        placeNextRef.current(to.key);
+        goTo(idxRef.current + 1);
+        return;
+      }
       advancedTo.current = to.key;
       finishRef.current();
     };
@@ -2412,6 +2428,21 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         // Runde 39 (RESCUE_RETRY): das Deck misst die Zeit ohne Ton selbst (Start des Moments, Hintergrund zählt mit). Ab RESCUE_MS geht es auf einen bereiten Moment, auch direkt nach der
         // Rückkehr und unabhängig von sl.broken und Netzwechsel (die setzen waitSince unten zurück, die Schwelle wurde dann nie erreicht).
         if (audioDeck.rescueRetry && !userPaused.current && audioDeck.silentFor() > RESCUE_MS && readyFirst(idxRef.current, 'rescue')) return;
+        // Runde 43 (STALL_SWITCH): der Moment spielte schon, seine Zeit steht aber STALL_SWITCH_MS am Stück und ein Element ist bereit: Wechsel darauf, der verlassene Moment bleibt ungesehen, kein Skip.
+        // Ohne bereites Element wird weiter gewartet (eine Zeile je Moment).
+        if (!userPaused.current && audioDeck.stalledFor() >= STALL_SWITCH_MS) {
+          const stalledS = Math.round(audioDeck.stalledFor() / 1000);
+          const ok = audioDeck.hasReady() && readyFirst(idxRef.current, 'stall');
+          if (ok) {
+            audioDeck.stallHandled();
+            diag.current.push(`deck: stall switch ${m.id} no progress ${stalledS} s, switched to ${queue.current[idxRef.current]?.id ?? '?'}`);
+            return;
+          }
+          if (!stallWaitNoted.current.has(m.id)) {
+            stallWaitNoted.current.add(m.id);
+            diag.current.push(`deck: stall ${m.id} no progress ${stalledS} s, no ready element, waiting`);
+          }
+        }
       }
       if (!p || !sl.ready || !m || forYouRef.current || textRef.current || recallRef.current) {
         // Runde 18: kein Moment mit Player im Blick: nichts lädt, der Sync darf schreiben

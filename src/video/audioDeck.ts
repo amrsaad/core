@@ -402,6 +402,55 @@ export const BG_REFILL_PARALLEL = 2;
 /** Runde 38: so viele Kandidaten voraus fragt das Deck den Host (mindestens 4) */
 export const BG_REFILL_CAND = 6;
 /**
+ * Runde 43 (Gerätelog 26.11.2026 11:43 bis 12:04, sehr schwaches Mobilnetz): verdeckt blieb die Quelle nach "inline next" bis zu 106 s stumm, weil nach dem ersten Wechsel je Hintergrund-Phase
+ * kein weiterer Versuch kam (bgStuckDone) und die Zeit ohne Ton erst nach dem play() (nach JUMP_META_MS) gemessen wurde.
+ * BG_DEAD_NEXT = true: spielt die aktive Quelle nach einem Rückfall (inline next) nach BG_DEAD_NEXT_MS nicht (kein playing, oder Fehler am Element: sofort), versucht das Deck verdeckt den
+ * nächsten Kandidaten: ein bereites Element des Vorrats (Tausch wie beim Clip-Ende), sonst die nächste Quelle der Warteschlange im aktiven Element (derselbe Weg wie inline next, keine neue
+ * Technik). Auch ein erneut hängender Wechsel (BG_STUCK) darf weiter wechseln. Höchstens BG_DEAD_NEXT_MAX Versuche in Folge (der erste Hänge-Wechsel zählt mit; jeder kostet BG_DEAD_NEXT_MS
+ * und einen Netzstart, nach drei erfolglosen Quellen ist das Netz selbst weg, weitere Versuche kosten nur Akku und Datenvolumen). Dann Stopp mit "bg: dead next stop". Ein Fortschritt der
+ * Zeit setzt den Zähler zurück. NotAllowedError zählt nicht (iOS verweigert dort das play(), ein weiterer Kandidat würde ebenso verweigert). Der verlassene Moment bleibt ungesehen, kein Skip.
+ * Zeilen: "bg: dead next #n/3 <id> ...", "bg: dead next ok <id> playing after n ms", "bg: dead next stop after n tries ...". false: Verhalten von Runde 42 (ein Versuch je Phase).
+ */
+export const BG_DEAD_NEXT = true;
+export const BG_DEAD_NEXT_MS = 10_000;
+export const BG_DEAD_NEXT_MAX = 3;
+/**
+ * Runde 43: spielte der aktive Moment schon und steht seine Zeit STALL_SWITCH_MS am Stück (kein Fortschritt von currentTime, sichtbar oder verdeckt), und ein Element des Vorrats ist
+ * bereit, wechselt die App darauf (sichtbar: derselbe Weg wie die Rettung "ready first ... (stall)", verdeckt: Tausch wie beim Clip-Ende). Der verlassene Moment bleibt ungesehen und zählt
+ * nicht als Skip. Ohne bereites Element wird weiter gewartet. Je Moment ein Wechsel. Zeilen: "deck: stall switch <id> ...". false: kein Wechsel.
+ */
+export const STALL_SWITCH = true;
+export const STALL_SWITCH_MS = 8000;
+
+/**
+ * Runde 43: Entscheidung des verdeckten Weiterwechselns einer stummen Quelle.
+ * wait: noch nicht lange genug stumm. none: Schalter aus, nicht verdeckt, kein Host oder kein weiterer Kandidat. stop: Versuche aufgebraucht. swap: bereites Element tauschen. inline: nächste Quelle im aktiven Element.
+ */
+export function deadNextCall(o: {
+  on: boolean;
+  hidden: boolean;
+  hasHost: boolean;
+  tries: number;
+  max: number;
+  silentMs: number;
+  afterMs: number;
+  errored: boolean;
+  ready: number;
+  candidate: boolean;
+}): 'wait' | 'none' | 'stop' | 'swap' | 'inline' {
+  if (!o.on || !o.hidden || !o.hasHost) return 'none';
+  if (!o.errored && o.silentMs < o.afterMs) return 'wait';
+  if (o.ready <= 0 && !o.candidate) return 'none';
+  if (o.tries >= o.max) return 'stop';
+  return o.ready > 0 ? 'swap' : 'inline';
+}
+
+/** Runde 43: soll der laufende Moment, dessen Zeit steht, auf ein bereites Element wechseln? */
+export function stallSwitchCall(o: { on: boolean; played: boolean; want: boolean; paused: boolean; stalledMs: number; afterMs: number; ready: number; done: boolean }): boolean {
+  return o.on && o.played && o.want && !o.paused && !o.done && o.ready > 0 && o.stalledMs >= o.afterMs;
+}
+
+/**
  * Runde 39 (Gerätelog 24.11.2026 07:47 bis 07:58, Befund 1): toter Start, rund 85 s ohne Ton. Nach "fresh reload failed" (Laden verdeckt gescheitert) und dem Fehlerereignis stand das Element
  * im Fehlerzustand (error.code 4). Nach der HTML-Spezifikation lehnt play() dann jedes Mal mit NotSupportedError ab, ohne je zu laden. Jeder Anlass (Rückkehr, Tipp, "net: recover") rief nur wieder play().
  * DEAD_RELOAD = true: meldet play() NotSupportedError, hat das Element einen Ladefehler, oder ist "fresh reload" ohne Metadaten gescheitert, lädt das Deck die Quelle sichtbar einmal sauber neu
@@ -655,6 +704,10 @@ export interface DeckDeps {
   unlockGuard?: boolean;
   /** Runde 38: false schaltet das frühere Nachladen verdeckt ab (Ziel 1, ein Abruf, nur bei leerem Vorrat), Standard BG_REFILL_EARLY */
   bgRefillEarly?: boolean;
+  /** Runde 43: false schaltet das verdeckte Weiterwechseln einer stummen Quelle ab (ein Versuch je Phase wie Runde 42), Standard BG_DEAD_NEXT */
+  bgDeadNext?: boolean;
+  /** Runde 43: false schaltet den Wechsel bei stehender Zeit ab, Standard STALL_SWITCH */
+  stallSwitch?: boolean;
   /** Runde 39: false schaltet das saubere Neuladen einer toten Quelle ab, Standard DEAD_RELOAD */
   deadReload?: boolean;
   /** Runde 39: false schaltet die Rettung nach Zeit ohne Ton im Deck ab (der Host fällt auf waitSince zurück), Standard RESCUE_RETRY */
@@ -876,6 +929,17 @@ export class AudioDeck {
   private bgProg: { el: DeckEl; key: string; t: number; at: number } | null = null;
   private bgStuckTimer: ReturnType<typeof setInterval> | null = null;
   private bgStuckDone = false;
+  /** Runde 43 (BG_DEAD_NEXT): Schalter, Versuche in Folge, Zeitgeber, Stopp schon gemeldet, laufender Versuch (Ziel, Beginn), Wechsel ohne Gesehen-Buchführung */
+  private bgDeadOn: boolean;
+  private deadN = 0;
+  private deadTimer: ReturnType<typeof setTimeout> | null = null;
+  private deadStopNoted = false;
+  private deadTry: { to: string; t0: number; n: number } | null = null;
+  private unseenAdv = false;
+  /** Runde 43 (STALL_SWITCH): Schalter, Messung der stehenden Zeit des aktiven Elements, Momente mit schon erfolgtem Wechsel */
+  private stallOn: boolean;
+  private stl: { el: DeckEl; key: string; t: number; at: number } | null = null;
+  private stallDone = new Set<string>();
   /** Letzter Wechsel im Hintergrund, bis das Element des Nachfolgers spielt (Diagnose) */
   private adv: { to: string; t0: number } | null = null;
   /** Ton und Wiedergabe des aktuellen Elements, getrieben von volumechange, playing und pause (Hinweis "Ton aus") */
@@ -883,7 +947,7 @@ export class AudioDeck {
   /** Schlüssel aller Ausschnitte, die geladen wurden (Tests, Diagnose) */
   readonly history: string[] = [];
   /** Beim automatischen Weiter im Hintergrund: der Tausch auf das nächste bereite Element ist schon geschehen, jetzt die Buchführung */
-  onAdvance: ((from: DeckClip, to: DeckClip) => void) | null = null;
+  onAdvance: ((from: DeckClip, to: DeckClip, unseen?: boolean) => void) | null = null;
   /** Vorrat (Kaltstart): liegt der Ausschnitt im Vorrat und fehlt nur die Blob-URL, ein Versprechen darauf (true = bereit). Sonst null. */
   pending: ((id: string, key: string) => Promise<boolean> | null) | null = null;
   /** Jeder Start einer Quelle: aus dem Vorrat oder vom Netz (Zähler coldNetStarts) */
@@ -973,6 +1037,8 @@ export class AudioDeck {
     this.bgEarlyOn = deps.bgRefillEarly ?? BG_REFILL_EARLY;
     this.freshOn = deps.freshReload ?? FRESH_RELOAD;
     this.bgStuckOn = deps.bgStuck ?? BG_STUCK;
+    this.bgDeadOn = deps.bgDeadNext ?? BG_DEAD_NEXT;
+    this.stallOn = deps.stallSwitch ?? STALL_SWITCH;
     this.dodgeOn = deps.dodge ?? true;
   }
 
@@ -1243,6 +1309,10 @@ export class AudioDeck {
       clearTimeout(this.inl.timer);
       this.inl = null;
     }
+    if (this.deadTry && this.deadTry.to === this.clip?.id) {
+      this.diag(`bg: dead next ok ${this.deadTry.to} playing after ${Date.now() - this.deadTry.t0} ms (try ${this.deadTry.n}/${BG_DEAD_NEXT_MAX})`);
+      this.deadTry = null;
+    }
     if (this.adv && this.adv.to === this.clip?.id) {
       this.note(`advance to ${this.adv.to}: playing after ${Date.now() - this.adv.t0} ms, rate ${el.playbackRate}, ${this.stateText(el)}`);
       this.adv = null;
@@ -1456,6 +1526,8 @@ export class AudioDeck {
       const c = this.clip;
       if (!mine() || !c || this.done) return;
       this.loading(false);
+      // Runde 43: Fehler am Element des Rückfalls verdeckt: sofort der nächste Kandidat
+      if (this.inl && this.deadCheck('error')) return;
       if (this.isLocal) {
         // Ausschnitt aus dem Vorrat nicht abspielbar: einmal vom Netz laden statt zu überspringen
         this.deps.dropLocal(c.key);
@@ -1481,6 +1553,12 @@ export class AudioDeck {
       this.sink?.error();
     });
     // Runde 39: die Media Session folgt dem aktiven Element (nach den übrigen Handlern, damit deren Meldungen an den Host schon draußen sind)
+    // Runde 43: ein Rückfall im aktiven Element, der nichts liefert, wird auch aus den Ereignissen des Elements geprüft (zusätzlich zum Zeitgeber)
+    for (const ev of ['stalled', 'waiting']) {
+      el.addEventListener(ev, () => {
+        if (mine() && this.inl) this.deadCheck(ev);
+      });
+    }
     for (const ev of ['play', 'playing', 'pause', 'waiting', 'ended', 'emptied']) {
       el.addEventListener(ev, () => {
         if (mine()) this.msSync(ev);
@@ -3294,8 +3372,11 @@ export class AudioDeck {
     this.diag(`deck play refused ${name} (${why}) ${c?.id ?? ''}`);
     if (this.inl && c && this.inl.key === c.key) {
       this.diag(`bg: inline next refused ${this.inl.id} ${name}`);
+      const t0 = this.inl.t0;
       clearTimeout(this.inl.timer);
       this.inl = null;
+      // Runde 43: NotSupportedError (Element im Fehlerzustand) verdeckt: sofort der nächste Kandidat. NotAllowedError nicht: iOS verweigert das play(), ein weiterer Kandidat würde ebenso verweigert.
+      if (name === 'NotSupportedError' && this.hidden() && this.deadAdvance(name, Date.now() - t0, true)) return;
     }
     // Abgelehnt heißt: dieses Element hat keine Freigabe. Ein Anstoß im Ereignis pointerdown (unlock) ist kein Anlass für die Tippfläche, der Tipp folgt gleich mit pointerup.
     if (name === 'NotAllowedError') {
@@ -3411,7 +3492,7 @@ export class AudioDeck {
           if (this.el) this.note(`advance to ${to.id}: NOT playing after 3 s, ${this.stateText(this.el)} error ${this.el.error?.code ?? 'none'}`);
         }, 3000);
         try {
-          this.onAdvance(from, to);
+          this.onAdvance(from, to, this.unseenAdv || undefined);
         } catch (e) {
           this.diag(`deck onAdvance failed ${e instanceof Error ? e.message : String(e)}`);
         }
@@ -3475,11 +3556,12 @@ export class AudioDeck {
       }, BG_INLINE_MS),
     };
     try {
-      this.onAdvance(from, to);
+      this.onAdvance(from, to, this.unseenAdv || undefined);
     } catch (e) {
       this.diag(`deck onAdvance failed ${e instanceof Error ? e.message : String(e)}`);
     }
     this.bgRefill();
+    this.armDead(to.key);
     return true;
   }
 
@@ -4030,9 +4112,110 @@ export class AudioDeck {
     return this.sink === sink && this.isLocal;
   }
 
+  /** Runde 43: Zeitgeber für den Rückfall: nach BG_DEAD_NEXT_MS ohne playing wird der nächste Kandidat versucht (der Takt von BG_STUCK misst erst nach dem play(), das wartet bis JUMP_META_MS) */
+  private armDead(key: string) {
+    if (this.deadTimer) clearTimeout(this.deadTimer);
+    this.deadTimer = null;
+    if (!this.bgDeadOn) return;
+    this.deadTimer = setTimeout(() => {
+      this.deadTimer = null;
+      if (this.clip?.key === key) this.deadCheck('timer');
+    }, BG_DEAD_NEXT_MS);
+    (this.deadTimer as unknown as { unref?: () => void }).unref?.();
+  }
+
+  /** Runde 43: Rückfall im aktiven Element noch ohne playing? Dann (nach BG_DEAD_NEXT_MS, bei einem Fehler am Element sofort) der nächste Kandidat. Aufrufer: Zeitgeber, Elementereignisse (stalled, waiting, error). */
+  private deadCheck(why: string): boolean {
+    const el = this.el;
+    const c = this.clip;
+    const inl = this.inl;
+    if (!this.bgDeadOn || !el || !c || !inl || inl.key !== c.key || !this.hidden()) return false;
+    return this.deadAdvance(why, Date.now() - inl.t0, !!el.error);
+  }
+
+  /**
+   * Runde 43: eine stumme Quelle verdeckt ersetzen (BG_DEAD_NEXT). Entscheidung deadNextCall. swap und inline laufen über clipEnd (derselbe Weg wie beim Ende eines Ausschnitts, mit "unseen":
+   * der Host bucht den verlassenen Moment als ungesehen). Gibt zurück, ob gewechselt wurde.
+   */
+  private deadAdvance(why: string, silentMs: number, errored: boolean): boolean {
+    const el = this.el;
+    const c = this.clip;
+    if (!el || !c || this.done) return false;
+    const ready = this.readyCount();
+    const candidate = !!this.nextClips?.(4).some((x) => x.key !== c.key && !this.inlineTried.has(x.key));
+    const call = deadNextCall({ on: this.bgDeadOn, hidden: this.hidden(), hasHost: !!this.onAdvance, tries: this.deadN, max: BG_DEAD_NEXT_MAX, silentMs, afterMs: BG_DEAD_NEXT_MS, errored, ready, candidate: candidate && this.bgInline && this.lane === 'plain' });
+    if (call === 'wait' || call === 'none') return false;
+    if (call === 'stop') {
+      if (!this.deadStopNoted) {
+        this.deadStopNoted = true;
+        this.diag(`bg: dead next stop after ${this.deadN} tries, last ${c.id} (${why}) rs=${el.readyState} ns=${el.networkState ?? 'n/a'} error=${el.error?.code ?? 'none'}, staying`);
+      }
+      return false;
+    }
+    this.deadN++;
+    this.diag(`bg: dead next #${this.deadN}/${BG_DEAD_NEXT_MAX} ${c.id} silent ${Math.round(silentMs / 1000)} s (${why}) rs=${el.readyState} ns=${el.networkState ?? 'n/a'} error=${el.error?.code ?? 'none'}, ${call === 'swap' ? `ready element (pool ${ready})` : 'next in queue'}`);
+    if (this.inl) clearTimeout(this.inl.timer);
+    this.inl = null;
+    const t0 = Date.now();
+    this.unseenAdv = true;
+    try {
+      this.clipEnd('dead next');
+    } finally {
+      this.unseenAdv = false;
+    }
+    const to = this.clip;
+    const moved = !!to && to.key !== c.key;
+    if (moved && to) this.deadTry = { to: to.id, t0, n: this.deadN };
+    else this.diag(`bg: dead next failed ${c.id} (no switch)`);
+    return moved;
+  }
+
+  /**
+   * Runde 43 (STALL_SWITCH): Messung der stehenden Zeit des aktiven Elements (currentTime, sichtbar vom Takt, verdeckt vom Zeitgeber der Hänge-Erkennung). Gibt die Zeit am Stück zurück, 0 bei Fortschritt,
+   * Pause, fehlendem Wunsch, vor dem ersten Ton, im Sprung oder Warten auf Daten (dort gelten eigene Fristen).
+   */
+  private stalledMs(now = Date.now()): number {
+    const el = this.el;
+    const c = this.clip;
+    if (!el || !c || this.done || this.holding || !this.want || !this.played || el.paused || el.ended || el.seeking || this.jump || this.dataWait || !el.src || el.src.startsWith('data:')) {
+      this.stl = null;
+      return 0;
+    }
+    const t = el.currentTime;
+    const p = this.stl;
+    if (!p || p.el !== el || p.key !== c.key || Math.abs(t - p.t) > FROZEN_EPS) {
+      this.stl = { el, key: c.key, t, at: now };
+      return 0;
+    }
+    return now - p.at;
+  }
+
+  /** Runde 43: so lange steht die Zeit des aktiven Moments am Stück (ms), 0 wenn der Schalter aus ist, der Moment schon gewechselt wurde oder verdeckt. Der Host wechselt sichtbar ab STALL_SWITCH_MS ("ready first ... (stall)"). */
+  stalledFor(): number {
+    const c = this.clip;
+    if (!this.stallOn || !c || this.hidden() || this.stallDone.has(c.key)) return 0;
+    return this.stalledMs();
+  }
+
+  /** Runde 43: der Host hat sichtbar gewechselt (oder nicht), je Moment höchstens ein Versuch */
+  stallHandled() {
+    const c = this.clip;
+    if (c) this.stallDone.add(c.key);
+    if (this.stallDone.size > 100) this.stallDone.delete(this.stallDone.values().next().value as string);
+  }
+
+  /** Runde 43: Anzahl bereiter Elemente für die Entscheidung des Hosts */
+  hasReady(): boolean {
+    return this.readyCount() > 0;
+  }
+
   /** Runde 36: Zeitgeber der Hänge-Erkennung verdeckt (alle BG_STUCK_TICK_MS), solange die Seite im Hintergrund steht */
   private bgStuckStart() {
     this.bgStuckStop(false);
+    this.deadN = 0;
+    this.deadStopNoted = false;
+    this.deadTry = null;
+    this.stl = null;
     if (!this.bgStuckOn) return;
     this.bgStuckDone = false;
     this.bgProg = null;
@@ -4045,6 +4228,8 @@ export class AudioDeck {
   private bgStuckStop(report = true) {
     if (this.bgStuckTimer) clearInterval(this.bgStuckTimer);
     this.bgStuckTimer = null;
+    if (this.deadTimer) clearTimeout(this.deadTimer);
+    this.deadTimer = null;
     const p = this.bgProg;
     this.bgProg = null;
     const el = this.el;
@@ -4068,11 +4253,39 @@ export class AudioDeck {
     const cur = el.currentTime;
     const p = this.bgProg;
     if (!p || p.el !== el || p.key !== c.key || Math.abs(cur - p.t) > FROZEN_EPS) {
+      // Runde 43: lief die Zeit auf demselben Moment weiter, ist der Wechsel gelungen, die Versuche in Folge beginnen neu
+      if (p && p.el === el && p.key === c.key) {
+        this.deadN = 0;
+        this.deadStopNoted = false;
+      }
       this.bgProg = { el, key: c.key, t: cur, at: now };
       return;
     }
-    if (now - p.at < BG_STUCK_MS || this.bgStuckDone || !this.onAdvance) return;
+    // Runde 43 (STALL_SWITCH): schon gespielt, die Zeit steht STALL_SWITCH_MS, ein Element ist bereit: Tausch mit "unseen" (der verlassene Moment bleibt ungesehen)
+    if (this.stallOn && this.onAdvance && now - p.at >= STALL_SWITCH_MS && !this.stallDone.has(c.key) && stallSwitchCall({ on: true, played: this.played, want: this.want, paused: el.paused, stalledMs: now - p.at, afterMs: STALL_SWITCH_MS, ready: this.readyCount(), done: this.done })) {
+      this.stallDone.add(c.key);
+      this.diag(`deck: stall switch ${c.id} no progress ${Math.round((now - p.at) / 1000)} s (hidden), ready element (pool ${this.readyCount()})`);
+      this.unseenAdv = true;
+      try {
+        this.clipEnd('stall');
+      } finally {
+        this.unseenAdv = false;
+      }
+      const to = this.clip;
+      const moved = !!to && to.key !== c.key && !this.done;
+      this.diag(`deck: stall switch ${moved ? 'ok' : 'failed'} ${c.id}${moved && to ? ` to ${to.id}` : ''}`);
+      return;
+    }
+    if (now - p.at < BG_STUCK_MS || !this.onAdvance) return;
+    if (this.bgStuckDone) {
+      // Runde 43: nach dem ersten Wechsel steht auch der Nachfolger: weiter, bis BG_DEAD_NEXT_MAX Versuche in Folge erreicht sind
+      if (this.bgDeadOn) this.deadAdvance('stuck again', now - p.at, false);
+      return;
+    }
+    // Runde 43: auch der erste Hänge-Wechsel zählt zu den Versuchen in Folge (nach BG_DEAD_NEXT_MAX Stopp)
+    if (this.bgDeadOn && this.deadN >= BG_DEAD_NEXT_MAX) return;
     this.bgStuckDone = true;
+    if (this.bgDeadOn) this.deadN++;
     this.diag(`bg: stuck ${c.id} t=${cur.toFixed(1)} for ${Math.round((now - p.at) / 1000)} s, advancing`);
     this.clipEnd('stuck');
     const to = this.clip;

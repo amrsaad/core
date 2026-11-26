@@ -114,11 +114,14 @@ class El implements DeckEl {
 const clip = (id: string): DeckClip => ({ key: `${id}|10|14`, id, url: `https://pod.test/${id}.mp3`, start: 10, end: 14 });
 const ALL = ['a', 'b', 'c', 'd', 'e', 'f', 'g'].map(clip);
 
-function setup(opts: { freshReload?: boolean; bgStuck?: boolean; bgInline?: boolean } = {}) {
+function setup(opts: { freshReload?: boolean; bgStuck?: boolean; bgInline?: boolean; stallSwitch?: boolean; bgDeadNext?: boolean } = {}) {
   const els: El[] = [];
   const hid = { v: false };
   const deck = new AudioDeck({
     standby: true,
+    // Runde 43: diese Tests prüfen die Hänge-Erkennung von Runde 36 (10 s, ein Versuch je Phase). Den Wechsel nach 8 s (stallSwitch) und das Weiterwechseln (bgDeadNext) hat tests/audio-round43.test.ts
+    stallSwitch: false,
+    bgDeadNext: false,
     ...opts,
     local: () => undefined,
     dropLocal: () => {},

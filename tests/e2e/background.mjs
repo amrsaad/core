@@ -49,6 +49,40 @@ const IOS_GATE = () => {
     return orig.call(this);
   };
 };
+// Runde 43: nachgebaute Medien-Elemente, die nie Daten liefern (hängende Quelle) oder deren Zeit steht. Nach FAKE_MEDIA und IOS_GATE einbauen.
+// window.__deadOn = true: jede Netz-Quelle außer der ersten geladenen hängt (kein loadedmetadata, kein canplaythrough, play() nie erfüllt), bis window.__goodAt (performance.now) erreicht ist.
+// Gilt ab load(): eine Quelle, die vorher hing, bleibt hängend. window.__freeze(): die Zeit des laufenden Elements steht (die Daten bleiben aus), load() hebt es auf.
+const DEAD_FAKE = () => {
+  const P = HTMLMediaElement.prototype;
+  const load = P.load;
+  const play = P.play;
+  const pause = P.pause;
+  window.__deadOn = false;
+  window.__deadFirst = '';
+  window.__goodAt = 0;
+  const real = (el) => { const s = String(el.src || ''); return !!s && !s.startsWith('data:'); };
+  P.load = function () {
+    if (Object.getOwnPropertyDescriptor(this, '__t')?.get) delete this.__t;
+    const s = String(this.src || '');
+    if (window.__deadOn && real(this) && !window.__deadFirst) window.__deadFirst = s;
+    this.__dead = !!window.__deadOn && real(this) && s !== window.__deadFirst && !(window.__goodAt && performance.now() >= window.__goodAt);
+    // wie ein Element ohne Daten: die alte Wiedergabe (Zeitgeber der Nachbildung) endet, nichts kommt nach
+    if (this.__dead) { pause.call(this); this.__p = true; return; }
+    return load.call(this);
+  };
+  P.play = function () {
+    if (this.__dead && real(this)) { this.__p = false; return new Promise(() => {}); }
+    return play.call(this);
+  };
+  window.__freeze = () => {
+    const el = [...document.querySelectorAll('audio')].find((e) => !e.paused && real(e));
+    if (!el) return false;
+    const v = el.__t || 0;
+    Object.defineProperty(el, '__t', { configurable: true, get: () => v, set: () => {} });
+    return true;
+  };
+};
+const DEAD_ON = () => { window.__deadOn = true; };
 const freshPage = async (browser, url, k, poolBody, query, extraInit, onCx) => {
   const cx = await browser.newContext({ ...devices['iPhone 15'], serviceWorkers: 'block' });
   await cx.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
@@ -430,6 +464,86 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     r.bgHungLog = hl.filter((x) => /^lock: |^watchdog|^go |^deck: swap|^skipped/.test(x));
     r.bgStayLog = st.after.filter((x) => /^lock: |^watchdog|^go |^skipped/.test(x));
     await fh.cx.close();
+
+    // Runde 43 (BG_DEAD_NEXT): verdeckt, Vorrat leer, die nächste Quelle liefert nie Daten. Nach 10 s versucht das Deck den nächsten Kandidaten, der spielt (höchstens 15 s Stille).
+    // Der verlassene Moment bleibt ungesehen und zählt nicht als Skip. DEAD_FAKE: alles außer dem ersten Moment hängt, bis die Quelle des zweiten Kandidaten freigegeben wird.
+    const fd = await freshPage(browser, url, k, poolBgStock, '?now=2026-10-23&seed=3', [MS_SPY, IOS_GATE, DEAD_FAKE, DEAD_ON], routeMp3);
+    const pd = fd.pg;
+    await pd.waitForSelector('[data-testid=form-switch]');
+    await pd.click('[data-testid=form-switch] >> text=Audio');
+    await waitFor(pd, () => window.__core.state() === 1 && window.__core.moment()?.audio === true);
+    await pd.waitForTimeout(1200);
+    const dIdx = await pd.evaluate(() => window.__core.idx());
+    const dLen0 = await pd.evaluate(() => window.__core.diag().length);
+    await setVisibility(pd, 'hidden');
+    await pd.evaluate(() => { window.__open = true; });
+    const dHas = (re) => pd.evaluate(([src, n]) => window.__core.diag().slice(n).some((x) => new RegExp(src).test(x)), [re.source, dLen0]);
+    c.bgDeadInline = await waitFor(pd, (n) => window.__core.diag().slice(n).some((x) => /^bg: inline next \S+ \(pool empty\)$/.test(x)), dLen0, 14000);
+    const dT0 = Date.now();
+    const dX = await pd.evaluate(() => window.__core.moment().id);
+    // vor Ablauf der 10 s kommt Daten für neue Quellen: die erste (verlorene) Quelle bleibt hängend, der nächste Kandidat lädt
+    await pd.waitForTimeout(4000);
+    await pd.evaluate(() => { window.__goodAt = performance.now(); });
+    c.bgDeadNoEarlySwitch = !(await dHas(/^bg: dead next #1\//));
+    c.bgDeadNext = await waitFor(pd, (n) => window.__core.diag().slice(n).some((x) => /^bg: dead next #1\/3 /.test(x)), dLen0, 12000);
+    const dT1 = Date.now();
+    c.bgDeadOk = await waitFor(pd, (n) => window.__core.diag().slice(n).some((x) => /^bg: dead next ok /.test(x)) && window.__core.state() === 1, dLen0, 8000);
+    const dT2 = Date.now();
+    r.bgDeadMs = { toSwitch: dT1 - dT0, toPlaying: dT2 - dT0 };
+    c.bgDeadSwitchAt10s = dT1 - dT0 >= 9000 && dT1 - dT0 <= 12500;
+    c.bgDeadPlaysUnder15s = c.bgDeadOk && dT2 - dT0 <= 15000;
+    const dY = await pd.evaluate(() => window.__core.moment().id);
+    c.bgDeadTwoMoments = dY !== dX && (await pd.evaluate(() => window.__core.idx())) === dIdx + 2;
+    const dl = (await pd.evaluate(() => window.__core.diag())).slice(dLen0);
+    r.bgDeadLog = dl.filter((x) => /^bg: (inline next|dead next|stuck)|^go \d+->\d+$|^skip|^skipped/.test(x));
+    const dPr = await pd.evaluate((id) => window.__core.probe(id), dX);
+    c.bgDeadUnseen = !dPr.seen && dPr.swipes === null && dPr.skips === null && dl.some((x) => x.startsWith(`bg: dead next ${dX} not seen, switched to `));
+    c.bgDeadNoSkipLine = !dl.some((x) => /^skip: /.test(x) && x.includes(dX)) && !dl.some((x) => x === `skipped (not seen) ${dX}`);
+    c.bgDeadNoStop = !dl.some((x) => /^bg: dead next stop/.test(x));
+    c.bgDeadNoVisible = !dl.some((x) => /app: visible|page visible/.test(x));
+    await fd.cx.close();
+
+    // Runde 43 (STALL_SWITCH): der Moment spielt, seine Zeit steht (keine Daten mehr), ein Element des Vorrats ist bereit: nach 8 s Wechsel darauf, der verlassene Moment bleibt ungesehen.
+    for (const where of ['visible', 'hidden']) {
+      const fs2 = await freshPage(browser, url, k, poolBgStock, '?now=2026-10-23&seed=3', [MS_SPY, IOS_GATE, DEAD_FAKE], routeMp3);
+      const ps = fs2.pg;
+      const key = where === 'visible' ? 'bgStallVisible' : 'bgStallHidden';
+      await ps.waitForSelector('[data-testid=form-switch]');
+      await ps.click('[data-testid=form-switch] >> text=Audio');
+      await waitFor(ps, () => window.__core.state() === 1 && window.__core.moment()?.audio === true);
+      // Sichtbar rettet die bestehende Rettung (RESCUE_FAST, 3 s) den ersten Moment der frischen Seite in der Nachbildung auch ohne Stillstand: erst diese abwarten, dann gilt der Wechsel dem zweiten Moment
+      if (where === 'visible') await waitFor(ps, () => window.__core.diag().some((x) => /\(rescue\)$/.test(x)), undefined, 8000);
+      await waitFor(ps, () => window.__core.state() === 1);
+      // erst anlaufen lassen (der erste Ton ist da), dann steht die Zeit, danach auf den Vorrat warten
+      await ps.waitForTimeout(1200);
+      const sIdx0 = await ps.evaluate(() => window.__core.idx());
+      const sCur = await ps.evaluate(() => window.__core.moment().id);
+      const sLen = await ps.evaluate(() => window.__core.diag().length);
+      const frozen = await ps.evaluate(() => window.__freeze());
+      const sT0 = Date.now();
+      if (where === 'hidden') {
+        await setVisibility(ps, 'hidden');
+        await ps.evaluate(() => { window.__open = true; });
+      }
+      c[`${key}Ready`] = frozen && (await waitFor(ps, () => window.__core.deck().ready >= 2, undefined, 6000));
+      // Wechsel: die Zeit steht, nach spätestens 8 s ist ein anderer Moment dran (verdeckt über STALL_SWITCH, sichtbar über STALL_SWITCH oder die Rettung nach stehender Zeit)
+      c[`${key}Switch`] = await waitFor(ps, (id) => window.__core.moment().id !== id, sCur, 16000);
+      const sMs = Date.now() - sT0;
+      const sNow = await ps.evaluate(() => ({ id: window.__core.moment().id, idx: window.__core.idx() }));
+      r[`${key}Ms`] = sMs;
+      c[`${key}Within8to10s`] = sMs >= 7500 && sMs <= 10500;
+      c[`${key}Plays`] = await waitFor(ps, () => window.__core.state() === 1, undefined, 4000);
+      c[`${key}Moved`] = sNow.id !== sCur;
+      // der Wechsel selbst zählt nicht als Skip (kein Wisch, keine Sperre, kein Signal "skips")
+      const sPr = await ps.evaluate((id) => window.__core.probe(id), sCur);
+      c[`${key}NoSkipCount`] = sPr.swipes === null && sPr.skips === null && sPr.rejected === null;
+      const sl = (await ps.evaluate(() => window.__core.diag())).slice(sLen);
+      r[`${key}Log`] = sl.filter((x) => /^deck: (stall|ready first|swap)|^bg: (dead next|stuck)|^go |^skip/.test(x));
+      c[`${key}NoSkip`] = !sl.some((x) => /^skip: /.test(x)) && !sl.some((x) => x === `skipped (not seen) ${sCur}`);
+      c[`${key}Mechanism`] = where === 'hidden' ? sl.some((x) => /^deck: stall switch \S+ no progress \d+ s \(hidden\)/.test(x)) : sl.some((x) => /^deck: ready first \S+ over \S+ \(stall\)$/.test(x)) && sl.some((x) => /^deck: stall switch \S+ no progress \d+ s, switched to /.test(x));
+      c[`${key}IdxOk`] = where === 'visible' ? sNow.idx === sIdx0 : sNow.idx === sIdx0 + 1;
+      await fs2.cx.close();
+    }
 
     // Video-Reiter mit eigenem Stream: läuft im Hintergrund bis zum Ende, dann Stopp ohne Auto-Weiter
     const fv = await freshPage(browser, url, k, poolBgVideo, '?now=2026-10-23&seed=3');
