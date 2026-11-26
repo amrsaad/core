@@ -1,5 +1,5 @@
 {
- "at": "2026-11-26T21:31:02.993Z",
+ "at": "2026-11-26T22:16:19.589Z",
  "runs": [
   {
    "browser": "webkit",
@@ -54,12 +54,12 @@
    },
    "diagLines": 19,
    "diagSample": [
-    "c4ou slot0 sy3:1 state 2",
-    "c4ou sync: first upload waits for stable playback",
-    "c4ou app: hidden",
-    "c4ou sync: first upload released (app left) after 3.0 s"
+    "gv3o slot0 sy7:1 state 2",
+    "gv3o sync: first upload waits for stable playback",
+    "gv3o app: hidden",
+    "gv3o sync: first upload released (app left) after 3.0 s"
    ],
-   "writeDelayMs": 10044,
+   "writeDelayMs": 10025,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -121,12 +121,12 @@
    },
    "diagLines": 20,
    "diagSample": [
-    "fjlq slot0 sy2:1 state 2",
-    "fjlq sync: first upload waits for stable playback",
-    "fjlq app: hidden",
-    "fjlq sync: first upload released (app left) after 3.0 s"
+    "cod3 slot0 sy1:1 state 2",
+    "cod3 sync: first upload waits for stable playback",
+    "cod3 app: hidden",
+    "cod3 sync: first upload released (app left) after 3.0 s"
    ],
-   "writeDelayMs": 10025,
+   "writeDelayMs": 10018,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
