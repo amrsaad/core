@@ -2,7 +2,7 @@
 // Messfenster je Wisch: vom Aufsetzen bis 600 ms nach dem Loslassen (Ziehen, Auslaufen, Player-Arbeit danach).
 // Nachgebaute YouTube-API wie in moments.mjs, also misst der Test die Animation des Feeds, nicht den echten IFrame.
 // Aufruf: node tests/e2e/swipe.mjs <url> <ausgabeordner>   (vorher npm run build, dann vite preview)
-// Umgebung: E2E_BROWSERS=webkit,chromium  E2E_THROTTLE=4,8 (CPU-Drosselung nur Chromium, nur Information)  SWIPES=10  E2E_NOGATE=1 (nur messen)
+// Umgebung: E2E_BROWSERS=webkit,chromium  E2E_THROTTLE=4,8 (CPU-Drosselung nur Chromium, nur Information)  SWIPES=10  E2E_NOGATE=1 (nur messen)  E2E_QS="&phone=0" (Vergleich: alte Ansicht)
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { chromium, devices, webkit } from 'playwright';
@@ -115,7 +115,7 @@ for (const v of variants) {
       const cdp = await ctx.newCDPSession(page);
       await cdp.send('Emulation.setCPUThrottlingRate', { rate: v.throttle });
     }
-    await page.goto(`${url}?now=2026-10-23&seed=3#k=${k}`);
+    await page.goto(`${url}?now=2026-10-23&seed=3${process.env.E2E_QS ?? ''}#k=${k}`); // E2E_QS=&phone=0: nur zum Vergleich alt gegen neu, ändert nur die URL
     c.feedLoaded = await waitFor(page, () => !!window.__core?.moment());
     c.firstPlaying = await waitFor(page, () => window.__core.state() === 1);
     if (process.env.E2E_CSS) await page.addStyleTag({ content: process.env.E2E_CSS }); // nur zum Suchen von Ursachen
