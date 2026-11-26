@@ -15,6 +15,8 @@ import { onPageError } from './pageerrors.mjs';
 const [url = 'http://127.0.0.1:4173/core/', out = 'pipeline/out/e2e-phoneview'] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
 const FAKE = readFileSync(new URL('./fakeyt.js', import.meta.url), 'utf8');
+// Runde 46 (AUDIO_NO_YT): der Audio-Reiter lädt die YouTube-API nicht mehr, die Nachbildung der Audio-Elemente kommt per Init-Skript (wie endpage.mjs)
+const FAKE_MEDIA = FAKE.slice(FAKE.indexOf('// Eigene Streams'));
 const EX = Array.from({ length: 30 }, (_, i) => `Sentence ${i + 1} of the checked excerpt, long enough to wrap over several lines in the reading column.`).join('\n');
 const EX_SHORT = 'Short passage that fits on one screen. Two sentences are enough.';
 const LONG = ' und dazu ein langer zweiter Teil, der klar über drei Zeilen hinausgeht, damit die kleineren Stufen nötig werden und der Hook trotzdem nie abgeschnitten wird';
@@ -70,6 +72,7 @@ async function open(type, size, { init, query = '', pool = POOL, tab = null } = 
   const errors = [];
   pg.on('pageerror', onPageError(errors));
   await pg.addInitScript(() => { window.__ytSlow = true; });
+  await pg.addInitScript(FAKE_MEDIA);
   if (init) await pg.addInitScript(init);
   await pg.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: pool }));
   await pg.goto(`${url}?now=2026-10-23&seed=3${query}#k=${k}`);
@@ -532,6 +535,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       c.ersteGesteKeinPause = await waitFor(pg, () => window.__core.state() === 1, undefined, 1500) && (await pg.locator('[data-testid=ctl-play]').getAttribute('aria-label')) === 'Pause';
       c.ersteGesteTippWeg = await waitFor(pg, () => !document.querySelector('[data-testid=tap-to-play]'), undefined, 3000);
       c.ersteGesteTonAn = await pg.evaluate(() => window.__core.sound() === true);
+      // Runde 46: der Ton läuft sofort (die Quelle ist schon geladen), das stille Anspielen der Reserve-Elemente endet erst nach rund 300 ms. Die Zeile mit angenommenen Elementen erst abwarten (das Aufsetzen davor wird in der Nachbildung abgelehnt, ok=0), dann lesen.
+      await waitFor(pg, () => window.__core.diag().some((x) => /^deck: gesture unlock \d+ elements ok=[1-9]/.test(x)), undefined, 4000);
       const d = await pg.evaluate(() => window.__core.diag());
       c.ersteGesteDeckUnlock = d.some((x) => /^deck: gesture unlock \d+ elements ok=[1-9]\d* /.test(x));
       c.ersteGesteSpielZeile = d.some((x) => /^deck play#1 ok/.test(x));
@@ -564,7 +569,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       else if (mode === 'touchendPlusKlick') await pg.evaluate((q) => { const b = document.querySelector(q); b.dispatchEvent(new Event('touchend', { bubbles: true, cancelable: true })); b.click(); }, play);
       else { const b = await center(pg, play); await pg.mouse.move(b.x, b.y); await pg.mouse.down(); await pg.waitForTimeout(900); await pg.mouse.up(); }
       c[`ersteGeste ${mode} startet`] = await waitFor(pg, () => window.__core.state() === 1, undefined, 6000);
-      await pg.evaluate(() => { window.__pausedWhilePlaying = 0; }); // das Freischalten der Reserve-Elemente (play, pause) ist vorbei, ab hier zählt jedes Anhalten
+      // Das Freischalten der Reserve-Elemente (play, pause) muss vorbei sein, ab hier zählt jedes Anhalten. Runde 46: der Ton läuft sofort, das stille Anspielen endet erst nach rund 300 ms (Zeile "gesture unlock"), also darauf warten statt auf den Start.
+      await waitFor(pg, () => window.__core.diag().some((x) => /^deck: gesture unlock \d+ elements ok=[1-9]/.test(x)), undefined, 4000);
+      await pg.evaluate(() => { window.__pausedWhilePlaying = 0; });
       // Danach 2 s lang jede 100 ms: nie wieder pausiert, die Taste zeigt Pause
       let steady = true;
       for (let n = 0; n < 20; n++) { await pg.waitForTimeout(100); if ((await pg.evaluate(() => window.__core.state())) !== 1) steady = false; }
