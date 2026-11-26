@@ -1,5 +1,5 @@
 {
- "at": "2026-11-26T17:17:12.515Z",
+ "at": "2026-11-26T19:26:43.907Z",
  "runs": [
   {
    "browser": "webkit",
@@ -49,14 +49,14 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "diagLines": 19,
+   "diagLines": 20,
    "diagSample": [
-    "peja slot0 sy5:1 state 2",
-    "peja sync: packed 2 kB to 1 kB",
-    "peja sync: PUT ok 1 kB in 0.0 s",
-    "peja app: hidden"
+    "6m64 slot0 sy5:1 state 2",
+    "6m64 sync: packed 2 kB to 1 kB",
+    "6m64 sync: PUT ok 1 kB in 0.0 s",
+    "6m64 app: hidden"
    ],
-   "writeDelayMs": 10023,
+   "writeDelayMs": 10048,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -113,14 +113,14 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "diagLines": 18,
+   "diagLines": 19,
    "diagSample": [
-    "xnde slot0 sy7:1 state 2",
-    "xnde sync: packed 2 kB to 1 kB",
-    "xnde sync: PUT ok 1 kB in 0.0 s",
-    "xnde app: hidden"
+    "zjwu slot0 sy3:1 state 2",
+    "zjwu sync: packed 2 kB to 1 kB",
+    "zjwu sync: PUT ok 1 kB in 0.0 s",
+    "zjwu app: hidden"
    ],
-   "writeDelayMs": 10016,
+   "writeDelayMs": 10021,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
