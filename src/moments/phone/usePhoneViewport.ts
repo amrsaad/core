@@ -1,11 +1,11 @@
 import { useLayoutEffect } from 'react';
 import { phoneTopClear } from './flags';
-import { iosMajor, makeVpLimiter, phoneTargetHeight, phoneViewportLine } from './viewport';
+import { iosMajor, makeVpLimiter, phoneShortWindow, phoneViewportLine } from './viewport';
 
 /**
- * Runde 50: iPhone-App, Feed bis zum unteren Rand und optionaler Abstand unter der Statusleiste (siehe viewport.ts und PHONE_TOP_CLEAR_PX in flags.ts).
- * Setzt am Wurzelelement --ph-h (Zielhöhe, nur im Fehlerfall der Standalone-App, sonst fehlt die Variable) und --ph-clear (Abstand, nur Standalone). Beide erben in den Feed.
- * Schreibt die Zeile "vp: ..." in die Diagnose: beim Start (sobald die Leisten stehen, spätestens nach rund 3 s) und nach resize oder orientationchange, höchstens eine Zeile je 2 s und fünf je Sitzung.
+ * Runde 50: iPhone-App, optionaler Abstand unter der Statusleiste (--ph-clear am Wurzelelement, nur Standalone, siehe viewport.ts und PHONE_TOP_CLEAR_PX in flags.ts).
+ * Runde 50c: Rückfall für das zu kurze Fenster (WebKit 301108): data-ph-short am Wurzelelement, solange Standalone, Hochformat und Bildschirmhöhe minus Fensterhöhe gleich der oberen Sicherheitsrand-Höhe ist (phone.css).
+ * Schreibt die Zeile "vp: ..." in die Diagnose: beim Start (sobald die Leisten stehen, spätestens nach rund 3 s, bei geänderter Fensterhöhe nach 1,5 s noch einmal) und nach resize oder orientationchange, höchstens eine Zeile je 2 s und fünf je Sitzung.
  */
 export function usePhoneViewport(enabled: boolean, log: (line: string) => void) {
   useLayoutEffect(() => {
@@ -19,7 +19,7 @@ export function usePhoneViewport(enabled: boolean, log: (line: string) => void) 
     const allow = makeVpLimiter();
     const ios = iosMajor(navigator.userAgent || '');
     let dead = false;
-    let fix: number | null = null;
+    let short = false;
     const standalone = () => (navigator as Navigator & { standalone?: boolean }).standalone === true || !!window.matchMedia?.('(display-mode: standalone)').matches;
     const rect = (sel: string): [number, number] | undefined => {
       const e = document.querySelector(sel);
@@ -32,19 +32,26 @@ export function usePhoneViewport(enabled: boolean, log: (line: string) => void) 
       const st = parseFloat(cs.paddingTop) || 0;
       const sb = parseFloat(cs.paddingBottom) || 0;
       const sa = standalone();
-      const target = phoneTargetHeight({ standalone: sa, portrait: window.innerHeight >= window.innerWidth, screenH: window.screen.height, innerH: window.innerHeight, safeT: st });
-      fix = target;
-      if (target === null) root.style.removeProperty('--ph-h');
-      else root.style.setProperty('--ph-h', `${target}px`);
+      short = phoneShortWindow({ standalone: sa, portrait: window.innerHeight >= window.innerWidth, screenH: window.screen.height, innerH: window.innerHeight, safeT: st });
+      if (short) root.setAttribute('data-ph-short', '');
+      else root.removeAttribute('data-ph-short');
       root.style.setProperty('--ph-clear', `${sa ? phoneTopClear() : 0}px`);
       return { st, sb, sa };
     };
+    const topEl = (): string => {
+      const e = document.elementFromPoint(window.innerWidth / 2, 2);
+      if (!e) return 'none';
+      const c = e.classList?.[0];
+      return c ? `${e.tagName}.${c}` : e.tagName;
+    };
+    let firstIh = -1;
     const write = () => {
       const { st, sb, sa } = apply();
       log(
         phoneViewportLine({
           iw: window.innerWidth, ih: window.innerHeight, vvh: window.visualViewport?.height, ch: root.clientHeight, sw: window.screen.width, sh: window.screen.height, st, sb,
-          standalone: sa, ios, head: rect('.ph-head'), bar: rect('.ph-bar'), feed: rect('.vfeed[data-phone]'), fix,
+          standalone: sa, ios, head: rect('.ph-head'), bar: rect('.ph-bar'), feed: rect('.vfeed[data-phone]'),
+          dh: root.scrollHeight, sy: window.scrollY, top: topEl(), short,
         }),
       );
     };
@@ -56,7 +63,12 @@ export function usePhoneViewport(enabled: boolean, log: (line: string) => void) 
       if (dead) return;
       tries++;
       if ((document.querySelector('.ph-bar') && document.querySelector('.ph-head')) || tries >= 5) {
-        if (allow(performance.now())) write();
+        if (allow(performance.now())) {
+          write();
+          // Das Fenster kann sich nach der ersten Zeile noch ändern (iOS vergrößert es, sobald die Seite hoch genug ist): einmal nach 1,5 s nachschreiben, wenn sich ih geändert hat
+          firstIh = window.innerHeight;
+          timer = window.setTimeout(() => { if (!dead && window.innerHeight !== firstIh && allow(performance.now(), 0)) write(); }, 1500);
+        }
         return;
       }
       timer = window.setTimeout(first, 600);
@@ -77,7 +89,7 @@ export function usePhoneViewport(enabled: boolean, log: (line: string) => void) 
       window.removeEventListener('orientationchange', onChange);
       window.removeEventListener('pageshow', apply);
       probe.remove();
-      root.style.removeProperty('--ph-h');
+      root.removeAttribute('data-ph-short');
       root.style.removeProperty('--ph-clear');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

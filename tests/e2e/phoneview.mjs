@@ -4,7 +4,7 @@
 // Verhalten bei 390x844: Zeitleiste läuft, Pause und Weiter per Taste, Voriger und Nächster, Wischen, Tippen auf den Inhalt, Tempo, CC, Like, Save, Share, More,
 // Abrufkarte und Share-Blatt liegen über der Leiste, Settings über die Taste oben rechts, Saved über die Navigation dort, Text scrollt und wischt erst am Textende.
 // Erste Geste nach dem App-Start ist die Play-Taste: Ton startet (iOS-Regel des Tests wie in audiotab.mjs, Zeile "deck: gesture unlock").
-// Runde 50: Profil "Gerät" 393x852 mit Sicherheitsrand 59/34 und nachgestelltem Gerätefehler (Fensterhöhe 793, screen.height 852, navigator.standalone): Feed bis zum unteren Rand (--ph-h), feste Kopfleiste,
+// Runde 50: Profil "Gerät" 393x852 mit Sicherheitsrand 59/34 und nachgestelltem Gerätefehler (Fensterhöhe 793, screen.height 852, navigator.standalone): Rückfall data-ph-short (Runde 50c, kein --ph-h mehr), Leiste und Tasten nie unter dem Fenster, feste deckende Kopfleiste mit Treffern an der oberen Kante,
 // Abstand oben per Schalter (window.__phTopClear 40), Titelbild als Quadrat (nie beschnitten), vorige und nächste Zeile genau einzeilig, Diag-Zeile "vp:".
 // Schalter aus (?phone=0): der alte Aufbau (kein data-phone, keine .ph-Klassen, .vactions, untere Navigation).
 // Nur Kunst-IDs und Testtexte.
@@ -117,6 +117,8 @@ const idOf = (i) => `test${String(i).padStart(7, '0')}:100`;
 
 const waitFor = async (page, fn, arg, timeout = 6000) => { try { await page.waitForFunction(fn, arg, { timeout, polling: 100 }); return true; } catch { return false; } };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+/** Runde 50c: hält die Antwort auf img.test/slow an, bis HOLD.p erfüllt ist (ohne HOLD.p 2 s), damit das Bild gezielt nach dem Messen eintrifft */
+const HOLD = { p: null };
 const E = (pg, id) => pg.locator(`[data-testid="${id}"]`);
 const has = async (pg, id) => (await E(pg, id).count()) > 0;
 const idx = (pg) => pg.evaluate(() => window.__core.idx());
@@ -145,7 +147,7 @@ async function open(type, size, { init, query = '', pool = POOL, tab = null } = 
   await cx.route(/img\.test\/cover/, (x) => x.fulfill({ contentType: 'image/png', body: PNG }));
   // Stream-Adresse der Testmomente: ein leerer, gültiger Abspielplan statt eines Netzfehlers, damit ein Moment nicht nach wenigen Sekunden als verloren übersprungen wird
   await cx.route('https://stream.test/**', (x) => x.fulfill({ contentType: 'application/vnd.apple.mpegurl', body: '#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:10\n#EXT-X-MEDIA-SEQUENCE:0\n' }));
-  await cx.route(/img\.test\/slow/, async (x) => { await sleep(2000); await x.fulfill({ contentType: 'image/png', body: PNG }); });
+  await cx.route(/img\.test\/slow/, async (x) => { await (HOLD.p ?? sleep(2000)); await x.fulfill({ contentType: 'image/png', body: PNG }); });
   await cx.route(/img\.test\/tiny/, (x) => x.fulfill({ contentType: 'image/png', body: mkPng(1, 1) }));
   await cx.route(/img\.test\/wide/, (x) => x.fulfill({ contentType: 'image/png', body: PNG_WIDE }));
   await cx.route(/img\.test\/broken/, (x) => x.abort());
@@ -461,8 +463,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         if (form === 'video') {
           const bd = await center(pg, '.vslot[aria-hidden=false] .vframe > div');
           const k0 = await idx(pg);
-          await swipe(pg, bd.x, bd.b.y + bd.b.height - 8, bd.b.y + bd.b.height - 8 - 240);
+          // Runde 50c: 200 statt 240 px, damit der Wisch mit der Maus nicht über der Kopfleiste (nimmt jetzt Berührungen an) endet. Ein Finger bleibt auf dem Gerät am Startelement.
+          await swipe(pg, bd.x, bd.b.y + bd.b.height - 8, bd.b.y + bd.b.height - 8 - 200);
           c['390 video Wischen im Player wechselt'] = await waitFor(pg, (i) => window.__core.idx() === i + 1, k0, 5000);
+          r.notes['390 video Wischen im Player'] = { k0, now: await idx(pg), bd: bd.b, st: await st(pg) };
           await waitFor(pg, () => window.__core.state() === 1, undefined, 5000);
           await pg.waitForTimeout(700);
           await pg.locator('[data-testid=ctl-prev]').click();
@@ -685,6 +689,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const R = (e) => { if (!e) return null; const b = e.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom, w: b.width, h: b.height }; };
         const q = (s) => document.querySelector(s);
         const img = q('[data-testid=ph-cover]'); const card = q('[data-testid=ph-lyrics]'); const ics = img ? getComputedStyle(img) : null; const ccs = getComputedStyle(card);
+        // Runde 50c: das Quadrat ist ein Element um das Bild (Fläche, Radius, Rand als Überlagerung ::after), das Bild füllt es
+        const slot = q('[data-testid=ph-cover-slot]'); const scs = slot ? getComputedStyle(slot) : null; const sas = slot ? getComputedStyle(slot, '::after') : null;
         const bw = parseFloat(ccs.borderLeftWidth) || 0;
         const pad = parseFloat(ccs.paddingLeft) || 0;
         const vis = img ? (ics.display !== 'none' && img.getBoundingClientRect().height > 0) : false;
@@ -698,14 +704,15 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           cardInner: { l: cb.left + bw, r: cb.right - bw, t: cb.top + bw, b: cb.bottom - bw },
           content: { l: cb.left + bw + pad, r: cb.right - bw - pad, t: cb.top + bw + pad, b: cb.bottom - bw - pad },
           cardRadius: ccs.borderTopLeftRadius, padTop: ccs.paddingTop, cardOverflow: ccs.overflow, art: card.dataset.art ?? null, dir: card.dataset.dir ?? null,
-          img: img ? { ...R(img), vis, fit: ics.objectFit, dfit: img.dataset.fit, pos: ics.objectPosition, filter: ics.filter, bf: ics.backdropFilter, anim: ics.animationName, trans: ics.transitionDuration, bgi: ics.backgroundImage, alt: img.getAttribute('alt'), lazy: img.getAttribute('loading'), dec: img.getAttribute('decoding'), ref: img.getAttribute('referrerpolicy'), aw: img.getAttribute('width'), hh: img.getAttribute('height'), src: img.getAttribute('src'), done: img.complete && img.naturalWidth > 0, nw: img.naturalWidth, nh: img.naturalHeight, radius: ics.borderTopLeftRadius, bw: ics.borderTopWidth, bs: ics.borderTopStyle, bc: ics.borderTopColor, inCard: img.parentElement === card } : null,
+          img: img ? { ...R(img), vis, fit: ics.objectFit, dfit: img.dataset.fit, pos: ics.objectPosition, filter: ics.filter, bf: ics.backdropFilter, anim: ics.animationName, trans: ics.transitionDuration, bgi: ics.backgroundImage, alt: img.getAttribute('alt'), lazy: img.getAttribute('loading'), dec: img.getAttribute('decoding'), ref: img.getAttribute('referrerpolicy'), aw: img.getAttribute('width'), hh: img.getAttribute('height'), src: img.getAttribute('src'), done: img.complete && img.naturalWidth > 0, nw: img.naturalWidth, nh: img.naturalHeight, radius: scs.borderTopLeftRadius, bw: sas.borderTopWidth, bs: sas.borderTopStyle, bc: sas.borderTopColor, inCard: !!slot && img.parentElement === slot && slot.parentElement === card, op: parseFloat(ics.opacity) } : null,
           out: lineInfo('ph-lyric-out'), cur: lineInfo('caption'), next: lineInfo('ph-lyric-next'), next2: lineInfo(".ph-row[data-role='next2']"), next3: lineInfo(".ph-row[data-role='next3']"), note: note ? R(note) : null, noteText: note?.textContent ?? null,
+          slot: slot ? { ...R(slot), state: slot.dataset.state, bg: scs.backgroundColor, vis: scs.display !== 'none' && slot.getBoundingClientRect().height > 0 } : null,
           count: document.querySelectorAll('[data-testid=ph-cover]').length, small: document.querySelectorAll('.ph-chiprow img, .ph-cover, .ph-chiprow [data-cover]').length,
           hook: { ...R(hk), step: hk.dataset.step, size: parseFloat(getComputedStyle(hk).fontSize), sh: hk.scrollHeight, ch: hk.clientHeight }, actions: R(q('[data-testid=ph-actions]')), row: R(q('.ph-chiprow')), contentBox: R(q('[data-testid=ph-audio]')),
           cc: q('[data-testid=cc]')?.getAttribute('aria-pressed') ?? null,
         };
       });
-      const loaded = () => waitFor(pg, () => { const i = document.querySelector('[data-testid=ph-cover]'); return !!i && i.complete && i.naturalWidth > 0; }, undefined, 4000);
+      const loaded = async () => { const ok = await waitFor(pg, () => { const i = document.querySelector('[data-testid=ph-cover]'); return !!i && i.complete && i.naturalWidth > 0 && i.dataset.ready === 'yes' && parseFloat(getComputedStyle(i).opacity) === 1; }, undefined, 4000); return ok; };
       /** Warten, bis die aktuelle Zeile mit prefix beginnt (die Zeit läuft mit dem Abspielen) */
       const rowsRest = () => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row')).length === 0;
       const atLine = async (prefix) => { const ok = await waitFor(pg, (x) => document.querySelector('[data-testid=caption]')?.textContent.startsWith(x), prefix, 9000); await waitFor(pg, () => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row')).length === 0, undefined, 3000); return ok; };
@@ -758,7 +765,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       c[`${tag} Bild mit normalem Karten-Innenabstand oben`] = !!a.img && (!a.img.vis || (Math.abs(a.img.t - a.content.t) <= 1 && Math.abs(a.img.l - a.content.l) <= 1)) && a.padTop === '20px';
       c[`${tag} Bild bündig mit der Startkante der Untertitel (links)`] = !a.img.vis || flushOk(a, false);
       c[`${tag} Bild ganz in der Karte`] = !!a.img && (!a.img.vis || true) && (!a.img.vis || a.img.l >= a.cardInner.l - 0.5 && a.img.r <= a.cardInner.r + 0.5 && a.img.t >= a.cardInner.t - 0.5 && a.img.b <= a.cardInner.b + 0.5) && a.img.inCard;
-      c[`${tag} Bild Radius 12, Rand 1 px aus 8 Prozent Weiß, ohne Filter und Animation`] = !!a.img && a.img.radius === '12px' && a.img.bw === '1px' && a.img.bs === 'solid' && /0\.08/.test(a.img.bc) && a.img.filter === 'none' && a.img.bf === 'none' && a.img.anim === 'none' && a.img.bgi === 'none' && /^0s/.test(a.img.trans);
+      c[`${tag} Bild Radius 12, Rand 1 px aus 8 Prozent Weiß, ohne Filter und Animation`] = !!a.img && a.img.radius === '12px' && a.img.bw === '1px' && a.img.bs === 'solid' && /0\.08/.test(a.img.bc) && a.img.filter === 'none' && a.img.bf === 'none' && a.img.anim === 'none' && a.img.bgi === 'none' && /^0\.2s/.test(a.img.trans);
       c[`${tag} quadratisches Bild: cover, nicht beschnitten`] = !!a.img && a.img.fit === 'cover' && a.img.dfit === 'cover' && Math.abs(a.img.nw / a.img.nh - 1) <= 0.02 && /^(50% 50%|center center|center)$/.test(a.img.pos);
       c[`${tag} Abrufregeln`] = !!a.img && a.img.alt === '' && !a.img.lazy && a.img.dec === 'async' && a.img.ref === 'no-referrer' && a.img.src === COVER && !!a.img.aw && !!a.img.hh && a.count === 1;
       c[`${tag} Untertitel in der Karte, unter dem Bild, ohne Überlappung`] = linesOk(a, true);
@@ -830,12 +837,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       c[`${tag} arabisch: rechtsbündig`] = af.curRight.boxR - af.curRight.textR <= 2;
       if (size.name === '390x844') await pg.screenshot({ path: `${out}/${name}-390-audio-arabisch.png` });
       if (size.name === '375x667') await pg.screenshot({ path: `${out}/${name}-375-audio-arabisch.png` });
-      // Moment mit abgebrochener Route: Bild verschwindet, Karte wie ohne thumb
+      // Moment mit abgebrochener Route (Runde 50c): das Bild-Element verschwindet, die ruhige Fläche bleibt stehen, die Zeilen liegen darunter
       await showMoment(pg, idOf(43));
-      await waitFor(pg, () => !document.querySelector('[data-testid=ph-cover]'), undefined, 4000);
+      await waitFor(pg, () => !document.querySelector('[data-testid=ph-cover]') && !!document.querySelector('[data-testid=ph-cover-slot][data-state=error]'), undefined, 4000);
       const d = await info();
       r.notes[`${tag} ladefehler`] = d;
-      c[`${tag} Ladefehler: kein Bild, kein Platzhalter, Karte wie ohne thumb`] = (!d.img ? d.art === null : !d.img.vis) && linesOk(d, !!d.img && d.img.vis);
+      c[`${tag} Ladefehler: kein Bild-Element, Fläche bleibt, Zeilen unter der Fläche`] = !d.img && !!d.slot && d.art !== null && (!d.slot.vis || linesOk({ ...d, img: d.slot }, true));
       c[`${tag} keine Seitenfehler`] = o.errors.length === 0;
       await o.browser.close();
     }
@@ -887,7 +894,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const q = (s) => document.querySelector(s);
         const feed = q('.vfeed[data-phone]'); const head = q('.ph-head'); const hs = head ? getComputedStyle(head) : null;
         return {
-          ih: innerHeight, sh: screen.height, v: feed ? getComputedStyle(feed).getPropertyValue('--ph-h').trim() : null, rootV: document.documentElement.style.getPropertyValue('--ph-h'),
+          ih: innerHeight, sh: screen.height, short: document.documentElement.hasAttribute('data-ph-short'), phPb: q('[data-testid=ph-bar]') ? getComputedStyle(q('[data-testid=ph-bar]')).paddingBottom : null, htmlBg: getComputedStyle(document.documentElement).backgroundColor, barBg: q('[data-testid=ph-bar]') ? getComputedStyle(q('[data-testid=ph-bar]')).backgroundColor : null, minRule: [...document.styleSheets].some((ss) => { try { return [...ss.cssRules].some((x) => x.media && /display-mode:\s*standalone/.test(x.media.mediaText) && /min-height/.test(x.cssText) && /100lvh/.test(x.cssText)); } catch { return false; } }), phH: document.documentElement.style.getPropertyValue('--ph-h') + (feed ? getComputedStyle(feed).getPropertyValue('--ph-h').trim() : ''),
+          btns: [...document.querySelectorAll('[data-testid=ph-bar] button, [data-testid=ph-actions] button')].map((e) => { const b = e.getBoundingClientRect(); return { t: b.top, b: b.bottom, l: b.left, r: b.right, id: e.dataset.testid ?? e.getAttribute('aria-label') ?? '' }; }),
           feed: R(feed), head: R(head), tabs: R(q('.ph-tabs')), actions: R(q('[data-testid=ph-actions]')), bar: R(q('[data-testid=ph-bar]')), lyrics: R(q('[data-testid=ph-lyrics]')), audio: R(q('[data-testid=ph-audio]')), hook: R(q('[data-testid=hook]')),
           pos: hs?.position, bg: hs?.backgroundColor, inStage: !!head?.closest('.vstage'), vstage: getComputedStyle(q('.vstage')).transform,
           scrollY: document.scrollingElement.scrollHeight, vp: window.__core.diag().filter((x) => x.startsWith('vp:')),
@@ -896,7 +904,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const prep = async (size, extra = {}) => { const o = await open(type, { ...size, ...extra }, { tab: 'audio', pool: POOL_G }); await showMoment(o.pg, idOf(40)); await waitFor(o.pg, () => { const i = document.querySelector('[data-testid=ph-cover]'); return !!i && i.complete && i.naturalWidth > 0; }, undefined, 4000); await waitFor(o.pg, () => window.__core.diag().some((x) => x.startsWith('vp:')), undefined, 6000); return o; };
       const oA = await prep(GER);
       const A = await oA.pg.evaluate(MEAS);
-      r.notes['Gerät A (Fehler, Korrektur an)'] = A;
+      r.notes['Gerät A (kurzes Fenster, Rückfall an)'] = A;
       const oB = await prep(GER, { standalone: false });
       const B = await oB.pg.evaluate(MEAS);
       r.notes['Gerät B (kein Standalone)'] = B;
@@ -904,17 +912,24 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const C = await oC.pg.evaluate(MEAS);
       r.notes['Gerät C (Fensterhöhe gleich screen.height)'] = C;
       c['Gerät Fehler nachgestellt: Fenster 793, screen.height 852'] = A.ih === 793 && A.sh === 852;
-      c['Gerät Variable --ph-h gesetzt (852px)'] = A.v === '852px' && A.rootV === '852px';
-      c['Gerät Feed reicht bis 852 (top 0, bottom 852)'] = !!A.feed && Math.abs(A.feed.t) <= 0.5 && Math.abs(A.feed.b - 852) <= 0.5 && Math.abs(A.feed.w - 393) <= 0.5;
-      c['Gerät Abspielleiste endet bei 852'] = !!A.bar && Math.abs(A.bar.b - 852) <= 0.5 && Math.abs(A.actions.b - A.bar.t) <= 1;
-      c['Gerät Karte ist 59 px höher als ohne Korrektur'] = !!A.lyrics && !!B.lyrics && Math.abs(A.lyrics.h - B.lyrics.h - 59) <= 1;
-      c['Gerät ohne Korrektur endet die Leiste bei 793 (Befund)'] = !!B.bar && Math.abs(B.bar.b - 793) <= 0.5 && B.v === '' && B.rootV === '';
+      // Runde 50c: keine Höhenüberschreibung mehr (--ph-h gibt es nicht), Feed und Leiste enden am Fenster, der Rückfall data-ph-short nimmt den doppelten unteren Rand weg
+      c['Gerät kein --ph-h mehr (weder am Wurzelelement noch im Feed)'] = A.phH === '' && B.phH === '' && C.phH === '';
+      c['Gerät Rückfall data-ph-short gesetzt (Fenster 793, Bildschirm 852, Sicherheitsrand 59)'] = A.short === true && B.short === false && C.short === false;
+      c['Gerät Feed endet am Fenster (0 bis 793)'] = !!A.feed && Math.abs(A.feed.t) <= 0.5 && Math.abs(A.feed.b - A.ih) <= 0.5 && Math.abs(A.feed.w - 393) <= 0.5;
+      c['Gerät kurzes Fenster: Abspielleiste endet bei innerHeight, Aktionsreihe direkt darüber'] = !!A.bar && A.bar.b <= A.ih + 0.01 && Math.abs(A.bar.b - A.ih) <= 0.5 && Math.abs(A.actions.b - A.bar.t) <= 1;
+      c['Gerät kurzes Fenster: alle Tasten ganz im Fenster, keine angeschnitten'] = A.btns.length >= 8 && A.btns.every((x) => x.b <= A.ih + 0.01 && x.t >= 0 && x.l >= 0 && x.r <= 393.01 && x.b - x.t >= 43.5);
+      c['Gerät kurzes Fenster: Abstand der Tasten zur Unterkante gleich s-4 (16 px)'] = A.phPb === '16px' && Math.abs(A.ih - Math.max(...A.btns.filter((x) => A.bar && x.t >= A.bar.t).map((x) => x.b)) - 16) <= 0.5;
+      c['Gerät kurzes Fenster: Leiste 18 px niedriger, Karte 18 px höher als mit Home-Rand (Gegenprobe B)'] = !!A.lyrics && !!B.lyrics && Math.abs(A.lyrics.h - B.lyrics.h - 18) <= 1 && Math.abs((B.bar.h - A.bar.h) - 18) <= 0.5;
+      c['Gerät html-Hintergrund gleich der Farbe der Leiste (der Streifen darunter wirkt wie ihre Fortsetzung)'] = /^rgb\(/.test(A.htmlBg) && A.htmlBg === A.barBg;
+      c['Gerät Gegenprobe ohne Standalone: Leiste endet bei 793, Home-Rand 34 bleibt'] = !!B.bar && Math.abs(B.bar.b - 793) <= 0.5 && B.phPb === '34px' && Math.abs(B.ih - Math.max(...B.btns.filter((x) => x.t >= B.bar.t).map((x) => x.b)) - 34) <= 0.5;
+      c['Gerät normales Standalone-Profil 393x852: Leiste bis 852, Tasten oberhalb von 852 minus 34'] = !!C.bar && Math.abs(C.bar.b - 852) <= 0.5 && C.phPb === '34px' && Math.abs(852 - Math.max(...C.btns.filter((x) => x.t >= C.bar.t).map((x) => x.b)) - 34) <= 0.5 && C.btns.length >= 8 && C.btns.filter((x) => x.t >= C.bar.t).every((x) => x.b <= 852 - 34 + 0.5);
+      c['Gerät html min-height-Regel für die Standalone-App im Stylesheet (WebKit 301108)'] = A.minRule === true;
       c['Gerät kein Seitenscroll durch die Überhöhe'] = A.scrollY <= A.ih + 1;
       const vpA = A.vp[0] ?? '';
-      c['Gerät Diag-Zeile "vp:" mit fix=852'] = /^vp: iw=393 ih=793 vvh=\d+(\.\d+)? ch=793 sw=\d+ sh=852 st=59 sb=34 standalone=yes ios=\S+ head=0,103 bar=\S+ feed=0,852 fix=852$/.test(vpA);
-      if (!c['Gerät Diag-Zeile "vp:" mit fix=852']) r.notes['Gerät Diag A'] = A.vp;
-      c['Gegenprobe ohne Standalone: keine Korrektur (fix=none, Feed endet bei 793)'] = B.v === '' && !!B.feed && Math.abs(B.feed.b - 793) <= 0.5 && /standalone=no/.test(B.vp[0] ?? '') && /fix=none$/.test(B.vp[0] ?? '');
-      c['Gegenprobe ih gleich sh: keine Korrektur (fix=none, Feed endet bei 852)'] = C.v === '' && !!C.feed && Math.abs(C.feed.b - 852) <= 0.5 && !!C.bar && Math.abs(C.bar.b - 852) <= 0.5 && /fix=none$/.test(C.vp[0] ?? '');
+      c['Gerät Diag-Zeile "vp:" mit dh, sy, top, short=yes'] = /^vp: iw=393 ih=793 vvh=\d+(\.\d+)? ch=793 sw=\d+ sh=852 st=59 sb=34 standalone=yes ios=\S+ head=0,103 bar=\S+ feed=0,793 dh=\d+(\.\d+)? sy=0 top=DIV\.head short=yes$/.test(vpA);
+      if (!c['Gerät Diag-Zeile "vp:" mit dh, sy, top, short=yes']) r.notes['Gerät Diag A'] = A.vp;
+      c['Gegenprobe ohne Standalone: kein Rückfall (short=no, Feed endet bei 793)'] = B.short === false && !!B.feed && Math.abs(B.feed.b - 793) <= 0.5 && /standalone=no/.test(B.vp[0] ?? '') && /short=no$/.test(B.vp[0] ?? '');
+      c['Gegenprobe ih gleich sh: kein Rückfall (short=no, Feed und Leiste enden bei 852)'] = C.short === false && !!C.feed && Math.abs(C.feed.b - 852) <= 0.5 && !!C.bar && Math.abs(C.bar.b - 852) <= 0.5 && /short=no$/.test(C.vp[0] ?? '');
       // Kopfleiste: fest, deckend, Rechteck wie vorher (0 bis 103, volle Breite), nicht im bewegten Stapel
       c['Gerät Kopfleiste position fixed, deckender Hintergrund, nicht im bewegten Stapel'] = A.pos === 'fixed' && /^rgb\(/.test(A.bg) && !A.inStage;
       c['Gerät Kopfleiste Rechteck wie vorher (0 bis 103, volle Breite, Reiter 59 bis 103)'] = !!A.head && Math.abs(A.head.t) <= 0.5 && Math.abs(A.head.b - 103) <= 0.5 && Math.abs(A.head.l) <= 0.5 && Math.abs(A.head.w - 393) <= 0.5 && Math.abs(A.tabs.t - 59) <= 0.5 && Math.abs(A.tabs.b - 103) <= 0.5 && JSON.stringify(A.head) === JSON.stringify(B.head);
@@ -937,28 +952,30 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const pg = oA.pg;
         await pg.waitForTimeout(2200);
         await pg.setViewportSize({ width: 393, height: 700 });
-        const got = await waitFor(pg, () => window.__core.diag().some((x) => /^vp: .* ih=700 /.test(x) && /fix=none$/.test(x)), undefined, 4000);
-        const gone = await pg.evaluate(() => document.documentElement.style.getPropertyValue('--ph-h') === '');
+        const got = await waitFor(pg, () => window.__core.diag().some((x) => /^vp: .* ih=700 /.test(x) && /short=no$/.test(x)), undefined, 4000);
+        const gone = await pg.evaluate(() => !document.documentElement.hasAttribute('data-ph-short'));
         await pg.setViewportSize({ width: 393, height: 793 });
-        const back = await waitFor(pg, () => document.documentElement.style.getPropertyValue('--ph-h') === '852px', undefined, 3000);
-        c['Gerät nach resize: neue Zeile, Variable folgt dem Fenster'] = got && gone && back;
+        const back = await waitFor(pg, () => document.documentElement.hasAttribute('data-ph-short'), undefined, 3000);
+        c['Gerät nach resize: neue Zeile, Attribut data-ph-short folgt dem Fenster'] = got && gone && back;
         for (let i = 0; i < 10; i++) { await pg.setViewportSize({ width: 393, height: 780 + (i % 2) * 13 }); await pg.waitForTimeout(60); }
         const n = await pg.evaluate(() => window.__core.diag().filter((x) => x.startsWith('vp:')).length);
         c['Gerät Diag höchstens 5 Zeilen je Sitzung'] = n >= 2 && n <= 5;
         r.notes['Gerät Diag Zahl'] = n;
         await pg.setViewportSize({ width: 393, height: 793 });
       }
-      // Reiter Text und Video im Fehlerfall: Feed und Leiste bis 852
+      // Reiter Text und Video im kurzen Fenster: Feed und Leiste am Fenster
       await gotoTab(oA.pg, 'text'); await showMoment(oA.pg, idOf(48)); await oA.pg.waitForTimeout(500);
       const tx = await oA.pg.evaluate(MEAS);
-      c['Gerät Text-Reiter: Feed bis 852 und Leiste bei 852'] = Math.abs(tx.feed.b - 852) <= 0.5 && Math.abs(tx.bar.b - 852) <= 0.5 && tx.v === '852px';
+      c['Gerät Text-Reiter: Feed und Leiste bei innerHeight, alle Tasten im Fenster'] = Math.abs(tx.feed.b - tx.ih) <= 0.5 && Math.abs(tx.bar.b - tx.ih) <= 0.5 && tx.short === true && tx.btns.every((x) => x.b <= tx.ih + 0.01);
       await oA.pg.locator('[data-testid=form-switch] button:has-text("Video")').click(); await waitFor(oA.pg, () => window.__core.moment() && window.__core.state() === 1, undefined, 8000); await oA.pg.waitForTimeout(700);
       const vd = await oA.pg.evaluate(MEAS);
-      c['Gerät Video-Reiter: Feed bis 852 und Leiste bei 852'] = Math.abs(vd.feed.b - 852) <= 0.5 && Math.abs(vd.bar.b - 852) <= 0.5 && vd.v === '852px';
-      // Bildschirmfotos: ein Fenster von 793 zeigt nichts unter seiner Kante (auch nicht mit clip), darum eine Seite mit Fensterhöhe 852 (Layout wie mit der Korrektur: Feed 0 bis 852, Sicherheitsrand 59/34)
+      c['Gerät Video-Reiter: Feed und Leiste bei innerHeight, alle Tasten im Fenster'] = Math.abs(vd.feed.b - vd.ih) <= 0.5 && Math.abs(vd.bar.b - vd.ih) <= 0.5 && vd.short === true && vd.btns.every((x) => x.b <= vd.ih + 0.01);
+      // Bildschirmfotos (Runde 50c): ein Fenster von 793 zeigt nichts unter seiner Kante. Darum eine Seite mit Fensterhöhe 852, deren Feed 59 px über dem unteren Rand endet (Stil unten), Bildschirmhöhe 911: dasselbe Layout wie im kurzen Fenster mit Rückfall data-ph-short, darunter der html-Hintergrund als Streifen.
       {
-        const oS = await open(type, { ...GER, height: 852, screenH: 0, standalone: false }, { tab: 'audio', pool: POOL_G });
+        const oS = await open(type, { ...GER, height: 852, screenH: 911 }, { tab: 'audio', pool: POOL_G, init: () => { const put = () => { const st = document.createElement('style'); st.textContent = '.vfeed[data-phone]{bottom:59px !important}'; document.documentElement.appendChild(st); }; if (document.documentElement) put(); else document.addEventListener('readystatechange', put, { once: true }); } });
         const ps = oS.pg;
+        // Die Höhe des Feeds kommt aus top und bottom (height auto), nicht aus 100dvh: mit bottom 59 endet er bei 793, obwohl das Fenster 852 hoch ist
+        c['Gerät Feed-Höhe folgt top und bottom (height auto statt 100dvh)'] = await ps.evaluate(() => { const f = document.querySelector('.vfeed[data-phone]'); return getComputedStyle(f).bottom === '59px' && Math.abs(f.getBoundingClientRect().bottom - 793) <= 0.5 && innerHeight === 852; });
         await showMoment(ps, idOf(59)); await waitFor(ps, () => document.querySelector('[data-testid=caption]')?.textContent.startsWith('Zweite') && !!document.querySelector('[data-testid=ph-lyric-next]'), undefined, 9000); await ps.waitForTimeout(300);
         await ps.screenshot({ path: `${out}/${name}-geraet-audio-lateinisch.png` });
         await showMoment(ps, idOf(58)); await ps.evaluate(async () => { await document.fonts.ready; }); await waitFor(ps, () => document.querySelector('[data-testid=caption]')?.textContent.startsWith('هذا سطر تجريبي ثان') && !!document.querySelector('[data-testid=ph-lyric-next]'), undefined, 9000); await ps.waitForTimeout(300);
@@ -1013,51 +1030,132 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       }
     }
 
-    // ---------- Runde 50 (Ziel 8): Titelbild nimmt erst Platz, wenn es geladen ist (innerhalb von 600 ms), sonst kein Bild für den Moment ----------
+    // ---------- Runde 50c (Fehler 3): Hat der Moment ein Titelbild, ist das Quadrat von Anfang an reserviert (ruhige Fläche), das Bild blendet ohne Zeitgrenze ein, bei Fehler bleibt die Fläche ----------
     {
       const covers = {};
-      for (const size of [SIZES[0], GER]) {
+      // Profil Gerät hier mit Fensterhöhe 852 (so gibt iOS der Seite das Fenster mit der Regel in phone.css): im kurzen Fenster 793 liegt die Kartenhöhe von Moment 68 genau an der Grenze, ab der die Karte das Quadrat ausblendet (siehe Notiz unten)
+      for (const size of [SIZES[0], { ...GER, height: 852 }]) {
         const o = await open(type, size, { tab: 'audio', pool: POOL_C });
-        const pg = o.pg; const { info, atLine } = H50(pg);
+        const pg = o.pg; const { info, atLine, linesOk } = H50(pg);
         const diagOf = (id) => pg.evaluate((i) => window.__core.diag().filter((x) => x.startsWith(`cover: ${i} `)), id);
-        const tag = `${size.name} Titelbild-Abruf`;
-        // Bezug: Moment ohne Titelbild
+        const tag = `${size.name} Titelbild-Platz`;
+        // Bezug: Moment ohne Titelbild (kein Quadrat)
         await showMoment(pg, idOf(44));
         await atLine('Dritte');
         const base = await info();
         const baseD = await diagOf(idOf(44));
-        c[`${tag}: ohne thumb Diag cover none`] = baseD.length === 1 && baseD[0].endsWith(' none');
-        const same = (x) => !!x.cur && Math.abs(x.cur.t - base.cur.t) <= 1 && Math.abs(x.cur.l - base.cur.l) <= 1 && Math.abs(x.cur.w - base.cur.w) <= 1 && Math.abs(x.cur.h - base.cur.h) <= 1 && Math.abs(x.card.h - base.card.h) <= 1 && Math.abs(x.hook.h - base.hook.h) <= 1;
-        const noBox = (x) => !x.img || !x.img.vis;
-        for (const [id, want, label] of [[68, 'late', 'verspätet (2 s)'], [69, 'error', 'kaputt'], [70, 'error', 'durchsichtig 1x1']]) {
+        c[`${tag}: ohne thumb Diag cover none, kein Quadrat, kein Bild`] = baseD.length === 1 && baseD[0].endsWith(' none') && !base.slot && !base.img && base.art === null && base.padTop === '20px';
+        // Verzögertes Bild (Route gehalten, bis wir freigeben): sofort das reservierte Quadrat mit Fläche
+        let release; HOLD.p = new Promise((res) => { release = res; });
+        await showMoment(pg, idOf(68));
+        await atLine('Dritte');
+        const pre = await info();
+        const preD = await diagOf(idOf(68));
+        r.notes[`${tag} vor dem Laden`] = { slot: pre.slot, img: pre.img ? { op: pre.img.op, done: pre.img.done } : null, cur: pre.cur, d: preD };
+        const alpha = (col) => { const m = /\/\s*([\d.]+)\s*\)/.exec(col ?? '') ?? /rgba\([^)]*,\s*([\d.]+)\s*\)/.exec(col ?? ''); return m ? parseFloat(m[1]) : /^(rgb|color)\(/.test(col ?? '') ? 1 : null; };
+        c[`${tag} vor dem Laden: Quadrat reserviert (Fläche sichtbar, quadratisch, Zustand wait)`] = !!pre.slot && pre.slot.vis && pre.slot.state === 'wait' && Math.abs(pre.slot.w - pre.slot.h) <= 1 && pre.slot.w >= 72 && pre.art === 'top';
+        c[`${tag} vor dem Laden: Fläche in der Bereichsfarbe mit niedriger Deckkraft (Alpha unter 0,3, über 0)`] = !!pre.slot && alpha(pre.slot.bg) > 0 && alpha(pre.slot.bg) < 0.3;
+        c[`${tag} vor dem Laden: Bild nicht geladen, unsichtbar (Deckkraft 0), keine Zeitgrenze (Diag late nach 600 ms, Quadrat bleibt)`] = !!pre.img && !pre.img.done && pre.img.op === 0 && preD.length === 1 && preD[0] === `cover: ${idOf(68)} late`;
+        c[`${tag} vor dem Laden: Zeilen unter dem Quadrat, nichts überlappt`] = !!pre.slot && linesOk({ ...pre, img: pre.slot }, true);
+        await pg.screenshot({ path: `${out}/${name}-cover-${size.name}-1-vor-dem-laden.png` });
+        release(); HOLD.p = null;
+        const gotImg = await waitFor(pg, () => { const i = document.querySelector('[data-testid=ph-cover]'); return !!i && i.complete && i.naturalWidth > 0 && i.dataset.ready === 'yes' && parseFloat(getComputedStyle(i).opacity) === 1; }, undefined, 4000);
+        await atLine('Dritte');
+        const post = await info();
+        await pg.screenshot({ path: `${out}/${name}-cover-${size.name}-2-nach-dem-laden.png` });
+        const postD = await diagOf(idOf(68));
+        r.notes[`${tag} nach dem Laden`] = { slot: post.slot, img: post.img ? { op: post.img.op, nw: post.img.nw } : null, cur: post.cur, d: postD };
+        c[`${tag} nach dem Laden: Bild sichtbar (Deckkraft 1, naturalWidth über 0), füllt das Quadrat`] = gotImg && !!post.img && post.img.op === 1 && post.img.nw > 0 && !!post.slot && Math.abs(post.img.l - post.slot.l) <= 0.5 && Math.abs(post.img.t - post.slot.t) <= 0.5 && Math.abs(post.img.w - post.slot.w) <= 0.5 && Math.abs(post.img.h - post.slot.h) <= 0.5 && post.slot.state === 'ready';
+        const dd = (x, y) => Math.max(Math.abs(x.t - y.t), Math.abs(x.l - y.l), Math.abs(x.w - y.w), Math.abs(x.h - y.h));
+        c[`${tag} Lage der aktuellen Zeile vor und nach dem Laden gleich (0 px)`] = !!pre.cur && !!post.cur && pre.cur.text === post.cur.text && dd(pre.cur, post.cur) === 0;
+        c[`${tag} Quadrat und Karte vor und nach dem Laden gleich (0 px)`] = !!pre.slot && !!post.slot && dd(pre.slot, post.slot) === 0 && dd(pre.card, post.card) === 0 && dd(pre.hook, post.hook) === 0;
+        c[`${tag} Diag nach dem Laden weiter genau eine Zeile late`] = postD.length === 1 && postD[0] === `cover: ${idOf(68)} late`;
+        // Fehlerfälle: abgebrochene Route (69) und 1x1 (70): Fläche bleibt, kein Bild-Element, gleiche Lage wie im Wartezustand
+        for (const [id, label] of [[69, 'kaputt'], [70, 'durchsichtig 1x1']]) {
           await showMoment(pg, idOf(id));
           const got = await waitFor(pg, (i) => window.__core.diag().some((x) => x.startsWith(`cover: ${i} `)), idOf(id), 4000);
+          await waitFor(pg, () => !!document.querySelector('[data-testid=ph-cover-slot][data-state=error]'), undefined, 4000);
           await atLine('Dritte');
           const a = await info();
+          if (id === 69) await pg.screenshot({ path: `${out}/${name}-cover-${size.name}-3-fehler.png` });
           const d = await diagOf(idOf(id));
-          r.notes[`${tag} ${label}`] = { d, img: a.img ? { vis: a.img.vis, w: a.img.w, h: a.img.h } : null, art: a.art };
-          c[`${tag} ${label}: Diag cover ${want}, genau eine Zeile`] = got && d.length === 1 && d[0] === `cover: ${idOf(id)} ${want}`;
-          c[`${tag} ${label}: keine leere Fläche, keine Bildfläche, Karte ohne Bild`] = noBox(a) && a.art === null && a.padTop === '20px';
-          c[`${tag} ${label}: erste Zeile an derselben Stelle wie im Moment ohne Bild`] = same(a);
-          if (id === 68) {
-            // Das Bild trifft nach 2 s doch ein: nichts springt nachträglich
-            await pg.waitForTimeout(2300);
-            await atLine('Dritte');
-            const z = await info();
-            const d2 = await diagOf(idOf(id));
-            c[`${tag} ${label}: trifft später ein, Karte springt nicht, Diag bleibt late`] = noBox(z) && z.art === null && same(z) && d2.length === 1 && d2[0].endsWith(' late');
-          }
+          r.notes[`${tag} ${label}`] = { d, slot: a.slot, img: a.img ? { vis: a.img.vis } : null, cur: a.cur };
+          c[`${tag} ${label}: Diag cover error, genau eine Zeile`] = got && d.length === 1 && d[0] === `cover: ${idOf(id)} error`;
+          c[`${tag} ${label}: Fläche bleibt stehen, kein Bild-Element (kein kaputtes Symbol)`] = !!a.slot && a.slot.vis && a.slot.state === 'error' && !a.img && a.count === 0 && alpha(a.slot.bg) > 0;
+          c[`${tag} ${label}: Lage von Quadrat und aktueller Zeile wie im Wartezustand (0 px)`] = !!a.slot && !!a.cur && dd(a.slot, pre.slot) === 0 && dd(a.cur, pre.cur) === 0;
         }
         // Normal geladen: ok (Moment 40 hat ein sofort geliefertes Bild)
         await showMoment(pg, idOf(40));
         const okGot = await waitFor(pg, (i) => window.__core.diag().some((x) => x === `cover: ${i} ok`), idOf(40), 4000);
+        await waitFor(pg, () => { const i = document.querySelector('[data-testid=ph-cover]'); return !!i && i.dataset.ready === 'yes' && parseFloat(getComputedStyle(i).opacity) === 1; }, undefined, 3000);
         const ok = await info();
-        c[`${tag}: schnelles Bild: Diag cover ok, Bild sichtbar als Quadrat`] = okGot && !!ok.img && ok.img.vis && Math.abs(ok.img.w - ok.img.h) <= 1 && ok.art !== null;
-        covers[size.name] = { base: base.cur, card: base.card.h };
+        c[`${tag}: schnelles Bild: Diag cover ok, Bild sichtbar als Quadrat`] = okGot && !!ok.img && ok.img.vis && ok.img.op === 1 && Math.abs(ok.img.w - ok.img.h) <= 1 && ok.art !== null;
+        covers[size.name] = { base: base.cur, card: base.card.h, reserved: pre.slot };
         c[`${tag}: keine Seitenfehler`] = o.errors.length === 0;
         await o.browser.close();
       }
       r.notes['Titelbild Ruhelage'] = covers;
+      {
+        // Notiz: kurzes Fenster 793 (Rückfall), Moment 68 mit mehrzeiligem Hook und Moment 40 mit einzeiligem Hook: bleibt das Quadrat sichtbar?
+        const o = await open(type, GER, { tab: 'audio', pool: POOL_C });
+        const { info, atLine } = H50(o.pg);
+        const res = {};
+        for (const id of [40, 44, 68]) { await showMoment(o.pg, idOf(id)); await atLine('Dritte'); const x = await info(); res[id] = { card: x.card.h, slot: x.slot ? { vis: x.slot.vis, w: x.slot.w } : null }; }
+        r.notes['Titelbild im kurzen Fenster 793'] = res;
+        await o.browser.close();
+      }
+    }
+
+    // ---------- Runde 50c (Fehler 2): feste, deckende Kopfleiste an der oberen Kante, die Treffer annimmt (iOS 26 lässt dann den Rand-Weichzeichner weg) ----------
+    {
+      const EDGE = () => {
+        const head = document.querySelector('.ph-head');
+        const W = innerWidth;
+        const pts = [[2, 2], [Math.round(W / 2), 2], [W - 2, 2], [Math.round(W / 2), 30], [Math.round(W / 2), 58]].map(([x, y]) => document.elementFromPoint(x, y) === head);
+        const cs = getComputedStyle(head);
+        const hb = head.getBoundingClientRect();
+        const anc = []; for (let e = head.parentElement; e; e = e.parentElement) { const x = getComputedStyle(e); if ((x.transform && x.transform !== 'none') || (x.filter && x.filter !== 'none') || /transform|filter/.test(x.willChange) || /paint|layout|strict|content/.test(x.contain) || (x.perspective && x.perspective !== 'none') || (x.backdropFilter && x.backdropFilter !== 'none')) anc.push(e.tagName + '.' + (e.className || '')); }
+        // Was liegt über der Leiste (höherer z-index, Bereich 0 bis 59, sichtbar)?
+        const z = parseInt(cs.zIndex, 10) || 0;
+        const above = [...document.querySelectorAll('body *')].filter((e) => { if (head.contains(e)) return false; const x = getComputedStyle(e); const b = e.getBoundingClientRect(); return b.top < 59 && b.bottom > 0 && b.width > 0 && x.display !== 'none' && x.visibility !== 'hidden' && x.position !== 'static' && (parseInt(x.zIndex, 10) || 0) > z && !e.closest('[aria-hidden=true]'); }).map((e) => e.tagName + '.' + (e.className || ''));
+        const a = /rgba\(([^)]+)\)/.exec(cs.backgroundColor);
+        return {
+          pts, W, pos: cs.position, left: cs.left, top: cs.top, w: hb.width, l: hb.left, t: hb.top, pe: cs.pointerEvents, bg: cs.backgroundColor, alphaOk: /^rgb\(/.test(cs.backgroundColor) || (!!a && parseFloat(a[1].split(/[ ,\/]+/)[3]) === 1), bf: cs.backdropFilter, mask: cs.maskImage, wmask: cs.webkitMaskImage, tr: cs.transform, fl: cs.filter, bgi: cs.backgroundImage, op: cs.opacity,
+          anc, above, parent: head.parentElement.tagName + '.' + head.parentElement.className, direct: head.parentElement.classList.contains('vfeed'),
+        };
+      };
+      for (const [label, size] of [['kurzes Fenster 793', GER], ['normal 852', { ...GER, height: 852 }]]) {
+        const o = await open(type, size, { tab: 'audio', pool: POOL_G });
+        await showMoment(o.pg, idOf(40)); await o.pg.waitForTimeout(500);
+        const m = await o.pg.evaluate(EDGE);
+        r.notes[`Kante ${label}`] = m;
+        const tag = `Obere Kante ${label}`;
+        c[`${tag}: Trefferprüfung an (2,2), (Mitte,2), (rechts,2), (Mitte,30), (Mitte,58) liefert die Kopfleiste`] = m.pts.every(Boolean);
+        c[`${tag}: position fixed, left 0, top 0, Breite gleich innerWidth, nimmt Berührungen an (pointer-events auto)`] = m.pos === 'fixed' && m.left === '0px' && m.top === '0px' && Math.abs(m.w - m.W) <= 0.5 && Math.abs(m.l) <= 0.5 && Math.abs(m.t) <= 0.5 && m.pe === 'auto';
+        c[`${tag}: Hintergrund voll deckend ohne Alpha, einfarbig (kein Verlauf), Deckkraft 1`] = m.alphaOk && /^rgb\(/.test(m.bg) && m.bgi === 'none' && m.op === '1';
+        c[`${tag}: kein backdrop-filter, keine Maske, keine transform, kein filter an der Leiste`] = m.bf === 'none' && (m.mask === 'none' || m.mask === '') && (m.wmask === 'none' || m.wmask === '' || m.wmask === undefined) && m.tr === 'none' && m.fl === 'none';
+        c[`${tag}: kein Vorfahr mit transform, filter, will-change, contain, perspective, backdrop-filter`] = m.anc.length === 0;
+        c[`${tag}: direktes Kind des Feed-Wurzelelements, nichts mit höherem z-index über 0 bis 59`] = m.direct && m.above.length === 0;
+        c[`${tag}: keine Seitenfehler`] = o.errors.length === 0;
+        await o.browser.close();
+      }
+      // Diag: ändert sich ih nach der ersten Zeile, folgt innerhalb von 4 s eine neue Zeile mit dem neuen Wert
+      {
+        const o = await open(type, GER, { tab: 'audio', pool: POOL_G });
+        await waitFor(o.pg, () => window.__core.diag().some((x) => x.startsWith('vp:')), undefined, 6000);
+        await o.pg.setViewportSize({ width: 393, height: 852 });
+        const got = await waitFor(o.pg, () => window.__core.diag().some((x) => /^vp: .* ih=852 /.test(x) && /short=no$/.test(x)), undefined, 4000);
+        const n = await o.pg.evaluate(() => window.__core.diag().filter((x) => x.startsWith('vp:')).length);
+        c['Diag vp: nach geänderter Fensterhöhe folgt eine neue Zeile (ih=852, short=no), höchstens 5 Zeilen'] = got && n >= 2 && n <= 5;
+        await o.browser.close();
+      }
+      // Foto: normales Standalone-Profil 393x852 (Fenster gleich Bildschirm)
+      {
+        const o = await open(type, { ...GER, height: 852 }, { tab: 'audio', pool: POOL_G });
+        await showMoment(o.pg, idOf(59)); await waitFor(o.pg, () => document.querySelector('[data-testid=caption]')?.textContent.startsWith('Zweite') && !!document.querySelector('[data-testid=ph-lyric-next]'), undefined, 9000); await o.pg.waitForTimeout(400);
+        await o.pg.screenshot({ path: `${out}/${name}-r50c-normal-852-audio.png` });
+        await o.browser.close();
+      }
     }
 
     // ---------- Runde 50b (Auflage 2 und 3): Reihenfolge der Verkleinerung bei immer kleinerer Karte: Bild kleiner, Bild weg, nächste Zeilen weniger (3, 2, 1), zuletzt die aktuelle Zeile klemmen ----------
@@ -1373,8 +1471,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await showMoment(pg, idOf(40));
       await waitFor(pg, () => { const i = document.querySelector('[data-testid=ph-cover]'); return !!i && i.complete; }, undefined, 4000);
       await pg.waitForTimeout(500);
-      const one = await pg.evaluate(() => ({ n: document.querySelectorAll('.ph-art, [data-testid=ph-cover]').length, src: document.querySelector('[data-testid=ph-cover]')?.getAttribute('src'), inCard: !!document.querySelector('[data-testid=ph-lyrics] > [data-testid=ph-cover]'), https: /^https:/.test(document.querySelector('[data-testid=ph-cover]')?.getAttribute('src') ?? '') }));
-      c['Titelbild ein Element in der Karte, aus dem Feld thumb, https'] = one.n === 1 && one.src === COVER && one.inCard && one.https;
+      const one = await pg.evaluate(() => ({ n: document.querySelectorAll('[data-testid=ph-cover]').length + document.querySelectorAll('.ph-art').length - 1, src: document.querySelector('[data-testid=ph-cover]')?.getAttribute('src'), inCard: !!document.querySelector('[data-testid=ph-lyrics] > .ph-art > [data-testid=ph-cover]'), https: /^https:/.test(document.querySelector('[data-testid=ph-cover]')?.getAttribute('src') ?? '') }));
+      c['Titelbild ein Element in der Karte (im Quadrat), aus dem Feld thumb, https'] = one.n === 1 && one.src === COVER && one.inCard && one.https;
       r.notes['Titelbild Abrufe'] = { asked, one };
       await o.browser.close();
     }

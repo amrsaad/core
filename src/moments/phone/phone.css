@@ -5,7 +5,7 @@
    Die Fläche ist immer dunkel (auch bei hellem Gerät): Text und Papier-Stimmung gelten hier nicht, wie in der Mac-Ansicht. */
 .vfeed[data-phone] {
   --head-h: 44px;
-  /* Runde 50: --ph-clear (Abstand unter der Statusleiste, nur Standalone, siehe PHONE_TOP_CLEAR_PX) und --ph-h (Höhe bis zum unteren Rand) setzt usePhoneViewport am Wurzelelement. Fehlen sie, gilt 0 und inset 0. */
+  /* Runde 50: --ph-clear (Abstand unter der Statusleiste, nur Standalone, siehe PHONE_TOP_CLEAR_PX) setzt usePhoneViewport am Wurzelelement. Fehlt er, gilt 0. */
   --ph-top: calc(var(--safe-t) + var(--ph-clear, 0px) + var(--head-h));
   /* Unterkante: die Home-Anzeige, mindestens 16 px */
   --ph-pb: max(var(--s-4), var(--safe-b));
@@ -13,7 +13,8 @@
   --ph-act-pt: 14px;
   --ph-act-pb: var(--s-3);
   --ph-act-h: calc(52px + var(--ph-act-pt) + var(--ph-act-pb));
-  --ph-bar-h: calc(var(--s-2) + 16px + 10px + 68px + var(--ph-pb));
+  /* Runde 50c: plus 1 px für die obere Haarlinie (box-sizing border-box), sonst sitzen die Tasten 1 px zu tief und der Abstand zur Unterkante ist --ph-pb minus 1 */
+  --ph-bar-h: calc(var(--s-2) + 16px + 10px + 68px + 1px + var(--ph-pb));
   --ph-notes: 0px;
   /* Runde 50: eigene Zeile für die Statuszeile (nur solange eine Status-Meldung steht, data-status am Feed), direkt über der Zeile "N notes" bzw. der Aktionsreihe. Der Inhalt endet darüber. */
   --ph-status: 0px;
@@ -27,16 +28,23 @@
   --ink-2: var(--on-media-muted);
   background: var(--stage);
 }
-/* Runde 48: unterer Rand. Der Feed sitzt fest am Fenster (inset 0 statt 100dvh): in der Standalone-App auf iOS kann 100dvh kleiner als der Bildschirm sein, dann blieb darunter ein Streifen
-   in der Farbe der Seite. Zusätzlich hat die Seite hinter dem Feed die Farbe der unteren Leiste, falls das Fenster dennoch höher ist als der Feed (kein Farbwechsel unter der Leiste). */
-.vfeed[data-phone] { position: fixed; inset: 0; height: var(--ph-h, auto); }
-/* Runde 50: Auf dem Gerät (installierte App) ist das Layout-Fenster um die obere Sicherheitsrand-Höhe kürzer als der Bildschirm. Mit --ph-h reicht der Feed bis zum physischen unteren Rand.
-   Bei gesetzter Höhe gewinnt height über bottom (überbestimmt), top bleibt 0. */
+/* Runde 48: unterer Rand. Der Feed sitzt fest am Fenster (inset 0 statt 100dvh). Zusätzlich hat die Seite hinter dem Feed die Farbe der unteren Leiste, falls das Fenster dennoch höher ist als der Feed. */
+/* height: auto ist nötig: .vfeed hat sonst 100dvh (index.css), und 100dvh kann in der installierten App vom Fenster abweichen. Mit auto bestimmen top und bottom die Höhe. */
+.vfeed[data-phone] { position: fixed; inset: 0; height: auto; }
+/* Runde 50c: WebKit-Fehler 301108. In der installierten App (viewport-fit=cover, black-translucent) ist das Layout-Fenster um die Statusleiste kürzer als der Bildschirm, solange die Seite kürzer als der Bildschirm ist,
+   darunter bleibt ein leerer Streifen. Ist das Dokument mindestens so hoch wie der Bildschirm, gibt iOS der Seite das volle Fenster, und der feste Feed (inset 0) reicht von selbst bis unten.
+   min-height gewinnt gegen height: 100% aus index.css. */
+@media (display-mode: standalone) {
+  html:has(.vfeed[data-phone]) { min-height: min(100lvh, calc(100% + var(--safe-t))); }
+}
+/* Rückfall (usePhoneViewport setzt data-ph-short, wenn das Fenster trotzdem um die Statusleiste kürzer bleibt): der leere Streifen unter der Leiste deckt den Bereich der Home-Anzeige schon ab,
+   darum kein zusätzlicher unterer Sicherheitsrand in der Leiste. Der Streifen selbst hat die Farbe der Leiste (die Regel darunter, die Seite hinter dem Feed). */
+html[data-ph-short] .vfeed[data-phone] { --ph-pb: var(--s-4); }
 html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed[data-phone]) #root { background: var(--feed-surface); }
 @media (max-height: 740px) {
   .vfeed[data-phone] { --ph-act-pt: var(--s-2); --ph-act-pb: var(--s-1); }
 }
-.vfeed[data-phone][data-form='text'] { --ph-bar-h: calc(var(--s-2) + 56px + var(--ph-pb)); }
+.vfeed[data-phone][data-form='text'] { --ph-bar-h: calc(var(--s-2) + 56px + 1px + var(--ph-pb)); }
 .vfeed[data-phone][data-notes] { --ph-notes: var(--notes-row); }
 .vfeed[data-phone][data-statusrow] { --ph-status: 28px; }
 
@@ -47,7 +55,7 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
 /* Audio: kein Cover in dieser Ansicht, die Elemente bleiben im DOM (Wiederladen, Sperrbildschirm), nur unsichtbar. Die Fläche .vaudio bleibt und deckt wie bisher den Player ab. */
 .vfeed[data-phone][data-form='audio'] .vaudio-art,
 .vfeed[data-phone][data-form='audio'] .vplay { display: none; }
-.vfeed[data-phone][data-form='audio'] .vtap { top: calc(var(--ph-top) + (var(--ph-h, 100dvh) - var(--ph-top) - var(--ph-dock-h)) * 0.7); }
+.vfeed[data-phone][data-form='audio'] .vtap { top: calc(var(--ph-top) + (100% - var(--ph-top) - var(--ph-dock-h)) * 0.7); }
 
 /* ---------- Reiterleiste oben ---------- */
 .head.ph-head {
@@ -55,6 +63,8 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
   position: fixed;
   top: 0;
   width: 100%;
+  /* Runde 50c: nimmt Berührungen an (.head ist sonst pointer-events none). Nur so findet die Trefferprüfung an der oberen Kante diese feste, deckende Leiste und iOS 26 lässt den Rand-Weichzeichner weg. */
+  pointer-events: auto;
   height: calc(var(--safe-t) + var(--ph-clear, 0px) + 44px);
   box-sizing: border-box;
   padding: calc(var(--safe-t) + var(--ph-clear, 0px)) var(--margin) 0;
@@ -197,11 +207,15 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
    kein Verlauf, kein Filter. Oben: normaler Karten-Innenabstand, bündig mit der Startkante der Untertitel (links, bei arabisch rechts über data-dir), Seite clamp(72px, Höhe minus 148px (arabisch 212px) für die Zeilen samt Abstand: aktuelle 2 Zeilen, nächste 2, 128px).
    Reicht der Platz nicht für 72 px plus die Zeilen, entfällt das Bild (die Zeilen werden nach der Reihenfolge in PhoneLyrics verkürzt). Ohne Untertitel (CC aus oder kein Text): größtmögliches Quadrat mittig.
    Quadratisches Bild: cover auf der Quadratfläche. Nicht quadratisches (data-fit contain, gesetzt beim Laden): ganz sichtbar, Kartenfarbe dahinter. */
-.ph-art[data-ready='no'] { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .ph-lyrics[data-art] { container-name: ph-card; --ph-lines: 148px; }
 .ph-lyrics[data-art][data-dir='rtl'] { --ph-lines: 212px; }
-.ph-art { display: block; flex: none; box-sizing: border-box; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--on-media) 8%, transparent); background: var(--surface); object-fit: cover; object-position: center; }
-.ph-art[data-fit='contain'] { object-fit: contain; }
+/* Runde 50c: das Quadrat ist von Anfang an da (Fläche in der Bereichsfarbe mit niedriger Deckkraft), das Bild blendet darin ein. Rand als Überlagerung, damit das Bild genau das Quadrat füllt. */
+.ph-art { position: relative; display: block; flex: none; box-sizing: border-box; border-radius: 12px; overflow: hidden; background: color-mix(in srgb, var(--ad, var(--accent)) 14%, transparent); }
+.ph-art::after { content: ''; position: absolute; inset: 0; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--on-media) 8%, transparent); pointer-events: none; }
+.ph-art-img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0; transition: opacity 200ms var(--ease); }
+.ph-art-img[data-ready='yes'] { opacity: 1; }
+.ph-art-img[data-fit='contain'] { object-fit: contain; }
+@media (prefers-reduced-motion: reduce) { .ph-art-img { transition: none; } }
 .ph-lyrics[data-art='top'] > .ph-art { width: clamp(72px, calc(100cqh - var(--ph-lines)), 128px); height: clamp(72px, calc(100cqh - var(--ph-lines)), 128px); align-self: flex-start; }
 .ph-lyrics[data-art='top'][data-dir='rtl'] > .ph-art { align-self: flex-end; }
 @container ph-card (max-height: 219px) { .ph-lyrics[data-art='top'] > .ph-art { display: none; } }

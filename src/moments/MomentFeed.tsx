@@ -4205,7 +4205,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   }, [queue.current[idx]?.id, form, forYou]);
   // Runde 48: Text-Reiter am Handy, jeder Text auf eine Seite (Stufen, kein inneres Scrollen)
   usePhoneTextFit(textBox, ph && form === 'text' && !forYou, queue.current[idx]?.id, (l) => diag.current.push(l));
-  // Runde 50: iPhone-App, Feed bis zum unteren Rand (--ph-h), Abstand oben (--ph-clear), Diagnose-Zeile "vp: ..."
+  // Runde 50: iPhone-App, Rückfall bei zu kurzem Fenster (data-ph-short), Abstand oben (--ph-clear), Diagnose-Zeile "vp: ..."
   usePhoneViewport(ph, (l) => diag.current.push(l));
   useLayoutEffect(() => {
     // Hook nie kürzen: mehr als drei Zeilen in Normalgröße, dann eine Stufe kleiner

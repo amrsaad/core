@@ -119,23 +119,24 @@ export interface PhoneAudioProps {
   onCover?: (line: string) => void;
 }
 
-/** Wie lange ein Titelbild nach dem Wechsel zum Moment höchstens brauchen darf, damit es eingeblendet wird (ms). Danach bleibt der Moment ohne Bild, die Karte springt nie nachträglich. */
+/** Ab wann ein Titelbild in der Diagnose als verspätet gilt (ms nach dem Wechsel zum Moment). Das Bild wird trotzdem eingeblendet, sobald es da ist, es gibt keine Zeitgrenze. */
 export const COVER_WAIT_MS = 600;
 /** Kleinere Bilder (zum Beispiel ein durchsichtiges 1x1) gelten als Fehler */
 const COVER_MIN_PX = 16;
-type CoverPhase = 'wait' | 'ok' | 'late' | 'error';
+type CoverPhase = 'wait' | 'ready' | 'error';
 
 /** Audio: Chip, Kanal, Hook, darunter das Feld mit dem mitlaufenden Text (durchgehende Liste, siehe PhoneLyrics) */
 export function PhoneAudio(p: PhoneAudioProps) {
   const box = useRef<HTMLDivElement>(null);
   const hook = useRef<HTMLHeadingElement>(null);
-  // Titelbild nur im aktiven Moment (diese Ansicht steht nur für ihn). Es nimmt erst Platz ein, wenn es geladen ist (load, naturalWidth größer 0) und das innerhalb von COVER_WAIT_MS nach dem Wechsel geschah.
-  // Bis dahin und bei Verspätung oder Fehler sieht die Karte aus wie ohne Bild (das Element liegt unsichtbar, ohne Platz, und lädt normal: kein loading=lazy, das bei versteckten Bildern nie lädt).
+  // Titelbild nur im aktiven Moment (diese Ansicht steht nur für ihn). Hat der Moment ein Bild (thumb), ist das Quadrat von Anfang an reserviert (Runde 50c, keine Layoutverschiebung):
+  // bis das Bild da ist (ohne Zeitgrenze) und bei einem Ladefehler steht dort eine ruhige Fläche in der Bereichsfarbe, das Bild blendet ein. Ohne thumb kein Quadrat.
   const thumb = coverUrl(p.m.thumb);
   const [st, setSt] = useState<{ src: string; p: CoverPhase }>({ src: '', p: 'wait' });
   const phase: CoverPhase = thumb ? (st.src === thumb ? st.p : 'wait') : 'error';
-  const src = thumb && (phase === 'wait' || phase === 'ok') ? thumb : '';
-  const ready = !!src && phase === 'ok';
+  const src = thumb && phase !== 'error' ? thumb : '';
+  const ready = !!src && phase === 'ready';
+  const reserved = !!thumb;
   const img = useRef<HTMLImageElement>(null);
   const t0 = useRef(0);
   const logged = useRef('');
@@ -144,18 +145,19 @@ export function PhoneAudio(p: PhoneAudioProps) {
     logged.current = `${id}|${ph}`;
     p.onCover?.(`cover: ${id} ${ph}`);
   };
+  // Diagnose: nur das erste Urteil je Moment zählt (ok: kam innerhalb COVER_WAIT_MS, late: kam später oder war nach COVER_WAIT_MS noch nicht da, error: Ladefehler)
   const settled = useRef('');
-  const settle = (next: CoverPhase) => {
-    // Nur das erste Urteil je Moment zählt (ein Fehler vor Ablauf der Frist wird nicht nachträglich zu "late")
+  const verdict = (v: 'ok' | 'late' | 'error') => {
     if (settled.current === `${p.m.id}|${thumb}`) return;
     settled.current = `${p.m.id}|${thumb}`;
-    setSt({ src: thumb, p: next });
-    note(p.m.id, next);
+    note(p.m.id, v);
   };
+  const fail = () => { verdict('error'); setSt({ src: thumb, p: 'error' }); };
   const judge = (el: HTMLImageElement) => {
-    if (!(el.naturalWidth >= COVER_MIN_PX && el.naturalHeight >= COVER_MIN_PX)) return settle('error');
+    if (!(el.naturalWidth >= COVER_MIN_PX && el.naturalHeight >= COVER_MIN_PX)) return fail();
     setWide(Math.abs(el.naturalWidth / el.naturalHeight - 1) > 0.02 ? thumb : '');
-    settle(performance.now() - t0.current <= COVER_WAIT_MS ? 'ok' : 'late');
+    verdict(performance.now() - t0.current <= COVER_WAIT_MS ? 'ok' : 'late');
+    setSt({ src: thumb, p: 'ready' });
   };
   useLayoutEffect(() => {
     if (!thumb) {
@@ -163,7 +165,7 @@ export function PhoneAudio(p: PhoneAudioProps) {
       return;
     }
     t0.current = performance.now();
-    const timer = window.setTimeout(() => settle('late'), COVER_WAIT_MS);
+    const timer = window.setTimeout(() => verdict('late'), COVER_WAIT_MS);
     // Ein Bild aus dem Cache kann geladen sein, bevor der Handler hängt
     const el = img.current;
     if (el?.complete) {
@@ -175,7 +177,7 @@ export function PhoneAudio(p: PhoneAudioProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [thumb, p.m.id]);
   // Ohne Untertitel zum Anzeigen (CC aus, kein Text): das Bild steht als größtmögliches Quadrat mittig in der Karte
-  const fill = ready && (p.hasCaptions ? !p.captionsOn : !p.fallbackText);
+  const fill = reserved && (p.hasCaptions ? !p.captionsOn : !p.fallbackText);
   // Nicht quadratisches Bild: ganz sichtbar (contain) auf der Quadratfläche statt beschnitten (cover)
   const [wide, setWide] = useState('');
   // Reserve unter dem Hook: wie ohne Bild. Der Hook wird wegen des Bildes nicht kleiner (Runde 50, gemessen): das Bild nimmt nur Platz, der übrig ist, und entfällt sonst.
@@ -200,24 +202,28 @@ export function PhoneAudio(p: PhoneAudioProps) {
   return (
     <div className="ph-audio" ref={box} data-testid="ph-audio" data-notes={p.notes ? '' : undefined} style={{ ['--ad' as string]: AREA_COLOR[p.m.area] }}>
       <PhoneInfo m={p.m} speaker={p.speaker} info={p.info} onSource={p.onSource} hookRef={hook} />
-      <section className="ph-lyrics" data-testid="ph-lyrics" aria-label="Captions" aria-live="off" data-art={ready ? (fill ? 'fill' : 'top') : undefined} data-dir={ready ? lineProps(sample).dir : undefined}>
-        {src && (
-          <img
-            key={`c${p.m.id}`}
-            ref={img}
-            className="ph-art"
-            data-testid="ph-cover"
-            data-ready={ready ? 'yes' : 'no'}
-            data-fit={wide === src ? 'contain' : 'cover'}
-            src={src}
-            alt=""
-            width={128}
-            height={128}
-            decoding="async"
-            referrerPolicy="no-referrer"
-            onLoad={(e) => judge(e.currentTarget)}
-            onError={() => settle('error')}
-          />
+      <section className="ph-lyrics" data-testid="ph-lyrics" aria-label="Captions" aria-live="off" data-art={reserved ? (fill ? 'fill' : 'top') : undefined} data-dir={reserved ? lineProps(sample).dir : undefined}>
+        {reserved && (
+          <div className="ph-art" data-testid="ph-cover-slot" data-state={phase}>
+            {src && (
+              <img
+                key={`c${p.m.id}`}
+                ref={img}
+                className="ph-art-img"
+                data-testid="ph-cover"
+                data-ready={ready ? 'yes' : 'no'}
+                data-fit={wide === src ? 'contain' : 'cover'}
+                src={src}
+                alt=""
+                width={128}
+                height={128}
+                decoding="async"
+                referrerPolicy="no-referrer"
+                onLoad={(e) => judge(e.currentTarget)}
+                onError={fail}
+              />
+            )}
+          </div>
         )}
         {fill ? null : lines}
       </section>
