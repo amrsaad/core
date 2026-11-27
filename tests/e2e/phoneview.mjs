@@ -9,6 +9,7 @@
 // Aufruf: node tests/e2e/phoneview.mjs <url> <ausgabeordner>   (vorher npm run build, dann vite preview). E2E_BROWSERS=chromium,webkit
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
+import { deflateSync as zlibSync } from 'node:zlib';
 import { chromium, devices, webkit } from 'playwright';
 import { onPageError } from './pageerrors.mjs';
 
@@ -40,18 +41,35 @@ const EX4 = EX.split('\n').slice(0, 4).join(' ');
 const EX7 = EX.split('\n').slice(0, 7).join(' ');
 moments.push(mk(56, 'body', { form: 'text', videoId: 'texto00056', author: 'Author 56', ref: 'Ref 56', sourceUrl: 'https://example.org/s/56', license: 'CC BY 4.0', excerpt: EX4 }));
 moments.push(mk(57, 'body', { form: 'text', videoId: 'texto00057', author: 'Author 57', ref: 'Ref 57', sourceUrl: 'https://example.org/s/57', license: 'CC BY 4.0', excerpt: EX7 }));
+// Runde 49: Moment 58, arabische Untertitel und Überschrift (frei erfundene Testtexte) mit Titelbild
+const AR_CUES = [[0, 'هذا سطر تجريبي أول، أطول قليلا من سطر واحد على الهاتف المحمول.'], [2, 'هذا سطر تجريبي ثان قصير.'], [4, 'هذا سطر تجريبي ثالث مع جملة تلتف أيضا على عدة أسطر.'], [7, 'الرابع.']];
+const M58 = (mk(58, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/58.m3u8', hook: 'هذا عنوان تجريبي طويل قليلا للحظة الاختبار', cues: AR_CUES, thumb: 'https://img.test/cover58.png' }));
 const COVER = 'https://img.test/cover40.png';
 const m40 = moments.find((x) => x.id === `test${String(40).padStart(7, '0')}:100`);
 m40.thumb = COVER;
+m40.hook = 'Testmoment 40 brain, ein kurzer Satz';
+const m42 = moments.find((x) => x.id === `test${String(42).padStart(7, '0')}:100`);
+m42.thumb = 'https://img.test/cover42.png';
 const m43 = moments.find((x) => x.id === `test${String(43).padStart(7, '0')}:100`);
 m43.thumb = 'https://img.test/broken43.png';
-// 1x1 PNG als Titelbild
-const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
+// Titelbild lokal erzeugt: 96x64, Farbverlauf mit Raster (kein Netzabruf)
+const PNG = (() => {
+  const W = 96, H = 64; const rows = [];
+  for (let y = 0; y < H; y++) { const row = Buffer.alloc(1 + W * 3); for (let x = 0; x < W; x++) { const g = (x % 16 < 2 || y % 16 < 2) ? 235 : 0; row[1 + x * 3] = Math.min(255, 40 + x * 2 + g); row[2 + x * 3] = Math.min(255, 90 + y * 2 + g); row[3 + x * 3] = Math.min(255, 160 - x + g); } rows.push(row); }
+  const crc = (b) => { let c, t = []; for (let n = 0; n < 256; n++) { c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } let r = 0xffffffff; for (const x of b) r = t[(r ^ x) & 255] ^ (r >>> 8); return (r ^ 0xffffffff) >>> 0; };
+  const chunk = (type, data) => { const len = Buffer.alloc(4); len.writeUInt32BE(data.length); const td = Buffer.concat([Buffer.from(type), data]); const cr = Buffer.alloc(4); cr.writeUInt32BE(crc(td)); return Buffer.concat([len, td, cr]); };
+  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(W, 0); ihdr.writeUInt32BE(H, 4); ihdr[8] = 8; ihdr[9] = 2;
+  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', ihdr), chunk('IDAT', zlibSync(Buffer.concat(rows))), chunk('IEND', Buffer.alloc(0))]);
+})();
 const raw = crypto.getRandomValues(new Uint8Array(32));
 const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt']);
 const iv = crypto.getRandomValues(new Uint8Array(12));
 const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify({ updatedAt: '2026-10-23T00:00:00Z', lastRun: '2026-10-23T00:00:00Z', moments })));
 const POOL = JSON.stringify({ v: 1, iv: Buffer.from(iv).toString('base64url'), ct: Buffer.from(ct).toString('base64url') });
+// Pool mit dem arabischen Titelbild-Moment 58 nur für den Block der Runde 49 (die übrigen Abläufe behalten ihre Reihenfolge)
+const iv49 = crypto.getRandomValues(new Uint8Array(12));
+const ct49 = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv49 }, key, new TextEncoder().encode(JSON.stringify({ updatedAt: '2026-10-23T00:00:00Z', lastRun: '2026-10-23T00:00:00Z', moments: [...moments, M58] })));
+const POOL49 = JSON.stringify({ v: 1, iv: Buffer.from(iv49).toString('base64url'), ct: Buffer.from(ct49).toString('base64url') });
 const k = Buffer.from(raw).toString('base64url');
 const idOf = (i) => `test${String(i).padStart(7, '0')}:100`;
 
@@ -591,35 +609,127 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await o.browser.close();
     }
 
-    // ---------- Runde 48: Audio, kleines Titelbild ----------
-    {
-      const o = await open(type, SIZES[0], { tab: 'audio' });
+    // ---------- Runde 49: Audio, großes Titelbild oben in der Karte, arabische Schrift Amiri ----------
+    for (const size of SIZES) {
+      const o = await open(type, size, { tab: 'audio', pool: POOL49 });
       const pg = o.pg;
-      const info = () => pg.evaluate(() => { const img = document.querySelector('[data-testid=ph-cover]'); const row = document.querySelector('.ph-chiprow'); const R = (e) => { const b = e.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom, w: b.width, h: b.height }; }; const cs = img ? getComputedStyle(img) : null; const chips = document.querySelector('[data-testid=speaker-line]'); const src = document.querySelector('[data-testid=source]'); const chip = document.querySelector('.ph-chip'); const spk = document.querySelector('.ph-speaker'); return { img: img ? { ...R(img), radius: cs.borderTopLeftRadius, fit: cs.objectFit, border: cs.borderTopWidth + ' ' + cs.borderTopColor, alt: img.getAttribute('alt'), lazy: img.getAttribute('loading'), dec: img.getAttribute('decoding'), ref: img.getAttribute('referrerpolicy'), done: img.complete && img.naturalWidth > 0, src: img.getAttribute('src') } : null, row: R(row), chips: R(chips), src: R(src), chip: R(chip), spk: R(spk), spkOver: spk.scrollWidth > spk.clientWidth, count: document.querySelectorAll('[data-testid=ph-cover]').length, hook: R(document.querySelector('[data-testid=hook]')) }; });
-      await showMoment(pg, idOf(40));
-      await waitFor(pg, () => { const i = document.querySelector('[data-testid=ph-cover]'); return !!i && i.complete && i.naturalWidth > 0; }, undefined, 4000);
-      const a = await info();
-      r.notes.audioCover = a;
-      c.audioCoverSichtbar44 = !!a.img && Math.abs(a.img.w - 44) <= 0.5 && Math.abs(a.img.h - 44) <= 0.5 && a.img.done && a.count === 1;
-      c.audioCoverStil = !!a.img && a.img.radius === '10px' && a.img.fit === 'cover' && /^1px (rgba\(255, 255, 255, 0\.08\)|color\(srgb 1 1 1 \/ 0\.08\))$/.test(a.img.border);
-      c.audioCoverAttribute = !!a.img && a.img.alt === '' && a.img.lazy === 'lazy' && a.img.dec === 'async' && a.img.ref === 'no-referrer' && a.img.src === COVER;
-      c.audioCoverLinks = !!a.img && a.img.r <= a.chips.l + 12 + 0.5 && a.chip.t < a.spk.t && a.src.l >= a.chips.r - 0.5;
-      c.audioCoverKanalEinzeilig = !!a.img && a.spk.h <= 20;
-      await pg.screenshot({ path: `${out}/${name}-390-audio-cover.png` });
-      // Moment ohne thumb: kein Bild, Zeile wie vorher
+      const tag = `${size.name} Titelbild`;
+      const info = () => pg.evaluate(() => {
+        const R = (e) => { if (!e) return null; const b = e.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom, w: b.width, h: b.height }; };
+        const q = (s) => document.querySelector(s);
+        const img = q('[data-testid=ph-cover]'); const card = q('[data-testid=ph-lyrics]'); const ics = img ? getComputedStyle(img) : null; const ccs = getComputedStyle(card);
+        const bw = parseFloat(ccs.borderLeftWidth) || 0;
+        const vis = img ? (ics.display !== 'none' && img.getBoundingClientRect().height > 0) : false;
+        const lines = ['ph-lyric-prev', 'ph-lyric-cur', 'ph-lyric-next'].map((t) => R(q(`[data-testid=${t === 'ph-lyric-cur' ? 'caption' : t}]`)));
+        const note = q('.ph-lyric-note');
+        return {
+          id: window.__core.moment()?.id, card: R(card), cardInner: { l: card.getBoundingClientRect().left + bw, r: card.getBoundingClientRect().right - bw, t: card.getBoundingClientRect().top + bw, b: card.getBoundingClientRect().bottom - bw },
+          cardRadius: ccs.borderTopLeftRadius, padTop: ccs.paddingTop, cardOverflow: ccs.overflow, art: card.dataset.art ?? null,
+          img: img ? { ...R(img), vis, fit: ics.objectFit, pos: ics.objectPosition, filter: ics.filter, bf: ics.backdropFilter, anim: ics.animationName, trans: ics.transitionDuration, bgi: ics.backgroundImage, alt: img.getAttribute('alt'), lazy: img.getAttribute('loading'), dec: img.getAttribute('decoding'), ref: img.getAttribute('referrerpolicy'), aw: img.getAttribute('width'), hh: img.getAttribute('height'), src: img.getAttribute('src'), done: img.complete && img.naturalWidth > 0 } : null,
+          prev: lines[0], cur: lines[1], next: lines[2], note: note ? R(note) : null, noteText: note?.textContent ?? null,
+          count: document.querySelectorAll('[data-testid=ph-cover]').length, small: document.querySelectorAll('.ph-chiprow img, .ph-cover, .ph-chiprow [data-cover]').length,
+          hook: R(q('[data-testid=hook]')), actions: R(q('[data-testid=ph-actions]')), row: R(q('.ph-chiprow')), content: R(q('[data-testid=ph-audio]')),
+          cc: q('[data-testid=cc]')?.getAttribute('aria-pressed') ?? null,
+        };
+      });
+      const loaded = () => waitFor(pg, () => { const i = document.querySelector('[data-testid=ph-cover]'); return !!i && i.complete && i.naturalWidth > 0; }, undefined, 4000);
+      /** Zeilen ganz in der Karte, unter dem Bild, ohne Überlappung untereinander, mit Aktionsreihe und Überschrift */
+      const linesOk = (a, withArt) => {
+        const L = [a.prev, a.cur, a.next].filter((x) => x && x.w > 0 && x.h > 0);
+        if (!a.cur || !a.cur.h) return false;
+        const inCard = L.every((x) => x.l >= a.cardInner.l - 0.5 && x.r <= a.cardInner.r + 0.5 && x.t >= a.cardInner.t - 0.5 && x.b <= a.cardInner.b + 0.5);
+        const underArt = !withArt || L.every((x) => x.t >= a.img.b - 0.5);
+        const order = L.every((x, i) => i === 0 || L[i - 1].b <= x.t + 0.5);
+        const apart = a.card.t >= a.hook.b - 0.5 && a.card.b <= a.actions.t + 0.5;
+        return inCard && underArt && order && apart;
+      };
+      // Ohne thumb: kein Bild, Karte wie vorher
       await showMoment(pg, idOf(41));
+      c[`${tag} Moment ohne thumb steht`] = (await info()).id === idOf(41);
       const b = await info();
-      r.notes.audioOhneThumb = b;
-      c.audioOhneThumbKeinBild = !b.img && b.count === 0 && b.row.h <= 30;
-      // Moment mit Ladefehler: Bild verschwindet, Zeile unverändert hoch
+      r.notes[`${tag} ohne thumb`] = b;
+      c[`${tag} ohne thumb: kein Bild, kein leerer Platz, Karte wie vorher`] = !b.img && b.count === 0 && b.art === null && linesOk(b, false) && b.padTop === '20px';
+      if (size.name === '390x844') await pg.screenshot({ path: `${out}/${name}-390-audio-ohne-thumb.png` });
+      // Latein mit Titelbild
+      await showMoment(pg, idOf(40));
+      await loaded();
+      const a = await info();
+      r.notes[`${tag} lateinisch`] = a;
+      const target = size.height >= 800 ? [130, 150] : [88, 150];
+      c[`${tag} Moment mit Bild steht`] = a.id === idOf(40);
+      c[`${tag} Bild sichtbar, volle Kartenbreite, Höhe im Zielbereich`] = !!a.img && a.img.vis && a.img.done && a.art === 'top' && Math.abs(a.img.w - (a.cardInner.r - a.cardInner.l)) <= 1 && Math.abs(a.img.l - a.cardInner.l) <= 1 && a.img.h >= target[0] - 0.5 && a.img.h <= target[1] + 0.5;
+      c[`${tag} Bild oben an der Karte, Ecken folgen dem Radius`] = !!a.img && Math.abs(a.img.t - a.cardInner.t) <= 1 && a.cardOverflow.startsWith('hidden') && a.cardRadius === '18px';
+      c[`${tag} Bild ungefähr ein Drittel der Karte`] = !!a.img && a.img.h / a.card.h >= 0.25 && a.img.h / a.card.h <= 0.5;
+      c[`${tag} Bild object-fit cover, ohne Filter, Verlauf und Animation`] = !!a.img && a.img.fit === 'cover' && /^(50% 50%|center center|center)$/.test(a.img.pos) && a.img.filter === 'none' && a.img.bf === 'none' && a.img.anim === 'none' && a.img.bgi === 'none' && /^0s/.test(a.img.trans);
+      c[`${tag} Abrufregeln`] = !!a.img && a.img.alt === '' && a.img.lazy === 'lazy' && a.img.dec === 'async' && a.img.ref === 'no-referrer' && a.img.src === COVER && !!a.img.aw && !!a.img.hh && a.count === 1;
+      c[`${tag} Untertitel in der Karte, unter dem Bild, ohne Überlappung`] = linesOk(a, true);
+      c[`${tag} kleines 44er Cover entfällt, Kopfzeile wie vor Runde 48`] = a.small === 0 && a.row.h <= 30;
+      c[`${tag} Untertitel mittig im Rest der Karte`] = (() => { const L = [a.prev, a.cur, a.next].filter(Boolean); const top = L[0].t - a.img.b; const bot = a.cardInner.b - L[L.length - 1].b; return Math.abs(top - bot) <= Math.max(40, (a.cardInner.b - a.img.b) * 0.3); })();
+      if (size.name === '390x844') await pg.screenshot({ path: `${out}/${name}-390-audio-cover.png` });
+      if (size.name === '375x667') await pg.screenshot({ path: `${out}/${name}-375-audio-cover.png` });
+      // CC aus: das Bild füllt die ganze Karte
+      await pg.locator('[data-testid=cc]').click();
+      await waitFor(pg, () => document.querySelector('[data-testid=ph-lyrics]').dataset.art === 'fill', undefined, 3000);
+      const f = await info();
+      r.notes[`${tag} cc aus`] = f;
+      c[`${tag} CC aus: Bild füllt die Karte, kein Hinweistext`] = !!f.img && f.img.vis && f.art === 'fill' && Math.abs(f.img.l - f.cardInner.l) <= 1 && Math.abs(f.img.r - f.cardInner.r) <= 1 && Math.abs(f.img.t - f.cardInner.t) <= 1 && Math.abs(f.img.b - f.cardInner.b) <= 1 && f.img.fit === 'cover' && !f.note && !f.cur && f.count === 1 && f.cc === 'false';
+      if (size.name === '390x844') await pg.screenshot({ path: `${out}/${name}-390-audio-cc-aus.png` });
+      await pg.locator('[data-testid=cc]').click();
+      await waitFor(pg, () => document.querySelector('[data-testid=ph-lyrics]').dataset.art === 'top', undefined, 3000);
+      c[`${tag} CC wieder an: Bild oben, Untertitel zurück`] = linesOk(await info(), true);
+      // Sehr langer Hook (Moment 42 mit Bild): das Bild darf kleiner werden oder ganz entfallen, nichts überlappt, nichts wird abgeschnitten
+      await showMoment(pg, idOf(42));
+      await waitFor(pg, () => document.querySelector('[data-testid=hook]').textContent.includes('Testmoment 42'), undefined, 3000);
+      await pg.waitForTimeout(400);
+      const lh = await info();
+      r.notes[`${tag} langer Hook`] = lh;
+      c[`${tag} langer Hook: Bild 88 bis 150 px oder ganz weg, Zeilen ohne Überlappung`] = lh.id === idOf(42) && linesOk(lh, !!lh.img && lh.img.vis) && (!lh.img || !lh.img.vis || (lh.img.h >= 87.5 && lh.img.h <= 150.5)) && (await pg.evaluate(() => { const h = document.querySelector('[data-testid=hook]'); return h.scrollHeight <= h.clientHeight + 1; }));
+      // Arabisch mit Titelbild: Amiri, rechtsbündig, nichts abgeschnitten
+      await showMoment(pg, idOf(58));
+      await loaded();
+      await pg.evaluate(async () => { await document.fonts.load("400 24px Amiri", 'ء'); await document.fonts.load("700 24px Amiri", 'ء'); await document.fonts.ready; });
+      await pg.waitForTimeout(300);
+      const ar = await info();
+      const af = await pg.evaluate(() => { const F = (s) => { const e = document.querySelector(s); if (!e) return null; const cs = getComputedStyle(e); return { fam: cs.fontFamily, weight: cs.fontWeight, size: parseFloat(cs.fontSize), lh: parseFloat(cs.lineHeight), dir: cs.direction, align: cs.textAlign, sh: e.scrollHeight, ch: e.clientHeight, lang: e.getAttribute('lang') }; }; const h = document.querySelector('[data-testid=hook]'); return { prev: F('[data-testid=ph-lyric-prev]'), cur: F('[data-testid=caption]'), next: F('[data-testid=ph-lyric-next]'), hook: F('[data-testid=hook]'), hookSh: h.scrollHeight <= h.clientHeight + 1, check4: document.fonts.check('24px Amiri', 'ء'), check7: document.fonts.check('700 24px Amiri', 'ء'), curRight: (() => { const e = document.querySelector('[data-testid=caption]'); const b = e.getBoundingClientRect(); const rg = document.createRange(); rg.selectNodeContents(e); const rb = rg.getBoundingClientRect(); return { boxR: b.right, textR: rb.right, textL: rb.left, boxL: b.left }; })() }; });
+      r.notes[`${tag} arabisch`] = { ar, af };
+      c[`${tag} arabisch: Untertitel in Amiri`] = [af.prev, af.cur, af.next].filter(Boolean).every((x) => /^Amiri\b|^"?Amiri"?/.test(x.fam) && x.dir === 'rtl' && x.weight === '400');
+      c[`${tag} arabisch: Überschrift in Amiri 700`] = !!af.hook && /^"?Amiri"?/.test(af.hook.fam) && af.hook.weight === '700' && af.hook.dir === 'rtl';
+      c[`${tag} arabisch: Amiri geladen (document.fonts.check)`] = af.check4 && af.check7;
+      c[`${tag} arabisch: Zeilenhöhe mindestens 1,8, Überschrift 1,5`] = af.cur.lh / af.cur.size >= 1.8 && af.hook.lh / af.hook.size >= 1.5;
+      c[`${tag} arabisch: Überschrift nicht abgeschnitten`] = af.hookSh;
+      c[`${tag} arabisch: Bild und Untertitel in der Karte, ohne Überlappung`] = !!ar.img && linesOk(ar, ar.img.vis);
+      c[`${tag} arabisch: Bild sichtbar oder bei zu kleiner Karte ganz weg`] = !!ar.img && (ar.img.vis ? ar.img.h >= 87.5 && ar.img.h <= 150.5 : ar.cardInner.b - ar.cardInner.t < 264);
+      c[`${tag} arabisch: rechtsbündig`] = af.curRight.boxR - af.curRight.textR <= 2;
+      if (size.name === '390x844') await pg.screenshot({ path: `${out}/${name}-390-audio-arabisch.png` });
+      if (size.name === '375x667') await pg.screenshot({ path: `${out}/${name}-375-audio-arabisch.png` });
+      // Moment mit abgebrochener Route: Bild verschwindet, Karte wie ohne thumb
       await showMoment(pg, idOf(43));
       await waitFor(pg, () => !document.querySelector('[data-testid=ph-cover]'), undefined, 4000);
       const d = await info();
-      r.notes.audioLadefehler = d;
-      c.audioLadefehlerKeinBild = !d.img && d.count === 0 && Math.abs(d.row.h - b.row.h) <= 0.5 && Math.abs(d.chips.l - b.chips.l) <= 0.5;
-      await pg.screenshot({ path: `${out}/${name}-390-audio-ladefehler.png` });
-      // Anfragen: nur der aktive Moment lädt sein Bild (kein Abruf im Voraus)
-      c['Audio Titelbild keine Seitenfehler'] = o.errors.length === 0;
+      r.notes[`${tag} ladefehler`] = d;
+      // Ladefehler: das Element verschwindet; ist das Bild wegen kleiner Karte ohnehin ausgeblendet (display none, lädt dann nicht), bleibt es unsichtbar
+      c[`${tag} Ladefehler: kein Bild, kein Platzhalter, Karte wie ohne thumb`] = (!d.img ? d.art === null : !d.img.vis) && linesOk(d, false);
+      // Wechsel von Moment mit Bild zu Moment ohne Bild und zurück: kein altes Bild bleibt stehen
+      await showMoment(pg, idOf(40));
+      await loaded();
+      await showMoment(pg, idOf(41));
+      c[`${tag} nach dem Wechsel kein altes Bild`] = (await info()).count === 0;
+      c[`${tag} keine Seitenfehler`] = o.errors.length === 0;
+      await o.browser.close();
+    }
+    // Abrufe: Titelbild nur aus dem Feld thumb (https), nur ein Bild-Element der Karte, nur der aktive Moment. Die versteckten Bilder der alten Schicht (.vaudio-bg, .vaudio-art) laden in beiden Ansichten
+    // wie bisher (Feed, nicht Teil dieser Runde), sie werden nur notiert.
+    {
+      const o = await open(type, SIZES[0], { tab: 'audio' });
+      const pg = o.pg;
+      const asked = [];
+      o.cx.on('request', (q) => { if (/img\.test|ytimg/.test(q.url())) asked.push(q.url()); });
+      await showMoment(pg, idOf(40));
+      await waitFor(pg, () => { const i = document.querySelector('[data-testid=ph-cover]'); return !!i && i.complete; }, undefined, 4000);
+      await pg.waitForTimeout(500);
+      const one = await pg.evaluate(() => ({ n: document.querySelectorAll('.ph-art, [data-testid=ph-cover]').length, src: document.querySelector('[data-testid=ph-cover]')?.getAttribute('src'), inCard: !!document.querySelector('[data-testid=ph-lyrics] > [data-testid=ph-cover]'), https: /^https:/.test(document.querySelector('[data-testid=ph-cover]')?.getAttribute('src') ?? '') }));
+      c['Titelbild ein Element in der Karte, aus dem Feld thumb, https'] = one.n === 1 && one.src === COVER && one.inCard && one.https;
+      r.notes['Titelbild Abrufe'] = { asked, one };
       await o.browser.close();
     }
 

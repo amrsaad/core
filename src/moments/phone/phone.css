@@ -116,11 +116,6 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
 .ph-speaker { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* Source: kleine Taste am Ende der Chip-Zeile (die Aktionsreihe hat vier Tasten), 44 px Berührfläche ohne die Zeile zu strecken */
 .ph-src { pointer-events: auto; flex: none; width: 44px; height: 44px; margin: -10px -12px -10px 0; display: flex; align-items: center; justify-content: center; border-radius: var(--r-pill); color: var(--on-media-muted); }
-.ph-chiprow[data-cover] { min-height: 44px; }
-.ph-chiprow[data-cover] .ph-tap { flex: 1 1 0; display: flex; align-items: center; gap: var(--s-3); }
-.ph-chiprow[data-cover] .ph-chips { flex: 1 1 0; flex-direction: column; align-items: flex-start; gap: 2px; }
-.ph-chiprow[data-cover] .ph-speaker { max-width: 100%; }
-.ph-cover { flex: none; width: 44px; height: 44px; box-sizing: border-box; border-radius: 10px; object-fit: cover; border: 1px solid color-mix(in srgb, var(--on-media) 8%, transparent); background: var(--surface); }
 .ph-hooktap { min-width: 0; }
 .ph-hook { margin: 0; color: var(--text); font-weight: 700; overflow-wrap: anywhere; font-size: 28px; line-height: 35px; letter-spacing: -0.015em; }
 .ph-hook[data-step='1'] { font-size: 24px; line-height: 31px; }
@@ -128,7 +123,12 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
 .ph-video .ph-hook { font-size: 24px; line-height: 31px; letter-spacing: -0.01em; }
 .ph-video .ph-hook[data-step='1'] { font-size: 21px; line-height: 27px; }
 .ph-video .ph-hook[data-step='2'] { font-size: 18px; line-height: 24px; }
-.ph-hook[lang='ar'], .ph-hook:dir(rtl) { font-family: var(--font-ar); }
+.ph-hook[lang='ar'], .ph-hook:dir(rtl) { font-family: var(--font-verse); font-weight: 700; letter-spacing: 0; font-size: 33px; line-height: 1.6; }
+.ph-hook[lang='ar'][data-step='1'], .ph-hook:dir(rtl)[data-step='1'] { font-size: 29px; }
+.ph-hook[lang='ar'][data-step='2'], .ph-hook:dir(rtl)[data-step='2'] { font-size: 25px; }
+.ph-video .ph-hook[lang='ar'], .ph-video .ph-hook:dir(rtl) { font-size: 29px; line-height: 1.6; }
+.ph-video .ph-hook[lang='ar'][data-step='1'], .ph-video .ph-hook:dir(rtl)[data-step='1'] { font-size: 25px; }
+.ph-video .ph-hook[lang='ar'][data-step='2'], .ph-video .ph-hook:dir(rtl)[data-step='2'] { font-size: 22px; }
 
 /* Video: Untertitel wie bisher (Element des Feeds), jetzt im Fluss unter dem Hook statt unter dem Bild */
 .ph-cap .vcaption { position: static; display: block; width: auto; }
@@ -168,7 +168,45 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
 .ph-lyric-note { font-size: var(--t-body); line-height: var(--t-body-lh); color: var(--on-media-muted); text-align: center; }
 /* Langer Auszug: der Rest läuft unten weich aus */
 .ph-lyrics:has(> .ph-lyric-text)::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: var(--s-8); border-radius: 0 0 18px 18px; background: linear-gradient(to bottom, transparent, var(--surface)); pointer-events: none; }
-.ph-lyrics [lang='ar'] { font-family: var(--font-ar); line-height: 1.8; }
+/* Runde 49: arabische Untertitel in Amiri wie in der alten Ansicht (Amiri wirkt bei gleicher Größe kleiner, daher je Zeile etwa 1,2-fach). Gewicht 400, 600 gäbe künstliches Fett. Zeilenhöhe 1,9 lässt Vokalzeichen frei. */
+.ph-lyrics [lang='ar'] { font-family: var(--font-verse); font-weight: 400; line-height: 1.9; }
+.ph-lyric-prev[lang='ar'] { font-size: 19px; }
+.ph-lyric-cur[lang='ar'] { font-size: 27px; line-height: 1.85; }
+.ph-lyric-next[lang='ar'] { font-size: 17px; }
+.ph-lyric-text[lang='ar'] { font-size: 21px; }
+@container (max-height: 210px) { .ph-lyric-cur[lang='ar'] { font-size: 24px; } }
+
+/* Runde 49: großes Titelbild oben in der Karte (nur Audio, Feld thumb). Volle Kartenbreite, obere Ecken folgen dem Kartenradius (overflow hidden), unten gerade Kante.
+   Kein Verlauf, kein Filter, keine Animation. Höhe etwa 38 % der Karte, 88 bis 150 px, und immer so, dass darunter 176 px für drei Zeilen bleiben (bei kleiner Karte mit etwas kleinerer aktueller Zeile). Geht das nicht
+   (Karte unter 264 px), entfällt das Bild ganz und die Karte sieht aus wie ohne thumb (unter 251 px nur die aktuelle Zeile, wie bisher unter 210 px Innenhöhe).
+   Die Zeilen liegen mit Bild in .ph-lyr-body. Eine Zeile, die dort nicht ganz Platz hat (ungewöhnlich lange aktuelle Zeile), blendet PhoneAudio aus (data-clip), statt sie anzuschneiden. */
+.ph-lyrics[data-art] { container-name: ph-card; }
+.ph-art { display: block; object-fit: cover; object-position: center; background: var(--surface-2); }
+.ph-lyrics[data-art='top'] { padding: 0; display: flex; flex-direction: column; }
+.ph-lyrics[data-art='top'] > .ph-art { flex: none; box-sizing: border-box; width: 100%; max-width: none; height: clamp(88px, min(38cqh, 100cqh - 176px), 150px); }
+.ph-lyr-body { position: relative; flex: 1 1 0; min-height: 0; box-sizing: border-box; padding: var(--s-2) var(--s-5) var(--s-5); display: grid; grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr); overflow: hidden; }
+.ph-lyr-body:has(> .ph-lyric-text, > .ph-lyric-note) { display: flex; flex-direction: column; justify-content: center; }
+.ph-lyr-body:has(> .ph-lyric-text)::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: var(--s-8); background: linear-gradient(to bottom, transparent, var(--surface)); pointer-events: none; }
+.ph-lyr-body > .ph-lyric-prev, .ph-lyr-body > .ph-lyric-next { -webkit-line-clamp: 1; line-clamp: 1; max-height: 100%; }
+.ph-lyr-body > [data-clip] { visibility: hidden; }
+/* Kleine Karte: aktuelle Zeile eine Stufe kleiner, damit drei Zeilen neben dem Bild Platz haben */
+@container ph-card (max-height: 330px) {
+  .ph-lyr-body > .ph-lyric-cur { font-size: 22px; line-height: 29px; }
+  .ph-lyr-body > .ph-lyric-cur[lang='ar'] { font-size: 24px; line-height: 1.85; }
+}
+@container ph-card (max-height: 263px) {
+  .ph-lyrics[data-art='top'] > .ph-art { display: none; }
+  .ph-lyr-body { padding-top: var(--s-5); }
+}
+@container ph-card (max-height: 250px) {
+  .ph-lyr-body > .ph-lyric-prev, .ph-lyr-body > .ph-lyric-next { display: none; }
+  .ph-lyr-body > .ph-lyric-cur { grid-row: 1 / -1; align-self: safe center; font-size: 20px; line-height: 26px; }
+  .ph-lyr-body > .ph-lyric-cur[lang='ar'] { font-size: 24px; line-height: 1.9; }
+}
+/* CC aus: das Bild füllt die ganze Karte */
+.ph-lyrics[data-art='fill'] { padding: 0; }
+.ph-lyrics[data-art='fill'] > .ph-art { position: absolute; inset: 0; width: 100%; height: 100%; }
+
 
 /* ---------- Aktionsreihe ---------- */
 .ph-actions {

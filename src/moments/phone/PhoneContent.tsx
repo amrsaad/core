@@ -51,15 +51,14 @@ export interface PhoneInfoHandlers {
   onPointerCancel: () => void;
 }
 
-/** Kleines Titelbild des Audio-Moments (Runde 48): Adresse beim Originalanbieter, nur wenn das Feld thumb eine https-Adresse ist */
+/** Titelbild des Audio-Moments (Runde 48, ab Runde 49 groß oben in der Karte): Adresse beim Originalanbieter, nur wenn das Feld thumb eine https-Adresse ist */
 export const coverUrl = (thumb?: string): string => (thumb && /^https:\/\//i.test(thumb.trim()) ? thumb.trim() : '');
 
-export function PhoneInfo({ m, speaker, info, onSource, hookRef, cover }: { m: Moment; speaker: string; info: PhoneInfoHandlers; onSource?: () => void; hookRef: RefObject<HTMLHeadingElement>; cover?: { src: string; onError: () => void } }) {
+export function PhoneInfo({ m, speaker, info, onSource, hookRef }: { m: Moment; speaker: string; info: PhoneInfoHandlers; onSource?: () => void; hookRef: RefObject<HTMLHeadingElement> }) {
   return (
     <>
-      <div className="ph-chiprow" data-cover={cover ? '' : undefined}>
+      <div className="ph-chiprow">
         <div className="ph-tap" data-testid="info-tap" {...info}>
-          {cover && <img className="ph-cover" data-testid="ph-cover" src={cover.src} alt="" width={44} height={44} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={cover.onError} />}
           <div className="ph-chips" data-testid="speaker-line" style={{ ['--ad' as string]: AREA_COLOR[m.area] }}>
             <span className="ph-chip">
               <i aria-hidden="true" />
@@ -104,16 +103,40 @@ export interface PhoneAudioProps {
 export function PhoneAudio(p: PhoneAudioProps) {
   const box = useRef<HTMLDivElement>(null);
   const hook = useRef<HTMLHeadingElement>(null);
-  // Titelbild nur im aktiven Moment (diese Ansicht steht nur für ihn), lädt es nicht, verschwindet der Platz ganz
+  // Titelbild nur im aktiven Moment (diese Ansicht steht nur für ihn), lädt es nicht, verschwindet es ganz (Karte wie ohne thumb)
   const thumb = coverUrl(p.m.thumb);
   const [bad, setBad] = useState('');
-  const cover = thumb && bad !== thumb ? { src: thumb, onError: () => setBad(thumb) } : undefined;
-  useHookFit(box, hook, 132, `${p.m.id}|${cover ? 'c' : ''}`);
-  return (
-    <div className="ph-audio" ref={box} data-testid="ph-audio" data-notes={p.notes ? '' : undefined} style={{ ['--ad' as string]: AREA_COLOR[p.m.area] }}>
-      <PhoneInfo m={p.m} speaker={p.speaker} info={p.info} onSource={p.onSource} hookRef={hook} cover={cover} />
-      <section className="ph-lyrics" data-testid="ph-lyrics" aria-label="Captions" aria-live="off">
-        {!p.hasCaptions && !p.fallbackText ? (
+  const src = thumb && bad !== thumb ? thumb : '';
+  // Runde 49: oben in der Karte über den Untertiteln. Ohne Untertitel zum Anzeigen (CC aus, kein Text) füllt es die ganze Karte
+  const fill = !!src && (p.hasCaptions ? !p.captionsOn : !p.fallbackText);
+  // Mit Titelbild braucht die Karte mehr Platz (Bild mindestens 88 px plus Platz für drei Zeilen; die Messung zieht die Chip-Zeile nicht ab, daher der hohe Wert), die Überschrift wird dafür eher eine Stufe kleiner
+  useHookFit(box, hook, src ? 362 : 132, `${p.m.id}|${src ? 'c' : ''}`);
+  // Mit Bild: eine vorige oder nächste Zeile, die in ihrer Reihe nicht ganz Platz hat, wird ausgeblendet statt angeschnitten (nur die aktuelle Zeile bleibt)
+  const lyr = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const w = lyr.current;
+    if (!w) return;
+    const clip = () => {
+      for (const e of Array.from(w.querySelectorAll<HTMLElement>('.ph-lyric-prev, .ph-lyric-next'))) {
+        e.removeAttribute('data-clip');
+        const cs = getComputedStyle(e);
+        const need = (parseFloat(cs.lineHeight) || 0) + (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+        if (e.clientHeight < need - 1) e.setAttribute('data-clip', '');
+      }
+    };
+    clip();
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(clip);
+    ro?.observe(w);
+    const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
+    fonts?.addEventListener?.('loadingdone', clip);
+    return () => {
+      ro?.disconnect();
+      fonts?.removeEventListener?.('loadingdone', clip);
+    };
+  }, [src, fill, p.captionsOn, p.lyric.prev, p.lyric.cur, p.lyric.next]);
+  const lines = (
+    <>
+      {!p.hasCaptions && !p.fallbackText ? (
           <p className="ph-lyric-note">No captions for this moment.</p>
         ) : !p.hasCaptions ? (
           <p className="ph-lyric-text" data-testid="ph-lyric-text" {...lineProps(p.fallbackText)}>
@@ -138,6 +161,14 @@ export function PhoneAudio(p: PhoneAudioProps) {
             )}
           </>
         )}
+    </>
+  );
+  return (
+    <div className="ph-audio" ref={box} data-testid="ph-audio" data-notes={p.notes ? '' : undefined} style={{ ['--ad' as string]: AREA_COLOR[p.m.area] }}>
+      <PhoneInfo m={p.m} speaker={p.speaker} info={p.info} onSource={p.onSource} hookRef={hook} />
+      <section className="ph-lyrics" data-testid="ph-lyrics" aria-label="Captions" aria-live="off" data-art={src ? (fill ? 'fill' : 'top') : undefined}>
+        {src && <img key={p.m.id} className="ph-art" data-testid="ph-cover" src={src} alt="" width={390} height={140} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setBad(thumb)} />}
+        {fill ? null : src ? <div className="ph-lyr-body" ref={lyr}>{lines}</div> : lines}
       </section>
     </div>
   );
