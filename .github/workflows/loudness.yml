@@ -51,7 +51,7 @@ jobs:
           cat > measure.py <<'PYEOF'
           #!/usr/bin/env python3
           """Integrierte Lautheit und Klangmerkmale je Fenster. ffmpeg liest nur start bis end (Suchen per -ss vor -i, Dauer per -t) und zerlegt das
-          Signal in einem Durchgang in vier Zweige. Zweig 1: ebur128 (Lautheit, unverändert wie vor v1, Zusammenfassung "I: -18.3 LUFS"). Zweig 2: Mono-Mix in Blöcken
+          Signal in einem Durchgang in vier Zweige. Zweig 1: ebur128 (Lautheit, unverändert wie vor v1, Zusammenfassung "I: -18.3 LUFS", Ausgang des Graphen). Zweig 2: Mono-Mix in Blöcken
           zu 0,1 s, astats je Block (RMS und Spitze). Zweig 3: Mono-Mix, aeval setzt jedes Sample mit Betrag über 0,944 (-0,5 dBFS) auf 1, sonst 0, astats RMS
           darüber ergibt den Anteil. Zweig 4: Mono-Mix, acrossover in 13 Frequenzbänder, astats RMS je Band über das ganze Fenster (Energie je Band).
           Schlägt der Durchgang mit den Klangzweigen fehl, läuft der alte Aufruf (nur ebur128), dann fehlt nur sound und der Grund steht in sErr."""
@@ -74,8 +74,8 @@ jobs:
               stat = 'astats=metadata=1:reset=0:measure_perchannel=none:measure_overall=RMS_level'
               mono = f'aformat=sample_rates={RATE}:channel_layouts=mono'
               parts = [
-                  '[0:a]asplit=4[a1][a2][a3][a4]',
-                  '[a1]ebur128=peak=none[e]',
+                  'asplit=4[a1][a2][a3][a4]',
+                  '[a1]ebur128=peak=none',
                   f'[a2]{mono},asetnsamples=n={BLOCK}:p=0,astats=metadata=1:reset=1:measure_perchannel=none:measure_overall=RMS_level+Peak_level+Number_of_samples,'
                   'ametadata=mode=print:file=blk.txt,anullsink',
                   f"[a3]{mono},aeval=exprs='gt(abs(val(0))\\,{CLIP_LEVEL:.6f})':channel_layout=mono,{stat},ametadata=mode=print:key=lavfi.astats.Overall.RMS_level:file=clip.txt,anullsink",
@@ -166,7 +166,7 @@ jobs:
                   try:
                       try:
                           # Bytes lesen und tolerant dekodieren: ID3-Tags enthalten manchmal kein UTF-8
-                          r = run(head + ['-filter_complex', graph(), '-map', '[e]', '-f', 'null', '-'], wd)
+                          r = run(head + ['-af', graph(), '-f', 'null', '-'], wd)
                       except subprocess.TimeoutExpired:
                           err = 'timeout'
                           continue
