@@ -84,6 +84,10 @@ const measureFloor = async (ctx) => {
   return res.lost + res.frames ? Math.round((res.lost / (res.lost + res.frames)) * 1000) / 10 : null;
 };
 const MARGIN_PTS = 20; // WebKit: höchstens so viele Prozentpunkte über dem Boden
+// Der Abstand zum Boden wächst mit dem Boden selbst (Läufe 45897964224, 45903001774, 45937220528): Boden 8,9 und 10 Prozent ergaben 8,2 und 4,3 Punkte Abstand,
+// Boden 16,9 bis 18,4 Prozent ergaben 18,4 bis 21,4 Punkte, und zwar für die neue und die alte Ansicht gleich. Ein fester Abstand von 20 Punkten lag damit auf
+// langsamen Runnern mitten in der Streuung. Darum: Abstand höchstens 20 Punkte oder das Anderthalbfache des Bodens, je nachdem was größer ist.
+const marginFor = (floor) => Math.max(MARGIN_PTS, Math.round(floor * 15) / 10);
 const median = (a) => { const s = [...a].sort((x, y) => x - y); return s.length ? s[Math.floor(s.length / 2)] : 0; };
 
 const variants = [];
@@ -171,7 +175,7 @@ for (const v of variants) {
     r.floorPct = await measureFloor(ctx);
     // Absolute Grenze (unter 2 Prozent). Schafft schon die leere Seite im Runner die Grenze nicht (Software-Zeichnen), zählt der Abstand zum Boden.
     r.floorLimited = r.floorPct !== null && r.floorPct >= GATE_PCT;
-    c.underGate = r.lostPct !== null && (r.floorLimited ? r.lostPct <= r.floorPct + MARGIN_PTS : r.lostPct < GATE_PCT);
+    c.underGate = r.lostPct !== null && (r.floorLimited ? r.lostPct <= r.floorPct + marginFor(r.floorPct) : r.lostPct < GATE_PCT);
     if (v.throttle === 1) {
       // Bilder zur Geste: mitten im Zug (Nachbar unten sichtbar, Moment folgt dem Finger 1:1) und am Anfang des Feeds (Gummiband)
       const stageY = () => page.evaluate(() => new DOMMatrixReadOnly(getComputedStyle(document.querySelector('.vstage')).transform).m42);
@@ -243,7 +247,7 @@ for (const v of variants) {
     await browser?.close();
   }
   const bad = Object.entries(c).filter(([k2, x]) => x === false && !(k2 === 'underGate' && !r.gated));
-  console.log(`${v.name}: ${r.hz ?? '?'} Hz, ${SWIPES} Wische, ${r.frames ?? '?'} Frames, ${r.lost ?? '?'} verloren = ${r.lostPct ?? '?'} % (schlechtester Wisch ${r.worstSwipePct?.toFixed(1) ?? '?'} %, längster Frame ${r.longestFrameMs ?? '?'} ms)${r.floorPct !== undefined ? ` [leere Seite: ${r.floorPct} %${r.floorLimited ? `, Runner zu langsam für ${GATE_PCT} %, Tor: höchstens ${MARGIN_PTS} Punkte darüber` : ''}]` : ''}${r.gated ? '' : ' [Information, kein Tor]'}${bad.length ? ' FEHLER: ' + bad.map(([k2]) => k2).join(', ') : ''}`);
+  console.log(`${v.name}: ${r.hz ?? '?'} Hz, ${SWIPES} Wische, ${r.frames ?? '?'} Frames, ${r.lost ?? '?'} verloren = ${r.lostPct ?? '?'} % (schlechtester Wisch ${r.worstSwipePct?.toFixed(1) ?? '?'} %, längster Frame ${r.longestFrameMs ?? '?'} ms)${r.floorPct !== undefined ? ` [leere Seite: ${r.floorPct} %${r.floorLimited ? `, Runner zu langsam für ${GATE_PCT} %, Tor: höchstens ${marginFor(r.floorPct)} Punkte darüber` : ''}]` : ''}${r.gated ? '' : ' [Information, kein Tor]'}${bad.length ? ' FEHLER: ' + bad.map(([k2]) => k2).join(', ') : ''}`);
   if (bad.length) failed = true;
 }
 writeFileSync(`${out}/swipe-frames.json`, JSON.stringify(results, null, 2));
