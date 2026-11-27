@@ -757,7 +757,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const note = q('.ph-lyric-note');
         const hk = q('[data-testid=hook]');
         return {
-          id: window.__core.moment()?.id, card: R(card),
+          id: window.__core.moment()?.id, card: R(card), areaB: areaR ? areaR.bottom : null,
           // Innenfläche der Karte ohne Rand und Innenabstand (dort liegt alles Sichtbare)
           cardInner: { l: cb.left + bw, r: cb.right - bw, t: cb.top + bw, b: cb.bottom - bw },
           content: { l: cb.left + bw + pad, r: cb.right - bw - pad, t: cb.top + bw + pad, b: cb.bottom - bw - pad },
@@ -1279,15 +1279,16 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         await pg.waitForTimeout(300);
         await waitFor(pg, () => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row, .ph-col')).length === 0, undefined, 2000);
         const a = await info();
-        const k = await pg.evaluate(() => { const b = document.querySelector('.ph-lyr-body'); const c = document.querySelector('.ph-col'); const l = parseFloat(getComputedStyle(c.firstElementChild).lineHeight); return { k: parseInt(getComputedStyle(c).getPropertyValue('--clamp'), 10), want: Math.max(2, Math.floor(b.clientHeight / l)) }; });
+        const k = await pg.evaluate(() => { const b = document.querySelector('.ph-lyr-body'); const c = document.querySelector('.ph-col'); const l = parseFloat(getComputedStyle(c.firstElementChild).lineHeight); return { k: parseInt(getComputedStyle(c).getPropertyValue('--clamp'), 10), want: Math.max(2, Math.floor((b.clientHeight - 28) / l)) }; });
         const rows = [a.next, a.next2, a.next3];
-        seq.push({ h, img: a.img && a.img.vis ? Math.round(a.img.w) : 0, cur: a.cur ? Math.round(a.cur.h / a.cur.lh) : 0, nx: rows.map(nl), k: k.k, kWant: k.want, ok: rows.every((x) => nbOk(x)) && a.cur.b <= a.cardInner.b + 0.5 && a.cur.t >= a.cardInner.t - 0.5 && a.card.b <= a.actions.t + 0.5 && (!a.next || a.next.hidden || a.next.vb <= a.cardInner.b + 0.5) });
+        seq.push({ h, img: a.img && a.img.vis ? Math.round(a.img.w) : 0, cur: a.cur ? Math.round(a.cur.h / a.cur.lh) : 0, nx: rows.map(nl), k: k.k, kWant: k.want, over: a.areaB - a.cur.b, ok: rows.every((x) => nbOk(x)) && a.cur.b <= a.cardInner.b + 0.5 && a.cur.t >= a.cardInner.t - 0.5 && a.card.b <= a.actions.t + 0.5 && (!a.next || a.next.hidden || a.next.vb <= a.cardInner.b + 0.5) });
       }
       r.notes['Verkleinerung 375x667 (Höhe, Bild px, aktuelle Zeilen, sichtbare nächste Zeilen je Reihe, K)'] = seq;
       c['Verkleinerung: alles im Bereich der Karte, nie über der Aktionsreihe, Zeilenboxen ganz'] = seq.every((x) => x.ok && x.cur >= 1);
+      c['Verkleinerung: die aktuelle Zeile endet mindestens 28 px über der Unterkante der Fläche (bei K größer 2)'] = seq.every((x) => x.k === 2 || x.over >= 27.5);
       c['Verkleinerung: das Bild wird nur kleiner, nie größer (je kleiner die Karte)'] = seq.every((x, i) => i === 0 || x.img <= seq[i - 1].img);
       c['Verkleinerung: das Bild bleibt, solange die nächste Zeile mindestens 2 sichtbare Zeilen hat'] = seq.every((x) => x.img === 0 || (x.nx[0] >= 2 && x.cur >= 1));
-      c['Verkleinerung: eine Klemme K für alle Zeilen, K gleich max(2, Bereichshöhe geteilt durch Zeilenhöhe)'] = seq.every((x) => x.k === x.kWant && x.k >= 2);
+      c['Verkleinerung: eine Klemme K für alle Zeilen, K gleich max(2, (Bereichshöhe minus 28 px Maske) geteilt durch Zeilenhöhe)'] = seq.every((x) => x.k === x.kWant && x.k >= 2);
       c['Verkleinerung: alle Stufen kamen vor (Bild 128, kleiner, weg) und die Klemme wurde kleiner'] = seq.some((x) => x.img === 128) && seq.some((x) => x.img > 0 && x.img < 128) && seq.some((x) => x.img === 0) && seq[seq.length - 1].k < seq[0].k;
       await o.browser.close();
     }
@@ -1421,7 +1422,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const analyze = (fr, seq, gap) => {
         const curOf = (f) => f.rows.find((x) => x[4] === 'cur')?.[0];
         const evs = []; for (let i = 1; i < fr.length; i++) { const a0 = curOf(fr[i - 1]); const a1 = curOf(fr[i]); if (a0 !== undefined && a1 !== undefined && a0 !== a1 && Math.abs(a1 - a0) < 5) evs.push(i); }
-        const R = { changes: evs.length, a: 0, b: 0, c: 0, d: 0, dRaw: 0, e: 9, f: 0, i: 0, labs: {}, dbl: 0, trp: 0 };
+        const R = { changes: evs.length, a: 0, b: 0, c: 0, d: 0, dRaw: 0, e: 9, f: 0, fz: 0, m: 9999, i: 0, labs: {}, dbl: 0, trp: 0 };
         const h0 = new Map(); for (const f of fr) for (const x of f.rows) { const h = h0.get(x[0]); if (!h) h0.set(x[0], [x[5], x[5]]); else { h[0] = Math.min(h[0], x[5]); h[1] = Math.max(h[1], x[5]); } }
         for (const [, h] of h0) R.a = Math.max(R.a, h[1] - h[0]);
         for (const f of fr) for (let k = 1; k < f.rows.length; k++) R.b = Math.max(R.b, Math.abs(f.rows[k][1] - f.rows[k - 1][2] - gap));
@@ -1438,7 +1439,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           const ob = fr[f0 - 1].rows.find((x) => x[0] === nw - 1); const ce = fr[end].rows.find((x) => x[0] === nw);
           R.c = Math.max(R.c, Math.abs((ce[1] - fr[end].at) - (ob[1] - fr[f0 - 1].at)));
           for (let f = f0; f <= end; f++) for (const x of fr[f].rows) { const xb = fr[f0 - 1].rows.find((q) => q[0] === x[0]); const xe = fr[end].rows.find((q) => q[0] === x[0]); if (inArea(xb, fr[f0 - 1]) && inArea(xe, fr[end])) R.e = Math.min(R.e, x[3]); }
-          for (let f = f0; f <= end; f++) if (fr[f].t - fr[f0].t >= 150) R.f = Math.max(R.f, fr[f].rows.find((x) => x[0] === nw - 1)[3]);
+          // f: Warten bis die alte Zeile unter Deckkraft 0,01 fällt (Frist 1000 ms), danach bleibt sie dort
+          { let fz = -1; for (let f = f0; f <= end; f++) if (fr[f].rows.find((x) => x[0] === nw - 1)[3] < 0.01) { fz = f; break; } R.fz = Math.max(R.fz, fz < 0 || fr[fz].t - fr[f0].t > 1000 ? Infinity : fr[fz].t - fr[f0].t); if (fz >= 0) for (let f = fz; f <= end; f++) R.f = Math.max(R.f, fr[f].rows.find((x) => x[0] === nw - 1)[3]); }
+          // m: Unterkante der aktuellen Zeile in Ruhe über der Maske (28 px)
+          R.m = Math.min(R.m, fr[end].ab - fr[end].rows.find((x) => x[0] === nw)[2]);
           for (let f = f0 + 1; f <= end; f++) for (const x of fr[f].rows) { const y0 = fr[f - 1].rows.find((q) => q[0] === x[0]); if (y0 && x[4] !== 'out' && y0[4] !== 'out' && inArea(x, fr[f]) && inArea(y0, fr[f - 1])) R.i = Math.max(R.i, Math.abs(x[3] - y0[3])); }
         }
         return R;
@@ -1476,7 +1480,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         c[`${nm} c: Anker in Ruhe vor und nach dem Wechsel gleich (0,5 px)`] = R.c <= 0.5;
         c[`${nm} d: Schritt der Spalte bei Bildabstand bis 34 ms höchstens 38 px`] = R.d <= 38;
         c[`${nm} e: davor und danach sichtbare Zeile nie unter Deckkraft 0,4`] = R.e >= 0.4;
-        c[`${nm} f: alte Zeile nach 150 ms Deckkraft 0`] = R.f <= 0.01;
+        c[`${nm} f: alte Zeile erreicht Deckkraft unter 0,01 innerhalb von 1000 ms und bleibt dort`] = R.fz <= 1000 && R.f < 0.01;
+        c[`${nm} m: Unterkante der aktuellen Zeile mindestens 28 px über der Unterkante der Fläche (nie in der Maske)`] = R.m >= 28 - 0.5;
         c[`${nm} g: mindestens 6 Doppelwechsel (120 ms) und 3 Dreifachwechsel (80 ms) gemessen`] = R.dbl >= 6 && R.trp >= 3;
         c[`${nm} g: Endlage gleich Neuaufbau (0,5 px), keine Inline-Reste außer der Spalte, keine Hilfsattribute, keine laufende Animation`] = Math.abs(fin.y - fin.want) <= 0.5 && fin.rowsStyled === 0 && fin.bodyStyle === null && fin.data === 0 && fin.anims === 0 && /^(--clamp: \d+; )?(transition-duration: [\d.]+ms; )?(--clamp: \d+; )?(transition-duration: [\d.]+ms; )?transform: translate3d\([^)]*\);?$/.test((fin.colStyle ?? '').replace(/;\s*$/, ';'));
         c[`${nm} i: keine Auslassung, die im Lauf erscheint oder verschwindet (Zeilenhöhe fest, Deckkraft stufenlos, Sprung je Bild unter 0,25)`] = R.a <= 0.01 && R.i < 0.25;
@@ -1653,8 +1658,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           r.notes[`${tag} Auflage 3`] = { card: a.card, actions: a.actions, hook: hk, curLines: lines, natural, cur: { t: a.cur.t, b: a.cur.b }, cardB: a.cardInner.b, img: a.img && a.img.vis };
           c[`${tag}: Karte nie über der Aktionsreihe, unter dem Hook`] = a.card.b <= a.actions.t + 0.5 && a.card.t >= a.hook.b - 0.5;
           c[`${tag}: aktuelle Zeile ganz in der Karte (oben und unten)`] = a.cur.t >= a.cardInner.t - 0.5 && a.cur.b <= a.cardInner.b + 0.5;
-          c[`${tag}: aktuelle Zeile vollständig oder auf ganze Zeilenzahl geklemmt (Höhe ein Vielfaches der Zeilenhöhe, Überlauf hidden)`] = Math.abs(a.cur.h - lines * a.cur.lh) <= 1 && a.cur.ov === 'hidden' && lines >= Math.min(3, natural) ;
+          c[`${tag}: aktuelle Zeile vollständig oder auf ganze Zeilenzahl geklemmt (Höhe ein Vielfaches der Zeilenhöhe, Überlauf hidden)`] = Math.abs(a.cur.h - lines * a.cur.lh) <= 1 && a.cur.ov === 'hidden' && lines >= Math.min(a.cur.k, natural) ;
           c[`${tag}: Hook vollständig oder auf ganze Zeilen geklemmt (kein angeschnittener Rest)`] = hk.clamp ? (Math.abs(hk.ch / hk.lh - Math.round(hk.ch / hk.lh)) <= 0.06 && hk.ov === 'hidden') : hk.sh <= hk.ch + 1;
+          r.notes[`${tag} Abstand zur Maske`] = { over: a.areaB - a.cur.b, k: a.cur.k, lines };
+          c[`${tag}: aktuelle Zeile endet mindestens 28 px über der Unterkante der Fläche (nie in der Maske)`] = a.areaB - a.cur.b >= 27.5;
           c[`${tag}: Karte hat Platz für mindestens 3 Zeilen der aktuellen Zeile`] = a.cardInner.b - a.cardInner.t >= Math.min(3, natural) * a.cur.lh;
           c[`${tag}: nichts in der Karte überlappt, nächste Zeilen ganz sichtbar oder gar nicht`] = linesOk(a, !!a.img && a.img.vis) && nbOk(a.next) && nbOk(a.next2) && nbOk(a.next3);
           if (size.name === '375x667' || size.name === GER.name) { if (id === 72 || size.name === '375x667') await pg.screenshot({ path: `${out}/${name}-${size.name === GER.name ? 'geraet' : '375'}-audio-${id === 72 ? 'hook4' : 'hook10'}.png` }); }

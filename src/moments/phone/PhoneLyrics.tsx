@@ -12,6 +12,8 @@ import { isArabic } from '../types';
 const lineProps = (s: string) => ({ dir: isArabic(s) ? ('rtl' as const) : ('ltr' as const), lang: isArabic(s) ? 'ar' : 'en' });
 /** Weg (px), bis zu dem die Bewegung 250 ms dauert */
 const NEAR_PX = 120;
+/** Höhe der Ausblendung am unteren Rand der Fläche (phone.css, mask-image): die aktuelle Zeile endet immer darüber */
+const MASK_PX = 28;
 const DUR_MIN = 250;
 const DUR_MAX = 420;
 
@@ -37,7 +39,7 @@ function PhoneLyricsView({ id, cues, idx }: PhoneLyricsProps) {
     if (!b || !c) return;
     const lh = (e: Element | null) => (e ? parseFloat(getComputedStyle(e).lineHeight) || 0 : 0);
     const l = Math.max(lh(c.firstElementChild), lh(c.querySelector('[lang=ar]'))) || 30;
-    c.style.setProperty('--clamp', String(Math.max(2, Math.floor(b.clientHeight / l))));
+    c.style.setProperty('--clamp', String(Math.max(2, Math.floor((b.clientHeight - MASK_PX) / l))));
   };
 
   const place = (instant: boolean) => {
