@@ -366,3 +366,9 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
 
 /* Runde 50b: Blätter (More, Share, Fokus) in der iPhone-Ansicht: unter dem letzten Eintrag mindestens Home-Anzeige plus 8 px (hier plus 24 px) Innenabstand */
 html:has(.vfeed[data-phone]) .sheet-body { padding-bottom: calc(max(var(--safe-b), env(safe-area-inset-bottom, 0px)) + var(--nav-h, 0px) + var(--s-6)); }
+
+/* Runde 51: Abrufkarte auf dem Raster, linke und rechte Kante 20 pt, Oberkante 16 px unter der Seitenkante (= 24 pt unter der Reiterleiste), nach der Antwort unverändert */
+.vfeed[data-phone] .vrecall-page { padding-left: var(--s-5); padding-right: var(--s-5); }
+.vfeed[data-phone] .vrecall-page[data-answered] { transition: none; }
+/* Runde 51: passt der Block auch in der kleinsten Stufe nicht (kleines Gerät, sehr lange Frage), scrollt die Seite von innen, statt abzuschneiden. Oberkante bleibt. */
+.vfeed[data-phone] .vrecall-page { overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; }

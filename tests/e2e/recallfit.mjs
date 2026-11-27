@@ -270,7 +270,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
             if (e.ghost) fail(`${t} kein Platzhalter`, '.recall-ghost da'); else ok(`${t} kein Platzhalter`);
             if (e.pageScroll > 1 || e.anyScrollable) edge(`${t} kein Scrollen`, `Seite ${e.pageScroll} px, scrollbare Elemente ${e.anyScrollable}`); else ok(`${t} kein Scrollen`);
             // Seitenrand 24 px
-            if (Math.abs(e.sideL - 24) > 1 || Math.abs(e.sideR - 24) > 1) fail(`${t} Rand 24 px`, `${e.sideL} / ${e.sideR}`); else ok(`${t} Rand 24 px`);
+            if (Math.abs(e.sideL - 20) > 1 || Math.abs(e.sideR - 20) > 1) fail(`${t} Rand 20 px`, `${e.sideL} / ${e.sideR}`); else ok(`${t} Rand 20 px`); // Runde 51: Raster 20
             // Frage höchstens 4 Zeilen, nie gekürzt, Antworten nie gekürzt
             if (e.qLines > 4.05 || /…/.test(e.qText) || e.optTexts.some((x) => /…/.test(x))) fail(`${t} Frage höchstens 4 Zeilen ohne Auslassung`, `${e.qLines?.toFixed(2)} Zeilen`); else ok(`${t} Frage höchstens 4 Zeilen ohne Auslassung`);
             // Maße je Stufe
@@ -290,8 +290,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
               const above = e.tagTop - e.pageTop;
               const below = e.areaBottom - e.lastBottom;
               const free = above + below;
-              const want = Math.max(0, free < 16 ? free : Math.max(16, 0.4 * free));
-              if (Math.abs(above - want) > 12) fail(`${t} Verteilung 40/60`, `oben ${above.toFixed(1)}, unten ${below.toFixed(1)}, erwartet oben ${want.toFixed(1)}`); else ok(`${t} Verteilung 40/60`);
+              // Runde 51: die Oberkante sitzt fest 16 px unter der Seitenkante (24 pt unter der Reiterleiste), nicht mehr bei 40 Prozent
+              const want = 16;
+              if (Math.abs(above - want) > 1) fail(`${t} Oberkante fest 16 px`, `oben ${above.toFixed(1)}, unten ${below.toFixed(1)}, erwartet oben ${want.toFixed(1)}`); else ok(`${t} Oberkante fest 16 px`);
             } else {
               // Nach der Antwort genau eine Erklärung (recall-why), kein Hook auf dem Handy, Abstände Erklärung zu Next, Next so hoch wie eine Antwort
               if (e.hookAfterInDom || p.hookInfo || e.visibleHookText) fail(`${t} kein Hook nach der Antwort`, 'recall-hook-after oder Hook-Text vorhanden'); else ok(`${t} kein Hook nach der Antwort`);

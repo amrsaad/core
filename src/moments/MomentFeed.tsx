@@ -4285,7 +4285,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const statusKind = statusOf({ offline: !online, syncError, loading: loading || (deckWait && form === 'audio'), nextReady: nextReady && form === 'video', background: bgShown && form === 'audio', muted: hint && form !== 'text' });
   const m = queue.current[idx];
   shownId.current = m?.id ?? '';
-  const recallEl = recall ? <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} read={recall.read} rng={rng.current!} onAnswer={answerRecall} onClose={closeRecall} onSkip={skipRecallCard} onDiag={(line) => diag.current.push(line)} keys={!!desk} ctl={recallCtl} origin={!!desk && form !== 'text'} /> : null;
+  const recallEl = recall ? <RecallCard key={recall.m.id + String(recall.review)} m={recall.m} review={recall.review} read={recall.read} rng={rng.current!} onAnswer={answerRecall} onClose={closeRecall} onSkip={skipRecallCard} onDiag={(line) => diag.current.push(line)} keys={!!desk} ctl={recallCtl} origin={!!desk && form !== 'text'} noImg={ph} /> : null;
   const saved = m && !!state.savedMoments[m.id];
   const liked = !!m && !!state.momentLiked?.[m.id];
   const captionsRule = !!m && form !== 'text' && captionsShown(form === 'audio' ? 'on' : state.settings.captionMode, m);
@@ -4376,7 +4376,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
             <div className="vframe">
               <div ref={(el) => (slot.host = el)} />
             </div>
-            {posterOf(mm)}
+            {posterOf(mm, ph && form === 'audio' ? (offset === 0 || offset === 1 ? 'art' : 'none') : undefined)}
             <div
               ref={(el) => (slot.cover = el)}
               className="vcover"
@@ -4407,7 +4407,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       {/* Geister: der vorige Moment (nur Vorschaubild, er wird erst beim Zurückwischen zum Player) und hinter dem letzten Moment die Endseite */}
       {!single && form !== 'text' && queue.current[idx - 1] && (
         <div className="vslot vghost" style={{ ['--off' as string]: -1 }} aria-hidden="true">
-          {posterOf(queue.current[idx - 1])}
+          {posterOf(queue.current[idx - 1], ph && form === 'audio' ? 'none' : undefined)}
         </div>
       )}
       {!single && form !== 'text' && idx === queue.current.length - 1 && (
@@ -4754,8 +4754,11 @@ function ActionButton({ label, aria, testid, onClick, on, fill = true, icon, dis
 }
 
 /** Vorschaubild eines Moments: Video über dem IFrame, Audio mit Cover. Text hat keins. */
-function posterOf(mm: Moment | undefined) {
+function posterOf(mm: Moment | undefined, phoneAudio?: 'art' | 'none') {
   if (!mm || mm.form === 'text') return null;
+  // Runde 51: iPhone-Ansicht, Audio: das Cover zeigt PhoneAudio selbst. Hier höchstens das Cover des aktiven und des nächsten Moments vorladen, nur mit echtem thumb (nie der Rückfall auf i.ytimg.com), sonst kein Bild.
+  if (phoneAudio && mm.audio)
+    return <div className="vaudio">{phoneAudio === 'art' && mm.thumb ? <Cover className="vaudio-art" src={mm.thumb} /> : null}</div>;
   if (!mm.audio)
     return (
       <>

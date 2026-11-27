@@ -4,7 +4,7 @@ import { Icon } from '../components/Icon';
 import { recallTag, shuffleOrder } from './recall';
 import { isArabic, thumbOf, type Moment } from './types';
 import { sourceLine } from './source';
-import { FIT_LEVELS, pickRecallFit, recallSwipe, recallTop, recallTopDone } from './recallfit';
+import { FIT_LEVELS, RECALL_TOP_MIN, RECALL_TOP_MIN_DONE, pickRecallFit, recallSwipe, recallTop, recallTopDone } from './recallfit';
 
 /** Bezug oben auf der Abrufkarte (Issue 42): Hook und Quelle des Ursprungs-Moments, Sprache und Richtung folgen dem Moment */
 export function originOf(m: Moment): { hook: string; dir: 'rtl' | 'ltr'; source: string } {
@@ -89,10 +89,12 @@ export function fitRoot(root: HTMLElement, answered = false, from = 0, top: numb
     done.push(doneHeight(root, box));
   }
   // Nach der Antwort zählt nur noch der Block nach der Antwort (die Oberkante ist schon festgelegt), samt 8 px Mindestabstand oben
-  const level = pickRecallFit(answered ? [] : ask, done, room, from);
+  // Runde 51: auf dem Handy sitzt die Oberkante fest 16 px unter der Seitenkante (24 pt unter der Reiterleiste, wie der Chip der anderen Reiter), vor und nach der Antwort. Der Block nach der Antwort braucht dann 16 statt 8 px oben.
+  const phone = !!root.closest('.vfeed[data-phone]');
+  const level = pickRecallFit(answered ? [] : ask, phone ? done.map((d) => d + RECALL_TOP_MIN - RECALL_TOP_MIN_DONE) : done, room, from);
   root.dataset.fit = String(level);
-  const t0 = answered && top !== null ? top : recallTop(room, ask[level]);
-  const t = answered ? recallTopDone(t0, room, done[level]) : t0;
+  const t0 = phone ? RECALL_TOP_MIN : answered && top !== null ? top : recallTop(room, ask[level]);
+  const t = phone ? RECALL_TOP_MIN : answered ? recallTopDone(t0, room, done[level]) : t0;
   if (answered) root.setAttribute('data-answered', '');
   root.style.setProperty('--rc-top', `${t}px`);
   return { level, top: t0 };
@@ -112,7 +114,7 @@ export interface RecallCtl {
  * Die Stufe (recallfit.ts, data-fit) wird so gewählt, dass der Block vor und nach der Antwort passt. Nichts scrollt.
  * Weiter geht es vor der Antwort nur über "Skip" (ohne Wertung), nach der Antwort über "Next" oder einen Wisch nach oben.
  */
-export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, onDiag, keys, ctl, origin = true }: { m: Moment; review: boolean; read?: string | null; origin?: boolean; rng: () => number; onAnswer: (got: boolean) => void; onClose: () => void; onSkip?: () => void; onDiag?: (line: string) => void; keys?: boolean; ctl?: MutableRefObject<RecallCtl | null> }) {
+export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, onDiag, keys, ctl, origin = true, noImg = false }: { m: Moment; noImg?: boolean; review: boolean; read?: string | null; origin?: boolean; rng: () => number; onAnswer: (got: boolean) => void; onClose: () => void; onSkip?: () => void; onDiag?: (line: string) => void; keys?: boolean; ctl?: MutableRefObject<RecallCtl | null> }) {
   const r = m.recall!;
   const order = useMemo(() => shuffleOrder(r.options.length, rng), [m.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const [chosen, setChosen] = useState<number | null>(null);
@@ -189,7 +191,7 @@ export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, on
       }}
     >
       <div className="recall-source">
-        <img src={thumbOf(m)} alt="" draggable={false} />
+        {!noImg && <img src={thumbOf(m)} alt="" draggable={false} />}
         <div>
           <div className="recall-area" style={{ color: AREA_COLOR[m.area] }}>{AREA_LABEL[m.area]}</div>
           <div className="recall-speaker">{speaker}{review ? ' · again' : ''}</div>

@@ -292,7 +292,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         qar: /[\u0600-\u06FF]/.test(q?.textContent ?? ''),
         fullWidth: opts.every((o) => { const cs = getComputedStyle(card); return Math.abs(rect(o).width - (rect(card).width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight))) < 2; }),
         order: opts.map((o) => o.dataset.correct),
-        cover: !!card?.querySelector('.recall-source img'),
+        cover: !!card?.querySelector('.recall-source img') || !!document.querySelector('.vfeed[data-phone]'), // Runde 51: iPhone-Ansicht lädt dort kein Bild (Quelle ist ausgeblendet)
         area: !!card?.querySelector('.recall-area')?.textContent,
         speaker: !!card?.querySelector('.recall-speaker')?.textContent,
         coverFirst: card?.firstElementChild?.className === 'recall-source',
@@ -476,7 +476,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     r.hlsDiag = hlsDiag.slice(-6);
     // Runde 46: im Nachbau ist readyState immer 0, der Wettlauf (START_RACE) lässt den ersten bereiten Moment per Tausch (swap) spielen, der Startversuch heißt dann "swap" statt "start"
     c.hlsDiagPerAttempt = hlsDiag.some((l) => /deck loadedmetadata rs=\d muted=\w+/.test(l)) && hlsDiag.some((l) => /deck play#\d+ (start|swap) rs=\d muted=\w+/.test(l)) && hlsDiag.some((l) => /deck play#\d+ ok/.test(l));
-    c.audioCoverShown = await waitFor(page, () => !!document.querySelector('.vslot[aria-hidden=false] .vaudio-art'));
+    // Runde 51: in der iPhone-Ansicht zeigt PhoneAudio das Titelbild, die Fläche .vaudio trägt nur noch ein vorgeladenes Bild mit echtem thumb (nie i.ytimg.com)
+    c.audioCoverShown = await waitFor(page, () => !!document.querySelector(document.querySelector('.vfeed[data-phone]') ? '.vslot[aria-hidden=false] .vaudio' : '.vslot[aria-hidden=false] .vaudio-art'));
     c.audioBigCaption = await waitFor(page, () => { const el = document.querySelector('[data-testid=caption] span'); return !!el?.textContent && parseFloat(getComputedStyle(el).fontSize) >= 22; });
     await page.screenshot({ path: `${out}/${name}-10-audio.png` });
     c.audioNeverVideo = await page.evaluate(async () => {

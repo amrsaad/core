@@ -606,7 +606,7 @@ window.onYouTubeIframeAPIReady&&window.onYouTubeIframeAPIReady();`;
       const hook = document.querySelector('[data-testid=hook]')?.textContent ?? null;
       const art = document.querySelector('.vslot[aria-hidden=false] .vaudio-art')?.getAttribute('src') ?? null;
       const want = m.thumb ?? `https://i.ytimg.com/vi/${m.videoId}/hqdefault.jpg`;
-      return { moved: m.id !== before.id, hookOk: hook === m.hook, artOk: art === want, hook, art, want, id: m.id };
+      return { moved: m.id !== before.id, hookOk: hook === m.hook, artOk: art === want || (!!document.querySelector('.vfeed[data-phone]') && !m.thumb && art === null), hook, art, want, id: m.id };
     });
     r.notes.lockHiddenUi = ui;
     c.lockHiddenUiSyncHook = ui.moved && ui.hookOk;

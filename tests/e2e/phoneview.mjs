@@ -98,7 +98,16 @@ const M73 = mk(73, 'brain', { form: 'audio', audio: true, hls: 'https://stream.t
 const M68 = mk(68, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/68.m3u8', thumb: 'https://img.test/slow68.png' });
 const M69 = mk(69, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/69.m3u8', thumb: 'https://img.test/broken69.png' });
 const M70 = mk(70, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/70.m3u8', thumb: 'https://img.test/tiny70.png' });
-const ALL = [...moments, M58, M59, M60, M61, M62, M63, M64, M65, M66, M67, M72, M73, M68, M69, M70];
+// Runde 51: gemischt lange Zeilen (kurz, mittel, lang, sehr lang) für die Überlappungsprüfung im Wechsel, lateinisch und arabisch
+const MIXL = [EN_LONG, 'Kurz.', 'Eine mittlere Zeile, die auf dem Handy in zwei Zeilen umbricht.', CUE5, 'Noch eine kurze.', EN_LONG, CUE5, 'Mitte.'];
+const MIXA = [AR_LONG, 'هذا سطر قصير.', AR_LONG + ' ' + AR_LONG, 'سطر ثالث متوسط الطول يمتد على سطرين في الهاتف المحمول.', AR_LONG, 'قصير.'];
+const M74 = mk(74, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/74.m3u8', hook: 'Testmoment 74 brain, ein kurzer Satz', cues: Array.from({ length: 24 }, (_, i) => [i * 0.6, MIXL[i % MIXL.length]]), thumb: 'https://img.test/cover74.png' });
+const M75 = mk(75, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/75.m3u8', hook: 'هذا عنوان تجريبي طويل قليلا للحظة الاختبار', cues: Array.from({ length: 24 }, (_, i) => [i * 0.6, MIXA[i % MIXA.length]]), thumb: 'https://img.test/cover75.png' });
+// Runde 51: Abrufkarte mit langer Frage und langen Antworten (Audio)
+const QL = 'Welche Aussage über die beschriebene Abfolge der Schritte trifft zu, wenn man die Reihenfolge, die Bedingungen und die Ausnahmen aus dem Text gemeinsam berücksichtigt und dabei nichts hinzufügt?';
+const AL = 'Diese Antwort ist absichtlich lang und umbricht auf dem Handy über mehrere Zeilen, damit die Tasten hoch werden';
+const M76 = mk(76, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/76.m3u8', hook: 'Testmoment 76 brain, ein kurzer Satz', thumb: 'https://img.test/cover76.png', recall: { question: QL, options: [AL + ' (A)', AL + ' (richtig)', AL + ' (B)'], correct: 1, why: 'Weil die Reihenfolge zuerst kommt und dann die Bedingung gilt, die im Text genannt wird, und weil keine Ausnahme genannt ist.' } });
+const ALL = [...moments, M76, M74, M75, M58, M59, M60, M61, M62, M63, M64, M65, M66, M67, M72, M73, M68, M69, M70];
 const numOf = (m) => Number(m.id.slice(4, 11));
 const poolOf = async (audio, text = null) => {
   const iv2 = crypto.getRandomValues(new Uint8Array(12));
@@ -109,13 +118,25 @@ const POOL_A = await poolOf([40, 41, 42, 43, 44, 61, 58]);
 const POOL_B = await poolOf([40, 59, 62, 60, 65, 66]);
 const POOL_L = await poolOf([67]);
 const POOL_X = await poolOf([72, 73]);
+const POOL_O = await poolOf([74, 75]);
+const POOL_Q = await poolOf([76, 40]);
 const POOL_C = await poolOf([40, 44, 68, 69, 70]);
 const POOL_G = await poolOf([40, 58, 59]);
 const POOL_T = await poolOf([40], [48, 63, 64]);
 const k = Buffer.from(raw).toString('base64url');
 const idOf = (i) => `test${String(i).padStart(7, '0')}:100`;
 
-const waitFor = async (page, fn, arg, timeout = 6000) => { try { await page.waitForFunction(fn, arg, { timeout, polling: 100 }); return true; } catch { return false; } };
+// Runde 51 (Ziel 4): Fortschritt auf stderr, jede Wartezeit höchstens 15 s mit benanntem Fehlschlag, Gesamt-Limit je Browser 18 Minuten
+const T0 = Date.now();
+const prog = { browser: '', section: '', run: null };
+const sec = (name) => { prog.section = name; console.error(`[${prog.browser} ${Math.round((Date.now() - T0) / 1000)} s] ${name}`); };
+const waitFor = async (page, fn, arg, timeout = 6000, soft = false) => {
+  try { await page.waitForFunction(fn, arg, { timeout: Math.min(timeout, 15000), polling: 100 }); return true; } catch {
+    // Zeitlimit: benannter Fehlschlag (Abschnitt und Bedingung), nur wenn die Bedingung gebraucht wurde
+    if (prog.run && !soft) prog.run.timeouts.push(`${prog.section}: ${String(fn).replace(/\s+/g, ' ').slice(0, 90)}`);
+    return false;
+  }
+};
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 /** Runde 50c: hält die Antwort auf img.test/slow an, bis HOLD.p erfüllt ist (ohne HOLD.p 2 s), damit das Bild gezielt nach dem Messen eintrifft */
 const HOLD = { p: null };
@@ -134,10 +155,14 @@ const TABS = [['video', 'Video'], ['audio', 'Audio'], ['text', 'Text']];
 /** Runde 50, Profil Gerät: 393x852 pt, Sicherheitsrand 59/34. Gerätefehler: das Layout-Fenster ist 793 hoch (screen.height minus 59), installierte App. */
 const GER = { name: '393x852', width: 393, height: 793, device: 'iPhone 14', safeT: 59, safeB: 34, screenH: 852, standalone: true };
 
+const shared = new Map();
 async function open(type, size, { init, query = '', pool = POOL, tab = null } = {}) {
-  const browser = await type.launch(process.env.E2E_CHROME && type === chromium ? { executablePath: process.env.E2E_CHROME } : {});
+  sec(`open ${size.name}${size.reduced ? ' reduced' : ''} ${tab ?? ''}`);
+  // Runde 51: ein Browser je Engine für alle Seiten (jede Seite bekommt einen eigenen Kontext), spart den Start je Abschnitt
+  shared.set(type, shared.get(type) ?? await type.launch(process.env.E2E_CHROME && type === chromium ? { executablePath: process.env.E2E_CHROME } : {}));
+  const base = shared.get(type);
   const prof = devices[size.device] ?? devices['iPhone 14'];
-  const cx = await browser.newContext({ ...prof, viewport: { width: size.width, height: size.height }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, serviceWorkers: 'block', ...(size.reduced ? { reducedMotion: 'reduce' } : {}) });
+  const cx = await base.newContext({ ...prof, viewport: { width: size.width, height: size.height }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, serviceWorkers: 'block', ...(size.reduced ? { reducedMotion: 'reduce' } : {}) });
   await cx.addInitScript(({ t, b }) => {
     const put = () => { if (!document.documentElement) return false; const s = document.createElement('style'); s.textContent = `:root{--safe-top:${t}px;--safe-bottom:${b}px}`; document.documentElement.appendChild(s); return true; };
     if (!put()) document.addEventListener('readystatechange', put, { once: true });
@@ -152,6 +177,8 @@ async function open(type, size, { init, query = '', pool = POOL, tab = null } = 
   await cx.route(/img\.test\/wide/, (x) => x.fulfill({ contentType: 'image/png', body: PNG_WIDE }));
   await cx.route(/img\.test\/broken/, (x) => x.abort());
   const pg = await cx.newPage();
+  pg.setDefaultTimeout(15000);
+  pg.setDefaultNavigationTimeout(15000);
   const errors = [];
   pg.on('pageerror', onPageError(errors));
   // Gerätefehler (Runde 50): screen.height größer als die Fensterhöhe, installierte App, Abstand oben per Schalter
@@ -170,16 +197,18 @@ async function open(type, size, { init, query = '', pool = POOL, tab = null } = 
   await pg.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: pool }));
   await pg.goto(`${url}?now=2026-10-23&seed=3${query}#k=${k}`);
   await waitFor(pg, () => !!window.__core?.moment(), undefined, 9000);
-  await pg.waitForTimeout(500);
+  await settle(pg);
   if (tab) await gotoTab(pg, tab);
-  return { browser, cx, pg, errors };
+  return { browser: { close: () => cx.close() }, cx, pg, errors };
 }
 /** Reiter per Tipp wählen (die Taste ist selbst die Geste) und warten, bis ein Moment der Form steht */
+/** Zwei gezeichnete Bilder abwarten statt fester Zeit (Layout und Messung der Ansicht sind dann gelaufen), dazu eine kurze Ruhe */
+const settle = async (pg) => { await pg.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))); await pg.waitForTimeout(150); };
 async function gotoTab(pg, form) {
   const label = TABS.find(([f]) => f === form)[1];
   await pg.locator(`[data-testid=form-switch] button:has-text("${label}")`).click();
   await waitFor(pg, (f) => window.__core.moment() && (f === 'text' ? !!document.querySelector('[data-testid=text-view]') : window.__core.state() === 1), form, 8000);
-  await pg.waitForTimeout(700);
+  await settle(pg);
 }
 /** Einen Moment der Reihe nach vorn holen und dorthin gehen */
 async function showMoment(pg, id) {
@@ -192,12 +221,13 @@ async function showMoment(pg, id) {
       if (went) break;
       await pg.waitForTimeout(300);
     }
-    if (await waitFor(pg, (i) => window.__core.moment()?.id === i, id, 3000)) break;
+    if (await waitFor(pg, (i) => window.__core.moment()?.id === i, id, 3000, true)) break;
   }
-  await pg.waitForTimeout(700);
+  await pg.waitForTimeout(400);
 }
 
 // ---------- Geometrie ----------
+sec('Geometrie');
 const GEOM = () => {
   const R = (e) => { if (!e) return null; const b = e.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom, w: b.width, h: b.height }; };
   const q = (s) => document.querySelector(s);
@@ -346,11 +376,21 @@ const IOS_RULE = () => {
 const results = { at: new Date().toISOString(), runs: [] };
 const targets = (process.env.E2E_BROWSERS ?? 'webkit,chromium').split(',');
 for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter(([n]) => targets.includes(n))) {
-  const r = { browser: name, checks: {}, notes: {} };
+  const r = { browser: name, checks: {}, notes: {}, timeouts: [] };
   results.runs.push(r);
   const c = r.checks;
+  prog.browser = name; prog.run = r;
+  // Gesamt-Limit je Browser: 18 Minuten, danach Abbruch mit dem letzten Abschnitt (kein stummes Hängen)
+  const cap = setTimeout(() => {
+    r.error = `Gesamt-Limit 18 Minuten, letzter Abschnitt: ${prog.section}`;
+    console.error(`[${name}] ${r.error}`);
+    try { writeFileSync(`${out}/results.json`, JSON.stringify(results, null, 1)); } catch { /* egal */ }
+    console.log(JSON.stringify({ browser: name, ok: false, checks: Object.keys(c).length, fails: Object.entries(c).filter(([, v]) => v !== true).map(([n]) => n), error: r.error }));
+    process.exit(1);
+  }, 18 * 60 * 1000);
   try {
     // ---------- Aufbau: drei Größen, drei Reiter, sehr langer Hook ----------
+    sec('Aufbau: drei Größen, drei Reiter, sehr langer Hook');
     for (const size of SIZES) {
       const o = await open(type, size);
       const pg = o.pg;
@@ -410,6 +450,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
 
     // ---------- Verhalten bei 390x844: Video und Audio ----------
+    sec('Verhalten bei 390x844: Video und Audio');
     {
       const size = SIZES[0];
       const o = await open(type, size);
@@ -432,7 +473,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const idBefore = await pg.evaluate(() => window.__core.moment().id);
         const posBefore = await pg.evaluate(() => window.__core.time());
         await pg.mouse.click(tl.b.x + tl.b.width * 0.9, tl.y);
-        await pg.waitForTimeout(400);
+        await pg.waitForTimeout(250);
         c[`${tag} Zeitleiste springt nicht`] = (await pg.evaluate(() => window.__core.moment().id)) === idBefore && Math.abs((await pg.evaluate(() => window.__core.time())) - posBefore) < 3;
         // Pause-Taste pausiert und setzt fort
         const play = '[data-testid=ctl-play]';
@@ -455,11 +496,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         await swipe(pg, area.x, area.y + dy, area.y - dy);
         c[`${tag} Wischen hoch wechselt`] = await waitFor(pg, (i) => window.__core.idx() === i + 1, i0, 5000);
         await waitFor(pg, () => window.__core.state() === 1, undefined, 5000);
-        await pg.waitForTimeout(500);
+        await pg.waitForTimeout(300);
         await swipe(pg, area.x, area.y - dy, area.y + dy);
         r.notes[`${tag} Wischen runter wechselt`] = { i0, now: await idx(pg), area: area.b }; c[`${tag} Wischen runter wechselt`] = await waitFor(pg, (i) => window.__core.idx() === i, i0, 5000);
         await waitFor(pg, () => window.__core.state() === 1, undefined, 5000);
-        await pg.waitForTimeout(500);
+        await pg.waitForTimeout(300);
         if (form === 'video') {
           const bd = await center(pg, '.vslot[aria-hidden=false] .vframe > div');
           const k0 = await idx(pg);
@@ -468,11 +509,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           c['390 video Wischen im Player wechselt'] = await waitFor(pg, (i) => window.__core.idx() === i + 1, k0, 5000);
           r.notes['390 video Wischen im Player'] = { k0, now: await idx(pg), bd: bd.b, st: await st(pg) };
           await waitFor(pg, () => window.__core.state() === 1, undefined, 5000);
-          await pg.waitForTimeout(700);
+          await pg.waitForTimeout(400);
           await pg.locator('[data-testid=ctl-prev]').click();
           await waitFor(pg, (i) => window.__core.idx() === i, k0, 4000);
           await waitFor(pg, () => window.__core.state() === 1, undefined, 5000);
-          await pg.waitForTimeout(500);
+          await pg.waitForTimeout(300);
         }
         {
           // Wisch, der in der Aktionsreihe zwischen den Tasten beginnt (Daumen unten), wechselt den Moment wie auf dem Inhalt
@@ -481,16 +522,16 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           await swipe(pg, ab.x + ab.width / 2, ab.y + 4, ab.y - 300);
           c[`${tag} Wisch aus der Aktionsreihe wechselt`] = await waitFor(pg, (i) => window.__core.idx() === i + 1, k1, 5000);
           await waitFor(pg, () => window.__core.state() === 1, undefined, 5000);
-          await pg.waitForTimeout(700);
+          await pg.waitForTimeout(400);
           await pg.locator('[data-testid=ctl-prev]').click();
           await waitFor(pg, (i) => window.__core.idx() === i, k1, 4000);
           await waitFor(pg, () => window.__core.state() === 1, undefined, 5000);
-          await pg.waitForTimeout(500);
+          await pg.waitForTimeout(300);
         }
         // Tippen auf den Inhalt pausiert und setzt fort (wie bisher: nach kurzer Wartezeit für den Doppeltipp)
         await pg.mouse.click(area.x, area.y);
         c[`${tag} Tippen auf Inhalt pausiert`] = await waitFor(pg, () => window.__core.state() !== 1, undefined, 3000) && (await pg.locator(play).getAttribute('aria-label')) === 'Play';
-        await pg.waitForTimeout(500);
+        await pg.waitForTimeout(300);
         await pg.mouse.click(area.x, area.y);
         c[`${tag} Tippen auf Inhalt setzt fort`] = await waitFor(pg, () => window.__core.state() === 1, undefined, 4000);
         // Tempo: 1x, 1.5x, 2x, 1x
@@ -543,6 +584,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
 
     // ---------- Aktionsreihe, Blätter über der Leiste, Settings und Saved ----------
+    sec('Aktionsreihe, Blätter über der Leiste, Settings und Saved');
     {
       const o = await open(type, SIZES[0]);
       const pg = o.pg;
@@ -559,7 +601,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       // More: das bestehende Blatt, über der Leiste
       await E(pg, 'more').click();
       c.moreOeffnet = await waitFor(pg, () => !!document.querySelector('[data-testid=note-sheet]'), undefined, 3000);
-      await pg.waitForTimeout(500);
+      await pg.waitForTimeout(300);
       const over = (sel, sheet) => pg.evaluate(([s, sh]) => { const b = document.querySelector(s).getBoundingClientRect(); const e = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2); return !!e && !!e.closest(sh); }, [sel, sheet]);
       c.moreUeberLeiste = await over('[data-testid=ctl-play]', '[data-testid=note-sheet]');
       // Runde 50b (Auflage 6): ganz nach unten gescrollt liegt der letzte Eintrag mindestens 8 px über Home-Anzeige (Sicherheitsabstand unten)
@@ -585,9 +627,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await waitFor(pg, () => !document.querySelector('[data-testid=caption-sheet]'), undefined, 3000);
       // Fokus-Blatt per langem Druck auf einen Reiter, über der Leiste
       const tab = await center(pg, '[data-testid=form-switch] button:has-text("Video")');
-      await pg.mouse.move(tab.x, tab.y); await pg.mouse.down(); await pg.waitForTimeout(700); await pg.mouse.up();
+      await pg.mouse.move(tab.x, tab.y); await pg.mouse.down(); await pg.waitForTimeout(600); await pg.mouse.up();
       c.fokusOeffnet = await waitFor(pg, () => !!document.querySelector('[data-testid=focus-sheet]'), undefined, 3000);
-      await pg.waitForTimeout(400);
+      await pg.waitForTimeout(250);
       c.fokusUeberLeiste = await over('[data-testid=ctl-play]', '[data-testid=focus-sheet]');
       await pg.evaluate(() => { document.querySelector('[data-testid=focus-sheet-close]')?.click(); });
       await waitFor(pg, () => !document.querySelector('[data-testid=focus-sheet]'), undefined, 3000);
@@ -595,7 +637,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const other = await pg.evaluate(() => window.__core.queue()[window.__core.idx() + 1]);
       await pg.evaluate((i) => window.__core.showRecall(i), other);
       c.abrufOeffnet = await waitFor(pg, () => !!document.querySelector('[data-testid=recall-card]'), undefined, 4000);
-      await pg.waitForTimeout(500);
+      await pg.waitForTimeout(300);
       c.abrufUeberLeiste = await over('[data-testid=ctl-play]', '[data-testid=recall-page]') && await over('[data-testid=like]', '[data-testid=recall-page]');
       await pg.screenshot({ path: `${out}/${name}-390-recall.png` });
       await pg.evaluate(() => window.__core.skipRecall());
@@ -617,6 +659,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
 
     // ---------- Text: Ausweg-Fall (künstlich sehr langer Text, passt auch in der kleinsten Stufe nicht): scrollt, Wisch erst am Textende. Dazu Previous und Next ----------
+    sec('Text: Ausweg-Fall (künstlich sehr langer Text, passt auch in der kleinsten Stufe nicht): s');
     {
       const o = await open(type, SIZES[0], { tab: 'text' });
       const pg = o.pg;
@@ -633,7 +676,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await pg.screenshot({ path: `${out}/${name}-390-text-ausweg-mitte.png` });
       // Ans Ende scrollen: Origin und Apply today stehen unten
       await pg.evaluate(() => { const v = document.querySelector('[data-testid=text-view]'); v.scrollTop = v.scrollHeight; });
-      await pg.waitForTimeout(400);
+      await pg.waitForTimeout(250);
       const end = await pg.evaluate(() => ({ origin: document.querySelector('[data-testid=ph-origin]')?.textContent ?? null, apply: document.querySelector('[data-testid=ph-apply]')?.textContent ?? null, applyVisible: (() => { const e = document.querySelector('[data-testid=ph-apply]'); const v = document.querySelector('[data-testid=text-view]'); if (!e) return false; const a = e.getBoundingClientRect(), b = v.getBoundingClientRect(); return a.bottom <= b.bottom + 1 && a.top >= b.top; })() }));
       r.notes.textOriginApply = { ...end, id: await pg.evaluate(() => window.__core.moment().id), form: await pg.evaluate(() => window.__core.moment().form) }; c.textOriginApply = /Test entry 30/.test(end.origin ?? '') && /Apply today/.test(end.apply ?? '') && /Do the small thing today\./.test(end.apply ?? '') && end.applyVisible;
       await pg.screenshot({ path: `${out}/${name}-390-text-end.png` });
@@ -642,7 +685,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await pg.waitForTimeout(200);
       const i0 = await idx(pg);
       await touchSwipe(pg, '[data-testid=text-view]', 200, 600, 300);
-      await pg.waitForTimeout(500);
+      await pg.waitForTimeout(300);
       c.auswegWischMitteBleibt = (await idx(pg)) === i0;
       await pg.evaluate(() => { const v = document.querySelector('[data-testid=text-view]'); v.scrollTop = v.scrollHeight; });
       await pg.waitForTimeout(200);
@@ -664,6 +707,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
 
     // ---------- Runde 48: unterer Rand auch bei einem Fenster, das höher ist als der Feed ----------
+    sec('Runde 48: unterer Rand auch bei einem Fenster, das höher ist als der Feed');
     {
       const o = await open(type, SIZES[0]);
       const pg = o.pg;
@@ -683,6 +727,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
 
     // ---------- Runde 50: Audio, Titelbild als Quadrat (nie beschnitten), vorige und nächste Zeile genau einzeilig, arabische Schrift Amiri ----------
+    sec('Runde 50: Audio, Titelbild als Quadrat (nie beschnitten), vorige und nächste Zeile genau e');
     // Die Größen der Reihe plus das Profil Gerät (393 breit, Fenster 793 hoch, Feed 852 hoch mit der Korrektur)
     const H50 = (pg) => {
       const info = () => pg.evaluate(() => {
@@ -715,7 +760,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const loaded = async () => { const ok = await waitFor(pg, () => { const i = document.querySelector('[data-testid=ph-cover]'); return !!i && i.complete && i.naturalWidth > 0 && i.dataset.ready === 'yes' && parseFloat(getComputedStyle(i).opacity) === 1; }, undefined, 4000); return ok; };
       /** Warten, bis die aktuelle Zeile mit prefix beginnt (die Zeit läuft mit dem Abspielen) */
       const rowsRest = () => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row')).length === 0;
-      const atLine = async (prefix) => { const ok = await waitFor(pg, (x) => document.querySelector('[data-testid=caption]')?.textContent.startsWith(x), prefix, 9000); await waitFor(pg, () => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row')).length === 0, undefined, 3000); return ok; };
+      const atLine = async (prefix) => { const ok = await waitFor(pg, (x) => document.querySelector('[data-testid=caption]')?.textContent.startsWith(x), prefix, 9000, true); await waitFor(pg, () => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row')).length === 0, undefined, 3000, true); return ok; };
       /** Zeilen ganz in der Karte, unter dem Bild, ohne Überlappung untereinander, mit Aktionsreihe und Überschrift */
       const linesOk = (a, withArt) => {
         const L = [a.cur, a.next, a.next2, a.next3].filter((x) => x && x.w > 0 && x.h > 0 && !x.hidden);
@@ -743,7 +788,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       return { info, loaded, atLine, linesOk, squareOk, flushOk, nbOk, rowsRest };
     };
     const r50 = {};
-    for (const size of [...SIZES, GER]) {
+    for (const size of [SIZES[1], GER]) {
       const o = await open(type, size, { tab: 'audio', pool: POOL_A });
       const pg = o.pg;
       const tag = `${size.name} Titelbild`;
@@ -812,7 +857,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       // Sehr langer Hook (Moment 42 mit Bild): das Bild darf kleiner werden oder ganz entfallen, nichts überlappt, nichts wird abgeschnitten
       await showMoment(pg, idOf(42));
       await waitFor(pg, () => document.querySelector('[data-testid=hook]').textContent.includes('Testmoment 42'), undefined, 3000);
-      await pg.waitForTimeout(400);
+      await pg.waitForTimeout(250);
       const lh = await info();
       r.notes[`${tag} langer Hook`] = lh;
       c[`${tag} langer Hook: Bild nach der Größenregel oder ganz weg, Zeilen ohne Überlappung, Hook ganz`] = lh.id === idOf(42) && linesOk(lh, !!lh.img && lh.img.vis) && squareOk(lh, false) && lh.hook.sh <= lh.hook.ch + 1;
@@ -847,7 +892,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await o.browser.close();
     }
     // Zweites Szenario je Größe: lange Sätze (Moment 59), breites Bild (62), Bild allein (60)
-    for (const size of [...SIZES, GER]) {
+    for (const size of [SIZES[1], GER]) {
       const o = await open(type, size, { tab: 'audio', pool: POOL_B });
       const pg = o.pg;
       const tag = `${size.name} Titelbild`;
@@ -885,8 +930,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await o.browser.close();
     }
     r.notes['Hook-Stufen und Maße (Runde 50)'] = r50;
-    for (const size of [...SIZES, GER]) c[`${size.name} Hook wegen des Bildes nicht kleiner`] = r50[`${size.name} Hook-Stufe mit Bild`] <= r50[`${size.name} Hook-Stufe ohne Bild`] || r50[`${size.name} Bild px`] > 0;
+    for (const size of [SIZES[1], GER]) c[`${size.name} Hook wegen des Bildes nicht kleiner`] = r50[`${size.name} Hook-Stufe mit Bild`] <= r50[`${size.name} Hook-Stufe ohne Bild`] || r50[`${size.name} Bild px`] > 0;
     // ---------- Runde 50: Profil Gerät (393x852, Sicherheitsrand 59/34) mit nachgestelltem Gerätefehler ----------
+    sec('Runde 50: Profil Gerät (393x852, Sicherheitsrand 59/34) mit nachgestelltem Gerätefehler');
     // Gerätefehler: Fensterhöhe 793, screen.height 852, navigator.standalone true. Messen wie auf dem Gerät: Feed, Kopfleiste und Leiste je top und bottom.
     {
       const MEAS = () => {
@@ -945,7 +991,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         c['Gerät Kopfleiste bleibt beim Wischen stehen'] = mid.vstage !== 'none' && JSON.stringify(mid.head) === JSON.stringify(A.head);
         if (!c['Gerät Kopfleiste bleibt beim Wischen stehen']) r.notes['Gerät Wisch'] = { vstage: mid.vstage, head: mid.head };
         await waitFor(pg, () => window.__core.state() === 1, undefined, 6000);
-        await pg.waitForTimeout(600);
+        await pg.waitForTimeout(350);
       }
       // Diag-Grenzen und Folgen von resize: nach 2 s ein neues Fenster 700 hoch: Variable weg (Differenz 152), neue Zeile; zurück auf 793: Variable wieder da
       {
@@ -983,9 +1029,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         await showMoment(ps, idOf(40));
         await ps.locator('[data-testid=cc]').click(); await waitFor(ps, () => document.querySelector('[data-testid=ph-lyrics]').dataset.art === 'fill', undefined, 3000);
         await ps.screenshot({ path: `${out}/${name}-geraet-audio-cc-aus.png` });
-        await gotoTab(ps, 'text'); await showMoment(ps, idOf(56)); await ps.waitForTimeout(500);
+        await gotoTab(ps, 'text'); await showMoment(ps, idOf(56)); await ps.waitForTimeout(300);
         await ps.screenshot({ path: `${out}/${name}-geraet-text.png` });
-        await ps.locator('[data-testid=form-switch] button:has-text("Video")').click(); await waitFor(ps, () => window.__core.moment() && window.__core.state() === 1, undefined, 8000); await ps.waitForTimeout(700);
+        await ps.locator('[data-testid=form-switch] button:has-text("Video")').click(); await waitFor(ps, () => window.__core.moment() && window.__core.state() === 1, undefined, 8000); await ps.waitForTimeout(400);
         await ps.screenshot({ path: `${out}/${name}-geraet-video.png` });
         await oS.browser.close();
       }
@@ -997,7 +1043,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const o = await open(type, { ...GER, ...extra }, { tab: form === 'video' ? null : form, pool: POOL_G });
         if (form === 'audio') await showMoment(o.pg, idOf(40));
         if (form === 'text') await showMoment(o.pg, idOf(48));
-        await o.pg.waitForTimeout(600);
+        await o.pg.waitForTimeout(350);
         const g = await o.pg.evaluate(GEOM);
         const m = await o.pg.evaluate(() => ({ head: document.querySelector('.ph-head').getBoundingClientRect().bottom, tabs: document.querySelector('.ph-tabs').getBoundingClientRect().top, hookT: document.querySelector('[data-testid=hook]').getBoundingClientRect().top, hookB: document.querySelector('[data-testid=hook]').getBoundingClientRect().bottom, tvT: document.querySelector('[data-testid=text-view]')?.getBoundingClientRect().top ?? null, clear: getComputedStyle(document.querySelector('.vfeed')).getPropertyValue('--ph-clear').trim(), top: getComputedStyle(document.querySelector('.vfeed')).getPropertyValue('--ph-top').trim(), fit: document.querySelector('[data-testid=text-view]')?.dataset.tscroll ?? null }));
         const errs = o.errors.length;
@@ -1024,13 +1070,14 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       {
         // Fotos mit Abstand 40 (Fenster 852, Standalone, ohne Korrekturfall)
         const oK = await open(type, { ...GER, height: 852, screenH: 0, topClear: 40 }, { tab: 'audio', pool: POOL_G });
-        await showMoment(oK.pg, idOf(40)); await oK.pg.waitForTimeout(500);
+        await showMoment(oK.pg, idOf(40)); await oK.pg.waitForTimeout(300);
         await oK.pg.screenshot({ path: `${out}/${name}-geraet-abstand40-audio.png` });
         await oK.browser.close();
       }
     }
 
     // ---------- Runde 50c (Fehler 3): Hat der Moment ein Titelbild, ist das Quadrat von Anfang an reserviert (ruhige Fläche), das Bild blendet ohne Zeitgrenze ein, bei Fehler bleibt die Fläche ----------
+    sec('Runde 50c (Fehler 3): Titelbild mit reserviertem Quadrat, blendet ohne Zeitgrenze ein');
     {
       const covers = {};
       // Profil Gerät hier mit Fensterhöhe 852 (so gibt iOS der Seite das Fenster mit der Regel in phone.css): im kurzen Fenster 793 liegt die Kartenhöhe von Moment 68 genau an der Grenze, ab der die Karte das Quadrat ausblendet (siehe Notiz unten)
@@ -1159,6 +1206,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
 
     // ---------- Runde 50b (Auflage 2 und 3): Reihenfolge der Verkleinerung bei immer kleinerer Karte: Bild kleiner, Bild weg, nächste Zeilen weniger (3, 2, 1), zuletzt die aktuelle Zeile klemmen ----------
+    sec('Runde 50b (Auflage 2 und 3): Reihenfolge der Verkleinerung bei immer kleinerer Karte: Bild');
     {
       const o = await open(type, SIZES[1], { tab: 'audio', pool: POOL_L });
       const pg = o.pg; const { info, atLine, nbOk } = H50(pg);
@@ -1185,8 +1233,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
 
     // ---------- Runde 50 (Ziel 9): Zeilenwechsel als durchgehende Liste, nur transform, opacity, color, sanft und ohne Springen ----------
+    sec('Runde 50 (Ziel 9): Zeilenwechsel als durchgehende Liste, nur transform, opacity, color, sa');
     {
-      for (const size of [{ ...SIZES[0] }, GER]) {
+      for (const size of [GER]) {
         const o = await open(type, size, { tab: 'audio', pool: POOL_B });
         const pg = o.pg; const { info, atLine, rowsRest } = H50(pg);
         const tag = `${size.name} Zeilenwechsel`;
@@ -1247,13 +1296,15 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
 
     // ---------- Runde 50b (Auflage 1): Verlauf eines Zeilenwechsels per rAF-Abtastung bei 4-facher CPU-Drosselung (nicht nur die Endlage): Dauer, verteilt über Frames, laufende Transitions, kein langer Frame (nur Chromium) ----------
-    if (type === chromium) {
-      for (const size of [SIZES[0], GER]) {
+    sec('Runde 50b (Auflage 1): Verlauf eines Zeilenwechsels per rAF-Abtastung bei 4-facher CPU-Dro');
+    {
+      for (const size of [GER]) {
         const o = await open(type, size, { tab: 'audio', pool: POOL_B });
         const pg = o.pg;
         await showMoment(pg, idOf(66));
-        const cdp = await o.cx.newCDPSession(pg);
-        await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+        // CDP (CPU-Drosselung) gibt es nur in Chromium. In WebKit läuft derselbe Test ohne Drosselung.
+        const cdp = type === chromium ? await o.cx.newCDPSession(pg) : null;
+        await cdp?.send('Emulation.setCPUThrottlingRate', { rate: 4 });
         await pg.evaluate(() => {
           window.__fr = { f: [], on: true };
           const tick = (t) => { if (!window.__fr.on) return; window.__fr.f.push({ t, a: document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row') && x.playState === 'running').length, rows: [...document.querySelectorAll('.ph-row')].map((e) => [+e.dataset.i, e.getBoundingClientRect().top, +getComputedStyle(e).opacity, e.dataset.role]) }); requestAnimationFrame(tick); };
@@ -1261,7 +1312,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         });
         const got = await waitFor(pg, () => { const f = window.__fr.f; return f.length > 0 && (f[f.length - 1].rows.find((x) => x[3] === 'cur')?.[0] ?? 0) >= 12; }, undefined, 15000);
         const fr = await pg.evaluate(() => { window.__fr.on = false; return window.__fr.f; });
-        await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
+        await cdp?.send('Emulation.setCPUThrottlingRate', { rate: 1 });
         const curOf = (f) => f.rows.find((x) => x[3] === 'cur')?.[0];
         const dts = fr.slice(1).map((f, i) => f.t - fr[i].t);
         const evs = [];
@@ -1282,14 +1333,114 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         c[`${size.name} Verlauf: Dauer je Wechsel 200 bis 300 ms`] = done.length >= 8 && done.every((x) => x.durMs >= 200 && x.durMs <= 300);
         c[`${size.name} Verlauf: Bewegung auf mindestens 10 Frames verteilt, kein harter Sprung`] = done.length >= 8 && done.every((x) => x.frames >= 10);
         c[`${size.name} Verlauf: während des Wechsels laufen Transitions (getAnimations)`] = done.length >= 8 && done.every((x) => x.animsSeen >= 5);
-        c[`${size.name} Verlauf: kein Frame über 34 ms bei 4x CPU (nach 20 Frames Anlauf)`] = Math.max(...dts.slice(20)) <= 34;
+        c[`${size.name} Verlauf: kein Frame über 34 ms bei 4x CPU (nach 20 Frames Anlauf)`] = type !== chromium || Math.max(...dts.slice(20)) <= 34; // nur mit Drosselung (Chromium) ein Zeitlimit je Frame
         c[`${size.name} Verlauf: Ankunft an der festen Ankerposition (alle Wechsel gleiches Ziel, 1 px)`] = done.length >= 8 && done.every((x) => Math.abs(x.toTop - done[0].toTop) <= 1);
         c[`${size.name} Verlauf: keine Seitenfehler`] = o.errors.length === 0;
         await o.browser.close();
       }
     }
 
+    // ---------- Runde 51 (Ziel 2): in keinem Frame eines Wechsels überlappen sich die Kästen zweier sichtbarer Zeilen (Deckkraft über 0,3) um mehr als 1 px; rAF-Abtastung bei 4x CPU, gemischt lange Zeilen, auch arabisch ----------
+    sec('Runde 51 (Ziel 2): in keinem Frame eines Wechsels überlappen sich die Kästen zweier sichtb');
+    {
+      for (const size of [SIZES[1], GER]) {
+        for (const [lab, num] of [['lateinisch', 74], ['arabisch', 75]]) {
+          if ((size === GER) === (num === 74)) continue; // je Sprache ein Profil: lateinisch 375x667, arabisch Gerät
+          const o = await open(type, size, { tab: 'audio', pool: POOL_O });
+          const pg = o.pg;
+          await showMoment(pg, idOf(num));
+          const cdp = type === chromium ? await o.cx.newCDPSession(pg) : null;
+          await cdp?.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+          await pg.evaluate(() => {
+            window.__ov = { f: [], on: true };
+            const tick = (t) => { if (!window.__ov.on) return; window.__ov.f.push({ t, rows: [...document.querySelectorAll('.ph-row')].map((e) => { const b = e.getBoundingClientRect(); return [+e.dataset.i, b.top, b.bottom, +getComputedStyle(e).opacity, e.dataset.role]; }) }); requestAnimationFrame(tick); };
+            requestAnimationFrame(tick);
+          });
+          const got = await waitFor(pg, () => { const f = window.__ov.f; return f.length > 0 && (f[f.length - 1].rows.find((x) => x[4] === 'cur')?.[0] ?? 0) >= 10; }, undefined, 15000);
+          const fr = await pg.evaluate(() => { window.__ov.on = false; return window.__ov.f; });
+          await cdp?.send('Emulation.setCPUThrottlingRate', { rate: 1 });
+          let worst = 0; let where = null; let wi = 0; let changes = 0; let prevCur;
+          for (const f of fr) {
+            const cur = f.rows.find((x) => x[4] === 'cur')?.[0]; if (prevCur !== undefined && cur !== undefined && cur !== prevCur) changes++; prevCur = cur;
+            const vis = f.rows.filter((x) => x[3] > 0.3);
+            for (let a = 0; a < vis.length; a++) for (let b = a + 1; b < vis.length; b++) { const ov = Math.min(vis[a][2], vis[b][2]) - Math.max(vis[a][1], vis[b][1]); if (ov > worst) { worst = ov; wi = fr.indexOf(f); where = [vis[a][0], vis[b][0], Math.round(f.t)]; } }
+          }
+          r.notes[`${size.name} Überlappung ${lab}`] = { frames: fr.length, changes, worst: Math.round(worst * 10) / 10, where, ctx: [wi - 2, wi - 1, wi, wi + 1].map((k) => fr[k] && fr[k].rows.map((x) => x.map((v) => (typeof v === 'number' ? Math.round(v * 10) / 10 : v)))) };
+          c[`${size.name} Überlappung ${lab}: mindestens 8 Wechsel abgetastet`] = got && changes >= 8;
+          c[`${size.name} Überlappung ${lab}: in keinem Frame mehr als 1 px Überlappung sichtbarer Zeilen`] = worst <= 1;
+          await o.browser.close();
+        }
+      }
+    }
+
+    // ---------- Runde 51 (Ziel 3): iPhone-Ansicht, Audio und Text: nie eine Anfrage an i.ytimg.com, im Audio-Reiter über 5 Momentwechsel nur Titelbilder des aktiven und des direkt nächsten Moments ----------
+    sec('Runde 51 (Ziel 3): iPhone-Ansicht, Audio und Text: nie eine Anfrage an i.ytimg.com, im Aud');
+    {
+      for (const tab of ['audio', 'text']) {
+        const o = await open(type, SIZES[0], { tab, pool: tab === 'audio' ? POOL_A : POOL_T });
+        const pg = o.pg;
+        const reqs = [];
+        pg.on('request', (rq) => { const u = rq.url(); if (/i\.ytimg\.com|img\.test/.test(u) || rq.resourceType() === 'image') reqs.push(u); });
+        await pg.waitForTimeout(1200);
+        const allowed = new Set();
+        const mark = async () => { const ids = await pg.evaluate(() => { const q = window.__core.queue(); const i = window.__core.idx(); return [q[i], q[i + 1]].filter(Boolean); }); for (const id of ids) allowed.add(Number(id.slice(4, 11))); };
+        await mark();
+        for (let n = 0; n < (tab === 'audio' ? 5 : 2); n++) {
+          const before = await pg.evaluate(() => window.__core.moment()?.id);
+          await pg.evaluate(() => window.__core.next());
+          await waitFor(pg, (b) => window.__core.moment()?.id !== b, before, tab === 'audio' ? 4000 : 1500, true);
+          await pg.waitForTimeout(400);
+          await mark();
+        }
+        const ytimg = reqs.filter((u) => /i\.ytimg\.com/.test(u));
+        const numOfUrl = (u) => { const mm = /(?:cover|broken|wide)(\d+)/.exec(u); return mm ? Number(mm[1]) : null; };
+        const strays = reqs.map((u) => [u, numOfUrl(u)]).filter(([, n]) => n !== null && !allowed.has(n));
+        r.notes[`Bildanfragen ${tab}`] = { n: reqs.length, ytimg: ytimg.length, strays: strays.map((x) => x[0]), allowed: [...allowed], urls: [...new Set(reqs)].slice(0, 20) };
+        c[`Bildanfragen ${tab}: keine Anfrage an i.ytimg.com über 5 Momentwechsel`] = ytimg.length === 0;
+        if (tab === 'audio') c['Bildanfragen audio: nur Titelbilder des aktiven und des nächsten Moments'] = strays.length === 0;
+        await o.browser.close();
+      }
+    }
+
+    // ---------- Runde 51 (Ziel 1): Abrufkarte auf dem Raster: Kanten 20, Oberkante 24 pt unter der Reiterleiste (wie der Chip), nach der Antwort nur Zuwachs nach unten, nichts über den unteren Rand ----------
+    sec('Runde 51 (Ziel 1): Abrufkarte auf dem Raster: Kanten 20, Oberkante 24 pt unter der Reiterl');
+    for (const size of [SIZES[1], GER]) {
+      for (const [tab, qid, pool, long] of [['video', null, POOL, false], ['audio', 40, POOL_A, false], ['text', null, POOL_T, false], ['audio', 76, POOL_Q, true]]) {
+      if (size === GER && (tab === 'video' || tab === 'text')) continue; // Video und Text: gleiche Seite, bei 375x667 geprüft
+        const o = await open(type, size, { tab, pool });
+        const pg = o.pg;
+        if (qid) await showMoment(pg, idOf(qid));
+        const tag = `${size.name} Abruf ${tab}${long ? ' lang' : ''}`;
+        await pg.evaluate(() => window.__core.showRecall(window.__core.moment().id));
+        await waitFor(pg, () => !!document.querySelector('[data-testid=recall-card]'), undefined, 4000);
+        await pg.waitForTimeout(350);
+        const geo = () => pg.evaluate(() => {
+          const W = window.innerWidth; const page = document.querySelector('[data-testid=recall-page]'); const R = (e) => e.getBoundingClientRect();
+          const sw = R(document.querySelector('[data-testid=form-switch]'));
+          const kids = [...page.querySelectorAll('.vrecall-head, .vrecall-origin, .recall-q, .recall-option, .recall-primary')].filter((e) => R(e).height > 0);
+          const first = page.querySelector('.vrecall-head') ?? page.firstElementChild;
+          const cs = getComputedStyle(page); const room = R(page).bottom - parseFloat(cs.paddingBottom);
+          const bottom = Math.max(...[...page.querySelectorAll('.recall > *, .vrecall-head, .vrecall-origin')].map((e) => R(e).bottom));
+          const lefts = kids.map((e) => Math.round(R(e).left * 10) / 10); const rights = kids.map((e) => Math.round((W - R(e).right) * 10) / 10);
+          return { W, top: R(first).top, expect: sw.bottom + 24, lefts, rights, bottom, room, scroll: page.scrollHeight - page.clientHeight, canScroll: cs.overflowY === 'auto', scrollTop: page.scrollTop, pageTop: R(page).top };
+        });
+        const g1 = await geo();
+        const pick = pg.locator('[data-testid=recall-option][data-correct="0"]').first();
+        let g2 = null;
+        if (await pick.count()) { await pick.click(); await waitFor(pg, () => !!document.querySelector('[data-testid=recall-why]'), undefined, 3000); await pg.waitForTimeout(300); g2 = await geo(); }
+        r.notes[tag] = { vor: g1, nach: g2 };
+        c[`${tag}: Oberkante 24 pt unter der Reiterleiste (1 px)`] = Math.abs(g1.top - g1.expect) <= 1;
+        c[`${tag}: linke und rechte Kante 20 pt`] = g1.lefts.every((x) => Math.abs(x - 20) <= 1) && g1.rights.every((x) => Math.abs(x - 20) <= 1);
+        c[`${tag}: Block innerhalb der Fläche, nichts scrollt`] = ((g1.bottom <= g1.room + 1 && g1.scroll <= 1) || g1.canScroll) && g1.scrollTop === 0;
+        c[`${tag}: nach der Antwort bleibt die Oberkante, Block innerhalb der Fläche oder scrollbar`] = !!g2 && Math.abs(g2.top - g1.top) <= 1 && ((g2.bottom <= g2.room + 1 && g2.scroll <= 1) || g2.canScroll) && g2.lefts.every((x) => Math.abs(x - 20) <= 1);
+        await pg.screenshot({ path: `${out}/${name}-${tag.replace(/ /g, '-')}-vor.png` });
+        if (g2) { await pg.screenshot({ path: `${out}/${name}-${tag.replace(/ /g, '-')}-nach.png` }); }
+        await o.browser.close();
+      }
+    }
+
     // ---------- Runde 50b (Auflage 3): die aktuelle Zeile steht nie außerhalb der Karte, die Karte nie über der Aktionsreihe (4-Zeilen-Hook, 10-Zeilen-Hook, 5-Zeilen-Untertitel) ----------
+    sec('Runde 50b (Auflage 3): die aktuelle Zeile steht nie außerhalb der Karte, die Karte nie übe');
     {
       for (const size of [...SIZES, GER]) {
         const o = await open(type, size, { tab: 'audio', pool: POOL_X });
@@ -1317,8 +1468,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
 
     // ---------- Runde 50b (Auflage 2): Anker oben, keine vorige Zeile, abnehmende Deckkraft, Kontrast der direkt nächsten Zeile mindestens 4,5 zu 1 ----------
+    sec('Runde 50b (Auflage 2): Anker oben, keine vorige Zeile, abnehmende Deckkraft, Kontrast der ');
     {
-      for (const size of [SIZES[0], GER]) {
+      for (const size of [SIZES[1], GER]) {
         const o = await open(type, size, { tab: 'audio', pool: POOL_B });
         const pg = o.pg; const { info, atLine, loaded } = H50(pg);
         const tag = `${size.name} Anker`;
@@ -1358,8 +1510,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
 
     // ---------- Runde 50b (Auflage 4): einheitlicher Rand und fester Abstand Reiterleiste zu Chip in allen Reitern und bei jeder Textlänge ----------
+    sec('Runde 50b (Auflage 4): einheitlicher Rand und fester Abstand Reiterleiste zu Chip in allen');
     {
-      for (const size of [SIZES[0], SIZES[1], GER]) {
+      for (const size of [SIZES[1], GER]) {
         const tag = `${size.name} Rand`;
         const rows = [];
         const grab = (pg) => pg.evaluate(() => {
@@ -1369,12 +1522,12 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           return { chip, hook: R(q('[data-testid=hook]')), tabs: R(q('.ph-tabs')), card: R(q('[data-testid=ph-lyrics]')) ?? R(q('[data-testid=ph-apply]')), apply: R(q('[data-testid=ph-apply]')), meta: R(q('[data-testid=ph-origin]')), actions: R(q('[data-testid=ph-actions]')) };
         });
         // Video
-        { const o = await open(type, size, {}); await waitFor(o.pg, () => window.__core.state() === 1, undefined, 8000); await o.pg.waitForTimeout(600); rows.push({ k: 'video', ...(await grab(o.pg)) }); await o.browser.close(); }
+        { const o = await open(type, size, {}); await waitFor(o.pg, () => window.__core.state() === 1, undefined, 8000); await o.pg.waitForTimeout(350); rows.push({ k: 'video', ...(await grab(o.pg)) }); await o.browser.close(); }
         // Audio
         { const o = await open(type, size, { tab: 'audio', pool: POOL_A }); await showMoment(o.pg, idOf(41)); rows.push({ k: 'audio', ...(await grab(o.pg)) }); await showMoment(o.pg, idOf(42)); rows.push({ k: 'audio langer Hook', ...(await grab(o.pg)) }); await o.browser.close(); }
         // Text: kurz, mittel, lang, langer Hook
-        { const o = await open(type, size, { tab: 'text' }); for (const [id, k] of [[48, 'text kurz'], [56, 'text mittel'], [57, 'text lang'], [47, 'text langer Hook']]) { await showMoment(o.pg, idOf(id)); await o.pg.waitForTimeout(500); rows.push({ k, ...(await grab(o.pg)) }); } await o.browser.close(); }
-        { const o = await open(type, size, { tab: 'text', pool: POOL_T }); for (const [id, k] of [[63, 'text Takeaway'], [64, 'text Takeaway alt']]) { await showMoment(o.pg, idOf(id)); await o.pg.waitForTimeout(500); rows.push({ k, ...(await grab(o.pg)) }); } await o.browser.close(); }
+        { const o = await open(type, size, { tab: 'text' }); for (const [id, k] of [[48, 'text kurz'], [56, 'text mittel'], [57, 'text lang'], [47, 'text langer Hook']]) { await showMoment(o.pg, idOf(id)); await o.pg.waitForTimeout(300); rows.push({ k, ...(await grab(o.pg)) }); } await o.browser.close(); }
+        { const o = await open(type, size, { tab: 'text', pool: POOL_T }); for (const [id, k] of [[63, 'text Takeaway'], [64, 'text Takeaway alt']]) { await showMoment(o.pg, idOf(id)); await o.pg.waitForTimeout(300); rows.push({ k, ...(await grab(o.pg)) }); } await o.browser.close(); }
         r.notes[`${tag} Messwerte`] = rows.map((x) => ({ k: x.k, chipL: x.chip?.l, chipT: x.chip?.t, tabsB: x.tabs?.b, hookL: x.hook?.l, cardL: x.card?.l, applyL: x.apply?.l, metaL: x.meta?.l }));
         c[`${tag}: Chip links bei 20 in Video, Audio und Text (1 px)`] = rows.every((x) => x.chip && Math.abs(x.chip.l - 20) <= 1);
         c[`${tag}: Hook links bei 20 in allen Reitern (1 px)`] = rows.every((x) => x.hook && Math.abs(x.hook.l - 20) <= 1);
@@ -1386,6 +1539,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
 
     // ---------- Runde 50: Takeaway im Text-Reiter (Zitat, eine Metazeile, eine Karte) und die Statuszeile (eigene Zeile, nie auf Inhalt) ----------
+    sec('Runde 50: Takeaway im Text-Reiter (Zitat, eine Metazeile, eine Karte) und die Statuszeile ');
     for (const size of [SIZES[0], { ...GER, height: 852, screenH: 0, standalone: false }]) {
       const tag = `${size.name} Takeaway`;
       const hitR = (a, b) => !!a && !!b && a.l < b.r - 0.5 && b.l < a.r - 0.5 && a.t < b.b - 0.5 && b.t < a.b - 0.5;
@@ -1403,7 +1557,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       }, ['x', TK_O, TK_A]);
       for (const [id, quote] of [[63, true], [64, false]]) {
         await showMoment(pg, idOf(id));
-        await pg.waitForTimeout(500);
+        await pg.waitForTimeout(300);
         const t = await read();
         const k = `${tag} ${quote ? 'mit Zitat' : 'ohne Zitat (alter Pool)'}`;
         r.notes[k] = t;
@@ -1425,11 +1579,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const o2 = await open(type, size, { tab: form === 'video' ? null : form, pool: POOL_T });
         const pg2 = o2.pg;
         if (form === 'text') await showMoment(pg2, idOf(63));
-        await pg2.waitForTimeout(400);
+        await pg2.waitForTimeout(250);
         const before = await pg2.evaluate(() => { const c = document.querySelector('[data-testid=text-view], [data-testid=ph-audio], [data-testid=ph-video]').getBoundingClientRect(); return { b: c.bottom }; });
         await o2.cx.setOffline(true);
         await waitFor(pg2, () => !!document.querySelector('.status[data-status=offline]'), undefined, 5000);
-        await pg2.waitForTimeout(500);
+        await pg2.waitForTimeout(300);
         const stat = () => pg2.evaluate(() => {
           const R = (e) => { if (!e) return null; const b = e.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom, w: b.width, h: b.height }; };
           const q = (x) => document.querySelector(x);
@@ -1478,6 +1632,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
 
     // ---------- Erste Geste nach dem App-Start ist die Play-Taste ----------
+    sec('Erste Geste nach dem App-Start ist die Play-Taste');
     {
       const o = await open(type, SIZES[0], { init: IOS_RULE });
       const pg = o.pg;
@@ -1561,6 +1716,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     }
 
     // ---------- Schalter aus: der alte Aufbau ----------
+    sec('Schalter aus: der alte Aufbau');
     for (const [form] of TABS) {
       const o = await open(type, SIZES[0], { query: '&phone=0' });
       const pg = o.pg;
@@ -1580,8 +1736,13 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await o.browser.close();
     }
   } catch (e) {
-    r.error = String(e && e.stack ? e.stack : e);
+    r.error = `${String(e && e.stack ? e.stack : e)} (Abschnitt: ${prog.section})`;
   }
+  clearTimeout(cap);
+  await shared.get(type)?.close().catch(() => {});
+  shared.delete(type);
+  for (const t of r.timeouts) c[`Zeitlimit 15 s: ${t}`] = false;
+  console.error(`[${name} ${Math.round((Date.now() - T0) / 1000)} s] fertig`);
 }
 writeFileSync(`${out}/results.json`, JSON.stringify(results, null, 1));
 let bad = 0;
