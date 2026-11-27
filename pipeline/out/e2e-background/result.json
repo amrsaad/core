@@ -1,5 +1,5 @@
 {
- "at": "2026-11-27T12:15:08.191Z",
+ "at": "2026-11-27T13:33:01.958Z",
  "runs": [
   {
    "browser": "webkit",
@@ -133,9 +133,9 @@
    },
    "bgAudioLog": [
     "bg: mediasession none to playing (feed paused=false) hidden=false",
-    "bg: deck page hidden: paused=false ended=false t=1.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck page hidden: paused=false ended=false t=1.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: left bgaudio0:0",
-    "bg: deck page hidden +1 s: paused=false ended=false t=2.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+    "bg: deck page hidden +1 s: paused=false ended=false t=2.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
     "bg: deck clip end via timeupdate hidden=true pool=5 onAdvance=true advance=yes rs=0 muted=false t=4.0",
     "bg: ms playbackState playing (swap)",
     "bg: deck advance bgaudio0 to bgaudio1: swap and play() in this handler, new element true, next from storage false, readyState 0",
@@ -150,13 +150,13 @@
     "bg: started bgaudio5:0",
     "bg: next bgaudio5:0",
     "bg: deck page visible: paused=false ended=false t=0.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
-    "bg: deck while hidden 7 s: timeupdate 70, ended 0, clip ends 2, play calls 2, stuck checks 4, refills 0/0/0",
+    "bg: deck while hidden 7 s: timeupdate 69, ended 0, clip ends 2, play calls 2, stuck checks 4, refills 0/0/0",
     "bg: back bgaudio5:0"
    ],
-   "bgPoolFiveMs": 354,
+   "bgPoolFiveMs": 280,
    "bgPoolStart": {
-    "fill": 6,
-    "ok": 31,
+    "fill": 7,
+    "ok": 32,
     "stock": []
    },
    "bgRowLog": [
@@ -191,7 +191,7 @@
     "bg: started bgaudio6:0",
     "bg: next bgaudio6:0",
     "bg: refill bgaudio7 (pool 1/0, target 2)",
-    "bg: refill ready bgaudio7 after 32 ms",
+    "bg: refill ready bgaudio7 after 34 ms",
     "bg: deck advance to bgaudio6: NOT playing after 3 s, rs=0 muted=false t=2.9 error none",
     "bg: deck clip end via timeupdate hidden=true pool=2 onAdvance=true advance=yes rs=0 muted=false t=4.0",
     "bg: deck advance bgaudio6 to bgaudio3: swap and play() in this handler, new element true, next from storage false, readyState 0",
@@ -224,7 +224,7 @@
      "deck: swap bgaudio6 ready=true pool=1",
      "bg: refill bgaudio7 (pool 1/0, target 2)",
      "deck: pool load bgaudio7 src=net",
-     "bg: refill ready bgaudio7 after 32 ms",
+     "bg: refill ready bgaudio7 after 34 ms",
      "deck: pool refill 2/5",
      "bg: deck clip end via timeupdate hidden=true pool=2 onAdvance=true advance=yes rs=0 muted=false t=4.0",
      "deck: swap bgaudio3 ready=true pool=1",
@@ -287,11 +287,11 @@
     "bgstock1"
    ],
    "bgNextFiveMs": [
-    38,
-    24,
-    23,
-    13,
-    16
+    30,
+    18,
+    11,
+    10,
+    13
    ],
    "bgNextSkipLines": [
     "go 0->1",
@@ -304,33 +304,33 @@
     {
      "sync": true,
      "src": "https://stream.test/bgstock0.mp3",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js:1:68 < playAfterJump@http://127.0.0.1:4178/core/assets/main-UDGeNI5 < swapEntry@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js < swapNext@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js: < Rl@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js:9:4619 < @http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js:11:13495"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js:1:68 < playAfterJump@http://127.0.0.1:4178/core/assets/main-CeCZwu2 < swapEntry@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js < swapNext@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js: < Ol@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js:12:444 < @http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js:14:13495"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock8.mp3",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js:1:68 < playAfterJump@http://127.0.0.1:4178/core/assets/main-UDGeNI5 < swapEntry@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js < swapNext@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js: < Rl@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js:9:4619 < @http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js:11:13495"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js:1:68 < playAfterJump@http://127.0.0.1:4178/core/assets/main-CeCZwu2 < swapEntry@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js < swapNext@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js: < Ol@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js:12:444 < @http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js:14:13495"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock4.mp3",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js:1:68 < playAfterJump@http://127.0.0.1:4178/core/assets/main-UDGeNI5 < swapEntry@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js < swapNext@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js: < Rl@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js:9:4619 < @http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js:11:13495"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js:1:68 < playAfterJump@http://127.0.0.1:4178/core/assets/main-CeCZwu2 < swapEntry@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js < swapNext@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js: < Ol@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js:12:444 < @http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js:14:13495"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock10.mp3",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js:1:68 < playAfterJump@http://127.0.0.1:4178/core/assets/main-UDGeNI5 < swapEntry@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js < swapNext@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js: < Rl@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js:9:4619 < @http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js:11:13495"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js:1:68 < playAfterJump@http://127.0.0.1:4178/core/assets/main-CeCZwu2 < swapEntry@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js < swapNext@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js: < Ol@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js:12:444 < @http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js:14:13495"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock1.mp3",
-     "stack": "kick@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js:1:68 < playAfterJump@http://127.0.0.1:4178/core/assets/main-UDGeNI5 < swapEntry@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js < swapNext@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js: < Rl@http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js:9:4619 < @http://127.0.0.1:4178/core/assets/main-UDGeNI5g.js:11:13495"
+     "stack": "kick@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js:1:68 < playAfterJump@http://127.0.0.1:4178/core/assets/main-CeCZwu2 < swapEntry@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js < swapNext@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js: < Ol@http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js:12:444 < @http://127.0.0.1:4178/core/assets/main-CeCZwu2A.js:14:13495"
     }
    ],
    "bgNextQueuedLines": [
     "deck: pool fill deferred (net budget)",
     "deck: pool fill 2/5 (local 0, net 2)",
-    "deck: pool ready bgstock9 after 30 ms host=stream.test",
+    "deck: pool ready bgstock9 after 31 ms host=stream.test",
     "pool 1/5 ready",
     "deck: swap bgstock9 ready=true pool=0",
     "deck play#7 swap rs=0 muted=false t=10.0",
@@ -338,10 +338,10 @@
     "lock next: queued swap bgstock9",
     "go 5->6",
     "deck play#7 ok",
-    "deck: pool ready bgnet2 after 35 ms host=stream.test",
+    "deck: pool ready bgnet2 after 34 ms host=stream.test",
     "pool 1/5 ready",
     "deck: pool fill 3/5 (local 0, net 3)",
-    "deck: pool ready bgstock3 after 31 ms host=stream.test",
+    "deck: pool ready bgstock3 after 33 ms host=stream.test",
     "pool 2/5 ready",
     "deck: pool fill 4/5 (local 0, net 4)",
     "deck: pool ready bgstock5 after 31 ms host=stream.test",
@@ -366,8 +366,8 @@
     "lock: stuck, stay"
    ],
    "bgDeadMs": {
-    "toSwitch": 9969,
-    "toPlaying": 11487
+    "toSwitch": 9978,
+    "toPlaying": 11499
    },
    "bgDeadLog": [
     "bg: inline next bgstock0 (pool empty)",
@@ -379,13 +379,13 @@
     "bg: inline next playing bgstock8 after 1522 ms",
     "bg: dead next ok bgstock8 playing after 1523 ms (try 1/3)"
    ],
-   "bgStallVisibleMs": 8257,
+   "bgStallVisibleMs": 8255,
    "bgStallVisibleLog": [
     "deck: ready first bgstock4:0 over bgstock8:0 (stall)",
     "deck: swap bgstock4 ready=true pool=4",
     "deck: stall switch bgstock8:0 no progress 8 s, switched to bgstock4:0"
    ],
-   "bgStallHiddenMs": 8082,
+   "bgStallHiddenMs": 8073,
    "bgStallHiddenLog": [
     "deck: stall switch bgstock2 no progress 8 s (hidden), ready element (pool 5)",
     "deck: swap bgstock0 ready=true pool=4",
@@ -547,10 +547,10 @@
     "bg: deck while hidden 7 s: timeupdate 69, ended 0, clip ends 2, play calls 2, stuck checks 4, refills 0/0/0",
     "bg: back bgaudio5:0"
    ],
-   "bgPoolFiveMs": 192,
+   "bgPoolFiveMs": 177,
    "bgPoolStart": {
-    "fill": 6,
-    "ok": 25,
+    "fill": 7,
+    "ok": 26,
     "stock": []
    },
    "bgRowLog": [
@@ -682,10 +682,10 @@
    ],
    "bgNextFiveMs": [
     15,
-    12,
-    11,
-    10,
-    10
+    9,
+    9,
+    9,
+    9
    ],
    "bgNextSkipLines": [
     "go 0->1",
@@ -698,27 +698,27 @@
     {
      "sync": true,
      "src": "https://stream.test/bgstock0.mp3",
-     "stack": "at P.play (<anonymous>:9:134) < at o0.kick (http://127.0.0.1:4178/core/assets/main-UDGeNI5g. < at o0.playAfterJump (http://127.0.0.1:4178/core/assets/main- < at o0.swapEntry (http://127.0.0.1:4178/core/assets/main-UDGe < at o0.swapNext (http://127.0.0.1:4178/core/assets/main-UDGeN < at Object.Rl [as current] (http://127.0.0.1:4178/core/assets"
+     "stack": "at P.play (<anonymous>:9:134) < at d0.kick (http://127.0.0.1:4178/core/assets/main-CeCZwu2A. < at d0.playAfterJump (http://127.0.0.1:4178/core/assets/main- < at d0.swapEntry (http://127.0.0.1:4178/core/assets/main-CeCZ < at d0.swapNext (http://127.0.0.1:4178/core/assets/main-CeCZw < at Object.Ol [as current] (http://127.0.0.1:4178/core/assets"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock8.mp3",
-     "stack": "at P.play (<anonymous>:9:134) < at o0.kick (http://127.0.0.1:4178/core/assets/main-UDGeNI5g. < at o0.playAfterJump (http://127.0.0.1:4178/core/assets/main- < at o0.swapEntry (http://127.0.0.1:4178/core/assets/main-UDGe < at o0.swapNext (http://127.0.0.1:4178/core/assets/main-UDGeN < at Object.Rl [as current] (http://127.0.0.1:4178/core/assets"
+     "stack": "at P.play (<anonymous>:9:134) < at d0.kick (http://127.0.0.1:4178/core/assets/main-CeCZwu2A. < at d0.playAfterJump (http://127.0.0.1:4178/core/assets/main- < at d0.swapEntry (http://127.0.0.1:4178/core/assets/main-CeCZ < at d0.swapNext (http://127.0.0.1:4178/core/assets/main-CeCZw < at Object.Ol [as current] (http://127.0.0.1:4178/core/assets"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock4.mp3",
-     "stack": "at P.play (<anonymous>:9:134) < at o0.kick (http://127.0.0.1:4178/core/assets/main-UDGeNI5g. < at o0.playAfterJump (http://127.0.0.1:4178/core/assets/main- < at o0.swapEntry (http://127.0.0.1:4178/core/assets/main-UDGe < at o0.swapNext (http://127.0.0.1:4178/core/assets/main-UDGeN < at Object.Rl [as current] (http://127.0.0.1:4178/core/assets"
+     "stack": "at P.play (<anonymous>:9:134) < at d0.kick (http://127.0.0.1:4178/core/assets/main-CeCZwu2A. < at d0.playAfterJump (http://127.0.0.1:4178/core/assets/main- < at d0.swapEntry (http://127.0.0.1:4178/core/assets/main-CeCZ < at d0.swapNext (http://127.0.0.1:4178/core/assets/main-CeCZw < at Object.Ol [as current] (http://127.0.0.1:4178/core/assets"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock10.mp3",
-     "stack": "at P.play (<anonymous>:9:134) < at o0.kick (http://127.0.0.1:4178/core/assets/main-UDGeNI5g. < at o0.playAfterJump (http://127.0.0.1:4178/core/assets/main- < at o0.swapEntry (http://127.0.0.1:4178/core/assets/main-UDGe < at o0.swapNext (http://127.0.0.1:4178/core/assets/main-UDGeN < at Object.Rl [as current] (http://127.0.0.1:4178/core/assets"
+     "stack": "at P.play (<anonymous>:9:134) < at d0.kick (http://127.0.0.1:4178/core/assets/main-CeCZwu2A. < at d0.playAfterJump (http://127.0.0.1:4178/core/assets/main- < at d0.swapEntry (http://127.0.0.1:4178/core/assets/main-CeCZ < at d0.swapNext (http://127.0.0.1:4178/core/assets/main-CeCZw < at Object.Ol [as current] (http://127.0.0.1:4178/core/assets"
     },
     {
      "sync": true,
      "src": "https://stream.test/bgstock1.mp3",
-     "stack": "at P.play (<anonymous>:9:134) < at o0.kick (http://127.0.0.1:4178/core/assets/main-UDGeNI5g. < at o0.playAfterJump (http://127.0.0.1:4178/core/assets/main- < at o0.swapEntry (http://127.0.0.1:4178/core/assets/main-UDGe < at o0.swapNext (http://127.0.0.1:4178/core/assets/main-UDGeN < at Object.Rl [as current] (http://127.0.0.1:4178/core/assets"
+     "stack": "at P.play (<anonymous>:9:134) < at d0.kick (http://127.0.0.1:4178/core/assets/main-CeCZwu2A. < at d0.playAfterJump (http://127.0.0.1:4178/core/assets/main- < at d0.swapEntry (http://127.0.0.1:4178/core/assets/main-CeCZ < at d0.swapNext (http://127.0.0.1:4178/core/assets/main-CeCZw < at Object.Ol [as current] (http://127.0.0.1:4178/core/assets"
     }
    ],
    "bgNextQueuedLines": [
@@ -732,7 +732,7 @@
     "lock next: queued swap bgstock9",
     "go 5->6",
     "deck play#7 ok",
-    "deck: pool ready bgnet2 after 33 ms host=stream.test",
+    "deck: pool ready bgnet2 after 32 ms host=stream.test",
     "pool 1/5 ready",
     "deck: pool fill 3/5 (local 0, net 3)",
     "deck: pool ready bgstock3 after 30 ms host=stream.test",
@@ -760,8 +760,8 @@
     "lock: stuck, stay"
    ],
    "bgDeadMs": {
-    "toSwitch": 10012,
-    "toPlaying": 11517
+    "toSwitch": 10014,
+    "toPlaying": 11519
    },
    "bgDeadLog": [
     "bg: inline next bgstock0 (pool empty)",
@@ -770,16 +770,16 @@
     "bg: inline next bgstock8 (pool empty)",
     "bg: dead next bgstock0:0 not seen, switched to bgstock8",
     "go 1->2",
-    "bg: inline next playing bgstock8 after 1520 ms",
+    "bg: inline next playing bgstock8 after 1521 ms",
     "bg: dead next ok bgstock8 playing after 1522 ms (try 1/3)"
    ],
-   "bgStallVisibleMs": 8213,
+   "bgStallVisibleMs": 8216,
    "bgStallVisibleLog": [
     "deck: ready first bgstock4:0 over bgstock8:0 (stall)",
     "deck: swap bgstock4 ready=true pool=4",
     "deck: stall switch bgstock8:0 no progress 8 s, switched to bgstock4:0"
    ],
-   "bgStallHiddenMs": 8017,
+   "bgStallHiddenMs": 8022,
    "bgStallHiddenLog": [
     "deck: stall switch bgstock2 no progress 8 s (hidden), ready element (pool 5)",
     "deck: swap bgstock0 ready=true pool=4",
