@@ -205,6 +205,7 @@ export function PhoneAudio(p: PhoneAudioProps) {
       <section className="ph-lyrics" data-testid="ph-lyrics" aria-label="Captions" aria-live="off" data-art={reserved ? (fill ? 'fill' : 'top') : undefined} data-dir={reserved ? lineProps(sample).dir : undefined}>
         {reserved && (
           <div className="ph-art" data-testid="ph-cover-slot" data-state={phase}>
+            {phase === 'error' && <Icon name="headphones" size="40px" className="ph-art-sym" />}
             {src && (
               <img
                 key={`c${p.m.id}`}

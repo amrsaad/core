@@ -41,6 +41,9 @@
    darum kein zusätzlicher unterer Sicherheitsrand in der Leiste. Der Streifen selbst hat die Farbe der Leiste (die Regel darunter, die Seite hinter dem Feed). */
 html[data-ph-short] .vfeed[data-phone] { --ph-pb: var(--s-4); }
 html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed[data-phone]) #root { background: var(--feed-surface); }
+/* Runde 51d: solange Abrufkarte oder Endseite gezeigt wird, hat auch die Fläche hinter dem Feed (Streifen unter dem Fenster im Rückfall) die Farbe dieser Seite, keine hellere Kante unter ihr */
+html:has(.vfeed[data-phone] .vrecall-page), html:has(.vfeed[data-phone] .vrecall-page) body, html:has(.vfeed[data-phone] .vrecall-page) #root,
+html:has(.vfeed[data-phone] .vend[data-testid='end-page']), html:has(.vfeed[data-phone] .vend[data-testid='end-page']) body, html:has(.vfeed[data-phone] .vend[data-testid='end-page']) #root { background: var(--stage); }
 @media (max-height: 740px) {
   .vfeed[data-phone] { --ph-act-pt: var(--s-2); --ph-act-pb: var(--s-1); }
 }
@@ -190,7 +193,7 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
   transition-timing-function: var(--ease-lyr);
 }
 /* Zeilen unter einer wachsenden Zeile stehen sofort an ihrer Endlage, fallen auf 0,25 und blenden ab 130 ms in 120 ms auf ihre Stufe */
-.ph-row[data-snap] { transition-duration: var(--dur-lyr), 120ms, var(--dur-lyr); transition-delay: 0s, 130ms, 0s; transition-timing-function: var(--ease-lyr), linear, var(--ease-lyr); }
+.ph-row[data-snap] { transition-duration: var(--dur-lyr), 120ms, var(--dur-lyr); transition-delay: 0s, var(--snap-delay, 130ms), 0s; transition-timing-function: var(--ease-lyr), linear, var(--ease-lyr); }
 /* Die alte Zeile blendet schnell aus (sie fährt nur 60 px weg und würde sonst die nachrückende Zeile überlappen) */
 .ph-row[data-snap][data-cut], .ph-row[data-snap][data-role='far'] { transition-duration: var(--dur-lyr), 60ms, var(--dur-lyr); transition-delay: 0s; }
 .ph-row[data-role='out'] { transition-duration: var(--dur-lyr), 60ms, var(--dur-lyr); transition-timing-function: var(--ease-lyr), linear, var(--ease-lyr); }
@@ -223,6 +226,8 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
 .ph-art::after { content: ''; position: absolute; inset: 0; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--on-media) 8%, transparent); pointer-events: none; }
 .ph-art-img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0; transition: opacity 200ms var(--ease); }
 .ph-art-img[data-ready='yes'] { opacity: 1; }
+/* Runde 51d: nur im Fehlerzustand ein ruhiges Symbol mittig (Bereichsfarbe, 55 %, 40 px), das Quadrat behält seine Größe */
+.ph-art-sym { position: absolute; inset: 0; margin: auto; color: var(--ad, var(--accent)); opacity: 0.55; pointer-events: none; }
 .ph-art-img[data-fit='contain'] { object-fit: contain; }
 @media (prefers-reduced-motion: reduce) { .ph-art-img { transition: none; } }
 .ph-lyrics[data-art='top'] > .ph-art { width: clamp(72px, calc(100cqh - var(--ph-lines)), 128px); height: clamp(72px, calc(100cqh - var(--ph-lines)), 128px); align-self: flex-start; }

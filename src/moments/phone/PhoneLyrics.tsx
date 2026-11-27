@@ -134,8 +134,11 @@ function PhoneLyricsView({ id, cues, idx }: PhoneLyricsProps) {
     }
     window.clearTimeout(growTimer.current);
     // die schnelle Anfahrt nur bei kurzem Weg (sonst würde der Schritt zwischen zwei Bildern zu groß, z. B. bei einem zweiten Wechsel kurz nach dem ersten)
-    if (grewCur && Math.abs(visY.get(cur) ?? 0) <= GROW_NEAR) b.dataset.grow = '';
+    const near = Math.abs(visY.get(cur) ?? 0) <= GROW_NEAR;
+    if (grewCur && near) b.dataset.grow = '';
     else delete b.dataset.grow;
+    // Weiter Weg (zweiter Wechsel kurz nach dem ersten): die Zeilen darunter blenden erst ein, wenn die wachsende Zeile angekommen ist
+    b.style.setProperty('--snap-delay', near ? '130ms' : '240ms');
     // Zeilen mit Ziel-Deckkraft 0 (ausgeblendet) fallen höchstens auf ihre jetzige Deckkraft und blenden schnell aus, alle anderen auf SNAP_FLOOR
     const gone = (e: HTMLElement) => e.hasAttribute('data-cut') || e.dataset.role === 'far' || e.dataset.role === 'out';
     // Zweiter Wechsel mitten in der Bewegung: steht die alte Zeile dann noch unter der neuen aktuellen Zeile, würden sich beide überlappen. Sie fällt sofort auf SNAP_FLOOR (blendet danach in 60 ms aus).

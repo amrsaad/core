@@ -114,7 +114,7 @@ const L77 = []; const T77 = []; {
   for (const g of [[1, 3, 2], [2, 6, 1], [3, 3, 6], [2, 3, 3]]) { for (const n of g) { T77.push(t); L77.push(n); t += 0.12; } t += 1.4; }
   T77.push(t); L77.push(2);
 }
-const M77 = mk(77, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/77.m3u8', hook: 'Testmoment 77 brain, ein kurzer Satz', cues: T77.map((x, i) => [x, mkT77(LEN77[L77[i]], 'Z' + (i + 1))]), thumb: 'https://img.test/cover77.png' });
+const M77 = mk(77, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/77.m3u8', hook: 'Testmoment 77 brain, ein kurzer Satz', cues: T77.map((x, i) => [x, mkT77(LEN77[L77[i]], 'Z' + (i + 1))]) }); // ohne Titelbild: das reservierte Quadrat (Runde 50c) nähme der Karte Höhe und die Zeilenzahlen kämen nicht zustande
 // Runde 51: Abrufkarte mit langer Frage und langen Antworten (Audio)
 const QL = 'Welche Aussage über die beschriebene Abfolge der Schritte trifft zu, wenn man die Reihenfolge, die Bedingungen und die Ausnahmen aus dem Text gemeinsam berücksichtigt und dabei nichts hinzufügt?';
 const AL = 'Diese Antwort ist absichtlich lang und umbricht auf dem Handy über mehrere Zeilen, damit die Tasten hoch werden';
@@ -1047,6 +1047,43 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         await ps.screenshot({ path: `${out}/${name}-geraet-video.png` });
         await oS.browser.close();
       }
+      // Runde 51d: im kurzen Fenster (Rückfall data-ph-short) hat html die Farbe der Seite, solange Abrufkarte oder Endseite gezeigt wird (kein hellerer Streifen unter ihr), sonst die Farbe der Leiste
+      c['Gerät Text und Video: html-Hintergrund gleich der Farbe der Leiste'] = /^rgb\(/.test(tx.htmlBg) && tx.htmlBg === tx.barBg && /^rgb\(/.test(vd.htmlBg) && vd.htmlBg === vd.barBg;
+      {
+        const oR = await open(type, GER, { tab: 'audio', pool: POOL_G });
+        const pr = oR.pg;
+        await showMoment(pr, idOf(40));
+        const bg = () => pr.evaluate(() => { const h = getComputedStyle(document.documentElement).backgroundColor; const e = (s) => { const n = document.querySelector(s); return n ? getComputedStyle(n).backgroundColor : null; }; return { short: document.documentElement.hasAttribute('data-ph-short'), html: h, body: getComputedStyle(document.body).backgroundColor, bar: e('[data-testid=ph-bar]'), recall: e('[data-testid=recall-page]'), end: e('[data-testid=end-page]'), feedSurface: (() => { const p = document.createElement('i'); p.style.color = 'var(--feed-surface)'; document.body.appendChild(p); const v = getComputedStyle(p).color; p.remove(); return v; })() }; });
+        const b0 = await bg();
+        await pr.evaluate(() => window.__core.showRecall(window.__core.moment().id));
+        const gotR = await waitFor(pr, () => !!document.querySelector('[data-testid=recall-page]'), undefined, 6000); await pr.waitForTimeout(500);
+        const bR = await bg();
+        await pr.screenshot({ path: `${out}/${name}-geraet-abrufkarte-streifen.png` }).catch(() => {});
+        r.notes['Gerät 51d Farben'] = { audio: b0, recall: bR };
+        c['Gerät 51d kurzes Fenster Audio: html gleich Leistenfarbe'] = b0.short === true && /^rgb\(/.test(b0.html) && b0.html === b0.bar;
+        c['Gerät 51d Abrufkarte: html gleich dem Hintergrund der Abrufkarten-Seite (nicht var(--feed-surface))'] = gotR && bR.short === true && /^rgb\(/.test(bR.html) && bR.html === bR.recall && bR.html !== bR.feedSurface && bR.body === bR.recall;
+        // Karte schließen, bis die Endseite steht (nächster Moment, Karten beantworten)
+        let gotE = false;
+        for (let k = 0; k < 40 && !gotE; k++) {
+          gotE = await pr.evaluate(() => !!document.querySelector('[data-testid=end-page]') && !document.querySelector('[data-testid=recall-card]'));
+          if (gotE) break;
+          const card = await pr.locator('[data-testid=recall-card]').count();
+          if (card) { await pr.locator('[data-testid=recall-option][data-correct="1"]').first().click().catch(() => {}); await pr.waitForTimeout(250); await pr.locator('[data-testid=recall-next]').first().click().catch(() => {}); }
+          else await pr.evaluate(() => window.__core.next());
+          await pr.waitForTimeout(450);
+        }
+        await pr.waitForTimeout(500);
+        const bE = await bg();
+        await pr.screenshot({ path: `${out}/${name}-geraet-endseite-streifen.png` }).catch(() => {});
+        r.notes['Gerät 51d Farben Endseite'] = bE;
+        c['Gerät 51d Endseite: html gleich dem Hintergrund der Endseite (nicht var(--feed-surface))'] = gotE && bE.short === true && /^rgb\(/.test(bE.html) && bE.html === bE.end && bE.html !== bE.feedSurface && bE.body === bE.end;
+        // zurück in den Reiter Audio: wieder die Farbe der Leiste
+        await pr.evaluate(() => window.__core.next()).catch(() => {});
+        await gotoTab(pr, 'text'); await pr.waitForTimeout(400);
+        const bT = await bg();
+        c['Gerät 51d nach Endseite im Reiter Text: html wieder gleich Leistenfarbe'] = bT.short === true && /^rgb\(/.test(bT.html) && bT.html === bT.bar;
+        await oR.browser.close();
+      }
       c['Gerät keine Seitenfehler'] = oA.errors.length === 0 && oB.errors.length === 0 && oC.errors.length === 0;
       await oA.browser.close(); await oB.browser.close(); await oC.browser.close();
 
@@ -1097,6 +1134,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const o = await open(type, size, { tab: 'audio', pool: POOL_C });
         const pg = o.pg; const { info, atLine, linesOk } = H50(pg);
         const diagOf = (id) => pg.evaluate((i) => window.__core.diag().filter((x) => x.startsWith(`cover: ${i} `)), id);
+        // Runde 51d: Symbol im Fehlerzustand (Kopfhörer aus dem Symbolsatz der App, mittig, Bereichsfarbe, 55 %, 40 px)
+        const symOf = () => pg.evaluate(() => { const s = document.querySelector('[data-testid=ph-cover-slot] .ph-art-sym'); const sl = document.querySelector('[data-testid=ph-cover-slot]'); if (!s || !sl) return null; const b = s.getBoundingClientRect(); const a = sl.getBoundingClientRect(); const probe = document.createElement('i'); probe.style.color = 'var(--ad)'; document.querySelector('.ph-audio').appendChild(probe); const area = getComputedStyle(probe).color; probe.remove(); const cs = getComputedStyle(s); return { w: b.width, h: b.height, op: parseFloat(cs.opacity), dx: b.left + b.width / 2 - (a.left + a.width / 2), dy: b.top + b.height / 2 - (a.top + a.height / 2), colorOk: cs.color === area, paths: s.querySelectorAll('path').length, svg: s.tagName.toLowerCase() === 'svg', aw: a.width, ah: a.height }; });
         const tag = `${size.name} Titelbild-Platz`;
         // Bezug: Moment ohne Titelbild (kein Quadrat)
         await showMoment(pg, idOf(44));
@@ -1110,6 +1149,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         await atLine('Dritte');
         const pre = await info();
         const preD = await diagOf(idOf(68));
+        const symPre = await symOf();
         r.notes[`${tag} vor dem Laden`] = { slot: pre.slot, img: pre.img ? { op: pre.img.op, done: pre.img.done } : null, cur: pre.cur, d: preD };
         const alpha = (col) => { const m = /\/\s*([\d.]+)\s*\)/.exec(col ?? '') ?? /rgba\([^)]*,\s*([\d.]+)\s*\)/.exec(col ?? ''); return m ? parseFloat(m[1]) : /^(rgb|color)\(/.test(col ?? '') ? 1 : null; };
         c[`${tag} vor dem Laden: Quadrat reserviert (Fläche sichtbar, quadratisch, Zustand wait)`] = !!pre.slot && pre.slot.vis && pre.slot.state === 'wait' && Math.abs(pre.slot.w - pre.slot.h) <= 1 && pre.slot.w >= 72 && pre.art === 'top';
@@ -1123,6 +1163,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const post = await info();
         await pg.screenshot({ path: `${out}/${name}-cover-${size.name}-2-nach-dem-laden.png` });
         const postD = await diagOf(idOf(68));
+        const symPost = await symOf();
+        c[`${tag}: Ladezustand und geladener Zustand zeigen kein Symbol`] = symPre === null && symPost === null;
         r.notes[`${tag} nach dem Laden`] = { slot: post.slot, img: post.img ? { op: post.img.op, nw: post.img.nw } : null, cur: post.cur, d: postD };
         c[`${tag} nach dem Laden: Bild sichtbar (Deckkraft 1, naturalWidth über 0), füllt das Quadrat`] = gotImg && !!post.img && post.img.op === 1 && post.img.nw > 0 && !!post.slot && Math.abs(post.img.l - post.slot.l) <= 0.5 && Math.abs(post.img.t - post.slot.t) <= 0.5 && Math.abs(post.img.w - post.slot.w) <= 0.5 && Math.abs(post.img.h - post.slot.h) <= 0.5 && post.slot.state === 'ready';
         const dd = (x, y) => Math.max(Math.abs(x.t - y.t), Math.abs(x.l - y.l), Math.abs(x.w - y.w), Math.abs(x.h - y.h));
@@ -1141,6 +1183,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           r.notes[`${tag} ${label}`] = { d, slot: a.slot, img: a.img ? { vis: a.img.vis } : null, cur: a.cur };
           c[`${tag} ${label}: Diag cover error, genau eine Zeile`] = got && d.length === 1 && d[0] === `cover: ${idOf(id)} error`;
           c[`${tag} ${label}: Fläche bleibt stehen, kein Bild-Element (kein kaputtes Symbol)`] = !!a.slot && a.slot.vis && a.slot.state === 'error' && !a.img && a.count === 0 && alpha(a.slot.bg) > 0;
+          const sy = await symOf();
+          r.notes[`${tag} ${label} Symbol`] = sy;
+          c[`${tag} ${label}: Fehlerzustand zeigt das Symbol (inline-SVG, 40 px, 55 %, mittig, Bereichsfarbe)`] = !!sy && sy.svg && sy.paths >= 1 && Math.abs(sy.w - 40) <= 0.5 && Math.abs(sy.h - 40) <= 0.5 && Math.abs(sy.op - 0.55) <= 0.01 && Math.abs(sy.dx) <= 1 && Math.abs(sy.dy) <= 1 && sy.colorOk && sy.aw >= 72;
           c[`${tag} ${label}: Lage von Quadrat und aktueller Zeile wie im Wartezustand (0 px)`] = !!a.slot && !!a.cur && dd(a.slot, pre.slot) === 0 && dd(a.cur, pre.cur) === 0;
         }
         // Normal geladen: ok (Moment 40 hat ein sofort geliefertes Bild)
