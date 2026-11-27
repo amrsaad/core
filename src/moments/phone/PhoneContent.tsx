@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, type ReactNode, type RefObject } from 'react';
+import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { Icon } from '../../components/Icon';
 import { AREA_COLOR, AREA_LABEL } from '../../lib/labels';
 import { isArabic, type Moment } from '../types';
@@ -51,11 +51,15 @@ export interface PhoneInfoHandlers {
   onPointerCancel: () => void;
 }
 
-export function PhoneInfo({ m, speaker, info, onSource, hookRef }: { m: Moment; speaker: string; info: PhoneInfoHandlers; onSource?: () => void; hookRef: RefObject<HTMLHeadingElement> }) {
+/** Kleines Titelbild des Audio-Moments (Runde 48): Adresse beim Originalanbieter, nur wenn das Feld thumb eine https-Adresse ist */
+export const coverUrl = (thumb?: string): string => (thumb && /^https:\/\//i.test(thumb.trim()) ? thumb.trim() : '');
+
+export function PhoneInfo({ m, speaker, info, onSource, hookRef, cover }: { m: Moment; speaker: string; info: PhoneInfoHandlers; onSource?: () => void; hookRef: RefObject<HTMLHeadingElement>; cover?: { src: string; onError: () => void } }) {
   return (
     <>
-      <div className="ph-chiprow">
+      <div className="ph-chiprow" data-cover={cover ? '' : undefined}>
         <div className="ph-tap" data-testid="info-tap" {...info}>
+          {cover && <img className="ph-cover" data-testid="ph-cover" src={cover.src} alt="" width={44} height={44} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={cover.onError} />}
           <div className="ph-chips" data-testid="speaker-line" style={{ ['--ad' as string]: AREA_COLOR[m.area] }}>
             <span className="ph-chip">
               <i aria-hidden="true" />
@@ -100,10 +104,14 @@ export interface PhoneAudioProps {
 export function PhoneAudio(p: PhoneAudioProps) {
   const box = useRef<HTMLDivElement>(null);
   const hook = useRef<HTMLHeadingElement>(null);
-  useHookFit(box, hook, 132, p.m.id);
+  // Titelbild nur im aktiven Moment (diese Ansicht steht nur für ihn), lädt es nicht, verschwindet der Platz ganz
+  const thumb = coverUrl(p.m.thumb);
+  const [bad, setBad] = useState('');
+  const cover = thumb && bad !== thumb ? { src: thumb, onError: () => setBad(thumb) } : undefined;
+  useHookFit(box, hook, 132, `${p.m.id}|${cover ? 'c' : ''}`);
   return (
     <div className="ph-audio" ref={box} data-testid="ph-audio" data-notes={p.notes ? '' : undefined} style={{ ['--ad' as string]: AREA_COLOR[p.m.area] }}>
-      <PhoneInfo m={p.m} speaker={p.speaker} info={p.info} onSource={p.onSource} hookRef={hook} />
+      <PhoneInfo m={p.m} speaker={p.speaker} info={p.info} onSource={p.onSource} hookRef={hook} cover={cover} />
       <section className="ph-lyrics" data-testid="ph-lyrics" aria-label="Captions" aria-live="off">
         {!p.hasCaptions && !p.fallbackText ? (
           <p className="ph-lyric-note">No captions for this moment.</p>

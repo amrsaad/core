@@ -24,6 +24,10 @@
   --ink-2: var(--on-media-muted);
   background: var(--stage);
 }
+/* Runde 48: unterer Rand. Der Feed sitzt fest am Fenster (inset 0 statt 100dvh): in der Standalone-App auf iOS kann 100dvh kleiner als der Bildschirm sein, dann blieb darunter ein Streifen
+   in der Farbe der Seite. Zusätzlich hat die Seite hinter dem Feed die Farbe der unteren Leiste, falls das Fenster dennoch höher ist als der Feed (kein Farbwechsel unter der Leiste). */
+.vfeed[data-phone] { position: fixed; inset: 0; height: auto; }
+html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed[data-phone]) #root { background: var(--feed-surface); }
 @media (max-height: 740px) {
   .vfeed[data-phone] { --ph-act-pt: var(--s-2); --ph-act-pb: var(--s-1); }
 }
@@ -112,6 +116,11 @@
 .ph-speaker { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* Source: kleine Taste am Ende der Chip-Zeile (die Aktionsreihe hat vier Tasten), 44 px Berührfläche ohne die Zeile zu strecken */
 .ph-src { pointer-events: auto; flex: none; width: 44px; height: 44px; margin: -10px -12px -10px 0; display: flex; align-items: center; justify-content: center; border-radius: var(--r-pill); color: var(--on-media-muted); }
+.ph-chiprow[data-cover] { min-height: 44px; }
+.ph-chiprow[data-cover] .ph-tap { flex: 1 1 0; display: flex; align-items: center; gap: var(--s-3); }
+.ph-chiprow[data-cover] .ph-chips { flex: 1 1 0; flex-direction: column; align-items: flex-start; gap: 2px; }
+.ph-chiprow[data-cover] .ph-speaker { max-width: 100%; }
+.ph-cover { flex: none; width: 44px; height: 44px; box-sizing: border-box; border-radius: 10px; object-fit: cover; border: 1px solid color-mix(in srgb, var(--on-media) 8%, transparent); background: var(--surface); }
 .ph-hooktap { min-width: 0; }
 .ph-hook { margin: 0; color: var(--text); font-weight: 700; overflow-wrap: anywhere; font-size: 28px; line-height: 35px; letter-spacing: -0.015em; }
 .ph-hook[data-step='1'] { font-size: 24px; line-height: 31px; }
@@ -229,34 +238,45 @@
 .ph-play { width: 68px; height: 68px; background: var(--text); color: var(--stage); }
 .ph-wide { flex: 1 1 0; height: 56px; display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2); border-radius: var(--r-group); border: 1px solid color-mix(in srgb, var(--on-media) 16%, transparent); color: var(--text); font-size: var(--t-row); line-height: 22px; font-weight: var(--w-tab); }
 
-/* ---------- Text: Chip, Serifen-Überschrift, Lesetext (scrollt), Herkunft, Apply today ---------- */
+/* ---------- Text: Chip, Serifen-Überschrift, Lesetext, Herkunft, Apply today ----------
+   Runde 48: jeder Text steht auf einer Seite, ohne inneres Scrollen. usePhoneTextFit wählt die Stufe (data-tfit 0 bis 4) nach einer Messung je Moment.
+   Stufe: Überschrift 32/28/24/22/20 px, Zitat 19/17/16/15/15 px, Abstände je Stufe kleiner. Passt auch Stufe 4 nicht (data-tscroll="yes"), scrollt der Bereich
+   als letzter Ausweg, die Überschrift bleibt dann oben stehen. */
 .vfeed[data-phone] .vtext {
   --read-ar: 18px;
+  --fh: 32px; --fq: 19px; --fql: 29px; --fa: 18px; --fal: 32px; --fgap: 20px; --fpt: 24px; --fpb: 16px; --fhead: 16px;
   inset: var(--ph-top) 0 calc(var(--ph-dock-h) + var(--ph-notes)) 0;
   box-sizing: border-box;
-  padding: var(--s-6) var(--s-6) var(--s-4);
+  padding: var(--fpt) var(--s-6) var(--fpb);
   display: flex;
   flex-direction: column;
-  gap: var(--s-5);
-  overflow-y: auto;
+  gap: var(--fgap);
+  overflow-y: hidden;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
   background: var(--stage);
   color: var(--text);
 }
+.vfeed[data-phone] .vtext[data-tfit='1'] { --fh: 28px; --fq: 17px; --fql: 26px; --fa: 17px; --fal: 30px; --fgap: 16px; --fpt: 20px; --fpb: 14px; --fhead: 14px; }
+.vfeed[data-phone] .vtext[data-tfit='2'] { --fh: 24px; --fq: 16px; --fql: 24px; --fa: 16px; --fal: 28px; --fgap: 14px; --fpt: 16px; --fpb: 12px; --fhead: 12px; }
+.vfeed[data-phone] .vtext[data-tfit='3'] { --fh: 22px; --fq: 15px; --fql: 22px; --fa: 15px; --fal: 26px; --fgap: 12px; --fpt: 12px; --fpb: 10px; --fhead: 10px; }
+.vfeed[data-phone] .vtext[data-tfit='4'] { --fh: 20px; --fq: 15px; --fql: 22px; --fa: 15px; --fal: 25px; --fgap: 10px; --fpt: 8px; --fpb: 8px; --fhead: 8px; }
+.vfeed[data-phone] .vtext[data-tscroll='yes'] { overflow-y: auto; padding-top: 0; }
 .vfeed[data-phone] .vtext > * { flex: none; }
-.vfeed[data-phone] .vtext:not([data-end]) { -webkit-mask-image: linear-gradient(to bottom, var(--stage) calc(100% - 32px), transparent); mask-image: linear-gradient(to bottom, var(--stage) calc(100% - 32px), transparent); }
-.ptx-head { display: flex; flex-direction: column; gap: var(--s-4); }
-.ptx-hook { margin: 0; font-family: var(--font-brain); font-weight: 600; letter-spacing: var(--tracking-title); font-size: 32px; line-height: 40px; color: var(--text); overflow-wrap: anywhere; }
-.ptx-hook[data-size='m'] { font-size: 26px; line-height: 33px; }
-.ptx-hook[data-size='s'] { font-size: 22px; line-height: 29px; }
-.ptx-hook[lang='ar'], .ptx-hook:dir(rtl) { font-family: var(--font-ar); }
+/* Letzter Ausweg: die Überschrift bleibt beim Scrollen oben stehen, nichts rutscht halb unter die Reiterleiste */
+.vfeed[data-phone] .vtext[data-tscroll='yes'] .ptx-head { position: sticky; top: 0; z-index: 1; padding: var(--fpt) 0 var(--s-3); background: var(--stage); }
+.vfeed[data-phone] .vtext[data-tscroll='yes']:not([data-end]) { -webkit-mask-image: linear-gradient(to bottom, var(--stage) calc(100% - 32px), transparent); mask-image: linear-gradient(to bottom, var(--stage) calc(100% - 32px), transparent); }
+.ptx-head { display: flex; flex-direction: column; gap: var(--fhead, var(--s-4)); }
+.ptx-hook { margin: 0; font-family: var(--font-brain); font-weight: 600; letter-spacing: var(--tracking-title); font-size: var(--fh, 32px); line-height: 1.25; color: var(--text); overflow-wrap: anywhere; }
+.ptx-hook[data-size='m'] { font-size: min(var(--fh), 26px); }
+.ptx-hook[data-size='s'] { font-size: min(var(--fh), 22px); }
+.ptx-hook[lang='ar'], .ptx-hook:dir(rtl) { font-family: var(--font-ar); line-height: 1.5; }
 .vfeed[data-phone] .dtx-quote { margin: 0; padding-left: var(--s-4); border-left: 2px solid color-mix(in srgb, var(--on-media) 22%, transparent); }
-.vfeed[data-phone] .vtext-body { overflow: visible; font-family: var(--font-brain); font-size: 19px; line-height: 29px; color: var(--body); }
-.vfeed[data-phone] .vtext-rtl { font-family: var(--font-ar); font-size: var(--read-ar); line-height: 32px; }
+.vfeed[data-phone] .vtext-body { overflow: visible; font-family: var(--font-brain); font-size: var(--fq); line-height: var(--fql); color: var(--body); }
+.vfeed[data-phone] .vtext-rtl { font-family: var(--font-ar); font-size: var(--fa); line-height: var(--fal); }
 .vfeed[data-phone] .dtx-origin { margin: 0; }
-.vfeed[data-phone] .dtx-apply { margin: 0; padding: var(--s-4) 18px; }
+.vfeed[data-phone] .dtx-apply { margin: 0; padding: var(--fhead) 18px; }
 .vfeed[data-phone] .dtx-apply p { font-size: var(--t-row); line-height: 25px; }
 .vfeed[data-phone] .vtext .vtext-source { margin: 0; }
 

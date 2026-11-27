@@ -49,6 +49,7 @@ import { PhoneActions } from './phone/PhoneActions';
 import { PhoneTransport, PhoneTextBar } from './phone/PhoneTransport';
 import { PhoneAudio, PhoneVideo } from './phone/PhoneContent';
 import { PhoneTextHead } from './phone/PhoneText';
+import { usePhoneTextFit } from './phone/usePhoneTextFit';
 import { DeskSide } from './desk/DeskSide';
 import { coverLetter, fracOf, lyricLines, scrolledToEnd, queuedAfter, seekBy, seekPos, upNext, SEEK_S } from './desk/model';
 import { speakerLine } from './speaker';
@@ -4199,6 +4200,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queue.current[idx]?.id, form, forYou]);
+  // Runde 48: Text-Reiter am Handy, jeder Text auf eine Seite (Stufen, kein inneres Scrollen)
+  usePhoneTextFit(textBox, ph && form === 'text' && !forYou, queue.current[idx]?.id, (l) => diag.current.push(l));
   useLayoutEffect(() => {
     // Hook nie kürzen: mehr als drei Zeilen in Normalgröße, dann eine Stufe kleiner
     const el = hookEl.current;

@@ -99,3 +99,18 @@ export const FIT_FULL: TextFit = { step: 0, cut: null, clamp: false };
 export const sameFit = (a: TextFit, b: TextFit): boolean => a.step === b.step && a.cut === b.cut && a.clamp === b.clamp;
 /** Der Text ist gekürzt, der Rest steht im Blatt. Erst dort am Ende gilt der Moment als gesehen. */
 export const isTruncated = (f: TextFit): boolean => f.cut !== null || f.clamp;
+
+/** Runde 48: Text-Reiter der iPhone-Ansicht. Stufen 0 bis PHONE_TEXT_STEPS - 1 (Überschrift 32/28/24/22/20 px, Zitat 19/17/16/15/15 px, Abstände je Stufe kleiner, Größen in phone.css). */
+export const PHONE_TEXT_STEPS = 5;
+
+/**
+ * Stufe für den Text-Reiter am Handy. fits[i] sagt, ob der ganze Inhalt in Stufe i ohne Scrollen in die Fläche passt (von groß nach klein gemessen).
+ * Gewählt wird die größte passende Stufe. Passt keine, bleibt die kleinste und die Fläche scrollt (letzter Ausweg).
+ */
+export function pickPhoneStep(fits: boolean[]): { step: number; scroll: boolean } {
+  for (let i = 0; i < fits.length; i++) if (fits[i]) return { step: i, scroll: false };
+  return { step: Math.max(0, fits.length - 1), scroll: true };
+}
+
+/** Zeile für die Diagnose */
+export const phoneFitLine = (id: string, step: number, scroll: boolean): string => `text: fit ${id} step=${step} scroll=${scroll ? 'yes' : 'no'}`;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cleanText, cutText, fitCut, isTruncated, MAX_EMPTY, pickCutStep, pickStep, sentenceEnds, TEXT_STEPS, versePieces } from '../src/moments/textfit';
+import { cleanText, cutText, fitCut, isTruncated, MAX_EMPTY, PHONE_TEXT_STEPS, phoneFitLine, pickCutStep, pickPhoneStep, pickStep, sentenceEnds, TEXT_STEPS, versePieces } from '../src/moments/textfit';
 
 // Brief 18 (Issues 41 und 43): Regeln für Text auf einem Bildschirm und arabische Verse, ohne DOM.
 describe('textfit: Escapes aus der Pipeline', () => {
@@ -88,5 +88,25 @@ describe('textfit: Wahl der Stufe (Issue 53)', () => {
     expect(pickCutStep([Infinity, Infinity, Infinity], 400)).toBe(2);
     expect(pickCutStep([Infinity, 30, Infinity], 400)).toBe(1);
     expect(pickCutStep([], 400)).toBe(0);
+  });
+});
+
+// Runde 48: Stufenwahl der Text-Einpassung am Handy
+describe('textfit: pickPhoneStep (Handy)', () => {
+  it('nimmt die größte passende Stufe, ohne Scrollen', () => {
+    expect(pickPhoneStep([true, true, true, true, true])).toEqual({ step: 0, scroll: false });
+    expect(pickPhoneStep([false, false, true, true, true])).toEqual({ step: 2, scroll: false });
+    expect(pickPhoneStep([false, false, false, false, true])).toEqual({ step: 4, scroll: false });
+  });
+  it('passt keine Stufe, bleibt die kleinste und der Bereich scrollt (letzter Ausweg)', () => {
+    expect(pickPhoneStep([false, false, false, false, false])).toEqual({ step: 4, scroll: true });
+  });
+  it('leere Liste ist Stufe 0 ohne Scrollen nicht vorgesehen, aber ohne Fehler', () => {
+    expect(pickPhoneStep([])).toEqual({ step: 0, scroll: true });
+  });
+  it('Stufenzahl und Diagzeile', () => {
+    expect(PHONE_TEXT_STEPS).toBe(5);
+    expect(phoneFitLine('abc:1', 3, false)).toBe('text: fit abc:1 step=3 scroll=no');
+    expect(phoneFitLine('abc:1', 4, true)).toBe('text: fit abc:1 step=4 scroll=yes');
   });
 });

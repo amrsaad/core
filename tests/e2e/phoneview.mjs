@@ -35,6 +35,18 @@ for (let i = 30; i < 40; i++) moments.push(mk(i, 'body'));
 for (let i = 40; i < 46; i++) moments.push(mk(i, 'brain', { form: 'audio', audio: true, hls: `https://stream.test/${i}.m3u8`, ...(i === 42 ? { hook: `Testmoment ${i} brain, ein Satz${LONG}` } : {}), ...(i === 45 ? { cues: undefined } : {}) }));
 // Text: 46 mit Herkunft und Apply today, 47 sehr langer Hook, 48 kurzer Text (passt auf einen Bildschirm)
 for (let i = 46; i < 56; i++) moments.push(mk(i, 'body', { form: 'text', videoId: `texto${String(i).padStart(5, '0')}`, author: `Author ${i}`, ref: `Ref ${i}`, sourceUrl: `https://example.org/s/${i}`, license: 'CC BY 4.0', ...(i === 46 ? { kind: 'takeaway', apply: 'Do the small thing today.', origin: 'Test entry 30' } : {}), ...(i === 47 ? { hook: `Testmoment ${i} body, ein Satz${LONG}` } : {}), ...(i === 48 ? { excerpt: EX_SHORT } : {}) }));
+// Runde 48: Text mittlerer Länge (passt nach der Einpassung auf eine Seite), etwas länger, Audio mit Titelbild (40) und ohne (41)
+const EX4 = EX.split('\n').slice(0, 4).join(' ');
+const EX7 = EX.split('\n').slice(0, 7).join(' ');
+moments.push(mk(56, 'body', { form: 'text', videoId: 'texto00056', author: 'Author 56', ref: 'Ref 56', sourceUrl: 'https://example.org/s/56', license: 'CC BY 4.0', excerpt: EX4 }));
+moments.push(mk(57, 'body', { form: 'text', videoId: 'texto00057', author: 'Author 57', ref: 'Ref 57', sourceUrl: 'https://example.org/s/57', license: 'CC BY 4.0', excerpt: EX7 }));
+const COVER = 'https://img.test/cover40.png';
+const m40 = moments.find((x) => x.id === `test${String(40).padStart(7, '0')}:100`);
+m40.thumb = COVER;
+const m43 = moments.find((x) => x.id === `test${String(43).padStart(7, '0')}:100`);
+m43.thumb = 'https://img.test/broken43.png';
+// 1x1 PNG als Titelbild
+const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
 const raw = crypto.getRandomValues(new Uint8Array(32));
 const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt']);
 const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -68,6 +80,8 @@ async function open(type, size, { init, query = '', pool = POOL, tab = null } = 
   }, { t: size.safeT, b: size.safeB });
   await cx.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
   await cx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
+  await cx.route(/img\.test\/cover/, (x) => x.fulfill({ contentType: 'image/png', body: PNG }));
+  await cx.route(/img\.test\/broken/, (x) => x.abort());
   const pg = await cx.newPage();
   const errors = [];
   pg.on('pageerror', onPageError(errors));
@@ -139,6 +153,21 @@ const GEOM = () => {
     // Unterkante der letzten Taste der Leiste über der sicheren Unterkante
     lowest: Math.max(...[...document.querySelectorAll('.ph-bar button')].filter(vis).map((e) => e.getBoundingClientRect().bottom)),
   };
+};
+/** Runde 48: Was liegt am Punkt (Breite/2, Höhe-2)? Erste nicht durchsichtige Hintergrundfarbe von dort nach oben, verglichen mit der Farbe der unteren Leiste */
+const BOTTOM = () => {
+  const W = innerWidth, H = innerHeight;
+  // Die Leiste nimmt keine Zeiger an (Wischen von überall): für die Messung kurz ansprechbar machen
+  const probe = document.createElement('style');
+  probe.textContent = '.ph-bar,.ph-actions{pointer-events:auto !important}';
+  document.head.appendChild(probe);
+  setTimeout(() => probe.remove(), 0);
+  const solid = (c) => !!c && !/^rgba\(.*,\s*0\)$/.test(c) && c !== 'transparent';
+  const colorAt = (x, y) => { for (let n = document.elementFromPoint(x, y); n; n = n.parentElement) { const c = getComputedStyle(n).backgroundColor; if (solid(c)) return { c, html: n.outerHTML.slice(0, 160), tag: `${n.tagName}.${String(n.className).slice(0, 40)}${n.dataset?.testid ? '#' + n.dataset.testid : ''}` }; } return { c: null, tag: null }; };
+  const bar = document.querySelector('[data-testid=ph-bar]');
+  const barC = bar ? getComputedStyle(bar).backgroundColor : null;
+  const a = colorAt(W / 2, H - 2), b = colorAt(8, H - 2), t = colorAt(W / 2, H - 20);
+  return { barC, bottom: a, left: b, above: t, same: a.c === barC && b.c === barC };
 };
 /** Kontrast der sichtbaren Textknoten gegen den tatsächlichen Hintergrund (wie layout.mjs), nur im Bereich der neuen Ansicht */
 const CONTRAST = () => {
@@ -245,6 +274,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         if (form !== 'video') await gotoTab(pg, form);
         let g = await pg.evaluate(GEOM);
         geomOk(g, tag, c, r.notes);
+        const bt = await pg.evaluate(BOTTOM);
+        c[`${tag} unterer Rand Leistenfarbe`] = bt.same;
+        if (!bt.same) r.notes[`${tag} unterer Rand`] = bt;
         c[`${tag} Kontrast AA`] = (await pg.evaluate(CONTRAST)).length === 0;
         if (!c[`${tag} Kontrast AA`]) r.notes[`${tag} Kontrast`] = await pg.evaluate(CONTRAST);
         if (form === 'video') {
@@ -258,6 +290,24 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           if (!c[`${tag} Feld unter dem Hook`]) r.notes[`${tag} Feld`] = { lyrics: g.lyrics, hook: g.hook, content: g.content };
         }
         await pg.screenshot({ path: `${out}/${name}-${size.name}-${form}.png` });
+        // Runde 48: Text-Reiter ohne inneres Scrollen. Kurzer und längerer Text: alles passt, die Überschrift liegt unter der Reiterleiste, ein Wisch nach oben wechselt sofort.
+        if (form === 'text') {
+          for (const [label, id] of [['kurz', idOf(48)], ['lang', idOf(56)], ...(size.height >= 800 ? [['sehr lang', idOf(57)]] : [])]) {
+            await showMoment(pg, id);
+            const t = await pg.evaluate(() => { const v = document.querySelector('[data-testid=text-view]'); const h = document.querySelector('[data-testid=hook]').getBoundingClientRect(); const head = document.querySelector('.ph-head').getBoundingClientRect(); const bar = document.querySelector('[data-testid=ph-actions]').getBoundingClientRect(); const src = document.querySelector('[data-testid=text-source]')?.getBoundingClientRect(); return { sh: v.scrollHeight, ch: v.clientHeight, hookTop: h.top, headB: head.bottom, fit: v.dataset.tfit, scroll: v.dataset.tscroll, srcB: src ? src.bottom : null, actT: bar.top, hookSize: parseFloat(getComputedStyle(document.querySelector('[data-testid=hook]')).fontSize), bodySize: parseFloat(getComputedStyle(document.querySelector('[data-testid=text-body]')).fontSize) }; });
+            const k = `${tag} Text ${label}`;
+            r.notes[k] = t;
+            await pg.screenshot({ path: `${out}/${name}-${size.name}-text-${label.replace(' ', '')}.png` });
+            c[`${k} ohne Scrollen`] = t.sh <= t.ch + 1 && t.scroll === 'no';
+            c[`${k} Überschrift unter der Kopfleiste`] = t.hookTop >= t.headB - 0.5;
+            c[`${k} Quelle über der Aktionsreihe`] = t.srcB === null || t.srcB <= t.actT + 0.5;
+            c[`${k} Mindestgrößen`] = t.bodySize >= 15 && t.hookSize >= 20;
+            const i0 = await idx(pg);
+            await touchSwipe(pg, '[data-testid=text-view]', 200, 600, 300);
+            c[`${k} Wisch wechselt sofort`] = await waitFor(pg, (i) => window.__core.idx() === i + 1, i0, 3000);
+            c[`${k} Diagzeile`] = await pg.evaluate(([i]) => window.__core.diag().some((x) => x === `text: fit ${i} step=${document.querySelector('[data-testid=text-view]')?.dataset.tfit ?? 'x'} scroll=no`) || window.__core.diag().some((x) => x.startsWith(`text: fit ${i} step=`)), [id]);
+          }
+        }
         // Der sehr lange Hook: nie abgeschnitten, in höchstens zwei Stufen kleiner
         const long = form === 'video' ? idOf(5) : form === 'audio' ? idOf(42) : idOf(47);
         await showMoment(pg, long);
@@ -475,15 +525,21 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await o.browser.close();
     }
 
-    // ---------- Text: scrollt, Wisch erst am Textende, Previous und Next ----------
+    // ---------- Text: Ausweg-Fall (künstlich sehr langer Text, passt auch in der kleinsten Stufe nicht): scrollt, Wisch erst am Textende. Dazu Previous und Next ----------
     {
       const o = await open(type, SIZES[0], { tab: 'text' });
       const pg = o.pg;
       await showMoment(pg, idOf(46));
       const g = await pg.evaluate(() => { const v = document.querySelector('[data-testid=text-view]'); const cs = getComputedStyle(v); return { overflowY: cs.overflowY, scrollable: v.scrollHeight > v.clientHeight + 4, origin: document.querySelector('[data-testid=desk-origin]')?.textContent ?? null, apply: document.querySelector('[data-testid=desk-apply]')?.textContent ?? null, source: document.querySelector('[data-testid=text-source]')?.textContent ?? null, serif: getComputedStyle(document.querySelector('[data-testid=hook]')).fontFamily }; });
-      c.textScrollt = g.overflowY === 'auto' && g.scrollable;
+      c.auswegTextScrollt = g.overflowY === 'auto' && g.scrollable;
       c.textHatSerifenHook = /Source Serif|serif|Georgia/i.test(g.serif);
       c.textQuelleDa = /Author 46/.test(g.source ?? '') || !!g.source;
+      c.auswegStufeKlein = await pg.evaluate(() => { const v = document.querySelector('[data-testid=text-view]'); return v.dataset.tscroll === 'yes' && v.dataset.tfit === '4'; });
+      // Mitten im Text: die Überschrift bleibt unter der Reiterleiste stehen
+      await pg.evaluate(() => { const v = document.querySelector('[data-testid=text-view]'); v.scrollTop = 300; });
+      await pg.waitForTimeout(200);
+      c.auswegUeberschriftBleibt = await pg.evaluate(() => document.querySelector('[data-testid=hook]').getBoundingClientRect().top >= document.querySelector('.ph-head').getBoundingClientRect().bottom - 0.5);
+      await pg.screenshot({ path: `${out}/${name}-390-text-ausweg-mitte.png` });
       // Ans Ende scrollen: Origin und Apply today stehen unten
       await pg.evaluate(() => { const v = document.querySelector('[data-testid=text-view]'); v.scrollTop = v.scrollHeight; });
       await pg.waitForTimeout(400);
@@ -496,11 +552,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const i0 = await idx(pg);
       await touchSwipe(pg, '[data-testid=text-view]', 200, 600, 300);
       await pg.waitForTimeout(500);
-      c.textWischMitteBleibt = (await idx(pg)) === i0;
+      c.auswegWischMitteBleibt = (await idx(pg)) === i0;
       await pg.evaluate(() => { const v = document.querySelector('[data-testid=text-view]'); v.scrollTop = v.scrollHeight; });
       await pg.waitForTimeout(200);
       await touchSwipe(pg, '[data-testid=text-view]', 200, 600, 300);
-      c.textWischAmEndeWechselt = await waitFor(pg, (i) => window.__core.idx() === i + 1, i0, 3000);
+      c.auswegWischAmEndeWechselt = await waitFor(pg, (i) => window.__core.idx() === i + 1, i0, 3000);
       // Previous und Next
       await pg.locator('[data-testid=ctl-prev]').click();
       c.textPrevious = await waitFor(pg, (i) => window.__core.idx() === i, i0, 3000);
@@ -513,6 +569,57 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await touchSwipe(pg, '[data-testid=text-view]', 200, 600, 300);
       c.textKurzWischWechselt = await waitFor(pg, (i) => window.__core.idx() === i + 1, j0, 3000);
       c['Text keine Seitenfehler'] = o.errors.length === 0;
+      await o.browser.close();
+    }
+
+    // ---------- Runde 48: unterer Rand auch bei einem Fenster, das höher ist als der Feed ----------
+    {
+      const o = await open(type, SIZES[0]);
+      const pg = o.pg;
+      for (const [form] of TABS) {
+        if (form !== 'video') await gotoTab(pg, form);
+        // Feed künstlich um 60 px kürzer als das Fenster (wie in der iOS-Standalone-App, wenn 100dvh kleiner ist als der Bildschirm)
+        await pg.evaluate(() => { const f = document.querySelector('.vfeed'); f.style.height = `${innerHeight - 60}px`; });
+        await pg.waitForTimeout(300);
+        const bt = await pg.evaluate(BOTTOM);
+        c[`kurzer Feed ${form} Fläche unter der Leiste hat Leistenfarbe`] = bt.same;
+        if (!bt.same) r.notes[`kurzer Feed ${form}`] = bt;
+        if (form === 'text') await pg.screenshot({ path: `${out}/${name}-390-kurzer-feed.png` });
+        await pg.evaluate(() => { document.querySelector('.vfeed').style.height = ''; });
+      }
+      c['kurzer Feed keine Seitenfehler'] = o.errors.length === 0;
+      await o.browser.close();
+    }
+
+    // ---------- Runde 48: Audio, kleines Titelbild ----------
+    {
+      const o = await open(type, SIZES[0], { tab: 'audio' });
+      const pg = o.pg;
+      const info = () => pg.evaluate(() => { const img = document.querySelector('[data-testid=ph-cover]'); const row = document.querySelector('.ph-chiprow'); const R = (e) => { const b = e.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom, w: b.width, h: b.height }; }; const cs = img ? getComputedStyle(img) : null; const chips = document.querySelector('[data-testid=speaker-line]'); const src = document.querySelector('[data-testid=source]'); const chip = document.querySelector('.ph-chip'); const spk = document.querySelector('.ph-speaker'); return { img: img ? { ...R(img), radius: cs.borderTopLeftRadius, fit: cs.objectFit, border: cs.borderTopWidth + ' ' + cs.borderTopColor, alt: img.getAttribute('alt'), lazy: img.getAttribute('loading'), dec: img.getAttribute('decoding'), ref: img.getAttribute('referrerpolicy'), done: img.complete && img.naturalWidth > 0, src: img.getAttribute('src') } : null, row: R(row), chips: R(chips), src: R(src), chip: R(chip), spk: R(spk), spkOver: spk.scrollWidth > spk.clientWidth, count: document.querySelectorAll('[data-testid=ph-cover]').length, hook: R(document.querySelector('[data-testid=hook]')) }; });
+      await showMoment(pg, idOf(40));
+      await waitFor(pg, () => { const i = document.querySelector('[data-testid=ph-cover]'); return !!i && i.complete && i.naturalWidth > 0; }, undefined, 4000);
+      const a = await info();
+      r.notes.audioCover = a;
+      c.audioCoverSichtbar44 = !!a.img && Math.abs(a.img.w - 44) <= 0.5 && Math.abs(a.img.h - 44) <= 0.5 && a.img.done && a.count === 1;
+      c.audioCoverStil = !!a.img && a.img.radius === '10px' && a.img.fit === 'cover' && /^1px (rgba\(255, 255, 255, 0\.08\)|color\(srgb 1 1 1 \/ 0\.08\))$/.test(a.img.border);
+      c.audioCoverAttribute = !!a.img && a.img.alt === '' && a.img.lazy === 'lazy' && a.img.dec === 'async' && a.img.ref === 'no-referrer' && a.img.src === COVER;
+      c.audioCoverLinks = !!a.img && a.img.r <= a.chips.l + 12 + 0.5 && a.chip.t < a.spk.t && a.src.l >= a.chips.r - 0.5;
+      c.audioCoverKanalEinzeilig = !!a.img && a.spk.h <= 20;
+      await pg.screenshot({ path: `${out}/${name}-390-audio-cover.png` });
+      // Moment ohne thumb: kein Bild, Zeile wie vorher
+      await showMoment(pg, idOf(41));
+      const b = await info();
+      r.notes.audioOhneThumb = b;
+      c.audioOhneThumbKeinBild = !b.img && b.count === 0 && b.row.h <= 30;
+      // Moment mit Ladefehler: Bild verschwindet, Zeile unverändert hoch
+      await showMoment(pg, idOf(43));
+      await waitFor(pg, () => !document.querySelector('[data-testid=ph-cover]'), undefined, 4000);
+      const d = await info();
+      r.notes.audioLadefehler = d;
+      c.audioLadefehlerKeinBild = !d.img && d.count === 0 && Math.abs(d.row.h - b.row.h) <= 0.5 && Math.abs(d.chips.l - b.chips.l) <= 0.5;
+      await pg.screenshot({ path: `${out}/${name}-390-audio-ladefehler.png` });
+      // Anfragen: nur der aktive Moment lädt sein Bild (kein Abruf im Voraus)
+      c['Audio Titelbild keine Seitenfehler'] = o.errors.length === 0;
       await o.browser.close();
     }
 

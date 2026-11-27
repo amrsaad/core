@@ -323,6 +323,12 @@
  * Neutral und Brain wechseln dort bei hellem Gerät auf ihre dunkle Palette. Beat und Body sind schon dunkel.
  * Text (data-surface="page") liegt auf dem Papier und behält die helle Palette.
  */
+/* Runde 48: Farbe der Fläche im Feed (--surface dort) auch außerhalb des Feeds, für die Seite hinter der iPhone-Ansicht (phone.css). Dunkle Geräte: derselbe Wert wie --surface. */
+:root { --feed-surface: var(--surface); }
+@media (prefers-color-scheme: light) {
+  :root:not([data-mood]) { --feed-surface: #141a20; }
+  :root[data-mood='brain'] { --feed-surface: #14171d; }
+}
 @media (prefers-color-scheme: light) {
   :root:not([data-mood]) :is(.vfeed:not([data-surface='page']), .dbar, .dpanel) {
     --text: #ffffff; --body: #c8d0d6; --muted: #8a9aa8; --soft: #5d6973; --surface: #141a20; --surface-2: #1f272e;
