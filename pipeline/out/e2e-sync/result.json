@@ -1,5 +1,5 @@
 {
- "at": "2026-11-27T12:17:29.308Z",
+ "at": "2026-11-27T13:35:42.303Z",
  "runs": [
   {
    "browser": "webkit",
@@ -52,14 +52,14 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "diagLines": 20,
+   "diagLines": 22,
    "diagSample": [
-    "s9yf slot0 sy5:1 state 2",
-    "s9yf sync: first upload waits for stable playback",
-    "s9yf app: hidden",
-    "s9yf sync: first upload released (app left) after 3.0 s"
+    "v6ox vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 fix=none",
+    "v6ox sync: first upload waits for stable playback",
+    "v6ox app: hidden",
+    "v6ox sync: first upload released (app left) after 3.0 s"
    ],
-   "writeDelayMs": 10036,
+   "writeDelayMs": 10035,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -119,14 +119,14 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "diagLines": 20,
+   "diagLines": 21,
    "diagSample": [
-    "uxpj slot0 sy7:1 state 2",
-    "uxpj sync: first upload waits for stable playback",
-    "uxpj app: hidden",
-    "uxpj sync: first upload released (app left) after 3.0 s"
+    "1awn sync: first upload waits for stable playback",
+    "1awn vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 fix=none",
+    "1awn app: hidden",
+    "1awn sync: first upload released (app left) after 3.0 s"
    ],
-   "writeDelayMs": 10020,
+   "writeDelayMs": 10024,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
