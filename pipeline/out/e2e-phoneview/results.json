@@ -1,5 +1,5 @@
 {
- "at": "2026-11-27T14:44:29.838Z",
+ "at": "2026-11-27T20:03:48.749Z",
  "runs": [
   {
    "browser": "chromium",
@@ -346,7 +346,7 @@
     "390x844 Titelbild arabisch: Bild bündig mit der rechten Textkante": true,
     "390x844 Titelbild arabisch: nächste Zeilen bis 2 Zeilen, nie angeschnitten, direkt nächste Zeile sichtbar": true,
     "390x844 Titelbild arabisch: rechtsbündig": true,
-    "390x844 Titelbild Ladefehler: kein Bild, kein Platzhalter, Karte wie ohne thumb": true,
+    "390x844 Titelbild Ladefehler: kein Bild-Element, Fläche bleibt, Zeilen unter der Fläche": true,
     "390x844 Titelbild keine Seitenfehler": true,
     "375x667 Titelbild Moment ohne thumb steht": true,
     "375x667 Titelbild ohne thumb: kein Bild, kein leerer Platz, Karte wie vorher": true,
@@ -380,7 +380,7 @@
     "375x667 Titelbild arabisch: Bild bündig mit der rechten Textkante": true,
     "375x667 Titelbild arabisch: nächste Zeilen bis 2 Zeilen, nie angeschnitten, direkt nächste Zeile sichtbar": true,
     "375x667 Titelbild arabisch: rechtsbündig": true,
-    "375x667 Titelbild Ladefehler: kein Bild, kein Platzhalter, Karte wie ohne thumb": true,
+    "375x667 Titelbild Ladefehler: kein Bild-Element, Fläche bleibt, Zeilen unter der Fläche": true,
     "375x667 Titelbild keine Seitenfehler": true,
     "430x932 Titelbild Moment ohne thumb steht": true,
     "430x932 Titelbild ohne thumb: kein Bild, kein leerer Platz, Karte wie vorher": true,
@@ -414,7 +414,7 @@
     "430x932 Titelbild arabisch: Bild bündig mit der rechten Textkante": true,
     "430x932 Titelbild arabisch: nächste Zeilen bis 2 Zeilen, nie angeschnitten, direkt nächste Zeile sichtbar": true,
     "430x932 Titelbild arabisch: rechtsbündig": true,
-    "430x932 Titelbild Ladefehler: kein Bild, kein Platzhalter, Karte wie ohne thumb": true,
+    "430x932 Titelbild Ladefehler: kein Bild-Element, Fläche bleibt, Zeilen unter der Fläche": true,
     "430x932 Titelbild keine Seitenfehler": true,
     "393x852 Titelbild Moment ohne thumb steht": true,
     "393x852 Titelbild ohne thumb: kein Bild, kein leerer Platz, Karte wie vorher": true,
@@ -448,7 +448,7 @@
     "393x852 Titelbild arabisch: Bild bündig mit der rechten Textkante": true,
     "393x852 Titelbild arabisch: nächste Zeilen bis 2 Zeilen, nie angeschnitten, direkt nächste Zeile sichtbar": true,
     "393x852 Titelbild arabisch: rechtsbündig": true,
-    "393x852 Titelbild Ladefehler: kein Bild, kein Platzhalter, Karte wie ohne thumb": true,
+    "393x852 Titelbild Ladefehler: kein Bild-Element, Fläche bleibt, Zeilen unter der Fläche": true,
     "393x852 Titelbild keine Seitenfehler": true,
     "390x844 Titelbild langer nächster Satz: höchstens 2 Zeilen, nichts von einer dritten Zeile": true,
     "390x844 Titelbild großer Platz: langer Nachbar auf genau 2 Zeilen begrenzt": true,
@@ -487,22 +487,29 @@
     "430x932 Hook wegen des Bildes nicht kleiner": true,
     "393x852 Hook wegen des Bildes nicht kleiner": true,
     "Gerät Fehler nachgestellt: Fenster 793, screen.height 852": true,
-    "Gerät Variable --ph-h gesetzt (852px)": true,
-    "Gerät Feed reicht bis 852 (top 0, bottom 852)": true,
-    "Gerät Abspielleiste endet bei 852": true,
-    "Gerät Karte ist 59 px höher als ohne Korrektur": true,
-    "Gerät ohne Korrektur endet die Leiste bei 793 (Befund)": true,
+    "Gerät kein --ph-h mehr (weder am Wurzelelement noch im Feed)": true,
+    "Gerät Rückfall data-ph-short gesetzt (Fenster 793, Bildschirm 852, Sicherheitsrand 59)": true,
+    "Gerät Feed endet am Fenster (0 bis 793)": true,
+    "Gerät kurzes Fenster: Abspielleiste endet bei innerHeight, Aktionsreihe direkt darüber": true,
+    "Gerät kurzes Fenster: alle Tasten ganz im Fenster, keine angeschnitten": true,
+    "Gerät kurzes Fenster: Abstand der Tasten zur Unterkante gleich s-4 (16 px)": true,
+    "Gerät kurzes Fenster: Leiste 18 px niedriger, Karte 18 px höher als mit Home-Rand (Gegenprobe B)": true,
+    "Gerät html-Hintergrund gleich der Farbe der Leiste (der Streifen darunter wirkt wie ihre Fortsetzung)": true,
+    "Gerät Gegenprobe ohne Standalone: Leiste endet bei 793, Home-Rand 34 bleibt": true,
+    "Gerät normales Standalone-Profil 393x852: Leiste bis 852, Tasten oberhalb von 852 minus 34": true,
+    "Gerät html min-height-Regel für die Standalone-App im Stylesheet (WebKit 301108)": true,
     "Gerät kein Seitenscroll durch die Überhöhe": true,
-    "Gerät Diag-Zeile \"vp:\" mit fix=852": true,
-    "Gegenprobe ohne Standalone: keine Korrektur (fix=none, Feed endet bei 793)": true,
-    "Gegenprobe ih gleich sh: keine Korrektur (fix=none, Feed endet bei 852)": true,
+    "Gerät Diag-Zeile \"vp:\" mit dh, sy, top, short=yes": true,
+    "Gegenprobe ohne Standalone: kein Rückfall (short=no, Feed endet bei 793)": true,
+    "Gegenprobe ih gleich sh: kein Rückfall (short=no, Feed und Leiste enden bei 852)": true,
     "Gerät Kopfleiste position fixed, deckender Hintergrund, nicht im bewegten Stapel": true,
     "Gerät Kopfleiste Rechteck wie vorher (0 bis 103, volle Breite, Reiter 59 bis 103)": true,
     "Gerät Kopfleiste bleibt beim Wischen stehen": true,
-    "Gerät nach resize: neue Zeile, Variable folgt dem Fenster": true,
+    "Gerät nach resize: neue Zeile, Attribut data-ph-short folgt dem Fenster": true,
     "Gerät Diag höchstens 5 Zeilen je Sitzung": true,
-    "Gerät Text-Reiter: Feed bis 852 und Leiste bei 852": true,
-    "Gerät Video-Reiter: Feed bis 852 und Leiste bei 852": true,
+    "Gerät Text-Reiter: Feed und Leiste bei innerHeight, alle Tasten im Fenster": true,
+    "Gerät Video-Reiter: Feed und Leiste bei innerHeight, alle Tasten im Fenster": true,
+    "Gerät Feed-Höhe folgt top und bottom (height auto statt 100dvh)": true,
     "Gerät keine Seitenfehler": true,
     "Abstand 40 video: Kopf und Reiter 40 px tiefer": true,
     "Abstand 40 video: Inhalt 40 px tiefer": true,
@@ -526,32 +533,55 @@
     "Abstand 40 text: Kopf endet bei 143 (59 + 40 + 44)": true,
     "Abstand 40 text: keine Seitenfehler": true,
     "Abstand 40 im Browser-Tab (nicht Standalone): keine Verschiebung": true,
-    "390x844 Titelbild-Abruf: ohne thumb Diag cover none": true,
-    "390x844 Titelbild-Abruf verspätet (2 s): Diag cover late, genau eine Zeile": true,
-    "390x844 Titelbild-Abruf verspätet (2 s): keine leere Fläche, keine Bildfläche, Karte ohne Bild": true,
-    "390x844 Titelbild-Abruf verspätet (2 s): erste Zeile an derselben Stelle wie im Moment ohne Bild": true,
-    "390x844 Titelbild-Abruf verspätet (2 s): trifft später ein, Karte springt nicht, Diag bleibt late": true,
-    "390x844 Titelbild-Abruf kaputt: Diag cover error, genau eine Zeile": true,
-    "390x844 Titelbild-Abruf kaputt: keine leere Fläche, keine Bildfläche, Karte ohne Bild": true,
-    "390x844 Titelbild-Abruf kaputt: erste Zeile an derselben Stelle wie im Moment ohne Bild": true,
-    "390x844 Titelbild-Abruf durchsichtig 1x1: Diag cover error, genau eine Zeile": true,
-    "390x844 Titelbild-Abruf durchsichtig 1x1: keine leere Fläche, keine Bildfläche, Karte ohne Bild": true,
-    "390x844 Titelbild-Abruf durchsichtig 1x1: erste Zeile an derselben Stelle wie im Moment ohne Bild": true,
-    "390x844 Titelbild-Abruf: schnelles Bild: Diag cover ok, Bild sichtbar als Quadrat": true,
-    "390x844 Titelbild-Abruf: keine Seitenfehler": true,
-    "393x852 Titelbild-Abruf: ohne thumb Diag cover none": true,
-    "393x852 Titelbild-Abruf verspätet (2 s): Diag cover late, genau eine Zeile": true,
-    "393x852 Titelbild-Abruf verspätet (2 s): keine leere Fläche, keine Bildfläche, Karte ohne Bild": true,
-    "393x852 Titelbild-Abruf verspätet (2 s): erste Zeile an derselben Stelle wie im Moment ohne Bild": true,
-    "393x852 Titelbild-Abruf verspätet (2 s): trifft später ein, Karte springt nicht, Diag bleibt late": true,
-    "393x852 Titelbild-Abruf kaputt: Diag cover error, genau eine Zeile": true,
-    "393x852 Titelbild-Abruf kaputt: keine leere Fläche, keine Bildfläche, Karte ohne Bild": true,
-    "393x852 Titelbild-Abruf kaputt: erste Zeile an derselben Stelle wie im Moment ohne Bild": true,
-    "393x852 Titelbild-Abruf durchsichtig 1x1: Diag cover error, genau eine Zeile": true,
-    "393x852 Titelbild-Abruf durchsichtig 1x1: keine leere Fläche, keine Bildfläche, Karte ohne Bild": true,
-    "393x852 Titelbild-Abruf durchsichtig 1x1: erste Zeile an derselben Stelle wie im Moment ohne Bild": true,
-    "393x852 Titelbild-Abruf: schnelles Bild: Diag cover ok, Bild sichtbar als Quadrat": true,
-    "393x852 Titelbild-Abruf: keine Seitenfehler": true,
+    "390x844 Titelbild-Platz: ohne thumb Diag cover none, kein Quadrat, kein Bild": true,
+    "390x844 Titelbild-Platz vor dem Laden: Quadrat reserviert (Fläche sichtbar, quadratisch, Zustand wait)": true,
+    "390x844 Titelbild-Platz vor dem Laden: Fläche in der Bereichsfarbe mit niedriger Deckkraft (Alpha unter 0,3, über 0)": true,
+    "390x844 Titelbild-Platz vor dem Laden: Bild nicht geladen, unsichtbar (Deckkraft 0), keine Zeitgrenze (Diag late nach 600 ms, Quadrat bleibt)": true,
+    "390x844 Titelbild-Platz vor dem Laden: Zeilen unter dem Quadrat, nichts überlappt": true,
+    "390x844 Titelbild-Platz nach dem Laden: Bild sichtbar (Deckkraft 1, naturalWidth über 0), füllt das Quadrat": true,
+    "390x844 Titelbild-Platz Lage der aktuellen Zeile vor und nach dem Laden gleich (0 px)": true,
+    "390x844 Titelbild-Platz Quadrat und Karte vor und nach dem Laden gleich (0 px)": true,
+    "390x844 Titelbild-Platz Diag nach dem Laden weiter genau eine Zeile late": true,
+    "390x844 Titelbild-Platz kaputt: Diag cover error, genau eine Zeile": true,
+    "390x844 Titelbild-Platz kaputt: Fläche bleibt stehen, kein Bild-Element (kein kaputtes Symbol)": true,
+    "390x844 Titelbild-Platz kaputt: Lage von Quadrat und aktueller Zeile wie im Wartezustand (0 px)": true,
+    "390x844 Titelbild-Platz durchsichtig 1x1: Diag cover error, genau eine Zeile": true,
+    "390x844 Titelbild-Platz durchsichtig 1x1: Fläche bleibt stehen, kein Bild-Element (kein kaputtes Symbol)": true,
+    "390x844 Titelbild-Platz durchsichtig 1x1: Lage von Quadrat und aktueller Zeile wie im Wartezustand (0 px)": true,
+    "390x844 Titelbild-Platz: schnelles Bild: Diag cover ok, Bild sichtbar als Quadrat": true,
+    "390x844 Titelbild-Platz: keine Seitenfehler": true,
+    "393x852 Titelbild-Platz: ohne thumb Diag cover none, kein Quadrat, kein Bild": true,
+    "393x852 Titelbild-Platz vor dem Laden: Quadrat reserviert (Fläche sichtbar, quadratisch, Zustand wait)": true,
+    "393x852 Titelbild-Platz vor dem Laden: Fläche in der Bereichsfarbe mit niedriger Deckkraft (Alpha unter 0,3, über 0)": true,
+    "393x852 Titelbild-Platz vor dem Laden: Bild nicht geladen, unsichtbar (Deckkraft 0), keine Zeitgrenze (Diag late nach 600 ms, Quadrat bleibt)": true,
+    "393x852 Titelbild-Platz vor dem Laden: Zeilen unter dem Quadrat, nichts überlappt": true,
+    "393x852 Titelbild-Platz nach dem Laden: Bild sichtbar (Deckkraft 1, naturalWidth über 0), füllt das Quadrat": true,
+    "393x852 Titelbild-Platz Lage der aktuellen Zeile vor und nach dem Laden gleich (0 px)": true,
+    "393x852 Titelbild-Platz Quadrat und Karte vor und nach dem Laden gleich (0 px)": true,
+    "393x852 Titelbild-Platz Diag nach dem Laden weiter genau eine Zeile late": true,
+    "393x852 Titelbild-Platz kaputt: Diag cover error, genau eine Zeile": true,
+    "393x852 Titelbild-Platz kaputt: Fläche bleibt stehen, kein Bild-Element (kein kaputtes Symbol)": true,
+    "393x852 Titelbild-Platz kaputt: Lage von Quadrat und aktueller Zeile wie im Wartezustand (0 px)": true,
+    "393x852 Titelbild-Platz durchsichtig 1x1: Diag cover error, genau eine Zeile": true,
+    "393x852 Titelbild-Platz durchsichtig 1x1: Fläche bleibt stehen, kein Bild-Element (kein kaputtes Symbol)": true,
+    "393x852 Titelbild-Platz durchsichtig 1x1: Lage von Quadrat und aktueller Zeile wie im Wartezustand (0 px)": true,
+    "393x852 Titelbild-Platz: schnelles Bild: Diag cover ok, Bild sichtbar als Quadrat": true,
+    "393x852 Titelbild-Platz: keine Seitenfehler": true,
+    "Obere Kante kurzes Fenster 793: Trefferprüfung an (2,2), (Mitte,2), (rechts,2), (Mitte,30), (Mitte,58) liefert die Kopfleiste": true,
+    "Obere Kante kurzes Fenster 793: position fixed, left 0, top 0, Breite gleich innerWidth, nimmt Berührungen an (pointer-events auto)": true,
+    "Obere Kante kurzes Fenster 793: Hintergrund voll deckend ohne Alpha, einfarbig (kein Verlauf), Deckkraft 1": true,
+    "Obere Kante kurzes Fenster 793: kein backdrop-filter, keine Maske, keine transform, kein filter an der Leiste": true,
+    "Obere Kante kurzes Fenster 793: kein Vorfahr mit transform, filter, will-change, contain, perspective, backdrop-filter": true,
+    "Obere Kante kurzes Fenster 793: direktes Kind des Feed-Wurzelelements, nichts mit höherem z-index über 0 bis 59": true,
+    "Obere Kante kurzes Fenster 793: keine Seitenfehler": true,
+    "Obere Kante normal 852: Trefferprüfung an (2,2), (Mitte,2), (rechts,2), (Mitte,30), (Mitte,58) liefert die Kopfleiste": true,
+    "Obere Kante normal 852: position fixed, left 0, top 0, Breite gleich innerWidth, nimmt Berührungen an (pointer-events auto)": true,
+    "Obere Kante normal 852: Hintergrund voll deckend ohne Alpha, einfarbig (kein Verlauf), Deckkraft 1": true,
+    "Obere Kante normal 852: kein backdrop-filter, keine Maske, keine transform, kein filter an der Leiste": true,
+    "Obere Kante normal 852: kein Vorfahr mit transform, filter, will-change, contain, perspective, backdrop-filter": true,
+    "Obere Kante normal 852: direktes Kind des Feed-Wurzelelements, nichts mit höherem z-index über 0 bis 59": true,
+    "Obere Kante normal 852: keine Seitenfehler": true,
+    "Diag vp: nach geänderter Fensterhöhe folgt eine neue Zeile (ih=852, short=no), höchstens 5 Zeilen": true,
     "Verkleinerung: alles ganz in der Karte, nie über der Aktionsreihe, Nachbarn nie angeschnitten": true,
     "Verkleinerung: das Bild wird nur kleiner, nie größer (je kleiner die Karte)": true,
     "Verkleinerung: das Bild bleibt, solange die nächste Zeile ihre 2 Zeilen hat, und geht vor jeder Kürzung der nächsten Zeilen": true,
@@ -737,7 +767,7 @@
     "393x852 Status video: sehr lange Meldung einzeilig mit Auslassung, nichts überlappt": true,
     "393x852 Status video: ohne Meldung kein Platz reserviert": true,
     "393x852 Status video: keine Seitenfehler": true,
-    "Titelbild ein Element in der Karte, aus dem Feld thumb, https": true,
+    "Titelbild ein Element in der Karte (im Quadrat), aus dem Feld thumb, https": true,
     "startOhneGesteWartet": true,
     "startOhneGesteKeinTon": true,
     "startPlayTasteZeigtPlay": true,
@@ -776,98 +806,98 @@
    },
    "notes": {
     "390x844 text Text kurz": {
-     "sh": 565,
-     "ch": 565,
+     "sh": 564,
+     "ch": 564,
      "hookTop": 167,
      "headB": 103,
      "fit": "0",
      "scroll": "no",
      "srcB": 520.171875,
-     "actT": 668,
+     "actT": 667,
      "hookSize": 32,
      "bodySize": 19
     },
     "390x844 text Text lang": {
-     "sh": 565,
-     "ch": 565,
+     "sh": 564,
+     "ch": 564,
      "hookTop": 163,
      "headB": 103,
      "fit": "2",
      "scroll": "no",
      "srcB": 570.015625,
-     "actT": 668,
+     "actT": 667,
      "hookSize": 24,
      "bodySize": 16
     },
     "390x844 text Text sehr lang": {
-     "sh": 565,
-     "ch": 565,
+     "sh": 564,
+     "ch": 564,
      "hookTop": 159,
      "headB": 103,
      "fit": "4",
      "scroll": "no",
      "srcB": 654.171875,
-     "actT": 668,
+     "actT": 667,
      "hookSize": 20,
      "bodySize": 15
     },
     "375x667 text Text kurz": {
-     "sh": 459,
-     "ch": 459,
+     "sh": 458,
+     "ch": 458,
      "hookTop": 128,
      "headB": 64,
      "fit": "0",
      "scroll": "no",
      "srcB": 481.171875,
-     "actT": 523,
+     "actT": 522,
      "hookSize": 32,
      "bodySize": 19
     },
     "375x667 text Text lang": {
-     "sh": 459,
-     "ch": 459,
+     "sh": 458,
+     "ch": 458,
      "hookTop": 122,
      "headB": 64,
      "fit": "3",
      "scroll": "no",
      "srcB": 497.09375,
-     "actT": 523,
+     "actT": 522,
      "hookSize": 22,
      "bodySize": 15
     },
     "430x932 text Text kurz": {
-     "sh": 653,
-     "ch": 653,
+     "sh": 652,
+     "ch": 652,
      "hookTop": 167,
      "headB": 103,
      "fit": "0",
      "scroll": "no",
      "srcB": 477.9375,
-     "actT": 756,
+     "actT": 755,
      "hookSize": 32,
      "bodySize": 19
     },
     "430x932 text Text lang": {
-     "sh": 653,
-     "ch": 653,
+     "sh": 652,
+     "ch": 652,
      "hookTop": 167,
      "headB": 103,
      "fit": "0",
      "scroll": "no",
      "srcB": 709.9375,
-     "actT": 756,
+     "actT": 755,
      "hookSize": 32,
      "bodySize": 19
     },
     "430x932 text Text sehr lang": {
-     "sh": 653,
-     "ch": 653,
+     "sh": 652,
+     "ch": 652,
      "hookTop": 163,
      "headB": 103,
      "fit": "2",
      "scroll": "no",
      "srcB": 666.015625,
-     "actT": 756,
+     "actT": 755,
      "hookSize": 24,
      "bodySize": 16
     },
@@ -878,8 +908,19 @@
       "x": 0,
       "y": 322.375,
       "width": 390,
-      "height": 307.625
+      "height": 306.625
      }
+    },
+    "390 video Wischen im Player": {
+     "k0": 0,
+     "now": 1,
+     "bd": {
+      "x": 0,
+      "y": 103,
+      "width": 390,
+      "height": 219.375
+     },
+     "st": 1
     },
     "390 audio Wischen runter wechselt": {
      "i0": 0,
@@ -888,7 +929,7 @@
       "x": 20,
       "y": 253,
       "width": 350,
-      "height": 365
+      "height": 364
      }
     },
     "lyric": {
@@ -925,21 +966,21 @@
       "l": 20,
       "t": 323,
       "r": 370,
-      "b": 618,
+      "b": 617,
       "w": 350,
-      "h": 295
+      "h": 294
      },
      "cardInner": {
       "l": 21,
       "r": 369,
       "t": 324,
-      "b": 617
+      "b": 616
      },
      "content": {
       "l": 41,
       "r": 349,
       "t": 344,
-      "b": 597
+      "b": 596
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -1034,6 +1075,7 @@
      },
      "note": null,
      "noteText": null,
+     "slot": null,
      "count": 0,
      "small": 0,
      "hook": {
@@ -1050,9 +1092,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 630,
+      "t": 629,
       "r": 390,
-      "b": 708,
+      "b": 707,
       "w": 390,
       "h": 78
      },
@@ -1068,9 +1110,9 @@
       "l": 0,
       "t": 103,
       "r": 390,
-      "b": 630,
+      "b": 629,
       "w": 390,
-      "h": 527
+      "h": 526
      },
      "cc": "true"
     },
@@ -1080,21 +1122,21 @@
       "l": 20,
       "t": 253,
       "r": 370,
-      "b": 618,
+      "b": 617,
       "w": 350,
-      "h": 365
+      "h": 364
      },
      "cardInner": {
       "l": 21,
       "r": 369,
       "t": 254,
-      "b": 617
+      "b": 616
      },
      "content": {
       "l": 41,
       "r": 349,
       "t": 274,
-      "b": 597
+      "b": 596
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -1115,7 +1157,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -1131,7 +1173,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": {
@@ -1220,6 +1263,17 @@
      },
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 274,
+      "r": 169,
+      "b": 402,
+      "w": 128,
+      "h": 128,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -1236,9 +1290,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 630,
+      "t": 629,
       "r": 390,
-      "b": 708,
+      "b": 707,
       "w": 390,
       "h": 78
      },
@@ -1254,9 +1308,9 @@
       "l": 0,
       "t": 103,
       "r": 390,
-      "b": 630,
+      "b": 629,
       "w": 390,
-      "h": 527
+      "h": 526
      },
      "cc": "true"
     },
@@ -1266,21 +1320,21 @@
       "l": 20,
       "t": 253,
       "r": 370,
-      "b": 618,
+      "b": 617,
       "w": 350,
-      "h": 365
+      "h": 364
      },
      "cardInner": {
       "l": 21,
       "r": 369,
       "t": 254,
-      "b": 617
+      "b": 616
      },
      "content": {
       "l": 41,
       "r": 349,
       "t": 274,
-      "b": 597
+      "b": 596
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -1301,7 +1355,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -1317,7 +1371,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": {
       "l": 41,
@@ -1406,6 +1461,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 274,
+      "r": 169,
+      "b": 402,
+      "w": 128,
+      "h": 128,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -1422,9 +1488,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 630,
+      "t": 629,
       "r": 390,
-      "b": 708,
+      "b": 707,
       "w": 390,
       "h": 78
      },
@@ -1440,9 +1506,9 @@
       "l": 0,
       "t": 103,
       "r": 390,
-      "b": 630,
+      "b": 629,
       "w": 390,
-      "h": 527
+      "h": 526
      },
      "cc": "true"
     },
@@ -1452,21 +1518,21 @@
       "l": 20,
       "t": 253,
       "r": 370,
-      "b": 618,
+      "b": 617,
       "w": 350,
-      "h": 365
+      "h": 364
      },
      "cardInner": {
       "l": 21,
       "r": 369,
       "t": 254,
-      "b": 617
+      "b": 616
      },
      "content": {
       "l": 41,
       "r": 349,
       "t": 274,
-      "b": 597
+      "b": 596
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -1487,7 +1553,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -1503,7 +1569,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": {
       "l": 41,
@@ -1572,6 +1639,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 274,
+      "r": 169,
+      "b": 402,
+      "w": 128,
+      "h": 128,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -1588,9 +1666,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 630,
+      "t": 629,
       "r": 390,
-      "b": 708,
+      "b": 707,
       "w": 390,
       "h": 78
      },
@@ -1606,9 +1684,9 @@
       "l": 0,
       "t": 103,
       "r": 390,
-      "b": 630,
+      "b": 629,
       "w": 390,
-      "h": 527
+      "h": 526
      },
      "cc": "true"
     },
@@ -1618,21 +1696,21 @@
       "l": 20,
       "t": 253,
       "r": 370,
-      "b": 618,
+      "b": 617,
       "w": 350,
-      "h": 365
+      "h": 364
      },
      "cardInner": {
       "l": 21,
       "r": 369,
       "t": 254,
-      "b": 617
+      "b": 616
      },
      "content": {
       "l": 41,
       "r": 349,
       "t": 274,
-      "b": 597
+      "b": 596
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -1641,9 +1719,9 @@
      "dir": "ltr",
      "img": {
       "l": 41,
-      "t": 281.5,
+      "t": 281,
       "r": 349,
-      "b": 589.5,
+      "b": 589,
       "w": 308,
       "h": 308,
       "vis": true,
@@ -1653,7 +1731,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -1669,7 +1747,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": null,
@@ -1678,6 +1757,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 281,
+      "r": 349,
+      "b": 589,
+      "w": 308,
+      "h": 308,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -1694,9 +1784,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 630,
+      "t": 629,
       "r": 390,
-      "b": 708,
+      "b": 707,
       "w": 390,
       "h": 78
      },
@@ -1712,9 +1802,9 @@
       "l": 0,
       "t": 103,
       "r": 390,
-      "b": 630,
+      "b": 629,
       "w": 390,
-      "h": 527
+      "h": 526
      },
      "cc": "false"
     },
@@ -1724,21 +1814,21 @@
       "l": 20,
       "t": 463,
       "r": 370,
-      "b": 618,
+      "b": 617,
       "w": 350,
-      "h": 155
+      "h": 154
      },
      "cardInner": {
       "l": 21,
       "r": 369,
       "t": 464,
-      "b": 617
+      "b": 616
      },
      "content": {
       "l": 41,
       "r": 349,
       "t": 484,
-      "b": 597
+      "b": 596
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -1759,7 +1849,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -1775,7 +1865,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": {
@@ -1864,6 +1955,17 @@
      },
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": false
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -1880,9 +1982,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 630,
+      "t": 629,
       "r": 390,
-      "b": 708,
+      "b": 707,
       "w": 390,
       "h": 78
      },
@@ -1898,9 +2000,9 @@
       "l": 0,
       "t": 103,
       "r": 390,
-      "b": 630,
+      "b": 629,
       "w": 390,
-      "h": 527
+      "h": 526
      },
      "cc": "true"
     },
@@ -1911,21 +2013,21 @@
        "l": 20,
        "t": 288.59375,
        "r": 370,
-       "b": 618,
+       "b": 617,
        "w": 350,
-       "h": 329.40625
+       "h": 328.40625
       },
       "cardInner": {
        "l": 21,
        "r": 369,
        "t": 289.59375,
-       "b": 617
+       "b": 616
       },
       "content": {
        "l": 41,
        "r": 349,
        "t": 309.59375,
-       "b": 597
+       "b": 596
       },
       "cardRadius": "18px",
       "padTop": "20px",
@@ -1933,12 +2035,12 @@
       "art": "top",
       "dir": "rtl",
       "img": {
-       "l": 273.59375,
+       "l": 274.59375,
        "t": 309.59375,
        "r": 349,
-       "b": 385,
-       "w": 75.40625,
-       "h": 75.40625,
+       "b": 384,
+       "w": 74.40625,
+       "h": 74.40625,
        "vis": true,
        "fit": "cover",
        "dfit": "cover",
@@ -1946,7 +2048,7 @@
        "filter": "none",
        "bf": "none",
        "anim": "none",
-       "trans": "0s",
+       "trans": "0.2s",
        "bgi": "none",
        "alt": "",
        "lazy": null,
@@ -1962,13 +2064,14 @@
        "bw": "1px",
        "bs": "solid",
        "bc": "color(srgb 1 1 1 / 0.08)",
-       "inCard": true
+       "inCard": true,
+       "op": 1
       },
       "out": {
        "l": 41,
-       "t": 251,
+       "t": 250,
        "r": 349,
-       "b": 389,
+       "b": 388,
        "w": 308,
        "h": 138,
        "lh": 46,
@@ -1987,9 +2090,9 @@
       },
       "cur": {
        "l": 41,
-       "t": 401,
+       "t": 400,
        "r": 349,
-       "b": 447,
+       "b": 446,
        "w": 308,
        "h": 46,
        "lh": 46,
@@ -2008,9 +2111,9 @@
       },
       "next": {
        "l": 41,
-       "t": 459,
+       "t": 458,
        "r": 349,
-       "b": 551,
+       "b": 550,
        "w": 308,
        "h": 92,
        "lh": 46,
@@ -2029,9 +2132,9 @@
       },
       "next2": {
        "l": 41,
-       "t": 563,
+       "t": 562,
        "r": 349,
-       "b": 609,
+       "b": 608,
        "w": 308,
        "h": 46,
        "lh": 46,
@@ -2051,6 +2154,17 @@
       "next3": null,
       "note": null,
       "noteText": null,
+      "slot": {
+       "l": 274.59375,
+       "t": 309.59375,
+       "r": 349,
+       "b": 384,
+       "w": 74.40625,
+       "h": 74.40625,
+       "state": "ready",
+       "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+       "vis": true
+      },
       "count": 1,
       "small": 0,
       "hook": {
@@ -2067,9 +2181,9 @@
       },
       "actions": {
        "l": 0,
-       "t": 630,
+       "t": 629,
        "r": 390,
-       "b": 708,
+       "b": 707,
        "w": 390,
        "h": 78
       },
@@ -2085,9 +2199,9 @@
        "l": 0,
        "t": 103,
        "r": 390,
-       "b": 630,
+       "b": 629,
        "w": 390,
-       "h": 527
+       "h": 526
       },
       "cc": "true"
      },
@@ -2143,34 +2257,34 @@
       "l": 20,
       "t": 323,
       "r": 370,
-      "b": 618,
+      "b": 617,
       "w": 350,
-      "h": 295
+      "h": 294
      },
      "cardInner": {
       "l": 21,
       "r": 369,
       "t": 324,
-      "b": 617
+      "b": 616
      },
      "content": {
       "l": 41,
       "r": 349,
       "t": 344,
-      "b": 597
+      "b": 596
      },
      "cardRadius": "18px",
      "padTop": "20px",
      "cardOverflow": "hidden",
-     "art": null,
-     "dir": null,
+     "art": "top",
+     "dir": "ltr",
      "img": null,
      "out": null,
      "cur": {
       "l": 41,
-      "t": 344,
+      "t": 464,
       "r": 349,
-      "b": 434,
+      "b": 554,
       "w": 308,
       "h": 90,
       "lh": 30,
@@ -2189,9 +2303,9 @@
      },
      "next": {
       "l": 41,
-      "t": 446,
+      "t": 566,
       "r": 349,
-      "b": 476,
+      "b": 596,
       "w": 308,
       "h": 30,
       "lh": 30,
@@ -2210,9 +2324,9 @@
      },
      "next2": {
       "l": 41,
-      "t": 488,
+      "t": 608,
       "r": 349,
-      "b": 548,
+      "b": 668,
       "w": 308,
       "h": 60,
       "lh": 30,
@@ -2223,17 +2337,17 @@
       "ws": "normal",
       "to": "clip",
       "ov": "hidden",
-      "op": 0.6,
-      "hidden": false,
+      "op": 0,
+      "hidden": true,
       "pt": 0,
       "pb": 0,
       "text": "Dritte Zeile mit einem Satz, der ebenfalls umbricht."
      },
      "next3": {
       "l": 41,
-      "t": 560,
+      "t": 608,
       "r": 349,
-      "b": 590,
+      "b": 638,
       "w": 308,
       "h": 30,
       "lh": 30,
@@ -2244,14 +2358,25 @@
       "ws": "normal",
       "to": "clip",
       "ov": "hidden",
-      "op": 0.42,
-      "hidden": false,
+      "op": 0,
+      "hidden": true,
       "pt": 0,
       "pb": 0,
       "text": "Vierte."
      },
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 344,
+      "r": 145,
+      "b": 448,
+      "w": 104,
+      "h": 104,
+      "state": "error",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 0,
      "small": 0,
      "hook": {
@@ -2268,9 +2393,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 630,
+      "t": 629,
       "r": 390,
-      "b": 708,
+      "b": 707,
       "w": 390,
       "h": 78
      },
@@ -2286,9 +2411,9 @@
       "l": 0,
       "t": 103,
       "r": 390,
-      "b": 630,
+      "b": 629,
       "w": 390,
-      "h": 527
+      "h": 526
      },
      "cc": "true"
     },
@@ -2298,21 +2423,21 @@
       "l": 20,
       "t": 284,
       "r": 355,
-      "b": 473,
+      "b": 472,
       "w": 335,
-      "h": 189
+      "h": 188
      },
      "cardInner": {
       "l": 21,
       "r": 354,
       "t": 285,
-      "b": 472
+      "b": 471
      },
      "content": {
       "l": 41,
       "r": 334,
       "t": 305,
-      "b": 452
+      "b": 451
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -2407,6 +2532,7 @@
      },
      "note": null,
      "noteText": null,
+     "slot": null,
      "count": 0,
      "small": 0,
      "hook": {
@@ -2423,9 +2549,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 485,
+      "t": 484,
       "r": 375,
-      "b": 549,
+      "b": 548,
       "w": 375,
       "h": 64
      },
@@ -2441,9 +2567,9 @@
       "l": 0,
       "t": 64,
       "r": 375,
-      "b": 485,
+      "b": 484,
       "w": 375,
-      "h": 421
+      "h": 420
      },
      "cc": "true"
     },
@@ -2453,21 +2579,21 @@
       "l": 20,
       "t": 214,
       "r": 355,
-      "b": 473,
+      "b": 472,
       "w": 335,
-      "h": 259
+      "h": 258
      },
      "cardInner": {
       "l": 21,
       "r": 354,
       "t": 215,
-      "b": 472
+      "b": 471
      },
      "content": {
       "l": 41,
       "r": 334,
       "t": 235,
-      "b": 452
+      "b": 451
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -2488,7 +2614,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -2504,7 +2630,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": {
@@ -2593,6 +2720,17 @@
      },
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": false
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -2609,9 +2747,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 485,
+      "t": 484,
       "r": 375,
-      "b": 549,
+      "b": 548,
       "w": 375,
       "h": 64
      },
@@ -2627,9 +2765,9 @@
       "l": 0,
       "t": 64,
       "r": 375,
-      "b": 485,
+      "b": 484,
       "w": 375,
-      "h": 421
+      "h": 420
      },
      "cc": "true"
     },
@@ -2639,21 +2777,21 @@
       "l": 20,
       "t": 214,
       "r": 355,
-      "b": 473,
+      "b": 472,
       "w": 335,
-      "h": 259
+      "h": 258
      },
      "cardInner": {
       "l": 21,
       "r": 354,
       "t": 215,
-      "b": 472
+      "b": 471
      },
      "content": {
       "l": 41,
       "r": 334,
       "t": 235,
-      "b": 452
+      "b": 451
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -2674,7 +2812,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -2690,7 +2828,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": {
       "l": 41,
@@ -2779,6 +2918,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": false
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -2795,9 +2945,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 485,
+      "t": 484,
       "r": 375,
-      "b": 549,
+      "b": 548,
       "w": 375,
       "h": 64
      },
@@ -2813,9 +2963,9 @@
       "l": 0,
       "t": 64,
       "r": 375,
-      "b": 485,
+      "b": 484,
       "w": 375,
-      "h": 421
+      "h": 420
      },
      "cc": "true"
     },
@@ -2825,21 +2975,21 @@
       "l": 20,
       "t": 214,
       "r": 355,
-      "b": 473,
+      "b": 472,
       "w": 335,
-      "h": 259
+      "h": 258
      },
      "cardInner": {
       "l": 21,
       "r": 354,
       "t": 215,
-      "b": 472
+      "b": 471
      },
      "content": {
       "l": 41,
       "r": 334,
       "t": 235,
-      "b": 452
+      "b": 451
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -2860,7 +3010,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -2876,7 +3026,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": {
       "l": 41,
@@ -2945,6 +3096,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": false
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -2961,9 +3123,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 485,
+      "t": 484,
       "r": 375,
-      "b": 549,
+      "b": 548,
       "w": 375,
       "h": 64
      },
@@ -2979,9 +3141,9 @@
       "l": 0,
       "t": 64,
       "r": 375,
-      "b": 485,
+      "b": 484,
       "w": 375,
-      "h": 421
+      "h": 420
      },
      "cc": "true"
     },
@@ -2991,21 +3153,21 @@
       "l": 20,
       "t": 214,
       "r": 355,
-      "b": 473,
+      "b": 472,
       "w": 335,
-      "h": 259
+      "h": 258
      },
      "cardInner": {
       "l": 21,
       "r": 354,
       "t": 215,
-      "b": 472
+      "b": 471
      },
      "content": {
       "l": 41,
       "r": 334,
       "t": 235,
-      "b": 452
+      "b": 451
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -3013,12 +3175,12 @@
      "art": "fill",
      "dir": "ltr",
      "img": {
-      "l": 79,
+      "l": 79.5,
       "t": 235,
-      "r": 296,
-      "b": 452,
-      "w": 217,
-      "h": 217,
+      "r": 295.5,
+      "b": 451,
+      "w": 216,
+      "h": 216,
       "vis": true,
       "fit": "cover",
       "dfit": "cover",
@@ -3026,7 +3188,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -3042,7 +3204,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": null,
@@ -3051,6 +3214,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 79.5,
+      "t": 235,
+      "r": 295.5,
+      "b": 451,
+      "w": 216,
+      "h": 216,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -3067,9 +3241,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 485,
+      "t": 484,
       "r": 375,
-      "b": 549,
+      "b": 548,
       "w": 375,
       "h": 64
      },
@@ -3085,9 +3259,9 @@
       "l": 0,
       "t": 64,
       "r": 375,
-      "b": 485,
+      "b": 484,
       "w": 375,
-      "h": 421
+      "h": 420
      },
      "cc": "false"
     },
@@ -3097,21 +3271,21 @@
       "l": 20,
       "t": 306,
       "r": 355,
-      "b": 473,
+      "b": 472,
       "w": 335,
-      "h": 167
+      "h": 166
      },
      "cardInner": {
       "l": 21,
       "r": 354,
       "t": 307,
-      "b": 472
+      "b": 471
      },
      "content": {
       "l": 41,
       "r": 334,
       "t": 327,
-      "b": 452
+      "b": 451
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -3132,7 +3306,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -3148,7 +3322,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": {
@@ -3237,6 +3412,17 @@
      },
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": false
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -3253,9 +3439,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 485,
+      "t": 484,
       "r": 375,
-      "b": 549,
+      "b": 548,
       "w": 375,
       "h": 64
      },
@@ -3271,9 +3457,9 @@
       "l": 0,
       "t": 64,
       "r": 375,
-      "b": 485,
+      "b": 484,
       "w": 375,
-      "h": 421
+      "h": 420
      },
      "cc": "true"
     },
@@ -3284,21 +3470,21 @@
        "l": 20,
        "t": 249.59375,
        "r": 355,
-       "b": 473,
+       "b": 472,
        "w": 335,
-       "h": 223.40625
+       "h": 222.40625
       },
       "cardInner": {
        "l": 21,
        "r": 354,
        "t": 250.59375,
-       "b": 472
+       "b": 471
       },
       "content": {
        "l": 41,
        "r": 334,
        "t": 270.59375,
-       "b": 452
+       "b": 451
       },
       "cardRadius": "18px",
       "padTop": "20px",
@@ -3319,7 +3505,7 @@
        "filter": "none",
        "bf": "none",
        "anim": "none",
-       "trans": "0s",
+       "trans": "0.2s",
        "bgi": "none",
        "alt": "",
        "lazy": null,
@@ -3335,7 +3521,8 @@
        "bw": "1px",
        "bs": "solid",
        "bc": "color(srgb 1 1 1 / 0.08)",
-       "inCard": true
+       "inCard": true,
+       "op": 1
       },
       "out": {
        "l": 41,
@@ -3424,6 +3611,17 @@
       "next3": null,
       "note": null,
       "noteText": null,
+      "slot": {
+       "l": 0,
+       "t": 0,
+       "r": 0,
+       "b": 0,
+       "w": 0,
+       "h": 0,
+       "state": "ready",
+       "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+       "vis": false
+      },
       "count": 1,
       "small": 0,
       "hook": {
@@ -3440,9 +3638,9 @@
       },
       "actions": {
        "l": 0,
-       "t": 485,
+       "t": 484,
        "r": 375,
-       "b": 549,
+       "b": 548,
        "w": 375,
        "h": 64
       },
@@ -3458,9 +3656,9 @@
        "l": 0,
        "t": 64,
        "r": 375,
-       "b": 485,
+       "b": 484,
        "w": 375,
-       "h": 421
+       "h": 420
       },
       "cc": "true"
      },
@@ -3516,27 +3714,27 @@
       "l": 20,
       "t": 284,
       "r": 355,
-      "b": 473,
+      "b": 472,
       "w": 335,
-      "h": 189
+      "h": 188
      },
      "cardInner": {
       "l": 21,
       "r": 354,
       "t": 285,
-      "b": 472
+      "b": 471
      },
      "content": {
       "l": 41,
       "r": 334,
       "t": 305,
-      "b": 452
+      "b": 451
      },
      "cardRadius": "18px",
      "padTop": "20px",
      "cardOverflow": "hidden",
-     "art": null,
-     "dir": null,
+     "art": "top",
+     "dir": "ltr",
      "img": null,
      "out": null,
      "cur": {
@@ -3625,6 +3823,17 @@
      },
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0,
+      "state": "error",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": false
+     },
      "count": 0,
      "small": 0,
      "hook": {
@@ -3641,9 +3850,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 485,
+      "t": 484,
       "r": 375,
-      "b": 549,
+      "b": 548,
       "w": 375,
       "h": 64
      },
@@ -3659,9 +3868,9 @@
       "l": 0,
       "t": 64,
       "r": 375,
-      "b": 485,
+      "b": 484,
       "w": 375,
-      "h": 421
+      "h": 420
      },
      "cc": "true"
     },
@@ -3671,21 +3880,21 @@
       "l": 20,
       "t": 288,
       "r": 410,
-      "b": 706,
+      "b": 705,
       "w": 390,
-      "h": 418
+      "h": 417
      },
      "cardInner": {
       "l": 21,
       "r": 409,
       "t": 289,
-      "b": 705
+      "b": 704
      },
      "content": {
       "l": 41,
       "r": 389,
       "t": 309,
-      "b": 685
+      "b": 684
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -3780,6 +3989,7 @@
      },
      "note": null,
      "noteText": null,
+     "slot": null,
      "count": 0,
      "small": 0,
      "hook": {
@@ -3796,9 +4006,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 718,
+      "t": 717,
       "r": 430,
-      "b": 796,
+      "b": 795,
       "w": 430,
       "h": 78
      },
@@ -3814,9 +4024,9 @@
       "l": 0,
       "t": 103,
       "r": 430,
-      "b": 718,
+      "b": 717,
       "w": 430,
-      "h": 615
+      "h": 614
      },
      "cc": "true"
     },
@@ -3826,21 +4036,21 @@
       "l": 20,
       "t": 253,
       "r": 410,
-      "b": 706,
+      "b": 705,
       "w": 390,
-      "h": 453
+      "h": 452
      },
      "cardInner": {
       "l": 21,
       "r": 409,
       "t": 254,
-      "b": 705
+      "b": 704
      },
      "content": {
       "l": 41,
       "r": 389,
       "t": 274,
-      "b": 685
+      "b": 684
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -3861,7 +4071,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -3877,7 +4087,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": {
@@ -3966,6 +4177,17 @@
      },
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 274,
+      "r": 169,
+      "b": 402,
+      "w": 128,
+      "h": 128,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -3982,9 +4204,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 718,
+      "t": 717,
       "r": 430,
-      "b": 796,
+      "b": 795,
       "w": 430,
       "h": 78
      },
@@ -4000,9 +4222,9 @@
       "l": 0,
       "t": 103,
       "r": 430,
-      "b": 718,
+      "b": 717,
       "w": 430,
-      "h": 615
+      "h": 614
      },
      "cc": "true"
     },
@@ -4012,21 +4234,21 @@
       "l": 20,
       "t": 253,
       "r": 410,
-      "b": 706,
+      "b": 705,
       "w": 390,
-      "h": 453
+      "h": 452
      },
      "cardInner": {
       "l": 21,
       "r": 409,
       "t": 254,
-      "b": 705
+      "b": 704
      },
      "content": {
       "l": 41,
       "r": 389,
       "t": 274,
-      "b": 685
+      "b": 684
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -4047,7 +4269,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -4063,7 +4285,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": {
       "l": 41,
@@ -4152,6 +4375,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 274,
+      "r": 169,
+      "b": 402,
+      "w": 128,
+      "h": 128,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -4168,9 +4402,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 718,
+      "t": 717,
       "r": 430,
-      "b": 796,
+      "b": 795,
       "w": 430,
       "h": 78
      },
@@ -4186,9 +4420,9 @@
       "l": 0,
       "t": 103,
       "r": 430,
-      "b": 718,
+      "b": 717,
       "w": 430,
-      "h": 615
+      "h": 614
      },
      "cc": "true"
     },
@@ -4198,21 +4432,21 @@
       "l": 20,
       "t": 253,
       "r": 410,
-      "b": 706,
+      "b": 705,
       "w": 390,
-      "h": 453
+      "h": 452
      },
      "cardInner": {
       "l": 21,
       "r": 409,
       "t": 254,
-      "b": 705
+      "b": 704
      },
      "content": {
       "l": 41,
       "r": 389,
       "t": 274,
-      "b": 685
+      "b": 684
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -4233,7 +4467,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -4249,7 +4483,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": {
       "l": 41,
@@ -4318,6 +4553,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 274,
+      "r": 169,
+      "b": 402,
+      "w": 128,
+      "h": 128,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -4334,9 +4580,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 718,
+      "t": 717,
       "r": 430,
-      "b": 796,
+      "b": 795,
       "w": 430,
       "h": 78
      },
@@ -4352,9 +4598,9 @@
       "l": 0,
       "t": 103,
       "r": 430,
-      "b": 718,
+      "b": 717,
       "w": 430,
-      "h": 615
+      "h": 614
      },
      "cc": "true"
     },
@@ -4364,21 +4610,21 @@
       "l": 20,
       "t": 253,
       "r": 410,
-      "b": 706,
+      "b": 705,
       "w": 390,
-      "h": 453
+      "h": 452
      },
      "cardInner": {
       "l": 21,
       "r": 409,
       "t": 254,
-      "b": 705
+      "b": 704
      },
      "content": {
       "l": 41,
       "r": 389,
       "t": 274,
-      "b": 685
+      "b": 684
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -4387,9 +4633,9 @@
      "dir": "ltr",
      "img": {
       "l": 41,
-      "t": 305.5,
+      "t": 305,
       "r": 389,
-      "b": 653.5,
+      "b": 653,
       "w": 348,
       "h": 348,
       "vis": true,
@@ -4399,7 +4645,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -4415,7 +4661,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": null,
@@ -4424,6 +4671,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 305,
+      "r": 389,
+      "b": 653,
+      "w": 348,
+      "h": 348,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -4440,9 +4698,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 718,
+      "t": 717,
       "r": 430,
-      "b": 796,
+      "b": 795,
       "w": 430,
       "h": 78
      },
@@ -4458,9 +4716,9 @@
       "l": 0,
       "t": 103,
       "r": 430,
-      "b": 718,
+      "b": 717,
       "w": 430,
-      "h": 615
+      "h": 614
      },
      "cc": "false"
     },
@@ -4470,21 +4728,21 @@
       "l": 20,
       "t": 428,
       "r": 410,
-      "b": 706,
+      "b": 705,
       "w": 390,
-      "h": 278
+      "h": 277
      },
      "cardInner": {
       "l": 21,
       "r": 409,
       "t": 429,
-      "b": 705
+      "b": 704
      },
      "content": {
       "l": 41,
       "r": 389,
       "t": 449,
-      "b": 685
+      "b": 684
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -4494,10 +4752,10 @@
      "img": {
       "l": 41,
       "t": 449,
-      "r": 129,
-      "b": 537,
-      "w": 88,
-      "h": 88,
+      "r": 128,
+      "b": 536,
+      "w": 87,
+      "h": 87,
       "vis": true,
       "fit": "cover",
       "dfit": "cover",
@@ -4505,7 +4763,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -4521,14 +4779,15 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": {
       "l": 41,
-      "t": 553,
+      "t": 552,
       "r": 389,
-      "b": 643,
+      "b": 642,
       "w": 348,
       "h": 90,
       "lh": 30,
@@ -4547,9 +4806,9 @@
      },
      "next": {
       "l": 41,
-      "t": 655,
+      "t": 654,
       "r": 389,
-      "b": 685,
+      "b": 684,
       "w": 348,
       "h": 30,
       "lh": 30,
@@ -4568,9 +4827,9 @@
      },
      "next2": {
       "l": 41,
-      "t": 697,
+      "t": 696,
       "r": 389,
-      "b": 757,
+      "b": 756,
       "w": 348,
       "h": 60,
       "lh": 30,
@@ -4589,9 +4848,9 @@
      },
      "next3": {
       "l": 41,
-      "t": 697,
+      "t": 696,
       "r": 389,
-      "b": 727,
+      "b": 726,
       "w": 348,
       "h": 30,
       "lh": 30,
@@ -4610,6 +4869,17 @@
      },
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 449,
+      "r": 128,
+      "b": 536,
+      "w": 87,
+      "h": 87,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -4626,9 +4896,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 718,
+      "t": 717,
       "r": 430,
-      "b": 796,
+      "b": 795,
       "w": 430,
       "h": 78
      },
@@ -4644,9 +4914,9 @@
       "l": 0,
       "t": 103,
       "r": 430,
-      "b": 718,
+      "b": 717,
       "w": 430,
-      "h": 615
+      "h": 614
      },
      "cc": "true"
     },
@@ -4657,21 +4927,21 @@
        "l": 20,
        "t": 288.59375,
        "r": 410,
-       "b": 706,
+       "b": 705,
        "w": 390,
-       "h": 417.40625
+       "h": 416.40625
       },
       "cardInner": {
        "l": 21,
        "r": 409,
        "t": 289.59375,
-       "b": 705
+       "b": 704
       },
       "content": {
        "l": 41,
        "r": 389,
        "t": 309.59375,
-       "b": 685
+       "b": 684
       },
       "cardRadius": "18px",
       "padTop": "20px",
@@ -4692,7 +4962,7 @@
        "filter": "none",
        "bf": "none",
        "anim": "none",
-       "trans": "0s",
+       "trans": "0.2s",
        "bgi": "none",
        "alt": "",
        "lazy": null,
@@ -4708,7 +4978,8 @@
        "bw": "1px",
        "bs": "solid",
        "bc": "color(srgb 1 1 1 / 0.08)",
-       "inCard": true
+       "inCard": true,
+       "op": 1
       },
       "out": {
        "l": 41,
@@ -4797,6 +5068,17 @@
       "next3": null,
       "note": null,
       "noteText": null,
+      "slot": {
+       "l": 261,
+       "t": 309.59375,
+       "r": 389,
+       "b": 437.59375,
+       "w": 128,
+       "h": 128,
+       "state": "ready",
+       "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+       "vis": true
+      },
       "count": 1,
       "small": 0,
       "hook": {
@@ -4813,9 +5095,9 @@
       },
       "actions": {
        "l": 0,
-       "t": 718,
+       "t": 717,
        "r": 430,
-       "b": 796,
+       "b": 795,
        "w": 430,
        "h": 78
       },
@@ -4831,9 +5113,9 @@
        "l": 0,
        "t": 103,
        "r": 430,
-       "b": 718,
+       "b": 717,
        "w": 430,
-       "h": 615
+       "h": 614
       },
       "cc": "true"
      },
@@ -4889,34 +5171,34 @@
       "l": 20,
       "t": 288,
       "r": 410,
-      "b": 706,
+      "b": 705,
       "w": 390,
-      "h": 418
+      "h": 417
      },
      "cardInner": {
       "l": 21,
       "r": 409,
       "t": 289,
-      "b": 705
+      "b": 704
      },
      "content": {
       "l": 41,
       "r": 389,
       "t": 309,
-      "b": 685
+      "b": 684
      },
      "cardRadius": "18px",
      "padTop": "20px",
      "cardOverflow": "hidden",
-     "art": null,
-     "dir": null,
+     "art": "top",
+     "dir": "ltr",
      "img": null,
      "out": null,
      "cur": {
       "l": 41,
-      "t": 309,
+      "t": 453,
       "r": 389,
-      "b": 399,
+      "b": 543,
       "w": 348,
       "h": 90,
       "lh": 30,
@@ -4935,9 +5217,9 @@
      },
      "next": {
       "l": 41,
-      "t": 411,
+      "t": 555,
       "r": 389,
-      "b": 441,
+      "b": 585,
       "w": 348,
       "h": 30,
       "lh": 30,
@@ -4956,9 +5238,9 @@
      },
      "next2": {
       "l": 41,
-      "t": 453,
+      "t": 597,
       "r": 389,
-      "b": 513,
+      "b": 657,
       "w": 348,
       "h": 60,
       "lh": 30,
@@ -4977,9 +5259,9 @@
      },
      "next3": {
       "l": 41,
-      "t": 525,
+      "t": 669,
       "r": 389,
-      "b": 555,
+      "b": 699,
       "w": 348,
       "h": 30,
       "lh": 30,
@@ -4990,14 +5272,25 @@
       "ws": "normal",
       "to": "clip",
       "ov": "hidden",
-      "op": 0.42,
-      "hidden": false,
+      "op": 0,
+      "hidden": true,
       "pt": 0,
       "pb": 0,
       "text": "Vierte."
      },
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 309,
+      "r": 169,
+      "b": 437,
+      "w": 128,
+      "h": 128,
+      "state": "error",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 0,
      "small": 0,
      "hook": {
@@ -5014,9 +5307,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 718,
+      "t": 717,
       "r": 430,
-      "b": 796,
+      "b": 795,
       "w": 430,
       "h": 78
      },
@@ -5032,9 +5325,9 @@
       "l": 0,
       "t": 103,
       "r": 430,
-      "b": 718,
+      "b": 717,
       "w": 430,
-      "h": 615
+      "h": 614
      },
      "cc": "true"
     },
@@ -5044,21 +5337,21 @@
       "l": 20,
       "t": 323,
       "r": 373,
-      "b": 626,
+      "b": 584,
       "w": 353,
-      "h": 303
+      "h": 261
      },
      "cardInner": {
       "l": 21,
       "r": 372,
       "t": 324,
-      "b": 625
+      "b": 583
      },
      "content": {
       "l": 41,
       "r": 352,
       "t": 344,
-      "b": 605
+      "b": 563
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -5145,14 +5438,15 @@
       "ws": "normal",
       "to": "clip",
       "ov": "hidden",
-      "op": 0.42,
-      "hidden": false,
+      "op": 0,
+      "hidden": true,
       "pt": 0,
       "pb": 0,
       "text": "Vierte."
      },
      "note": null,
      "noteText": null,
+     "slot": null,
      "count": 0,
      "small": 0,
      "hook": {
@@ -5169,9 +5463,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 638,
+      "t": 596,
       "r": 393,
-      "b": 716,
+      "b": 674,
       "w": 393,
       "h": 78
      },
@@ -5187,9 +5481,9 @@
       "l": 0,
       "t": 103,
       "r": 393,
-      "b": 638,
+      "b": 596,
       "w": 393,
-      "h": 535
+      "h": 493
      },
      "cc": "true"
     },
@@ -5199,21 +5493,21 @@
       "l": 20,
       "t": 253,
       "r": 373,
-      "b": 626,
+      "b": 584,
       "w": 353,
-      "h": 373
+      "h": 331
      },
      "cardInner": {
       "l": 21,
       "r": 372,
       "t": 254,
-      "b": 625
+      "b": 583
      },
      "content": {
       "l": 41,
       "r": 352,
       "t": 274,
-      "b": 605
+      "b": 563
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -5234,7 +5528,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -5250,7 +5544,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": {
@@ -5299,28 +5594,28 @@
       "l": 41,
       "t": 562,
       "r": 352,
-      "b": 592,
+      "b": 622,
       "w": 311,
-      "h": 30,
+      "h": 60,
       "lh": 30,
       "sh": 60,
-      "ch": 30,
+      "ch": 60,
       "sw": 311,
       "cw": 311,
       "ws": "normal",
       "to": "clip",
       "ov": "hidden",
-      "op": 0.6,
-      "hidden": false,
+      "op": 0,
+      "hidden": true,
       "pt": 0,
       "pb": 0,
       "text": "Dritte Zeile mit einem Satz, der ebenfalls umbricht."
      },
      "next3": {
       "l": 41,
-      "t": 604,
+      "t": 562,
       "r": 352,
-      "b": 634,
+      "b": 592,
       "w": 311,
       "h": 30,
       "lh": 30,
@@ -5339,6 +5634,17 @@
      },
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 274,
+      "r": 169,
+      "b": 402,
+      "w": 128,
+      "h": 128,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -5355,9 +5661,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 638,
+      "t": 596,
       "r": 393,
-      "b": 716,
+      "b": 674,
       "w": 393,
       "h": 78
      },
@@ -5373,9 +5679,9 @@
       "l": 0,
       "t": 103,
       "r": 393,
-      "b": 638,
+      "b": 596,
       "w": 393,
-      "h": 535
+      "h": 493
      },
      "cc": "true"
     },
@@ -5385,21 +5691,21 @@
       "l": 20,
       "t": 253,
       "r": 373,
-      "b": 626,
+      "b": 584,
       "w": 353,
-      "h": 373
+      "h": 331
      },
      "cardInner": {
       "l": 21,
       "r": 372,
       "t": 254,
-      "b": 625
+      "b": 583
      },
      "content": {
       "l": 41,
       "r": 352,
       "t": 274,
-      "b": 605
+      "b": 563
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -5420,7 +5726,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -5436,7 +5742,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": {
       "l": 41,
@@ -5525,6 +5832,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 274,
+      "r": 169,
+      "b": 402,
+      "w": 128,
+      "h": 128,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -5541,9 +5859,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 638,
+      "t": 596,
       "r": 393,
-      "b": 716,
+      "b": 674,
       "w": 393,
       "h": 78
      },
@@ -5559,9 +5877,9 @@
       "l": 0,
       "t": 103,
       "r": 393,
-      "b": 638,
+      "b": 596,
       "w": 393,
-      "h": 535
+      "h": 493
      },
      "cc": "true"
     },
@@ -5571,21 +5889,21 @@
       "l": 20,
       "t": 253,
       "r": 373,
-      "b": 626,
+      "b": 584,
       "w": 353,
-      "h": 373
+      "h": 331
      },
      "cardInner": {
       "l": 21,
       "r": 372,
       "t": 254,
-      "b": 625
+      "b": 583
      },
      "content": {
       "l": 41,
       "r": 352,
       "t": 274,
-      "b": 605
+      "b": 563
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -5606,7 +5924,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -5622,7 +5940,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": {
       "l": 41,
@@ -5691,6 +6010,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 274,
+      "r": 169,
+      "b": 402,
+      "w": 128,
+      "h": 128,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -5707,9 +6037,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 638,
+      "t": 596,
       "r": 393,
-      "b": 716,
+      "b": 674,
       "w": 393,
       "h": 78
      },
@@ -5725,9 +6055,9 @@
       "l": 0,
       "t": 103,
       "r": 393,
-      "b": 638,
+      "b": 596,
       "w": 393,
-      "h": 535
+      "h": 493
      },
      "cc": "true"
     },
@@ -5737,21 +6067,21 @@
       "l": 20,
       "t": 253,
       "r": 373,
-      "b": 626,
+      "b": 584,
       "w": 353,
-      "h": 373
+      "h": 331
      },
      "cardInner": {
       "l": 21,
       "r": 372,
       "t": 254,
-      "b": 625
+      "b": 583
      },
      "content": {
       "l": 41,
       "r": 352,
       "t": 274,
-      "b": 605
+      "b": 563
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -5759,12 +6089,12 @@
      "art": "fill",
      "dir": "ltr",
      "img": {
-      "l": 41,
-      "t": 284,
-      "r": 352,
-      "b": 595,
-      "w": 311,
-      "h": 311,
+      "l": 52,
+      "t": 274,
+      "r": 341,
+      "b": 563,
+      "w": 289,
+      "h": 289,
       "vis": true,
       "fit": "cover",
       "dfit": "cover",
@@ -5772,7 +6102,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -5788,7 +6118,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": null,
@@ -5797,6 +6128,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 52,
+      "t": 274,
+      "r": 341,
+      "b": 563,
+      "w": 289,
+      "h": 289,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -5813,9 +6155,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 638,
+      "t": 596,
       "r": 393,
-      "b": 716,
+      "b": 674,
       "w": 393,
       "h": 78
      },
@@ -5831,9 +6173,9 @@
       "l": 0,
       "t": 103,
       "r": 393,
-      "b": 638,
+      "b": 596,
       "w": 393,
-      "h": 535
+      "h": 493
      },
      "cc": "false"
     },
@@ -5843,21 +6185,21 @@
       "l": 20,
       "t": 428,
       "r": 373,
-      "b": 626,
+      "b": 584,
       "w": 353,
-      "h": 198
+      "h": 156
      },
      "cardInner": {
       "l": 21,
       "r": 372,
       "t": 429,
-      "b": 625
+      "b": 583
      },
      "content": {
       "l": 41,
       "r": 352,
       "t": 449,
-      "b": 605
+      "b": 563
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -5878,7 +6220,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -5894,7 +6236,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": {
@@ -5933,17 +6276,17 @@
       "ws": "normal",
       "to": "clip",
       "ov": "hidden",
-      "op": 1,
-      "hidden": false,
+      "op": 0,
+      "hidden": true,
       "pt": 0,
       "pb": 0,
       "text": "Zweite Zeile, kurz."
      },
      "next2": {
       "l": 41,
-      "t": 593,
+      "t": 551,
       "r": 352,
-      "b": 653,
+      "b": 611,
       "w": 311,
       "h": 60,
       "lh": 30,
@@ -5962,9 +6305,9 @@
      },
      "next3": {
       "l": 41,
-      "t": 593,
+      "t": 551,
       "r": 352,
-      "b": 623,
+      "b": 581,
       "w": 311,
       "h": 30,
       "lh": 30,
@@ -5983,6 +6326,17 @@
      },
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": false
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -5999,9 +6353,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 638,
+      "t": 596,
       "r": 393,
-      "b": 716,
+      "b": 674,
       "w": 393,
       "h": 78
      },
@@ -6017,9 +6371,9 @@
       "l": 0,
       "t": 103,
       "r": 393,
-      "b": 638,
+      "b": 596,
       "w": 393,
-      "h": 535
+      "h": 493
      },
      "cc": "true"
     },
@@ -6030,21 +6384,21 @@
        "l": 20,
        "t": 288.59375,
        "r": 373,
-       "b": 626,
+       "b": 584,
        "w": 353,
-       "h": 337.40625
+       "h": 295.40625
       },
       "cardInner": {
        "l": 21,
        "r": 372,
        "t": 289.59375,
-       "b": 625
+       "b": 583
       },
       "content": {
        "l": 41,
        "r": 352,
        "t": 309.59375,
-       "b": 605
+       "b": 563
       },
       "cardRadius": "18px",
       "padTop": "20px",
@@ -6052,20 +6406,20 @@
       "art": "top",
       "dir": "rtl",
       "img": {
-       "l": 268.59375,
-       "t": 309.59375,
-       "r": 352,
-       "b": 393,
-       "w": 83.40625,
-       "h": 83.40625,
-       "vis": true,
+       "l": 0,
+       "t": 0,
+       "r": 0,
+       "b": 0,
+       "w": 0,
+       "h": 0,
+       "vis": false,
        "fit": "cover",
        "dfit": "cover",
        "pos": "50% 50%",
        "filter": "none",
        "bf": "none",
        "anim": "none",
-       "trans": "0s",
+       "trans": "0.2s",
        "bgi": "none",
        "alt": "",
        "lazy": null,
@@ -6081,13 +6435,14 @@
        "bw": "1px",
        "bs": "solid",
        "bc": "color(srgb 1 1 1 / 0.08)",
-       "inCard": true
+       "inCard": true,
+       "op": 1
       },
       "out": {
        "l": 41,
-       "t": 259,
+       "t": 159.59375,
        "r": 352,
-       "b": 397,
+       "b": 297.59375,
        "w": 311,
        "h": 138,
        "lh": 46,
@@ -6106,9 +6461,9 @@
       },
       "cur": {
        "l": 41,
-       "t": 409,
+       "t": 309.59375,
        "r": 352,
-       "b": 455,
+       "b": 355.59375,
        "w": 311,
        "h": 46,
        "lh": 46,
@@ -6127,9 +6482,9 @@
       },
       "next": {
        "l": 41,
-       "t": 467,
+       "t": 367.59375,
        "r": 352,
-       "b": 559,
+       "b": 459.59375,
        "w": 311,
        "h": 92,
        "lh": 46,
@@ -6148,9 +6503,9 @@
       },
       "next2": {
        "l": 41,
-       "t": 571,
+       "t": 471.59375,
        "r": 352,
-       "b": 617,
+       "b": 517.59375,
        "w": 311,
        "h": 46,
        "lh": 46,
@@ -6161,8 +6516,8 @@
        "ws": "normal",
        "to": "clip",
        "ov": "hidden",
-       "op": 0,
-       "hidden": true,
+       "op": 0.6,
+       "hidden": false,
        "pt": 0,
        "pb": 0,
        "text": "الرابع."
@@ -6170,6 +6525,17 @@
       "next3": null,
       "note": null,
       "noteText": null,
+      "slot": {
+       "l": 0,
+       "t": 0,
+       "r": 0,
+       "b": 0,
+       "w": 0,
+       "h": 0,
+       "state": "ready",
+       "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+       "vis": false
+      },
       "count": 1,
       "small": 0,
       "hook": {
@@ -6186,9 +6552,9 @@
       },
       "actions": {
        "l": 0,
-       "t": 638,
+       "t": 596,
        "r": 393,
-       "b": 716,
+       "b": 674,
        "w": 393,
        "h": 78
       },
@@ -6204,9 +6570,9 @@
        "l": 0,
        "t": 103,
        "r": 393,
-       "b": 638,
+       "b": 596,
        "w": 393,
-       "h": 535
+       "h": 493
       },
       "cc": "true"
      },
@@ -6262,27 +6628,27 @@
       "l": 20,
       "t": 323,
       "r": 373,
-      "b": 626,
+      "b": 584,
       "w": 353,
-      "h": 303
+      "h": 261
      },
      "cardInner": {
       "l": 21,
       "r": 372,
       "t": 324,
-      "b": 625
+      "b": 583
      },
      "content": {
       "l": 41,
       "r": 352,
       "t": 344,
-      "b": 605
+      "b": 563
      },
      "cardRadius": "18px",
      "padTop": "20px",
      "cardOverflow": "hidden",
-     "art": null,
-     "dir": null,
+     "art": "top",
+     "dir": "ltr",
      "img": null,
      "out": null,
      "cur": {
@@ -6363,14 +6729,25 @@
       "ws": "normal",
       "to": "clip",
       "ov": "hidden",
-      "op": 0.42,
-      "hidden": false,
+      "op": 0,
+      "hidden": true,
       "pt": 0,
       "pb": 0,
       "text": "Vierte."
      },
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0,
+      "state": "error",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": false
+     },
      "count": 0,
      "small": 0,
      "hook": {
@@ -6387,9 +6764,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 638,
+      "t": 596,
       "r": 393,
-      "b": 716,
+      "b": 674,
       "w": 393,
       "h": 78
      },
@@ -6405,9 +6782,9 @@
       "l": 0,
       "t": 103,
       "r": 393,
-      "b": 638,
+      "b": 596,
       "w": 393,
-      "h": 535
+      "h": 493
      },
      "cc": "true"
     },
@@ -6417,21 +6794,21 @@
       "l": 20,
       "t": 253,
       "r": 370,
-      "b": 618,
+      "b": 617,
       "w": 350,
-      "h": 365
+      "h": 364
      },
      "cardInner": {
       "l": 21,
       "r": 369,
       "t": 254,
-      "b": 617
+      "b": 616
      },
      "content": {
       "l": 41,
       "r": 349,
       "t": 274,
-      "b": 597
+      "b": 596
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -6452,7 +6829,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -6468,7 +6845,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": {
       "l": 41,
@@ -6557,6 +6935,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 274,
+      "r": 169,
+      "b": 402,
+      "w": 128,
+      "h": 128,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -6573,9 +6962,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 630,
+      "t": 629,
       "r": 390,
-      "b": 708,
+      "b": 707,
       "w": 390,
       "h": 78
      },
@@ -6591,9 +6980,9 @@
       "l": 0,
       "t": 103,
       "r": 390,
-      "b": 630,
+      "b": 629,
       "w": 390,
-      "h": 527
+      "h": 526
      },
      "cc": "true"
     },
@@ -6609,21 +6998,21 @@
       "l": 20,
       "t": 253,
       "r": 370,
-      "b": 618,
+      "b": 617,
       "w": 350,
-      "h": 365
+      "h": 364
      },
      "cardInner": {
       "l": 21,
       "r": 369,
       "t": 254,
-      "b": 617
+      "b": 616
      },
      "content": {
       "l": 41,
       "r": 349,
       "t": 274,
-      "b": 597
+      "b": 596
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -6644,7 +7033,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -6660,7 +7049,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": {
@@ -6749,6 +7139,17 @@
      },
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 274,
+      "r": 169,
+      "b": 402,
+      "w": 128,
+      "h": 128,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -6765,9 +7166,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 630,
+      "t": 629,
       "r": 390,
-      "b": 708,
+      "b": 707,
       "w": 390,
       "h": 78
      },
@@ -6783,9 +7184,9 @@
       "l": 0,
       "t": 103,
       "r": 390,
-      "b": 630,
+      "b": 629,
       "w": 390,
-      "h": 527
+      "h": 526
      },
      "cc": "true"
     },
@@ -6795,21 +7196,21 @@
       "l": 20,
       "t": 253,
       "r": 370,
-      "b": 618,
+      "b": 617,
       "w": 350,
-      "h": 365
+      "h": 364
      },
      "cardInner": {
       "l": 21,
       "r": 369,
       "t": 254,
-      "b": 617
+      "b": 616
      },
      "content": {
       "l": 41,
       "r": 349,
       "t": 274,
-      "b": 597
+      "b": 596
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -6818,9 +7219,9 @@
      "dir": "ltr",
      "img": {
       "l": 41,
-      "t": 281.5,
+      "t": 281,
       "r": 349,
-      "b": 589.5,
+      "b": 589,
       "w": 308,
       "h": 308,
       "vis": true,
@@ -6830,7 +7231,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -6846,7 +7247,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": null,
@@ -6855,6 +7257,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 281,
+      "r": 349,
+      "b": 589,
+      "w": 308,
+      "h": 308,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -6871,9 +7284,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 630,
+      "t": 629,
       "r": 390,
-      "b": 708,
+      "b": 707,
       "w": 390,
       "h": 78
      },
@@ -6889,9 +7302,9 @@
       "l": 0,
       "t": 103,
       "r": 390,
-      "b": 630,
+      "b": 629,
       "w": 390,
-      "h": 527
+      "h": 526
      },
      "cc": null
     },
@@ -6901,21 +7314,21 @@
       "l": 20,
       "t": 214,
       "r": 355,
-      "b": 473,
+      "b": 472,
       "w": 335,
-      "h": 259
+      "h": 258
      },
      "cardInner": {
       "l": 21,
       "r": 354,
       "t": 215,
-      "b": 472
+      "b": 471
      },
      "content": {
       "l": 41,
       "r": 334,
       "t": 235,
-      "b": 452
+      "b": 451
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -6936,7 +7349,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -6952,7 +7365,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": {
       "l": 41,
@@ -7041,6 +7455,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": false
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -7057,9 +7482,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 485,
+      "t": 484,
       "r": 375,
-      "b": 549,
+      "b": 548,
       "w": 375,
       "h": 64
      },
@@ -7075,9 +7500,9 @@
       "l": 0,
       "t": 64,
       "r": 375,
-      "b": 485,
+      "b": 484,
       "w": 375,
-      "h": 421
+      "h": 420
      },
      "cc": "true"
     },
@@ -7093,21 +7518,21 @@
       "l": 20,
       "t": 214,
       "r": 355,
-      "b": 473,
+      "b": 472,
       "w": 335,
-      "h": 259
+      "h": 258
      },
      "cardInner": {
       "l": 21,
       "r": 354,
       "t": 215,
-      "b": 472
+      "b": 471
      },
      "content": {
       "l": 41,
       "r": 334,
       "t": 235,
-      "b": 452
+      "b": 451
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -7128,7 +7553,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -7144,7 +7569,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": {
@@ -7233,6 +7659,17 @@
      },
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": false
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -7249,9 +7686,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 485,
+      "t": 484,
       "r": 375,
-      "b": 549,
+      "b": 548,
       "w": 375,
       "h": 64
      },
@@ -7267,9 +7704,9 @@
       "l": 0,
       "t": 64,
       "r": 375,
-      "b": 485,
+      "b": 484,
       "w": 375,
-      "h": 421
+      "h": 420
      },
      "cc": "true"
     },
@@ -7279,21 +7716,21 @@
       "l": 20,
       "t": 214,
       "r": 355,
-      "b": 473,
+      "b": 472,
       "w": 335,
-      "h": 259
+      "h": 258
      },
      "cardInner": {
       "l": 21,
       "r": 354,
       "t": 215,
-      "b": 472
+      "b": 471
      },
      "content": {
       "l": 41,
       "r": 334,
       "t": 235,
-      "b": 452
+      "b": 451
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -7301,12 +7738,12 @@
      "art": "fill",
      "dir": "ltr",
      "img": {
-      "l": 79,
+      "l": 79.5,
       "t": 235,
-      "r": 296,
-      "b": 452,
-      "w": 217,
-      "h": 217,
+      "r": 295.5,
+      "b": 451,
+      "w": 216,
+      "h": 216,
       "vis": true,
       "fit": "cover",
       "dfit": "cover",
@@ -7314,7 +7751,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -7330,7 +7767,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": null,
@@ -7339,6 +7777,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 79.5,
+      "t": 235,
+      "r": 295.5,
+      "b": 451,
+      "w": 216,
+      "h": 216,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -7355,9 +7804,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 485,
+      "t": 484,
       "r": 375,
-      "b": 549,
+      "b": 548,
       "w": 375,
       "h": 64
      },
@@ -7373,9 +7822,9 @@
       "l": 0,
       "t": 64,
       "r": 375,
-      "b": 485,
+      "b": 484,
       "w": 375,
-      "h": 421
+      "h": 420
      },
      "cc": null
     },
@@ -7385,21 +7834,21 @@
       "l": 20,
       "t": 253,
       "r": 410,
-      "b": 706,
+      "b": 705,
       "w": 390,
-      "h": 453
+      "h": 452
      },
      "cardInner": {
       "l": 21,
       "r": 409,
       "t": 254,
-      "b": 705
+      "b": 704
      },
      "content": {
       "l": 41,
       "r": 389,
       "t": 274,
-      "b": 685
+      "b": 684
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -7420,7 +7869,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -7436,7 +7885,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": {
       "l": 41,
@@ -7525,6 +7975,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 274,
+      "r": 169,
+      "b": 402,
+      "w": 128,
+      "h": 128,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -7541,9 +8002,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 718,
+      "t": 717,
       "r": 430,
-      "b": 796,
+      "b": 795,
       "w": 430,
       "h": 78
      },
@@ -7559,9 +8020,9 @@
       "l": 0,
       "t": 103,
       "r": 430,
-      "b": 718,
+      "b": 717,
       "w": 430,
-      "h": 615
+      "h": 614
      },
      "cc": "true"
     },
@@ -7577,21 +8038,21 @@
       "l": 20,
       "t": 253,
       "r": 410,
-      "b": 706,
+      "b": 705,
       "w": 390,
-      "h": 453
+      "h": 452
      },
      "cardInner": {
       "l": 21,
       "r": 409,
       "t": 254,
-      "b": 705
+      "b": 704
      },
      "content": {
       "l": 41,
       "r": 389,
       "t": 274,
-      "b": 685
+      "b": 684
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -7612,7 +8073,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -7628,7 +8089,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": {
@@ -7717,6 +8179,17 @@
      },
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 274,
+      "r": 169,
+      "b": 402,
+      "w": 128,
+      "h": 128,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -7733,9 +8206,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 718,
+      "t": 717,
       "r": 430,
-      "b": 796,
+      "b": 795,
       "w": 430,
       "h": 78
      },
@@ -7751,9 +8224,9 @@
       "l": 0,
       "t": 103,
       "r": 430,
-      "b": 718,
+      "b": 717,
       "w": 430,
-      "h": 615
+      "h": 614
      },
      "cc": "true"
     },
@@ -7763,21 +8236,21 @@
       "l": 20,
       "t": 253,
       "r": 410,
-      "b": 706,
+      "b": 705,
       "w": 390,
-      "h": 453
+      "h": 452
      },
      "cardInner": {
       "l": 21,
       "r": 409,
       "t": 254,
-      "b": 705
+      "b": 704
      },
      "content": {
       "l": 41,
       "r": 389,
       "t": 274,
-      "b": 685
+      "b": 684
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -7786,9 +8259,9 @@
      "dir": "ltr",
      "img": {
       "l": 41,
-      "t": 305.5,
+      "t": 305,
       "r": 389,
-      "b": 653.5,
+      "b": 653,
       "w": 348,
       "h": 348,
       "vis": true,
@@ -7798,7 +8271,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -7814,7 +8287,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": null,
@@ -7823,6 +8297,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 305,
+      "r": 389,
+      "b": 653,
+      "w": 348,
+      "h": 348,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -7839,9 +8324,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 718,
+      "t": 717,
       "r": 430,
-      "b": 796,
+      "b": 795,
       "w": 430,
       "h": 78
      },
@@ -7857,9 +8342,9 @@
       "l": 0,
       "t": 103,
       "r": 430,
-      "b": 718,
+      "b": 717,
       "w": 430,
-      "h": 615
+      "h": 614
      },
      "cc": null
     },
@@ -7869,21 +8354,21 @@
       "l": 20,
       "t": 253,
       "r": 373,
-      "b": 626,
+      "b": 584,
       "w": 353,
-      "h": 373
+      "h": 331
      },
      "cardInner": {
       "l": 21,
       "r": 372,
       "t": 254,
-      "b": 625
+      "b": 583
      },
      "content": {
       "l": 41,
       "r": 352,
       "t": 274,
-      "b": 605
+      "b": 563
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -7904,7 +8389,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -7920,18 +8405,19 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": {
       "l": 41,
-      "t": 256,
+      "t": 286,
       "r": 352,
       "b": 406,
       "w": 311,
-      "h": 150,
+      "h": 120,
       "lh": 30,
       "sh": 150,
-      "ch": 150,
+      "ch": 120,
       "sw": 311,
       "cw": 311,
       "ws": "normal",
@@ -8009,6 +8495,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 274,
+      "r": 169,
+      "b": 402,
+      "w": 128,
+      "h": 128,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -8025,9 +8522,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 638,
+      "t": 596,
       "r": 393,
-      "b": 716,
+      "b": 674,
       "w": 393,
       "h": 78
      },
@@ -8043,9 +8540,9 @@
       "l": 0,
       "t": 103,
       "r": 393,
-      "b": 638,
+      "b": 596,
       "w": 393,
-      "h": 535
+      "h": 493
      },
      "cc": "true"
     },
@@ -8061,21 +8558,21 @@
       "l": 20,
       "t": 253,
       "r": 373,
-      "b": 626,
+      "b": 584,
       "w": 353,
-      "h": 373
+      "h": 331
      },
      "cardInner": {
       "l": 21,
       "r": 372,
       "t": 254,
-      "b": 625
+      "b": 583
      },
      "content": {
       "l": 41,
       "r": 352,
       "t": 274,
-      "b": 605
+      "b": 563
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -8096,7 +8593,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -8112,7 +8609,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": {
@@ -8161,28 +8659,28 @@
       "l": 41,
       "t": 562,
       "r": 352,
-      "b": 592,
+      "b": 622,
       "w": 311,
-      "h": 30,
+      "h": 60,
       "lh": 30,
       "sh": 60,
-      "ch": 30,
+      "ch": 60,
       "sw": 311,
       "cw": 311,
       "ws": "normal",
       "to": "clip",
       "ov": "hidden",
-      "op": 0.6,
-      "hidden": false,
+      "op": 0,
+      "hidden": true,
       "pt": 0,
       "pb": 0,
       "text": "Dritte Zeile mit einem Satz, der ebenfalls umbricht."
      },
      "next3": {
       "l": 41,
-      "t": 604,
+      "t": 562,
       "r": 352,
-      "b": 634,
+      "b": 592,
       "w": 311,
       "h": 30,
       "lh": 30,
@@ -8201,6 +8699,17 @@
      },
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 41,
+      "t": 274,
+      "r": 169,
+      "b": 402,
+      "w": 128,
+      "h": 128,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -8217,9 +8726,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 638,
+      "t": 596,
       "r": 393,
-      "b": 716,
+      "b": 674,
       "w": 393,
       "h": 78
      },
@@ -8235,9 +8744,9 @@
       "l": 0,
       "t": 103,
       "r": 393,
-      "b": 638,
+      "b": 596,
       "w": 393,
-      "h": 535
+      "h": 493
      },
      "cc": "true"
     },
@@ -8247,21 +8756,21 @@
       "l": 20,
       "t": 253,
       "r": 373,
-      "b": 626,
+      "b": 584,
       "w": 353,
-      "h": 373
+      "h": 331
      },
      "cardInner": {
       "l": 21,
       "r": 372,
       "t": 254,
-      "b": 625
+      "b": 583
      },
      "content": {
       "l": 41,
       "r": 352,
       "t": 274,
-      "b": 605
+      "b": 563
      },
      "cardRadius": "18px",
      "padTop": "20px",
@@ -8269,12 +8778,12 @@
      "art": "fill",
      "dir": "ltr",
      "img": {
-      "l": 41,
-      "t": 284,
-      "r": 352,
-      "b": 595,
-      "w": 311,
-      "h": 311,
+      "l": 52,
+      "t": 274,
+      "r": 341,
+      "b": 563,
+      "w": 289,
+      "h": 289,
       "vis": true,
       "fit": "cover",
       "dfit": "cover",
@@ -8282,7 +8791,7 @@
       "filter": "none",
       "bf": "none",
       "anim": "none",
-      "trans": "0s",
+      "trans": "0.2s",
       "bgi": "none",
       "alt": "",
       "lazy": null,
@@ -8298,7 +8807,8 @@
       "bw": "1px",
       "bs": "solid",
       "bc": "color(srgb 1 1 1 / 0.08)",
-      "inCard": true
+      "inCard": true,
+      "op": 1
      },
      "out": null,
      "cur": null,
@@ -8307,6 +8817,17 @@
      "next3": null,
      "note": null,
      "noteText": null,
+     "slot": {
+      "l": 52,
+      "t": 274,
+      "r": 341,
+      "b": 563,
+      "w": 289,
+      "h": 289,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "count": 1,
      "small": 0,
      "hook": {
@@ -8323,9 +8844,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 638,
+      "t": 596,
       "r": 393,
-      "b": 716,
+      "b": 674,
       "w": 393,
       "h": 78
      },
@@ -8341,9 +8862,9 @@
       "l": 0,
       "t": 103,
       "r": 393,
-      "b": 638,
+      "b": 596,
       "w": 393,
-      "h": 535
+      "h": 493
      },
      "cc": null
     },
@@ -8351,108 +8872,98 @@
      "390x844 Hook mit Bild kurz": "0",
      "390x844 Hook-Stufe ohne Bild": 0,
      "390x844 Hook-Stufe mit Bild": 0,
-     "390x844 Karte hoch mit Bild": 295,
-     "390x844 Bild px": 105,
+     "390x844 Karte hoch mit Bild": 294,
+     "390x844 Bild px": 104,
      "375x667 Hook mit Bild kurz": "0",
      "375x667 Hook-Stufe ohne Bild": 0,
      "375x667 Hook-Stufe mit Bild": 0,
-     "375x667 Karte hoch mit Bild": 189,
+     "375x667 Karte hoch mit Bild": 188,
      "375x667 Bild px": 0,
      "430x932 Hook mit Bild kurz": "0",
      "430x932 Hook-Stufe ohne Bild": 0,
      "430x932 Hook-Stufe mit Bild": 0,
-     "430x932 Karte hoch mit Bild": 418,
+     "430x932 Karte hoch mit Bild": 417,
      "430x932 Bild px": 128,
      "393x852 Hook mit Bild kurz": "0",
      "393x852 Hook-Stufe ohne Bild": 0,
      "393x852 Hook-Stufe mit Bild": 0,
-     "393x852 Karte hoch mit Bild": 303,
-     "393x852 Bild px": 113
+     "393x852 Karte hoch mit Bild": 261,
+     "393x852 Bild px": 0
     },
-    "Gerät A (Fehler, Korrektur an)": {
+    "Gerät A (kurzes Fenster, Rückfall an)": {
      "ih": 793,
      "sh": 852,
-     "v": "852px",
-     "rootV": "852px",
-     "feed": {
-      "l": 0,
-      "t": 0,
-      "r": 393,
-      "b": 852,
-      "w": 393,
-      "h": 852
-     },
-     "head": {
-      "l": 0,
-      "t": 0,
-      "r": 393,
-      "b": 103,
-      "w": 393,
-      "h": 103
-     },
-     "tabs": {
-      "l": 16,
-      "t": 59,
-      "r": 192.828125,
-      "b": 103,
-      "w": 176.828125,
-      "h": 44
-     },
-     "actions": {
-      "l": 0,
-      "t": 638,
-      "r": 393,
-      "b": 716,
-      "w": 393,
-      "h": 78
-     },
-     "bar": {
-      "l": 0,
-      "t": 716,
-      "r": 393,
-      "b": 852,
-      "w": 393,
-      "h": 136
-     },
-     "lyrics": {
-      "l": 20,
-      "t": 253,
-      "r": 373,
-      "b": 626,
-      "w": 353,
-      "h": 373
-     },
-     "audio": {
-      "l": 0,
-      "t": 103,
-      "r": 393,
-      "b": 638,
-      "w": 393,
-      "h": 535
-     },
-     "hook": {
-      "l": 20,
-      "t": 167,
-      "r": 373,
-      "b": 237,
-      "w": 353,
-      "h": 70
-     },
-     "pos": "fixed",
-     "bg": "rgb(11, 13, 17)",
-     "inStage": false,
-     "vstage": "none",
-     "scrollY": 793,
-     "vp": [
-      "vp: iw=393 ih=793 vvh=793 ch=793 sw=390 sh=852 st=59 sb=34 standalone=yes ios=16 head=0,103 bar=716,852 feed=0,852 fix=852",
-      "vp: iw=393 ih=793 vvh=793 ch=793 sw=390 sh=852 st=59 sb=34 standalone=yes ios=16 head=0,103 bar=716,852 feed=0,852 fix=852"
-     ]
-    },
-    "Gerät B (kein Standalone)": {
-     "ih": 793,
-     "sh": 852,
-     "v": "",
-     "rootV": "",
+     "short": true,
+     "phPb": "16px",
+     "htmlBg": "rgb(20, 23, 29)",
+     "barBg": "rgb(20, 23, 29)",
+     "minRule": true,
+     "phH": "",
+     "btns": [
+      {
+       "t": 610,
+       "b": 662,
+       "l": 20,
+       "r": 105.25,
+       "id": "like"
+      },
+      {
+       "t": 610,
+       "b": 662,
+       "l": 109.25,
+       "r": 194.5,
+       "id": "save"
+      },
+      {
+       "t": 610,
+       "b": 662,
+       "l": 198.5,
+       "r": 283.75,
+       "id": "share"
+      },
+      {
+       "t": 610,
+       "b": 662,
+       "l": 287.75,
+       "r": 373,
+       "id": "more"
+      },
+      {
+       "t": 721,
+       "b": 765,
+       "l": 20,
+       "r": 84,
+       "id": "rate"
+      },
+      {
+       "t": 719,
+       "b": 767,
+       "l": 96.5,
+       "r": 144.5,
+       "id": "ctl-prev"
+      },
+      {
+       "t": 709,
+       "b": 777,
+       "l": 162.5,
+       "r": 230.5,
+       "id": "ctl-play"
+      },
+      {
+       "t": 719,
+       "b": 767,
+       "l": 248.5,
+       "r": 296.5,
+       "id": "ctl-next"
+      },
+      {
+       "t": 721,
+       "b": 765,
+       "l": 309,
+       "r": 373,
+       "id": "cc"
+      }
+     ],
      "feed": {
       "l": 0,
       "t": 0,
@@ -8479,35 +8990,35 @@
      },
      "actions": {
       "l": 0,
-      "t": 579,
+      "t": 596,
       "r": 393,
-      "b": 657,
+      "b": 674,
       "w": 393,
       "h": 78
      },
      "bar": {
       "l": 0,
-      "t": 657,
+      "t": 674,
       "r": 393,
       "b": 793,
       "w": 393,
-      "h": 136
+      "h": 119
      },
      "lyrics": {
       "l": 20,
       "t": 253,
       "r": 373,
-      "b": 567,
+      "b": 584,
       "w": 353,
-      "h": 314
+      "h": 331
      },
      "audio": {
       "l": 0,
       "t": 103,
       "r": 393,
-      "b": 579,
+      "b": 596,
       "w": 393,
-      "h": 476
+      "h": 493
      },
      "hook": {
       "l": 20,
@@ -8523,15 +9034,232 @@
      "vstage": "none",
      "scrollY": 793,
      "vp": [
-      "vp: iw=393 ih=793 vvh=793 ch=793 sw=390 sh=852 st=59 sb=34 standalone=no ios=16 head=0,103 bar=657,793 feed=0,793 fix=none",
-      "vp: iw=393 ih=793 vvh=793 ch=793 sw=390 sh=852 st=59 sb=34 standalone=no ios=16 head=0,103 bar=657,793 feed=0,793 fix=none"
+      "vp: iw=393 ih=793 vvh=793 ch=793 sw=390 sh=852 st=59 sb=34 standalone=yes ios=16 head=0,103 bar=674,793 feed=0,793 dh=793 sy=0 top=DIV.head short=yes",
+      "vp: iw=393 ih=793 vvh=793 ch=793 sw=390 sh=852 st=59 sb=34 standalone=yes ios=16 head=0,103 bar=674,793 feed=0,793 dh=793 sy=0 top=DIV.head short=yes"
+     ]
+    },
+    "Gerät B (kein Standalone)": {
+     "ih": 793,
+     "sh": 852,
+     "short": false,
+     "phPb": "34px",
+     "htmlBg": "rgb(20, 23, 29)",
+     "barBg": "rgb(20, 23, 29)",
+     "minRule": true,
+     "phH": "",
+     "btns": [
+      {
+       "t": 592,
+       "b": 644,
+       "l": 20,
+       "r": 105.25,
+       "id": "like"
+      },
+      {
+       "t": 592,
+       "b": 644,
+       "l": 109.25,
+       "r": 194.5,
+       "id": "save"
+      },
+      {
+       "t": 592,
+       "b": 644,
+       "l": 198.5,
+       "r": 283.75,
+       "id": "share"
+      },
+      {
+       "t": 592,
+       "b": 644,
+       "l": 287.75,
+       "r": 373,
+       "id": "more"
+      },
+      {
+       "t": 703,
+       "b": 747,
+       "l": 20,
+       "r": 84,
+       "id": "rate"
+      },
+      {
+       "t": 701,
+       "b": 749,
+       "l": 96.5,
+       "r": 144.5,
+       "id": "ctl-prev"
+      },
+      {
+       "t": 691,
+       "b": 759,
+       "l": 162.5,
+       "r": 230.5,
+       "id": "ctl-play"
+      },
+      {
+       "t": 701,
+       "b": 749,
+       "l": 248.5,
+       "r": 296.5,
+       "id": "ctl-next"
+      },
+      {
+       "t": 703,
+       "b": 747,
+       "l": 309,
+       "r": 373,
+       "id": "cc"
+      }
+     ],
+     "feed": {
+      "l": 0,
+      "t": 0,
+      "r": 393,
+      "b": 793,
+      "w": 393,
+      "h": 793
+     },
+     "head": {
+      "l": 0,
+      "t": 0,
+      "r": 393,
+      "b": 103,
+      "w": 393,
+      "h": 103
+     },
+     "tabs": {
+      "l": 16,
+      "t": 59,
+      "r": 192.828125,
+      "b": 103,
+      "w": 176.828125,
+      "h": 44
+     },
+     "actions": {
+      "l": 0,
+      "t": 578,
+      "r": 393,
+      "b": 656,
+      "w": 393,
+      "h": 78
+     },
+     "bar": {
+      "l": 0,
+      "t": 656,
+      "r": 393,
+      "b": 793,
+      "w": 393,
+      "h": 137
+     },
+     "lyrics": {
+      "l": 20,
+      "t": 253,
+      "r": 373,
+      "b": 566,
+      "w": 353,
+      "h": 313
+     },
+     "audio": {
+      "l": 0,
+      "t": 103,
+      "r": 393,
+      "b": 578,
+      "w": 393,
+      "h": 475
+     },
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 373,
+      "b": 237,
+      "w": 353,
+      "h": 70
+     },
+     "pos": "fixed",
+     "bg": "rgb(11, 13, 17)",
+     "inStage": false,
+     "vstage": "none",
+     "scrollY": 793,
+     "vp": [
+      "vp: iw=393 ih=793 vvh=793 ch=793 sw=390 sh=852 st=59 sb=34 standalone=no ios=16 head=0,103 bar=656,793 feed=0,793 dh=793 sy=0 top=DIV.head short=no",
+      "vp: iw=393 ih=793 vvh=793 ch=793 sw=390 sh=852 st=59 sb=34 standalone=no ios=16 head=0,103 bar=656,793 feed=0,793 dh=793 sy=0 top=DIV.head short=no"
      ]
     },
     "Gerät C (Fensterhöhe gleich screen.height)": {
      "ih": 852,
      "sh": 852,
-     "v": "",
-     "rootV": "",
+     "short": false,
+     "phPb": "34px",
+     "htmlBg": "rgb(20, 23, 29)",
+     "barBg": "rgb(20, 23, 29)",
+     "minRule": true,
+     "phH": "",
+     "btns": [
+      {
+       "t": 651,
+       "b": 703,
+       "l": 20,
+       "r": 105.25,
+       "id": "like"
+      },
+      {
+       "t": 651,
+       "b": 703,
+       "l": 109.25,
+       "r": 194.5,
+       "id": "save"
+      },
+      {
+       "t": 651,
+       "b": 703,
+       "l": 198.5,
+       "r": 283.75,
+       "id": "share"
+      },
+      {
+       "t": 651,
+       "b": 703,
+       "l": 287.75,
+       "r": 373,
+       "id": "more"
+      },
+      {
+       "t": 762,
+       "b": 806,
+       "l": 20,
+       "r": 84,
+       "id": "rate"
+      },
+      {
+       "t": 760,
+       "b": 808,
+       "l": 96.5,
+       "r": 144.5,
+       "id": "ctl-prev"
+      },
+      {
+       "t": 750,
+       "b": 818,
+       "l": 162.5,
+       "r": 230.5,
+       "id": "ctl-play"
+      },
+      {
+       "t": 760,
+       "b": 808,
+       "l": 248.5,
+       "r": 296.5,
+       "id": "ctl-next"
+      },
+      {
+       "t": 762,
+       "b": 806,
+       "l": 309,
+       "r": 373,
+       "id": "cc"
+      }
+     ],
      "feed": {
       "l": 0,
       "t": 0,
@@ -8558,35 +9286,35 @@
      },
      "actions": {
       "l": 0,
-      "t": 638,
+      "t": 637,
       "r": 393,
-      "b": 716,
+      "b": 715,
       "w": 393,
       "h": 78
      },
      "bar": {
       "l": 0,
-      "t": 716,
+      "t": 715,
       "r": 393,
       "b": 852,
       "w": 393,
-      "h": 136
+      "h": 137
      },
      "lyrics": {
       "l": 20,
       "t": 253,
       "r": 373,
-      "b": 626,
+      "b": 625,
       "w": 353,
-      "h": 373
+      "h": 372
      },
      "audio": {
       "l": 0,
       "t": 103,
       "r": 393,
-      "b": 638,
+      "b": 637,
       "w": 393,
-      "h": 535
+      "h": 534
      },
      "hook": {
       "l": 20,
@@ -8602,8 +9330,8 @@
      "vstage": "none",
      "scrollY": 852,
      "vp": [
-      "vp: iw=393 ih=852 vvh=852 ch=852 sw=390 sh=852 st=59 sb=34 standalone=yes ios=16 head=0,103 bar=716,852 feed=0,852 fix=none",
-      "vp: iw=393 ih=852 vvh=852 ch=852 sw=390 sh=852 st=59 sb=34 standalone=yes ios=16 head=0,103 bar=716,852 feed=0,852 fix=none"
+      "vp: iw=393 ih=852 vvh=852 ch=852 sw=390 sh=852 st=59 sb=34 standalone=yes ios=16 head=0,103 bar=715,852 feed=0,852 dh=852 sy=0 top=DIV.head short=no",
+      "vp: iw=393 ih=852 vvh=852 ch=852 sw=390 sh=852 st=59 sb=34 standalone=yes ios=16 head=0,103 bar=715,852 feed=0,852 dh=852 sy=0 top=DIV.head short=no"
      ]
     },
     "Gerät Diag Zahl": 3,
@@ -8673,47 +9401,321 @@
       "fit": "no"
      }
     },
-    "390x844 Titelbild-Abruf verspätet (2 s)": {
+    "390x844 Titelbild-Platz vor dem Laden": {
+     "slot": {
+      "l": 41,
+      "t": 344,
+      "r": 145,
+      "b": 448,
+      "w": 104,
+      "h": 104,
+      "state": "wait",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
+     "img": {
+      "op": 0,
+      "done": false
+     },
+     "cur": {
+      "l": 41,
+      "t": 464,
+      "r": 349,
+      "b": 524,
+      "w": 308,
+      "h": 60,
+      "lh": 30,
+      "sh": 60,
+      "ch": 60,
+      "sw": 308,
+      "cw": 308,
+      "ws": "normal",
+      "to": "clip",
+      "ov": "hidden",
+      "op": 1,
+      "hidden": false,
+      "pt": 0,
+      "pb": 0,
+      "text": "Dritte Zeile mit einem Satz, der ebenfalls umbricht."
+     },
      "d": [
       "cover: test0000068:100 late"
-     ],
-     "img": null,
-     "art": null
+     ]
     },
-    "390x844 Titelbild-Abruf kaputt": {
+    "390x844 Titelbild-Platz nach dem Laden": {
+     "slot": {
+      "l": 41,
+      "t": 344,
+      "r": 145,
+      "b": 448,
+      "w": 104,
+      "h": 104,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
+     "img": {
+      "op": 1,
+      "nw": 96
+     },
+     "cur": {
+      "l": 41,
+      "t": 464,
+      "r": 349,
+      "b": 524,
+      "w": 308,
+      "h": 60,
+      "lh": 30,
+      "sh": 60,
+      "ch": 60,
+      "sw": 308,
+      "cw": 308,
+      "ws": "normal",
+      "to": "clip",
+      "ov": "hidden",
+      "op": 1,
+      "hidden": false,
+      "pt": 0,
+      "pb": 0,
+      "text": "Dritte Zeile mit einem Satz, der ebenfalls umbricht."
+     },
+     "d": [
+      "cover: test0000068:100 late"
+     ]
+    },
+    "390x844 Titelbild-Platz kaputt": {
      "d": [
       "cover: test0000069:100 error"
      ],
+     "slot": {
+      "l": 41,
+      "t": 344,
+      "r": 145,
+      "b": 448,
+      "w": 104,
+      "h": 104,
+      "state": "error",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "img": null,
-     "art": null
+     "cur": {
+      "l": 41,
+      "t": 464,
+      "r": 349,
+      "b": 524,
+      "w": 308,
+      "h": 60,
+      "lh": 30,
+      "sh": 60,
+      "ch": 60,
+      "sw": 308,
+      "cw": 308,
+      "ws": "normal",
+      "to": "clip",
+      "ov": "hidden",
+      "op": 1,
+      "hidden": false,
+      "pt": 0,
+      "pb": 0,
+      "text": "Dritte Zeile mit einem Satz, der ebenfalls umbricht."
+     }
     },
-    "390x844 Titelbild-Abruf durchsichtig 1x1": {
+    "390x844 Titelbild-Platz durchsichtig 1x1": {
      "d": [
       "cover: test0000070:100 error"
      ],
+     "slot": {
+      "l": 41,
+      "t": 344,
+      "r": 145,
+      "b": 448,
+      "w": 104,
+      "h": 104,
+      "state": "error",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "img": null,
-     "art": null
+     "cur": {
+      "l": 41,
+      "t": 464,
+      "r": 349,
+      "b": 524,
+      "w": 308,
+      "h": 60,
+      "lh": 30,
+      "sh": 60,
+      "ch": 60,
+      "sw": 308,
+      "cw": 308,
+      "ws": "normal",
+      "to": "clip",
+      "ov": "hidden",
+      "op": 1,
+      "hidden": false,
+      "pt": 0,
+      "pb": 0,
+      "text": "Dritte Zeile mit einem Satz, der ebenfalls umbricht."
+     }
     },
-    "393x852 Titelbild-Abruf verspätet (2 s)": {
+    "393x852 Titelbild-Platz vor dem Laden": {
+     "slot": {
+      "l": 41,
+      "t": 344,
+      "r": 153,
+      "b": 456,
+      "w": 112,
+      "h": 112,
+      "state": "wait",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
+     "img": {
+      "op": 0,
+      "done": false
+     },
+     "cur": {
+      "l": 41,
+      "t": 472,
+      "r": 352,
+      "b": 532,
+      "w": 311,
+      "h": 60,
+      "lh": 30,
+      "sh": 60,
+      "ch": 60,
+      "sw": 311,
+      "cw": 311,
+      "ws": "normal",
+      "to": "clip",
+      "ov": "hidden",
+      "op": 1,
+      "hidden": false,
+      "pt": 0,
+      "pb": 0,
+      "text": "Dritte Zeile mit einem Satz, der ebenfalls umbricht."
+     },
      "d": [
       "cover: test0000068:100 late"
-     ],
-     "img": null,
-     "art": null
+     ]
     },
-    "393x852 Titelbild-Abruf kaputt": {
+    "393x852 Titelbild-Platz nach dem Laden": {
+     "slot": {
+      "l": 41,
+      "t": 344,
+      "r": 153,
+      "b": 456,
+      "w": 112,
+      "h": 112,
+      "state": "ready",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
+     "img": {
+      "op": 1,
+      "nw": 96
+     },
+     "cur": {
+      "l": 41,
+      "t": 472,
+      "r": 352,
+      "b": 532,
+      "w": 311,
+      "h": 60,
+      "lh": 30,
+      "sh": 60,
+      "ch": 60,
+      "sw": 311,
+      "cw": 311,
+      "ws": "normal",
+      "to": "clip",
+      "ov": "hidden",
+      "op": 1,
+      "hidden": false,
+      "pt": 0,
+      "pb": 0,
+      "text": "Dritte Zeile mit einem Satz, der ebenfalls umbricht."
+     },
+     "d": [
+      "cover: test0000068:100 late"
+     ]
+    },
+    "393x852 Titelbild-Platz kaputt": {
      "d": [
       "cover: test0000069:100 error"
      ],
+     "slot": {
+      "l": 41,
+      "t": 344,
+      "r": 153,
+      "b": 456,
+      "w": 112,
+      "h": 112,
+      "state": "error",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "img": null,
-     "art": null
+     "cur": {
+      "l": 41,
+      "t": 472,
+      "r": 352,
+      "b": 532,
+      "w": 311,
+      "h": 60,
+      "lh": 30,
+      "sh": 60,
+      "ch": 60,
+      "sw": 311,
+      "cw": 311,
+      "ws": "normal",
+      "to": "clip",
+      "ov": "hidden",
+      "op": 1,
+      "hidden": false,
+      "pt": 0,
+      "pb": 0,
+      "text": "Dritte Zeile mit einem Satz, der ebenfalls umbricht."
+     }
     },
-    "393x852 Titelbild-Abruf durchsichtig 1x1": {
+    "393x852 Titelbild-Platz durchsichtig 1x1": {
      "d": [
       "cover: test0000070:100 error"
      ],
+     "slot": {
+      "l": 41,
+      "t": 344,
+      "r": 153,
+      "b": 456,
+      "w": 112,
+      "h": 112,
+      "state": "error",
+      "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+      "vis": true
+     },
      "img": null,
-     "art": null
+     "cur": {
+      "l": 41,
+      "t": 472,
+      "r": 352,
+      "b": 532,
+      "w": 311,
+      "h": 60,
+      "lh": 30,
+      "sh": 60,
+      "ch": 60,
+      "sw": 311,
+      "cw": 311,
+      "ws": "normal",
+      "to": "clip",
+      "ov": "hidden",
+      "op": 1,
+      "hidden": false,
+      "pt": 0,
+      "pb": 0,
+      "text": "Dritte Zeile mit einem Satz, der ebenfalls umbricht."
+     }
     },
     "Titelbild Ruhelage": {
      "390x844": {
@@ -8738,7 +9740,18 @@
        "pb": 0,
        "text": "Dritte Zeile mit einem Satz, der ebenfalls umbricht."
       },
-      "card": 295
+      "card": 294,
+      "reserved": {
+       "l": 41,
+       "t": 344,
+       "r": 145,
+       "b": 448,
+       "w": 104,
+       "h": 104,
+       "state": "wait",
+       "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+       "vis": true
+      }
      },
      "393x852": {
       "base": {
@@ -8762,8 +9775,99 @@
        "pb": 0,
        "text": "Dritte Zeile mit einem Satz, der ebenfalls umbricht."
       },
-      "card": 303
+      "card": 302,
+      "reserved": {
+       "l": 41,
+       "t": 344,
+       "r": 153,
+       "b": 456,
+       "w": 112,
+       "h": 112,
+       "state": "wait",
+       "bg": "color(srgb 0.647059 0.580392 1 / 0.14)",
+       "vis": true
+      }
      }
+    },
+    "Titelbild im kurzen Fenster 793": {
+     "40": {
+      "card": 331,
+      "slot": {
+       "vis": true,
+       "w": 128
+      }
+     },
+     "44": {
+      "card": 261,
+      "slot": null
+     },
+     "68": {
+      "card": 261,
+      "slot": {
+       "vis": false,
+       "w": 0
+      }
+     }
+    },
+    "Kante kurzes Fenster 793": {
+     "pts": [
+      true,
+      true,
+      true,
+      true,
+      true
+     ],
+     "W": 393,
+     "pos": "fixed",
+     "left": "0px",
+     "top": "0px",
+     "w": 393,
+     "l": 0,
+     "t": 0,
+     "pe": "auto",
+     "bg": "rgb(11, 13, 17)",
+     "alphaOk": true,
+     "bf": "none",
+     "mask": "none",
+     "wmask": "none",
+     "tr": "none",
+     "fl": "none",
+     "bgi": "none",
+     "op": "1",
+     "anc": [],
+     "above": [],
+     "parent": "DIV.vfeed",
+     "direct": true
+    },
+    "Kante normal 852": {
+     "pts": [
+      true,
+      true,
+      true,
+      true,
+      true
+     ],
+     "W": 393,
+     "pos": "fixed",
+     "left": "0px",
+     "top": "0px",
+     "w": 393,
+     "l": 0,
+     "t": 0,
+     "pe": "auto",
+     "bg": "rgb(11, 13, 17)",
+     "alphaOk": true,
+     "bf": "none",
+     "mask": "none",
+     "wmask": "none",
+     "tr": "none",
+     "fl": "none",
+     "bgi": "none",
+     "op": "1",
+     "anc": [],
+     "above": [],
+     "parent": "DIV.vfeed",
+     "direct": true
     },
     "Verkleinerung 375x667 (Höhe, Bild px, aktuelle Zeilen, nächste Zeilen je Reihe)": [
      {
@@ -8821,7 +9925,7 @@
       "nx": [
        2,
        2,
-       2
+       1
       ],
       "shown": 3,
       "ok": true
@@ -8888,7 +9992,7 @@
      },
      {
       "h": 720,
-      "img": 122,
+      "img": 121,
       "cur": 1,
       "nx": [
        2,
@@ -8900,7 +10004,7 @@
      },
      {
       "h": 700,
-      "img": 102,
+      "img": 101,
       "cur": 1,
       "nx": [
        2,
@@ -9115,7 +10219,7 @@
        "cue": 2,
        "frames": 13,
        "durMs": 217,
-       "animsSeen": 15,
+       "animsSeen": 16,
        "fromTop": 346,
        "toTop": 274
       },
@@ -9131,7 +10235,7 @@
        "cue": 4,
        "frames": 13,
        "durMs": 217,
-       "animsSeen": 16,
+       "animsSeen": 15,
        "fromTop": 346,
        "toTop": 274
       },
@@ -9139,7 +10243,7 @@
        "cue": 5,
        "frames": 13,
        "durMs": 217,
-       "animsSeen": 15,
+       "animsSeen": 16,
        "fromTop": 346,
        "toTop": 274
       },
@@ -9155,7 +10259,7 @@
        "cue": 7,
        "frames": 13,
        "durMs": 217,
-       "animsSeen": 15,
+       "animsSeen": 16,
        "fromTop": 346,
        "toTop": 274
       },
@@ -9171,7 +10275,7 @@
        "cue": 9,
        "frames": 13,
        "durMs": 217,
-       "animsSeen": 16,
+       "animsSeen": 15,
        "fromTop": 346,
        "toTop": 274
       },
@@ -9179,7 +10283,7 @@
        "cue": 10,
        "frames": 13,
        "durMs": 217,
-       "animsSeen": 15,
+       "animsSeen": 16,
        "fromTop": 346,
        "toTop": 274
       },
@@ -9225,7 +10329,7 @@
        "cue": 5,
        "frames": 13,
        "durMs": 217,
-       "animsSeen": 16,
+       "animsSeen": 15,
        "fromTop": 346,
        "toTop": 274
       },
@@ -9233,7 +10337,7 @@
        "cue": 6,
        "frames": 13,
        "durMs": 217,
-       "animsSeen": 16,
+       "animsSeen": 15,
        "fromTop": 346,
        "toTop": 274
       },
@@ -9249,7 +10353,7 @@
        "cue": 8,
        "frames": 13,
        "durMs": 217,
-       "animsSeen": 15,
+       "animsSeen": 16,
        "fromTop": 346,
        "toTop": 274
       },
@@ -9265,7 +10369,7 @@
        "cue": 10,
        "frames": 13,
        "durMs": 217,
-       "animsSeen": 16,
+       "animsSeen": 15,
        "fromTop": 346,
        "toTop": 274
       },
@@ -9273,7 +10377,7 @@
        "cue": 11,
        "frames": 13,
        "durMs": 217,
-       "animsSeen": 16,
+       "animsSeen": 15,
        "fromTop": 346,
        "toTop": 274
       }
@@ -9284,15 +10388,15 @@
       "l": 20,
       "t": 393,
       "r": 370,
-      "b": 618,
+      "b": 617,
       "w": 350,
-      "h": 225
+      "h": 224
      },
      "actions": {
       "l": 0,
-      "t": 630,
+      "t": 629,
       "r": 390,
-      "b": 708,
+      "b": 707,
       "w": 390,
       "h": 78
      },
@@ -9310,7 +10414,7 @@
       "t": 414,
       "b": 594
      },
-     "cardB": 617,
+     "cardB": 616,
      "img": false
     },
     "390x844 10-Zeilen-Hook Auflage 3": {
@@ -9318,15 +10422,15 @@
       "l": 20,
       "t": 480,
       "r": 370,
-      "b": 618,
+      "b": 617,
       "w": 350,
-      "h": 138
+      "h": 137
      },
      "actions": {
       "l": 0,
-      "t": 630,
+      "t": 629,
       "r": 390,
-      "b": 708,
+      "b": 707,
       "w": 390,
       "h": 78
      },
@@ -9344,7 +10448,7 @@
       "t": 501,
       "b": 591
      },
-     "cardB": 617,
+     "cardB": 616,
      "img": false
     },
     "375x667 4-Zeilen-Hook Auflage 3": {
@@ -9352,15 +10456,15 @@
       "l": 20,
       "t": 299,
       "r": 355,
-      "b": 473,
+      "b": 472,
       "w": 335,
-      "h": 174
+      "h": 173
      },
      "actions": {
       "l": 0,
-      "t": 485,
+      "t": 484,
       "r": 375,
-      "b": 549,
+      "b": 548,
       "w": 375,
       "h": 64
      },
@@ -9378,7 +10482,7 @@
       "t": 320,
       "b": 440
      },
-     "cardB": 472,
+     "cardB": 471,
      "img": false
     },
     "375x667 10-Zeilen-Hook Auflage 3": {
@@ -9386,15 +10490,15 @@
       "l": 20,
       "t": 333,
       "r": 355,
-      "b": 473,
+      "b": 472,
       "w": 335,
-      "h": 140
+      "h": 139
      },
      "actions": {
       "l": 0,
-      "t": 485,
+      "t": 484,
       "r": 375,
-      "b": 549,
+      "b": 548,
       "w": 375,
       "h": 64
      },
@@ -9412,7 +10516,7 @@
       "t": 354,
       "b": 444
      },
-     "cardB": 472,
+     "cardB": 471,
      "img": false
     },
     "430x932 4-Zeilen-Hook Auflage 3": {
@@ -9420,15 +10524,15 @@
       "l": 20,
       "t": 358,
       "r": 410,
-      "b": 706,
+      "b": 705,
       "w": 390,
-      "h": 348
+      "h": 347
      },
      "actions": {
       "l": 0,
-      "t": 718,
+      "t": 717,
       "r": 430,
-      "b": 796,
+      "b": 795,
       "w": 430,
       "h": 78
      },
@@ -9446,7 +10550,7 @@
       "t": 523,
       "b": 673
      },
-     "cardB": 705,
+     "cardB": 704,
      "img": true
     },
     "430x932 10-Zeilen-Hook Auflage 3": {
@@ -9454,15 +10558,15 @@
       "l": 20,
       "t": 561,
       "r": 410,
-      "b": 706,
+      "b": 705,
       "w": 390,
-      "h": 145
+      "h": 144
      },
      "actions": {
       "l": 0,
-      "t": 718,
+      "t": 717,
       "r": 430,
-      "b": 796,
+      "b": 795,
       "w": 430,
       "h": 78
      },
@@ -9480,7 +10584,7 @@
       "t": 582,
       "b": 672
      },
-     "cardB": 705,
+     "cardB": 704,
      "img": false
     },
     "393x852 4-Zeilen-Hook Auflage 3": {
@@ -9488,15 +10592,15 @@
       "l": 20,
       "t": 393,
       "r": 373,
-      "b": 626,
+      "b": 584,
       "w": 353,
-      "h": 233
+      "h": 191
      },
      "actions": {
       "l": 0,
-      "t": 638,
+      "t": 596,
       "r": 393,
-      "b": 716,
+      "b": 674,
       "w": 393,
       "h": 78
      },
@@ -9508,35 +10612,35 @@
       "ov": "visible",
       "step": "0"
      },
-     "curLines": 6,
+     "curLines": 4,
      "natural": 7,
      "cur": {
       "t": 414,
-      "b": 594
+      "b": 534
      },
-     "cardB": 625,
+     "cardB": 583,
      "img": false
     },
     "393x852 10-Zeilen-Hook Auflage 3": {
      "card": {
       "l": 20,
-      "t": 480,
+      "t": 426,
       "r": 373,
-      "b": 626,
+      "b": 584,
       "w": 353,
-      "h": 146
+      "h": 158
      },
      "actions": {
       "l": 0,
-      "t": 638,
+      "t": 596,
       "r": 393,
-      "b": 716,
+      "b": 674,
       "w": 393,
       "h": 78
      },
      "hook": {
       "sh": 405,
-      "ch": 297,
+      "ch": 243,
       "lh": 27,
       "clamp": true,
       "ov": "hidden",
@@ -9545,10 +10649,10 @@
      "curLines": 3,
      "natural": 7,
      "cur": {
-      "t": 501,
-      "b": 591
+      "t": 447,
+      "b": 537
      },
-     "cardB": 625,
+     "cardB": 583,
      "img": false
     },
     "390x844 Anker Kontrast": {
@@ -9910,9 +11014,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 668,
+      "t": 667,
       "r": 390,
-      "b": 746,
+      "b": 745,
       "w": 390,
       "h": 78
      },
@@ -9920,14 +11024,14 @@
       "l": 0,
       "t": 103,
       "r": 390,
-      "b": 668,
+      "b": 667,
       "w": 390,
-      "h": 565
+      "h": 564
      },
      "scroll": "no",
      "fit": "0",
-     "sh": 565,
-     "ch": 565
+     "sh": 564,
+     "ch": 564
     },
     "390x844 Takeaway mit Zitat Abstände": [
      20,
@@ -9986,9 +11090,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 668,
+      "t": 667,
       "r": 390,
-      "b": 746,
+      "b": 745,
       "w": 390,
       "h": 78
      },
@@ -9996,14 +11100,14 @@
       "l": 0,
       "t": 103,
       "r": 390,
-      "b": 668,
+      "b": 667,
       "w": 390,
-      "h": 565
+      "h": 564
      },
      "scroll": "no",
      "fit": "0",
-     "sh": 565,
-     "ch": 565
+     "sh": 564,
+     "ch": 564
     },
     "390x844 Takeaway ohne Zitat (alter Pool) Abstände": [
      20,
@@ -10013,9 +11117,9 @@
     "390x844 Status text": {
      "st": {
       "l": 20,
-      "t": 640,
+      "t": 639,
       "r": 370,
-      "b": 668,
+      "b": 667,
       "w": 350,
       "h": 28
      },
@@ -10024,20 +11128,20 @@
       "l": 0,
       "t": 103,
       "r": 390,
-      "b": 640,
+      "b": 639,
       "w": 390,
-      "h": 537
+      "h": 536
      },
      "before": {
-      "b": 668
+      "b": 667
      }
     },
     "390x844 Status audio": {
      "st": {
       "l": 20,
-      "t": 602,
+      "t": 601,
       "r": 370,
-      "b": 630,
+      "b": 629,
       "w": 350,
       "h": 28
      },
@@ -10046,20 +11150,20 @@
       "l": 0,
       "t": 103,
       "r": 390,
-      "b": 602,
+      "b": 601,
       "w": 390,
-      "h": 499
+      "h": 498
      },
      "before": {
-      "b": 630
+      "b": 629
      }
     },
     "390x844 Status video": {
      "st": {
       "l": 20,
-      "t": 602,
+      "t": 601,
       "r": 370,
-      "b": 630,
+      "b": 629,
       "w": 350,
       "h": 28
      },
@@ -10068,12 +11172,12 @@
       "l": 0,
       "t": 322.375,
       "r": 390,
-      "b": 602,
+      "b": 601,
       "w": 390,
-      "h": 279.625
+      "h": 278.625
      },
      "before": {
-      "b": 602
+      "b": 601
      }
     },
     "393x852 Takeaway mit Zitat": {
@@ -10128,9 +11232,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 676,
+      "t": 675,
       "r": 393,
-      "b": 754,
+      "b": 753,
       "w": 393,
       "h": 78
      },
@@ -10138,14 +11242,14 @@
       "l": 0,
       "t": 103,
       "r": 393,
-      "b": 676,
+      "b": 675,
       "w": 393,
-      "h": 573
+      "h": 572
      },
      "scroll": "no",
      "fit": "0",
-     "sh": 573,
-     "ch": 573
+     "sh": 572,
+     "ch": 572
     },
     "393x852 Takeaway mit Zitat Abstände": [
      20,
@@ -10204,9 +11308,9 @@
      },
      "actions": {
       "l": 0,
-      "t": 676,
+      "t": 675,
       "r": 393,
-      "b": 754,
+      "b": 753,
       "w": 393,
       "h": 78
      },
@@ -10214,14 +11318,14 @@
       "l": 0,
       "t": 103,
       "r": 393,
-      "b": 676,
+      "b": 675,
       "w": 393,
-      "h": 573
+      "h": 572
      },
      "scroll": "no",
      "fit": "0",
-     "sh": 573,
-     "ch": 573
+     "sh": 572,
+     "ch": 572
     },
     "393x852 Takeaway ohne Zitat (alter Pool) Abstände": [
      20,
@@ -10231,9 +11335,9 @@
     "393x852 Status text": {
      "st": {
       "l": 20,
-      "t": 648,
+      "t": 647,
       "r": 373,
-      "b": 676,
+      "b": 675,
       "w": 353,
       "h": 28
      },
@@ -10242,20 +11346,20 @@
       "l": 0,
       "t": 103,
       "r": 393,
-      "b": 648,
+      "b": 647,
       "w": 393,
-      "h": 545
+      "h": 544
      },
      "before": {
-      "b": 676
+      "b": 675
      }
     },
     "393x852 Status audio": {
      "st": {
       "l": 20,
-      "t": 610,
+      "t": 609,
       "r": 373,
-      "b": 638,
+      "b": 637,
       "w": 353,
       "h": 28
      },
@@ -10264,20 +11368,20 @@
       "l": 0,
       "t": 103,
       "r": 393,
-      "b": 610,
+      "b": 609,
       "w": 393,
-      "h": 507
+      "h": 506
      },
      "before": {
-      "b": 638
+      "b": 637
      }
     },
     "393x852 Status video": {
      "st": {
       "l": 20,
-      "t": 610,
+      "t": 609,
       "r": 373,
-      "b": 638,
+      "b": 637,
       "w": 353,
       "h": 28
      },
@@ -10286,12 +11390,12 @@
       "l": 0,
       "t": 324.0625,
       "r": 393,
-      "b": 610,
+      "b": 609,
       "w": 393,
-      "h": 285.9375
+      "h": 284.9375
      },
      "before": {
-      "b": 610
+      "b": 609
      }
     },
     "Titelbild Abrufe": {
@@ -10317,7 +11421,7 @@
      "ui: overlay vfeed opacity=1.00 bg=1.00 after tab feed/audio",
      "ui: overlay vaudio opacity=1.00 bg=1.00 after tab feed/audio",
      "deck: gesture pointerup unlocked 6/6",
-     "vp: iw=390 ih=844 vvh=844 ch=844 sw=390 sh=844 st=59 sb=34 standalone=no ios=16 head=0,103 bar=708,844 feed=0,844 fix=none"
+     "vp: iw=390 ih=844 vvh=844 ch=844 sw=390 sh=844 st=59 sb=34 standalone=no ios=16 head=0,103 bar=707,844 feed=0,844 dh=844 sy=0 top=DIV.head short=no"
     ],
     "aus video": {
      "phoneAttr": false,

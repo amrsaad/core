@@ -1,5 +1,5 @@
 {
- "at": "2026-11-27T14:28:18.836Z",
+ "at": "2026-11-27T19:47:00.827Z",
  "runs": [
   {
    "browser": "webkit",
@@ -31,20 +31,20 @@
     "ytNoErrors": true
    },
    "notes": {
-    "audioWallMs": 189,
-    "audioStartLine": "start: snaudio0:0 first sound 118 ms after tab open (yt api waited 0 ms)",
-    "audioFirstSoundMs": 118,
+    "audioWallMs": 197,
+    "audioStartLine": "start: snaudio0:0 first sound 125 ms after tab open (yt api waited 0 ms)",
+    "audioFirstSoundMs": 125,
     "audioDiag": [
      "deck: start order none first=snaudio0:0 heads=0 usable=0 stock=0",
      "deck: src net snaudio0",
-     "start: snaudio0:0 first sound 118 ms after tab open (yt api waited 0 ms)",
+     "start: snaudio0:0 first sound 125 ms after tab open (yt api waited 0 ms)",
      "deck: src net snaudio0"
     ],
-    "hlsWallMs": 39,
-    "hlsStartLine": "start: snhls0:0 first sound 162 ms after tab open (yt api waited 0 ms)",
-    "hlsFirstSoundMs": 162,
-    "ytLateMs": 3003,
-    "ytStartLine": "start: snyt00000ab:0 first sound 6168 ms after tab open (yt api waited 3002 ms)"
+    "hlsWallMs": 79,
+    "hlsStartLine": "start: snhls0:0 first sound 155 ms after tab open (yt api waited 0 ms)",
+    "hlsFirstSoundMs": 155,
+    "ytLateMs": 3042,
+    "ytStartLine": "start: snyt00000ab:0 first sound 6169 ms after tab open (yt api waited 3001 ms)"
    },
    "ok": true
   },
@@ -78,20 +78,20 @@
     "ytNoErrors": true
    },
    "notes": {
-    "audioWallMs": 83,
-    "audioStartLine": "start: snaudio0:0 first sound 32 ms after tab open (yt api waited 0 ms)",
-    "audioFirstSoundMs": 32,
+    "audioWallMs": 82,
+    "audioStartLine": "start: snaudio0:0 first sound 31 ms after tab open (yt api waited 0 ms)",
+    "audioFirstSoundMs": 31,
     "audioDiag": [
      "deck: start order none first=snaudio0:0 heads=0 usable=0 stock=0",
      "deck: src net snaudio0",
-     "start: snaudio0:0 first sound 32 ms after tab open (yt api waited 0 ms)",
+     "start: snaudio0:0 first sound 31 ms after tab open (yt api waited 0 ms)",
      "deck: src net snaudio0"
     ],
-    "hlsWallMs": 63,
-    "hlsStartLine": "start: snhls0:0 first sound 51 ms after tab open (yt api waited 0 ms)",
-    "hlsFirstSoundMs": 51,
-    "ytLateMs": 3021,
-    "ytStartLine": "start: snyt00000ab:0 first sound 6054 ms after tab open (yt api waited 3000 ms)"
+    "hlsWallMs": 16,
+    "hlsStartLine": "start: snhls0:0 first sound 53 ms after tab open (yt api waited 0 ms)",
+    "hlsFirstSoundMs": 53,
+    "ytLateMs": 3019,
+    "ytStartLine": "start: snyt00000ab:0 first sound 6056 ms after tab open (yt api waited 3000 ms)"
    },
    "ok": true
   }
