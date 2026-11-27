@@ -1,95 +1,29 @@
 {
  "date": "2026-11-27",
  "seed": false,
- "candidates": 91,
- "accepted": 78,
- "rejectedCount": 13,
- "passRate": 0.857,
- "selected": 18,
+ "candidates": 120,
+ "accepted": 118,
+ "rejectedCount": 2,
+ "passRate": 0.983,
+ "selected": 16,
  "selectedByArea": {
   "brain": 14,
-  "body": 2,
+  "body": 0,
   "beat": 2
  },
- "total": 3329,
+ "total": 3345,
  "rejected": [
   {
-   "id": "pmid:43082461",
+   "id": "pmid:43022461",
    "rule": 1,
    "reason": "source.url lieferte HTTP 203",
-   "headline": "Artificial Intelligence in the Multidisciplinary Tumor Board for Prostate Cancer"
+   "headline": "Three decades of coronary intravascular ultrasound and optical coherence tomography"
   },
   {
-   "id": "pmid:43094962",
+   "id": "pmid:43040476",
    "rule": 1,
    "reason": "source.url lieferte HTTP 203",
-   "headline": "An intelligent systems framework for closed-loop chronic glaucoma management"
-  },
-  {
-   "id": "pmid:42889514",
-   "rule": 1,
-   "reason": "source.url lieferte HTTP 203",
-   "headline": "From inherited susceptibility to tumor state"
-  },
-  {
-   "id": "pmid:41000392",
-   "rule": 1,
-   "reason": "source.url lieferte HTTP 203",
-   "headline": "Dual-target immunotherapies in NSCLC"
-  },
-  {
-   "id": "pmid:42846062",
-   "rule": 1,
-   "reason": "source.url lieferte HTTP 203",
-   "headline": "The relationship between academic self-efficacy and test anxiety"
-  },
-  {
-   "id": "pmid:42766289",
-   "rule": 1,
-   "reason": "source.url lieferte HTTP 203",
-   "headline": "AI for Health Care Quality and Patient Safety"
-  },
-  {
-   "id": "pmid:42337601",
-   "rule": 1,
-   "reason": "source.url lieferte HTTP 203",
-   "headline": "Algorithmic bias in surgical risk prediction models and its impact on patient safety"
-  },
-  {
-   "id": "pmid:40306409",
-   "rule": 1,
-   "reason": "source.url lieferte HTTP 203",
-   "headline": "Deep Learning-Based Models for Ventricular Segmentation in Hydrocephalus"
-  },
-  {
-   "id": "pmid:43091408",
-   "rule": 1,
-   "reason": "source.url lieferte HTTP 203",
-   "headline": "Screening Cardiac Amyloidosis via AI Echocardiography"
-  },
-  {
-   "id": "pmid:43083706",
-   "rule": 1,
-   "reason": "source.url lieferte HTTP 203",
-   "headline": "Systematic Review of Algal Toxins in Seals and Sea Lions"
-  },
-  {
-   "id": "pmid:42974518",
-   "rule": 1,
-   "reason": "source.url lieferte HTTP 203",
-   "headline": "Psychedelics in neurosurgery"
-  },
-  {
-   "id": "pmid:42200828",
-   "rule": 1,
-   "reason": "source.url lieferte HTTP 203",
-   "headline": "Novel Approaches to the Management of Myelodysplastic Syndromes"
-  },
-  {
-   "id": "pmid:41762830",
-   "rule": 1,
-   "reason": "source.url lieferte HTTP 203",
-   "headline": "Artificial intelligence revolution in toxicology"
+   "headline": "Mapping AI-supported formative assessment in physical education"
   }
  ],
  "skippedByBuilder": [
@@ -1011,6 +945,370 @@
   },
   {
    "id": "pmid:39193818",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36963570",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
+  },
+  {
+   "id": "pmid:36503723",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39365199",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36565904",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36585290",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:35370083",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:34902546",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:35331686",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:34954332",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:37154065",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39725023",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36333227",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39709150",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39755350",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39954936",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:37683184",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36423732",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39245300",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36728028",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40334739",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36581531",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:35490733",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41564280",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40345360",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40258484",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39167582",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40023354",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39293570",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41423848",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:38149945",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42537978",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42600884",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40456396",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41765266",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41421762",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
+  },
+  {
+   "id": "pmid:41921769",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36795396",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41871655",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39278389",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41692377",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40499787",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
+  },
+  {
+   "id": "pmid:38458409",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41708012",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:38438095",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:38244962",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:36669130",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42489607",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41490771",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40659111",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41218194",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39418040",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
+  },
+  {
+   "id": "pmid:42267276",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41827742",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42453591",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:40169443",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42295724",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42428505",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42857145",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:43032705",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42876545",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42528610",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42761264",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:39444814",
+   "reason": "Zahl im Titel fehlt im Conclusion-Satz"
+  },
+  {
+   "id": "pmid:42292218",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42255221",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42724126",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42547897",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42432490",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41908760",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42730155",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42865497",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42687973",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:43016653",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42774067",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42974304",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41897259",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41173515",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42535064",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42052619",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42343964",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42479879",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:42947696",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:41783894",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:37883405",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:32868676",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:37316181",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:38781473",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:38626029",
+   "reason": "kein Conclusion-Satz unter 400 Zeichen"
+  },
+  {
+   "id": "pmid:36796860",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:35966021",
+   "reason": "Titel zu lang für Headline"
+  },
+  {
+   "id": "pmid:35389932",
    "reason": "Titel zu lang für Headline"
   }
  ]
