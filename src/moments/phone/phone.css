@@ -158,10 +158,9 @@ html:has(.vfeed[data-phone] .vend[data-testid='end-page']), html:has(.vfeed[data
 .ph-cap .vcaption span { color: var(--on-media-muted); font-size: 16px; line-height: 24px; }
 .ph-cap .vcaption-rtl span { font-size: var(--t-caption); line-height: var(--t-ar-lh); }
 
-/* Audio: Feld mit dem mitlaufenden Text (Runde 50, Liste siehe PhoneLyrics.tsx). Die Karte hat Innenabstand, oben optional das Titelbild (Quadrat), darunter .ph-lyr-body.
-   Alle Zeilen haben dieselbe Schrift (22 px, Zeilenhöhe 30 px, Gewicht 600, arabisch Amiri 25 px, 400): nur Farbe und Deckkraft unterscheiden aktuelle Zeile, Nachbarn und ferne Zeilen. Ein Größenunterschied änderte den Umbruch
-   und ließe die Zeile beim Wechsel springen. Die Zeilen liegen absolut (top 0) und stehen über translate3d an ihrem Platz. Bewegung: nur transform, opacity und color in 250 ms (--ease), nie height, top, margin oder font-size.
-   Nachbarn zeigen bis zu 2 Zeilen, mit Auslassung am Ende der zweiten (line-clamp ohne Innenabstand und ohne max-height am selben Kasten: kein Pixel einer dritten Zeile). Die aktuelle Zeile ist immer ganz. */
+/* Audio: Feld mit dem mitlaufenden Text (Runde 51e, starre Spalte, siehe PhoneLyrics.tsx). Die Karte hat Innenabstand, oben optional das Titelbild (Quadrat), darunter .ph-lyr-body.
+   Alle Zeilen haben dieselbe Schrift (22 px, Zeilenhöhe 30 px, Gewicht 600, arabisch Amiri 25 px, 400), dieselbe Klemmung (--clamp, eine für alle) und damit immer dieselbe Höhe: nur Farbe und Deckkraft unterscheiden
+   die Rollen. Bewegung: nur transform an der Spalte, Deckkraft und Farbe je Zeile. */
 .ph-lyrics {
   position: relative;
   flex: 1 1 0;
@@ -181,30 +180,24 @@ html:has(.vfeed[data-phone] .vend[data-testid='end-page']), html:has(.vfeed[data
   --lyr-gap: var(--s-3);
 }
 .ph-lyr-body { position: relative; flex: 1 1 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
-.ph-lyr-body.ph-list { display: block; }
+/* Runde 51e: starre Spalte. Oben schneidet die Fläche hart am Anker ab (overflow hidden), unten endet eine angeschnittene Zeile weich (Maske über 28 px). */
+.ph-lyr-body.ph-list { display: block; -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 28px), transparent); mask-image: linear-gradient(to bottom, black calc(100% - 28px), transparent); }
+.ph-col { position: relative; display: flex; flex-direction: column; gap: var(--lyr-gap); will-change: transform; transition-property: transform; transition-timing-function: var(--ease-lyr); transition-duration: 0ms; }
 .ph-row {
-  position: absolute; left: 0; right: 0; top: 0; margin: 0; padding: 0;
+  flex: none; margin: 0; padding: 0;
   font-size: 22px; line-height: 30px; font-weight: 600; color: var(--muted); overflow-wrap: anywhere;
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--clamp, 2); line-clamp: var(--clamp, 2); overflow: hidden;
-  will-change: transform;
-  transition-property: transform, opacity, color;
-  transition-duration: var(--dur-lyr), var(--dur-lyr), var(--dur-lyr);
-  /* Runde 51b: sanfter Start (kein Schritt über 40 px zwischen zwei Bildern auch bei hohen Zeilen) */
+  opacity: 0.42;
+  transition-property: opacity, color;
+  transition-duration: var(--dur-lyr);
   transition-timing-function: var(--ease-lyr);
 }
-/* Zeilen unter einer wachsenden Zeile stehen sofort an ihrer Endlage, fallen auf 0,25 und blenden ab 130 ms in 120 ms auf ihre Stufe */
-.ph-row[data-snap] { transition-duration: var(--dur-lyr), 120ms, var(--dur-lyr); transition-delay: 0s, var(--snap-delay, 130ms), 0s; transition-timing-function: var(--ease-lyr), linear, var(--ease-lyr); }
-/* Die alte Zeile blendet schnell aus (sie fährt nur 60 px weg und würde sonst die nachrückende Zeile überlappen) */
-.ph-row[data-snap][data-cut], .ph-row[data-snap][data-role='far'] { transition-duration: var(--dur-lyr), 60ms, var(--dur-lyr); transition-delay: 0s; }
-.ph-row[data-role='out'] { transition-duration: var(--dur-lyr), 60ms, var(--dur-lyr); transition-timing-function: var(--ease-lyr), linear, var(--ease-lyr); }
-/* Wächst die aktuelle Zeile, fährt sie schnell an (nur sie und die alte Zeile bewegen sich): ihr Kasten ist dann vor dem Einblenden der Zeilen darunter an Ort und Stelle */
-.ph-lyr-body[data-grow] { --ease-lyr: cubic-bezier(0.2, 0, 0, 1); }
-.ph-row[data-role='cur'] { color: var(--text); }
-.ph-row[data-role='next2'] { opacity: 0.6; }
-.ph-row[data-role='next3'] { opacity: 0.42; }
-.ph-row[data-role='far'], .ph-row[data-role='out'], .ph-row[data-cut] { opacity: 0; }
-.ph-lyr-body[data-jump] .ph-row { transition: none; }
-@media (prefers-reduced-motion: reduce) { .ph-row { transition: none; } }
+.ph-row[data-role='cur'] { color: var(--text); opacity: 1; }
+.ph-row[data-role='next'] { opacity: 0.6; }
+.ph-row[data-role='out'], .ph-row[data-role='past'] { opacity: 0; }
+/* Die alte Zeile blendet in 120 ms aus, während die Spalte fährt */
+.ph-row[data-role='out'] { transition-duration: 120ms; transition-timing-function: linear; }
+@media (prefers-reduced-motion: reduce) { .ph-col { transition: none; } }
 .ph-lyr-body > .ph-lyric-text, .ph-lyr-body > .ph-lyric-note { margin: 0; }
 .ph-lyric-text { font-size: 17px; line-height: 26px; color: var(--body); white-space: pre-line; overflow-wrap: anywhere; }
 .ph-lyric-note { font-size: var(--t-body); line-height: var(--t-body-lh); color: var(--on-media-muted); text-align: center; }

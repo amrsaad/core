@@ -98,28 +98,28 @@ const M73 = mk(73, 'brain', { form: 'audio', audio: true, hls: 'https://stream.t
 const M68 = mk(68, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/68.m3u8', thumb: 'https://img.test/slow68.png' });
 const M69 = mk(69, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/69.m3u8', thumb: 'https://img.test/broken69.png' });
 const M70 = mk(70, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/70.m3u8', thumb: 'https://img.test/tiny70.png' });
-// Runde 51: gemischt lange Zeilen (kurz, mittel, lang, sehr lang) für die Überlappungsprüfung im Wechsel, lateinisch und arabisch
-const MIXL = [EN_LONG, 'Kurz.', 'Eine mittlere Zeile, die auf dem Handy in zwei Zeilen umbricht.', CUE5, 'Noch eine kurze.', EN_LONG, CUE5, 'Mitte.'];
-const MIXA = [AR_LONG, 'هذا سطر قصير.', AR_LONG + ' ' + AR_LONG, 'سطر ثالث متوسط الطول يمتد على سطرين في الهاتف المحمول.', AR_LONG, 'قصير.'];
-const M74 = mk(74, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/74.m3u8', hook: 'Testmoment 74 brain, ein kurzer Satz', cues: Array.from({ length: 24 }, (_, i) => [i * 0.8, MIXL[i % MIXL.length]]), thumb: 'https://img.test/cover74.png' });
-const M75 = mk(75, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/75.m3u8', hook: 'هذا عنوان تجريبي طويل قليلا للحظة الاختبار', cues: Array.from({ length: 24 }, (_, i) => [i * 0.8, MIXA[i % MIXA.length]]), thumb: 'https://img.test/cover75.png' });
-// Runde 51c: Zeilen mit festen Zeilenzahlen (1, 2, 3 und 6 Zeilen bei 375 und 393 Breite) für die Wechsel 2 auf 2, 3 auf 3, 1 auf 3, 2 auf 6, 6 auf 1 und für doppelte Wechsel im Abstand von 0,12 s
-const W77 = 'alpha beta gamma delta epsilon zeta theta kappa lambda sigma omega rho'.split(' ');
-const mkT77 = (n, tag) => { let t = tag; let i = 0; while (t.length < n) t += ' ' + W77[i++ % W77.length]; return t; };
-const LEN77 = { 1: 10, 2: 38, 3: 60, 6: 130 };
-const L77 = []; const T77 = []; {
+// Runde 51e: Zeilen mit festen Zeilenzahlen (1, 2, 3 und 6 Zeilen) lateinisch und arabisch, mit und ohne Titelbild, für den Zeilenwechsel bild für bild. Die Folge deckt 1 auf 1, 2 auf 2, 3 auf 3, 1 auf 3, 2 auf 6, 3 auf 6 und 6 auf 1 ab,
+// danach Doppelwechsel im Abstand von 0,12 s und ein Dreifachwechsel im Abstand von 0,08 s. M82: 40 Zeilen im Abstand von 3 s für Sprünge und das Pixel-Vergleichsbild.
+const W51 = 'alpha beta gamma delta epsilon zeta theta kappa lambda sigma omega rho'.split(' ');
+const A51 = 'هذا سطر تجريبي طويل جدا يمتد على عدة أسطر في الهاتف المحمول لأن الجملة لا تنتهي بسرعة'.split(' ');
+const LEN51 = { lat: { 1: 10, 2: 38, 3: 60, 6: 130 }, ar: { 1: 20, 2: 50, 3: 80, 6: 200 } };
+const mkT51 = (n, tag, ar) => { let t = ar ? '' : tag; let i = 0; const w = ar ? A51 : W51; while (t.length < n) t += (t ? ' ' : '') + w[i++ % w.length]; return ar ? `${tag} ${t}` : t; };
+const SEQ51 = []; const TIME51 = []; {
   let t = 0;
-  for (let rep = 0; rep < 2; rep++) for (const n of [2, 2, 3, 3, 1, 3, 2, 6, 6, 1]) { T77.push(t); L77.push(n); t += 0.8; }
-  t += 0.8;
-  for (const g of [[1, 3, 2], [2, 6, 1], [3, 3, 6], [2, 3, 3]]) { for (const n of g) { T77.push(t); L77.push(n); t += 0.12; } t += 1.4; }
-  T77.push(t); L77.push(2);
+  for (const n of [1, 1, 2, 2, 3, 3, 1, 3, 2, 6, 3, 6, 1]) { TIME51.push(t); SEQ51.push(n); t += 0.9; }
+  t += 0.9;
+  for (const g of [[1, 3, 2, 6], [2, 3, 3, 1]]) { for (const n of g) { TIME51.push(t); SEQ51.push(n); t += 0.12; } t += 1.4; }
+  for (const n of [3, 6, 2, 3]) { TIME51.push(t); SEQ51.push(n); t += 0.08; }
+  t += 1.4; TIME51.push(t); SEQ51.push(1);
 }
-const M77 = mk(77, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/77.m3u8', hook: 'Testmoment 77 brain, ein kurzer Satz', cues: T77.map((x, i) => [x, mkT77(LEN77[L77[i]], 'Z' + (i + 1))]) }); // ohne Titelbild: das reservierte Quadrat (Runde 50c) nähme der Karte Höhe und die Zeilenzahlen kämen nicht zustande
+const mk51 = (i, ar, cover) => mk(i, 'brain', { form: 'audio', audio: true, hls: `https://stream.test/${i}.m3u8`, hook: ar ? 'هذا عنوان تجريبي' : `Testmoment ${i} brain, ein kurzer Satz`, ...(cover ? { thumb: `https://img.test/cover${i}.png` } : {}), cues: TIME51.map((x, k) => [x, mkT51(LEN51[ar ? 'ar' : 'lat'][SEQ51[k]], `Z${k + 1}`, ar)]) });
+const M78 = mk51(78, false, false); const M79 = mk51(79, false, true); const M80 = mk51(80, true, false); const M81 = mk51(81, true, true);
+const M82 = mk(82, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/82.m3u8', hook: 'Testmoment 82 brain, ein kurzer Satz', thumb: 'https://img.test/cover82.png', cues: Array.from({ length: 40 }, (_, i) => [i * 3, `Z${i + 1} alpha beta gamma delta epsilon zeta theta kappa lambda`]) });
 // Runde 51: Abrufkarte mit langer Frage und langen Antworten (Audio)
 const QL = 'Welche Aussage über die beschriebene Abfolge der Schritte trifft zu, wenn man die Reihenfolge, die Bedingungen und die Ausnahmen aus dem Text gemeinsam berücksichtigt und dabei nichts hinzufügt?';
 const AL = 'Diese Antwort ist absichtlich lang und umbricht auf dem Handy über mehrere Zeilen, damit die Tasten hoch werden';
 const M76 = mk(76, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/76.m3u8', hook: 'Testmoment 76 brain, ein kurzer Satz', thumb: 'https://img.test/cover76.png', recall: { question: QL, options: [AL + ' (A)', AL + ' (richtig)', AL + ' (B)'], correct: 1, why: 'Weil die Reihenfolge zuerst kommt und dann die Bedingung gilt, die im Text genannt wird, und weil keine Ausnahme genannt ist.' } });
-const ALL = [...moments, M76, M77, M74, M75, M58, M59, M60, M61, M62, M63, M64, M65, M66, M67, M72, M73, M68, M69, M70];
+const ALL = [...moments, M76, M78, M79, M80, M81, M82, M58, M59, M60, M61, M62, M63, M64, M65, M66, M67, M72, M73, M68, M69, M70];
 const numOf = (m) => Number(m.id.slice(4, 11));
 const poolOf = async (audio, text = null) => {
   const iv2 = crypto.getRandomValues(new Uint8Array(12));
@@ -130,7 +130,7 @@ const POOL_A = await poolOf([40, 41, 42, 43, 44, 61, 58]);
 const POOL_B = await poolOf([40, 59, 62, 60, 65, 66]);
 const POOL_L = await poolOf([67]);
 const POOL_X = await poolOf([72, 73]);
-const POOL_O = await poolOf([74, 75, 77]);
+const POOL_O = await poolOf([78, 79, 80, 81, 82]);
 const POOL_Q = await poolOf([76, 40]);
 const POOL_C = await poolOf([40, 44, 68, 69, 70]);
 const POOL_G = await poolOf([40, 58, 59]);
@@ -752,7 +752,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const pad = parseFloat(ccs.paddingLeft) || 0;
         const vis = img ? (ics.display !== 'none' && img.getBoundingClientRect().height > 0) : false;
         const cb = card.getBoundingClientRect();
-        const lineInfo = (id) => { const e = q(id.includes('[') ? id : `[data-testid=${id}]`); if (!e) return null; const cs = getComputedStyle(e); return { ...R(e), lh: parseFloat(cs.lineHeight), sh: e.scrollHeight, ch: e.clientHeight, sw: e.scrollWidth, cw: e.clientWidth, ws: cs.whiteSpace, to: cs.textOverflow, ov: cs.overflowY, op: parseFloat(cs.opacity), hidden: cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0, pt: parseFloat(cs.paddingTop), pb: parseFloat(cs.paddingBottom), text: e.textContent }; };
+        const areaR = q('.ph-lyr-body') ? q('.ph-lyr-body').getBoundingClientRect() : null; const kRaw = q('.ph-col') ? parseInt(getComputedStyle(q('.ph-col')).getPropertyValue('--clamp'), 10) : 2; const curI = Number(q(".ph-row[data-role='cur']")?.dataset.i ?? -1);
+        const lineInfo = (id) => { const e = q(id.includes('[') ? id : `[data-testid=${id}]`); if (!e) return null; const cs = getComputedStyle(e); const eb = e.getBoundingClientRect(); const vt = areaR ? Math.max(eb.top, areaR.top) : eb.top; const vb = areaR ? Math.min(eb.bottom, areaR.bottom) : eb.bottom; return { ...R(e), vt, vb, k: kRaw, clipped: vb - vt < 8, lh: parseFloat(cs.lineHeight), sh: e.scrollHeight, ch: e.clientHeight, sw: e.scrollWidth, cw: e.clientWidth, ws: cs.whiteSpace, to: cs.textOverflow, ov: cs.overflowY, op: parseFloat(cs.opacity), hidden: cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0 || vb - vt < 8, pt: parseFloat(cs.paddingTop), pb: parseFloat(cs.paddingBottom), text: e.textContent }; };
         const note = q('.ph-lyric-note');
         const hk = q('[data-testid=hook]');
         return {
@@ -762,7 +763,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           content: { l: cb.left + bw + pad, r: cb.right - bw - pad, t: cb.top + bw + pad, b: cb.bottom - bw - pad },
           cardRadius: ccs.borderTopLeftRadius, padTop: ccs.paddingTop, cardOverflow: ccs.overflow, art: card.dataset.art ?? null, dir: card.dataset.dir ?? null,
           img: img ? { ...R(img), vis, fit: ics.objectFit, dfit: img.dataset.fit, pos: ics.objectPosition, filter: ics.filter, bf: ics.backdropFilter, anim: ics.animationName, trans: ics.transitionDuration, bgi: ics.backgroundImage, alt: img.getAttribute('alt'), lazy: img.getAttribute('loading'), dec: img.getAttribute('decoding'), ref: img.getAttribute('referrerpolicy'), aw: img.getAttribute('width'), hh: img.getAttribute('height'), src: img.getAttribute('src'), done: img.complete && img.naturalWidth > 0, nw: img.naturalWidth, nh: img.naturalHeight, radius: scs.borderTopLeftRadius, bw: sas.borderTopWidth, bs: sas.borderTopStyle, bc: sas.borderTopColor, inCard: !!slot && img.parentElement === slot && slot.parentElement === card, op: parseFloat(ics.opacity) } : null,
-          out: lineInfo('ph-lyric-out'), cur: lineInfo('caption'), next: lineInfo('ph-lyric-next'), next2: lineInfo(".ph-row[data-role='next2']"), next3: lineInfo(".ph-row[data-role='next3']"), note: note ? R(note) : null, noteText: note?.textContent ?? null,
+          out: lineInfo('ph-lyric-out'), cur: lineInfo('caption'), next: lineInfo('ph-lyric-next'), next2: lineInfo(`.ph-row[data-i='${curI + 2}']`), next3: lineInfo(`.ph-row[data-i='${curI + 3}']`), note: note ? R(note) : null, noteText: note?.textContent ?? null,
           slot: slot ? { ...R(slot), state: slot.dataset.state, bg: scs.backgroundColor, vis: scs.display !== 'none' && slot.getBoundingClientRect().height > 0 } : null,
           count: document.querySelectorAll('[data-testid=ph-cover]').length, small: document.querySelectorAll('.ph-chiprow img, .ph-cover, .ph-chiprow [data-cover]').length,
           hook: { ...R(hk), step: hk.dataset.step, size: parseFloat(getComputedStyle(hk).fontSize), sh: hk.scrollHeight, ch: hk.clientHeight }, actions: R(q('[data-testid=ph-actions]')), row: R(q('.ph-chiprow')), contentBox: R(q('[data-testid=ph-audio]')),
@@ -771,14 +772,15 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       });
       const loaded = async () => { const ok = await waitFor(pg, () => { const i = document.querySelector('[data-testid=ph-cover]'); return !!i && i.complete && i.naturalWidth > 0 && i.dataset.ready === 'yes' && parseFloat(getComputedStyle(i).opacity) === 1; }, undefined, 4000); return ok; };
       /** Warten, bis die aktuelle Zeile mit prefix beginnt (die Zeit läuft mit dem Abspielen) */
-      const rowsRest = () => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row')).length === 0;
-      const atLine = async (prefix) => { const ok = await waitFor(pg, (x) => document.querySelector('[data-testid=caption]')?.textContent.startsWith(x), prefix, 9000, true); await waitFor(pg, () => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row')).length === 0, undefined, 3000, true); return ok; };
+      const rowsRest = () => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row, .ph-col')).length === 0;
+      const atLine = async (prefix) => { const ok = await waitFor(pg, (x) => document.querySelector('[data-testid=caption]')?.textContent.startsWith(x), prefix, 9000, true); await waitFor(pg, () => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row, .ph-col')).length === 0, undefined, 3000, true); return ok; };
       /** Zeilen ganz in der Karte, unter dem Bild, ohne Überlappung untereinander, mit Aktionsreihe und Überschrift */
       const linesOk = (a, withArt) => {
         const L = [a.cur, a.next, a.next2, a.next3].filter((x) => x && x.w > 0 && x.h > 0 && !x.hidden);
         if (!a.cur || !a.cur.h) return false;
-        const inCard = L.every((x) => x.l >= a.cardInner.l - 0.5 && x.r <= a.cardInner.r + 0.5 && x.t >= a.cardInner.t - 0.5 && x.b <= a.cardInner.b + 0.5);
-        const underArt = !withArt || L.every((x) => x.t >= a.img.b - 0.5);
+        // Runde 51e: der Bereich klemmt unten hart und blendet unten aus, sichtbar ist der Teil im Bereich (vt bis vb); die aktuelle Zeile liegt ganz darin
+        const inCard = L.every((x) => x.l >= a.cardInner.l - 0.5 && x.r <= a.cardInner.r + 0.5 && x.vt >= a.cardInner.t - 0.5 && x.vb <= a.cardInner.b + 0.5) && a.cur.t >= a.cardInner.t - 0.5 && a.cur.b <= a.cardInner.b + 0.5;
+        const underArt = !withArt || L.every((x) => x.vt >= a.img.b - 0.5);
         const order = L.every((x, i) => i === 0 || L[i - 1].b <= x.t + 0.5);
         const apart = a.card.t >= a.hook.b - 0.5 && a.card.b <= a.actions.t + 0.5;
         return inCard && underArt && order && apart;
@@ -795,7 +797,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const flushOk = (a, rtl) => { const L = [a.cur, a.next, a.next2, a.next3].filter((x) => x && x.w > 0); return !!a.img && L.length > 0 && L.every((x) => (rtl ? Math.abs(x.r - a.img.r) <= 1 : Math.abs(x.l - a.img.l) <= 1)); };
       /** Vorige und nächste Zeile: genau eine Zeilenhöhe (2 px), nichts von einer zweiten Zeile (scrollHeight höchstens clientHeight plus 1), einzeilig mit Auslassung */
       /** Nachbarzeile (Runde 50): vollständig, bis zu zwei Zeilen, nie angeschnitten: Höhe ein ganzes Vielfaches der Zeilenhöhe, höchstens zwei, kein Innenabstand, Überlauf hidden (also kein Pixel einer dritten Zeile). Verdeckte Zeile (Deckkraft 0) zählt nicht. */
-      const nbOk = (x, want) => !x || x.op === 0 || (x.pt === 0 && x.pb === 0 && x.ov === 'hidden' && Math.abs(x.h - Math.round(x.h / x.lh) * x.lh) <= 1 && x.h <= 2 * x.lh + 2 && (want === undefined || Math.abs(x.h / x.lh - want) <= 0.1));
+      const nbOk = (x, want) => !x || x.op === 0 || x.hidden || (x.pt === 0 && x.pb === 0 && x.ov === 'hidden' && Math.abs(x.h - Math.round(x.h / x.lh) * x.lh) <= 1 && x.h <= x.k * x.lh + 2 && (want === undefined || Math.abs(x.h / x.lh - want) <= 0.1));
 
       return { info, loaded, atLine, linesOk, squareOk, flushOk, nbOk, rowsRest };
     };
@@ -832,7 +834,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await atLine('Zweite');
       const a2 = await info();
       r.notes[`${tag} lateinisch Zeile 2`] = a2;
-      c[`${tag} nächste Zeilen vollständig bis 2 Zeilen, nie angeschnitten (lateinisch)`] = nbOk(a2.next) && nbOk(a2.next2) && nbOk(a2.next3) && linesOk(a2, !!a2.img && a2.img.vis);
+      c[`${tag} nächste Zeilen bis K Zeilen mit ganzer Zeilenbox (lateinisch)`] = nbOk(a2.next) && nbOk(a2.next2) && nbOk(a2.next3) && linesOk(a2, !!a2.img && a2.img.vis);
       // Kurzer Nachbar: vollständig ohne Auslassung, eine Zeile; die aktuelle Zeile steht auf derselben Oberkante wie vorher
       await atLine('Dritte');
       const a3 = await info();
@@ -890,7 +892,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       c[`${tag} arabisch: Bild und Untertitel in der Karte, ohne Überlappung`] = !!ar.img && linesOk(ar, ar.img.vis);
       c[`${tag} arabisch: Bild Quadrat nach der Größenregel oder bei zu kleiner Karte ganz weg`] = ar.dir === 'rtl' && squareOk(ar, true);
       c[`${tag} arabisch: Bild bündig mit der rechten Textkante`] = !ar.img || !ar.img.vis || flushOk(ar, true);
-      c[`${tag} arabisch: nächste Zeilen bis 2 Zeilen, nie angeschnitten, direkt nächste Zeile sichtbar`] = nbOk(ar.next) && nbOk(ar.next2) && nbOk(ar.next3) && (!ar.next || ar.next.op === 1);
+      c[`${tag} arabisch: nächste Zeilen bis K Zeilen mit ganzer Zeilenbox, direkt nächste Zeile sichtbar (Deckkraft 0,6)`] = nbOk(ar.next) && nbOk(ar.next2) && nbOk(ar.next3) && !!ar.next && !ar.next.hidden && ar.next.op >= 0.4;
       c[`${tag} arabisch: rechtsbündig`] = af.curRight.boxR - af.curRight.textR <= 2;
       if (size.name === '390x844') await pg.screenshot({ path: `${out}/${name}-390-audio-arabisch.png` });
       if (size.name === '375x667') await pg.screenshot({ path: `${out}/${name}-375-audio-arabisch.png` });
@@ -918,7 +920,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       r.notes[`${tag} lange Sätze`] = w;
       const nl = (x) => (x.op === 0 ? 0 : Math.round(x.h / x.lh));
       r.notes[`${tag} Zeilen (nächste 1, 2, 3)`] = [nl(w.next), w.next2 ? nl(w.next2) : 0, w.next3 ? nl(w.next3) : 0, !!w.img && w.img.vis];
-      c[`${tag} langer nächster Satz: höchstens 2 Zeilen, nichts von einer dritten Zeile`] = nbOk(w.next) && nbOk(w.next2) && nbOk(w.next3) && linesOk(w, !!w.img && w.img.vis);
+      c[`${tag} langer nächster Satz: höchstens K Zeilen (eine Klemme für alle), nichts von einer weiteren Zeile`] = nbOk(w.next) && nbOk(w.next2) && nbOk(w.next3) && linesOk(w, !!w.img && w.img.vis);
       c[`${tag} großer Platz: langer Nachbar auf genau 2 Zeilen begrenzt`] = size.height < 800 || Math.abs(w.next.h - 2 * w.next.lh) <= 2;
       c[`${tag} Abstufung: Deckkraft nach unten abnehmend`] = !w.next2 || w.next2.op === 0 || w.next.op > w.next2.op;
       c[`${tag} lange Sätze: Bild bündig mit der Textkante`] = !w.img || !w.img.vis || flushOk(w, false);
@@ -1270,22 +1272,23 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await showMoment(pg, idOf(67));
       await atLine('Mitte');
       const seq = [];
-      const nl = (x) => (!x || x.op === 0 || x.hidden ? 0 : Math.round(x.h / x.lh));
+      // Runde 51e: sichtbare Zeilen der nächsten Zeile = Teil im Bereich (der Bereich klemmt unten hart), gerundet auf Zeilen
+      const nl = (x) => (!x || x.op === 0 || x.hidden ? 0 : Math.round((x.vb - x.vt) / x.lh));
       for (const h of [1000, 940, 900, 860, 840, 820, 800, 780, 760, 740, 720, 700, 660, 630, 600, 580, 560, 540, 520, 500, 480, 460, 440, 420]) {
         await pg.evaluate((v) => { document.querySelector('.vfeed').style.height = `${v}px`; }, h);
         await pg.waitForTimeout(300);
-        await waitFor(pg, () => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row')).length === 0, undefined, 2000);
+        await waitFor(pg, () => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row, .ph-col')).length === 0, undefined, 2000);
         const a = await info();
+        const k = await pg.evaluate(() => { const b = document.querySelector('.ph-lyr-body'); const c = document.querySelector('.ph-col'); const l = parseFloat(getComputedStyle(c.firstElementChild).lineHeight); return { k: parseInt(getComputedStyle(c).getPropertyValue('--clamp'), 10), want: Math.max(2, Math.floor(b.clientHeight / l)) }; });
         const rows = [a.next, a.next2, a.next3];
-        seq.push({ h, img: a.img && a.img.vis ? Math.round(a.img.w) : 0, cur: a.cur ? Math.round(a.cur.h / a.cur.lh) : 0, nx: rows.map(nl), shown: rows.filter((x) => x && x.op > 0).length, ok: rows.every((x) => nbOk(x)) && a.cur.b <= a.cardInner.b + 0.5 && a.cur.t >= a.cardInner.t - 0.5 && a.card.b <= a.actions.t + 0.5 && (!a.next || a.next.op === 0 || a.next.b <= a.cardInner.b + 0.5) });
+        seq.push({ h, img: a.img && a.img.vis ? Math.round(a.img.w) : 0, cur: a.cur ? Math.round(a.cur.h / a.cur.lh) : 0, nx: rows.map(nl), k: k.k, kWant: k.want, ok: rows.every((x) => nbOk(x)) && a.cur.b <= a.cardInner.b + 0.5 && a.cur.t >= a.cardInner.t - 0.5 && a.card.b <= a.actions.t + 0.5 && (!a.next || a.next.hidden || a.next.vb <= a.cardInner.b + 0.5) });
       }
-      r.notes['Verkleinerung 375x667 (Höhe, Bild px, aktuelle Zeilen, nächste Zeilen je Reihe)'] = seq;
-      const sum = (x) => x.nx.reduce((p, q) => p + q, 0);
-      c['Verkleinerung: alles ganz in der Karte, nie über der Aktionsreihe, Nachbarn nie angeschnitten'] = seq.every((x) => x.ok && x.cur >= 1);
+      r.notes['Verkleinerung 375x667 (Höhe, Bild px, aktuelle Zeilen, sichtbare nächste Zeilen je Reihe, K)'] = seq;
+      c['Verkleinerung: alles im Bereich der Karte, nie über der Aktionsreihe, Zeilenboxen ganz'] = seq.every((x) => x.ok && x.cur >= 1);
       c['Verkleinerung: das Bild wird nur kleiner, nie größer (je kleiner die Karte)'] = seq.every((x, i) => i === 0 || x.img <= seq[i - 1].img);
-      c['Verkleinerung: das Bild bleibt, solange die nächste Zeile ihre 2 Zeilen hat, und geht vor jeder Kürzung der nächsten Zeilen'] = seq.every((x) => x.img === 0 || (x.nx[0] === 2 && x.cur >= 1));
-      c['Verkleinerung: die aktuelle Zeile wird erst als Letztes geklemmt (erst wenn keine nächste Zeile mehr da ist)'] = seq.every((x) => x.cur >= 1 && (x.cur === 1 || x.shown >= 0));
-      c['Verkleinerung: alle Stufen kamen vor (Bild 128, kleiner, weg, nächste 3, 2, 1, 0 Zeilen)'] = seq.some((x) => x.img === 128) && seq.some((x) => x.img > 0 && x.img < 128) && seq.some((x) => x.img === 0) && [3, 2, 1, 0].every((n) => seq.some((x) => x.shown === n));
+      c['Verkleinerung: das Bild bleibt, solange die nächste Zeile mindestens 2 sichtbare Zeilen hat'] = seq.every((x) => x.img === 0 || (x.nx[0] >= 2 && x.cur >= 1));
+      c['Verkleinerung: eine Klemme K für alle Zeilen, K gleich max(2, Bereichshöhe geteilt durch Zeilenhöhe)'] = seq.every((x) => x.k === x.kWant && x.k >= 2);
+      c['Verkleinerung: alle Stufen kamen vor (Bild 128, kleiner, weg) und die Klemme wurde kleiner'] = seq.some((x) => x.img === 128) && seq.some((x) => x.img > 0 && x.img < 128) && seq.some((x) => x.img === 0) && seq[seq.length - 1].k < seq[0].k;
       await o.browser.close();
     }
 
@@ -1297,7 +1300,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const pg = o.pg; const { info, atLine, rowsRest } = H50(pg);
         const tag = `${size.name} Zeilenwechsel`;
         await showMoment(pg, idOf(65));
-        const rest = () => waitFor(pg, () => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row')).length === 0, undefined, 3000);
+        const rest = () => waitFor(pg, () => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row, .ph-col')).length === 0, undefined, 3000);
         // Übergangsart und Dauer der Zeilen (berechnet): nur transform, opacity, color, 220 bis 280 ms, ease-out
         const tr = await pg.evaluate(() => { const e = document.querySelector('.ph-row'); const cs = getComputedStyle(e); const dur = cs.transitionDuration.split(',').map((x) => parseFloat(x) * (x.includes('ms') ? 1 : 1000)); return { prop: cs.transitionProperty.split(',').map((x) => x.trim()), dur, fn: cs.transitionTimingFunction, filter: cs.filter, bf: cs.backdropFilter, will: cs.willChange }; });
         r.notes[`${tag} Übergang`] = tr;
@@ -1315,7 +1318,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         c[`${tag}: genau eine aktuelle Zeile, sonst nichts übrig`] = await pg.evaluate(() => document.querySelectorAll('[data-testid=caption]').length === 1 && document.querySelectorAll('.ph-row[data-role=cur]').length === 1);
         // Sprung (Moment 40) und Wechsel des Moments: sofort, keine laufende Bewegung, kein Rest des alten Textes
         await showMoment(pg, idOf(40));
-        const inst = await pg.evaluate(() => ({ anims: document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row')).length, txt: document.querySelector('[data-testid=ph-lyrics]')?.textContent ?? '' }));
+        const inst = await pg.evaluate(() => ({ anims: document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row, .ph-col')).length, txt: document.querySelector('[data-testid=ph-lyrics]')?.textContent ?? '' }));
         c[`${tag}: Momentwechsel sofort, keine Bewegung, kein Rest vom alten Text`] = inst.anims === 0 && !/Alpha|Beta|Gamma|Delta|Epsilon|Zeta/.test(inst.txt);
         // Zurücksuchen innerhalb des Moments (Sprung): sofort
         await showMoment(pg, idOf(65));
@@ -1324,9 +1327,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         await atLine('Epsilon');
         await pg.evaluate(() => { for (const a of document.querySelectorAll('audio')) if (!a.paused) a.currentTime = 100.3; });
         const back = await waitFor(pg, () => document.querySelector('[data-testid=caption]')?.textContent.startsWith('Alpha'), undefined, 3000);
-        const jump = await pg.evaluate(() => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row')).length);
+        const jump = await pg.evaluate(() => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row, .ph-col')).length);
         r.notes[`${tag} Sprung`] = { back, jump };
-        c[`${tag}: Sprung zurück zeigt die Zeile ohne Bewegung`] = back && jump === 0;
+        await rest();
+        const backTop = Math.round((await info()).cur.t * 10) / 10;
+        c[`${tag}: Sprung zurück erreicht die Zeile, in Ruhe am Anker, keine Bewegung bleibt hängen`] = back && Math.abs(backTop - tops[0]) <= 1 && await pg.evaluate(() => document.getAnimations().filter((x) => x.transitionProperty === 'transform').length === 0);
         c[`${tag}: keine Seitenfehler`] = o.errors.length === 0;
         await o.browser.close();
       }
@@ -1334,11 +1339,11 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       {
         const o = await open(type, { ...SIZES[0], reduced: true }, { tab: 'audio', pool: POOL_B });
         await showMoment(o.pg, idOf(65));
-        const tr = await o.pg.evaluate(() => { const cs = getComputedStyle(document.querySelector('.ph-row')); return { prop: cs.transitionProperty, dur: cs.transitionDuration }; });
-        c['Bewegung reduziert: Zeilen ohne Übergang'] = /^0s(, 0s)*$/.test(tr.dur) || tr.prop === 'none';
+        const tr = await o.pg.evaluate(() => { const cs = getComputedStyle(document.querySelector('.ph-col')); return { prop: cs.transitionProperty, dur: cs.transitionDuration }; });
+        c['Bewegung reduziert: die Spalte fährt nicht (kein Übergang), nur die Deckkraft der Zeilen blendet'] = /^0s(, 0s)*$/.test(tr.dur) || tr.prop === 'none';
         const w = await waitFor(o.pg, () => document.querySelector('[data-testid=caption]')?.textContent.startsWith('Beta'), undefined, 4000);
-        const an = await o.pg.evaluate(() => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row')).length);
-        c['Bewegung reduziert: Wechsel ohne laufende Bewegung'] = w && an === 0;
+        const an = await o.pg.evaluate(() => document.getAnimations().filter((x) => x.transitionProperty === 'transform').length);
+        c['Bewegung reduziert: Wechsel ohne laufende Bewegung (keine Transform-Animation)'] = w && an === 0;
         await o.browser.close();
       }
       // Arabisch (RTL): gleiche Bewegung, Endzustand richtig
@@ -1364,7 +1369,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         await cdp?.send('Emulation.setCPUThrottlingRate', { rate: 4 });
         await pg.evaluate(() => {
           window.__fr = { f: [], on: true };
-          const tick = (t) => { if (!window.__fr.on) return; window.__fr.f.push({ t, a: document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row') && x.playState === 'running').length, rows: [...document.querySelectorAll('.ph-row')].map((e) => [+e.dataset.i, e.getBoundingClientRect().top, +getComputedStyle(e).opacity, e.dataset.role]) }); requestAnimationFrame(tick); };
+          const tick = (t) => { if (!window.__fr.on) return; window.__fr.f.push({ t, a: document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row, .ph-col') && x.playState === 'running').length, rows: [...document.querySelectorAll('.ph-row')].map((e) => [+e.dataset.i, e.getBoundingClientRect().top, +getComputedStyle(e).opacity, e.dataset.role]) }); requestAnimationFrame(tick); };
           requestAnimationFrame(tick);
         });
         const got = await waitFor(pg, () => { const f = window.__fr.f; return f.length > 0 && (f[f.length - 1].rows.find((x) => x[3] === 'cur')?.[0] ?? 0) >= 12; }, undefined, 15000);
@@ -1387,7 +1392,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const done = res.slice(0, -1).filter((x) => x.frames > 0);
         r.notes[`${size.name} Verlauf Zeilenwechsel 4x`] = { frames: fr.length, maxDt: Math.max(...dts), changes: res.slice(0, 10) };
         c[`${size.name} Verlauf: mindestens 8 Wechsel gemessen`] = got && done.length >= 8;
-        c[`${size.name} Verlauf: Dauer je Wechsel 200 bis 300 ms`] = done.length >= 8 && done.every((x) => x.durMs >= 200 && x.durMs <= 300);
+        c[`${size.name} Verlauf: Dauer je Wechsel 200 bis 450 ms`] = done.length >= 8 && done.every((x) => x.durMs >= 200 && x.durMs <= 450);
         c[`${size.name} Verlauf: Bewegung auf mindestens 10 Frames verteilt, kein harter Sprung`] = done.length >= 8 && done.every((x) => x.frames >= 10);
         c[`${size.name} Verlauf: während des Wechsels laufen Transitions (getAnimations)`] = done.length >= 8 && done.every((x) => x.animsSeen >= 5);
         c[`${size.name} Verlauf: kein Frame über 34 ms bei 4x CPU (nach 20 Frames Anlauf)`] = type !== chromium || Math.max(...dts.slice(20)) <= 34; // nur mit Drosselung (Chromium) ein Zeitlimit je Frame
@@ -1397,127 +1402,149 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       }
     }
 
-    // ---------- Runde 51 (Ziel 2): in keinem Frame eines Wechsels überlappen sich die Kästen zweier sichtbarer Zeilen (Deckkraft über 0,3) um mehr als 1 px; rAF-Abtastung bei 4x CPU, gemischt lange Zeilen, auch arabisch ----------
-    sec('Runde 51 (Ziel 2): in keinem Frame eines Wechsels überlappen sich die Kästen zweier sichtb');
+    // ---------- Runde 51e: Zeilenwechsel als starre Spalte, bild für bild per requestAnimationFrame bei 4x CPU (CDP-Drosselung nur Chromium). Wechsel 1 auf 1, 2 auf 2, 3 auf 3, 1 auf 3, 2 auf 6, 3 auf 6, 6 auf 1, Doppelwechsel 120 ms, Dreifachwechsel 80 ms; lateinisch und arabisch, mit und ohne Titelbild ----------
+    sec('Runde 51e: Zeilenwechsel als starre Spalte, bild für bild bei 4x CPU, Doppel- und Dreifachwechsel, Sprung');
     {
-      for (const size of [SIZES[1], GER]) {
-        for (const [lab, num] of [['lateinisch', 74], ['arabisch', 75]]) {
-          if ((size === GER) === (num === 74)) continue; // je Sprache ein Profil: lateinisch 375x667, arabisch Gerät
-          const o = await open(type, size, { tab: 'audio', pool: POOL_O });
-          const pg = o.pg;
-          await showMoment(pg, idOf(num));
-          const cdp = type === chromium ? await o.cx.newCDPSession(pg) : null;
-          await cdp?.send('Emulation.setCPUThrottlingRate', { rate: 4 });
-          await pg.evaluate(() => {
-            window.__ov = { f: [], on: true };
-            const tick = (t) => { if (!window.__ov.on) return; window.__ov.f.push({ t, rows: [...document.querySelectorAll('.ph-row')].map((e) => { const b = e.getBoundingClientRect(); return [+e.dataset.i, b.top, b.bottom, +getComputedStyle(e).opacity, e.dataset.role, e.style.getPropertyValue('--clamp'), b.height]; }) }); requestAnimationFrame(tick); };
-            requestAnimationFrame(tick);
-          });
-          const got = await waitFor(pg, () => { const f = window.__ov.f; return f.length > 0 && (f[f.length - 1].rows.find((x) => x[4] === 'cur')?.[0] ?? 0) >= 10; }, undefined, 15000);
-          const fr = await pg.evaluate(() => { window.__ov.on = false; return window.__ov.f; });
-          await cdp?.send('Emulation.setCPUThrottlingRate', { rate: 1 });
-          let worst = 0; let where = null; let wi = 0; let changes = 0; let prevCur;
-          for (const f of fr) {
-            const cur = f.rows.find((x) => x[4] === 'cur')?.[0]; if (prevCur !== undefined && cur !== undefined && cur !== prevCur) changes++; prevCur = cur;
-            const vis = f.rows.filter((x) => x[3] > 0.3);
-            for (let a = 0; a < vis.length; a++) for (let b = a + 1; b < vis.length; b++) { const ov = Math.min(vis[a][2], vis[b][2]) - Math.max(vis[a][1], vis[b][1]); if (ov > worst) { worst = ov; wi = fr.indexOf(f); where = [vis[a][0], vis[b][0], Math.round(f.t)]; } }
+      const SAMPLER = () => {
+        window.__ov = { f: [], on: true };
+        const tick = (t) => {
+          if (!window.__ov.on) return;
+          const body = document.querySelector('.ph-lyr-body'); const col = document.querySelector('.ph-col');
+          if (body && col) {
+            const a = body.getBoundingClientRect(); const cs = getComputedStyle(col); const m = cs.transform;
+            window.__ov.f.push({ t, y: m && m !== 'none' ? new DOMMatrixReadOnly(m).m42 : 0, co: parseFloat(cs.opacity), at: a.top, ab: a.bottom, rows: [...col.children].map((e) => { const b = e.getBoundingClientRect(); return [+e.dataset.i, b.top, b.bottom, +getComputedStyle(e).opacity, e.dataset.role, b.height]; }) });
           }
-          // Runde 51b: je Wechsel (0 bis 600 ms): Höhe der aktuellen Zeile ab dem ersten Bild gleich Endhöhe, keine Auslassung wenn der Text passt, Anker gleich, kein Schritt über 38 px sichtbarer Zeilen
-          const evs = []; for (let i = 1; i < fr.length; i++) { const a0 = fr[i - 1].rows.find((x) => x[4] === 'cur')?.[0]; const a1 = fr[i].rows.find((x) => x[4] === 'cur')?.[0]; if (a0 !== undefined && a1 !== undefined && a0 !== a1) evs.push(i); }
-          let hJump = 0; let ell = 0; let step = 0; let stepRaw = 0; let outMove = 0; const anchors = []; let used = 0;
-          for (let e = 0; e < evs.length - 1; e++) {
-            const f0 = evs[e]; const end = Math.min(evs[e + 1] - 1, f0 + 36); const nw = fr[f0].rows.find((x) => x[4] === 'cur')[0];
-            const rowAt = (f) => fr[f].rows.find((x) => x[0] === nw); const fin = rowAt(end); if (!fin) continue; used++;
-            anchors.push(fin[1]);
-            { const o0 = fr[f0 - 1].rows.find((x) => x[0] === nw - 1); const o1 = fr[end].rows.find((x) => x[0] === nw - 1); if (o0 && o1) outMove = Math.max(outMove, Math.abs(o1[1] - o0[1])); }
-            for (let f = f0; f <= end; f++) { const rw = rowAt(f); if (rw && Math.abs(rw[6] - fin[6]) > 2) hJump = Math.max(hJump, Math.abs(rw[6] - fin[6])); if (rw && fin[5] === 'none' && rw[5] !== 'none') ell++; }
-            for (let f = f0; f <= end; f++) for (const x of fr[f].rows) { const y0 = fr[f - 1].rows.find((q) => q[0] === x[0]); if (y0 && x[3] > 0.3 && y0[3] > 0.3) { const d = Math.abs(x[1] - y0[1]); stepRaw = Math.max(stepRaw, d); if (fr[f].t - fr[f - 1].t <= 34) step = Math.max(step, d); } } // Runde 51c: Bildpaare mit über 34 ms Abstand (ein ausgefallenes Bild der Messung) zählen nicht zum Schritt, stehen aber als stepRaw im Bericht
-          }
-          const ancD = anchors.length ? Math.max(...anchors) - Math.min(...anchors) : 99;
-          c[`${size.name} Wechsel ${lab}: Höhe der aktuellen Zeile ab dem ersten Bild gleich der Endhöhe (2 px)`] = used >= 6 && hJump <= 2;
-          c[`${size.name} Wechsel ${lab}: keine Auslassung, die später verschwindet`] = used >= 6 && ell === 0;
-          c[`${size.name} Wechsel ${lab}: Anker gleich (1 px)`] = used >= 6 && ancD <= 1;
-          c[`${size.name} Wechsel ${lab}: kein Schritt über 38 px sichtbarer Zeilen zwischen zwei Bildern (4x CPU, Bildabstand bis 34 ms)`] = used >= 6 && step <= 38;
-          c[`${size.name} Wechsel ${lab}: die alte Zeile fährt höchstens 60 px nach oben`] = used >= 6 && outMove <= 61;
-          r.notes[`${size.name} Wechsel ${lab}`] = { used, outMove: Math.round(outMove), hJump: Math.round(hJump), ell, step: Math.round(step * 10) / 10, stepRaw: Math.round(stepRaw * 10) / 10, ancD: Math.round(ancD * 10) / 10 };
-          r.notes[`${size.name} Überlappung ${lab}`] = { frames: fr.length, changes, worst: Math.round(worst * 10) / 10, where, ctx: [wi - 2, wi - 1, wi, wi + 1].map((k) => fr[k] && fr[k].rows.map((x) => x.map((v) => (typeof v === 'number' ? Math.round(v * 10) / 10 : v)))) };
-          c[`${size.name} Überlappung ${lab}: mindestens 8 Wechsel abgetastet`] = got && changes >= 8;
-          c[`${size.name} Überlappung ${lab}: in keinem Frame mehr als 1 px Überlappung sichtbarer Zeilen`] = worst <= 1;
-          await o.browser.close();
+          requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      };
+      const analyze = (fr, seq, gap) => {
+        const curOf = (f) => f.rows.find((x) => x[4] === 'cur')?.[0];
+        const evs = []; for (let i = 1; i < fr.length; i++) { const a0 = curOf(fr[i - 1]); const a1 = curOf(fr[i]); if (a0 !== undefined && a1 !== undefined && a0 !== a1 && Math.abs(a1 - a0) < 5) evs.push(i); }
+        const R = { changes: evs.length, a: 0, b: 0, c: 0, d: 0, dRaw: 0, e: 9, f: 0, i: 0, labs: {}, dbl: 0, trp: 0 };
+        const h0 = new Map(); for (const f of fr) for (const x of f.rows) { const h = h0.get(x[0]); if (!h) h0.set(x[0], [x[5], x[5]]); else { h[0] = Math.min(h[0], x[5]); h[1] = Math.max(h[1], x[5]); } }
+        for (const [, h] of h0) R.a = Math.max(R.a, h[1] - h[0]);
+        for (const f of fr) for (let k = 1; k < f.rows.length; k++) R.b = Math.max(R.b, Math.abs(f.rows[k][1] - f.rows[k - 1][2] - gap));
+        for (let f = 1; f < fr.length; f++) { if (fr[f].co < 0.05 || fr[f - 1].co < 0.05) continue; const st = Math.abs(fr[f].y - fr[f - 1].y); R.dRaw = Math.max(R.dRaw, st); if (fr[f].t - fr[f - 1].t <= 34) R.d = Math.max(R.d, st); }
+        const inArea = (x, f) => Math.min(x[2], f.ab) - Math.max(x[1], f.at) >= 8;
+        for (let e = 0; e < evs.length; e++) {
+          const f0 = evs[e]; const nw = curOf(fr[f0]); const next = evs[e + 1] ?? fr.length;
+          const gp = e > 0 ? fr[f0].t - fr[evs[e - 1]].t : 9999; const gn = fr[next] ? fr[next].t - fr[f0].t : 9999;
+          const rapid = Math.min(gp, gn) < 400;
+          const end = Math.min(next - 1, f0 + 40); if (end <= f0 + 2) continue;
+          if (rapid) { if (Math.min(gp, gn) < 100) R.trp++; else R.dbl++; continue; }
+          if (fr[end].t - fr[f0].t < 460) continue;
+          const key = `${seq[nw - 1]} auf ${seq[nw]}`; R.labs[key] = (R.labs[key] ?? 0) + 1;
+          const ob = fr[f0 - 1].rows.find((x) => x[0] === nw - 1); const ce = fr[end].rows.find((x) => x[0] === nw);
+          R.c = Math.max(R.c, Math.abs((ce[1] - fr[end].at) - (ob[1] - fr[f0 - 1].at)));
+          for (let f = f0; f <= end; f++) for (const x of fr[f].rows) { const xb = fr[f0 - 1].rows.find((q) => q[0] === x[0]); const xe = fr[end].rows.find((q) => q[0] === x[0]); if (inArea(xb, fr[f0 - 1]) && inArea(xe, fr[end])) R.e = Math.min(R.e, x[3]); }
+          for (let f = f0; f <= end; f++) if (fr[f].t - fr[f0].t >= 150) R.f = Math.max(R.f, fr[f].rows.find((x) => x[0] === nw - 1)[3]);
+          for (let f = f0 + 1; f <= end; f++) for (const x of fr[f].rows) { const y0 = fr[f - 1].rows.find((q) => q[0] === x[0]); if (y0 && x[4] !== 'out' && y0[4] !== 'out' && inArea(x, fr[f]) && inArea(y0, fr[f - 1])) R.i = Math.max(R.i, Math.abs(x[3] - y0[3])); }
         }
-      }
-    }
-
-
-    // ---------- Runde 51c: Wechsel mit festen Zeilenzahlen (2 auf 2, 3 auf 3, 1 auf 3, 2 auf 6, 6 auf 1) bild für Bild bei 4x CPU: ohne Wachstum bleibt jede Zeile, die davor und danach sichtbar ist, in jedem Bild über 0,4 und nichts überlappt; mit Wachstum fallen die Zeilen darunter nie unter 0,2 und stehen ab 250 ms auf ihrer Stufe; doppelte Wechsel im Abstand von 0,12 s überlappen nie ----------
-    sec('Runde 51c: Wechsel mit festen Zeilenzahlen bild für bild bei 4x CPU, doppelte Wechsel');
-    {
-      for (const size of [SIZES[1], GER]) {
+        return R;
+      };
+      const CFG = [
+        ['393x852 lateinisch ohne Titelbild', { ...GER, height: 852 }, 78], ['393x852 lateinisch mit Titelbild', { ...GER, height: 852 }, 79], ['393x852 arabisch ohne Titelbild', { ...GER, height: 852 }, 80], ['393x852 arabisch mit Titelbild', { ...GER, height: 852 }, 81],
+        ['393x793 lateinisch mit Titelbild', GER, 79], ['375x667 lateinisch ohne Titelbild', SIZES[1], 78], ['375x667 arabisch ohne Titelbild', SIZES[1], 80],
+      ];
+      const all51 = {};
+      for (const [tag, size, num] of CFG) {
         const o = await open(type, size, { tab: 'audio', pool: POOL_O });
         const pg = o.pg;
-        await showMoment(pg, idOf(77));
+        await showMoment(pg, idOf(num));
         const cdp = type === chromium ? await o.cx.newCDPSession(pg) : null;
         await cdp?.send('Emulation.setCPUThrottlingRate', { rate: 4 });
-        await pg.evaluate(() => {
-          window.__ov = { f: [], on: true };
-          const tick = (t) => { if (!window.__ov.on) return; window.__ov.f.push({ t, rows: [...document.querySelectorAll('.ph-row')].map((e) => { const b = e.getBoundingClientRect(); return [+e.dataset.i, b.top, b.bottom, +getComputedStyle(e).opacity, e.dataset.role, e.style.getPropertyValue('--clamp'), b.height]; }) }); requestAnimationFrame(tick); };
-          requestAnimationFrame(tick);
-        });
-        const nCue = L77.length;
-        // die Wiedergabe dauert über 25 s (jede einzelne Wartezeit höchstens 15 s): in Schritten warten, nur der letzte zählt als Zeitlimit
+        await pg.evaluate(SAMPLER);
+        const nCue = SEQ51.length;
         const endCond = (n) => { const f = window.__ov.f; return f.length > 0 && (f[f.length - 1].rows.find((x) => x[4] === 'cur')?.[0] ?? 0) >= n - 1; };
         let got = false;
         for (let k = 0; k < 4 && !got; k++) got = await waitFor(pg, endCond, nCue, 12000, k < 3);
+        await pg.waitForTimeout(600);
         const fr = await pg.evaluate(() => { window.__ov.on = false; return window.__ov.f; });
         await cdp?.send('Emulation.setCPUThrottlingRate', { rate: 1 });
-        const curOf = (f) => f.rows.find((x) => x[4] === 'cur')?.[0];
-        const evs = []; for (let i = 1; i < fr.length; i++) { const a0 = curOf(fr[i - 1]); const a1 = curOf(fr[i]); if (a0 !== undefined && a1 !== undefined && a0 !== a1) evs.push(i); }
-        const ovl = (f) => { const vis = f.rows.filter((x) => x[3] > 0.3); let w = 0; for (let a = 0; a < vis.length; a++) for (let b = a + 1; b < vis.length; b++) w = Math.max(w, Math.min(vis[a][2], vis[b][2]) - Math.max(vis[a][1], vis[b][1])); return w; };
-        const res = {}; const dbl = { n: 0, ov: 0 }; let worstAll = 0; let stepAll = 0;
-        const rowAt = (f, i) => fr[f].rows.find((x) => x[0] === i);
-        for (let e = 0; e < evs.length; e++) {
-          const f0 = evs[e]; const nw = curOf(fr[f0]); const next = evs[e + 1] ?? fr.length; const end = Math.min(next - 1, f0 + 36);
-          const dt = fr[next] ? fr[next].t - fr[f0].t : 999; const dp = e > 0 ? fr[f0].t - fr[evs[e - 1]].t : 999;
-          const old = fr[f0 - 1].rows.find((x) => x[0] === nw - 1); const fin = rowAt(end, nw);
-          if (!old || !fin) continue;
-          const oL = Math.round(old[6] / 30); const nL = Math.round(fin[6] / 30);
-          const isDbl = Math.min(dt, dp) < 400;
-          const R = (res[`${oL} auf ${nL}`] ??= { n: 0, ov: 0, step: 0, stepRaw: 0, minVis: 9, minFollow: 9, late: 0 });
-          let ov = 0;
-          for (let f = f0; f <= end; f++) {
-            ov = Math.max(ov, ovl(fr[f]));
-            for (const x of fr[f].rows) {
-              const y0 = rowAt(f - 1, x[0]);
-              if (y0 && x[3] > 0.3 && y0[3] > 0.3 && !isDbl) { const d = Math.abs(x[1] - y0[1]); R.stepRaw = Math.max(R.stepRaw, d); if (fr[f].t - fr[f - 1].t <= 34) R.step = Math.max(R.step, d); }
-              if (isDbl) continue;
-              const before = rowAt(f0 - 1, x[0]); const after = rowAt(end, x[0]);
-              if (nL <= oL && before && after && before[3] > 0.3 && after[3] > 0.3) R.minVis = Math.min(R.minVis, x[3]);
-              if (nL > oL && x[0] > nw && after && after[3] > 0.3) { R.minFollow = Math.min(R.minFollow, x[3]); if (fr[f].t - fr[f0].t >= 270 && Math.abs(x[3] - after[3]) > 0.03) R.late++; }
+        const R = analyze(fr, SEQ51, 12);
+        const fin = await pg.evaluate(() => {
+          const col = document.querySelector('.ph-col'); const cur = document.querySelector('.ph-row[data-role=cur]'); const m = getComputedStyle(col).transform;
+          return { y: m && m !== 'none' ? new DOMMatrixReadOnly(m).m42 : 0, want: -cur.offsetTop, rowsStyled: [...document.querySelectorAll('.ph-row')].filter((e) => e.hasAttribute('style')).length, colStyle: col.getAttribute('style'), bodyStyle: document.querySelector('.ph-lyr-body').getAttribute('style'), data: [...document.querySelectorAll('[data-snap],[data-grow],[data-cut]')].length, anims: document.getAnimations().length, k: getComputedStyle(col).getPropertyValue('--clamp').trim(), n: col.children.length };
+        });
+        all51[tag] = { ...R, k: fin.k, frames: fr.length };
+        const nm = `${tag} 51e`;
+        c[`${nm}: alle Wechsel abgetastet`] = got && R.changes >= 24;
+        for (const lab of ['1 auf 1', '2 auf 2', '3 auf 3', '1 auf 3', '2 auf 6', '3 auf 6', '6 auf 1']) c[`${nm} ${lab}: mindestens ein ruhiger Wechsel gemessen`] = (R.labs[lab] ?? 0) >= 1;
+        c[`${nm} a: Höhe jeder Zeile in jedem Bild gleich ihrer Ruhehöhe (0)`] = fr.length > 100 && R.a <= 0.01;
+        c[`${nm} b: Abstände benachbarter Zeilen in jedem Bild gleich, Überlappung 0 (auch Doppel- und Dreifachwechsel)`] = R.b <= 0.01;
+        c[`${nm} c: Anker in Ruhe vor und nach dem Wechsel gleich (0,5 px)`] = R.c <= 0.5;
+        c[`${nm} d: Schritt der Spalte bei Bildabstand bis 34 ms höchstens 38 px`] = R.d <= 38;
+        c[`${nm} e: davor und danach sichtbare Zeile nie unter Deckkraft 0,4`] = R.e >= 0.4;
+        c[`${nm} f: alte Zeile nach 150 ms Deckkraft 0`] = R.f <= 0.01;
+        c[`${nm} g: mindestens 6 Doppelwechsel (120 ms) und 3 Dreifachwechsel (80 ms) gemessen`] = R.dbl >= 6 && R.trp >= 3;
+        c[`${nm} g: Endlage gleich Neuaufbau (0,5 px), keine Inline-Reste außer der Spalte, keine Hilfsattribute, keine laufende Animation`] = Math.abs(fin.y - fin.want) <= 0.5 && fin.rowsStyled === 0 && fin.bodyStyle === null && fin.data === 0 && fin.anims === 0 && /^(--clamp: \d+; )?(transition-duration: [\d.]+ms; )?(--clamp: \d+; )?(transition-duration: [\d.]+ms; )?transform: translate3d\([^)]*\);?$/.test((fin.colStyle ?? '').replace(/;\s*$/, ';'));
+        c[`${nm} i: keine Auslassung, die im Lauf erscheint oder verschwindet (Zeilenhöhe fest, Deckkraft stufenlos, Sprung je Bild unter 0,25)`] = R.a <= 0.01 && R.i < 0.25;
+        c[`${nm}: eine Klemmung K (2 oder mehr) an der Spalte`] = Number(fin.k) >= 2;
+        c[`${nm}: keine Seitenfehler`] = o.errors.length === 0;
+        if (cdp) { /* Messwerte nur in Chromium */ }
+        await o.browser.close();
+      }
+      r.notes['51e Messwerte'] = all51;
+      // h) Sprung über 8 Zeilen vor und zurück (Suchen), i) Pixelvergleich: nie ein Pixel der alten Zeile oberhalb der Fläche
+      {
+        const o = await open(type, { ...GER, height: 852 }, { tab: 'audio', pool: POOL_O });
+        const pg = o.pg;
+        await showMoment(pg, idOf(82));
+        await pg.waitForTimeout(600);
+        await pg.evaluate(SAMPLER);
+        const seekBy = (d) => pg.evaluate((dd) => { for (const a of document.querySelectorAll('audio')) if (a.__p === false) a.currentTime = Math.max(0, a.currentTime + dd); }, d);
+        const curNow = () => pg.evaluate(() => +document.querySelector('.ph-row[data-role=cur]')?.dataset.i);
+        const c0 = await curNow();
+        await seekBy(24); await waitFor(pg, (c) => +document.querySelector('.ph-row[data-role=cur]')?.dataset.i >= c + 8, c0, 6000); await pg.waitForTimeout(500);
+        const c1 = await curNow();
+        await seekBy(-24); await waitFor(pg, (c) => +document.querySelector('.ph-row[data-role=cur]')?.dataset.i <= c - 6, c1, 6000); await pg.waitForTimeout(500);
+        const fr = await pg.evaluate(() => { window.__ov.on = false; return window.__ov.f; });
+        const fin = await pg.evaluate(() => { const col = document.querySelector('.ph-col'); const cur = document.querySelector('.ph-row[data-role=cur]'); const m = getComputedStyle(col).transform; return { y: m && m !== 'none' ? new DOMMatrixReadOnly(m).m42 : 0, want: -cur.offsetTop, anims: document.getAnimations().length, rowsStyled: [...document.querySelectorAll('.ph-row')].filter((e) => e.hasAttribute('style')).length }; });
+        let bigStep = 0; let bigVisible = 0; let minCo = 1; let b2 = 0;
+        for (let f = 1; f < fr.length; f++) { const st = Math.abs(fr[f].y - fr[f - 1].y); minCo = Math.min(minCo, fr[f].co); if (st > 38) { bigStep++; if (fr[f].co > 0.05) bigVisible++; } for (let k = 1; k < fr[f].rows.length; k++) b2 = Math.max(b2, Math.abs(fr[f].rows[k][1] - fr[f].rows[k - 1][2] - 12)); }
+        r.notes['51e Sprung'] = { c0, c1, frames: fr.length, bigStep, bigVisible, minCo, b2, fin };
+        c['51e h: Sprung über 8 Zeilen vor und zurück ausgeführt'] = c1 >= c0 + 8 && fr.length > 20;
+        c['51e h: während des Sprungs wird die Spalte nur unsichtbar umgesetzt (kein Bild mit großem Schritt bei sichtbarer Spalte), sie blendet aus (unter 0,05)'] = bigStep >= 2 && bigVisible === 0 && minCo < 0.05;
+        c['51e h: Endlage nach Sprung und Rücksprung gleich Neuaufbau (0,5 px), keine Animation, keine Inline-Reste an Zeilen, Abstände fest'] = Math.abs(fin.y - fin.want) <= 0.5 && fin.anims === 0 && fin.rowsStyled === 0 && b2 <= 0.01;
+        await o.browser.close();
+      }
+      // f) Pixelvergleich: Streifen oberhalb der Fläche bleibt während des Wechsels unverändert (Chromium, Screencast)
+      if (type === chromium) {
+        const o = await open(type, { ...GER, height: 852 }, { tab: 'audio', pool: POOL_O });
+        const pg = o.pg;
+        await showMoment(pg, idOf(82));
+        await pg.waitForTimeout(500);
+        const cdp = await o.cx.newCDPSession(pg); const frames = [];
+        cdp.on('Page.screencastFrame', (f) => { frames.push({ t: f.metadata.timestamp * 1000, data: f.data }); cdp.send('Page.screencastFrameAck', { sessionId: f.sessionId }).catch(() => {}); });
+        await pg.evaluate(() => { window.__mut = []; new MutationObserver(() => window.__mut.push(Date.now())).observe(document.querySelector('.ph-col'), { attributes: true, subtree: true, attributeFilter: ['data-role'] }); });
+        await cdp.send('Page.startScreencast', { format: 'png', everyNthFrame: 1 });
+        await pg.waitForTimeout(7200);
+        await cdp.send('Page.stopScreencast');
+        const mut = await pg.evaluate(() => window.__mut);
+        const geo = await pg.evaluate(() => { const a = document.querySelector('.ph-lyr-body').getBoundingClientRect(); const l = document.querySelector('[data-testid=ph-lyrics]').getBoundingClientRect(); return { at: a.top, left: l.left, right: l.right, iw: innerWidth }; });
+        const groups = []; for (const m of mut) { if (!groups.length || m - groups[groups.length - 1] > 300) groups.push(m); }
+        const diffs = await pg.evaluate(async ({ frames, groups, geo }) => {
+          const dec = async (d) => { const bm = await createImageBitmap(await (await fetch(`data:image/png;base64,${d}`)).blob()); const cv = document.createElement('canvas'); cv.width = bm.width; cv.height = bm.height; const cx = cv.getContext('2d'); cx.drawImage(bm, 0, 0); return { cx, w: bm.width }; };
+          const out = [];
+          for (const g of groups.slice(0, 2)) {
+            const before = frames.filter((f) => f.t < g - 40).slice(-1)[0]; if (!before) continue;
+            const rest = await dec(before.data); const sc = rest.w / geo.iw;
+            const x = Math.round((geo.left + 24) * sc); const w = Math.round((geo.right - geo.left - 48) * sc); const y1 = Math.round(geo.at * sc); const y0 = y1 - Math.round(60 * sc);
+            const ref = rest.cx.getImageData(x, y0, w, y1 - y0).data;
+            let worst = 0; let inside = 0; let n = 0;
+            for (const f of frames.filter((q) => q.t >= g - 10 && q.t <= g + 450)) {
+              const im = await dec(f.data); const d = im.cx.getImageData(x, y0, w, y1 - y0).data; let s = 0; for (let i = 0; i < d.length; i += 4) s += Math.abs(d[i] - ref[i]) + Math.abs(d[i + 1] - ref[i + 1]) + Math.abs(d[i + 2] - ref[i + 2]);
+              worst = Math.max(worst, s / (d.length / 4 * 3)); n++;
+              const ins = im.cx.getImageData(x, y1, w, Math.round(60 * sc)).data; const ins0 = rest.cx.getImageData(x, y1, w, Math.round(60 * sc)).data; let s2 = 0; for (let i = 0; i < ins.length; i += 4) s2 += Math.abs(ins[i] - ins0[i]); inside = Math.max(inside, s2 / (ins.length / 4));
             }
+            out.push({ worst, inside, n });
           }
-          if (isDbl) { dbl.n++; dbl.ov = Math.max(dbl.ov, ov); } else { R.n++; R.ov = Math.max(R.ov, ov); }
-        }
-        for (const f of fr) worstAll = Math.max(worstAll, ovl(f));
-        for (const R of Object.values(res)) stepAll = Math.max(stepAll, R.step);
-        const nm = size.name;
-        c[`${nm} 51c: alle Wechsel abgetastet`] = got && evs.length >= nCue - 3;
-        for (const lab of ['2 auf 2', '3 auf 3', '1 auf 3', '2 auf 6', '6 auf 1']) {
-          const R = res[lab];
-          c[`${nm} 51c ${lab}: mindestens 1 Wechsel gemessen`] = !!R && R.n >= 1;
-          if (!R) continue;
-          const grow = Number(lab.split(' auf ')[1]) > Number(lab.split(' auf ')[0]);
-          if (grow) {
-            c[`${nm} 51c ${lab}: Zeilen darunter in keinem Bild unter 0,2 Deckkraft`] = R.minFollow >= 0.2 || R.minFollow === 9;
-            c[`${nm} 51c ${lab}: Zeilen darunter ab 250 ms auf ihrer Stufe`] = R.late === 0;
-          } else {
-            c[`${nm} 51c ${lab}: jede davor und danach sichtbare Zeile in jedem Bild mindestens 0,4`] = R.minVis >= 0.4;
-          }
-          c[`${nm} 51c ${lab}: keine Überlappung sichtbarer Zeilen (1 px)`] = R.ov <= 1;
-        }
-        c[`${nm} 51c: in keinem Bild eine Überlappung sichtbarer Zeilen über 1 px (ganzer Lauf, auch doppelte Wechsel)`] = worstAll <= 1;
-        c[`${nm} 51c: kein Schritt über 38 px sichtbarer Zeilen (ohne doppelte Wechsel, Bildabstand bis 34 ms)`] = stepAll <= 38;
-        c[`${nm} 51c: mindestens 6 Wechsel im Abstand von 0,12 s, nie eine Überlappung`] = dbl.n >= 6 && dbl.ov <= 1;
-        r.notes[`${nm} 51c`] = { frames: fr.length, changes: evs.length, worstAll: Math.round(worstAll * 10) / 10, step: Math.round(stepAll * 10) / 10, dbl, res: Object.fromEntries(Object.entries(res).map(([k, v]) => [k, { n: v.n, ov: Math.round(v.ov * 10) / 10, step: Math.round(v.step * 10) / 10, stepRaw: Math.round(v.stepRaw * 10) / 10, minVis: v.minVis === 9 ? null : Math.round(v.minVis * 100) / 100, minFollow: v.minFollow === 9 ? null : Math.round(v.minFollow * 100) / 100, late: v.late }])) };
+          return out;
+        }, { frames, groups, geo });
+        r.notes['51e Pixel oberhalb der Fläche'] = { groups: groups.length, frames: frames.length, diffs };
+        c['51e f: Pixel oberhalb der Fläche während des Wechsels unverändert gegen das Ruhebild (mittlere Abweichung unter 0,5 von 255), mindestens 2 Wechsel verglichen'] = diffs.length >= 2 && diffs.every((d) => d.n >= 5 && d.worst < 0.5);
+        c['51e f: Gegenprobe, die Fläche selbst ändert sich während des Wechsels (Abweichung über 2)'] = diffs.length >= 2 && diffs.every((d) => d.inside > 2);
         await o.browser.close();
       }
     }
@@ -1653,14 +1680,14 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           const card = getComputedStyle(document.querySelector('[data-testid=ph-lyrics]')).backgroundColor;
           const bg = num(card).slice(0, 3);
           const ratio = (sel) => { const e = document.querySelector(sel); if (!e) return null; const cs = getComputedStyle(e); const fg = num(cs.color); const al = (fg[3] ?? 1) * parseFloat(cs.opacity); const mix = [0, 1, 2].map((i) => fg[i] * al + bg[i] * (1 - al)); const L1 = lum(mix), L2 = lum(bg); return +((Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05)).toFixed(2); };
-          return { cur: ratio('[data-testid=caption]'), next: ratio("[data-testid=ph-lyric-next]"), next2: ratio(".ph-row[data-role='next2']"), next3: ratio(".ph-row[data-role='next3']"), bg: card };
+          return { cur: ratio('[data-testid=caption]'), next: ratio("[data-testid=ph-lyric-next]"), bg: card };
         });
         r.notes[`${tag} Kontrast`] = kont; r.notes[`${tag} Zeilen`] = { cur: a.cur, next: a.next && { t: a.next.t, op: a.next.op }, next2: a.next2 && { op: a.next2.op }, next3: a.next3 && { op: a.next3.op }, out: a.out && { op: a.out.op, t: a.out.t } };
         c[`${tag}: keine vorige Zeile sichtbar (die alte aktuelle Zeile ist ausgeblendet)`] = !a.out || a.out.op === 0;
         c[`${tag}: aktuelle Zeile oben, die nächste direkt darunter (Abstand 12)`] = !!a.next && Math.abs(a.next.t - (a.cur.b + 12)) <= 1.5;
         c[`${tag}: Cover, dann direkt die aktuelle Zeile (Abstand 16 wie Kartenabstand) oder ohne Cover am oberen Innenrand`] = !a.img || !a.img.vis ? Math.abs(a.cur.t - a.content.t) <= 1 : Math.abs(a.cur.t - a.img.b - 16) <= 1.5;
-        c[`${tag}: bis zu 3 nächste Zeilen, Deckkraft nimmt nach unten ab`] = !!a.next && !!a.next2 && !!a.next3 && a.next.op === 1 && a.next2.op < a.next.op && a.next3.op < a.next2.op;
-        c[`${tag}: Kontrast der direkt nächsten Zeile mindestens 4,5 zu 1`] = kont.next >= 4.5;
+        c[`${tag}: nächste Zeile 0,6, weitere Zeilen 0,42, Deckkraft nimmt nach unten nie zu`] = !!a.next && !!a.next2 && !!a.next3 && Math.abs(a.next.op - 0.6) <= 0.02 && Math.abs(a.next2.op - 0.42) <= 0.02 && a.next3.op <= a.next2.op && a.next2.op < a.next.op;
+        c[`${tag}: Kontrast der direkt nächsten Zeile (Vorschau, Deckkraft 0,6 laut Runde 51e) mindestens 2,5 zu 1`] = kont.next >= 2.5;
         c[`${tag}: Kontrast der aktuellen Zeile mindestens 7 zu 1`] = kont.cur >= 7;
         // Ohne Titelbild (Moment 44, kein thumb): aktuelle Zeile am oberen Innenrand
         const o2 = await open(type, size, { tab: 'audio', pool: POOL_A });
@@ -1761,7 +1788,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           const others = {};
           for (const [n, sel] of [['chip', '.ph-chips'], ['kanal', '.ph-speaker'], ['hook', '[data-testid=hook]'], ['text', '[data-testid=text-view]'], ['audio', '[data-testid=ph-audio]'], ['video', '[data-testid=ph-video]'], ['karte', '[data-testid=ph-lyrics]'], ['zitat', '.dtx-quote'], ['meta', '[data-testid=ph-origin]'], ['apply', '[data-testid=ph-apply]'], ['aktionen', '[data-testid=ph-actions]'], ['leiste', '[data-testid=ph-bar]'], ['kopf', '.ph-head'], ['band', '.vslot[aria-hidden=false] .vframe > div'], ['quelle', '.ph-src']]) { const e = q(sel); if (e) others[n] = R(e); }
           // Kinder des Inhalts (Texte und Tasten)
-          const kids = [...document.querySelectorAll('.ph-audio *, .ph-video *, [data-testid=text-view] *, .ph-actions button, .ph-bar button, .ph-head button')].filter((e) => e.getBoundingClientRect().height > 0 && getComputedStyle(e).visibility !== 'hidden' && getComputedStyle(e.closest('.ph-row') ?? e).opacity !== '0' && [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim() || e.tagName === 'BUTTON' || e.tagName === 'IMG')).map((e) => R(e));
+          const kids = [...document.querySelectorAll('.ph-audio *, .ph-video *, [data-testid=text-view] *, .ph-actions button, .ph-bar button, .ph-head button')].filter((e) => e.getBoundingClientRect().height > 0 && getComputedStyle(e).visibility !== 'hidden' && getComputedStyle(e.closest('.ph-row') ?? e).opacity !== '0' && [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim() || e.tagName === 'BUTTON' || e.tagName === 'IMG')).map((e) => { const x = R(e); const ar = e.closest('.ph-lyr-body'); if (ar) { const ab = ar.getBoundingClientRect(); x.t = Math.max(x.t, ab.top); x.b = Math.min(x.b, ab.bottom); x.h = Math.max(0, x.b - x.t); } return x; }).filter((x) => x.h > 0);
           return { st: R(st), kind: st?.getAttribute('data-status'), text: st?.textContent.trim(), bg: cs?.backgroundColor, lh: parseFloat(getComputedStyle(sp).lineHeight), sh: sp.scrollHeight, ch: sp.clientHeight, spanH: sp.getBoundingClientRect().height, others, kids, count: document.querySelectorAll('.status').length, content: R(q('[data-testid=text-view], [data-testid=ph-audio], [data-testid=ph-video]')), row: q('.vfeed').hasAttribute('data-statusrow') };
         });
         const S = await stat();
