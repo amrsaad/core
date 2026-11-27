@@ -185,8 +185,13 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
   will-change: transform;
   transition-property: transform, opacity, color;
   transition-duration: var(--dur-lyr), var(--dur-lyr), var(--dur-lyr);
-  transition-timing-function: var(--ease);
+  /* Runde 51b: sanfter Start (kein Schritt über 40 px zwischen zwei Bildern auch bei hohen Zeilen) */
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
+/* Zeilen, die unter einer wachsenden Zeile an ihrer Endlage stehen, blenden erst ein, wenn die Zeile angekommen ist (vorher kreuzten sie sich): kurz vor Ende der Bewegung */
+.ph-row[data-snap] { transition-duration: var(--dur-lyr), 60ms, var(--dur-lyr); transition-delay: 0s, 190ms, 0s; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1), linear, cubic-bezier(0.4, 0, 0.2, 1); }
+/* Die alte Zeile blendet schnell aus (sie fährt nur 60 px weg und würde sonst die nachrückende Zeile überlappen) */
+.ph-row[data-role='out'] { transition-duration: var(--dur-lyr), 60ms, var(--dur-lyr); transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1), linear, cubic-bezier(0.4, 0, 0.2, 1); }
 .ph-row[data-role='cur'] { color: var(--text); }
 .ph-row[data-role='next2'] { opacity: 0.6; }
 .ph-row[data-role='next3'] { opacity: 0.42; }
@@ -372,3 +377,12 @@ html:has(.vfeed[data-phone]) .sheet-body { padding-bottom: calc(max(var(--safe-b
 .vfeed[data-phone] .vrecall-page[data-answered] { transition: none; }
 /* Runde 51: passt der Block auch in der kleinsten Stufe nicht (kleines Gerät, sehr lange Frage), scrollt die Seite von innen, statt abzuschneiden. Oberkante bleibt. */
 .vfeed[data-phone] .vrecall-page { overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; }
+
+/* Runde 51b: Abrufkarte, "Next" nach der Antwort immer sichtbar (fest am unteren Rand der Seite über deckender Fläche in der Seitenfarbe, der Inhalt scrollt darüber). Die Fläche ist ein Schatten (zählt nicht zur scrollbaren Höhe). */
+.vfeed[data-phone] .vrecall-page button.recall-primary {
+  position: sticky; z-index: 2;
+  bottom: 0; /* gemessen ab der Innenkante (Seitenpolster unten bleibt darunter) */
+  box-shadow: 0 0 0 12px var(--stage), 0 80px 0 60px var(--stage);
+}
+/* Oben eine kurze Ausblendung, nur wenn die Seite gescrollt ist (keine halb angeschnittene Zeile unter der Reiterleiste) */
+.vfeed[data-phone] .vrecall-page[data-scrolled] { -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 16px); mask-image: linear-gradient(to bottom, transparent 0, black 16px); }

@@ -224,6 +224,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
     await ctx.route('https://www.youtube.com/iframe_api', (x) => x.fulfill({ contentType: 'text/javascript', body: FAKE }));
     await ctx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
     const page = await ctx.newPage();
+    // Runde 51b: "Next" klebt unten (sticky). Die Abstände der Stufen werden an der natürlichen Lage gemessen, darum hier ohne Kleben.
+    await page.addInitScript(() => { const put = () => { const st = document.createElement('style'); st.textContent = '.vrecall-page button.recall-primary{position:static !important;box-shadow:none !important}'; (document.head || document.documentElement).appendChild(st); }; if (document.head) put(); else document.addEventListener('DOMContentLoaded', put, { once: true }); });
     const errors = [];
     page.on('pageerror', onPageError(errors));
     await page.route(/moments\/pool\.enc/, (x) => x.fulfill({ contentType: 'application/json', body: POOL }));

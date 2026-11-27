@@ -126,6 +126,8 @@ export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, on
   const top0 = useRef<number | null>(null);
   const diagRef = useRef(onDiag);
   diagRef.current = onDiag;
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
   const speaker = m.channel.replace(/^(.*?)\s*\((.+)\)$/, '$1 · $2');
   const ar = isArabic(r.question);
@@ -167,6 +169,43 @@ export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, on
       ro?.disconnect();
     };
   }, [answered, keys, m.id]);
+  // Runde 51b: Wisch auf der ganzen Seite (nicht nur auf dem Block). Ist die Seite scrollbar und steht nicht am Ende, scrollt ein Wisch nur und schließt nie.
+  // Geschlossen wird nur, wenn beim Aufsetzen nichts zu scrollen war oder die Seite schon am Ende stand. Vor der Antwort bleibt jeder Wisch gesperrt.
+  const answeredRef = useRef(answered);
+  answeredRef.current = answered;
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    const page = (card.closest('.vrecall-page') as HTMLElement | null) ?? card;
+    let canScroll = false;
+    const down = (e: TouchEvent) => {
+      if ((e.target as Element | null)?.closest?.('.recall-peek, .recall-peekov')) { y.current = null; return; }
+      y.current = e.touches[0].clientY;
+      canScroll = page.scrollHeight - page.clientHeight > 2 && page.scrollTop + page.clientHeight < page.scrollHeight - 2;
+    };
+    const up = (e: TouchEvent) => {
+      if (y.current === null) return;
+      const dy = e.changedTouches[0].clientY - y.current;
+      y.current = null;
+      if (canScroll && answeredRef.current) return;
+      const v = recallSwipe(answeredRef.current, dy);
+      if (v === 'close') onCloseRef.current();
+      else if (v === 'blocked' && !blocked.current) {
+        blocked.current = true;
+        diagRef.current?.(`recall: swipe blocked ${m.id}`);
+      }
+    };
+    const scr = () => { if (page.scrollTop > 0) page.setAttribute('data-scrolled', ''); else page.removeAttribute('data-scrolled'); };
+    page.addEventListener('touchstart', down, { passive: true });
+    page.addEventListener('touchend', up, { passive: true });
+    page.addEventListener('scroll', scr, { passive: true });
+    return () => {
+      page.removeEventListener('touchstart', down);
+      page.removeEventListener('touchend', up);
+      page.removeEventListener('scroll', scr);
+      page.removeAttribute('data-scrolled');
+    };
+  }, [m.id]);
   return (
     <div
       ref={cardRef}
@@ -177,18 +216,6 @@ export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, on
       style={{ ['--area' as string]: AREA_COLOR[m.area] }}
       onPointerDown={stop}
       onPointerUp={stop}
-      onTouchStart={(e) => {
-        y.current = e.touches[0].clientY;
-      }}
-      onTouchEnd={(e) => {
-        if (y.current === null) return;
-        const v = recallSwipe(answered, e.changedTouches[0].clientY - y.current);
-        if (v === 'close') onClose();
-        else if (v === 'blocked' && !blocked.current) {
-          blocked.current = true;
-          onDiag?.(`recall: swipe blocked ${m.id}`);
-        }
-      }}
     >
       <div className="recall-source">
         {!noImg && <img src={thumbOf(m)} alt="" draggable={false} />}

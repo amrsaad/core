@@ -101,8 +101,8 @@ const M70 = mk(70, 'brain', { form: 'audio', audio: true, hls: 'https://stream.t
 // Runde 51: gemischt lange Zeilen (kurz, mittel, lang, sehr lang) für die Überlappungsprüfung im Wechsel, lateinisch und arabisch
 const MIXL = [EN_LONG, 'Kurz.', 'Eine mittlere Zeile, die auf dem Handy in zwei Zeilen umbricht.', CUE5, 'Noch eine kurze.', EN_LONG, CUE5, 'Mitte.'];
 const MIXA = [AR_LONG, 'هذا سطر قصير.', AR_LONG + ' ' + AR_LONG, 'سطر ثالث متوسط الطول يمتد على سطرين في الهاتف المحمول.', AR_LONG, 'قصير.'];
-const M74 = mk(74, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/74.m3u8', hook: 'Testmoment 74 brain, ein kurzer Satz', cues: Array.from({ length: 24 }, (_, i) => [i * 0.6, MIXL[i % MIXL.length]]), thumb: 'https://img.test/cover74.png' });
-const M75 = mk(75, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/75.m3u8', hook: 'هذا عنوان تجريبي طويل قليلا للحظة الاختبار', cues: Array.from({ length: 24 }, (_, i) => [i * 0.6, MIXA[i % MIXA.length]]), thumb: 'https://img.test/cover75.png' });
+const M74 = mk(74, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/74.m3u8', hook: 'Testmoment 74 brain, ein kurzer Satz', cues: Array.from({ length: 24 }, (_, i) => [i * 0.8, MIXL[i % MIXL.length]]), thumb: 'https://img.test/cover74.png' });
+const M75 = mk(75, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/75.m3u8', hook: 'هذا عنوان تجريبي طويل قليلا للحظة الاختبار', cues: Array.from({ length: 24 }, (_, i) => [i * 0.8, MIXA[i % MIXA.length]]), thumb: 'https://img.test/cover75.png' });
 // Runde 51: Abrufkarte mit langer Frage und langen Antworten (Audio)
 const QL = 'Welche Aussage über die beschriebene Abfolge der Schritte trifft zu, wenn man die Reihenfolge, die Bedingungen und die Ausnahmen aus dem Text gemeinsam berücksichtigt und dabei nichts hinzufügt?';
 const AL = 'Diese Antwort ist absichtlich lang und umbricht auf dem Handy über mehrere Zeilen, damit die Tasten hoch werden';
@@ -1353,7 +1353,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           await cdp?.send('Emulation.setCPUThrottlingRate', { rate: 4 });
           await pg.evaluate(() => {
             window.__ov = { f: [], on: true };
-            const tick = (t) => { if (!window.__ov.on) return; window.__ov.f.push({ t, rows: [...document.querySelectorAll('.ph-row')].map((e) => { const b = e.getBoundingClientRect(); return [+e.dataset.i, b.top, b.bottom, +getComputedStyle(e).opacity, e.dataset.role]; }) }); requestAnimationFrame(tick); };
+            const tick = (t) => { if (!window.__ov.on) return; window.__ov.f.push({ t, rows: [...document.querySelectorAll('.ph-row')].map((e) => { const b = e.getBoundingClientRect(); return [+e.dataset.i, b.top, b.bottom, +getComputedStyle(e).opacity, e.dataset.role, e.style.getPropertyValue('--clamp'), b.height]; }) }); requestAnimationFrame(tick); };
             requestAnimationFrame(tick);
           });
           const got = await waitFor(pg, () => { const f = window.__ov.f; return f.length > 0 && (f[f.length - 1].rows.find((x) => x[4] === 'cur')?.[0] ?? 0) >= 10; }, undefined, 15000);
@@ -1365,6 +1365,24 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
             const vis = f.rows.filter((x) => x[3] > 0.3);
             for (let a = 0; a < vis.length; a++) for (let b = a + 1; b < vis.length; b++) { const ov = Math.min(vis[a][2], vis[b][2]) - Math.max(vis[a][1], vis[b][1]); if (ov > worst) { worst = ov; wi = fr.indexOf(f); where = [vis[a][0], vis[b][0], Math.round(f.t)]; } }
           }
+          // Runde 51b: je Wechsel (0 bis 600 ms): Höhe der aktuellen Zeile ab dem ersten Bild gleich Endhöhe, keine Auslassung wenn der Text passt, Anker gleich, kein Schritt über 40 px sichtbarer Zeilen
+          const evs = []; for (let i = 1; i < fr.length; i++) { const a0 = fr[i - 1].rows.find((x) => x[4] === 'cur')?.[0]; const a1 = fr[i].rows.find((x) => x[4] === 'cur')?.[0]; if (a0 !== undefined && a1 !== undefined && a0 !== a1) evs.push(i); }
+          let hJump = 0; let ell = 0; let step = 0; let outMove = 0; const anchors = []; let used = 0;
+          for (let e = 0; e < evs.length - 1; e++) {
+            const f0 = evs[e]; const end = Math.min(evs[e + 1] - 1, f0 + 36); const nw = fr[f0].rows.find((x) => x[4] === 'cur')[0];
+            const rowAt = (f) => fr[f].rows.find((x) => x[0] === nw); const fin = rowAt(end); if (!fin) continue; used++;
+            anchors.push(fin[1]);
+            { const o0 = fr[f0 - 1].rows.find((x) => x[0] === nw - 1); const o1 = fr[end].rows.find((x) => x[0] === nw - 1); if (o0 && o1) outMove = Math.max(outMove, Math.abs(o1[1] - o0[1])); }
+            for (let f = f0; f <= end; f++) { const rw = rowAt(f); if (rw && Math.abs(rw[6] - fin[6]) > 2) hJump = Math.max(hJump, Math.abs(rw[6] - fin[6])); if (rw && fin[5] === 'none' && rw[5] !== 'none') ell++; }
+            for (let f = f0; f <= end; f++) for (const x of fr[f].rows) { const y0 = fr[f - 1].rows.find((q) => q[0] === x[0]); if (y0 && x[3] > 0.3 && y0[3] > 0.3) step = Math.max(step, Math.abs(x[1] - y0[1])); }
+          }
+          const ancD = anchors.length ? Math.max(...anchors) - Math.min(...anchors) : 99;
+          c[`${size.name} Wechsel ${lab}: Höhe der aktuellen Zeile ab dem ersten Bild gleich der Endhöhe (2 px)`] = used >= 6 && hJump <= 2;
+          c[`${size.name} Wechsel ${lab}: keine Auslassung, die später verschwindet`] = used >= 6 && ell === 0;
+          c[`${size.name} Wechsel ${lab}: Anker gleich (1 px)`] = used >= 6 && ancD <= 1;
+          c[`${size.name} Wechsel ${lab}: kein Schritt über 40 px sichtbarer Zeilen zwischen zwei Bildern`] = used >= 6 && step <= 40;
+          c[`${size.name} Wechsel ${lab}: die alte Zeile fährt höchstens 60 px nach oben`] = used >= 6 && outMove <= 61;
+          r.notes[`${size.name} Wechsel ${lab}`] = { used, outMove: Math.round(outMove), hJump: Math.round(hJump), ell, step: Math.round(step), ancD: Math.round(ancD * 10) / 10 };
           r.notes[`${size.name} Überlappung ${lab}`] = { frames: fr.length, changes, worst: Math.round(worst * 10) / 10, where, ctx: [wi - 2, wi - 1, wi, wi + 1].map((k) => fr[k] && fr[k].rows.map((x) => x.map((v) => (typeof v === 'number' ? Math.round(v * 10) / 10 : v)))) };
           c[`${size.name} Überlappung ${lab}: mindestens 8 Wechsel abgetastet`] = got && changes >= 8;
           c[`${size.name} Überlappung ${lab}: in keinem Frame mehr als 1 px Überlappung sichtbarer Zeilen`] = worst <= 1;
@@ -1425,6 +1443,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           return { W, top: R(first).top, expect: sw.bottom + 24, lefts, rights, bottom, room, scroll: page.scrollHeight - page.clientHeight, canScroll: cs.overflowY === 'auto', scrollTop: page.scrollTop, pageTop: R(page).top };
         });
         const g1 = await geo();
+        const gone = () => waitFor(pg, () => !document.querySelector('[data-testid=recall-card]'), undefined, 1200, true);
+        // Runde 51b: vor der Antwort schließt kein Wisch (auch nicht auf der leeren Fläche unter dem Block)
+        await touchSwipe(pg, '.vrecall-page', 180, size === GER ? 600 : 500, 200);
+        c[`${tag}: vor der Antwort schließt kein Wisch`] = !(await gone()) && (await pg.locator('[data-testid=recall-card]').count()) === 1;
         const pick = pg.locator('[data-testid=recall-option][data-correct="0"]').first();
         let g2 = null;
         if (await pick.count()) { await pick.click(); await waitFor(pg, () => !!document.querySelector('[data-testid=recall-why]'), undefined, 3000); await pg.waitForTimeout(300); g2 = await geo(); }
@@ -1435,6 +1457,23 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         c[`${tag}: nach der Antwort bleibt die Oberkante, Block innerhalb der Fläche oder scrollbar`] = !!g2 && Math.abs(g2.top - g1.top) <= 1 && ((g2.bottom <= g2.room + 1 && g2.scroll <= 1) || g2.canScroll) && g2.lefts.every((x) => Math.abs(x - 20) <= 1);
         await pg.screenshot({ path: `${out}/${name}-${tag.replace(/ /g, '-')}-vor.png` });
         if (g2) { await pg.screenshot({ path: `${out}/${name}-${tag.replace(/ /g, '-')}-nach.png` }); }
+        // Runde 51b: Wisch nach der Antwort. Scrollbare Seite (375x667, lange Frage): Wisch 300 px schließt nicht, "Next" ist sichtbar und antippbar, am Ende der Seite schließt ein Wisch. Kurze Frage: Wisch ab y 600 (leere Fläche) schließt.
+        if (g2 && long && size === SIZES[1]) {
+          await touchSwipe(pg, '.vrecall-page', 180, 560, 260);
+          c[`${tag}: Wisch 300 px schließt nach der Antwort nicht, solange die Seite scrollbar ist`] = !(await gone());
+          const nx = await pg.evaluate(() => { const bt = document.querySelector('[data-testid=recall-next]'); const rr = bt.getBoundingClientRect(); const pr = document.querySelector('[data-testid=recall-page]').getBoundingClientRect(); const el = document.elementFromPoint(rr.left + rr.width / 2, rr.top + rr.height / 2); return { top: rr.top, bottom: rr.bottom, pageTop: pr.top, pageBottom: pr.bottom, hit: !!el && !!el.closest('[data-testid=recall-next]') }; });
+          r.notes[`${tag} Next`] = nx;
+          c[`${tag}: "Next" ohne Scrollen sichtbar und antippbar`] = nx.top >= nx.pageTop && nx.bottom <= nx.pageBottom + 1 && nx.hit;
+          await pg.screenshot({ path: `${out}/${name}-${tag.replace(/ /g, '-')}-nach-oben.png` });
+          await pg.evaluate(() => { const pgx = document.querySelector('[data-testid=recall-page]'); pgx.scrollTop = pgx.scrollHeight; });
+          await pg.waitForTimeout(250);
+          await pg.screenshot({ path: `${out}/${name}-${tag.replace(/ /g, '-')}-nach-unten.png` });
+          await touchSwipe(pg, '.vrecall-page', 180, 560, 260);
+          c[`${tag}: am Ende der Seite schließt ein Wisch`] = await gone();
+        } else if (g2 && !long && size === GER && tab === 'audio') {
+          await touchSwipe(pg, '.vrecall-page', 180, 600, 300);
+          c[`${tag}: Wisch auf der leeren Fläche (y 600) schließt nach der Antwort`] = await gone();
+        }
         await o.browser.close();
       }
     }

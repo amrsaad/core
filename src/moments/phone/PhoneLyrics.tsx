@@ -15,6 +15,8 @@ import { isArabic } from '../types';
 const lineProps = (s: string) => ({ dir: isArabic(s) ? ('rtl' as const) : ('ltr' as const), lang: isArabic(s) ? 'ar' : 'en' });
 /** Deckkraft der nächsten Zeilen nach unten (die direkt nächste Zeile bleibt bei 1, siehe phone.css) */
 const NEXT_MAX = 3;
+/** Weg der alten Zeile nach oben, höchstens (px) */
+const OUT_MAX = 60;
 
 export interface PhoneLyricsProps {
   /** Moment-ID (neuer Moment: sofort setzen) */
@@ -27,7 +29,6 @@ export interface PhoneLyricsProps {
 function PhoneLyricsView({ id, cues, idx }: PhoneLyricsProps) {
   const body = useRef<HTMLDivElement>(null);
   const last = useRef<{ id: string; idx: number } | null>(null);
-  const grow = useRef(0);
   const rows: { i: number; d: number; text: string }[] = [];
   if (idx >= 0) for (let d = -1; d <= NEXT_MAX + 1; d++) {
     const i = idx + d;
@@ -47,23 +48,19 @@ function PhoneLyricsView({ id, cues, idx }: PhoneLyricsProps) {
       return;
     }
     const live = [0, 1, 2, 3, 4].map((k) => els.get(idx + k)).filter((e): e is HTMLElement => !!e);
-    // Runde 51: Höhe und Klemmung vor dem Messen merken. Eine Zeile, die höher wird, bekommt die neue Klemmung erst am Ende der Bewegung (sonst überlappt sie die Zeile darunter, die noch ihren alten Weg fährt), eine kleinere sofort.
+    // Runde 51b: Höhe vor dem Messen merken (nur um zu erkennen, welche Zeile höher wird)
+    for (const e of els.values()) delete e.dataset.snap;
     const oldH = new Map<HTMLElement, number>();
-    const oldClamp = new Map<HTMLElement, string>();
-    for (const e of live) { oldH.set(e, e.offsetHeight); oldClamp.set(e, e.style.getPropertyValue('--clamp')); }
-    if (grow.current) { window.clearTimeout(grow.current); grow.current = 0; }
-    const later: [HTMLElement, string][] = [];
+    for (const e of live) oldH.set(e, e.offsetHeight);
     for (const e of live) { e.style.setProperty('--clamp', 'none'); delete e.dataset.cut; }
     const H = b.clientHeight;
     const g = parseFloat(getComputedStyle(b).getPropertyValue('--lyr-gap')) || 12;
     const lh = (e: HTMLElement) => parseFloat(getComputedStyle(e).lineHeight) || 30;
     const nat = (e: HTMLElement) => Math.max(1, Math.round(e.offsetHeight / lh(e)));
+    const finalH = new Map<HTMLElement, number>();
     const set = (e: HTMLElement, lines: number, natural: number) => {
-      const v = lines < natural ? String(lines) : 'none';
-      if (!jump && lines * lh(e) > (oldH.get(e) ?? 0) + 0.5 && oldH.get(e)) {
-        later.push([e, v]);
-        e.style.setProperty('--clamp', oldClamp.get(e) || '2');
-      } else e.style.setProperty('--clamp', v);
+      e.style.setProperty('--clamp', lines < natural ? String(lines) : 'none');
+      finalH.set(e, lines * lh(e));
     };
     // Aktuelle Zeile: ganz, höchstens so viele ganze Zeilen, wie in die Fläche passen (dann mit Auslassung)
     const lc = lh(cur);
@@ -99,14 +96,30 @@ function PhoneLyricsView({ id, cues, idx }: PhoneLyricsProps) {
     const out = els.get(idx - 1);
     if (out) {
       out.dataset.cut = '';
-      tops.set(idx - 1, -(out.offsetHeight + g));
+      // Runde 51b: die alte Zeile fährt höchstens 60 px nach oben (blendet dabei schnell aus), nicht um ihre ganze Höhe
+      tops.set(idx - 1, -Math.min(out.offsetHeight + g, OUT_MAX));
     }
+    // Runde 51b: wird eine Zeile höher als zuvor, hat sie ab dem ersten Bild ihre Endklemmung. Die Zeilen darunter stehen dann sofort an ihrer Endlage und blenden nur über die Deckkraft ein
+    // (aus 0, gleiche Dauer und Kurve), statt durch die wachsende Zeile zu fahren. Ohne Wachstum fährt der Block gemeinsam.
+    const snap: HTMLElement[] = [];
+    if (!jump) {
+      let grew = -1;
+      for (let k = 0; k <= NEXT_MAX + 1 && grew < 0; k++) {
+        const e = els.get(idx + k);
+        if (e && (finalH.get(e) ?? 0) > (oldH.get(e) ?? 0) + 1) grew = k;
+      }
+      if (grew >= 0) for (let k = grew + 1; k <= NEXT_MAX + 1; k++) { const e = els.get(idx + k); if (e) snap.push(e); }
+    }
+    for (const e of snap) { e.style.transition = 'none'; e.style.opacity = '0'; e.dataset.snap = ''; }
     for (const [i, t] of tops) els.get(i)!.style.transform = `translate3d(0, ${Math.round(t * 100) / 100}px, 0)`;
     if (jump) {
       void b.offsetHeight;
       delete b.dataset.jump;
+    } else if (snap.length) {
+      void b.offsetHeight;
+      for (const e of snap) { e.style.transition = ''; e.style.opacity = ''; }
+      window.setTimeout(() => { for (const e of snap) delete e.dataset.snap; }, 330);
     }
-    if (later.length) grow.current = window.setTimeout(() => { grow.current = 0; for (const [e, v] of later) e.style.setProperty('--clamp', v); }, 280);
   };
   const placeRef = useRef(place);
   placeRef.current = place;
@@ -119,7 +132,6 @@ function PhoneLyricsView({ id, cues, idx }: PhoneLyricsProps) {
   }, [id, idx, cues]);
 
   // Einmal je Moment (nicht je Zeile): neues Beobachten feuert sofort und bräche die Bewegung ab. Nur eine echte Größenänderung setzt neu (sofort).
-  useLayoutEffect(() => () => window.clearTimeout(grow.current), []);
   useLayoutEffect(() => {
     const b = body.current;
     if (!b) return;
