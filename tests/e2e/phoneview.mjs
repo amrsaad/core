@@ -892,7 +892,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       c[`${tag} arabisch: Bild und Untertitel in der Karte, ohne Überlappung`] = !!ar.img && linesOk(ar, ar.img.vis);
       c[`${tag} arabisch: Bild Quadrat nach der Größenregel oder bei zu kleiner Karte ganz weg`] = ar.dir === 'rtl' && squareOk(ar, true);
       c[`${tag} arabisch: Bild bündig mit der rechten Textkante`] = !ar.img || !ar.img.vis || flushOk(ar, true);
-      c[`${tag} arabisch: nächste Zeilen bis K Zeilen mit ganzer Zeilenbox, direkt nächste Zeile sichtbar (Deckkraft 0,6)`] = nbOk(ar.next) && nbOk(ar.next2) && nbOk(ar.next3) && !!ar.next && !ar.next.hidden && ar.next.op >= 0.4;
+      c[`${tag} arabisch: nächste Zeilen bis K Zeilen mit ganzer Zeilenbox, direkt nächste Zeile sichtbar (Deckkraft 1)`] = nbOk(ar.next) && nbOk(ar.next2) && nbOk(ar.next3) && !!ar.next && !ar.next.hidden && ar.next.op >= 0.4;
       c[`${tag} arabisch: rechtsbündig`] = af.curRight.boxR - af.curRight.textR <= 2;
       if (size.name === '390x844') await pg.screenshot({ path: `${out}/${name}-390-audio-arabisch.png` });
       if (size.name === '375x667') await pg.screenshot({ path: `${out}/${name}-375-audio-arabisch.png` });
@@ -1686,8 +1686,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         c[`${tag}: keine vorige Zeile sichtbar (die alte aktuelle Zeile ist ausgeblendet)`] = !a.out || a.out.op === 0;
         c[`${tag}: aktuelle Zeile oben, die nächste direkt darunter (Abstand 12)`] = !!a.next && Math.abs(a.next.t - (a.cur.b + 12)) <= 1.5;
         c[`${tag}: Cover, dann direkt die aktuelle Zeile (Abstand 16 wie Kartenabstand) oder ohne Cover am oberen Innenrand`] = !a.img || !a.img.vis ? Math.abs(a.cur.t - a.content.t) <= 1 : Math.abs(a.cur.t - a.img.b - 16) <= 1.5;
-        c[`${tag}: nächste Zeile 0,6, weitere Zeilen 0,42, Deckkraft nimmt nach unten nie zu`] = !!a.next && !!a.next2 && !!a.next3 && Math.abs(a.next.op - 0.6) <= 0.02 && Math.abs(a.next2.op - 0.42) <= 0.02 && a.next3.op <= a.next2.op && a.next2.op < a.next.op;
-        c[`${tag}: Kontrast der direkt nächsten Zeile (Vorschau, Deckkraft 0,6 laut Runde 51e) mindestens 2,5 zu 1`] = kont.next >= 2.5;
+        c[`${tag}: nächste Zeile Deckkraft 1, weitere Zeilen 0,6, Deckkraft nimmt nach unten nie zu`] = !!a.next && !!a.next2 && !!a.next3 && Math.abs(a.next.op - 1) <= 0.02 && Math.abs(a.next2.op - 0.6) <= 0.02 && a.next3.op <= a.next2.op && a.next2.op < a.next.op;
+        c[`${tag}: Kontrast der direkt nächsten Zeile mindestens 4,5 zu 1`] = kont.next >= 4.5;
         c[`${tag}: Kontrast der aktuellen Zeile mindestens 7 zu 1`] = kont.cur >= 7;
         // Ohne Titelbild (Moment 44, kein thumb): aktuelle Zeile am oberen Innenrand
         const o2 = await open(type, size, { tab: 'audio', pool: POOL_A });

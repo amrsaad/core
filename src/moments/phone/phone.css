@@ -187,13 +187,13 @@ html:has(.vfeed[data-phone] .vend[data-testid='end-page']), html:has(.vfeed[data
   flex: none; margin: 0; padding: 0;
   font-size: 22px; line-height: 30px; font-weight: 600; color: var(--muted); overflow-wrap: anywhere;
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--clamp, 2); line-clamp: var(--clamp, 2); overflow: hidden;
-  opacity: 0.42;
+  opacity: 0.6;
   transition-property: opacity, color;
   transition-duration: var(--dur-lyr);
   transition-timing-function: var(--ease-lyr);
 }
 .ph-row[data-role='cur'] { color: var(--text); opacity: 1; }
-.ph-row[data-role='next'] { opacity: 0.6; }
+.ph-row[data-role='next'] { opacity: 1; }
 .ph-row[data-role='out'], .ph-row[data-role='past'] { opacity: 0; }
 /* Die alte Zeile blendet in 120 ms aus, während die Spalte fährt */
 .ph-row[data-role='out'] { transition-duration: 120ms; transition-timing-function: linear; }
