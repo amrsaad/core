@@ -1,5 +1,5 @@
 {
- "at": "2026-11-27T07:00:20.203Z",
+ "at": "2026-11-27T12:29:55.827Z",
  "runs": [
   {
    "browser": "webkit",
@@ -2333,11 +2333,11 @@
      "pool 2/5 ready",
      "deck: pool load test0000045 src=net",
      "deck: pool fill 4/5 (local 0, net 4)",
-     "deck: gesture pointerup unlocked 6/6",
-     "load: test0000044 pool ls=- fb=- md=21 cp=1 sk=- total=21 conc=2 result=ready",
+     "load: test0000044 pool ls=- fb=- md=21 cp=0 sk=- total=21 conc=2 result=ready",
      "deck: pool ready test0000044 after 21 ms host=stream.test",
      "pool 3/5 ready",
-     "load: test0000045 pool ls=- fb=- md=21 cp=1 sk=- total=21 conc=2 result=ready",
+     "deck: gesture pointerup unlocked 6/6",
+     "load: test0000045 pool ls=- fb=- md=21 cp=0 sk=- total=21 conc=2 result=ready",
      "deck: pool ready test0000045 after 21 ms host=stream.test",
      "pool 4/5 ready"
     ],
