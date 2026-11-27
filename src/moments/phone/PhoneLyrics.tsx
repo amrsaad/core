@@ -17,6 +17,10 @@ const lineProps = (s: string) => ({ dir: isArabic(s) ? ('rtl' as const) : ('ltr'
 const NEXT_MAX = 3;
 /** Weg der alten Zeile nach oben, höchstens (px) */
 const OUT_MAX = 60;
+/** Runde 51c: Deckkraft, auf die Zeilen unter einer wachsenden Zeile fallen (nicht 0) */
+const SNAP_FLOOR = 0.25;
+/** Runde 51c: bis zu diesem Weg (px) der wachsenden Zeile fährt sie schnell an */
+const GROW_NEAR = 110;
 
 export interface PhoneLyricsProps {
   /** Moment-ID (neuer Moment: sofort setzen) */
@@ -29,6 +33,7 @@ export interface PhoneLyricsProps {
 function PhoneLyricsView({ id, cues, idx }: PhoneLyricsProps) {
   const body = useRef<HTMLDivElement>(null);
   const last = useRef<{ id: string; idx: number } | null>(null);
+  const growTimer = useRef(0);
   const rows: { i: number; d: number; text: string }[] = [];
   if (idx >= 0) for (let d = -1; d <= NEXT_MAX + 1; d++) {
     const i = idx + d;
@@ -52,6 +57,9 @@ function PhoneLyricsView({ id, cues, idx }: PhoneLyricsProps) {
     for (const e of els.values()) delete e.dataset.snap;
     const oldH = new Map<HTMLElement, number>();
     for (const e of live) oldH.set(e, e.offsetHeight);
+    // Runde 51c: sichtbare Lage der Zeilen jetzt (auch mitten in einer laufenden Bewegung)
+    const visY = new Map<HTMLElement, number>();
+    for (const e of live) { const t = getComputedStyle(e).transform; visY.set(e, t && t !== 'none' ? new DOMMatrixReadOnly(t).m42 : NaN); }
     for (const e of live) { e.style.setProperty('--clamp', 'none'); delete e.dataset.cut; }
     const H = b.clientHeight;
     const g = parseFloat(getComputedStyle(b).getPropertyValue('--lyr-gap')) || 12;
@@ -89,6 +97,7 @@ function PhoneLyricsView({ id, cues, idx }: PhoneLyricsProps) {
         e.dataset.cut = '';
         tops.set(idx + k, y);
         // Runde 51: nicht gezeigte Zeilen stehen weiter unten im Stapel (unter der letzten gezeigten Zeile), nicht auf deren Platz: so fährt der ganze Block mit gleichem Versatz, nichts überlappt beim Einrücken
+        finalH.set(e, Math.min(n, 2) * l);
         y += Math.min(n, 2) * l + g;
       }
     }
@@ -99,18 +108,49 @@ function PhoneLyricsView({ id, cues, idx }: PhoneLyricsProps) {
       // Runde 51b: die alte Zeile fährt höchstens 60 px nach oben (blendet dabei schnell aus), nicht um ihre ganze Höhe
       tops.set(idx - 1, -Math.min(out.offsetHeight + g, OUT_MAX));
     }
-    // Runde 51b: wird eine Zeile höher als zuvor, hat sie ab dem ersten Bild ihre Endklemmung. Die Zeilen darunter stehen dann sofort an ihrer Endlage und blenden nur über die Deckkraft ein
-    // (aus 0, gleiche Dauer und Kurve), statt durch die wachsende Zeile zu fahren. Ohne Wachstum fährt der Block gemeinsam.
+    // Runde 51c: zwei Fälle. (1) Die neue aktuelle Zeile ist höher als die alte aktuelle Zeile (Wachstum): die Zeilen darunter stehen sofort an ihrer Endlage, fallen auf 0,25 und blenden danach auf ihre Stufe
+    // (sonst führe die wachsende Zeile durch sie hindurch). (2) Sonst fährt der ganze Block gemeinsam, keine Zeile blendet aus. Wird eine Zeile beim Wechsel höher als vorher (z. B. 2 auf 3 Zeilen, weil sie bisher geklemmt war),
+    // starten die Zeilen darunter um diese Mehrhöhe tiefer: so bleibt der Abstand in jedem Bild gleich und nichts überlappt.
+    const prevH = out ? out.offsetHeight : 0;
+    const grewCur = !jump && !!out && (finalH.get(cur) ?? 0) > prevH + 1;
     const snap: HTMLElement[] = [];
+    const lift = new Map<HTMLElement, number>();
     if (!jump) {
-      let grew = -1;
-      for (let k = 0; k <= NEXT_MAX + 1 && grew < 0; k++) {
-        const e = els.get(idx + k);
-        if (e && (finalH.get(e) ?? 0) > (oldH.get(e) ?? 0) + 1) grew = k;
+      if (grewCur) {
+        for (let k = 1; k <= NEXT_MAX + 1; k++) { const e = els.get(idx + k); if (e) snap.push(e); }
+      } else {
+        // Startlagen: keine Zeile beginnt näher als Endhöhe plus Abstand unter ihrer Vorgängerin. Da jede Zeile gleichmäßig von ihrer Startlage zur Endlage fährt, bleibt der Abstand in jedem Bild mindestens so groß wie am Ende.
+        let prevEnd = (visY.get(cur) ?? NaN) + (finalH.get(cur) ?? 0) + g;
+        for (let k = 1; k <= NEXT_MAX + 1; k++) {
+          const e = els.get(idx + k);
+          if (!e) break;
+          const v = visY.get(e) ?? NaN;
+          if (Number.isNaN(v) || Number.isNaN(prevEnd)) { prevEnd = NaN; continue; }
+          const st = Math.max(v, prevEnd);
+          if (st > v + 0.5) lift.set(e, st);
+          prevEnd = st + (finalH.get(e) ?? 0) + g;
+        }
       }
-      if (grew >= 0) for (let k = grew + 1; k <= NEXT_MAX + 1; k++) { const e = els.get(idx + k); if (e) snap.push(e); }
     }
-    for (const e of snap) { e.style.transition = 'none'; e.style.opacity = '0'; e.dataset.snap = ''; }
+    window.clearTimeout(growTimer.current);
+    // die schnelle Anfahrt nur bei kurzem Weg (sonst würde der Schritt zwischen zwei Bildern zu groß, z. B. bei einem zweiten Wechsel kurz nach dem ersten)
+    if (grewCur && Math.abs(visY.get(cur) ?? 0) <= GROW_NEAR) b.dataset.grow = '';
+    else delete b.dataset.grow;
+    // Zeilen mit Ziel-Deckkraft 0 (ausgeblendet) fallen höchstens auf ihre jetzige Deckkraft und blenden schnell aus, alle anderen auf SNAP_FLOOR
+    const gone = (e: HTMLElement) => e.hasAttribute('data-cut') || e.dataset.role === 'far' || e.dataset.role === 'out';
+    // Zweiter Wechsel mitten in der Bewegung: steht die alte Zeile dann noch unter der neuen aktuellen Zeile, würden sich beide überlappen. Sie fällt sofort auf SNAP_FLOOR (blendet danach in 60 ms aus).
+    if (!jump && out) {
+      const t = getComputedStyle(out).transform;
+      const oy = t && t !== 'none' ? new DOMMatrixReadOnly(t).m42 : NaN;
+      const cy = visY.get(cur) ?? NaN;
+      if (!Number.isNaN(oy) && !Number.isNaN(cy) && oy + out.offsetHeight > cy - 1) {
+        snap.push(out);
+      }
+    }
+    for (const e of snap) { e.style.transition = 'none'; e.style.opacity = String(gone(e) ? Math.min(SNAP_FLOOR, parseFloat(getComputedStyle(e).opacity) || 0) : SNAP_FLOOR); e.dataset.snap = ''; }
+    for (const [e, y0] of lift) { e.style.transition = 'none'; e.style.transform = `translate3d(0, ${Math.round(y0 * 100) / 100}px, 0)`; }
+    if (snap.length || lift.size) void b.offsetHeight;
+    for (const e of lift.keys()) e.style.transition = '';
     for (const [i, t] of tops) els.get(i)!.style.transform = `translate3d(0, ${Math.round(t * 100) / 100}px, 0)`;
     if (jump) {
       void b.offsetHeight;
@@ -118,7 +158,8 @@ function PhoneLyricsView({ id, cues, idx }: PhoneLyricsProps) {
     } else if (snap.length) {
       void b.offsetHeight;
       for (const e of snap) { e.style.transition = ''; e.style.opacity = ''; }
-      window.setTimeout(() => { for (const e of snap) delete e.dataset.snap; }, 330);
+      window.setTimeout(() => { for (const e of snap) delete e.dataset.snap; }, 400);
+      growTimer.current = window.setTimeout(() => { delete b.dataset.grow; }, 400);
     }
   };
   const placeRef = useRef(place);

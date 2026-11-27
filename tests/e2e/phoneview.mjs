@@ -103,11 +103,23 @@ const MIXL = [EN_LONG, 'Kurz.', 'Eine mittlere Zeile, die auf dem Handy in zwei 
 const MIXA = [AR_LONG, 'هذا سطر قصير.', AR_LONG + ' ' + AR_LONG, 'سطر ثالث متوسط الطول يمتد على سطرين في الهاتف المحمول.', AR_LONG, 'قصير.'];
 const M74 = mk(74, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/74.m3u8', hook: 'Testmoment 74 brain, ein kurzer Satz', cues: Array.from({ length: 24 }, (_, i) => [i * 0.8, MIXL[i % MIXL.length]]), thumb: 'https://img.test/cover74.png' });
 const M75 = mk(75, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/75.m3u8', hook: 'هذا عنوان تجريبي طويل قليلا للحظة الاختبار', cues: Array.from({ length: 24 }, (_, i) => [i * 0.8, MIXA[i % MIXA.length]]), thumb: 'https://img.test/cover75.png' });
+// Runde 51c: Zeilen mit festen Zeilenzahlen (1, 2, 3 und 6 Zeilen bei 375 und 393 Breite) für die Wechsel 2 auf 2, 3 auf 3, 1 auf 3, 2 auf 6, 6 auf 1 und für doppelte Wechsel im Abstand von 0,12 s
+const W77 = 'alpha beta gamma delta epsilon zeta theta kappa lambda sigma omega rho'.split(' ');
+const mkT77 = (n, tag) => { let t = tag; let i = 0; while (t.length < n) t += ' ' + W77[i++ % W77.length]; return t; };
+const LEN77 = { 1: 10, 2: 38, 3: 60, 6: 130 };
+const L77 = []; const T77 = []; {
+  let t = 0;
+  for (let rep = 0; rep < 2; rep++) for (const n of [2, 2, 3, 3, 1, 3, 2, 6, 6, 1]) { T77.push(t); L77.push(n); t += 0.8; }
+  t += 0.8;
+  for (const g of [[1, 3, 2], [2, 6, 1], [3, 3, 6], [2, 3, 3]]) { for (const n of g) { T77.push(t); L77.push(n); t += 0.12; } t += 1.4; }
+  T77.push(t); L77.push(2);
+}
+const M77 = mk(77, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/77.m3u8', hook: 'Testmoment 77 brain, ein kurzer Satz', cues: T77.map((x, i) => [x, mkT77(LEN77[L77[i]], 'Z' + (i + 1))]), thumb: 'https://img.test/cover77.png' });
 // Runde 51: Abrufkarte mit langer Frage und langen Antworten (Audio)
 const QL = 'Welche Aussage über die beschriebene Abfolge der Schritte trifft zu, wenn man die Reihenfolge, die Bedingungen und die Ausnahmen aus dem Text gemeinsam berücksichtigt und dabei nichts hinzufügt?';
 const AL = 'Diese Antwort ist absichtlich lang und umbricht auf dem Handy über mehrere Zeilen, damit die Tasten hoch werden';
 const M76 = mk(76, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/76.m3u8', hook: 'Testmoment 76 brain, ein kurzer Satz', thumb: 'https://img.test/cover76.png', recall: { question: QL, options: [AL + ' (A)', AL + ' (richtig)', AL + ' (B)'], correct: 1, why: 'Weil die Reihenfolge zuerst kommt und dann die Bedingung gilt, die im Text genannt wird, und weil keine Ausnahme genannt ist.' } });
-const ALL = [...moments, M76, M74, M75, M58, M59, M60, M61, M62, M63, M64, M65, M66, M67, M72, M73, M68, M69, M70];
+const ALL = [...moments, M76, M77, M74, M75, M58, M59, M60, M61, M62, M63, M64, M65, M66, M67, M72, M73, M68, M69, M70];
 const numOf = (m) => Number(m.id.slice(4, 11));
 const poolOf = async (audio, text = null) => {
   const iv2 = crypto.getRandomValues(new Uint8Array(12));
@@ -118,7 +130,7 @@ const POOL_A = await poolOf([40, 41, 42, 43, 44, 61, 58]);
 const POOL_B = await poolOf([40, 59, 62, 60, 65, 66]);
 const POOL_L = await poolOf([67]);
 const POOL_X = await poolOf([72, 73]);
-const POOL_O = await poolOf([74, 75]);
+const POOL_O = await poolOf([74, 75, 77]);
 const POOL_Q = await poolOf([76, 40]);
 const POOL_C = await poolOf([40, 44, 68, 69, 70]);
 const POOL_G = await poolOf([40, 58, 59]);
@@ -565,7 +577,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           c[`${tag} Feld Größen`] = L.curFont === 22 && L.prevFont === 22 && L.nextFont === 22 && L.curColor !== L.prevColor;
           // Die aktuelle Zeile bleibt beim Wechsel an ihrem Platz: über vier Zeilen gleiche obere Kante bei gleich langer Zeile ist nicht verlangt, wohl aber dieselbe Mitte
           const mids = [];
-          for (let n = 0; n < 4; n++) { mids.push(await pg.evaluate(() => { const e = document.querySelector('[data-testid=caption]'); if (!e) return null; const b = e.getBoundingClientRect(); return Math.round(b.top); })); await pg.waitForTimeout(1800); }
+          for (let n = 0; n < 4; n++) { mids.push(await pg.evaluate(async () => { const top = () => { const e = document.querySelector('[data-testid=caption]'); return e ? e.getBoundingClientRect().top : null; }; /* Runde 51c: erst messen, wenn die Zeile ruht (zwei gleiche Werte im Abstand von 120 ms), nicht mitten im Wechsel */ for (let k = 0; k < 10; k++) { const a = top(); await new Promise((r) => setTimeout(r, 120)); if (a === top()) return a === null ? null : Math.round(a); } const t = top(); return t === null ? null : Math.round(t); })); await pg.waitForTimeout(1800); }
           const ok = mids.filter((x) => x !== null);
           c[`${tag} Feld feste Position`] = ok.length >= 2 && Math.max(...ok) - Math.min(...ok) <= 1;
           if (!c[`${tag} Feld feste Position`]) r.notes[`${tag} Feld Mitten`] = mids;
@@ -1365,29 +1377,103 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
             const vis = f.rows.filter((x) => x[3] > 0.3);
             for (let a = 0; a < vis.length; a++) for (let b = a + 1; b < vis.length; b++) { const ov = Math.min(vis[a][2], vis[b][2]) - Math.max(vis[a][1], vis[b][1]); if (ov > worst) { worst = ov; wi = fr.indexOf(f); where = [vis[a][0], vis[b][0], Math.round(f.t)]; } }
           }
-          // Runde 51b: je Wechsel (0 bis 600 ms): Höhe der aktuellen Zeile ab dem ersten Bild gleich Endhöhe, keine Auslassung wenn der Text passt, Anker gleich, kein Schritt über 40 px sichtbarer Zeilen
+          // Runde 51b: je Wechsel (0 bis 600 ms): Höhe der aktuellen Zeile ab dem ersten Bild gleich Endhöhe, keine Auslassung wenn der Text passt, Anker gleich, kein Schritt über 38 px sichtbarer Zeilen
           const evs = []; for (let i = 1; i < fr.length; i++) { const a0 = fr[i - 1].rows.find((x) => x[4] === 'cur')?.[0]; const a1 = fr[i].rows.find((x) => x[4] === 'cur')?.[0]; if (a0 !== undefined && a1 !== undefined && a0 !== a1) evs.push(i); }
-          let hJump = 0; let ell = 0; let step = 0; let outMove = 0; const anchors = []; let used = 0;
+          let hJump = 0; let ell = 0; let step = 0; let stepRaw = 0; let outMove = 0; const anchors = []; let used = 0;
           for (let e = 0; e < evs.length - 1; e++) {
             const f0 = evs[e]; const end = Math.min(evs[e + 1] - 1, f0 + 36); const nw = fr[f0].rows.find((x) => x[4] === 'cur')[0];
             const rowAt = (f) => fr[f].rows.find((x) => x[0] === nw); const fin = rowAt(end); if (!fin) continue; used++;
             anchors.push(fin[1]);
             { const o0 = fr[f0 - 1].rows.find((x) => x[0] === nw - 1); const o1 = fr[end].rows.find((x) => x[0] === nw - 1); if (o0 && o1) outMove = Math.max(outMove, Math.abs(o1[1] - o0[1])); }
             for (let f = f0; f <= end; f++) { const rw = rowAt(f); if (rw && Math.abs(rw[6] - fin[6]) > 2) hJump = Math.max(hJump, Math.abs(rw[6] - fin[6])); if (rw && fin[5] === 'none' && rw[5] !== 'none') ell++; }
-            for (let f = f0; f <= end; f++) for (const x of fr[f].rows) { const y0 = fr[f - 1].rows.find((q) => q[0] === x[0]); if (y0 && x[3] > 0.3 && y0[3] > 0.3) step = Math.max(step, Math.abs(x[1] - y0[1])); }
+            for (let f = f0; f <= end; f++) for (const x of fr[f].rows) { const y0 = fr[f - 1].rows.find((q) => q[0] === x[0]); if (y0 && x[3] > 0.3 && y0[3] > 0.3) { const d = Math.abs(x[1] - y0[1]); stepRaw = Math.max(stepRaw, d); if (fr[f].t - fr[f - 1].t <= 34) step = Math.max(step, d); } } // Runde 51c: Bildpaare mit über 34 ms Abstand (ein ausgefallenes Bild der Messung) zählen nicht zum Schritt, stehen aber als stepRaw im Bericht
           }
           const ancD = anchors.length ? Math.max(...anchors) - Math.min(...anchors) : 99;
           c[`${size.name} Wechsel ${lab}: Höhe der aktuellen Zeile ab dem ersten Bild gleich der Endhöhe (2 px)`] = used >= 6 && hJump <= 2;
           c[`${size.name} Wechsel ${lab}: keine Auslassung, die später verschwindet`] = used >= 6 && ell === 0;
           c[`${size.name} Wechsel ${lab}: Anker gleich (1 px)`] = used >= 6 && ancD <= 1;
-          c[`${size.name} Wechsel ${lab}: kein Schritt über 40 px sichtbarer Zeilen zwischen zwei Bildern`] = used >= 6 && step <= 40;
+          c[`${size.name} Wechsel ${lab}: kein Schritt über 38 px sichtbarer Zeilen zwischen zwei Bildern (4x CPU, Bildabstand bis 34 ms)`] = used >= 6 && step <= 38;
           c[`${size.name} Wechsel ${lab}: die alte Zeile fährt höchstens 60 px nach oben`] = used >= 6 && outMove <= 61;
-          r.notes[`${size.name} Wechsel ${lab}`] = { used, outMove: Math.round(outMove), hJump: Math.round(hJump), ell, step: Math.round(step), ancD: Math.round(ancD * 10) / 10 };
+          r.notes[`${size.name} Wechsel ${lab}`] = { used, outMove: Math.round(outMove), hJump: Math.round(hJump), ell, step: Math.round(step * 10) / 10, stepRaw: Math.round(stepRaw * 10) / 10, ancD: Math.round(ancD * 10) / 10 };
           r.notes[`${size.name} Überlappung ${lab}`] = { frames: fr.length, changes, worst: Math.round(worst * 10) / 10, where, ctx: [wi - 2, wi - 1, wi, wi + 1].map((k) => fr[k] && fr[k].rows.map((x) => x.map((v) => (typeof v === 'number' ? Math.round(v * 10) / 10 : v)))) };
           c[`${size.name} Überlappung ${lab}: mindestens 8 Wechsel abgetastet`] = got && changes >= 8;
           c[`${size.name} Überlappung ${lab}: in keinem Frame mehr als 1 px Überlappung sichtbarer Zeilen`] = worst <= 1;
           await o.browser.close();
         }
+      }
+    }
+
+
+    // ---------- Runde 51c: Wechsel mit festen Zeilenzahlen (2 auf 2, 3 auf 3, 1 auf 3, 2 auf 6, 6 auf 1) bild für Bild bei 4x CPU: ohne Wachstum bleibt jede Zeile, die davor und danach sichtbar ist, in jedem Bild über 0,4 und nichts überlappt; mit Wachstum fallen die Zeilen darunter nie unter 0,2 und stehen ab 250 ms auf ihrer Stufe; doppelte Wechsel im Abstand von 0,12 s überlappen nie ----------
+    sec('Runde 51c: Wechsel mit festen Zeilenzahlen bild für bild bei 4x CPU, doppelte Wechsel');
+    {
+      for (const size of [SIZES[1], GER]) {
+        const o = await open(type, size, { tab: 'audio', pool: POOL_O });
+        const pg = o.pg;
+        await showMoment(pg, idOf(77));
+        const cdp = type === chromium ? await o.cx.newCDPSession(pg) : null;
+        await cdp?.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+        await pg.evaluate(() => {
+          window.__ov = { f: [], on: true };
+          const tick = (t) => { if (!window.__ov.on) return; window.__ov.f.push({ t, rows: [...document.querySelectorAll('.ph-row')].map((e) => { const b = e.getBoundingClientRect(); return [+e.dataset.i, b.top, b.bottom, +getComputedStyle(e).opacity, e.dataset.role, e.style.getPropertyValue('--clamp'), b.height]; }) }); requestAnimationFrame(tick); };
+          requestAnimationFrame(tick);
+        });
+        const nCue = L77.length;
+        // die Wiedergabe dauert über 25 s (jede einzelne Wartezeit höchstens 15 s): in Schritten warten, nur der letzte zählt als Zeitlimit
+        const endCond = (n) => { const f = window.__ov.f; return f.length > 0 && (f[f.length - 1].rows.find((x) => x[4] === 'cur')?.[0] ?? 0) >= n - 1; };
+        let got = false;
+        for (let k = 0; k < 4 && !got; k++) got = await waitFor(pg, endCond, nCue, 12000, k < 3);
+        const fr = await pg.evaluate(() => { window.__ov.on = false; return window.__ov.f; });
+        await cdp?.send('Emulation.setCPUThrottlingRate', { rate: 1 });
+        const curOf = (f) => f.rows.find((x) => x[4] === 'cur')?.[0];
+        const evs = []; for (let i = 1; i < fr.length; i++) { const a0 = curOf(fr[i - 1]); const a1 = curOf(fr[i]); if (a0 !== undefined && a1 !== undefined && a0 !== a1) evs.push(i); }
+        const ovl = (f) => { const vis = f.rows.filter((x) => x[3] > 0.3); let w = 0; for (let a = 0; a < vis.length; a++) for (let b = a + 1; b < vis.length; b++) w = Math.max(w, Math.min(vis[a][2], vis[b][2]) - Math.max(vis[a][1], vis[b][1])); return w; };
+        const res = {}; const dbl = { n: 0, ov: 0 }; let worstAll = 0; let stepAll = 0;
+        const rowAt = (f, i) => fr[f].rows.find((x) => x[0] === i);
+        for (let e = 0; e < evs.length; e++) {
+          const f0 = evs[e]; const nw = curOf(fr[f0]); const next = evs[e + 1] ?? fr.length; const end = Math.min(next - 1, f0 + 36);
+          const dt = fr[next] ? fr[next].t - fr[f0].t : 999; const dp = e > 0 ? fr[f0].t - fr[evs[e - 1]].t : 999;
+          const old = fr[f0 - 1].rows.find((x) => x[0] === nw - 1); const fin = rowAt(end, nw);
+          if (!old || !fin) continue;
+          const oL = Math.round(old[6] / 30); const nL = Math.round(fin[6] / 30);
+          const isDbl = Math.min(dt, dp) < 400;
+          const R = (res[`${oL} auf ${nL}`] ??= { n: 0, ov: 0, step: 0, stepRaw: 0, minVis: 9, minFollow: 9, late: 0 });
+          let ov = 0;
+          for (let f = f0; f <= end; f++) {
+            ov = Math.max(ov, ovl(fr[f]));
+            for (const x of fr[f].rows) {
+              const y0 = rowAt(f - 1, x[0]);
+              if (y0 && x[3] > 0.3 && y0[3] > 0.3 && !isDbl) { const d = Math.abs(x[1] - y0[1]); R.stepRaw = Math.max(R.stepRaw, d); if (fr[f].t - fr[f - 1].t <= 34) R.step = Math.max(R.step, d); }
+              if (isDbl) continue;
+              const before = rowAt(f0 - 1, x[0]); const after = rowAt(end, x[0]);
+              if (nL <= oL && before && after && before[3] > 0.3 && after[3] > 0.3) R.minVis = Math.min(R.minVis, x[3]);
+              if (nL > oL && x[0] > nw && after && after[3] > 0.3) { R.minFollow = Math.min(R.minFollow, x[3]); if (fr[f].t - fr[f0].t >= 270 && Math.abs(x[3] - after[3]) > 0.03) R.late++; }
+            }
+          }
+          if (isDbl) { dbl.n++; dbl.ov = Math.max(dbl.ov, ov); } else { R.n++; R.ov = Math.max(R.ov, ov); }
+        }
+        for (const f of fr) worstAll = Math.max(worstAll, ovl(f));
+        for (const R of Object.values(res)) stepAll = Math.max(stepAll, R.step);
+        const nm = size.name;
+        c[`${nm} 51c: alle Wechsel abgetastet`] = got && evs.length >= nCue - 3;
+        for (const lab of ['2 auf 2', '3 auf 3', '1 auf 3', '2 auf 6', '6 auf 1']) {
+          const R = res[lab];
+          c[`${nm} 51c ${lab}: mindestens 1 Wechsel gemessen`] = !!R && R.n >= 1;
+          if (!R) continue;
+          const grow = Number(lab.split(' auf ')[1]) > Number(lab.split(' auf ')[0]);
+          if (grow) {
+            c[`${nm} 51c ${lab}: Zeilen darunter in keinem Bild unter 0,2 Deckkraft`] = R.minFollow >= 0.2 || R.minFollow === 9;
+            c[`${nm} 51c ${lab}: Zeilen darunter ab 250 ms auf ihrer Stufe`] = R.late === 0;
+          } else {
+            c[`${nm} 51c ${lab}: jede davor und danach sichtbare Zeile in jedem Bild mindestens 0,4`] = R.minVis >= 0.4;
+          }
+          c[`${nm} 51c ${lab}: keine Überlappung sichtbarer Zeilen (1 px)`] = R.ov <= 1;
+        }
+        c[`${nm} 51c: in keinem Bild eine Überlappung sichtbarer Zeilen über 1 px (ganzer Lauf, auch doppelte Wechsel)`] = worstAll <= 1;
+        c[`${nm} 51c: kein Schritt über 38 px sichtbarer Zeilen (ohne doppelte Wechsel, Bildabstand bis 34 ms)`] = stepAll <= 38;
+        c[`${nm} 51c: mindestens 6 Wechsel im Abstand von 0,12 s, nie eine Überlappung`] = dbl.n >= 6 && dbl.ov <= 1;
+        r.notes[`${nm} 51c`] = { frames: fr.length, changes: evs.length, worstAll: Math.round(worstAll * 10) / 10, step: Math.round(stepAll * 10) / 10, dbl, res: Object.fromEntries(Object.entries(res).map(([k, v]) => [k, { n: v.n, ov: Math.round(v.ov * 10) / 10, step: Math.round(v.step * 10) / 10, stepRaw: Math.round(v.stepRaw * 10) / 10, minVis: v.minVis === 9 ? null : Math.round(v.minVis * 100) / 100, minFollow: v.minFollow === 9 ? null : Math.round(v.minFollow * 100) / 100, late: v.late }])) };
+        await o.browser.close();
       }
     }
 
