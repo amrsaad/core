@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-27",
+ "records": [
+  {
+   "sourceId": "wiki:de:Blanton Museum of Art",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Blanton_Museum_of_Art",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/27",
+    "status": 200
+   },
+   "title": "Blanton Museum of Art",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Das Blanton Museum of Art ist das Kunstmuseum der University of Texas in Austin. Es geht auf die Stiftung Archer M. Huntingtons im Jahr 1927 zurück, der Mittel für den Ankauf von Kunstwerken durch die Universität zur Verfügung stellte. Der Huntington Fund trug auch zur Finanzierung für ein Gebäude bei, das die Sammlung und das Institut für Kunst der Universität beherbergte. 1963 eröffnete das Museum als Archer M. Huntington Art Gallery. Die stetig wachsende Sammlung musste in den folgenden Jahren auf verschiedene Standorte aufgeteilt werden. In den 1990er-Jahren begannen Planungen für ein neues Museumsgebäude, welches 2006 eröffnet wurde. Das Museum ist seit 1998 nach dem Stifter Jack S. Blanton benannt."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-27T04:15:01.223Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Blanton_Museum_of_Art": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Lotte Lenya",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Lotte_Lenya",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/27",
+    "status": 200
+   },
+   "title": "Lotte Lenya",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Lotte Lenya, auch Lotte Lenja, war eine österreichisch-amerikanische Schauspielerin und Sängerin (Mezzosopran/Alt)."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-27T04:15:01.223Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Lotte_Lenya": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Kathryn Bigelow",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Kathryn_Bigelow",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/27",
+    "status": 200
+   },
+   "title": "Kathryn Bigelow",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Kathryn Ann Bigelow [ˈkʰæθɹɪn ʔæn ˈbɪgəloʊ̯] ist eine US-amerikanische Filmregisseurin und Oscar-Preisträgerin."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-27T04:15:01.223Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Kathryn_Bigelow": 200
+   }
+  }
+ ]
+}
