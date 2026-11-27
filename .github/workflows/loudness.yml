@@ -4,6 +4,9 @@ name: loudness
 # Je Fenster nur der Ausschnitt start bis end (ffmpeg -ss/-t, ebur128), nicht die ganze Datei.
 # Ergebnis je Quelle als Artefakt "loud-<id>" mit <id>.json: {"id":..,"results":[{"start":..,"end":..,"lufs":-18.3|null,"err":".."}]} und stats.json.
 # lufs ist null, wenn die Messung scheitert, das Fenster zu kurz ist oder nur Stille liegt (-70 LUFS oder darunter).
+# Klangmerkmale (v1, gleicher ffmpeg-Durchgang, nur Zahlen): je Ergebnis zusätzlich "sound":{"noise":dBFS (10. Perzentil des RMS in Blöcken zu 0,4 s),
+# "snr":dB (90. minus 10. Perzentil), "clip":Anteil der Samples über -0,5 dBFS (Mono-Mix), "peak":dBFS, "bw":Hz unter denen 99 % der Energie liegen,
+# "bw95":dito 95 %, "hf":Energieanteil über 4 kHz, "blocks":Anzahl Blöcke, "v":1}. Fehlt sound, nennt sErr den Grund. Alte Auswerter lesen nur lufs und start/end.
 on:
   push:
     branches: [claude/compute]
@@ -47,55 +50,172 @@ jobs:
           mkdir -p work
           cat > measure.py <<'PYEOF'
           #!/usr/bin/env python3
-          """Integrierte Lautheit je Fenster. ffmpeg liest nur start bis end (Suchen per -ss vor -i, Dauer per -t), Filter ebur128.
-          Zusammenfassung am Ende der Ausgabe: "I: -18.3 LUFS". Stille ergibt -70 oder "-inf", das zählt als kein Wert."""
-          import json, os, re, subprocess, sys, time
+          """Integrierte Lautheit und Klangmerkmale je Fenster. ffmpeg liest nur start bis end (Suchen per -ss vor -i, Dauer per -t) und zerlegt das
+          Signal in einem Durchgang in vier Zweige. Zweig 1: ebur128 (Lautheit, unverändert wie vor v1, Zusammenfassung "I: -18.3 LUFS"). Zweig 2: Mono-Mix in Blöcken
+          zu 0,4 s, astats je Block (RMS und Spitze). Zweig 3: Mono-Mix, aeval setzt jedes Sample mit Betrag über 0,944 (-0,5 dBFS) auf 1, sonst 0, astats RMS
+          darüber ergibt den Anteil. Zweig 4: Mono-Mix, acrossover in 13 Frequenzbänder, astats RMS je Band über das ganze Fenster (Energie je Band).
+          Schlägt der Durchgang mit den Klangzweigen fehl, läuft der alte Aufruf (nur ebur128), dann fehlt nur sound und der Grund steht in sErr."""
+          import json, math, os, re, shutil, subprocess, sys, tempfile, time
 
           audio, out, job_id = os.environ['AUDIO'], sys.argv[1], sys.argv[2]
           windows = json.loads(os.environ['WINDOWS'])
           I_RE = re.compile(r'Integrated loudness:\s+I:\s+(-?inf|-?[\d.]+) LUFS')
 
+          RATE = 44100
+          BLOCK = int(RATE * 0.4)                     # 0,4 s je Block
+          CLIP_LEVEL = 10 ** (-0.5 / 20)              # -0,5 dBFS
+          SPLITS = [250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 8000, 10000, 12000, 16000]
+          EDGES = [0] + SPLITS + [RATE // 2]          # 13 Bänder
+          FLOOR_DB = -90.0                            # digitale Stille in Blöcken zählt als -90 dBFS
+
+
+          def graph():
+              bands = ''.join(f'[o{i}]' for i in range(len(SPLITS) + 1))
+              stat = 'astats=metadata=1:reset=0:measure_perchannel=none:measure_overall=RMS_level'
+              mono = f'aformat=sample_rates={RATE}:channel_layouts=mono'
+              parts = [
+                  '[0:a]asplit=4[a1][a2][a3][a4]',
+                  '[a1]ebur128=peak=none[e]',
+                  f'[a2]{mono},asetnsamples=n={BLOCK}:p=0,astats=metadata=1:reset=1:measure_perchannel=none:measure_overall=RMS_level+Peak_level+Number_of_samples,'
+                  'ametadata=mode=print:file=blk.txt,anullsink',
+                  f"[a3]{mono},aeval=exprs='gt(abs(val(0))\\,{CLIP_LEVEL:.6f})':channel_layout=mono,{stat},ametadata=mode=print:key=lavfi.astats.Overall.RMS_level:file=clip.txt,anullsink",
+                  f"[a4]{mono},acrossover=split='{' '.join(map(str, SPLITS))}':order=4th{bands}",
+              ]
+              parts += [f'[o{i}]{stat},ametadata=mode=print:key=lavfi.astats.Overall.RMS_level:file=band{i}.txt,anullsink' for i in range(len(SPLITS) + 1)]
+              return ';'.join(parts)
+
+
+          def last_db(path):
+              """Letzter Wert lavfi.astats.Overall.RMS_level in einer ametadata-Datei (kumuliert über das Fenster), -inf als None"""
+              v = None
+              for line in open(path, encoding='utf8', errors='replace'):
+                  if line.startswith('lavfi.astats.Overall.RMS_level='):
+                      v = line.split('=', 1)[1].strip()
+              if v is None:
+                  raise ValueError(f'{path}: kein Wert')
+              return None if 'inf' in v else float(v)
+
+
+          def pct(xs, p):
+              """Perzentil mit linearer Interpolation (wie numpy.percentile)"""
+              xs = sorted(xs)
+              k = (len(xs) - 1) * p / 100
+              lo, hi = int(math.floor(k)), int(math.ceil(k))
+              return xs[lo] + (xs[hi] - xs[lo]) * (k - lo)
+
+
+          def read_blocks(path):
+              """Blöcke (rms, peak, samples) aus blk.txt"""
+              blocks, cur = [], {}
+              for line in open(path, encoding='utf8', errors='replace'):
+                  line = line.strip()
+                  if line.startswith('frame:'):
+                      if cur:
+                          blocks.append(cur)
+                      cur = {}
+                  elif '=' in line:
+                      k, v = line.split('=', 1)
+                      cur[k.replace('lavfi.astats.Overall.', '')] = v
+              if cur:
+                  blocks.append(cur)
+              num = lambda s: FLOOR_DB if 'inf' in s else float(s)
+              return [(max(FLOOR_DB, num(b['RMS_level'])), num(b['Peak_level']), int(float(b['Number_of_samples']))) for b in blocks if {'RMS_level', 'Peak_level', 'Number_of_samples'} <= b.keys()]
+
+
+          def sound_from(wd):
+              blocks = [b for b in read_blocks(os.path.join(wd, 'blk.txt')) if b[2] >= BLOCK // 2]  # kurzen Schlussblock auslassen
+              if len(blocks) < 5:
+                  raise ValueError(f'nur {len(blocks)} Blöcke')
+              rms = [b[0] for b in blocks]
+              noise, speech = pct(rms, 10), pct(rms, 90)
+              cl = last_db(os.path.join(wd, 'clip.txt'))
+              clip = 0.0 if cl is None else min(1.0, 10 ** (cl / 10))   # mittleres Quadrat eines 0/1-Signals ist der Anteil
+              pw = []
+              for i in range(len(SPLITS) + 1):
+                  d = last_db(os.path.join(wd, f'band{i}.txt'))
+                  pw.append(0.0 if d is None else 10 ** (d / 10))
+              tot = sum(pw)
+              if tot <= 0:
+                  raise ValueError('keine Bandenergie')
+
+              def bw(share):
+                  acc = 0.0
+                  for i, p in enumerate(pw):
+                      if acc + p >= share * tot:
+                          f = (share * tot - acc) / p if p > 0 else 0.0
+                          return EDGES[i] + f * (EDGES[i + 1] - EDGES[i])
+                      acc += p
+                  return float(EDGES[-1])
+
+              return {'noise': round(noise, 1), 'snr': round(speech - noise, 1), 'clip': round(clip, 5), 'peak': round(max(b[1] for b in blocks), 1),
+                      'bw': round(bw(0.99)), 'bw95': round(bw(0.95)), 'hf': round(sum(pw[6:]) / tot, 4), 'blocks': len(blocks), 'v': 1}
+
+
+          def run(cmd, wd=None):
+              return subprocess.run(cmd, capture_output=True, timeout=600, cwd=wd)
+
 
           def measure(start, end):
-              cmd = ['ffmpeg', '-hide_banner', '-nostats', '-nostdin', '-ss', str(start), '-i', audio, '-t', str(round(end - start, 3)),
-                     '-vn', '-af', 'ebur128=peak=none', '-f', 'null', '-']
-              err = ''
+              dur = str(round(end - start, 3))
+              # -t vor -i begrenzt die Eingabe, damit alle Zweige dasselbe Fenster sehen (als Ausgabeoption begrenzte es nur den Zweig mit dem Ausgang)
+              head = ['ffmpeg', '-hide_banner', '-nostats', '-nostdin', '-ss', str(start), '-t', dur, '-i', audio, '-vn']
+              base = ['ffmpeg', '-hide_banner', '-nostats', '-nostdin', '-ss', str(start), '-i', audio, '-t', dur, '-vn']  # wie vor v1
+              err, serr = '', None
               for attempt in range(3):
+                  wd = tempfile.mkdtemp(prefix='snd')
                   try:
-                      # Bytes lesen und tolerant dekodieren: ID3-Tags enthalten manchmal kein UTF-8
-                      r = subprocess.run(cmd, capture_output=True, timeout=600)
-                  except subprocess.TimeoutExpired:
-                      err = 'timeout'
-                      continue
-                  except Exception as ex:  # ein Fenster darf nie den ganzen Auftrag abbrechen
-                      err = f'{type(ex).__name__}: {ex}'[:160]
-                      continue
-                  stderr = r.stderr.decode('utf-8', errors='replace')
-                  m = I_RE.search(stderr)
-                  if m:
-                      v = m.group(1)
-                      if 'inf' in v:
-                          return None, 'silence'
-                      x = float(v)
-                      # -70 LUFS ist die Untergrenze des Messgeräts: Stille
-                      return (None, 'silence') if x <= -69.9 else (round(x, 1), '')
-                  err = (stderr.strip().splitlines() or ['no output'])[-1][:160]
+                      try:
+                          # Bytes lesen und tolerant dekodieren: ID3-Tags enthalten manchmal kein UTF-8
+                          r = run(head + ['-filter_complex', graph(), '-map', '[e]', '-f', 'null', '-'], wd)
+                      except subprocess.TimeoutExpired:
+                          err = 'timeout'
+                          continue
+                      except Exception as ex:  # ein Fenster darf nie den ganzen Auftrag abbrechen
+                          err = f'{type(ex).__name__}: {ex}'[:160]
+                          continue
+                      stderr = r.stderr.decode('utf-8', errors='replace')
+                      m = I_RE.search(stderr)
+                      if m:
+                          v = m.group(1)
+                          if 'inf' in v:
+                              return None, 'silence', None, None
+                          x = float(v)
+                          # -70 LUFS ist die Untergrenze des Messgeräts: Stille
+                          if x <= -69.9:
+                              return None, 'silence', None, None
+                          try:
+                              return round(x, 1), '', sound_from(wd), None
+                          except Exception as ex:
+                              return round(x, 1), '', None, f'{type(ex).__name__}: {ex}'[:160]
+                      err = (stderr.strip().splitlines() or ['no output'])[-1][:160]
+                      serr = err
+                  finally:
+                      shutil.rmtree(wd, ignore_errors=True)
                   time.sleep(2 * (attempt + 1))
-              return None, err
+              # Rückfall: der alte Aufruf nur mit ebur128, damit die Lautheit nie an den Klangzweigen scheitert
+              try:
+                  r = run(base + ['-af', 'ebur128=peak=none', '-f', 'null', '-'])
+                  m = I_RE.search(r.stderr.decode('utf-8', errors='replace'))
+                  if m and 'inf' not in m.group(1) and float(m.group(1)) > -69.9:
+                      return round(float(m.group(1)), 1), '', None, f'graph: {serr or err}'[:160]
+              except Exception as ex:
+                  err = f'{type(ex).__name__}: {ex}'[:160]
+              return None, err, None, None
 
 
-          res, ok = [], 0
+          res, ok, snd = [], 0, 0
           for s, e in windows:
               if e - s < 1.0:
                   res.append({'start': s, 'end': e, 'lufs': None, 'err': 'too short'})
                   continue
-              v, err = measure(s, e)
+              v, err, sound, serr = measure(s, e)
               ok += v is not None
-              res.append({'start': s, 'end': e, 'lufs': v, **({'err': err} if err else {})})
-              print(s, e, v, err)
+              snd += sound is not None
+              res.append({'start': s, 'end': e, 'lufs': v, **({'err': err} if err else {}), **({'sound': sound} if sound else {}), **({'sErr': serr} if serr else {})})
+              print(s, e, v, err, sound, serr)
           json.dump({'id': job_id, 'results': res}, open(out, 'w'))
-          json.dump({'id': job_id, 'windows': len(windows), 'measured': ok}, open(os.path.join(os.path.dirname(out), 'stats.json'), 'w'))
-          print(f'{ok} von {len(windows)} Fenstern gemessen')
+          json.dump({'id': job_id, 'windows': len(windows), 'measured': ok, 'sound': snd}, open(os.path.join(os.path.dirname(out), 'stats.json'), 'w'))
+          print(f'{ok} von {len(windows)} Fenstern gemessen, Klang bei {snd}')
           PYEOF
           python3 measure.py work/${{ matrix.id }}.json ${{ matrix.id }}
       - uses: actions/upload-artifact@v4
