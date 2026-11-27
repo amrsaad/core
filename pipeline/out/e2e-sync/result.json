@@ -1,5 +1,5 @@
 {
- "at": "2026-11-27T13:35:42.303Z",
+ "at": "2026-11-27T14:24:01.436Z",
  "runs": [
   {
    "browser": "webkit",
@@ -54,12 +54,12 @@
    },
    "diagLines": 22,
    "diagSample": [
-    "v6ox vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 fix=none",
-    "v6ox sync: first upload waits for stable playback",
-    "v6ox app: hidden",
-    "v6ox sync: first upload released (app left) after 3.0 s"
+    "7wvf vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 fix=none",
+    "7wvf sync: first upload waits for stable playback",
+    "7wvf app: hidden",
+    "7wvf sync: first upload released (app left) after 3.0 s"
    ],
-   "writeDelayMs": 10035,
+   "writeDelayMs": 10031,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -121,12 +121,12 @@
    },
    "diagLines": 21,
    "diagSample": [
-    "1awn sync: first upload waits for stable playback",
-    "1awn vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 fix=none",
-    "1awn app: hidden",
-    "1awn sync: first upload released (app left) after 3.0 s"
+    "fedq sync: first upload waits for stable playback",
+    "fedq vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 fix=none",
+    "fedq app: hidden",
+    "fedq sync: first upload released (app left) after 3.0 s"
    ],
-   "writeDelayMs": 10024,
+   "writeDelayMs": 10022,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
