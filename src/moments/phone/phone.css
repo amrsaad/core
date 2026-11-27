@@ -129,6 +129,7 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
 .ph-hook { margin: 0; color: var(--text); font-weight: 700; overflow-wrap: anywhere; font-size: 28px; line-height: 35px; letter-spacing: -0.015em; }
 .ph-hook[data-step='1'] { font-size: 24px; line-height: 31px; }
 .ph-hook[data-step='2'] { font-size: 21px; line-height: 27px; }
+.ph-hook[data-clamp] { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--hook-lines, 2); line-clamp: var(--hook-lines, 2); overflow: hidden; }
 .ph-video .ph-hook { font-size: 24px; line-height: 31px; letter-spacing: -0.01em; }
 .ph-video .ph-hook[data-step='1'] { font-size: 21px; line-height: 27px; }
 .ph-video .ph-hook[data-step='2'] { font-size: 18px; line-height: 24px; }
@@ -176,8 +177,10 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
   transition-duration: var(--dur-lyr), var(--dur-lyr), var(--dur-lyr);
   transition-timing-function: var(--ease);
 }
-.ph-row[data-role='cur'] { display: block; color: var(--text); overflow: visible; -webkit-line-clamp: none; line-clamp: none; }
-.ph-row[data-role='far'], .ph-row[data-cut] { opacity: 0; }
+.ph-row[data-role='cur'] { color: var(--text); }
+.ph-row[data-role='next2'] { opacity: 0.6; }
+.ph-row[data-role='next3'] { opacity: 0.42; }
+.ph-row[data-role='far'], .ph-row[data-role='out'], .ph-row[data-cut] { opacity: 0; }
 .ph-lyr-body[data-jump] .ph-row { transition: none; }
 @media (prefers-reduced-motion: reduce) { .ph-row { transition: none; } }
 .ph-lyr-body > .ph-lyric-text, .ph-lyr-body > .ph-lyric-note { margin: 0; }
@@ -191,18 +194,18 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
 .ph-lyric-text[lang='ar'] { font-size: 21px; }
 
 /* Runde 50: Titelbild als Quadrat in der Karte (nur Audio, Feld thumb), vollständig sichtbar, nimmt erst Platz, wenn es geladen ist (data-ready=yes, siehe PhoneAudio). Radius 12 px, Rand 1 px (8 Prozent Weiß, wie in Runde 48),
-   kein Verlauf, kein Filter. Oben: normaler Karten-Innenabstand, bündig mit der Startkante der Untertitel (links, bei arabisch rechts über data-dir), Seite clamp(72px, Höhe minus 220px (arabisch 316px) für die Zeilen samt Abstand: vorige 2 Zeilen, aktuelle 2, nächste 2, 128px).
+   kein Verlauf, kein Filter. Oben: normaler Karten-Innenabstand, bündig mit der Startkante der Untertitel (links, bei arabisch rechts über data-dir), Seite clamp(72px, Höhe minus 148px (arabisch 212px) für die Zeilen samt Abstand: aktuelle 2 Zeilen, nächste 2, 128px).
    Reicht der Platz nicht für 72 px plus die Zeilen, entfällt das Bild (die Zeilen werden nach der Reihenfolge in PhoneLyrics verkürzt). Ohne Untertitel (CC aus oder kein Text): größtmögliches Quadrat mittig.
    Quadratisches Bild: cover auf der Quadratfläche. Nicht quadratisches (data-fit contain, gesetzt beim Laden): ganz sichtbar, Kartenfarbe dahinter. */
 .ph-art[data-ready='no'] { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-.ph-lyrics[data-art] { container-name: ph-card; --ph-lines: 220px; }
-.ph-lyrics[data-art][data-dir='rtl'] { --ph-lines: 316px; }
+.ph-lyrics[data-art] { container-name: ph-card; --ph-lines: 148px; }
+.ph-lyrics[data-art][data-dir='rtl'] { --ph-lines: 212px; }
 .ph-art { display: block; flex: none; box-sizing: border-box; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--on-media) 8%, transparent); background: var(--surface); object-fit: cover; object-position: center; }
 .ph-art[data-fit='contain'] { object-fit: contain; }
 .ph-lyrics[data-art='top'] > .ph-art { width: clamp(72px, calc(100cqh - var(--ph-lines)), 128px); height: clamp(72px, calc(100cqh - var(--ph-lines)), 128px); align-self: flex-start; }
 .ph-lyrics[data-art='top'][data-dir='rtl'] > .ph-art { align-self: flex-end; }
-@container ph-card (max-height: 291px) { .ph-lyrics[data-art='top'] > .ph-art { display: none; } }
-@container ph-card (max-height: 387px) { .ph-lyrics[data-art='top'][data-dir='rtl'] > .ph-art { display: none; } }
+@container ph-card (max-height: 219px) { .ph-lyrics[data-art='top'] > .ph-art { display: none; } }
+@container ph-card (max-height: 283px) { .ph-lyrics[data-art='top'][data-dir='rtl'] > .ph-art { display: none; } }
 .ph-lyrics[data-art='fill'] { display: grid; grid-template-rows: minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); place-items: center; }
 .ph-lyrics[data-art='fill'] > .ph-art { width: min(100cqw, 100cqh); height: min(100cqw, 100cqh); }
 
@@ -281,10 +284,11 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
    als letzter Ausweg, die Überschrift bleibt dann oben stehen. */
 .vfeed[data-phone] .vtext {
   --read-ar: 18px;
-  --fh: 32px; --fq: 19px; --fql: 29px; --fa: 18px; --fal: 32px; --fgap: 20px; --fpt: 24px; --fpb: 16px; --fhead: 16px;
+  --fh: 32px; --fq: 19px; --fql: 29px; --fa: 18px; --fal: 32px; --fgap: 20px; --fpt: var(--s-6); --fpb: 16px; --fhead: 16px;
   inset: var(--ph-top) 0 calc(var(--ph-dock-h) + var(--ph-notes) + var(--ph-status)) 0;
   box-sizing: border-box;
-  padding: var(--fpt) var(--s-6) var(--fpb);
+  /* Runde 50b: Rand wie in Audio, links und rechts 20 px, oben 24 px (--fpt) in jeder Stufe und bei jeder Textlänge: der Chip wandert nie. Platz schaffen nur Abstände darunter und die Textgröße. */
+  padding: var(--fpt) var(--s-5) var(--fpb);
   display: flex;
   flex-direction: column;
   gap: var(--fgap);
@@ -295,17 +299,17 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
   background: var(--stage);
   color: var(--text);
 }
-.vfeed[data-phone] .vtext[data-tfit='1'] { --fh: 28px; --fq: 17px; --fql: 26px; --fa: 17px; --fal: 30px; --fgap: 16px; --fpt: 20px; --fpb: 14px; --fhead: 14px; }
-.vfeed[data-phone] .vtext[data-tfit='2'] { --fh: 24px; --fq: 16px; --fql: 24px; --fa: 16px; --fal: 28px; --fgap: 14px; --fpt: 16px; --fpb: 12px; --fhead: 12px; }
-.vfeed[data-phone] .vtext[data-tfit='3'] { --fh: 22px; --fq: 15px; --fql: 22px; --fa: 15px; --fal: 26px; --fgap: 12px; --fpt: 12px; --fpb: 10px; --fhead: 10px; }
-.vfeed[data-phone] .vtext[data-tfit='4'] { --fh: 20px; --fq: 15px; --fql: 22px; --fa: 15px; --fal: 25px; --fgap: 10px; --fpt: 8px; --fpb: 8px; --fhead: 8px; }
+.vfeed[data-phone] .vtext[data-tfit='1'] { --fh: 28px; --fq: 17px; --fql: 26px; --fa: 17px; --fal: 30px; --fgap: 16px; --fpb: 14px; --fhead: 14px; }
+.vfeed[data-phone] .vtext[data-tfit='2'] { --fh: 24px; --fq: 16px; --fql: 24px; --fa: 16px; --fal: 28px; --fgap: 14px; --fpb: 12px; --fhead: 12px; }
+.vfeed[data-phone] .vtext[data-tfit='3'] { --fh: 22px; --fq: 15px; --fql: 22px; --fa: 15px; --fal: 26px; --fgap: 12px; --fpb: 10px; --fhead: 10px; }
+.vfeed[data-phone] .vtext[data-tfit='4'] { --fh: 20px; --fq: 15px; --fql: 22px; --fa: 15px; --fal: 25px; --fgap: 10px; --fpb: 8px; --fhead: 8px; }
 .vfeed[data-phone] .vtext[data-tscroll='yes'] { overflow-y: auto; padding-top: 0; }
 .vfeed[data-phone] .vtext > * { flex: none; }
 /* Letzter Ausweg: die Überschrift bleibt beim Scrollen oben stehen, nichts rutscht halb unter die Reiterleiste */
 .vfeed[data-phone] .vtext[data-tscroll='yes'] .ptx-head { position: sticky; top: 0; z-index: 1; padding: var(--fpt) 0 var(--s-3); background: var(--stage); }
 .vfeed[data-phone] .vtext[data-tscroll='yes']:not([data-end]) { -webkit-mask-image: linear-gradient(to bottom, var(--stage) calc(100% - 32px), transparent); mask-image: linear-gradient(to bottom, var(--stage) calc(100% - 32px), transparent); }
 .ptx-head { display: flex; flex-direction: column; gap: var(--fhead, var(--s-4)); }
-.ptx-hook { margin: 0; font-family: var(--font-brain); font-weight: 600; letter-spacing: var(--tracking-title); font-size: var(--fh, 32px); line-height: 1.25; color: var(--text); overflow-wrap: anywhere; }
+.ptx-hook { margin: 0; font-family: var(--font-brain); font-weight: 600; letter-spacing: var(--tracking-title); font-size: var(--fh, 32px); line-height: 1.32; color: var(--text); overflow-wrap: anywhere; }
 .ptx-hook[data-size='m'] { font-size: min(var(--fh), 26px); }
 .ptx-hook[data-size='s'] { font-size: min(var(--fh), 22px); }
 .ptx-hook[lang='ar'], .ptx-hook:dir(rtl) { font-family: var(--font-ar); line-height: 1.5; }
@@ -345,3 +349,6 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
 .vfeed[data-phone] .vrecall-page { --head-h: 52px; --nav-h: 56px; }
 /* Die 8 px zwischen Reiterleiste (44) und Karte (52) bleiben nicht offen: sonst scheint der Inhalt darunter durch */
 .vfeed[data-phone] .vrecall-page { box-shadow: 0 -8px 0 var(--stage); }
+
+/* Runde 50b: Blätter (More, Share, Fokus) in der iPhone-Ansicht: unter dem letzten Eintrag mindestens Home-Anzeige plus 8 px (hier plus 24 px) Innenabstand */
+html:has(.vfeed[data-phone]) .sheet-body { padding-bottom: calc(max(var(--safe-b), env(safe-area-inset-bottom, 0px)) + var(--nav-h, 0px) + var(--s-6)); }

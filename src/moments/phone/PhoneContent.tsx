@@ -15,27 +15,39 @@ const lineProps = (s: string) => ({ dir: isArabic(s) ? ('rtl' as const) : ('ltr'
  * Der Hook wird nie gekürzt. Er steht in der größten von drei Stufen (28, 24, 21 px im Audio, 24, 21, 18 px im Video), die in den Platz passt.
  * Platz = Höhe des Blocks minus Chip-Zeile, Abstände und der Mindestplatz darunter (reserve). Passt auch die kleinste nicht, bleibt sie und der Platz darunter schrumpft.
  */
-function useHookFit(box: RefObject<HTMLElement>, hook: RefObject<HTMLElement>, reserve: number, key: string, fallback = reserve) {
+function useHookFit(box: RefObject<HTMLElement>, hook: RefObject<HTMLElement>, reserve: number, key: string, fallback = reserve, clamp = false) {
   useLayoutEffect(() => {
     const b = box.current;
     const h = hook.current;
     if (!b || !h) return;
     const fit = () => {
+      h.style.removeProperty('--hook-lines');
+      delete h.dataset.clamp;
       const cs = getComputedStyle(b);
       const gap = parseFloat(cs.rowGap) || 0;
       const pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
-      const row = h.previousElementSibling as HTMLElement | null;
+      // Audio (clamp): die Chip-Zeile liegt vor dem Tipp-Umschlag des Hooks, nicht vor dem Hook selbst (sonst fehlen ihre 24 px in der Rechnung)
+      const row = (clamp ? h.closest('.ph-hooktap')?.previousElementSibling : h.previousElementSibling) as HTMLElement | null;
       const avail = b.clientHeight - pad - (row?.offsetHeight ?? 0) - gap;
       // Erst mit der Reserve für das Titelbild: die größte Stufe, bei der es Platz hat. Gibt es keine (kleine Karte), gilt die Reserve ohne Bild (das Bild entfällt dann per CSS), der Hook schrumpft nicht umsonst.
       const pick = (r: number): number | null => {
         for (let s = 0; s <= 2; s++) {
           h.dataset.step = String(s);
-          if (h.scrollHeight <= avail - r) return s;
+          if (h.scrollHeight <= avail - r - (clamp ? gap : 0)) return s;
         }
         return null;
       };
       const s = pick(reserve) ?? pick(fallback) ?? 2;
       h.dataset.step = String(s);
+      // Runde 50b (nur Audio): passt auch die kleinste Stufe nicht, werden die Hook-Zeilen geklemmt (Auslassung), damit die Karte ihre Mindesthöhe behält und nie die Aktionsreihe berührt
+      if (clamp) {
+        const room = avail - reserve - gap;
+        const lhh = parseFloat(getComputedStyle(h).lineHeight) || 0;
+        if (lhh && h.scrollHeight > room + 0.5) {
+          h.style.setProperty('--hook-lines', String(Math.max(1, Math.floor((room + 0.5) / lhh))));
+          h.dataset.clamp = '';
+        }
+      }
     };
     fit();
     const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(fit);
@@ -167,9 +179,10 @@ export function PhoneAudio(p: PhoneAudioProps) {
   // Nicht quadratisches Bild: ganz sichtbar (contain) auf der Quadratfläche statt beschnitten (cover)
   const [wide, setWide] = useState('');
   // Reserve unter dem Hook: wie ohne Bild. Der Hook wird wegen des Bildes nicht kleiner (Runde 50, gemessen): das Bild nimmt nur Platz, der übrig ist, und entfällt sonst.
-  useHookFit(box, hook, 132, p.m.id);
   const cues = p.m.cues ?? [];
   const sample = (p.cueIdx >= 0 && cues[p.cueIdx]?.[1]) || cues[0]?.[1] || p.fallbackText || p.m.hook;
+  // Mindesthöhe der Karte ohne Bild: drei Zeilen der aktuellen Zeile samt Innenabstand und Rand (arabisch höhere Zeilen)
+  useHookFit(box, hook, lineProps(sample).dir === 'rtl' ? 180 : 132, p.m.id, undefined, true);
   const lines =
     !p.hasCaptions && !p.fallbackText ? (
       <div className="ph-lyr-body"><p className="ph-lyric-note">No captions for this moment.</p></div>

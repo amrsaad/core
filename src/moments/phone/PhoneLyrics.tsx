@@ -2,18 +2,19 @@ import { memo, useLayoutEffect, useRef } from 'react';
 import { isArabic } from '../types';
 
 /**
- * Runde 50: mitlaufender Text der iPhone-Ansicht als durchgehende Liste.
- * Befund vorher (Ziel 9): bei jedem Zeilenwechsel wurden drei Elemente mit neuem Schlüssel ersetzt (key = Text), jedes blendete in 120 ms ein (Animation von opacity), die Schriftgröße sprang (17, 24 und 15 px,
- * dazu line-clamp je Rolle): die neue aktuelle Zeile erschien hart an ihrem Platz, die alte verschwand. Dazu rendert bei jedem Wechsel der ganze Feed (setCaption), die Karte selbst war nicht abgegrenzt.
- * Jetzt: eine Zeile je Cue mit festem Schlüssel (Cue-Nummer), Fenster von zwei Zeilen davor bis zwei danach. Alle Zeilen haben dieselbe Schrift (Größe, Gewicht, Umbruch), nur Farbe und Deckkraft unterscheiden sich:
- * ein Größenunterschied würde den Umbruch ändern und beim Wechsel springen, scale an einer Zeile mit anderer Breite würde ebenfalls neu umbrechen. Jede Zeile liegt absolut (top 0) und steht über translate3d
- * an ihrem Platz. Bei einem Wechsel gleiten alle Zeilen in 250 ms (transition auf transform, opacity, color, ease-out) an den neuen Platz: die bisher aktuelle Zeile wird zur vorigen, die nächste zur aktuellen.
- * Ein weiterer Wechsel mitten in der Bewegung setzt nur ein neues Ziel, die Transition läuft vom aktuellen Stand weiter. Sprung (Moment, Suchen, mehr als eine Zeile) und Größenänderung: sofort, ohne Bewegung.
- * Gemessen wird einmal je Wechsel (nicht je Bild). Die aktuelle Zeile hat eine feste Oberkante (hinter dem Platz für zwei vorige Zeilen), darum springt sie nicht, wenn die vorige oder nächste Zeile 1 oder 2 Zeilen hat, nur ihre Unterkante wandert mit ihrer Länge.
- * Reicht die Fläche nicht, werden die Nachbarn in dieser Reihenfolge verkürzt: nächste auf 1 Zeile, vorige auf 1 Zeile, nächste weg, vorige weg (nie angeschnitten, Auslassung am Ende der letzten Zeile).
+ * Runde 50b: mitlaufender Text der iPhone-Ansicht als durchgehende Liste, die aktuelle Zeile steht OBEN.
+ * Aufbau: Titelbild (falls da), darunter direkt die aktuelle Zeile (feste Oberkante: ändert sich bei keinem Zeilenwechsel, hängt nur davon ab, ob ein Titelbild da ist), darunter die nächsten Zeilen,
+ * so viele wie vollständig passen, höchstens drei, jede auf höchstens 2 Zeilen geklemmt (Auslassung, Höhe immer ein ganzes Vielfaches der Zeilenhöhe). Die vorige Zeile bleibt nicht stehen:
+ * beim Wechsel gleitet die alte aktuelle Zeile nach oben weg und blendet aus, die nächste rückt an den Anker und wird hell, unten rückt eine neue nach.
+ * Alle Zeilen haben dieselbe Schrift (der Umbruch ändert sich nie), nur Farbe und Deckkraft unterscheiden die Rollen. Jede Zeile liegt absolut (top 0) und steht über translate3d an ihrem Platz.
+ * Bewegung: nur transform, opacity, color (250 ms, --ease). Ein weiterer Wechsel mitten in der Bewegung setzt nur ein neues Ziel. Sprung (Moment, Suchen, mehr als eine Zeile) und echte Größenänderung: sofort.
+ * Gemessen wird einmal je Wechsel (nicht je Bild). Der ResizeObserver lebt einmal je Moment und ruft nur bei echter Größenänderung (nie aus dem ersten Aufruf nach observe): sonst bräche er die gerade
+ * gestartete Bewegung ab (Befund Runde 50b: Dauer 33 ms, erster Schritt 216 px).
+ * Platzmangel, Reihenfolge der Opfer (hier die letzten drei): nächste Zeilen weniger, zuletzt die aktuelle Zeile auf die verfügbare ganze Zeilenzahl klemmen (mit Auslassung), nie außerhalb der Karte.
  */
 const lineProps = (s: string) => ({ dir: isArabic(s) ? ('rtl' as const) : ('ltr' as const), lang: isArabic(s) ? 'ar' : 'en' });
-const STEPS: [number, number][] = [[2, 2], [2, 1], [1, 1], [1, 0], [0, 0]];
+/** Deckkraft der nächsten Zeilen nach unten (die direkt nächste Zeile bleibt bei 1, siehe phone.css) */
+const NEXT_MAX = 3;
 
 export interface PhoneLyricsProps {
   /** Moment-ID (neuer Moment: sofort setzen) */
@@ -27,7 +28,7 @@ function PhoneLyricsView({ id, cues, idx }: PhoneLyricsProps) {
   const body = useRef<HTMLDivElement>(null);
   const last = useRef<{ id: string; idx: number } | null>(null);
   const rows: { i: number; d: number; text: string }[] = [];
-  if (idx >= 0) for (let d = -2; d <= 2; d++) {
+  if (idx >= 0) for (let d = -1; d <= NEXT_MAX + 1; d++) {
     const i = idx + d;
     if (i >= 0 && i < cues.length) rows.push({ i, d, text: cues[i][1].trim() });
   }
@@ -35,52 +36,64 @@ function PhoneLyricsView({ id, cues, idx }: PhoneLyricsProps) {
   const place = (jump: boolean) => {
     const b = body.current;
     if (!b) return;
+    // Bei einem Sprung zuerst die Übergänge aus, noch vor dem ersten Lesen (das Lesen löst die Stilberechnung aus)
+    if (jump) b.dataset.jump = '';
     const els = new Map<number, HTMLElement>();
     b.querySelectorAll<HTMLElement>('.ph-row').forEach((e) => els.set(Number(e.dataset.i), e));
     const cur = els.get(idx);
-    if (!cur) return;
-    for (const e of els.values()) { e.style.setProperty('--clamp', '2'); delete e.dataset.cut; }
+    if (!cur) {
+      delete b.dataset.jump;
+      return;
+    }
+    const live = [0, 1, 2, 3, 4].map((k) => els.get(idx + k)).filter((e): e is HTMLElement => !!e);
+    for (const e of live) { e.style.setProperty('--clamp', 'none'); delete e.dataset.cut; }
     const H = b.clientHeight;
     const g = parseFloat(getComputedStyle(b).getPropertyValue('--lyr-gap')) || 12;
-    const hc = cur.offsetHeight;
-    const P = els.get(idx - 1);
-    const N = els.get(idx + 1);
-    const lh = (e?: HTMLElement) => (e ? parseFloat(getComputedStyle(e).lineHeight) || 0 : 0);
-    const hn2 = N ? N.offsetHeight : 0;
-    const lp = lh(P) || lh(cur);
-    const ln = lh(N) || lh(cur);
-    // Oberkante der aktuellen Zeile: fest, hinter dem Platz für die vorige Zeile (2, 1 oder 0 Zeilen samt Abstand). Sie springt nicht, wenn die vorige oder nächste Zeile 1 oder 2 Zeilen hat.
-    // Passt der Block (Platz oben, aktuelle Zeile, nächste Zeile) nicht in die Fläche, werden die Nachbarn verkürzt: nächste auf 1 Zeile, vorige auf 1, nächste weg, vorige weg.
-    let pc = 2;
-    let nc = 2;
-    for (const [a, c] of STEPS) {
-      pc = a;
-      nc = c;
-      const top = a ? a * lp + g : 0;
-      const hn = !N || c === 0 ? 0 : c === 2 ? hn2 : Math.min(hn2, ln);
-      if (top + hc + (hn ? g + hn : 0) <= H + 0.5) break;
+    const lh = (e: HTMLElement) => parseFloat(getComputedStyle(e).lineHeight) || 30;
+    const nat = (e: HTMLElement) => Math.max(1, Math.round(e.offsetHeight / lh(e)));
+    const set = (e: HTMLElement, lines: number, natural: number) => e.style.setProperty('--clamp', lines < natural ? String(lines) : 'none');
+    // Aktuelle Zeile: ganz, höchstens so viele ganze Zeilen, wie in die Fläche passen (dann mit Auslassung)
+    const lc = lh(cur);
+    const nc = nat(cur);
+    const lines = Math.max(1, Math.min(nc, Math.floor((H + 0.5) / lc)));
+    set(cur, lines, nc);
+    const hc = lines * lc;
+    const tops = new Map<number, number>([[idx, 0]]);
+    // Nächste Zeilen: so viele wie vollständig passen (je höchstens 2 Zeilen, sonst 1 Zeile), höchstens drei
+    let y = hc + g;
+    let open = true;
+    for (let k = 1; k <= NEXT_MAX + 1; k++) {
+      const e = els.get(idx + k);
+      if (!e) break;
+      const l = lh(e);
+      const n = nat(e);
+      let shown = 0;
+      if (open && k <= NEXT_MAX) for (const want of [Math.min(n, 2), 1]) if (!shown && y + want * l <= H + 0.5) shown = want;
+      if (shown) {
+        set(e, shown, n);
+        tops.set(idx + k, y);
+        y += shown * l + g;
+      } else {
+        open = false;
+        e.style.setProperty('--clamp', '2');
+        e.dataset.cut = '';
+        tops.set(idx + k, y);
+      }
     }
-    if (P) { P.style.setProperty('--clamp', String(Math.max(pc, 1))); if (pc === 0) P.dataset.cut = ''; }
-    if (N) { N.style.setProperty('--clamp', String(Math.max(nc, 1))); if (nc === 0) N.dataset.cut = ''; }
-    const hP = P && pc > 0 ? P.offsetHeight : 0;
-    const hN = N && nc > 0 ? N.offsetHeight : 0;
-    const curTop = pc ? pc * lp + g : 0;
-    const pTop = curTop - g - hP;
-    const nTop = curTop + hc + g;
-    const tops = new Map<number, number>([[idx, curTop]]);
-    if (P) tops.set(idx - 1, pc > 0 ? pTop : curTop - g - P.offsetHeight);
-    if (N) tops.set(idx + 1, nTop);
-    const P2 = els.get(idx - 2);
-    const N2 = els.get(idx + 2);
-    if (P2) tops.set(idx - 2, (tops.get(idx - 1) ?? curTop) - g - P2.offsetHeight);
-    if (N2) tops.set(idx + 2, (tops.get(idx + 1) ?? nTop) + hN + g);
-    if (jump) b.dataset.jump = '';
+    // Alte aktuelle Zeile: über den Anker hinaus nach oben, ausgeblendet (behält ihre letzte Klemmung)
+    const out = els.get(idx - 1);
+    if (out) {
+      out.dataset.cut = '';
+      tops.set(idx - 1, -(out.offsetHeight + g));
+    }
     for (const [i, t] of tops) els.get(i)!.style.transform = `translate3d(0, ${Math.round(t * 100) / 100}px, 0)`;
     if (jump) {
       void b.offsetHeight;
       delete b.dataset.jump;
     }
   };
+  const placeRef = useRef(place);
+  placeRef.current = place;
 
   useLayoutEffect(() => {
     const prev = last.current;
@@ -89,11 +102,21 @@ function PhoneLyricsView({ id, cues, idx }: PhoneLyricsProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, idx, cues]);
 
+  // Einmal je Moment (nicht je Zeile): neues Beobachten feuert sofort und bräche die Bewegung ab. Nur eine echte Größenänderung setzt neu (sofort).
   useLayoutEffect(() => {
     const b = body.current;
     if (!b) return;
-    const again = () => place(true);
-    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(again);
+    let w = b.clientWidth;
+    let h = b.clientHeight;
+    const again = () => placeRef.current(true);
+    const ro = typeof ResizeObserver === 'undefined'
+      ? null
+      : new ResizeObserver(() => {
+          if (b.clientWidth === w && b.clientHeight === h) return;
+          w = b.clientWidth;
+          h = b.clientHeight;
+          again();
+        });
     ro?.observe(b);
     const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
     fonts?.addEventListener?.('loadingdone', again);
@@ -101,14 +124,13 @@ function PhoneLyricsView({ id, cues, idx }: PhoneLyricsProps) {
       ro?.disconnect();
       fonts?.removeEventListener?.('loadingdone', again);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, idx]);
+  }, [id]);
 
   return (
     <div className="ph-lyr-body ph-list" ref={body}>
       {rows.map((r) => {
-        const role = r.d === 0 ? 'cur' : Math.abs(r.d) === 1 ? (r.d < 0 ? 'prev' : 'next') : 'far';
-        const tid = role === 'cur' ? 'caption' : role === 'prev' ? 'ph-lyric-prev' : role === 'next' ? 'ph-lyric-next' : undefined;
+        const role = r.d === 0 ? 'cur' : r.d < 0 ? 'out' : r.d <= NEXT_MAX ? (`next${r.d === 1 ? '' : r.d}` as const) : 'far';
+        const tid = role === 'cur' ? 'caption' : role === 'next' ? 'ph-lyric-next' : role === 'out' ? 'ph-lyric-out' : undefined;
         return (
           <p key={r.i} className="ph-row" data-i={r.i} data-role={role} data-testid={tid} {...lineProps(r.text)}>
             {role === 'cur' ? <span>{r.text}</span> : r.text}
