@@ -1,5 +1,5 @@
 {
- "at": "2026-11-27T06:05:28.855Z",
+ "at": "2026-11-27T07:00:20.203Z",
  "runs": [
   {
    "browser": "webkit",
@@ -313,14 +313,82 @@
     "kurzer Feed audio Fläche unter der Leiste hat Leistenfarbe": true,
     "kurzer Feed text Fläche unter der Leiste hat Leistenfarbe": true,
     "kurzer Feed keine Seitenfehler": true,
-    "audioCoverSichtbar44": true,
-    "audioCoverStil": true,
-    "audioCoverAttribute": true,
-    "audioCoverLinks": true,
-    "audioCoverKanalEinzeilig": true,
-    "audioOhneThumbKeinBild": true,
-    "audioLadefehlerKeinBild": true,
-    "Audio Titelbild keine Seitenfehler": true,
+    "390x844 Titelbild Moment ohne thumb steht": true,
+    "390x844 Titelbild ohne thumb: kein Bild, kein leerer Platz, Karte wie vorher": true,
+    "390x844 Titelbild Moment mit Bild steht": true,
+    "390x844 Titelbild Bild sichtbar, volle Kartenbreite, Höhe im Zielbereich": true,
+    "390x844 Titelbild Bild oben an der Karte, Ecken folgen dem Radius": true,
+    "390x844 Titelbild Bild ungefähr ein Drittel der Karte": true,
+    "390x844 Titelbild Bild object-fit cover, ohne Filter, Verlauf und Animation": true,
+    "390x844 Titelbild Abrufregeln": true,
+    "390x844 Titelbild Untertitel in der Karte, unter dem Bild, ohne Überlappung": true,
+    "390x844 Titelbild kleines 44er Cover entfällt, Kopfzeile wie vor Runde 48": true,
+    "390x844 Titelbild Untertitel mittig im Rest der Karte": true,
+    "390x844 Titelbild CC aus: Bild füllt die Karte, kein Hinweistext": true,
+    "390x844 Titelbild CC wieder an: Bild oben, Untertitel zurück": true,
+    "390x844 Titelbild langer Hook: Bild 88 bis 150 px oder ganz weg, Zeilen ohne Überlappung": true,
+    "390x844 Titelbild arabisch: Untertitel in Amiri": true,
+    "390x844 Titelbild arabisch: Überschrift in Amiri 700": true,
+    "390x844 Titelbild arabisch: Amiri geladen (document.fonts.check)": true,
+    "390x844 Titelbild arabisch: Zeilenhöhe mindestens 1,8, Überschrift 1,5": true,
+    "390x844 Titelbild arabisch: Überschrift nicht abgeschnitten": true,
+    "390x844 Titelbild arabisch: Bild und Untertitel in der Karte, ohne Überlappung": true,
+    "390x844 Titelbild arabisch: Bild sichtbar oder bei zu kleiner Karte ganz weg": true,
+    "390x844 Titelbild arabisch: rechtsbündig": true,
+    "390x844 Titelbild Ladefehler: kein Bild, kein Platzhalter, Karte wie ohne thumb": true,
+    "390x844 Titelbild nach dem Wechsel kein altes Bild": true,
+    "390x844 Titelbild keine Seitenfehler": true,
+    "375x667 Titelbild Moment ohne thumb steht": true,
+    "375x667 Titelbild ohne thumb: kein Bild, kein leerer Platz, Karte wie vorher": true,
+    "375x667 Titelbild Moment mit Bild steht": true,
+    "375x667 Titelbild Bild sichtbar, volle Kartenbreite, Höhe im Zielbereich": true,
+    "375x667 Titelbild Bild oben an der Karte, Ecken folgen dem Radius": true,
+    "375x667 Titelbild Bild ungefähr ein Drittel der Karte": true,
+    "375x667 Titelbild Bild object-fit cover, ohne Filter, Verlauf und Animation": true,
+    "375x667 Titelbild Abrufregeln": true,
+    "375x667 Titelbild Untertitel in der Karte, unter dem Bild, ohne Überlappung": true,
+    "375x667 Titelbild kleines 44er Cover entfällt, Kopfzeile wie vor Runde 48": true,
+    "375x667 Titelbild Untertitel mittig im Rest der Karte": true,
+    "375x667 Titelbild CC aus: Bild füllt die Karte, kein Hinweistext": true,
+    "375x667 Titelbild CC wieder an: Bild oben, Untertitel zurück": true,
+    "375x667 Titelbild langer Hook: Bild 88 bis 150 px oder ganz weg, Zeilen ohne Überlappung": true,
+    "375x667 Titelbild arabisch: Untertitel in Amiri": true,
+    "375x667 Titelbild arabisch: Überschrift in Amiri 700": true,
+    "375x667 Titelbild arabisch: Amiri geladen (document.fonts.check)": true,
+    "375x667 Titelbild arabisch: Zeilenhöhe mindestens 1,8, Überschrift 1,5": true,
+    "375x667 Titelbild arabisch: Überschrift nicht abgeschnitten": true,
+    "375x667 Titelbild arabisch: Bild und Untertitel in der Karte, ohne Überlappung": true,
+    "375x667 Titelbild arabisch: Bild sichtbar oder bei zu kleiner Karte ganz weg": true,
+    "375x667 Titelbild arabisch: rechtsbündig": true,
+    "375x667 Titelbild Ladefehler: kein Bild, kein Platzhalter, Karte wie ohne thumb": true,
+    "375x667 Titelbild nach dem Wechsel kein altes Bild": true,
+    "375x667 Titelbild keine Seitenfehler": true,
+    "430x932 Titelbild Moment ohne thumb steht": true,
+    "430x932 Titelbild ohne thumb: kein Bild, kein leerer Platz, Karte wie vorher": true,
+    "430x932 Titelbild Moment mit Bild steht": true,
+    "430x932 Titelbild Bild sichtbar, volle Kartenbreite, Höhe im Zielbereich": true,
+    "430x932 Titelbild Bild oben an der Karte, Ecken folgen dem Radius": true,
+    "430x932 Titelbild Bild ungefähr ein Drittel der Karte": true,
+    "430x932 Titelbild Bild object-fit cover, ohne Filter, Verlauf und Animation": true,
+    "430x932 Titelbild Abrufregeln": true,
+    "430x932 Titelbild Untertitel in der Karte, unter dem Bild, ohne Überlappung": true,
+    "430x932 Titelbild kleines 44er Cover entfällt, Kopfzeile wie vor Runde 48": true,
+    "430x932 Titelbild Untertitel mittig im Rest der Karte": true,
+    "430x932 Titelbild CC aus: Bild füllt die Karte, kein Hinweistext": true,
+    "430x932 Titelbild CC wieder an: Bild oben, Untertitel zurück": true,
+    "430x932 Titelbild langer Hook: Bild 88 bis 150 px oder ganz weg, Zeilen ohne Überlappung": true,
+    "430x932 Titelbild arabisch: Untertitel in Amiri": true,
+    "430x932 Titelbild arabisch: Überschrift in Amiri 700": true,
+    "430x932 Titelbild arabisch: Amiri geladen (document.fonts.check)": true,
+    "430x932 Titelbild arabisch: Zeilenhöhe mindestens 1,8, Überschrift 1,5": true,
+    "430x932 Titelbild arabisch: Überschrift nicht abgeschnitten": true,
+    "430x932 Titelbild arabisch: Bild und Untertitel in der Karte, ohne Überlappung": true,
+    "430x932 Titelbild arabisch: Bild sichtbar oder bei zu kleiner Karte ganz weg": true,
+    "430x932 Titelbild arabisch: rechtsbündig": true,
+    "430x932 Titelbild Ladefehler: kein Bild, kein Platzhalter, Karte wie ohne thumb": true,
+    "430x932 Titelbild nach dem Wechsel kein altes Bild": true,
+    "430x932 Titelbild keine Seitenfehler": true,
+    "Titelbild ein Element in der Karte, aus dem Feld thumb, https": true,
     "startOhneGesteWartet": true,
     "startOhneGesteKeinTon": true,
     "startPlayTasteZeigtPlay": true,
@@ -469,9 +537,9 @@
      "now": 2,
      "area": {
       "x": 20,
-      "y": 463,
+      "y": 318,
       "width": 350,
-      "height": 155
+      "height": 300
      }
     },
     "lyric": {
@@ -502,172 +570,48 @@
      "id": "test0000046:100",
      "form": "text"
     },
-    "audioCover": {
-     "img": {
+    "390x844 Titelbild ohne thumb": {
+     "id": "test0000041:100",
+     "card": {
       "l": 20,
-      "t": 127,
-      "r": 64,
-      "b": 171,
-      "w": 44,
-      "h": 44,
-      "radius": "10px",
-      "fit": "cover",
-      "border": "1px color(srgb 1 1 1 / 0.08)",
-      "alt": "",
-      "lazy": "lazy",
-      "dec": "async",
-      "ref": "no-referrer",
-      "done": true,
-      "src": "https://img.test/cover40.png"
-     },
-     "row": {
-      "l": 20,
-      "t": 127,
+      "t": 323,
       "r": 370,
-      "b": 171,
+      "b": 618,
       "w": 350,
-      "h": 44
+      "h": 295
      },
-     "chips": {
-      "l": 76,
-      "t": 127,
-      "r": 330,
-      "b": 171,
-      "w": 254,
-      "h": 44
+     "cardInner": {
+      "l": 21,
+      "r": 369,
+      "t": 324,
+      "b": 617
      },
-     "src": {
-      "l": 338,
-      "t": 127,
-      "r": 382,
-      "b": 171,
-      "w": 44,
-      "h": 44
-     },
-     "chip": {
-      "l": 76,
-      "t": 127,
-      "r": 138.328125,
-      "b": 151,
-      "w": 62.328125,
-      "h": 24
-     },
-     "spk": {
-      "l": 76,
-      "t": 153,
-      "r": 207.90625,
-      "b": 171,
-      "w": 131.90625,
-      "h": 18
-     },
-     "spkOver": false,
-     "count": 1,
-     "hook": {
-      "l": 20,
-      "t": 187,
-      "r": 370,
-      "b": 327,
-      "w": 350,
-      "h": 140
-     }
-    },
-    "audioOhneThumb": {
+     "cardRadius": "18px",
+     "padTop": "20px",
+     "cardOverflow": "hidden",
+     "art": null,
      "img": null,
-     "row": {
-      "l": 20,
-      "t": 127,
-      "r": 370,
-      "b": 151,
-      "w": 350,
-      "h": 24
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 422.5,
+      "r": 349,
+      "b": 518.5,
+      "w": 308,
+      "h": 96
      },
-     "chips": {
-      "l": 20,
-      "t": 127,
-      "r": 224.234375,
-      "b": 151,
-      "w": 204.234375,
-      "h": 24
+     "next": {
+      "l": 41,
+      "t": 518.5,
+      "r": 349,
+      "b": 548.5,
+      "w": 308,
+      "h": 30
      },
-     "src": {
-      "l": 338,
-      "t": 117,
-      "r": 382,
-      "b": 161,
-      "w": 44,
-      "h": 44
-     },
-     "chip": {
-      "l": 20,
-      "t": 127,
-      "r": 82.328125,
-      "b": 151,
-      "w": 62.328125,
-      "h": 24
-     },
-     "spk": {
-      "l": 92.328125,
-      "t": 130,
-      "r": 224.234375,
-      "b": 148,
-      "w": 131.90625,
-      "h": 18
-     },
-     "spkOver": false,
+     "note": null,
+     "noteText": null,
      "count": 0,
-     "hook": {
-      "l": 20,
-      "t": 167,
-      "r": 370,
-      "b": 447,
-      "w": 350,
-      "h": 280
-     }
-    },
-    "audioLadefehler": {
-     "img": null,
-     "row": {
-      "l": 20,
-      "t": 127,
-      "r": 370,
-      "b": 151,
-      "w": 350,
-      "h": 24
-     },
-     "chips": {
-      "l": 20,
-      "t": 127,
-      "r": 224.234375,
-      "b": 151,
-      "w": 204.234375,
-      "h": 24
-     },
-     "src": {
-      "l": 338,
-      "t": 117,
-      "r": 382,
-      "b": 161,
-      "w": 44,
-      "h": 44
-     },
-     "chip": {
-      "l": 20,
-      "t": 127,
-      "r": 82.328125,
-      "b": 151,
-      "w": 62.328125,
-      "h": 24
-     },
-     "spk": {
-      "l": 92.328125,
-      "t": 130,
-      "r": 224.234375,
-      "b": 148,
-      "w": 131.90625,
-      "h": 18
-     },
-     "spkOver": false,
-     "count": 0,
+     "small": 0,
      "hook": {
       "l": 20,
       "t": 167,
@@ -675,6 +619,1710 @@
       "b": 307,
       "w": 350,
       "h": 140
+     },
+     "actions": {
+      "l": 0,
+      "t": 630,
+      "r": 390,
+      "b": 708,
+      "w": 390,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 370,
+      "b": 151,
+      "w": 350,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 390,
+      "b": 630,
+      "w": 390,
+      "h": 527
+     },
+     "cc": "true"
+    },
+    "390x844 Titelbild lateinisch": {
+     "id": "test0000040:100",
+     "card": {
+      "l": 20,
+      "t": 253,
+      "r": 370,
+      "b": 618,
+      "w": 350,
+      "h": 365
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 369,
+      "t": 254,
+      "b": 617
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "top",
+     "img": {
+      "l": 21,
+      "t": 254,
+      "r": 369,
+      "b": 391.9375,
+      "w": 348,
+      "h": 137.9375,
+      "vis": true,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover40.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 450.46875,
+      "r": 349,
+      "b": 546.46875,
+      "w": 308,
+      "h": 96
+     },
+     "next": {
+      "l": 41,
+      "t": 546.46875,
+      "r": 349,
+      "b": 576.46875,
+      "w": 308,
+      "h": 30
+     },
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 370,
+      "b": 237,
+      "w": 350,
+      "h": 70
+     },
+     "actions": {
+      "l": 0,
+      "t": 630,
+      "r": 390,
+      "b": 708,
+      "w": 390,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 370,
+      "b": 151,
+      "w": 350,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 390,
+      "b": 630,
+      "w": 390,
+      "h": 527
+     },
+     "cc": "true"
+    },
+    "390x844 Titelbild cc aus": {
+     "id": "test0000040:100",
+     "card": {
+      "l": 20,
+      "t": 253,
+      "r": 370,
+      "b": 618,
+      "w": 350,
+      "h": 365
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 369,
+      "t": 254,
+      "b": 617
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "fill",
+     "img": {
+      "l": 21,
+      "t": 254,
+      "r": 369,
+      "b": 617,
+      "w": 348,
+      "h": 363,
+      "vis": true,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover40.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": null,
+     "next": null,
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 370,
+      "b": 237,
+      "w": 350,
+      "h": 70
+     },
+     "actions": {
+      "l": 0,
+      "t": 630,
+      "r": 390,
+      "b": 708,
+      "w": 390,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 370,
+      "b": 151,
+      "w": 350,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 390,
+      "b": 630,
+      "w": 390,
+      "h": 527
+     },
+     "cc": "false"
+    },
+    "390x844 Titelbild langer Hook": {
+     "id": "test0000042:100",
+     "card": {
+      "l": 20,
+      "t": 318,
+      "r": 370,
+      "b": 618,
+      "w": 350,
+      "h": 300
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 369,
+      "t": 319,
+      "b": 617
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "top",
+     "img": {
+      "l": 21,
+      "t": 319,
+      "r": 369,
+      "b": 432.234375,
+      "w": 348,
+      "h": 113.234375,
+      "vis": true,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover42.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 475.109375,
+      "r": 349,
+      "b": 562.109375,
+      "w": 308,
+      "h": 87
+     },
+     "next": {
+      "l": 41,
+      "t": 562.109375,
+      "r": 349,
+      "b": 592.109375,
+      "w": 308,
+      "h": 30
+     },
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 370,
+      "b": 302,
+      "w": 350,
+      "h": 135
+     },
+     "actions": {
+      "l": 0,
+      "t": 630,
+      "r": 390,
+      "b": 708,
+      "w": 390,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 370,
+      "b": 151,
+      "w": 350,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 390,
+      "b": 630,
+      "w": 390,
+      "h": 527
+     },
+     "cc": "true"
+    },
+    "390x844 Titelbild arabisch": {
+     "ar": {
+      "id": "test0000058:100",
+      "card": {
+       "l": 20,
+       "t": 287,
+       "r": 370,
+       "b": 618,
+       "w": 350,
+       "h": 331
+      },
+      "cardInner": {
+       "l": 21,
+       "r": 369,
+       "t": 288,
+       "b": 617
+      },
+      "cardRadius": "18px",
+      "padTop": "0px",
+      "cardOverflow": "hidden",
+      "art": "top",
+      "img": {
+       "l": 21,
+       "t": 288,
+       "r": 369,
+       "b": 413.015625,
+       "w": 348,
+       "h": 125.015625,
+       "vis": true,
+       "fit": "cover",
+       "pos": "50% 50%",
+       "filter": "none",
+       "bf": "none",
+       "anim": "none",
+       "trans": "0s",
+       "bgi": "none",
+       "alt": "",
+       "lazy": "lazy",
+       "dec": "async",
+       "ref": "no-referrer",
+       "aw": "390",
+       "hh": "140",
+       "src": "https://img.test/cover58.png",
+       "done": true
+      },
+      "prev": null,
+      "cur": {
+       "l": 41,
+       "t": 465,
+       "r": 349,
+       "b": 553,
+       "w": 308,
+       "h": 88
+      },
+      "next": {
+       "l": 41,
+       "t": 553,
+       "r": 349,
+       "b": 593,
+       "w": 308,
+       "h": 40
+      },
+      "note": null,
+      "noteText": null,
+      "count": 1,
+      "small": 0,
+      "hook": {
+       "l": 20,
+       "t": 167,
+       "r": 370,
+       "b": 271,
+       "w": 350,
+       "h": 104
+      },
+      "actions": {
+       "l": 0,
+       "t": 630,
+       "r": 390,
+       "b": 708,
+       "w": 390,
+       "h": 78
+      },
+      "row": {
+       "l": 20,
+       "t": 127,
+       "r": 370,
+       "b": 151,
+       "w": 350,
+       "h": 24
+      },
+      "content": {
+       "l": 0,
+       "t": 103,
+       "r": 390,
+       "b": 630,
+       "w": 390,
+       "h": 527
+      },
+      "cc": "true"
+     },
+     "af": {
+      "prev": null,
+      "cur": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "400",
+       "size": 24,
+       "lh": 44.400002,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 88,
+       "ch": 88,
+       "lang": "ar"
+      },
+      "next": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "400",
+       "size": 17,
+       "lh": 32.299999,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 40,
+       "ch": 40,
+       "lang": "ar"
+      },
+      "hook": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "700",
+       "size": 33,
+       "lh": 52.799999,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 104,
+       "ch": 104,
+       "lang": null
+      },
+      "hookSh": true,
+      "check4": true,
+      "check7": true,
+      "curRight": {
+       "boxR": 349,
+       "textR": 349,
+       "textL": 54.47686767578125,
+       "boxL": 41
+      }
+     }
+    },
+    "390x844 Titelbild ladefehler": {
+     "id": "test0000043:100",
+     "card": {
+      "l": 20,
+      "t": 323,
+      "r": 370,
+      "b": 618,
+      "w": 350,
+      "h": 295
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 369,
+      "t": 324,
+      "b": 617
+     },
+     "cardRadius": "18px",
+     "padTop": "20px",
+     "cardOverflow": "hidden",
+     "art": null,
+     "img": null,
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 422.5,
+      "r": 349,
+      "b": 518.5,
+      "w": 308,
+      "h": 96
+     },
+     "next": {
+      "l": 41,
+      "t": 518.5,
+      "r": 349,
+      "b": 548.5,
+      "w": 308,
+      "h": 30
+     },
+     "note": null,
+     "noteText": null,
+     "count": 0,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 370,
+      "b": 307,
+      "w": 350,
+      "h": 140
+     },
+     "actions": {
+      "l": 0,
+      "t": 630,
+      "r": 390,
+      "b": 708,
+      "w": 390,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 370,
+      "b": 151,
+      "w": 350,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 390,
+      "b": 630,
+      "w": 390,
+      "h": 527
+     },
+     "cc": "true"
+    },
+    "375x667 Titelbild ohne thumb": {
+     "id": "test0000041:100",
+     "card": {
+      "l": 20,
+      "t": 284,
+      "r": 355,
+      "b": 473,
+      "w": 335,
+      "h": 189
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 354,
+      "t": 285,
+      "b": 472
+     },
+     "cardRadius": "18px",
+     "padTop": "20px",
+     "cardOverflow": "hidden",
+     "art": null,
+     "img": null,
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 339.5,
+      "r": 334,
+      "b": 417.5,
+      "w": 293,
+      "h": 78
+     },
+     "next": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0
+     },
+     "note": null,
+     "noteText": null,
+     "count": 0,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 128,
+      "r": 355,
+      "b": 268,
+      "w": 335,
+      "h": 140
+     },
+     "actions": {
+      "l": 0,
+      "t": 485,
+      "r": 375,
+      "b": 549,
+      "w": 375,
+      "h": 64
+     },
+     "row": {
+      "l": 20,
+      "t": 88,
+      "r": 355,
+      "b": 112,
+      "w": 335,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 64,
+      "r": 375,
+      "b": 485,
+      "w": 375,
+      "h": 421
+     },
+     "cc": "true"
+    },
+    "375x667 Titelbild lateinisch": {
+     "id": "test0000040:100",
+     "card": {
+      "l": 20,
+      "t": 171,
+      "r": 355,
+      "b": 473,
+      "w": 335,
+      "h": 302
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 354,
+      "t": 172,
+      "b": 472
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "top",
+     "img": {
+      "l": 21,
+      "t": 172,
+      "r": 354,
+      "b": 286,
+      "w": 333,
+      "h": 114,
+      "vis": true,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover40.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 329.5,
+      "r": 334,
+      "b": 416.5,
+      "w": 293,
+      "h": 87
+     },
+     "next": {
+      "l": 41,
+      "t": 416.5,
+      "r": 334,
+      "b": 446.5,
+      "w": 293,
+      "h": 30
+     },
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 128,
+      "r": 355,
+      "b": 155,
+      "w": 335,
+      "h": 27
+     },
+     "actions": {
+      "l": 0,
+      "t": 485,
+      "r": 375,
+      "b": 549,
+      "w": 375,
+      "h": 64
+     },
+     "row": {
+      "l": 20,
+      "t": 88,
+      "r": 355,
+      "b": 112,
+      "w": 335,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 64,
+      "r": 375,
+      "b": 485,
+      "w": 375,
+      "h": 421
+     },
+     "cc": "true"
+    },
+    "375x667 Titelbild cc aus": {
+     "id": "test0000040:100",
+     "card": {
+      "l": 20,
+      "t": 171,
+      "r": 355,
+      "b": 473,
+      "w": 335,
+      "h": 302
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 354,
+      "t": 172,
+      "b": 472
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "fill",
+     "img": {
+      "l": 21,
+      "t": 172,
+      "r": 354,
+      "b": 472,
+      "w": 333,
+      "h": 300,
+      "vis": true,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover40.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": null,
+     "next": null,
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 128,
+      "r": 355,
+      "b": 155,
+      "w": 335,
+      "h": 27
+     },
+     "actions": {
+      "l": 0,
+      "t": 485,
+      "r": 375,
+      "b": 549,
+      "w": 375,
+      "h": 64
+     },
+     "row": {
+      "l": 20,
+      "t": 88,
+      "r": 355,
+      "b": 112,
+      "w": 335,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 64,
+      "r": 375,
+      "b": 485,
+      "w": 375,
+      "h": 421
+     },
+     "cc": "false"
+    },
+    "375x667 Titelbild langer Hook": {
+     "id": "test0000042:100",
+     "card": {
+      "l": 20,
+      "t": 306,
+      "r": 355,
+      "b": 473,
+      "w": 335,
+      "h": 167
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 354,
+      "t": 307,
+      "b": 472
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "top",
+     "img": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0,
+      "vis": false,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover42.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 350.5,
+      "r": 334,
+      "b": 428.5,
+      "w": 293,
+      "h": 78
+     },
+     "next": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0
+     },
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 128,
+      "r": 355,
+      "b": 290,
+      "w": 335,
+      "h": 162
+     },
+     "actions": {
+      "l": 0,
+      "t": 485,
+      "r": 375,
+      "b": 549,
+      "w": 375,
+      "h": 64
+     },
+     "row": {
+      "l": 20,
+      "t": 88,
+      "r": 355,
+      "b": 112,
+      "w": 335,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 64,
+      "r": 375,
+      "b": 485,
+      "w": 375,
+      "h": 421
+     },
+     "cc": "true"
+    },
+    "375x667 Titelbild arabisch": {
+     "ar": {
+      "id": "test0000058:100",
+      "card": {
+       "l": 20,
+       "t": 224,
+       "r": 355,
+       "b": 473,
+       "w": 335,
+       "h": 249
+      },
+      "cardInner": {
+       "l": 21,
+       "r": 354,
+       "t": 225,
+       "b": 472
+      },
+      "cardRadius": "18px",
+      "padTop": "0px",
+      "cardOverflow": "hidden",
+      "art": "top",
+      "img": {
+       "l": 0,
+       "t": 0,
+       "r": 0,
+       "b": 0,
+       "w": 0,
+       "h": 0,
+       "vis": false,
+       "fit": "cover",
+       "pos": "50% 50%",
+       "filter": "none",
+       "bf": "none",
+       "anim": "none",
+       "trans": "0s",
+       "bgi": "none",
+       "alt": "",
+       "lazy": "lazy",
+       "dec": "async",
+       "ref": "no-referrer",
+       "aw": "390",
+       "hh": "140",
+       "src": "https://img.test/cover58.png",
+       "done": true
+      },
+      "prev": null,
+      "cur": {
+       "l": 41,
+       "t": 303.5,
+       "r": 334,
+       "b": 393.5,
+       "w": 293,
+       "h": 90
+      },
+      "next": {
+       "l": 0,
+       "t": 0,
+       "r": 0,
+       "b": 0,
+       "w": 0,
+       "h": 0
+      },
+      "note": null,
+      "noteText": null,
+      "count": 1,
+      "small": 0,
+      "hook": {
+       "l": 20,
+       "t": 128,
+       "r": 355,
+       "b": 208,
+       "w": 335,
+       "h": 80
+      },
+      "actions": {
+       "l": 0,
+       "t": 485,
+       "r": 375,
+       "b": 549,
+       "w": 375,
+       "h": 64
+      },
+      "row": {
+       "l": 20,
+       "t": 88,
+       "r": 355,
+       "b": 112,
+       "w": 335,
+       "h": 24
+      },
+      "content": {
+       "l": 0,
+       "t": 64,
+       "r": 375,
+       "b": 485,
+       "w": 375,
+       "h": 421
+      },
+      "cc": "true"
+     },
+     "af": {
+      "prev": null,
+      "cur": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "400",
+       "size": 24,
+       "lh": 45.599998,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 90,
+       "ch": 90,
+       "lang": "ar"
+      },
+      "next": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "400",
+       "size": 17,
+       "lh": 32.299999,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 0,
+       "ch": 0,
+       "lang": "ar"
+      },
+      "hook": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "700",
+       "size": 25,
+       "lh": 40,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 80,
+       "ch": 80,
+       "lang": null
+      },
+      "hookSh": true,
+      "check4": true,
+      "check7": true,
+      "curRight": {
+       "boxR": 334,
+       "textR": 334,
+       "textL": 60.88482666015625,
+       "boxL": 41
+      }
+     }
+    },
+    "375x667 Titelbild ladefehler": {
+     "id": "test0000043:100",
+     "card": {
+      "l": 20,
+      "t": 284,
+      "r": 355,
+      "b": 473,
+      "w": 335,
+      "h": 189
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 354,
+      "t": 285,
+      "b": 472
+     },
+     "cardRadius": "18px",
+     "padTop": "20px",
+     "cardOverflow": "hidden",
+     "art": null,
+     "img": null,
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 339.5,
+      "r": 334,
+      "b": 417.5,
+      "w": 293,
+      "h": 78
+     },
+     "next": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0
+     },
+     "note": null,
+     "noteText": null,
+     "count": 0,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 128,
+      "r": 355,
+      "b": 268,
+      "w": 335,
+      "h": 140
+     },
+     "actions": {
+      "l": 0,
+      "t": 485,
+      "r": 375,
+      "b": 549,
+      "w": 375,
+      "h": 64
+     },
+     "row": {
+      "l": 20,
+      "t": 88,
+      "r": 355,
+      "b": 112,
+      "w": 335,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 64,
+      "r": 375,
+      "b": 485,
+      "w": 375,
+      "h": 421
+     },
+     "cc": "true"
+    },
+    "430x932 Titelbild ohne thumb": {
+     "id": "test0000041:100",
+     "card": {
+      "l": 20,
+      "t": 288,
+      "r": 410,
+      "b": 706,
+      "w": 390,
+      "h": 418
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 409,
+      "t": 289,
+      "b": 705
+     },
+     "cardRadius": "18px",
+     "padTop": "20px",
+     "cardOverflow": "hidden",
+     "art": null,
+     "img": null,
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 449,
+      "r": 389,
+      "b": 545,
+      "w": 348,
+      "h": 96
+     },
+     "next": {
+      "l": 41,
+      "t": 545,
+      "r": 389,
+      "b": 575,
+      "w": 348,
+      "h": 30
+     },
+     "note": null,
+     "noteText": null,
+     "count": 0,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 410,
+      "b": 272,
+      "w": 390,
+      "h": 105
+     },
+     "actions": {
+      "l": 0,
+      "t": 718,
+      "r": 430,
+      "b": 796,
+      "w": 430,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 410,
+      "b": 151,
+      "w": 390,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 430,
+      "b": 718,
+      "w": 430,
+      "h": 615
+     },
+     "cc": "true"
+    },
+    "430x932 Titelbild lateinisch": {
+     "id": "test0000040:100",
+     "card": {
+      "l": 20,
+      "t": 253,
+      "r": 410,
+      "b": 706,
+      "w": 390,
+      "h": 453
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 409,
+      "t": 254,
+      "b": 705
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "top",
+     "img": {
+      "l": 21,
+      "t": 254,
+      "r": 409,
+      "b": 404,
+      "w": 388,
+      "h": 150,
+      "vis": true,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover40.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 500.5,
+      "r": 389,
+      "b": 596.5,
+      "w": 348,
+      "h": 96
+     },
+     "next": {
+      "l": 41,
+      "t": 596.5,
+      "r": 389,
+      "b": 626.5,
+      "w": 348,
+      "h": 30
+     },
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 410,
+      "b": 237,
+      "w": 390,
+      "h": 70
+     },
+     "actions": {
+      "l": 0,
+      "t": 718,
+      "r": 430,
+      "b": 796,
+      "w": 430,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 410,
+      "b": 151,
+      "w": 390,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 430,
+      "b": 718,
+      "w": 430,
+      "h": 615
+     },
+     "cc": "true"
+    },
+    "430x932 Titelbild cc aus": {
+     "id": "test0000040:100",
+     "card": {
+      "l": 20,
+      "t": 253,
+      "r": 410,
+      "b": 706,
+      "w": 390,
+      "h": 453
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 409,
+      "t": 254,
+      "b": 705
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "fill",
+     "img": {
+      "l": 21,
+      "t": 254,
+      "r": 409,
+      "b": 705,
+      "w": 388,
+      "h": 451,
+      "vis": true,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover40.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": null,
+     "next": null,
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 410,
+      "b": 237,
+      "w": 390,
+      "h": 70
+     },
+     "actions": {
+      "l": 0,
+      "t": 718,
+      "r": 430,
+      "b": 796,
+      "w": 430,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 410,
+      "b": 151,
+      "w": 390,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 430,
+      "b": 718,
+      "w": 430,
+      "h": 615
+     },
+     "cc": "false"
+    },
+    "430x932 Titelbild langer Hook": {
+     "id": "test0000042:100",
+     "card": {
+      "l": 20,
+      "t": 338,
+      "r": 410,
+      "b": 706,
+      "w": 390,
+      "h": 368
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 409,
+      "t": 339,
+      "b": 705
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "top",
+     "img": {
+      "l": 21,
+      "t": 339,
+      "r": 409,
+      "b": 478.078125,
+      "w": 388,
+      "h": 139.078125,
+      "vis": true,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover42.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 537.53125,
+      "r": 389,
+      "b": 633.53125,
+      "w": 348,
+      "h": 96
+     },
+     "next": {
+      "l": 41,
+      "t": 633.53125,
+      "r": 389,
+      "b": 663.53125,
+      "w": 348,
+      "h": 30
+     },
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 410,
+      "b": 322,
+      "w": 390,
+      "h": 155
+     },
+     "actions": {
+      "l": 0,
+      "t": 718,
+      "r": 430,
+      "b": 796,
+      "w": 430,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 410,
+      "b": 151,
+      "w": 390,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 430,
+      "b": 718,
+      "w": 430,
+      "h": 615
+     },
+     "cc": "true"
+    },
+    "430x932 Titelbild arabisch": {
+     "ar": {
+      "id": "test0000058:100",
+      "card": {
+       "l": 20,
+       "t": 287,
+       "r": 410,
+       "b": 706,
+       "w": 390,
+       "h": 419
+      },
+      "cardInner": {
+       "l": 21,
+       "r": 409,
+       "t": 288,
+       "b": 705
+      },
+      "cardRadius": "18px",
+      "padTop": "0px",
+      "cardOverflow": "hidden",
+      "art": "top",
+      "img": {
+       "l": 21,
+       "t": 288,
+       "r": 409,
+       "b": 438,
+       "w": 388,
+       "h": 150,
+       "vis": true,
+       "fit": "cover",
+       "pos": "50% 50%",
+       "filter": "none",
+       "bf": "none",
+       "anim": "none",
+       "trans": "0s",
+       "bgi": "none",
+       "alt": "",
+       "lazy": "lazy",
+       "dec": "async",
+       "ref": "no-referrer",
+       "aw": "390",
+       "hh": "140",
+       "src": "https://img.test/cover58.png",
+       "done": true
+      },
+      "prev": null,
+      "cur": {
+       "l": 41,
+       "t": 516.5,
+       "r": 389,
+       "b": 614.5,
+       "w": 348,
+       "h": 98
+      },
+      "next": {
+       "l": 41,
+       "t": 614.5,
+       "r": 389,
+       "b": 654.5,
+       "w": 348,
+       "h": 40
+      },
+      "note": null,
+      "noteText": null,
+      "count": 1,
+      "small": 0,
+      "hook": {
+       "l": 20,
+       "t": 167,
+       "r": 410,
+       "b": 271,
+       "w": 390,
+       "h": 104
+      },
+      "actions": {
+       "l": 0,
+       "t": 718,
+       "r": 430,
+       "b": 796,
+       "w": 430,
+       "h": 78
+      },
+      "row": {
+       "l": 20,
+       "t": 127,
+       "r": 410,
+       "b": 151,
+       "w": 390,
+       "h": 24
+      },
+      "content": {
+       "l": 0,
+       "t": 103,
+       "r": 430,
+       "b": 718,
+       "w": 430,
+       "h": 615
+      },
+      "cc": "true"
+     },
+     "af": {
+      "prev": null,
+      "cur": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "400",
+       "size": 27,
+       "lh": 49.950001,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 98,
+       "ch": 98,
+       "lang": "ar"
+      },
+      "next": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "400",
+       "size": 17,
+       "lh": 32.299999,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 40,
+       "ch": 40,
+       "lang": "ar"
+      },
+      "hook": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "700",
+       "size": 33,
+       "lh": 52.799999,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 104,
+       "ch": 104,
+       "lang": null
+      },
+      "hookSh": true,
+      "check4": true,
+      "check7": true,
+      "curRight": {
+       "boxR": 389,
+       "textR": 389,
+       "textL": 57.661163330078125,
+       "boxL": 41
+      }
+     }
+    },
+    "430x932 Titelbild ladefehler": {
+     "id": "test0000043:100",
+     "card": {
+      "l": 20,
+      "t": 288,
+      "r": 410,
+      "b": 706,
+      "w": 390,
+      "h": 418
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 409,
+      "t": 289,
+      "b": 705
+     },
+     "cardRadius": "18px",
+     "padTop": "20px",
+     "cardOverflow": "hidden",
+     "art": null,
+     "img": null,
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 449,
+      "r": 389,
+      "b": 545,
+      "w": 348,
+      "h": 96
+     },
+     "next": {
+      "l": 41,
+      "t": 545,
+      "r": 389,
+      "b": 575,
+      "w": 348,
+      "h": 30
+     },
+     "note": null,
+     "noteText": null,
+     "count": 0,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 410,
+      "b": 272,
+      "w": 390,
+      "h": 105
+     },
+     "actions": {
+      "l": 0,
+      "t": 718,
+      "r": 430,
+      "b": 796,
+      "w": 430,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 410,
+      "b": 151,
+      "w": 390,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 430,
+      "b": 718,
+      "w": 430,
+      "h": 615
+     },
+     "cc": "true"
+    },
+    "Titelbild Abrufe": {
+     "asked": [
+      "https://img.test/broken43.png",
+      "https://i.ytimg.com/vi/test0000041/hqdefault.jpg"
+     ],
+     "one": {
+      "n": 1,
+      "src": "https://img.test/cover40.png",
+      "inCard": true,
+      "https": true
      }
     },
     "ersteGeste": [
@@ -685,12 +2333,12 @@
      "pool 2/5 ready",
      "deck: pool load test0000045 src=net",
      "deck: pool fill 4/5 (local 0, net 4)",
-     "load: test0000044 pool ls=- fb=- md=20 cp=0 sk=- total=20 conc=2 result=ready",
-     "deck: pool ready test0000044 after 20 ms host=stream.test",
-     "pool 3/5 ready",
      "deck: gesture pointerup unlocked 6/6",
-     "load: test0000045 pool ls=- fb=- md=20 cp=0 sk=- total=20 conc=2 result=ready",
-     "deck: pool ready test0000045 after 20 ms host=stream.test",
+     "load: test0000044 pool ls=- fb=- md=21 cp=1 sk=- total=21 conc=2 result=ready",
+     "deck: pool ready test0000044 after 21 ms host=stream.test",
+     "pool 3/5 ready",
+     "load: test0000045 pool ls=- fb=- md=21 cp=1 sk=- total=21 conc=2 result=ready",
+     "deck: pool ready test0000045 after 21 ms host=stream.test",
      "pool 4/5 ready"
     ],
     "aus video": {
@@ -1046,14 +2694,82 @@
     "kurzer Feed audio Fläche unter der Leiste hat Leistenfarbe": true,
     "kurzer Feed text Fläche unter der Leiste hat Leistenfarbe": true,
     "kurzer Feed keine Seitenfehler": true,
-    "audioCoverSichtbar44": true,
-    "audioCoverStil": true,
-    "audioCoverAttribute": true,
-    "audioCoverLinks": true,
-    "audioCoverKanalEinzeilig": true,
-    "audioOhneThumbKeinBild": true,
-    "audioLadefehlerKeinBild": true,
-    "Audio Titelbild keine Seitenfehler": true,
+    "390x844 Titelbild Moment ohne thumb steht": true,
+    "390x844 Titelbild ohne thumb: kein Bild, kein leerer Platz, Karte wie vorher": true,
+    "390x844 Titelbild Moment mit Bild steht": true,
+    "390x844 Titelbild Bild sichtbar, volle Kartenbreite, Höhe im Zielbereich": true,
+    "390x844 Titelbild Bild oben an der Karte, Ecken folgen dem Radius": true,
+    "390x844 Titelbild Bild ungefähr ein Drittel der Karte": true,
+    "390x844 Titelbild Bild object-fit cover, ohne Filter, Verlauf und Animation": true,
+    "390x844 Titelbild Abrufregeln": true,
+    "390x844 Titelbild Untertitel in der Karte, unter dem Bild, ohne Überlappung": true,
+    "390x844 Titelbild kleines 44er Cover entfällt, Kopfzeile wie vor Runde 48": true,
+    "390x844 Titelbild Untertitel mittig im Rest der Karte": true,
+    "390x844 Titelbild CC aus: Bild füllt die Karte, kein Hinweistext": true,
+    "390x844 Titelbild CC wieder an: Bild oben, Untertitel zurück": true,
+    "390x844 Titelbild langer Hook: Bild 88 bis 150 px oder ganz weg, Zeilen ohne Überlappung": true,
+    "390x844 Titelbild arabisch: Untertitel in Amiri": true,
+    "390x844 Titelbild arabisch: Überschrift in Amiri 700": true,
+    "390x844 Titelbild arabisch: Amiri geladen (document.fonts.check)": true,
+    "390x844 Titelbild arabisch: Zeilenhöhe mindestens 1,8, Überschrift 1,5": true,
+    "390x844 Titelbild arabisch: Überschrift nicht abgeschnitten": true,
+    "390x844 Titelbild arabisch: Bild und Untertitel in der Karte, ohne Überlappung": true,
+    "390x844 Titelbild arabisch: Bild sichtbar oder bei zu kleiner Karte ganz weg": true,
+    "390x844 Titelbild arabisch: rechtsbündig": true,
+    "390x844 Titelbild Ladefehler: kein Bild, kein Platzhalter, Karte wie ohne thumb": true,
+    "390x844 Titelbild nach dem Wechsel kein altes Bild": true,
+    "390x844 Titelbild keine Seitenfehler": true,
+    "375x667 Titelbild Moment ohne thumb steht": true,
+    "375x667 Titelbild ohne thumb: kein Bild, kein leerer Platz, Karte wie vorher": true,
+    "375x667 Titelbild Moment mit Bild steht": true,
+    "375x667 Titelbild Bild sichtbar, volle Kartenbreite, Höhe im Zielbereich": true,
+    "375x667 Titelbild Bild oben an der Karte, Ecken folgen dem Radius": true,
+    "375x667 Titelbild Bild ungefähr ein Drittel der Karte": true,
+    "375x667 Titelbild Bild object-fit cover, ohne Filter, Verlauf und Animation": true,
+    "375x667 Titelbild Abrufregeln": true,
+    "375x667 Titelbild Untertitel in der Karte, unter dem Bild, ohne Überlappung": true,
+    "375x667 Titelbild kleines 44er Cover entfällt, Kopfzeile wie vor Runde 48": true,
+    "375x667 Titelbild Untertitel mittig im Rest der Karte": true,
+    "375x667 Titelbild CC aus: Bild füllt die Karte, kein Hinweistext": true,
+    "375x667 Titelbild CC wieder an: Bild oben, Untertitel zurück": true,
+    "375x667 Titelbild langer Hook: Bild 88 bis 150 px oder ganz weg, Zeilen ohne Überlappung": true,
+    "375x667 Titelbild arabisch: Untertitel in Amiri": true,
+    "375x667 Titelbild arabisch: Überschrift in Amiri 700": true,
+    "375x667 Titelbild arabisch: Amiri geladen (document.fonts.check)": true,
+    "375x667 Titelbild arabisch: Zeilenhöhe mindestens 1,8, Überschrift 1,5": true,
+    "375x667 Titelbild arabisch: Überschrift nicht abgeschnitten": true,
+    "375x667 Titelbild arabisch: Bild und Untertitel in der Karte, ohne Überlappung": true,
+    "375x667 Titelbild arabisch: Bild sichtbar oder bei zu kleiner Karte ganz weg": true,
+    "375x667 Titelbild arabisch: rechtsbündig": true,
+    "375x667 Titelbild Ladefehler: kein Bild, kein Platzhalter, Karte wie ohne thumb": true,
+    "375x667 Titelbild nach dem Wechsel kein altes Bild": true,
+    "375x667 Titelbild keine Seitenfehler": true,
+    "430x932 Titelbild Moment ohne thumb steht": true,
+    "430x932 Titelbild ohne thumb: kein Bild, kein leerer Platz, Karte wie vorher": true,
+    "430x932 Titelbild Moment mit Bild steht": true,
+    "430x932 Titelbild Bild sichtbar, volle Kartenbreite, Höhe im Zielbereich": true,
+    "430x932 Titelbild Bild oben an der Karte, Ecken folgen dem Radius": true,
+    "430x932 Titelbild Bild ungefähr ein Drittel der Karte": true,
+    "430x932 Titelbild Bild object-fit cover, ohne Filter, Verlauf und Animation": true,
+    "430x932 Titelbild Abrufregeln": true,
+    "430x932 Titelbild Untertitel in der Karte, unter dem Bild, ohne Überlappung": true,
+    "430x932 Titelbild kleines 44er Cover entfällt, Kopfzeile wie vor Runde 48": true,
+    "430x932 Titelbild Untertitel mittig im Rest der Karte": true,
+    "430x932 Titelbild CC aus: Bild füllt die Karte, kein Hinweistext": true,
+    "430x932 Titelbild CC wieder an: Bild oben, Untertitel zurück": true,
+    "430x932 Titelbild langer Hook: Bild 88 bis 150 px oder ganz weg, Zeilen ohne Überlappung": true,
+    "430x932 Titelbild arabisch: Untertitel in Amiri": true,
+    "430x932 Titelbild arabisch: Überschrift in Amiri 700": true,
+    "430x932 Titelbild arabisch: Amiri geladen (document.fonts.check)": true,
+    "430x932 Titelbild arabisch: Zeilenhöhe mindestens 1,8, Überschrift 1,5": true,
+    "430x932 Titelbild arabisch: Überschrift nicht abgeschnitten": true,
+    "430x932 Titelbild arabisch: Bild und Untertitel in der Karte, ohne Überlappung": true,
+    "430x932 Titelbild arabisch: Bild sichtbar oder bei zu kleiner Karte ganz weg": true,
+    "430x932 Titelbild arabisch: rechtsbündig": true,
+    "430x932 Titelbild Ladefehler: kein Bild, kein Platzhalter, Karte wie ohne thumb": true,
+    "430x932 Titelbild nach dem Wechsel kein altes Bild": true,
+    "430x932 Titelbild keine Seitenfehler": true,
+    "Titelbild ein Element in der Karte, aus dem Feld thumb, https": true,
     "startOhneGesteWartet": true,
     "startOhneGesteKeinTon": true,
     "startPlayTasteZeigtPlay": true,
@@ -1202,9 +2918,9 @@
      "now": 2,
      "area": {
       "x": 20,
-      "y": 463,
+      "y": 318,
       "width": 350,
-      "height": 155
+      "height": 300
      }
     },
     "lyric": {
@@ -1235,172 +2951,48 @@
      "id": "test0000046:100",
      "form": "text"
     },
-    "audioCover": {
-     "img": {
+    "390x844 Titelbild ohne thumb": {
+     "id": "test0000041:100",
+     "card": {
       "l": 20,
-      "t": 127,
-      "r": 64,
-      "b": 171,
-      "w": 44,
-      "h": 44,
-      "radius": "10px",
-      "fit": "cover",
-      "border": "1px color(srgb 1 1 1 / 0.08)",
-      "alt": "",
-      "lazy": "lazy",
-      "dec": "async",
-      "ref": "no-referrer",
-      "done": true,
-      "src": "https://img.test/cover40.png"
-     },
-     "row": {
-      "l": 20,
-      "t": 127,
+      "t": 323,
       "r": 370,
-      "b": 171,
+      "b": 618,
       "w": 350,
-      "h": 44
+      "h": 295
      },
-     "chips": {
-      "l": 76,
-      "t": 127,
-      "r": 330,
-      "b": 171,
-      "w": 254,
-      "h": 44
+     "cardInner": {
+      "l": 21,
+      "r": 369,
+      "t": 324,
+      "b": 617
      },
-     "src": {
-      "l": 338,
-      "t": 127,
-      "r": 382,
-      "b": 171,
-      "w": 44,
-      "h": 44
-     },
-     "chip": {
-      "l": 76,
-      "t": 127,
-      "r": 138.328125,
-      "b": 151,
-      "w": 62.328125,
-      "h": 24
-     },
-     "spk": {
-      "l": 76,
-      "t": 153,
-      "r": 207.90625,
-      "b": 171,
-      "w": 131.90625,
-      "h": 18
-     },
-     "spkOver": false,
-     "count": 1,
-     "hook": {
-      "l": 20,
-      "t": 187,
-      "r": 370,
-      "b": 327,
-      "w": 350,
-      "h": 140
-     }
-    },
-    "audioOhneThumb": {
+     "cardRadius": "18px",
+     "padTop": "20px",
+     "cardOverflow": "hidden",
+     "art": null,
      "img": null,
-     "row": {
-      "l": 20,
-      "t": 127,
-      "r": 370,
-      "b": 151,
-      "w": 350,
-      "h": 24
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 422.5,
+      "r": 349,
+      "b": 518.5,
+      "w": 308,
+      "h": 96
      },
-     "chips": {
-      "l": 20,
-      "t": 127,
-      "r": 224.234375,
-      "b": 151,
-      "w": 204.234375,
-      "h": 24
+     "next": {
+      "l": 41,
+      "t": 518.5,
+      "r": 349,
+      "b": 548.5,
+      "w": 308,
+      "h": 30
      },
-     "src": {
-      "l": 338,
-      "t": 117,
-      "r": 382,
-      "b": 161,
-      "w": 44,
-      "h": 44
-     },
-     "chip": {
-      "l": 20,
-      "t": 127,
-      "r": 82.328125,
-      "b": 151,
-      "w": 62.328125,
-      "h": 24
-     },
-     "spk": {
-      "l": 92.328125,
-      "t": 130,
-      "r": 224.234375,
-      "b": 148,
-      "w": 131.90625,
-      "h": 18
-     },
-     "spkOver": false,
+     "note": null,
+     "noteText": null,
      "count": 0,
-     "hook": {
-      "l": 20,
-      "t": 167,
-      "r": 370,
-      "b": 447,
-      "w": 350,
-      "h": 280
-     }
-    },
-    "audioLadefehler": {
-     "img": null,
-     "row": {
-      "l": 20,
-      "t": 127,
-      "r": 370,
-      "b": 151,
-      "w": 350,
-      "h": 24
-     },
-     "chips": {
-      "l": 20,
-      "t": 127,
-      "r": 224.234375,
-      "b": 151,
-      "w": 204.234375,
-      "h": 24
-     },
-     "src": {
-      "l": 338,
-      "t": 117,
-      "r": 382,
-      "b": 161,
-      "w": 44,
-      "h": 44
-     },
-     "chip": {
-      "l": 20,
-      "t": 127,
-      "r": 82.328125,
-      "b": 151,
-      "w": 62.328125,
-      "h": 24
-     },
-     "spk": {
-      "l": 92.328125,
-      "t": 130,
-      "r": 224.234375,
-      "b": 148,
-      "w": 131.90625,
-      "h": 18
-     },
-     "spkOver": false,
-     "count": 0,
+     "small": 0,
      "hook": {
       "l": 20,
       "t": 167,
@@ -1408,6 +3000,1741 @@
       "b": 307,
       "w": 350,
       "h": 140
+     },
+     "actions": {
+      "l": 0,
+      "t": 630,
+      "r": 390,
+      "b": 708,
+      "w": 390,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 370,
+      "b": 151,
+      "w": 350,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 390,
+      "b": 630,
+      "w": 390,
+      "h": 527
+     },
+     "cc": "true"
+    },
+    "390x844 Titelbild lateinisch": {
+     "id": "test0000040:100",
+     "card": {
+      "l": 20,
+      "t": 253,
+      "r": 370,
+      "b": 618,
+      "w": 350,
+      "h": 365
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 369,
+      "t": 254,
+      "b": 617
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "top",
+     "img": {
+      "l": 21,
+      "t": 254,
+      "r": 369,
+      "b": 391.9375,
+      "w": 348,
+      "h": 137.9375,
+      "vis": true,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover40.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 450.46875,
+      "r": 349,
+      "b": 546.46875,
+      "w": 308,
+      "h": 96
+     },
+     "next": {
+      "l": 41,
+      "t": 546.46875,
+      "r": 349,
+      "b": 576.46875,
+      "w": 308,
+      "h": 30
+     },
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 370,
+      "b": 237,
+      "w": 350,
+      "h": 70
+     },
+     "actions": {
+      "l": 0,
+      "t": 630,
+      "r": 390,
+      "b": 708,
+      "w": 390,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 370,
+      "b": 151,
+      "w": 350,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 390,
+      "b": 630,
+      "w": 390,
+      "h": 527
+     },
+     "cc": "true"
+    },
+    "390x844 Titelbild cc aus": {
+     "id": "test0000040:100",
+     "card": {
+      "l": 20,
+      "t": 253,
+      "r": 370,
+      "b": 618,
+      "w": 350,
+      "h": 365
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 369,
+      "t": 254,
+      "b": 617
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "fill",
+     "img": {
+      "l": 21,
+      "t": 254,
+      "r": 369,
+      "b": 617,
+      "w": 348,
+      "h": 363,
+      "vis": true,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover40.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": null,
+     "next": null,
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 370,
+      "b": 237,
+      "w": 350,
+      "h": 70
+     },
+     "actions": {
+      "l": 0,
+      "t": 630,
+      "r": 390,
+      "b": 708,
+      "w": 390,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 370,
+      "b": 151,
+      "w": 350,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 390,
+      "b": 630,
+      "w": 390,
+      "h": 527
+     },
+     "cc": "false"
+    },
+    "390x844 Titelbild langer Hook": {
+     "id": "test0000042:100",
+     "card": {
+      "l": 20,
+      "t": 318,
+      "r": 370,
+      "b": 618,
+      "w": 350,
+      "h": 300
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 369,
+      "t": 319,
+      "b": 617
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "top",
+     "img": {
+      "l": 21,
+      "t": 319,
+      "r": 369,
+      "b": 432.234375,
+      "w": 348,
+      "h": 113.234375,
+      "vis": true,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover42.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 475.109375,
+      "r": 349,
+      "b": 562.109375,
+      "w": 308,
+      "h": 87
+     },
+     "next": {
+      "l": 41,
+      "t": 562.109375,
+      "r": 349,
+      "b": 592.109375,
+      "w": 308,
+      "h": 30
+     },
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 370,
+      "b": 302,
+      "w": 350,
+      "h": 135
+     },
+     "actions": {
+      "l": 0,
+      "t": 630,
+      "r": 390,
+      "b": 708,
+      "w": 390,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 370,
+      "b": 151,
+      "w": 350,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 390,
+      "b": 630,
+      "w": 390,
+      "h": 527
+     },
+     "cc": "true"
+    },
+    "390x844 Titelbild arabisch": {
+     "ar": {
+      "id": "test0000058:100",
+      "card": {
+       "l": 20,
+       "t": 288.59375,
+       "r": 370,
+       "b": 618,
+       "w": 350,
+       "h": 329.40625
+      },
+      "cardInner": {
+       "l": 21,
+       "r": 369,
+       "t": 289.59375,
+       "b": 617
+      },
+      "cardRadius": "18px",
+      "padTop": "0px",
+      "cardOverflow": "hidden",
+      "art": "top",
+      "img": {
+       "l": 21,
+       "t": 289.59375,
+       "r": 369,
+       "b": 414,
+       "w": 348,
+       "h": 124.40625,
+       "vis": true,
+       "fit": "cover",
+       "pos": "50% 50%",
+       "filter": "none",
+       "bf": "none",
+       "anim": "none",
+       "trans": "0s",
+       "bgi": "none",
+       "alt": "",
+       "lazy": "lazy",
+       "dec": "async",
+       "ref": "no-referrer",
+       "aw": "390",
+       "hh": "140",
+       "src": "https://img.test/cover58.png",
+       "done": true
+      },
+      "prev": null,
+      "cur": {
+       "l": 41,
+       "t": 465.109375,
+       "r": 349,
+       "b": 553.890625,
+       "w": 308,
+       "h": 88.78125
+      },
+      "next": {
+       "l": 41,
+       "t": 553.890625,
+       "r": 349,
+       "b": 594.1875,
+       "w": 308,
+       "h": 40.296875
+      },
+      "note": null,
+      "noteText": null,
+      "count": 1,
+      "small": 0,
+      "hook": {
+       "l": 20,
+       "t": 167,
+       "r": 370,
+       "b": 272.59375,
+       "w": 350,
+       "h": 105.59375
+      },
+      "actions": {
+       "l": 0,
+       "t": 630,
+       "r": 390,
+       "b": 708,
+       "w": 390,
+       "h": 78
+      },
+      "row": {
+       "l": 20,
+       "t": 127,
+       "r": 370,
+       "b": 151,
+       "w": 350,
+       "h": 24
+      },
+      "content": {
+       "l": 0,
+       "t": 103,
+       "r": 390,
+       "b": 630,
+       "w": 390,
+       "h": 527
+      },
+      "cc": "true"
+     },
+     "af": {
+      "prev": null,
+      "cur": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "400",
+       "size": 24,
+       "lh": 44.4,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 89,
+       "ch": 89,
+       "lang": "ar"
+      },
+      "next": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "400",
+       "size": 17,
+       "lh": 32.3,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 40,
+       "ch": 40,
+       "lang": "ar"
+      },
+      "hook": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "700",
+       "size": 33,
+       "lh": 52.8,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 106,
+       "ch": 106,
+       "lang": null
+      },
+      "hookSh": true,
+      "check4": true,
+      "check7": true,
+      "curRight": {
+       "boxR": 349,
+       "textR": 349,
+       "textL": 61,
+       "boxL": 41
+      }
+     }
+    },
+    "390x844 Titelbild ladefehler": {
+     "id": "test0000043:100",
+     "card": {
+      "l": 20,
+      "t": 323,
+      "r": 370,
+      "b": 618,
+      "w": 350,
+      "h": 295
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 369,
+      "t": 324,
+      "b": 617
+     },
+     "cardRadius": "18px",
+     "padTop": "20px",
+     "cardOverflow": "hidden",
+     "art": null,
+     "img": null,
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 422.5,
+      "r": 349,
+      "b": 518.5,
+      "w": 308,
+      "h": 96
+     },
+     "next": {
+      "l": 41,
+      "t": 518.5,
+      "r": 349,
+      "b": 548.5,
+      "w": 308,
+      "h": 30
+     },
+     "note": null,
+     "noteText": null,
+     "count": 0,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 370,
+      "b": 307,
+      "w": 350,
+      "h": 140
+     },
+     "actions": {
+      "l": 0,
+      "t": 630,
+      "r": 390,
+      "b": 708,
+      "w": 390,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 370,
+      "b": 151,
+      "w": 350,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 390,
+      "b": 630,
+      "w": 390,
+      "h": 527
+     },
+     "cc": "true"
+    },
+    "375x667 Titelbild ohne thumb": {
+     "id": "test0000041:100",
+     "card": {
+      "l": 20,
+      "t": 284,
+      "r": 355,
+      "b": 473,
+      "w": 335,
+      "h": 189
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 354,
+      "t": 285,
+      "b": 472
+     },
+     "cardRadius": "18px",
+     "padTop": "20px",
+     "cardOverflow": "hidden",
+     "art": null,
+     "img": null,
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 339.5,
+      "r": 334,
+      "b": 417.5,
+      "w": 293,
+      "h": 78
+     },
+     "next": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0
+     },
+     "note": null,
+     "noteText": null,
+     "count": 0,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 128,
+      "r": 355,
+      "b": 268,
+      "w": 335,
+      "h": 140
+     },
+     "actions": {
+      "l": 0,
+      "t": 485,
+      "r": 375,
+      "b": 549,
+      "w": 375,
+      "h": 64
+     },
+     "row": {
+      "l": 20,
+      "t": 88,
+      "r": 355,
+      "b": 112,
+      "w": 335,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 64,
+      "r": 375,
+      "b": 485,
+      "w": 375,
+      "h": 421
+     },
+     "cc": "true"
+    },
+    "375x667 Titelbild lateinisch": {
+     "id": "test0000040:100",
+     "card": {
+      "l": 20,
+      "t": 171,
+      "r": 355,
+      "b": 473,
+      "w": 335,
+      "h": 302
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 354,
+      "t": 172,
+      "b": 472
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "top",
+     "img": {
+      "l": 21,
+      "t": 172,
+      "r": 354,
+      "b": 286,
+      "w": 333,
+      "h": 114,
+      "vis": true,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover40.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 329.5,
+      "r": 334,
+      "b": 416.5,
+      "w": 293,
+      "h": 87
+     },
+     "next": {
+      "l": 41,
+      "t": 416.5,
+      "r": 334,
+      "b": 446.5,
+      "w": 293,
+      "h": 30
+     },
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 128,
+      "r": 355,
+      "b": 155,
+      "w": 335,
+      "h": 27
+     },
+     "actions": {
+      "l": 0,
+      "t": 485,
+      "r": 375,
+      "b": 549,
+      "w": 375,
+      "h": 64
+     },
+     "row": {
+      "l": 20,
+      "t": 88,
+      "r": 355,
+      "b": 112,
+      "w": 335,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 64,
+      "r": 375,
+      "b": 485,
+      "w": 375,
+      "h": 421
+     },
+     "cc": "true"
+    },
+    "375x667 Titelbild cc aus": {
+     "id": "test0000040:100",
+     "card": {
+      "l": 20,
+      "t": 171,
+      "r": 355,
+      "b": 473,
+      "w": 335,
+      "h": 302
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 354,
+      "t": 172,
+      "b": 472
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "fill",
+     "img": {
+      "l": 21,
+      "t": 172,
+      "r": 354,
+      "b": 472,
+      "w": 333,
+      "h": 300,
+      "vis": true,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover40.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": null,
+     "next": null,
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 128,
+      "r": 355,
+      "b": 155,
+      "w": 335,
+      "h": 27
+     },
+     "actions": {
+      "l": 0,
+      "t": 485,
+      "r": 375,
+      "b": 549,
+      "w": 375,
+      "h": 64
+     },
+     "row": {
+      "l": 20,
+      "t": 88,
+      "r": 355,
+      "b": 112,
+      "w": 335,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 64,
+      "r": 375,
+      "b": 485,
+      "w": 375,
+      "h": 421
+     },
+     "cc": "false"
+    },
+    "375x667 Titelbild langer Hook": {
+     "id": "test0000042:100",
+     "card": {
+      "l": 20,
+      "t": 306,
+      "r": 355,
+      "b": 473,
+      "w": 335,
+      "h": 167
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 354,
+      "t": 307,
+      "b": 472
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "top",
+     "img": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0,
+      "vis": false,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover42.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 350.5,
+      "r": 334,
+      "b": 428.5,
+      "w": 293,
+      "h": 78
+     },
+     "next": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0
+     },
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 128,
+      "r": 355,
+      "b": 290,
+      "w": 335,
+      "h": 162
+     },
+     "actions": {
+      "l": 0,
+      "t": 485,
+      "r": 375,
+      "b": 549,
+      "w": 375,
+      "h": 64
+     },
+     "row": {
+      "l": 20,
+      "t": 88,
+      "r": 355,
+      "b": 112,
+      "w": 335,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 64,
+      "r": 375,
+      "b": 485,
+      "w": 375,
+      "h": 421
+     },
+     "cc": "true"
+    },
+    "375x667 Titelbild arabisch": {
+     "ar": {
+      "id": "test0000058:100",
+      "card": {
+       "l": 20,
+       "t": 224,
+       "r": 355,
+       "b": 473,
+       "w": 335,
+       "h": 249
+      },
+      "cardInner": {
+       "l": 21,
+       "r": 354,
+       "t": 225,
+       "b": 472
+      },
+      "cardRadius": "18px",
+      "padTop": "0px",
+      "cardOverflow": "hidden",
+      "art": "top",
+      "img": {
+       "l": 0,
+       "t": 0,
+       "r": 0,
+       "b": 0,
+       "w": 0,
+       "h": 0,
+       "vis": false,
+       "fit": "cover",
+       "pos": "50% 50%",
+       "filter": "none",
+       "bf": "none",
+       "anim": "none",
+       "trans": "0s",
+       "bgi": "none",
+       "alt": "",
+       "lazy": "lazy",
+       "dec": "async",
+       "ref": "no-referrer",
+       "aw": "390",
+       "hh": "140",
+       "src": "https://img.test/cover58.png",
+       "done": true
+      },
+      "prev": null,
+      "cur": {
+       "l": 41,
+       "t": 302.90625,
+       "r": 334,
+       "b": 394.09375,
+       "w": 293,
+       "h": 91.1875
+      },
+      "next": {
+       "l": 0,
+       "t": 0,
+       "r": 0,
+       "b": 0,
+       "w": 0,
+       "h": 0
+      },
+      "note": null,
+      "noteText": null,
+      "count": 1,
+      "small": 0,
+      "hook": {
+       "l": 20,
+       "t": 128,
+       "r": 355,
+       "b": 208,
+       "w": 335,
+       "h": 80
+      },
+      "actions": {
+       "l": 0,
+       "t": 485,
+       "r": 375,
+       "b": 549,
+       "w": 375,
+       "h": 64
+      },
+      "row": {
+       "l": 20,
+       "t": 88,
+       "r": 355,
+       "b": 112,
+       "w": 335,
+       "h": 24
+      },
+      "content": {
+       "l": 0,
+       "t": 64,
+       "r": 375,
+       "b": 485,
+       "w": 375,
+       "h": 421
+      },
+      "cc": "true"
+     },
+     "af": {
+      "prev": null,
+      "cur": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "400",
+       "size": 24,
+       "lh": 45.6,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 91,
+       "ch": 91,
+       "lang": "ar"
+      },
+      "next": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "400",
+       "size": 17,
+       "lh": 32.3,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 0,
+       "ch": 0,
+       "lang": "ar"
+      },
+      "hook": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "700",
+       "size": 25,
+       "lh": 40,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 80,
+       "ch": 80,
+       "lang": null
+      },
+      "hookSh": true,
+      "check4": true,
+      "check7": true,
+      "curRight": {
+       "boxR": 334,
+       "textR": 334,
+       "textL": 46,
+       "boxL": 41
+      }
+     }
+    },
+    "375x667 Titelbild ladefehler": {
+     "id": "test0000043:100",
+     "card": {
+      "l": 20,
+      "t": 225,
+      "r": 355,
+      "b": 473,
+      "w": 335,
+      "h": 248
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 354,
+      "t": 226,
+      "b": 472
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "top",
+     "img": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0,
+      "vis": false,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/broken43.png",
+      "done": false
+     },
+     "prev": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0
+     },
+     "cur": {
+      "l": 41,
+      "t": 323,
+      "r": 334,
+      "b": 375,
+      "w": 293,
+      "h": 52
+     },
+     "next": {
+      "l": 0,
+      "t": 0,
+      "r": 0,
+      "b": 0,
+      "w": 0,
+      "h": 0
+     },
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 128,
+      "r": 355,
+      "b": 209,
+      "w": 335,
+      "h": 81
+     },
+     "actions": {
+      "l": 0,
+      "t": 485,
+      "r": 375,
+      "b": 549,
+      "w": 375,
+      "h": 64
+     },
+     "row": {
+      "l": 20,
+      "t": 88,
+      "r": 355,
+      "b": 112,
+      "w": 335,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 64,
+      "r": 375,
+      "b": 485,
+      "w": 375,
+      "h": 421
+     },
+     "cc": "true"
+    },
+    "430x932 Titelbild ohne thumb": {
+     "id": "test0000041:100",
+     "card": {
+      "l": 20,
+      "t": 288,
+      "r": 410,
+      "b": 706,
+      "w": 390,
+      "h": 418
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 409,
+      "t": 289,
+      "b": 705
+     },
+     "cardRadius": "18px",
+     "padTop": "20px",
+     "cardOverflow": "hidden",
+     "art": null,
+     "img": null,
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 449,
+      "r": 389,
+      "b": 545,
+      "w": 348,
+      "h": 96
+     },
+     "next": {
+      "l": 41,
+      "t": 545,
+      "r": 389,
+      "b": 575,
+      "w": 348,
+      "h": 30
+     },
+     "note": null,
+     "noteText": null,
+     "count": 0,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 410,
+      "b": 272,
+      "w": 390,
+      "h": 105
+     },
+     "actions": {
+      "l": 0,
+      "t": 718,
+      "r": 430,
+      "b": 796,
+      "w": 430,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 410,
+      "b": 151,
+      "w": 390,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 430,
+      "b": 718,
+      "w": 430,
+      "h": 615
+     },
+     "cc": "true"
+    },
+    "430x932 Titelbild lateinisch": {
+     "id": "test0000040:100",
+     "card": {
+      "l": 20,
+      "t": 253,
+      "r": 410,
+      "b": 706,
+      "w": 390,
+      "h": 453
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 409,
+      "t": 254,
+      "b": 705
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "top",
+     "img": {
+      "l": 21,
+      "t": 254,
+      "r": 409,
+      "b": 404,
+      "w": 388,
+      "h": 150,
+      "vis": true,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover40.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 500.5,
+      "r": 389,
+      "b": 596.5,
+      "w": 348,
+      "h": 96
+     },
+     "next": {
+      "l": 41,
+      "t": 596.5,
+      "r": 389,
+      "b": 626.5,
+      "w": 348,
+      "h": 30
+     },
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 410,
+      "b": 237,
+      "w": 390,
+      "h": 70
+     },
+     "actions": {
+      "l": 0,
+      "t": 718,
+      "r": 430,
+      "b": 796,
+      "w": 430,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 410,
+      "b": 151,
+      "w": 390,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 430,
+      "b": 718,
+      "w": 430,
+      "h": 615
+     },
+     "cc": "true"
+    },
+    "430x932 Titelbild cc aus": {
+     "id": "test0000040:100",
+     "card": {
+      "l": 20,
+      "t": 253,
+      "r": 410,
+      "b": 706,
+      "w": 390,
+      "h": 453
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 409,
+      "t": 254,
+      "b": 705
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "fill",
+     "img": {
+      "l": 21,
+      "t": 254,
+      "r": 409,
+      "b": 705,
+      "w": 388,
+      "h": 451,
+      "vis": true,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover40.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": null,
+     "next": null,
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 410,
+      "b": 237,
+      "w": 390,
+      "h": 70
+     },
+     "actions": {
+      "l": 0,
+      "t": 718,
+      "r": 430,
+      "b": 796,
+      "w": 430,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 410,
+      "b": 151,
+      "w": 390,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 430,
+      "b": 718,
+      "w": 430,
+      "h": 615
+     },
+     "cc": "false"
+    },
+    "430x932 Titelbild langer Hook": {
+     "id": "test0000042:100",
+     "card": {
+      "l": 20,
+      "t": 338,
+      "r": 410,
+      "b": 706,
+      "w": 390,
+      "h": 368
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 409,
+      "t": 339,
+      "b": 705
+     },
+     "cardRadius": "18px",
+     "padTop": "0px",
+     "cardOverflow": "hidden",
+     "art": "top",
+     "img": {
+      "l": 21,
+      "t": 339,
+      "r": 409,
+      "b": 478.078125,
+      "w": 388,
+      "h": 139.078125,
+      "vis": true,
+      "fit": "cover",
+      "pos": "50% 50%",
+      "filter": "none",
+      "bf": "none",
+      "anim": "none",
+      "trans": "0s",
+      "bgi": "none",
+      "alt": "",
+      "lazy": "lazy",
+      "dec": "async",
+      "ref": "no-referrer",
+      "aw": "390",
+      "hh": "140",
+      "src": "https://img.test/cover42.png",
+      "done": true
+     },
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 537.53125,
+      "r": 389,
+      "b": 633.53125,
+      "w": 348,
+      "h": 96
+     },
+     "next": {
+      "l": 41,
+      "t": 633.53125,
+      "r": 389,
+      "b": 663.53125,
+      "w": 348,
+      "h": 30
+     },
+     "note": null,
+     "noteText": null,
+     "count": 1,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 410,
+      "b": 322,
+      "w": 390,
+      "h": 155
+     },
+     "actions": {
+      "l": 0,
+      "t": 718,
+      "r": 430,
+      "b": 796,
+      "w": 430,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 410,
+      "b": 151,
+      "w": 390,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 430,
+      "b": 718,
+      "w": 430,
+      "h": 615
+     },
+     "cc": "true"
+    },
+    "430x932 Titelbild arabisch": {
+     "ar": {
+      "id": "test0000058:100",
+      "card": {
+       "l": 20,
+       "t": 288.59375,
+       "r": 410,
+       "b": 706,
+       "w": 390,
+       "h": 417.40625
+      },
+      "cardInner": {
+       "l": 21,
+       "r": 409,
+       "t": 289.59375,
+       "b": 705
+      },
+      "cardRadius": "18px",
+      "padTop": "0px",
+      "cardOverflow": "hidden",
+      "art": "top",
+      "img": {
+       "l": 21,
+       "t": 289.59375,
+       "r": 409,
+       "b": 439.59375,
+       "w": 388,
+       "h": 150,
+       "vis": true,
+       "fit": "cover",
+       "pos": "50% 50%",
+       "filter": "none",
+       "bf": "none",
+       "anim": "none",
+       "trans": "0s",
+       "bgi": "none",
+       "alt": "",
+       "lazy": "lazy",
+       "dec": "async",
+       "ref": "no-referrer",
+       "aw": "390",
+       "hh": "140",
+       "src": "https://img.test/cover58.png",
+       "done": true
+      },
+      "prev": null,
+      "cur": {
+       "l": 41,
+       "t": 516.359375,
+       "r": 389,
+       "b": 616.234375,
+       "w": 348,
+       "h": 99.875
+      },
+      "next": {
+       "l": 41,
+       "t": 616.234375,
+       "r": 389,
+       "b": 656.53125,
+       "w": 348,
+       "h": 40.296875
+      },
+      "note": null,
+      "noteText": null,
+      "count": 1,
+      "small": 0,
+      "hook": {
+       "l": 20,
+       "t": 167,
+       "r": 410,
+       "b": 272.59375,
+       "w": 390,
+       "h": 105.59375
+      },
+      "actions": {
+       "l": 0,
+       "t": 718,
+       "r": 430,
+       "b": 796,
+       "w": 430,
+       "h": 78
+      },
+      "row": {
+       "l": 20,
+       "t": 127,
+       "r": 410,
+       "b": 151,
+       "w": 390,
+       "h": 24
+      },
+      "content": {
+       "l": 0,
+       "t": 103,
+       "r": 430,
+       "b": 718,
+       "w": 430,
+       "h": 615
+      },
+      "cc": "true"
+     },
+     "af": {
+      "prev": null,
+      "cur": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "400",
+       "size": 27,
+       "lh": 49.95,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 100,
+       "ch": 100,
+       "lang": "ar"
+      },
+      "next": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "400",
+       "size": 17,
+       "lh": 32.3,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 40,
+       "ch": 40,
+       "lang": "ar"
+      },
+      "hook": {
+       "fam": "Amiri, \"Noto Naskh Arabic\", \"Geeza Pro\", serif",
+       "weight": "700",
+       "size": 33,
+       "lh": 52.8,
+       "dir": "rtl",
+       "align": "start",
+       "sh": 106,
+       "ch": 106,
+       "lang": null
+      },
+      "hookSh": true,
+      "check4": true,
+      "check7": true,
+      "curRight": {
+       "boxR": 389,
+       "textR": 389,
+       "textL": 67.5,
+       "boxL": 41
+      }
+     }
+    },
+    "430x932 Titelbild ladefehler": {
+     "id": "test0000043:100",
+     "card": {
+      "l": 20,
+      "t": 288,
+      "r": 410,
+      "b": 706,
+      "w": 390,
+      "h": 418
+     },
+     "cardInner": {
+      "l": 21,
+      "r": 409,
+      "t": 289,
+      "b": 705
+     },
+     "cardRadius": "18px",
+     "padTop": "20px",
+     "cardOverflow": "hidden",
+     "art": null,
+     "img": null,
+     "prev": null,
+     "cur": {
+      "l": 41,
+      "t": 449,
+      "r": 389,
+      "b": 545,
+      "w": 348,
+      "h": 96
+     },
+     "next": {
+      "l": 41,
+      "t": 545,
+      "r": 389,
+      "b": 575,
+      "w": 348,
+      "h": 30
+     },
+     "note": null,
+     "noteText": null,
+     "count": 0,
+     "small": 0,
+     "hook": {
+      "l": 20,
+      "t": 167,
+      "r": 410,
+      "b": 272,
+      "w": 390,
+      "h": 105
+     },
+     "actions": {
+      "l": 0,
+      "t": 718,
+      "r": 430,
+      "b": 796,
+      "w": 430,
+      "h": 78
+     },
+     "row": {
+      "l": 20,
+      "t": 127,
+      "r": 410,
+      "b": 151,
+      "w": 390,
+      "h": 24
+     },
+     "content": {
+      "l": 0,
+      "t": 103,
+      "r": 430,
+      "b": 718,
+      "w": 430,
+      "h": 615
+     },
+     "cc": "true"
+    },
+    "Titelbild Abrufe": {
+     "asked": [
+      "https://img.test/broken43.png",
+      "https://img.test/cover40.png",
+      "https://i.ytimg.com/vi/test0000041/hqdefault.jpg"
+     ],
+     "one": {
+      "n": 1,
+      "src": "https://img.test/cover40.png",
+      "inCard": true,
+      "https": true
      }
     },
     "ersteGeste": [
