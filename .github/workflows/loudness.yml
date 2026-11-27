@@ -4,7 +4,7 @@ name: loudness
 # Je Fenster nur der Ausschnitt start bis end (ffmpeg -ss/-t, ebur128), nicht die ganze Datei.
 # Ergebnis je Quelle als Artefakt "loud-<id>" mit <id>.json: {"id":..,"results":[{"start":..,"end":..,"lufs":-18.3|null,"err":".."}]} und stats.json.
 # lufs ist null, wenn die Messung scheitert, das Fenster zu kurz ist oder nur Stille liegt (-70 LUFS oder darunter).
-# Klangmerkmale (v1, gleicher ffmpeg-Durchgang, nur Zahlen): je Ergebnis zusätzlich "sound":{"noise":dBFS (10. Perzentil des RMS in Blöcken zu 0,4 s),
+# Klangmerkmale (v1, gleicher ffmpeg-Durchgang, nur Zahlen): je Ergebnis zusätzlich "sound":{"noise":dBFS (10. Perzentil des RMS in Blöcken zu 0,1 s),
 # "snr":dB (90. minus 10. Perzentil), "clip":Anteil der Samples über -0,5 dBFS (Mono-Mix), "peak":dBFS, "bw":Hz unter denen 99 % der Energie liegen,
 # "bw95":dito 95 %, "hf":Energieanteil über 4 kHz, "blocks":Anzahl Blöcke, "v":1}. Fehlt sound, nennt sErr den Grund. Alte Auswerter lesen nur lufs und start/end.
 on:
@@ -52,7 +52,7 @@ jobs:
           #!/usr/bin/env python3
           """Integrierte Lautheit und Klangmerkmale je Fenster. ffmpeg liest nur start bis end (Suchen per -ss vor -i, Dauer per -t) und zerlegt das
           Signal in einem Durchgang in vier Zweige. Zweig 1: ebur128 (Lautheit, unverändert wie vor v1, Zusammenfassung "I: -18.3 LUFS"). Zweig 2: Mono-Mix in Blöcken
-          zu 0,4 s, astats je Block (RMS und Spitze). Zweig 3: Mono-Mix, aeval setzt jedes Sample mit Betrag über 0,944 (-0,5 dBFS) auf 1, sonst 0, astats RMS
+          zu 0,1 s, astats je Block (RMS und Spitze). Zweig 3: Mono-Mix, aeval setzt jedes Sample mit Betrag über 0,944 (-0,5 dBFS) auf 1, sonst 0, astats RMS
           darüber ergibt den Anteil. Zweig 4: Mono-Mix, acrossover in 13 Frequenzbänder, astats RMS je Band über das ganze Fenster (Energie je Band).
           Schlägt der Durchgang mit den Klangzweigen fehl, läuft der alte Aufruf (nur ebur128), dann fehlt nur sound und der Grund steht in sErr."""
           import json, math, os, re, shutil, subprocess, sys, tempfile, time
@@ -62,7 +62,7 @@ jobs:
           I_RE = re.compile(r'Integrated loudness:\s+I:\s+(-?inf|-?[\d.]+) LUFS')
 
           RATE = 44100
-          BLOCK = int(RATE * 0.4)                     # 0,4 s je Block
+          BLOCK = int(RATE * 0.1)                     # 0,1 s je Block
           CLIP_LEVEL = 10 ** (-0.5 / 20)              # -0,5 dBFS
           SPLITS = [250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 8000, 10000, 12000, 16000]
           EDGES = [0] + SPLITS + [RATE // 2]          # 13 Bänder
@@ -211,7 +211,14 @@ jobs:
               v, err, sound, serr = measure(s, e)
               ok += v is not None
               snd += sound is not None
-              res.append({'start': s, 'end': e, 'lufs': v, **({'err': err} if err else {}), **({'sound': sound} if sound else {}), **({'sErr': serr} if serr else {})})
+              extra = {}
+              try:  # TEMP Diagnose: alter Aufruf, getrennt
+                  r0 = run(['ffmpeg', '-hide_banner', '-nostats', '-nostdin', '-ss', str(s), '-i', audio, '-t', str(round(e - s, 3)), '-vn', '-af', 'ebur128=peak=none', '-f', 'null', '-'])
+                  m0 = I_RE.search(r0.stderr.decode('utf-8', errors='replace'))
+                  extra = {'lufs0': float(m0.group(1)) if m0 and 'inf' not in m0.group(1) else None}
+              except Exception as ex:
+                  extra = {'lufs0': str(ex)[:60]}
+              res.append({'start': s, 'end': e, 'lufs': v, **extra, **({'err': err} if err else {}), **({'sound': sound} if sound else {}), **({'sErr': serr} if serr else {})})
               print(s, e, v, err, sound, serr)
           json.dump({'id': job_id, 'results': res}, open(out, 'w'))
           json.dump({'id': job_id, 'windows': len(windows), 'measured': ok, 'sound': snd}, open(os.path.join(os.path.dirname(out), 'stats.json'), 'w'))
