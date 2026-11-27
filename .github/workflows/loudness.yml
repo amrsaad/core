@@ -41,7 +41,10 @@ jobs:
       matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
     steps:
       - name: Werkzeuge
-        run: command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null)
+        run: |
+          # bis zu dreimal, ein einzelner Fehler von apt-get (Exit 100) soll nicht den ganzen Auftrag kosten
+          for i in 1 2 3; do command -v ffmpeg >/dev/null && break; sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null && break; sleep 10; done
+          command -v ffmpeg >/dev/null
       - name: Fenster messen
         env:
           AUDIO: ${{ matrix.audio }}
@@ -211,14 +214,7 @@ jobs:
               v, err, sound, serr = measure(s, e)
               ok += v is not None
               snd += sound is not None
-              extra = {}
-              try:  # TEMP Diagnose: alter Aufruf, getrennt
-                  r0 = run(['ffmpeg', '-hide_banner', '-nostats', '-nostdin', '-ss', str(s), '-i', audio, '-t', str(round(e - s, 3)), '-vn', '-af', 'ebur128=peak=none', '-f', 'null', '-'])
-                  m0 = I_RE.search(r0.stderr.decode('utf-8', errors='replace'))
-                  extra = {'lufs0': float(m0.group(1)) if m0 and 'inf' not in m0.group(1) else None}
-              except Exception as ex:
-                  extra = {'lufs0': str(ex)[:60]}
-              res.append({'start': s, 'end': e, 'lufs': v, **extra, **({'err': err} if err else {}), **({'sound': sound} if sound else {}), **({'sErr': serr} if serr else {})})
+              res.append({'start': s, 'end': e, 'lufs': v, **({'err': err} if err else {}), **({'sound': sound} if sound else {}), **({'sErr': serr} if serr else {})})
               print(s, e, v, err, sound, serr)
           json.dump({'id': job_id, 'results': res}, open(out, 'w'))
           json.dump({'id': job_id, 'windows': len(windows), 'measured': ok, 'sound': snd}, open(os.path.join(os.path.dirname(out), 'stats.json'), 'w'))
