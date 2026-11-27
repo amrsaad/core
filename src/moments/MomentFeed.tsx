@@ -48,8 +48,10 @@ import { DeskQueue } from './desk/DeskQueue';
 import { PhoneActions } from './phone/PhoneActions';
 import { PhoneTransport, PhoneTextBar } from './phone/PhoneTransport';
 import { PhoneAudio, PhoneVideo } from './phone/PhoneContent';
-import { PhoneTextHead } from './phone/PhoneText';
+import { PhoneTextFoot, PhoneTextHead } from './phone/PhoneText';
 import { usePhoneTextFit } from './phone/usePhoneTextFit';
+import { usePhoneViewport } from './phone/usePhoneViewport';
+import { isTakeaway, takeawayParts } from './phone/takeaway';
 import { DeskSide } from './desk/DeskSide';
 import { coverLetter, fracOf, lyricLines, scrolledToEnd, queuedAfter, seekBy, seekPos, upNext, SEEK_S } from './desk/model';
 import { speakerLine } from './speaker';
@@ -4072,7 +4074,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
       /** Nur Tests (Brief 14): die genannten Momente an idx+1, idx+2 ... legen und den Vorrat neu füllen */
       arrange: (ids: string[]) => {
         const at = idxRef.current;
-        const have = ids.filter((id) => queue.current.slice(at + 1).some((x) => x.id === id));
+        // Auch schon gespielte Momente (hinter idx) lassen sich wieder nach vorn holen: sie stehen dann als Kopie vor dem Rest
+        const have = ids.filter((id) => queue.current.some((x) => x.id === id));
         const rest = queue.current.slice(at + 1).filter((x) => !have.includes(x.id));
         applyQueue([...queue.current.slice(0, at + 1), ...have.map((id) => queue.current.find((x) => x.id === id)!), ...rest]);
         fillPoolRef.current();
@@ -4202,6 +4205,8 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   }, [queue.current[idx]?.id, form, forYou]);
   // Runde 48: Text-Reiter am Handy, jeder Text auf eine Seite (Stufen, kein inneres Scrollen)
   usePhoneTextFit(textBox, ph && form === 'text' && !forYou, queue.current[idx]?.id, (l) => diag.current.push(l));
+  // Runde 50: iPhone-App, Feed bis zum unteren Rand (--ph-h), Abstand oben (--ph-clear), Diagnose-Zeile "vp: ..."
+  usePhoneViewport(ph, (l) => diag.current.push(l));
   useLayoutEffect(() => {
     // Hook nie kürzen: mehr als drei Zeilen in Normalgröße, dann eine Stufe kleiner
     const el = hookEl.current;
@@ -4348,7 +4353,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const phNotes = ph && notesRow(prompt, form, !forYou, unsent(state.feedbackNotes).length);
 
   return (
-    <div className="vfeed" ref={dragEl} data-form={form} data-phone={ph ? '' : undefined} data-rtl={audioRtl ? '' : undefined} data-notes={notesRow(prompt, form, !forYou, unsent(state.feedbackNotes).length) ? '' : undefined} data-surface={form === 'text' && !ph ? 'page' : 'media'} style={{ ['--area' as string]: m ? AREA_COLOR[m.area] : 'var(--on-media)' }}>
+    <div className="vfeed" ref={dragEl} data-form={form} data-phone={ph ? '' : undefined} data-statusrow={ph && statusKind ? '' : undefined} data-rtl={audioRtl ? '' : undefined} data-notes={notesRow(prompt, form, !forYou, unsent(state.feedbackNotes).length) ? '' : undefined} data-surface={form === 'text' && !ph ? 'page' : 'media'} style={{ ['--area' as string]: m ? AREA_COLOR[m.area] : 'var(--on-media)' }}>
       <div className="vstage" ref={stageEl}>
       {slots.current.slice(0, SLOTS).map((slot, s) => {
         const j = slot.index;
@@ -4447,9 +4452,11 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
           }}
         >
           {(() => {
-            const t = cleanText(momentText(m));
+            // Runde 50: Takeaway am Handy, Zitat, eine Metazeile, eine Karte (kein excerpt mit allem, keine zweite Quellenzeile)
+            const tk = ph && !desk && isTakeaway(m) ? takeawayParts(m, cleanText(momentText(m))) : null;
+            const t = tk ? cleanText(tk.body) : cleanText(momentText(m));
             const ar = isArabic(t);
-            const sl = desk ? null : sourceLine(m);
+            const sl = desk || tk ? null : sourceLine(m);
             const deskText = !!desk || ph;
             const label = sl ? `${sl.prefix}${sl.text}` : '';
             // Arabisch (Entscheidung 22, Issue 43): Verse in { } in Amiri, Erklärtext in Noto Sans Arabic. Lateinisch bleibt ein Stück.
@@ -4492,7 +4499,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                   ) : (
                     <p className="vtext-source" data-testid="text-source">{label}</p>
                   ))}
-                {deskText && <DeskTextFoot m={m} />}
+                {tk ? <PhoneTextFoot meta={tk.meta} apply={tk.apply} area={m.area} /> : deskText && <DeskTextFoot m={m} />}
               </>
             );
             return deskText ? content : <div className="vtext-col" data-step={textFit.step}>{content}</div>;
@@ -4549,9 +4556,10 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
           onSource={fullVideoUrl(m) ? openFull : undefined}
           captionsOn={captionsOn}
           hasCaptions={hasCues(m)}
-          lyric={lyricLines(m.cues, shownCue.current)}
+          cueIdx={shownCue.current}
           fallbackText={hasCues(m) ? '' : momentText(m)}
           notes={phNotes}
+          onCover={(l) => diag.current.push(l)}
         />
       )}
       {ph && m && !forYou && form === 'video' && (

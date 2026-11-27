@@ -5,7 +5,8 @@
    Die Fläche ist immer dunkel (auch bei hellem Gerät): Text und Papier-Stimmung gelten hier nicht, wie in der Mac-Ansicht. */
 .vfeed[data-phone] {
   --head-h: 44px;
-  --ph-top: calc(var(--safe-t) + var(--head-h));
+  /* Runde 50: --ph-clear (Abstand unter der Statusleiste, nur Standalone, siehe PHONE_TOP_CLEAR_PX) und --ph-h (Höhe bis zum unteren Rand) setzt usePhoneViewport am Wurzelelement. Fehlen sie, gilt 0 und inset 0. */
+  --ph-top: calc(var(--safe-t) + var(--ph-clear, 0px) + var(--head-h));
   /* Unterkante: die Home-Anzeige, mindestens 16 px */
   --ph-pb: max(var(--s-4), var(--safe-b));
   /* Höhe der Aktionsreihe: Taste 52 px mit Abstand oben und unten, auf kurzen Geräten (iPhone SE) enger */
@@ -14,6 +15,8 @@
   --ph-act-h: calc(52px + var(--ph-act-pt) + var(--ph-act-pb));
   --ph-bar-h: calc(var(--s-2) + 16px + 10px + 68px + var(--ph-pb));
   --ph-notes: 0px;
+  /* Runde 50: eigene Zeile für die Statuszeile (nur solange eine Status-Meldung steht, data-status am Feed), direkt über der Zeile "N notes" bzw. der Aktionsreihe. Der Inhalt endet darüber. */
+  --ph-status: 0px;
   --ph-dock-h: calc(var(--ph-bar-h) + var(--ph-act-h));
   --notes-row: calc(var(--hit) + var(--s-2));
   /* Video: Player randlos über die volle Breite, 16:9, direkt unter der Reiterleiste */
@@ -26,13 +29,16 @@
 }
 /* Runde 48: unterer Rand. Der Feed sitzt fest am Fenster (inset 0 statt 100dvh): in der Standalone-App auf iOS kann 100dvh kleiner als der Bildschirm sein, dann blieb darunter ein Streifen
    in der Farbe der Seite. Zusätzlich hat die Seite hinter dem Feed die Farbe der unteren Leiste, falls das Fenster dennoch höher ist als der Feed (kein Farbwechsel unter der Leiste). */
-.vfeed[data-phone] { position: fixed; inset: 0; height: auto; }
+.vfeed[data-phone] { position: fixed; inset: 0; height: var(--ph-h, auto); }
+/* Runde 50: Auf dem Gerät (installierte App) ist das Layout-Fenster um die obere Sicherheitsrand-Höhe kürzer als der Bildschirm. Mit --ph-h reicht der Feed bis zum physischen unteren Rand.
+   Bei gesetzter Höhe gewinnt height über bottom (überbestimmt), top bleibt 0. */
 html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed[data-phone]) #root { background: var(--feed-surface); }
 @media (max-height: 740px) {
   .vfeed[data-phone] { --ph-act-pt: var(--s-2); --ph-act-pb: var(--s-1); }
 }
 .vfeed[data-phone][data-form='text'] { --ph-bar-h: calc(var(--s-2) + 56px + var(--ph-pb)); }
 .vfeed[data-phone][data-notes] { --ph-notes: var(--notes-row); }
+.vfeed[data-phone][data-statusrow] { --ph-status: 28px; }
 
 .vfeed[data-phone] .vframe > div,
 .vfeed[data-phone] .vposter,
@@ -41,14 +47,17 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
 /* Audio: kein Cover in dieser Ansicht, die Elemente bleiben im DOM (Wiederladen, Sperrbildschirm), nur unsichtbar. Die Fläche .vaudio bleibt und deckt wie bisher den Player ab. */
 .vfeed[data-phone][data-form='audio'] .vaudio-art,
 .vfeed[data-phone][data-form='audio'] .vplay { display: none; }
-.vfeed[data-phone][data-form='audio'] .vtap { top: calc(var(--ph-top) + (100dvh - var(--ph-top) - var(--ph-dock-h)) * 0.7); }
+.vfeed[data-phone][data-form='audio'] .vtap { top: calc(var(--ph-top) + (var(--ph-h, 100dvh) - var(--ph-top) - var(--ph-dock-h)) * 0.7); }
 
 /* ---------- Reiterleiste oben ---------- */
 .head.ph-head {
+  /* Runde 50: fest am Fenster (nicht im bewegten .vstage) mit deckendem Hintergrund, volle Breite, an der oberen Kante. WebKit lässt den System-Weichzeichner unter der Statusleiste weg, wenn eine feste, deckende Fläche die obere Kante abdeckt. */
+  position: fixed;
   top: 0;
-  height: calc(var(--safe-t) + 44px);
+  width: 100%;
+  height: calc(var(--safe-t) + var(--ph-clear, 0px) + 44px);
   box-sizing: border-box;
-  padding: var(--safe-t) var(--margin) 0;
+  padding: calc(var(--safe-t) + var(--ph-clear, 0px)) var(--margin) 0;
   justify-content: space-between;
   background: var(--stage);
 }
@@ -97,7 +106,7 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
   position: absolute;
   left: 0;
   right: 0;
-  bottom: calc(var(--ph-dock-h) + var(--ph-notes));
+  bottom: calc(var(--ph-dock-h) + var(--ph-notes) + var(--ph-status));
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -135,7 +144,10 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
 .ph-cap .vcaption span { color: var(--on-media-muted); font-size: 16px; line-height: 24px; }
 .ph-cap .vcaption-rtl span { font-size: var(--t-caption); line-height: var(--t-ar-lh); }
 
-/* Audio: Feld mit dem mitlaufenden Text. Drei Zeilen auf festem Raster: die aktuelle Zeile bleibt beim Wechsel an ihrem Platz (Mitte, Platz für drei Zeilen). */
+/* Audio: Feld mit dem mitlaufenden Text (Runde 50, Liste siehe PhoneLyrics.tsx). Die Karte hat Innenabstand, oben optional das Titelbild (Quadrat), darunter .ph-lyr-body.
+   Alle Zeilen haben dieselbe Schrift (22 px, Zeilenhöhe 30 px, Gewicht 600, arabisch Amiri 25 px, 400): nur Farbe und Deckkraft unterscheiden aktuelle Zeile, Nachbarn und ferne Zeilen. Ein Größenunterschied änderte den Umbruch
+   und ließe die Zeile beim Wechsel springen. Die Zeilen liegen absolut (top 0) und stehen über translate3d an ihrem Platz. Bewegung: nur transform, opacity und color in 250 ms (--ease), nie height, top, margin oder font-size.
+   Nachbarn zeigen bis zu 2 Zeilen, mit Auslassung am Ende der zweiten (line-clamp ohne Innenabstand und ohne max-height am selben Kasten: kein Pixel einer dritten Zeile). Die aktuelle Zeile ist immer ganz. */
 .ph-lyrics {
   position: relative;
   flex: 1 1 0;
@@ -145,67 +157,54 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
   border-radius: 18px;
   background: var(--surface);
   border: 1px solid var(--hairline);
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) minmax(96px, auto) minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
   overflow: hidden;
+  container-type: size;
+  --dur-lyr: 250ms;
+  --lyr-gap: var(--s-3);
 }
-.ph-lyrics { container-type: size; }
-.ph-lyrics p { margin: 0; overflow-wrap: anywhere; }
-.ph-lyric-prev, .ph-lyric-next { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; color: var(--muted); }
-.ph-lyric-prev { grid-row: 1; align-self: end; padding-bottom: var(--s-2); font-size: 17px; line-height: 25px; }
-.ph-lyric-cur { grid-row: 2; align-self: center; font-size: 24px; line-height: 32px; font-weight: 600; color: var(--text); }
-.ph-lyric-next { grid-row: 3; align-self: start; padding-top: var(--s-2); font-size: 15px; line-height: 22px; }
-/* Wird das Feld niedrig (kleines Gerät, langer Hook), bleibt nur die aktuelle Zeile, in kleinerer Schrift, nichts wird halb angeschnitten */
-@container (max-height: 210px) {
-  .ph-lyric-prev, .ph-lyric-next { display: none; }
-  .ph-lyric-cur { grid-row: 1 / -1; align-self: safe center; font-size: 20px; line-height: 26px; }
+.ph-lyr-body { position: relative; flex: 1 1 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+.ph-lyr-body.ph-list { display: block; }
+.ph-row {
+  position: absolute; left: 0; right: 0; top: 0; margin: 0; padding: 0;
+  font-size: 22px; line-height: 30px; font-weight: 600; color: var(--muted); overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--clamp, 2); line-clamp: var(--clamp, 2); overflow: hidden;
+  will-change: transform;
+  transition-property: transform, opacity, color;
+  transition-duration: var(--dur-lyr), var(--dur-lyr), var(--dur-lyr);
+  transition-timing-function: var(--ease);
 }
-.ph-lyrics > :is(.ph-lyric-prev, .ph-lyric-cur, .ph-lyric-next) { animation: ph-fade 120ms ease-out; }
-@keyframes ph-fade { from { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .ph-lyrics > :is(.ph-lyric-prev, .ph-lyric-cur, .ph-lyric-next) { animation: none; } }
-.ph-lyrics:has(> .ph-lyric-text, > .ph-lyric-note) { display: flex; flex-direction: column; justify-content: center; }
-.ph-lyric-text { font-size: 17px; line-height: 26px; color: var(--body); white-space: pre-line; }
+.ph-row[data-role='cur'] { display: block; color: var(--text); overflow: visible; -webkit-line-clamp: none; line-clamp: none; }
+.ph-row[data-role='far'], .ph-row[data-cut] { opacity: 0; }
+.ph-lyr-body[data-jump] .ph-row { transition: none; }
+@media (prefers-reduced-motion: reduce) { .ph-row { transition: none; } }
+.ph-lyr-body > .ph-lyric-text, .ph-lyr-body > .ph-lyric-note { margin: 0; }
+.ph-lyric-text { font-size: 17px; line-height: 26px; color: var(--body); white-space: pre-line; overflow-wrap: anywhere; }
 .ph-lyric-note { font-size: var(--t-body); line-height: var(--t-body-lh); color: var(--on-media-muted); text-align: center; }
 /* Langer Auszug: der Rest läuft unten weich aus */
-.ph-lyrics:has(> .ph-lyric-text)::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: var(--s-8); border-radius: 0 0 18px 18px; background: linear-gradient(to bottom, transparent, var(--surface)); pointer-events: none; }
-/* Runde 49: arabische Untertitel in Amiri wie in der alten Ansicht (Amiri wirkt bei gleicher Größe kleiner, daher je Zeile etwa 1,2-fach). Gewicht 400, 600 gäbe künstliches Fett. Zeilenhöhe 1,9 lässt Vokalzeichen frei. */
-.ph-lyrics [lang='ar'] { font-family: var(--font-verse); font-weight: 400; line-height: 1.9; }
-.ph-lyric-prev[lang='ar'] { font-size: 19px; }
-.ph-lyric-cur[lang='ar'] { font-size: 27px; line-height: 1.85; }
-.ph-lyric-next[lang='ar'] { font-size: 17px; }
-.ph-lyric-text[lang='ar'] { font-size: 21px; }
-@container (max-height: 210px) { .ph-lyric-cur[lang='ar'] { font-size: 24px; } }
-
-/* Runde 49: großes Titelbild oben in der Karte (nur Audio, Feld thumb). Volle Kartenbreite, obere Ecken folgen dem Kartenradius (overflow hidden), unten gerade Kante.
-   Kein Verlauf, kein Filter, keine Animation. Höhe etwa 38 % der Karte, 88 bis 150 px, und immer so, dass darunter 176 px für drei Zeilen bleiben (bei kleiner Karte mit etwas kleinerer aktueller Zeile). Geht das nicht
-   (Karte unter 264 px), entfällt das Bild ganz und die Karte sieht aus wie ohne thumb (unter 251 px nur die aktuelle Zeile, wie bisher unter 210 px Innenhöhe).
-   Die Zeilen liegen mit Bild in .ph-lyr-body. Eine Zeile, die dort nicht ganz Platz hat (ungewöhnlich lange aktuelle Zeile), blendet PhoneAudio aus (data-clip), statt sie anzuschneiden. */
-.ph-lyrics[data-art] { container-name: ph-card; }
-.ph-art { display: block; object-fit: cover; object-position: center; background: var(--surface-2); }
-.ph-lyrics[data-art='top'] { padding: 0; display: flex; flex-direction: column; }
-.ph-lyrics[data-art='top'] > .ph-art { flex: none; box-sizing: border-box; width: 100%; max-width: none; height: clamp(88px, min(38cqh, 100cqh - 176px), 150px); }
-.ph-lyr-body { position: relative; flex: 1 1 0; min-height: 0; box-sizing: border-box; padding: var(--s-2) var(--s-5) var(--s-5); display: grid; grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr); overflow: hidden; }
-.ph-lyr-body:has(> .ph-lyric-text, > .ph-lyric-note) { display: flex; flex-direction: column; justify-content: center; }
 .ph-lyr-body:has(> .ph-lyric-text)::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: var(--s-8); background: linear-gradient(to bottom, transparent, var(--surface)); pointer-events: none; }
-.ph-lyr-body > .ph-lyric-prev, .ph-lyr-body > .ph-lyric-next { -webkit-line-clamp: 1; line-clamp: 1; max-height: 100%; }
-.ph-lyr-body > [data-clip] { visibility: hidden; }
-/* Kleine Karte: aktuelle Zeile eine Stufe kleiner, damit drei Zeilen neben dem Bild Platz haben */
-@container ph-card (max-height: 330px) {
-  .ph-lyr-body > .ph-lyric-cur { font-size: 22px; line-height: 29px; }
-  .ph-lyr-body > .ph-lyric-cur[lang='ar'] { font-size: 24px; line-height: 1.85; }
-}
-@container ph-card (max-height: 263px) {
-  .ph-lyrics[data-art='top'] > .ph-art { display: none; }
-  .ph-lyr-body { padding-top: var(--s-5); }
-}
-@container ph-card (max-height: 250px) {
-  .ph-lyr-body > .ph-lyric-prev, .ph-lyr-body > .ph-lyric-next { display: none; }
-  .ph-lyr-body > .ph-lyric-cur { grid-row: 1 / -1; align-self: safe center; font-size: 20px; line-height: 26px; }
-  .ph-lyr-body > .ph-lyric-cur[lang='ar'] { font-size: 24px; line-height: 1.9; }
-}
-/* CC aus: das Bild füllt die ganze Karte */
-.ph-lyrics[data-art='fill'] { padding: 0; }
-.ph-lyrics[data-art='fill'] > .ph-art { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* Arabisch in Amiri wie in der alten Ansicht (Amiri wirkt bei gleicher Größe kleiner). Gewicht 400, 600 gäbe künstliches Fett. Zeilenhöhe 1,85 lässt Vokalzeichen frei. */
+.ph-lyrics [lang='ar'] { font-family: var(--font-verse); font-weight: 400; }
+.ph-row[lang='ar'] { font-size: 25px; line-height: 46px; }
+.ph-lyric-text[lang='ar'] { font-size: 21px; }
+
+/* Runde 50: Titelbild als Quadrat in der Karte (nur Audio, Feld thumb), vollständig sichtbar, nimmt erst Platz, wenn es geladen ist (data-ready=yes, siehe PhoneAudio). Radius 12 px, Rand 1 px (8 Prozent Weiß, wie in Runde 48),
+   kein Verlauf, kein Filter. Oben: normaler Karten-Innenabstand, bündig mit der Startkante der Untertitel (links, bei arabisch rechts über data-dir), Seite clamp(72px, Höhe minus 220px (arabisch 316px) für die Zeilen samt Abstand: vorige 2 Zeilen, aktuelle 2, nächste 2, 128px).
+   Reicht der Platz nicht für 72 px plus die Zeilen, entfällt das Bild (die Zeilen werden nach der Reihenfolge in PhoneLyrics verkürzt). Ohne Untertitel (CC aus oder kein Text): größtmögliches Quadrat mittig.
+   Quadratisches Bild: cover auf der Quadratfläche. Nicht quadratisches (data-fit contain, gesetzt beim Laden): ganz sichtbar, Kartenfarbe dahinter. */
+.ph-art[data-ready='no'] { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.ph-lyrics[data-art] { container-name: ph-card; --ph-lines: 220px; }
+.ph-lyrics[data-art][data-dir='rtl'] { --ph-lines: 316px; }
+.ph-art { display: block; flex: none; box-sizing: border-box; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--on-media) 8%, transparent); background: var(--surface); object-fit: cover; object-position: center; }
+.ph-art[data-fit='contain'] { object-fit: contain; }
+.ph-lyrics[data-art='top'] > .ph-art { width: clamp(72px, calc(100cqh - var(--ph-lines)), 128px); height: clamp(72px, calc(100cqh - var(--ph-lines)), 128px); align-self: flex-start; }
+.ph-lyrics[data-art='top'][data-dir='rtl'] > .ph-art { align-self: flex-end; }
+@container ph-card (max-height: 291px) { .ph-lyrics[data-art='top'] > .ph-art { display: none; } }
+@container ph-card (max-height: 387px) { .ph-lyrics[data-art='top'][data-dir='rtl'] > .ph-art { display: none; } }
+.ph-lyrics[data-art='fill'] { display: grid; grid-template-rows: minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); place-items: center; }
+.ph-lyrics[data-art='fill'] > .ph-art { width: min(100cqw, 100cqh); height: min(100cqw, 100cqh); }
 
 
 /* ---------- Aktionsreihe ---------- */
@@ -283,7 +282,7 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
 .vfeed[data-phone] .vtext {
   --read-ar: 18px;
   --fh: 32px; --fq: 19px; --fql: 29px; --fa: 18px; --fal: 32px; --fgap: 20px; --fpt: 24px; --fpb: 16px; --fhead: 16px;
-  inset: var(--ph-top) 0 calc(var(--ph-dock-h) + var(--ph-notes)) 0;
+  inset: var(--ph-top) 0 calc(var(--ph-dock-h) + var(--ph-notes) + var(--ph-status)) 0;
   box-sizing: border-box;
   padding: var(--fpt) var(--s-6) var(--fpb);
   display: flex;
@@ -314,13 +313,27 @@ html:has(.vfeed[data-phone]), html:has(.vfeed[data-phone]) body, html:has(.vfeed
 .vfeed[data-phone] .vtext-body { overflow: visible; font-family: var(--font-brain); font-size: var(--fq); line-height: var(--fql); color: var(--body); }
 .vfeed[data-phone] .vtext-rtl { font-family: var(--font-ar); font-size: var(--fa); line-height: var(--fal); }
 .vfeed[data-phone] .dtx-origin { margin: 0; }
+.vfeed[data-phone] .ptx-meta { font-size: var(--t-meta); line-height: var(--t-meta-lh); color: var(--muted); }
 .vfeed[data-phone] .dtx-apply { margin: 0; padding: var(--fhead) 18px; }
 .vfeed[data-phone] .dtx-apply p { font-size: var(--t-row); line-height: 25px; }
 .vfeed[data-phone] .vtext .vtext-source { margin: 0; }
 
 /* ---------- Status, Rückmeldung ---------- */
-.vfeed[data-phone] .status { top: calc(var(--ph-top) + var(--s-1)); }
-.vfeed[data-phone][data-form='video'] .status { top: calc(var(--ph-top) + var(--s-2)); left: var(--s-3); right: auto; width: fit-content; max-width: calc(100% - var(--s-6)); padding: 2px var(--s-2); border-radius: var(--r-pill); background: var(--media-shade); }
+.vfeed[data-phone] .status {
+  /* Runde 50: Befund am Gerät, die Zeile lag auf der Chip-Zeile des Textes. Jetzt eine eigene, schmale Zeile über der Aktionsreihe (in allen drei Reitern), deckend in Bühnenfarbe, einzeilig mit Auslassung.
+     Der Inhalt endet darüber (--ph-status), dort steht nie Text. */
+  top: auto;
+  left: var(--s-5);
+  right: var(--s-5);
+  bottom: calc(var(--ph-dock-h) + var(--ph-notes));
+  height: var(--ph-status);
+  box-sizing: border-box;
+  padding: 0 0 var(--s-1);
+  align-items: flex-end;
+  background: var(--stage);
+  z-index: calc(var(--z-ui) + 1);
+}
+.vfeed[data-phone] .status > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }
 /* "N notes, send?": eigene Reihe unten über der Aktionsreihe, Tippziel in der Daumenzone */
 .vfeed[data-phone] .vnotes { top: auto; right: auto; left: var(--s-5); bottom: calc(var(--ph-dock-h) + var(--s-1)); }
 

@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } fro
 import { Icon } from '../../components/Icon';
 import { AREA_COLOR, AREA_LABEL } from '../../lib/labels';
 import { isArabic, type Moment } from '../types';
+import { PhoneLyrics } from './PhoneLyrics';
 
 /**
  * Runde 45: Inhalt der iPhone-Ansicht zwischen Reiterleiste und Aktionsreihe (Audio und Video). Chip, Kanal, Hook, im Audio das Feld mit dem mitlaufenden Text.
@@ -14,7 +15,7 @@ const lineProps = (s: string) => ({ dir: isArabic(s) ? ('rtl' as const) : ('ltr'
  * Der Hook wird nie gekürzt. Er steht in der größten von drei Stufen (28, 24, 21 px im Audio, 24, 21, 18 px im Video), die in den Platz passt.
  * Platz = Höhe des Blocks minus Chip-Zeile, Abstände und der Mindestplatz darunter (reserve). Passt auch die kleinste nicht, bleibt sie und der Platz darunter schrumpft.
  */
-function useHookFit(box: RefObject<HTMLElement>, hook: RefObject<HTMLElement>, reserve: number, key: string) {
+function useHookFit(box: RefObject<HTMLElement>, hook: RefObject<HTMLElement>, reserve: number, key: string, fallback = reserve) {
   useLayoutEffect(() => {
     const b = box.current;
     const h = hook.current;
@@ -24,13 +25,17 @@ function useHookFit(box: RefObject<HTMLElement>, hook: RefObject<HTMLElement>, r
       const gap = parseFloat(cs.rowGap) || 0;
       const pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
       const row = h.previousElementSibling as HTMLElement | null;
-      const room = b.clientHeight - pad - (row?.offsetHeight ?? 0) - gap - reserve;
-      let s = 0;
-      for (;;) {
-        h.dataset.step = String(s);
-        if (h.scrollHeight <= room || s >= 2) break;
-        s++;
-      }
+      const avail = b.clientHeight - pad - (row?.offsetHeight ?? 0) - gap;
+      // Erst mit der Reserve für das Titelbild: die größte Stufe, bei der es Platz hat. Gibt es keine (kleine Karte), gilt die Reserve ohne Bild (das Bild entfällt dann per CSS), der Hook schrumpft nicht umsonst.
+      const pick = (r: number): number | null => {
+        for (let s = 0; s <= 2; s++) {
+          h.dataset.step = String(s);
+          if (h.scrollHeight <= avail - r) return s;
+        }
+        return null;
+      };
+      const s = pick(reserve) ?? pick(fallback) ?? 2;
+      h.dataset.step = String(s);
     };
     fit();
     const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(fit);
@@ -51,7 +56,7 @@ export interface PhoneInfoHandlers {
   onPointerCancel: () => void;
 }
 
-/** Titelbild des Audio-Moments (Runde 48, ab Runde 49 groß oben in der Karte): Adresse beim Originalanbieter, nur wenn das Feld thumb eine https-Adresse ist */
+/** Titelbild des Audio-Moments (Runde 48, ab Runde 49 groß oben in der Karte, ab Runde 50 als Quadrat): Adresse beim Originalanbieter, nur wenn das Feld thumb eine https-Adresse ist */
 export const coverUrl = (thumb?: string): string => (thumb && /^https:\/\//i.test(thumb.trim()) ? thumb.trim() : '');
 
 export function PhoneInfo({ m, speaker, info, onSource, hookRef }: { m: Moment; speaker: string; info: PhoneInfoHandlers; onSource?: () => void; hookRef: RefObject<HTMLHeadingElement> }) {
@@ -92,83 +97,116 @@ export interface PhoneAudioProps {
   /** Untertitel sind an (Regel des Moments oder Taste CC) */
   captionsOn: boolean;
   hasCaptions: boolean;
-  lyric: { prev: string; cur: string; next: string };
+  /** Nummer des aktuellen Cues (kleiner als 0: noch keiner) */
+  cueIdx: number;
   /** Ohne Untertitel: der Auszug des Moments */
   fallbackText: string;
   /** Platz unter der Zeile der Rückmeldung ("N notes, send?") */
   notes: boolean;
+  /** Diagnose-Zeile "cover: <id> ok|late|error|none" */
+  onCover?: (line: string) => void;
 }
 
-/** Audio: Chip, Kanal, Hook, darunter das Feld mit dem mitlaufenden Text (vorige Zeile gedämpft, aktuelle groß, nächste gedämpft, feste Position der aktuellen Zeile) */
+/** Wie lange ein Titelbild nach dem Wechsel zum Moment höchstens brauchen darf, damit es eingeblendet wird (ms). Danach bleibt der Moment ohne Bild, die Karte springt nie nachträglich. */
+export const COVER_WAIT_MS = 600;
+/** Kleinere Bilder (zum Beispiel ein durchsichtiges 1x1) gelten als Fehler */
+const COVER_MIN_PX = 16;
+type CoverPhase = 'wait' | 'ok' | 'late' | 'error';
+
+/** Audio: Chip, Kanal, Hook, darunter das Feld mit dem mitlaufenden Text (durchgehende Liste, siehe PhoneLyrics) */
 export function PhoneAudio(p: PhoneAudioProps) {
   const box = useRef<HTMLDivElement>(null);
   const hook = useRef<HTMLHeadingElement>(null);
-  // Titelbild nur im aktiven Moment (diese Ansicht steht nur für ihn), lädt es nicht, verschwindet es ganz (Karte wie ohne thumb)
+  // Titelbild nur im aktiven Moment (diese Ansicht steht nur für ihn). Es nimmt erst Platz ein, wenn es geladen ist (load, naturalWidth größer 0) und das innerhalb von COVER_WAIT_MS nach dem Wechsel geschah.
+  // Bis dahin und bei Verspätung oder Fehler sieht die Karte aus wie ohne Bild (das Element liegt unsichtbar, ohne Platz, und lädt normal: kein loading=lazy, das bei versteckten Bildern nie lädt).
   const thumb = coverUrl(p.m.thumb);
-  const [bad, setBad] = useState('');
-  const src = thumb && bad !== thumb ? thumb : '';
-  // Runde 49: oben in der Karte über den Untertiteln. Ohne Untertitel zum Anzeigen (CC aus, kein Text) füllt es die ganze Karte
-  const fill = !!src && (p.hasCaptions ? !p.captionsOn : !p.fallbackText);
-  // Mit Titelbild braucht die Karte mehr Platz (Bild mindestens 88 px plus Platz für drei Zeilen; die Messung zieht die Chip-Zeile nicht ab, daher der hohe Wert), die Überschrift wird dafür eher eine Stufe kleiner
-  useHookFit(box, hook, src ? 362 : 132, `${p.m.id}|${src ? 'c' : ''}`);
-  // Mit Bild: eine vorige oder nächste Zeile, die in ihrer Reihe nicht ganz Platz hat, wird ausgeblendet statt angeschnitten (nur die aktuelle Zeile bleibt)
-  const lyr = useRef<HTMLDivElement>(null);
+  const [st, setSt] = useState<{ src: string; p: CoverPhase }>({ src: '', p: 'wait' });
+  const phase: CoverPhase = thumb ? (st.src === thumb ? st.p : 'wait') : 'error';
+  const src = thumb && (phase === 'wait' || phase === 'ok') ? thumb : '';
+  const ready = !!src && phase === 'ok';
+  const img = useRef<HTMLImageElement>(null);
+  const t0 = useRef(0);
+  const logged = useRef('');
+  const note = (id: string, ph: string) => {
+    if (logged.current === `${id}|${ph}`) return;
+    logged.current = `${id}|${ph}`;
+    p.onCover?.(`cover: ${id} ${ph}`);
+  };
+  const settled = useRef('');
+  const settle = (next: CoverPhase) => {
+    // Nur das erste Urteil je Moment zählt (ein Fehler vor Ablauf der Frist wird nicht nachträglich zu "late")
+    if (settled.current === `${p.m.id}|${thumb}`) return;
+    settled.current = `${p.m.id}|${thumb}`;
+    setSt({ src: thumb, p: next });
+    note(p.m.id, next);
+  };
+  const judge = (el: HTMLImageElement) => {
+    if (!(el.naturalWidth >= COVER_MIN_PX && el.naturalHeight >= COVER_MIN_PX)) return settle('error');
+    setWide(Math.abs(el.naturalWidth / el.naturalHeight - 1) > 0.02 ? thumb : '');
+    settle(performance.now() - t0.current <= COVER_WAIT_MS ? 'ok' : 'late');
+  };
   useLayoutEffect(() => {
-    const w = lyr.current;
-    if (!w) return;
-    const clip = () => {
-      for (const e of Array.from(w.querySelectorAll<HTMLElement>('.ph-lyric-prev, .ph-lyric-next'))) {
-        e.removeAttribute('data-clip');
-        const cs = getComputedStyle(e);
-        const need = (parseFloat(cs.lineHeight) || 0) + (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
-        if (e.clientHeight < need - 1) e.setAttribute('data-clip', '');
-      }
-    };
-    clip();
-    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(clip);
-    ro?.observe(w);
-    const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
-    fonts?.addEventListener?.('loadingdone', clip);
-    return () => {
-      ro?.disconnect();
-      fonts?.removeEventListener?.('loadingdone', clip);
-    };
-  }, [src, fill, p.captionsOn, p.lyric.prev, p.lyric.cur, p.lyric.next]);
-  const lines = (
-    <>
-      {!p.hasCaptions && !p.fallbackText ? (
-          <p className="ph-lyric-note">No captions for this moment.</p>
-        ) : !p.hasCaptions ? (
-          <p className="ph-lyric-text" data-testid="ph-lyric-text" {...lineProps(p.fallbackText)}>
-            {p.fallbackText}
-          </p>
-        ) : !p.captionsOn ? (
-          <p className="ph-lyric-note">Captions are off. Tap CC to show them.</p>
-        ) : (
-          <>
-            {p.lyric.prev && (
-              <p key={`p${p.lyric.prev}`} className="ph-lyric-prev" data-testid="ph-lyric-prev" {...lineProps(p.lyric.prev)}>
-                {p.lyric.prev}
-              </p>
-            )}
-            <p key={`c${p.lyric.cur}`} className="ph-lyric-cur" data-testid="caption" {...lineProps(p.lyric.cur)}>
-              <span>{p.lyric.cur}</span>
-            </p>
-            {p.lyric.next && (
-              <p key={`n${p.lyric.next}`} className="ph-lyric-next" data-testid="ph-lyric-next" {...lineProps(p.lyric.next)}>
-                {p.lyric.next}
-              </p>
-            )}
-          </>
-        )}
-    </>
-  );
+    if (!thumb) {
+      note(p.m.id, 'none');
+      return;
+    }
+    t0.current = performance.now();
+    const timer = window.setTimeout(() => settle('late'), COVER_WAIT_MS);
+    // Ein Bild aus dem Cache kann geladen sein, bevor der Handler hängt
+    const el = img.current;
+    if (el?.complete) {
+      window.clearTimeout(timer);
+      judge(el);
+      return;
+    }
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [thumb, p.m.id]);
+  // Ohne Untertitel zum Anzeigen (CC aus, kein Text): das Bild steht als größtmögliches Quadrat mittig in der Karte
+  const fill = ready && (p.hasCaptions ? !p.captionsOn : !p.fallbackText);
+  // Nicht quadratisches Bild: ganz sichtbar (contain) auf der Quadratfläche statt beschnitten (cover)
+  const [wide, setWide] = useState('');
+  // Reserve unter dem Hook: wie ohne Bild. Der Hook wird wegen des Bildes nicht kleiner (Runde 50, gemessen): das Bild nimmt nur Platz, der übrig ist, und entfällt sonst.
+  useHookFit(box, hook, 132, p.m.id);
+  const cues = p.m.cues ?? [];
+  const sample = (p.cueIdx >= 0 && cues[p.cueIdx]?.[1]) || cues[0]?.[1] || p.fallbackText || p.m.hook;
+  const lines =
+    !p.hasCaptions && !p.fallbackText ? (
+      <div className="ph-lyr-body"><p className="ph-lyric-note">No captions for this moment.</p></div>
+    ) : !p.hasCaptions ? (
+      <div className="ph-lyr-body">
+        <p className="ph-lyric-text" data-testid="ph-lyric-text" {...lineProps(p.fallbackText)}>
+          {p.fallbackText}
+        </p>
+      </div>
+    ) : !p.captionsOn ? (
+      <div className="ph-lyr-body"><p className="ph-lyric-note">Captions are off. Tap CC to show them.</p></div>
+    ) : (
+      <PhoneLyrics key={`l${p.m.id}`} id={p.m.id} cues={cues} idx={p.cueIdx} />
+    );
   return (
     <div className="ph-audio" ref={box} data-testid="ph-audio" data-notes={p.notes ? '' : undefined} style={{ ['--ad' as string]: AREA_COLOR[p.m.area] }}>
       <PhoneInfo m={p.m} speaker={p.speaker} info={p.info} onSource={p.onSource} hookRef={hook} />
-      <section className="ph-lyrics" data-testid="ph-lyrics" aria-label="Captions" aria-live="off" data-art={src ? (fill ? 'fill' : 'top') : undefined}>
-        {src && <img key={p.m.id} className="ph-art" data-testid="ph-cover" src={src} alt="" width={390} height={140} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setBad(thumb)} />}
-        {fill ? null : src ? <div className="ph-lyr-body" ref={lyr}>{lines}</div> : lines}
+      <section className="ph-lyrics" data-testid="ph-lyrics" aria-label="Captions" aria-live="off" data-art={ready ? (fill ? 'fill' : 'top') : undefined} data-dir={ready ? lineProps(sample).dir : undefined}>
+        {src && (
+          <img
+            key={`c${p.m.id}`}
+            ref={img}
+            className="ph-art"
+            data-testid="ph-cover"
+            data-ready={ready ? 'yes' : 'no'}
+            data-fit={wide === src ? 'contain' : 'cover'}
+            src={src}
+            alt=""
+            width={128}
+            height={128}
+            decoding="async"
+            referrerPolicy="no-referrer"
+            onLoad={(e) => judge(e.currentTarget)}
+            onError={() => settle('error')}
+          />
+        )}
+        {fill ? null : lines}
       </section>
     </div>
   );

@@ -1,4 +1,5 @@
 import { AreaChip } from '../desk/DeskCenter';
+import { AREA_DK } from '../desk/area';
 import { hookSize } from '../desk/model';
 import type { Moment } from '../types';
 
@@ -11,5 +12,25 @@ export function PhoneTextHead({ m, speaker }: { m: Moment; speaker: string }) {
         {m.hook}
       </h1>
     </header>
+  );
+}
+
+/** Runde 50: Fuß des Takeaway-Textes am Handy. Metazeile (Herkunft und Nummer, einmal) und die Karte "Apply today" (einmal). Gleiche Abstände wie der Rest der Seite (--fgap aus phone.css). */
+export function PhoneTextFoot({ meta, apply, area }: { meta: string; apply: string; area: Moment['area'] }) {
+  if (!meta && !apply) return null;
+  return (
+    <>
+      {meta && (
+        <p className="dtx-origin ptx-meta" data-testid="ph-origin" dir="auto">
+          {meta}
+        </p>
+      )}
+      {apply && (
+        <section className="dtx-apply" data-testid="ph-apply" style={{ ['--ad' as string]: AREA_DK[area] }}>
+          <h2>Apply today</h2>
+          <p dir="auto">{apply}</p>
+        </section>
+      )}
+    </>
   );
 }
