@@ -6,7 +6,10 @@ name: loudness
 # lufs ist null, wenn die Messung scheitert, das Fenster zu kurz ist oder nur Stille liegt (-70 LUFS oder darunter).
 # Klangmerkmale (v1, gleicher ffmpeg-Durchgang, nur Zahlen): je Ergebnis zusätzlich "sound":{"noise":dBFS (10. Perzentil des RMS in Blöcken zu 0,1 s),
 # "snr":dB (90. minus 10. Perzentil), "clip":Anteil der Samples über -0,5 dBFS (Mono-Mix), "peak":dBFS, "bw":Hz unter denen 99 % der Energie liegen,
-# "bw95":dito 95 %, "hf":Energieanteil über 4 kHz, "blocks":Anzahl Blöcke, "v":1}. Fehlt sound, nennt sErr den Grund. Alte Auswerter lesen nur lufs und start/end.
+# "bw95":dito 95 %, "hf":Energieanteil über 4 kHz, "blocks":Anzahl Blöcke, "v":2}. Fehlt sound, nennt sErr den Grund.
+# v2: Blöcke mit RMS unter -80 dBFS (digitale Stille) zählen für noise und snr nicht, "silent" ist ihr Anteil, "kept" die Zahl der übrigen Blöcke. Bleiben
+# weniger als 50 Blöcke, fehlen noise und snr. "flat":Anteil der Samples, die das dritte oder spätere in einer Folge von Samples über -0,5 dBFS sind (abgeflachte
+# Spitzen wie bei Übersteuerung, ein Begrenzer ohne Verzerrung erzeugt kaum solche Folgen), "clip" bleibt der Anteil aller Samples über -0,5 dBFS. Alte Auswerter lesen nur lufs und start/end.
 on:
   push:
     branches: [claude/compute]
@@ -57,6 +60,7 @@ jobs:
           Signal in einem Durchgang in vier Zweige. Zweig 1: ebur128 (Lautheit, unverändert wie vor v1, Zusammenfassung "I: -18.3 LUFS", Ausgang des Graphen). Zweig 2: Mono-Mix in Blöcken
           zu 0,1 s, astats je Block (RMS und Spitze). Zweig 3: Mono-Mix, aeval setzt jedes Sample mit Betrag über 0,944 (-0,5 dBFS) auf 1, sonst 0, astats RMS
           darüber ergibt den Anteil. Zweig 4: Mono-Mix, acrossover in 13 Frequenzbänder, astats RMS je Band über das ganze Fenster (Energie je Band).
+          Zweig 5: Mono-Mix, aeval zählt mit st/ld die Länge der laufenden Folge von Samples über -0,5 dBFS und setzt 1, wenn sie 3 erreicht oder überschreitet, astats RMS ergibt den Anteil (flat).
           Schlägt der Durchgang mit den Klangzweigen fehl, läuft der alte Aufruf (nur ebur128), dann fehlt nur sound und der Grund steht in sErr."""
           import json, math, os, re, shutil, subprocess, sys, tempfile, time
 
@@ -70,6 +74,8 @@ jobs:
           SPLITS = [250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 8000, 10000, 12000, 16000]
           EDGES = [0] + SPLITS + [RATE // 2]          # 13 Bänder
           FLOOR_DB = -90.0                            # digitale Stille in Blöcken zählt als -90 dBFS
+          SILENT_DB = -80.0                           # Blöcke darunter (digitale Stille, Rauschtor) zählen für noise und snr nicht
+          MIN_KEPT = 50                               # weniger übrige Blöcke (5 s): kein noise, kein snr
 
 
           def graph():
@@ -77,11 +83,12 @@ jobs:
               stat = 'astats=metadata=1:reset=0:measure_perchannel=none:measure_overall=RMS_level'
               mono = f'aformat=sample_rates={RATE}:channel_layouts=mono'
               parts = [
-                  'asplit=4[a1][a2][a3][a4]',
+                  'asplit=5[a1][a2][a3][a4][a5]',
                   '[a1]ebur128=peak=none',
                   f'[a2]{mono},asetnsamples=n={BLOCK}:p=0,astats=metadata=1:reset=1:measure_perchannel=none:measure_overall=RMS_level+Peak_level+Number_of_samples,'
                   'ametadata=mode=print:file=blk.txt,anullsink',
                   f"[a3]{mono},aeval=exprs='gt(abs(val(0))\\,{CLIP_LEVEL:.6f})':channel_layout=mono,{stat},ametadata=mode=print:key=lavfi.astats.Overall.RMS_level:file=clip.txt,anullsink",
+                  f"[a5]{mono},aeval=exprs='st(0\\,if(gt(abs(val(0))\\,{CLIP_LEVEL:.6f})\\,ld(0)+1\\,0));gt(ld(0)\\,2)':channel_layout=mono,{stat},ametadata=mode=print:key=lavfi.astats.Overall.RMS_level:file=flat.txt,anullsink",
                   f"[a4]{mono},acrossover=split='{' '.join(map(str, SPLITS))}':order=4th{bands}",
               ]
               parts += [f'[o{i}]{stat},ametadata=mode=print:key=lavfi.astats.Overall.RMS_level:file=band{i}.txt,anullsink' for i in range(len(SPLITS) + 1)]
@@ -129,10 +136,16 @@ jobs:
               blocks = [b for b in read_blocks(os.path.join(wd, 'blk.txt')) if b[2] >= BLOCK // 2]  # kurzen Schlussblock auslassen
               if len(blocks) < 5:
                   raise ValueError(f'nur {len(blocks)} Blöcke')
-              rms = [b[0] for b in blocks]
-              noise, speech = pct(rms, 10), pct(rms, 90)
+              rms = [b[0] for b in blocks if b[0] >= SILENT_DB]
+              silent = 1 - len(rms) / len(blocks)
+              noise_snr = {}
+              if len(rms) >= MIN_KEPT:
+                  noise, speech = pct(rms, 10), pct(rms, 90)
+                  noise_snr = {'noise': round(noise, 1), 'snr': round(speech - noise, 1)}
               cl = last_db(os.path.join(wd, 'clip.txt'))
               clip = 0.0 if cl is None else min(1.0, 10 ** (cl / 10))   # mittleres Quadrat eines 0/1-Signals ist der Anteil
+              fl = last_db(os.path.join(wd, 'flat.txt'))
+              flat = 0.0 if fl is None else min(1.0, 10 ** (fl / 10))
               pw = []
               for i in range(len(SPLITS) + 1):
                   d = last_db(os.path.join(wd, f'band{i}.txt'))
@@ -150,8 +163,8 @@ jobs:
                       acc += p
                   return float(EDGES[-1])
 
-              return {'noise': round(noise, 1), 'snr': round(speech - noise, 1), 'clip': round(clip, 5), 'peak': round(max(b[1] for b in blocks), 1),
-                      'bw': round(bw(0.99)), 'bw95': round(bw(0.95)), 'hf': round(sum(pw[6:]) / tot, 4), 'blocks': len(blocks), 'v': 1}
+              return {**noise_snr, 'clip': round(clip, 5), 'flat': round(flat, 6), 'silent': round(silent, 3), 'kept': len(rms), 'peak': round(max(b[1] for b in blocks), 1),
+                      'bw': round(bw(0.99)), 'bw95': round(bw(0.95)), 'hf': round(sum(pw[6:]) / tot, 4), 'blocks': len(blocks), 'v': 2}
 
 
           def run(cmd, wd=None):
