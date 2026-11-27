@@ -1,5 +1,5 @@
 {
- "at": "2026-11-27T05:52:58.986Z",
+ "at": "2026-11-27T06:48:00.962Z",
  "runs": [
   {
    "browser": "webkit",
@@ -52,14 +52,14 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "diagLines": 20,
+   "diagLines": 21,
    "diagSample": [
-    "auff slot0 sy4:1 state 2",
-    "auff sync: first upload waits for stable playback",
-    "auff app: hidden",
-    "auff sync: first upload released (app left) after 3.0 s"
+    "b40w slot0 sy0:1 state 2",
+    "b40w sync: first upload waits for stable playback",
+    "b40w app: hidden",
+    "b40w sync: first upload released (app left) after 3.0 s"
    ],
-   "writeDelayMs": 10027,
+   "writeDelayMs": 10036,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -121,12 +121,12 @@
    },
    "diagLines": 20,
    "diagSample": [
-    "lmz4 slot0 sy0:1 state 2",
-    "lmz4 sync: first upload waits for stable playback",
-    "lmz4 app: hidden",
-    "lmz4 sync: first upload released (app left) after 3.0 s"
+    "epzd slot0 sy5:1 state 2",
+    "epzd sync: first upload waits for stable playback",
+    "epzd app: hidden",
+    "epzd sync: first upload released (app left) after 3.0 s"
    ],
-   "writeDelayMs": 10019,
+   "writeDelayMs": 10021,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
