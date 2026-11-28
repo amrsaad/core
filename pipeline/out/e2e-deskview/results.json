@@ -1,5 +1,5 @@
 {
- "at": "2026-11-28T06:07:22.548Z",
+ "at": "2026-11-28T07:44:37.749Z",
  "runs": [
   {
    "browser": "webkit",
@@ -106,6 +106,16 @@
     "noKeysWhileTyping": true,
     "helpKey": true,
     "noErrors1440": true,
+    "queueArabicRtl": true,
+    "queueArabicRightEdge": true,
+    "queueLatinLeftEdge": true,
+    "arabicHeadingNoTracking": true,
+    "latinHeadingKeepsTracking": true,
+    "quoteLatinLeft": true,
+    "quoteArabicRight": true,
+    "quoteGapSame": true,
+    "arabicColonSpaced": true,
+    "quoteNoErrors": true,
     "1280videoClean": true,
     "1280audioClean": true,
     "1280textClean": true,
@@ -164,7 +174,7 @@
       "sh": 60,
       "len": 81,
       "sep": "0px",
-      "bg": "color(srgb 0.107922 0.100549 0.093176)",
+      "bg": "color(srgb 0.107922 0.100549 0.08949)",
       "bd": "color(srgb 0.647059 0.580392 1 / 0.45)"
      },
      {
@@ -792,6 +802,16 @@
     "noKeysWhileTyping": true,
     "helpKey": true,
     "noErrors1440": true,
+    "queueArabicRtl": true,
+    "queueArabicRightEdge": true,
+    "queueLatinLeftEdge": true,
+    "arabicHeadingNoTracking": true,
+    "latinHeadingKeepsTracking": true,
+    "quoteLatinLeft": true,
+    "quoteArabicRight": true,
+    "quoteGapSame": true,
+    "arabicColonSpaced": true,
+    "quoteNoErrors": true,
     "1280videoClean": true,
     "1280audioClean": true,
     "1280textClean": true,
@@ -850,7 +870,7 @@
       "sh": 60,
       "len": 81,
       "sep": "0px",
-      "bg": "color(srgb 0.107922 0.100549 0.0894902)",
+      "bg": "color(srgb 0.107922 0.100549 0.0968627)",
       "bd": "color(srgb 0.647059 0.580392 1 / 0.45)"
      },
      {
@@ -860,7 +880,7 @@
       "sh": 60,
       "len": 80,
       "sep": "1px",
-      "bg": "color(srgb 0.145882 0.138824 0.128235)",
+      "bg": "color(srgb 0.145882 0.138824 0.135294)",
       "bd": "rgba(0, 0, 0, 0)"
      },
      {
@@ -971,7 +991,7 @@
       "sh": 120,
       "len": 169,
       "sep": "1px",
-      "bg": "rgba(0, 0, 0, 0)",
+      "bg": "color(srgb 0.138824 0.145882 0.16)",
       "bd": "rgba(0, 0, 0, 0)"
      },
      {
