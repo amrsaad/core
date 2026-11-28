@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-28T05:05:22.321Z",
+  "at": "2026-11-28T06:01:40.122Z",
   "runs": [
     {
       "browser": "webkit",
@@ -73,7 +73,7 @@
         "noYtNoErrors": true
       },
       "notes": {
-        "raceMs": 5331,
+        "raceMs": 5285,
         "raceLoads": [
           {
             "id": "srau0",
@@ -96,94 +96,86 @@
             "d": 30
           }
         ],
-        "raceLine": "race: start n=4 first ready srau1 after 5002 ms (pool), losers 3",
+        "raceLine": "race: start n=4 first ready srau1 after 5000 ms (pool), losers 3",
         "raceDiag": [
           "deck: pool load srau1 src=net",
           "deck: src net srau0",
-          "hedge: srau0 active rs=0 after 3001 ms, second element loads the same source, active load kept (unlocked 6/6)",
+          "hedge: srau0 active rs=0 after 3004 ms, second element loads the same source, active load kept (unlocked 6/6)",
           "deck: pool load srau7 src=net",
-          "load: srau1 pool ls=- fb=- md=5022 cp=5032 sk=- total=5032 conc=1 result=ready",
-          "race: start n=4 first ready srau1 after 5002 ms (pool), losers 3",
-          "deck: pool ready srau1 after 5034 ms host=stream.test",
+          "load: srau1 pool ls=- fb=- md=5019 cp=5030 sk=- total=5030 conc=1 result=ready",
+          "race: start n=4 first ready srau1 after 5000 ms (pool), losers 3",
+          "deck: pool ready srau1 after 5031 ms host=stream.test",
           "deck: ready first srau1:0 over srau0:0 (rescue)",
-          "load: srau0 hedge ls=- fb=- md=- cp=- sk=- total=2104 conc=3 result=dropped",
+          "load: srau0 hedge ls=- fb=- md=- cp=- sk=- total=2084 conc=3 result=dropped",
           "hedge: released srau0 (moment changed)",
           "deck: swap srau1 ready=true pool=0",
           "deck: pool load srau3 src=net",
-          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=5108 conc=2 result=dropped",
-          "start: srau1:0 first sound 5228 ms after tab open (yt api waited 0 ms)",
+          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=5090 conc=2 result=dropped",
+          "start: srau1:0 first sound 5208 ms after tab open (yt api waited 1 ms)",
           "load: srau3 pool ls=- fb=- md=- cp=- sk=- total=1 conc=2 result=lost",
           "deck: pool load srau0 src=net"
         ],
-        "raceThirdMs": 8329,
-        "thirdOpenedAfterMs": 3026,
+        "raceThirdMs": 8318,
+        "thirdOpenedAfterMs": 3022,
         "thirdDiag": [
           "deck: pool fill deferred (active not playing)",
           "deck: pool load srau1 src=net",
           "deck: pool fill 1/5 (local 0, net 1)",
           "deck: src net srau0",
-          "hedge: srau0 active rs=0 after 3001 ms, second element loads the same source, active load kept (unlocked 6/6)",
+          "hedge: srau0 active rs=0 after 3000 ms, second element loads the same source, active load kept (unlocked 6/6)",
           "deck: pool load srau7 src=net",
           "deck: pool fill 2/5 (local 0, net 2)",
           "deck: pool slow srau1 8000 ms rs=0 meta=false",
-          "load: srau7 pool ls=- fb=- md=5022 cp=5033 sk=- total=5034 conc=4 result=ready",
-          "race: start n=4 first ready srau7 after 8059 ms (pool), losers 3",
-          "deck: pool ready srau7 after 5034 ms host=stream.test",
+          "load: srau7 pool ls=- fb=- md=5021 cp=5031 sk=- total=5032 conc=4 result=ready",
+          "race: start n=4 first ready srau7 after 8053 ms (pool), losers 3",
+          "deck: pool ready srau7 after 5032 ms host=stream.test",
           "deck: pool load srau3 src=net",
           "deck: pool fill 3/5 (local 0, net 3)",
-          "load: srau3 pool ls=- fb=- md=52 cp=62 sk=- total=62 conc=4 result=ready",
-          "deck: pool ready srau3 after 62 ms host=stream.test",
-          "deck: pool load srau9 src=net",
-          "deck: pool fill 4/5 (local 0, net 4)",
           "deck: ready first srau7:0 over srau0:0 (rescue)",
-          "load: srau0 hedge ls=- fb=- md=- cp=- sk=- total=5125 conc=3 result=dropped",
+          "load: srau0 hedge ls=- fb=- md=- cp=- sk=- total=5110 conc=3 result=dropped",
           "hedge: released srau0 (moment changed)",
-          "deck: swap srau7 ready=true pool=1",
-          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=8129 conc=2 result=lost",
+          "deck: swap srau7 ready=true pool=0",
+          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=8114 conc=2 result=lost",
           "deck: pool load srau0 src=net",
-          "deck: pool fill 4/5 (local 0, net 4)"
+          "deck: pool fill 3/5 (local 0, net 3)",
+          "load: srau3 pool ls=- fb=- md=52 cp=67 sk=- total=67 conc=4 result=ready",
+          "deck: pool ready srau3 after 67 ms host=stream.test"
         ],
         "thirdLoads": [
           {
             "id": "srau0",
             "off": 0,
             "d": 12000,
-            "at": 412
+            "at": 397
           },
           {
             "id": "srau1",
             "off": 1,
             "d": 12000,
-            "at": 386
+            "at": 368
           },
           {
             "id": "srau7",
             "off": 2,
             "d": 5000,
-            "at": 3438
+            "at": 3419
           },
           {
             "id": "srau3",
             "off": 3,
             "d": 30,
-            "at": 8472
-          },
-          {
-            "id": "srau9",
-            "off": 4,
-            "d": 30,
-            "at": 8534
+            "at": 8451
           }
         ],
-        "hedgeMs": 5229,
+        "hedgeMs": 5252,
         "hedgeDiag": [
           "deck: src net srau0",
           "hedge: srau0 active rs=0 after 3001 ms, second element loads the same source, active load kept (unlocked 6/6)",
-          "load: srau0 hedge ls=- fb=- md=2021 cp=2031 sk=- total=2031 conc=3 result=ready",
-          "race: start n=4 first ready srau0 after 5034 ms (hedge), losers 3",
-          "hedge: won srau0 after 2032 ms, active rs=0 released",
+          "load: srau0 hedge ls=- fb=- md=2021 cp=2032 sk=- total=2033 conc=3 result=ready",
+          "race: start n=4 first ready srau0 after 5035 ms (hedge), losers 3",
+          "hedge: won srau0 after 2033 ms, active rs=0 released",
           "deck: swap srau0 ready=true pool=0",
-          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=5039 conc=2 result=lost"
+          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=5038 conc=2 result=lost"
         ],
         "syncPutAfterMs": 20004,
         "syncLeftPutMs": 30,
@@ -268,7 +260,7 @@
         "noYtNoErrors": true
       },
       "notes": {
-        "raceMs": 5190,
+        "raceMs": 5181,
         "raceLoads": [
           {
             "id": "srau0",
@@ -291,46 +283,46 @@
             "d": 30
           }
         ],
-        "raceLine": "race: start n=4 first ready srau1 after 5018 ms (pool), losers 3",
+        "raceLine": "race: start n=4 first ready srau1 after 5023 ms (pool), losers 3",
         "raceDiag": [
           "deck: pool load srau1 src=net",
           "deck: src net srau0",
-          "hedge: srau0 active rs=0 after 3008 ms, second element loads the same source, active load kept (unlocked 6/6)",
+          "hedge: srau0 active rs=0 after 3001 ms, second element loads the same source, active load kept (unlocked 6/6)",
           "deck: pool load srau7 src=net",
-          "load: srau1 pool ls=- fb=- md=5022 cp=5032 sk=- total=5032 conc=1 result=ready",
-          "race: start n=4 first ready srau1 after 5018 ms (pool), losers 3",
-          "deck: pool ready srau1 after 5032 ms host=stream.test",
+          "load: srau1 pool ls=- fb=- md=5026 cp=5035 sk=- total=5036 conc=1 result=ready",
+          "race: start n=4 first ready srau1 after 5023 ms (pool), losers 3",
+          "deck: pool ready srau1 after 5036 ms host=stream.test",
           "deck: ready first srau1:0 over srau0:0 (rescue)",
-          "load: srau0 hedge ls=- fb=- md=- cp=- sk=- total=2081 conc=3 result=dropped",
+          "load: srau0 hedge ls=- fb=- md=- cp=- sk=- total=2090 conc=3 result=dropped",
           "hedge: released srau0 (moment changed)",
           "deck: swap srau1 ready=true pool=0",
           "deck: pool load srau3 src=net",
-          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=5090 conc=2 result=dropped",
-          "start: srau1:0 first sound 5120 ms after tab open (yt api waited 0 ms)",
-          "load: srau3 pool ls=- fb=- md=- cp=- sk=- total=0 conc=2 result=lost",
+          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=5094 conc=2 result=dropped",
+          "start: srau1:0 first sound 5124 ms after tab open (yt api waited 0 ms)",
+          "load: srau3 pool ls=- fb=- md=- cp=- sk=- total=1 conc=2 result=lost",
           "deck: pool load srau0 src=net"
         ],
-        "raceThirdMs": 8190,
-        "thirdOpenedAfterMs": 3047,
+        "raceThirdMs": 8180,
+        "thirdOpenedAfterMs": 3040,
         "thirdDiag": [
           "deck: pool fill deferred (active not playing)",
           "deck: pool load srau1 src=net",
           "deck: pool fill 1/5 (local 0, net 1)",
           "deck: src net srau0",
-          "hedge: srau0 active rs=0 after 3005 ms, second element loads the same source, active load kept (unlocked 6/6)",
+          "hedge: srau0 active rs=0 after 3008 ms, second element loads the same source, active load kept (unlocked 6/6)",
           "deck: pool load srau7 src=net",
           "deck: pool fill 2/5 (local 0, net 2)",
           "deck: pool slow srau1 8000 ms rs=0 meta=false",
-          "load: srau7 pool ls=- fb=- md=5021 cp=5031 sk=- total=5031 conc=4 result=ready",
-          "race: start n=4 first ready srau7 after 8077 ms (pool), losers 3",
-          "deck: pool ready srau7 after 5031 ms host=stream.test",
+          "load: srau7 pool ls=- fb=- md=5028 cp=5038 sk=- total=5038 conc=4 result=ready",
+          "race: start n=4 first ready srau7 after 8078 ms (pool), losers 3",
+          "deck: pool ready srau7 after 5038 ms host=stream.test",
           "deck: pool load srau3 src=net",
           "deck: pool fill 3/5 (local 0, net 3)",
           "deck: ready first srau7:0 over srau0:0 (rescue)",
-          "load: srau0 hedge ls=- fb=- md=- cp=- sk=- total=5090 conc=3 result=dropped",
+          "load: srau0 hedge ls=- fb=- md=- cp=- sk=- total=5091 conc=3 result=dropped",
           "hedge: released srau0 (moment changed)",
           "deck: swap srau7 ready=true pool=0",
-          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=8098 conc=2 result=lost",
+          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=8100 conc=2 result=lost",
           "deck: pool load srau0 src=net",
           "deck: pool fill 3/5 (local 0, net 3)"
         ],
@@ -339,19 +331,19 @@
             "id": "srau0",
             "off": 0,
             "d": 12000,
-            "at": 153
+            "at": 151
           },
           {
             "id": "srau1",
             "off": 1,
             "d": 12000,
-            "at": 143
+            "at": 141
           },
           {
             "id": "srau7",
             "off": 2,
             "d": 5000,
-            "at": 3200
+            "at": 3191
           },
           {
             "id": "srau3",
@@ -363,14 +355,14 @@
         "hedgeMs": 5121,
         "hedgeDiag": [
           "deck: src net srau0",
-          "hedge: srau0 active rs=0 after 3001 ms, second element loads the same source, active load kept (unlocked 6/6)",
+          "hedge: srau0 active rs=0 after 3007 ms, second element loads the same source, active load kept (unlocked 6/6)",
           "load: srau0 hedge ls=- fb=- md=2020 cp=2030 sk=- total=2030 conc=3 result=ready",
-          "race: start n=4 first ready srau0 after 5032 ms (hedge), losers 3",
-          "hedge: won srau0 after 2030 ms, active rs=0 released",
+          "race: start n=4 first ready srau0 after 5038 ms (hedge), losers 3",
+          "hedge: won srau0 after 2031 ms, active rs=0 released",
           "deck: swap srau0 ready=true pool=0",
-          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=5034 conc=2 result=lost"
+          "load: srau0 active ls=- fb=- md=- cp=- sk=- total=5039 conc=2 result=lost"
         ],
-        "syncPutAfterMs": 20003,
+        "syncPutAfterMs": 20000,
         "syncLeftPutMs": 8,
         "noYtRequests": [],
         "noYtDom": {
