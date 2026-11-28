@@ -1482,12 +1482,13 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const kfill = R.curHs.filter((h) => h >= Number(fin.k) * fin.lh - 1).length; all51[tag] = { ...R, k: fin.k, kfill, frames: fr.length };
         console.error(`51e Info ${tag}: Cluster ${JSON.stringify(R.cl.map((x) => [x.n, Math.round(x.gap)]))}, K-füllende Zeilen gemessen: ${kfill} von ${R.curHs.length}`);
         const nm = `${tag} 51e`;
+        console.error(`51e Mess ${tag}: a ${R.a.toFixed(4)}, b ${R.b.toFixed(4)} ${JSON.stringify(R.bw)}, minGap ${R.minGap.toFixed(4)}, overlap ${R.overlap.toFixed(4)}, c ${R.c.toFixed(4)}, d ${R.d.toFixed(2)} ${JSON.stringify(R.dw ?? null)}, dRaw ${R.dRaw.toFixed(2)}, Bilder ${fr.length}`);
         c[`${nm}: alle Wechsel abgetastet`] = got && R.changes >= 24;
         for (const lab of ['1 auf 1', '2 auf 2', '3 auf 3', '1 auf 3', '2 auf 6', '3 auf 6', '6 auf 1']) c[`${nm} ${lab}: mindestens ein ruhiger Wechsel gemessen`] = (R.labs[lab] ?? 0) >= 1;
         c[`${nm} a: Höhe jeder Zeile in jedem Bild gleich ihrer Ruhehöhe (0)`] = fr.length > 100 && R.a <= 0.01;
         // Toleranz 0,5 px: WebKit rundet Zeilenkästen und Transformationen (Layouteinheit 1/64 px, Gerätepixel 1/3 px bei 3x), eine echte Überlappung oder Lücke wäre mindestens 1 px
         c[`${nm} b: Abstände benachbarter Zeilen in jedem Bild gleich (Abweichung höchstens 0,5 px), Überlappung höchstens 0,5 px (auch Doppel- und Dreifachwechsel)`] = R.b <= 0.5 && R.overlap <= 0.5;
-        if (!(R.b <= 0.5 && R.overlap <= 0.5)) console.error(`51e b ROT ${tag}: größte Abweichung ${R.b.toFixed(4)} px, kleinster Abstand ${R.minGap.toFixed(4)} px (Soll ${gap}), Überlappung ${Math.max(0, R.overlap).toFixed(4)} px, ${JSON.stringify(R.bw)}`);
+        if (!(R.b <= 0.5 && R.overlap <= 0.5)) console.error(`51e b ROT ${tag}: größte Abweichung ${R.b.toFixed(4)} px, kleinster Abstand ${R.minGap.toFixed(4)} px (Soll 12), Überlappung ${Math.max(0, R.overlap).toFixed(4)} px, ${JSON.stringify(R.bw)}`);
         if (R.b > 0.01 && R.b <= 0.5) console.error(`51e b Info ${tag}: Abweichung ${R.b.toFixed(4)} px (unter 0,5 px toleriert), ${JSON.stringify(R.bw)}`);
         c[`${nm} c: Anker in Ruhe vor und nach dem Wechsel gleich (0,5 px)`] = R.c <= 0.5;
         c[`${nm} d: Schritt der Spalte bei Bildabstand bis 34 ms höchstens 38 px`] = R.d <= 38;
