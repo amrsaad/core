@@ -1,5 +1,5 @@
 {
- "at": "2026-11-28T05:00:01.139Z",
+ "at": "2026-11-28T05:56:25.142Z",
  "runs": [
   {
    "browser": "webkit",
@@ -54,12 +54,12 @@
    },
    "diagLines": 22,
    "diagSample": [
-    "i3li vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 dh=659 sy=0 top=DIV.pad short=no",
-    "i3li sync: first upload waits for stable playback",
-    "i3li app: hidden",
-    "i3li sync: first upload released (app left) after 3.0 s"
+    "h0rx vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 dh=659 sy=0 top=DIV.pad short=no",
+    "h0rx sync: first upload waits for stable playback",
+    "h0rx app: hidden",
+    "h0rx sync: first upload released (app left) after 3.0 s"
    ],
-   "writeDelayMs": 10031,
+   "writeDelayMs": 10045,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -121,12 +121,12 @@
    },
    "diagLines": 21,
    "diagSample": [
-    "gw12 sync: first upload waits for stable playback",
-    "gw12 vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 dh=659 sy=0 top=LABEL.grp-row short=no",
-    "gw12 app: hidden",
-    "gw12 sync: first upload released (app left) after 3.0 s"
+    "jw66 sync: first upload waits for stable playback",
+    "jw66 vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 dh=659 sy=0 top=LABEL.grp-row short=no",
+    "jw66 app: hidden",
+    "jw66 sync: first upload released (app left) after 3.0 s"
    ],
-   "writeDelayMs": 10017,
+   "writeDelayMs": 10025,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
