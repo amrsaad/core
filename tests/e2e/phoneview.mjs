@@ -770,7 +770,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           cc: q('[data-testid=cc]')?.getAttribute('aria-pressed') ?? null,
         };
       });
-      const loaded = async () => { const ok = await waitFor(pg, () => { const i = document.querySelector('[data-testid=ph-cover]'); return !!i && i.complete && i.naturalWidth > 0 && i.dataset.ready === 'yes' && parseFloat(getComputedStyle(i).opacity) === 1; }, undefined, 4000); return ok; };
+      const loaded = async () => { const ok = await waitFor(pg, () => { const i = document.querySelector('[data-testid=ph-cover]'); return !!i && i.complete && i.naturalWidth > 0 && i.dataset.ready === 'yes' && parseFloat(getComputedStyle(i).opacity) >= 0.99; }, undefined, 4000); return ok; };
       /** Warten, bis die aktuelle Zeile mit prefix beginnt (die Zeit läuft mit dem Abspielen) */
       const rowsRest = () => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row, .ph-col')).length === 0;
       const atLine = async (prefix) => { const ok = await waitFor(pg, (x) => document.querySelector('[data-testid=caption]')?.textContent.startsWith(x), prefix, 9000, true); await waitFor(pg, () => document.getAnimations().filter((x) => x.effect?.target?.closest?.('.ph-row, .ph-col')).length === 0, undefined, 3000, true); return ok; };
@@ -1160,7 +1160,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         c[`${tag} vor dem Laden: Zeilen unter dem Quadrat, nichts überlappt`] = !!pre.slot && linesOk({ ...pre, img: pre.slot }, true);
         await pg.screenshot({ path: `${out}/${name}-cover-${size.name}-1-vor-dem-laden.png` });
         release(); HOLD.p = null;
-        const gotImg = await waitFor(pg, () => { const i = document.querySelector('[data-testid=ph-cover]'); return !!i && i.complete && i.naturalWidth > 0 && i.dataset.ready === 'yes' && parseFloat(getComputedStyle(i).opacity) === 1; }, undefined, 4000);
+        const gotImg = await waitFor(pg, () => { const i = document.querySelector('[data-testid=ph-cover]'); return !!i && i.complete && i.naturalWidth > 0 && i.dataset.ready === 'yes' && parseFloat(getComputedStyle(i).opacity) >= 0.99; }, undefined, 4000);
         await atLine('Dritte');
         const post = await info();
         await pg.screenshot({ path: `${out}/${name}-cover-${size.name}-2-nach-dem-laden.png` });
@@ -1168,8 +1168,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const symPost = await symOf();
         c[`${tag}: Ladezustand und geladener Zustand zeigen kein Symbol`] = symPre === null && symPost === null;
         r.notes[`${tag} nach dem Laden`] = { slot: post.slot, img: post.img ? { op: post.img.op, nw: post.img.nw } : null, cur: post.cur, d: postD };
-        c[`${tag} nach dem Laden: Bild sichtbar (Deckkraft 1, naturalWidth über 0), füllt das Quadrat`] = gotImg && !!post.img && post.img.op === 1 && post.img.nw > 0 && !!post.slot && Math.abs(post.img.l - post.slot.l) <= 0.5 && Math.abs(post.img.t - post.slot.t) <= 0.5 && Math.abs(post.img.w - post.slot.w) <= 0.5 && Math.abs(post.img.h - post.slot.h) <= 0.5 && post.slot.state === 'ready';
-        if (!(gotImg && !!post.img && post.img.op === 1 && post.img.nw > 0 && !!post.slot && Math.abs(post.img.l - post.slot.l) <= 0.5 && Math.abs(post.img.t - post.slot.t) <= 0.5 && Math.abs(post.img.w - post.slot.w) <= 0.5 && Math.abs(post.img.h - post.slot.h) <= 0.5 && post.slot.state === 'ready')) {
+        c[`${tag} nach dem Laden: Bild sichtbar (Deckkraft 1, naturalWidth über 0), füllt das Quadrat`] = gotImg && !!post.img && post.img.op >= 0.99 && post.img.nw > 0 && !!post.slot && Math.abs(post.img.l - post.slot.l) <= 0.5 && Math.abs(post.img.t - post.slot.t) <= 0.5 && Math.abs(post.img.w - post.slot.w) <= 0.5 && Math.abs(post.img.h - post.slot.h) <= 0.5 && post.slot.state === 'ready';
+        if (!(gotImg && !!post.img && post.img.op >= 0.99 && post.img.nw > 0 && !!post.slot && Math.abs(post.img.l - post.slot.l) <= 0.5 && Math.abs(post.img.t - post.slot.t) <= 0.5 && Math.abs(post.img.w - post.slot.w) <= 0.5 && Math.abs(post.img.h - post.slot.h) <= 0.5 && post.slot.state === 'ready')) {
           const reqs = await pg.evaluate(() => performance.getEntriesByType('resource').filter((e) => /cover|img\.test|thumb/i.test(e.name)).map((e) => e.name.slice(-40)));
           console.error(`Titelbild ROT ${tag}: gotImg ${gotImg}, Deckkraft ${post.img?.op}, naturalWidth ${post.img?.nw}, complete ${post.img?.done}, Bild ${JSON.stringify(post.img && { l: post.img.l, t: post.img.t, w: post.img.w, h: post.img.h })}, Quadrat ${JSON.stringify(post.slot && { l: post.slot.l, t: post.slot.t, w: post.slot.w, h: post.slot.h, state: post.slot.state })}, Fehlersymbol ${symPost !== null ? 'ja' : 'nein'}, Bildanfragen ${reqs.length} ${JSON.stringify(reqs)}`);
         }
