@@ -38,12 +38,12 @@ describe('phoneShortWindow', () => {
 
 describe('Diag-Zeile vp', () => {
   it('Format mit allen Feldern', () => {
-    const l = phoneViewportLine({ iw: 393, ih: 793, vvh: 793, ch: 793, sw: 393, sh: 852, st: 59, sb: 34, standalone: true, ios: '18', head: [0, 103], bar: [657, 793], feed: [0, 793], dh: 852, sy: 0, top: 'DIV.head', short: true });
-    expect(l).toBe('vp: iw=393 ih=793 vvh=793 ch=793 sw=393 sh=852 st=59 sb=34 standalone=yes ios=18 head=0,103 bar=657,793 feed=0,793 dh=852 sy=0 top=DIV.head short=yes');
+    const l = phoneViewportLine({ iw: 393, ih: 793, vvh: 793, ch: 793, sw: 393, sh: 852, st: 59, sb: 34, standalone: true, ios: '18', head: [0, 103], bar: [657, 793], feed: [0, 793], dh: 852, sy: 0, top: 'DIV.head', band: 59, pt: 'DIV.head', short: true });
+    expect(l).toBe('vp: iw=393 ih=793 vvh=793 ch=793 sw=393 sh=852 st=59 sb=34 standalone=yes ios=18 head=0,103 bar=657,793 feed=0,793 dh=852 sy=0 top=DIV.head band=59 pt=DIV.head short=yes');
   });
   it('fehlende Teile: none und ?', () => {
     const l = phoneViewportLine({ iw: 390, ih: 844, ch: 844, sw: 390, sh: 844, st: 0, sb: 0, standalone: false, ios: '?', dh: 844, sy: 0, top: 'none', short: false });
-    expect(l).toBe('vp: iw=390 ih=844 vvh=? ch=844 sw=390 sh=844 st=0 sb=0 standalone=no ios=? head=none bar=none feed=none dh=844 sy=0 top=none short=no');
+    expect(l).toBe('vp: iw=390 ih=844 vvh=? ch=844 sw=390 sh=844 st=0 sb=0 standalone=no ios=? head=none bar=none feed=none dh=844 sy=0 top=none band=none pt=none short=no');
   });
   it('nur die Hauptversion aus dem User-Agent', () => {
     expect(iosMajor('Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1')).toBe('18');

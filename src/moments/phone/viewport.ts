@@ -37,13 +37,17 @@ export interface PhoneViewportReading {
   sy: number;
   /** Element an (Breite/2, 2): tagName.ersteKlasse oder none */
   top: string;
+  /** Höhe des festen Bandes #ios-edge-band in px oder none (nicht angezeigt) */
+  band?: number;
+  /** Erstes Element mit position fixed in der Kette des Elements am Punkt (Breite/2, 4): tagName.id oder tagName.ersteKlasse oder none */
+  pt?: string;
   /** Rückfall aktiv (data-ph-short) */
   short: boolean;
 }
 
 /** Diag-Zeile "vp: ..." (keine personenbezogenen Daten, vom User-Agent nur die Hauptversion) */
 export function phoneViewportLine(v: PhoneViewportReading): string {
-  return `vp: iw=${r(v.iw)} ih=${r(v.ih)} vvh=${r(v.vvh)} ch=${r(v.ch)} sw=${r(v.sw)} sh=${r(v.sh)} st=${r(v.st)} sb=${r(v.sb)} standalone=${v.standalone ? 'yes' : 'no'} ios=${v.ios} head=${pair(v.head?.[0], v.head?.[1])} bar=${pair(v.bar?.[0], v.bar?.[1])} feed=${pair(v.feed?.[0], v.feed?.[1])} dh=${r(v.dh)} sy=${r(v.sy)} top=${v.top} short=${v.short ? 'yes' : 'no'}`;
+  return `vp: iw=${r(v.iw)} ih=${r(v.ih)} vvh=${r(v.vvh)} ch=${r(v.ch)} sw=${r(v.sw)} sh=${r(v.sh)} st=${r(v.st)} sb=${r(v.sb)} standalone=${v.standalone ? 'yes' : 'no'} ios=${v.ios} head=${pair(v.head?.[0], v.head?.[1])} bar=${pair(v.bar?.[0], v.bar?.[1])} feed=${pair(v.feed?.[0], v.feed?.[1])} dh=${r(v.dh)} sy=${r(v.sy)} top=${v.top} band=${v.band === undefined ? 'none' : r(v.band)} pt=${v.pt ?? 'none'} short=${v.short ? 'yes' : 'no'}`;
 }
 
 /** Hauptversion von iOS aus dem User-Agent oder "?" */

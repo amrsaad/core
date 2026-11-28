@@ -986,7 +986,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       c['Gerät html min-height-Regel für die Standalone-App im Stylesheet (WebKit 301108)'] = A.minRule === true;
       c['Gerät kein Seitenscroll durch die Überhöhe'] = A.scrollY <= A.ih + 1;
       const vpA = A.vp[0] ?? '';
-      c['Gerät Diag-Zeile "vp:" mit dh, sy, top, short=yes'] = /^vp: iw=393 ih=793 vvh=\d+(\.\d+)? ch=793 sw=\d+ sh=852 st=59 sb=34 standalone=yes ios=\S+ head=0,103 bar=\S+ feed=0,793 dh=\d+(\.\d+)? sy=0 top=DIV\.head short=yes$/.test(vpA);
+      c['Gerät Diag-Zeile "vp:" mit dh, sy, top, short=yes'] = /^vp: iw=393 ih=793 vvh=\d+(\.\d+)? ch=793 sw=\d+ sh=852 st=59 sb=34 standalone=yes ios=\S+ head=0,103 bar=\S+ feed=0,793 dh=\d+(\.\d+)? sy=0 top=DIV\.head band=\S+ pt=DIV\.head short=yes$/.test(vpA);
       if (!c['Gerät Diag-Zeile "vp:" mit dh, sy, top, short=yes']) r.notes['Gerät Diag A'] = A.vp;
       c['Gegenprobe ohne Standalone: kein Rückfall (short=no, Feed endet bei 793)'] = B.short === false && !!B.feed && Math.abs(B.feed.b - 793) <= 0.5 && /standalone=no/.test(B.vp[0] ?? '') && /short=no$/.test(B.vp[0] ?? '');
       c['Gegenprobe ih gleich sh: kein Rückfall (short=no, Feed und Leiste enden bei 852)'] = C.short === false && !!C.feed && Math.abs(C.feed.b - 852) <= 0.5 && !!C.bar && Math.abs(C.bar.b - 852) <= 0.5 && /short=no$/.test(C.vp[0] ?? '');
@@ -1597,6 +1597,84 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         c[`Bildanfragen ${tab}: keine Anfrage an i.ytimg.com über 5 Momentwechsel`] = ytimg.length === 0;
         if (tab === 'audio') c['Bildanfragen audio: nur Titelbilder des aktiven und des nächsten Moments'] = strays.length === 0;
         await o.browser.close();
+      }
+    }
+
+    // ---------- Runde 52: festes Band an der Oberkante für iOS 26 (Rand-Weichzeichner unter der Statusleiste): im HTML ab dem ersten Bild, nur Standalone auf iOS, Farbe der Kopfleiste, ohne Berührung, nichts sichtbar verändert ----------
+    sec('Runde 52: festes Band an der Oberkante (iOS 26), im HTML ab dem ersten Bild');
+    {
+      const { readFileSync, existsSync } = await import('node:fs');
+      const src = (f) => (existsSync(f) ? readFileSync(f, 'utf8') : null);
+      for (const f of ['index.html', 'dist/index.html']) {
+        const h = src(f);
+        if (h === null) { console.error(`52 Info: ${f} nicht vorhanden, übersprungen`); continue; }
+        const body = /<body[^>]*>\s*([\s\S]*)$/.exec(h)?.[1] ?? '';
+        const first = /^<div([^>]*)>\s*<\/div>/.exec(body);
+        const head = /<head[\s\S]*<\/head>/.exec(h)?.[0] ?? '';
+        const styleIdx = head.indexOf('#ios-edge-band');
+        const okFirst = !!first && /id="ios-edge-band"/.test(first[1]) && /aria-hidden="true"/.test(first[1]);
+        const okCss = styleIdx > -1 && /display-mode:\s*standalone/.test(head) && /-webkit-touch-callout:\s*none/.test(head) && /position:\s*fixed/.test(head) && /z-index:\s*2147483647/.test(head) && /pointer-events:\s*none/.test(head) && /<style/.test(head.slice(0, styleIdx)) && !/<script[^>]*src=[^>]*>/.test(head.slice(0, styleIdx));
+        const noScriptBefore = body.search(/<script/) < 0 || body.indexOf('ios-edge-band') < body.search(/<script/); // im Bündel steht das Modulskript im head (deferred), im Quelltext nach dem Band
+        console.error(`52 Quelltext ${f}: erstes Kind des body ${okFirst}, CSS im head ${okCss}, vor dem ersten Skript ${noScriptBefore}`);
+        c[`52 ${f}: Band ist das erste Kind von body (aria-hidden, leer) und steht vor jedem Skript`] = okFirst && noScriptBefore;
+        c[`52 ${f}: CSS inline im head (Standalone, -webkit-touch-callout, fest, höchster z-index, ohne Berührung)`] = okCss;
+      }
+      const ZONE = (w, h) => ({ x: 0, y: 0, width: w, height: h });
+      const INJECT = () => {
+        const nat = getComputedStyle(document.getElementById('ios-edge-band')).display !== 'none';
+        if (nat) return { injected: false, native: true };
+        let inner = '';
+        for (const ss of document.styleSheets) { let rules; try { rules = ss.cssRules; } catch { continue; } for (const x of rules) if (x.media && /display-mode:\s*standalone/.test(x.media.mediaText)) for (const y of x.cssRules) if (y.conditionText !== undefined && /touch-callout/.test(y.conditionText)) for (const z of y.cssRules) if (/ios-edge-band/.test(z.cssText)) inner += z.cssText + '\n'; }
+        const st = document.createElement('style'); st.id = 'band-test'; st.textContent = inner; document.head.appendChild(st);
+        return { injected: inner.length > 0, native: false };
+      };
+      const MEASURE = () => {
+        const e = document.getElementById('ios-edge-band'); const cs = getComputedStyle(e); const b = e.getBoundingClientRect(); const hd = document.querySelector('.ph-head'); const hs = hd ? getComputedStyle(hd) : null;
+        const hits = document.elementsFromPoint(window.innerWidth / 2, 4).map((x) => x.id || x.className || x.tagName).slice(0, 3);
+        const alpha = (col) => { const m = /rgba?\(([^)]+)\)/.exec(col); if (!m) return null; const p = m[1].split(',').map((v) => parseFloat(v)); return p.length > 3 ? p[3] : 1; };
+        return { display: cs.display, pos: cs.position, top: b.top, left: b.left, w: b.width, h: b.height, iw: window.innerWidth, bg: cs.backgroundColor, alpha: alpha(cs.backgroundColor), headBg: hs?.backgroundColor ?? null, headH: hd ? hd.getBoundingClientRect().height : null, pe: cs.pointerEvents, z: cs.zIndex, kids: e.childElementCount, text: e.textContent, filter: cs.backdropFilter, img: cs.backgroundImage, hits, mood: document.documentElement.getAttribute('data-mood'), supports: CSS.supports('-webkit-touch-callout', 'none'), sa: matchMedia('(display-mode: standalone)').matches };
+      };
+      const PROFILES = [['A 393x852', { ...GER, height: 852 }], ['B 393x793', GER], ['C 375x667', SIZES[1]]];
+      for (const [pn, size] of PROFILES) {
+        const zoneH = Math.max(size.safeT ?? 0, 12) || 12;
+        for (const [tab, qid, pool, st] of [['video', null, POOL, 'video'], ['audio', 40, POOL_A, 'audio'], ['text', null, POOL_T, 'text'], ['audio', 40, POOL_A, 'recall']]) {
+          const o = await open(type, size, { tab, pool });
+          const pg = o.pg;
+          if (qid) await showMoment(pg, idOf(qid));
+          if (st === 'recall') { await pg.evaluate(() => window.__core.showRecall(window.__core.moment().id)); await waitFor(pg, () => !!document.querySelector('[data-testid=recall-card]'), undefined, 4000); }
+          await pg.waitForTimeout(400);
+          const tag = `52 ${pn} ${st}`;
+          const w = size.width;
+          const m0 = await pg.evaluate(MEASURE);
+          const zone0 = await pg.screenshot({ clip: ZONE(w, zoneH) });
+          const inj = await pg.evaluate(INJECT);
+          await pg.waitForTimeout(150);
+          const m1 = await pg.evaluate(MEASURE);
+          const zone1 = await pg.screenshot({ clip: ZONE(w, zoneH) });
+          await pg.screenshot({ path: `${out}/${name}-band-${pn.split(' ')[0]}-${st}.png` });
+          const shown = m0.sa && m0.supports;
+          console.error(`${tag}: ohne Regel display ${m0.display} (Standalone ${m0.sa}, touch-callout ${m0.supports}), mit Regel Rechteck ${m1.left},${m1.top} ${m1.w}x${m1.h} Fenster ${m1.iw}, Farbe ${m1.bg} Kopfleiste ${m1.headBg}, Alpha ${m1.alpha}, Berührung ${m1.pe}, z ${m1.z}, Kinder ${m1.kids}, Stimmung ${m1.mood}, Treffer ${JSON.stringify(m1.hits)}, Zone ${zoneH} px gleich ${zone0.equals(zone1)}, injiziert ${JSON.stringify(inj)}`);
+          c[`${tag}: ausgeschaltet ausserhalb von Standalone auf iOS (display none, sonst sichtbar)`] = shown ? m0.display === 'block' : m0.display === 'none';
+          c[`${tag}: mit Regel fest bei 0,0, Breite gleich Fensterbreite, Höhe mindestens 12 px`] = m1.pos === 'fixed' && m1.top === 0 && m1.left === 0 && Math.abs(m1.w - m1.iw) <= 0.5 && m1.h >= 12;
+          c[`${tag}: Hintergrund deckend, einfarbig, gleich der Kopfleiste, kein Verlauf, kein backdrop-filter`] = m1.alpha === 1 && /^rgb\(/.test(m1.bg) && m1.bg === m1.headBg && m1.img === 'none' && (m1.filter === 'none' || m1.filter === '');
+          c[`${tag}: ohne Berührung (pointer-events none), kein Kind, höchster z-index`] = m1.pe === 'none' && m1.kids === 0 && m1.text === '' && m1.z === '2147483647';
+          c[`${tag}: Treffer an der Oberkante bleibt die Kopfleiste (das Band nimmt keine Berührung)`] = /head/.test(String(m1.hits[0]));
+          c[`${tag}: Zone 0 bis ${zoneH} px sieht mit und ohne Band gleich aus (nichts Sichtbares wird verdeckt)`] = zone0.equals(zone1);
+          if (st === 'audio' && pn.startsWith('A')) {
+            // Farbe folgt der Stimmung am html (Bühne), die Überblendung der Bühne dauert 400 ms
+            const moods = [];
+            for (const mood of ['beat', 'body', 'brain']) {
+              await pg.evaluate((mm) => document.documentElement.setAttribute('data-mood', mm), mood);
+              await pg.waitForTimeout(600);
+              const mm = await pg.evaluate(MEASURE);
+              moods.push([mood, mm.bg, mm.headBg]);
+            }
+            console.error(`52 Stimmung Band gegen Kopfleiste: ${JSON.stringify(moods)}`);
+            c['52 Farbe des Bandes gleich der Kopfleiste in jeder Stimmung (beat, body, brain)'] = moods.every(([, bb, hh]) => bb === hh && /^rgb\(/.test(bb));
+          }
+          c[`${tag}: keine Seitenfehler`] = o.errors.length === 0;
+          await o.browser.close();
+        }
       }
     }
 

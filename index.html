@@ -13,8 +13,22 @@
     <link rel="icon" href="%BASE_URL%icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon.png" />
     <title>core</title>
+    <style>
+      /* Runde 52: iOS 26 (WebKit LocalFrameView::fixedContainerEdges) lässt den Rand-Weichzeichner unter der Statusleiste weg, wenn an der Oberkante ein festes, mindestens 90 % breites, über 10 px hohes Element mit einfarbigem Hintergrund steht, und zwar ab dem ersten Bild (Quelle: coder/coder PR 31027).
+         Darum steht das Band hier im HTML und diese Regeln im head, nicht erst im Bündel. Nur in der installierten iPhone-App. Die Farbe ist die der Bühne (--stage), mit festem Rückfall je Stimmung (data-mood am html wie in tokens.css). Keine Berührung, kein Kind, kein Verlauf, keine Transparenz. */
+      #ios-edge-band { display: none; }
+      @media (display-mode: standalone) {
+        @supports (-webkit-touch-callout: none) {
+          #ios-edge-band { display: block; position: fixed; top: 0; left: 0; width: 100%; height: max(12px, env(safe-area-inset-top, 0px)); z-index: 2147483647; pointer-events: none; background-color: var(--stage, #0a0e12); }
+          html[data-mood='beat'] #ios-edge-band { background-color: var(--stage, #0d0b08); }
+          html[data-mood='body'] #ios-edge-band { background-color: var(--stage, #0a0e12); }
+          html[data-mood='brain'] #ios-edge-band { background-color: var(--stage, #0b0d11); }
+        }
+      }
+    </style>
   </head>
   <body>
+    <div id="ios-edge-band" aria-hidden="true"></div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

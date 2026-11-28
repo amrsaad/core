@@ -44,6 +44,19 @@ export function usePhoneViewport(enabled: boolean, log: (line: string) => void) 
       const c = e.classList?.[0];
       return c ? `${e.tagName}.${c}` : e.tagName;
     };
+    // Erstes Element mit position fixed in der Kette des obersten Elements am Punkt (Mitte, 4 px): so wie WebKit die Kante prüft (Runde 52)
+    const fixedAt = (): string => {
+      const label = (e: Element) => (e.id ? `${e.tagName}#${e.id}` : e.classList?.[0] ? `${e.tagName}.${e.classList[0]}` : e.tagName);
+      for (const hit of document.elementsFromPoint?.(window.innerWidth / 2, 4) ?? []) {
+        for (let e: Element | null = hit; e; e = e.parentElement) if (getComputedStyle(e).position === 'fixed') return label(e);
+      }
+      return 'none';
+    };
+    const bandH = (): number | undefined => {
+      const e = document.getElementById('ios-edge-band');
+      if (!e || getComputedStyle(e).display === 'none') return undefined;
+      return e.getBoundingClientRect().height;
+    };
     let firstIh = -1;
     const write = () => {
       const { st, sb, sa } = apply();
@@ -51,7 +64,7 @@ export function usePhoneViewport(enabled: boolean, log: (line: string) => void) 
         phoneViewportLine({
           iw: window.innerWidth, ih: window.innerHeight, vvh: window.visualViewport?.height, ch: root.clientHeight, sw: window.screen.width, sh: window.screen.height, st, sb,
           standalone: sa, ios, head: rect('.ph-head'), bar: rect('.ph-bar'), feed: rect('.vfeed[data-phone]'),
-          dh: root.scrollHeight, sy: window.scrollY, top: topEl(), short,
+          dh: root.scrollHeight, sy: window.scrollY, top: topEl(), band: bandH(), pt: fixedAt(), short,
         }),
       );
     };
