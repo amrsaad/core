@@ -343,10 +343,10 @@ const geomOk = (g, tag, c, notes) => {
 const mkRect = (r) => (r ? `${Math.round(r.l)},${Math.round(r.t)} ${Math.round(r.w)}x${Math.round(r.h)}` : null);
 
 /** Wischen mit der Maus auf der Fläche (der Feed folgt dem Finger, Ereignisse wie bei Touch) */
-async function swipe(pg, x, y0, y1) {
+async function swipe(pg, x, y0, y1, gap = 16) {
   await pg.mouse.move(x, y0);
   await pg.mouse.down();
-  for (let i = 1; i <= 8; i++) { await pg.mouse.move(x, y0 + ((y1 - y0) * i) / 8); await pg.waitForTimeout(16); }
+  for (let i = 1; i <= 8; i++) { await pg.mouse.move(x, y0 + ((y1 - y0) * i) / 8); await pg.waitForTimeout(gap); }
   await pg.mouse.up();
 }
 /** Wisch per Touch-Ereignissen auf einem Element (Text-Reiter: dort gelten onTouchStart und onTouchEnd).
@@ -772,7 +772,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           const bd = await center(pg, '.vslot[aria-hidden=false] .vframe > div');
           const k0 = await idx(pg);
           // Runde 50c: 200 statt 240 px, damit der Wisch mit der Maus nicht über der Kopfleiste (nimmt jetzt Berührungen an) endet. Ein Finger bleibt auf dem Gerät am Startelement.
-          await swipe(pg, bd.x, bd.b.y + bd.b.height - 8, bd.b.y + bd.b.height - 8 - 200);
+          // Runde 53d: 200 px sind 23,7 % der Höhe 844 (Schwelle 25 %), das Tempo entscheidet (Schwelle 0,4 px/ms). Mit 16 ms je Schritt schwankt es um 0,37 bis 0,52, darum schnell (4 ms) wischen: rund 2 px/ms
+          await swipe(pg, bd.x, bd.b.y + bd.b.height - 8, bd.b.y + bd.b.height - 8 - 200, 4);
           c['390 video Wischen im Player wechselt'] = await waitFor(pg, (i) => window.__core.idx() === i + 1, k0, 5000);
           r.notes['390 video Wischen im Player'] = { k0, now: await idx(pg), bd: bd.b, st: await st(pg) };
           await waitFor(pg, () => window.__core.state() === 1, undefined, 5000);
