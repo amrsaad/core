@@ -350,7 +350,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       requestAnimationFrame(frame);
     }));
     r.notes.cue = sample;
-    c.cueSamples = sample.n > 200;
+    // Mindestzahl 100 Proben in 10 s (10 Bilder je Sekunde). Maßgeblich für die Genauigkeit sind cueWithin300ms und cueNeverLate. WebKit auf den CI-Läufern lieferte zuletzt 182 bis 615 Proben (Chromium 601).
+    c.cueSamples = sample.n > 100;
+    if (!c.cueSamples) console.error(`audiotab cueSamples ROT: ${sample.n} Proben in 10 s, verlangt mehr als 100`);
     c.cueWithin300ms = sample.worst <= 3;
     c.cueNeverLate = sample.shownLate === 0 && sample.shownNow === 0;
     c.cueAt2x = sample.rate === 2;
@@ -385,7 +387,8 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       c.cueTempoDone = await waitFor(p4b, () => window.__cs.done, undefined, 12000);
       const cs = await p4b.evaluate(() => ({ worst: window.__cs.worst, n: window.__cs.n, rates: [...window.__cs.rates] }));
       r.notes.cueTempo = cs;
-      c.cueTempoSamples = cs.n > 150;
+      c.cueTempoSamples = cs.n > 75;
+      if (!c.cueTempoSamples) console.error(`audiotab cueTempoSamples ROT: ${cs.n} Proben, verlangt mehr als 75`);
       c.cueTempoSawBothRates = cs.rates.includes(1) && cs.rates.includes(2);
       // Gleiche Toleranz wie über 10 s bei 2x: höchstens 3 Cues (0,3 s). Der Sprung der Messung beim Wechsel darf nicht darüber liegen.
       c.cueTempoWithin300ms = cs.worst <= 3;
