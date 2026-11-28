@@ -1,5 +1,5 @@
 {
- "at": "2026-11-28T00:37:58.596Z",
+ "at": "2026-11-28T01:51:24.910Z",
  "runs": [
   {
    "browser": "webkit",
@@ -52,14 +52,14 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "diagLines": 22,
+   "diagLines": 20,
    "diagSample": [
-    "91rs vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 dh=659 sy=0 top=DIV.pad short=no",
-    "91rs sync: first upload waits for stable playback",
-    "91rs app: hidden",
-    "91rs sync: first upload released (app left) after 3.0 s"
+    "czhp vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 dh=659 sy=0 top=DIV.pad short=no",
+    "czhp sync: first upload waits for stable playback",
+    "czhp app: hidden",
+    "czhp sync: first upload released (app left) after 3.0 s"
    ],
-   "writeDelayMs": 10034,
+   "writeDelayMs": 10036,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -121,12 +121,12 @@
    },
    "diagLines": 21,
    "diagSample": [
-    "iwga sync: first upload waits for stable playback",
-    "iwga vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 dh=659 sy=0 top=LABEL.grp-row short=no",
-    "iwga app: hidden",
-    "iwga sync: first upload released (app left) after 3.0 s"
+    "u9mt sync: first upload waits for stable playback",
+    "u9mt vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 dh=659 sy=0 top=LABEL.grp-row short=no",
+    "u9mt app: hidden",
+    "u9mt sync: first upload released (app left) after 3.0 s"
    ],
-   "writeDelayMs": 10024,
+   "writeDelayMs": 10022,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
