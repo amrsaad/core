@@ -44,7 +44,7 @@
 .sv-dot { flex: none; width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--area); }
 .sv-meta b { color: var(--text); font-weight: var(--w-meta); }
 .sv-meta span:not(.sv-dot) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.sv-hook { margin: 0; font-size: var(--t-row); line-height: var(--t-row-lh); font-weight: var(--w-tab); overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.sv-hook { margin: 0; text-align: start; /* li vererbt in WebKit text-align left (match-parent), arabische Einträge (dir rtl) stünden sonst links */ font-size: var(--t-row); line-height: var(--t-row-lh); font-weight: var(--w-tab); overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .sv-for { margin: 0; color: var(--muted); font-size: var(--t-body); line-height: var(--t-body-lh); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .sv-items[data-view='grid'] .sv-for { display: none; }
 .sv-acts { display: flex; gap: var(--s-1); margin-top: auto; }
