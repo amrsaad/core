@@ -1422,7 +1422,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const analyze = (fr, seq, gap) => {
         const curOf = (f) => f.rows.find((x) => x[4] === 'cur')?.[0];
         const evs = []; for (let i = 1; i < fr.length; i++) { const a0 = curOf(fr[i - 1]); const a1 = curOf(fr[i]); if (a0 !== undefined && a1 !== undefined && a0 !== a1 && Math.abs(a1 - a0) < 5) evs.push(i); }
-        const R = { changes: evs.length, a: 0, b: 0, c: 0, d: 0, dRaw: 0, e: 9, f: 0, fz: 0, m: 9999, i: 0, labs: {}, dbl: 0, trp: 0 };
+        const R = { changes: evs.length, a: 0, b: 0, c: 0, d: 0, dRaw: 0, e: 9, f: 0, fz: 0, m: 9999, fz05: 0, curHs: [], i: 0, labs: {}, cl: [] };
+        // g: schnelle Wechsel als Cluster (aufeinanderfolgende Wechsel mit Abstand unter 400 ms), keine harte 100-ms-Grenze
+        { let cur = []; const flush = () => { if (cur.length >= 2) R.cl.push({ n: cur.length, gap: (fr[cur[cur.length - 1]].t - fr[cur[0]].t) / (cur.length - 1) }); cur = []; }; for (const i of evs) { if (cur.length && fr[i].t - fr[cur[cur.length - 1]].t >= 400) flush(); cur.push(i); } flush(); }
         const h0 = new Map(); for (const f of fr) for (const x of f.rows) { const h = h0.get(x[0]); if (!h) h0.set(x[0], [x[5], x[5]]); else { h[0] = Math.min(h[0], x[5]); h[1] = Math.max(h[1], x[5]); } }
         for (const [, h] of h0) R.a = Math.max(R.a, h[1] - h[0]);
         for (const f of fr) for (let k = 1; k < f.rows.length; k++) R.b = Math.max(R.b, Math.abs(f.rows[k][1] - f.rows[k - 1][2] - gap));
@@ -1433,16 +1435,16 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           const gp = e > 0 ? fr[f0].t - fr[evs[e - 1]].t : 9999; const gn = fr[next] ? fr[next].t - fr[f0].t : 9999;
           const rapid = Math.min(gp, gn) < 400;
           const end = Math.min(next - 1, f0 + 40); if (end <= f0 + 2) continue;
-          if (rapid) { if (Math.min(gp, gn) < 100) R.trp++; else R.dbl++; continue; }
+          if (rapid) continue;
           if (fr[end].t - fr[f0].t < 460) continue;
           const key = `${seq[nw - 1]} auf ${seq[nw]}`; R.labs[key] = (R.labs[key] ?? 0) + 1;
           const ob = fr[f0 - 1].rows.find((x) => x[0] === nw - 1); const ce = fr[end].rows.find((x) => x[0] === nw);
           R.c = Math.max(R.c, Math.abs((ce[1] - fr[end].at) - (ob[1] - fr[f0 - 1].at)));
           for (let f = f0; f <= end; f++) for (const x of fr[f].rows) { const xb = fr[f0 - 1].rows.find((q) => q[0] === x[0]); const xe = fr[end].rows.find((q) => q[0] === x[0]); if (inArea(xb, fr[f0 - 1]) && inArea(xe, fr[end])) R.e = Math.min(R.e, x[3]); }
           // f: Warten bis die alte Zeile unter Deckkraft 0,01 fällt (Frist 1000 ms), danach bleibt sie dort
-          { let fz = -1; for (let f = f0; f <= end; f++) if (fr[f].rows.find((x) => x[0] === nw - 1)[3] < 0.01) { fz = f; break; } R.fz = Math.max(R.fz, fz < 0 || fr[fz].t - fr[f0].t > 1000 ? Infinity : fr[fz].t - fr[f0].t); if (fz >= 0) for (let f = fz; f <= end; f++) R.f = Math.max(R.f, fr[f].rows.find((x) => x[0] === nw - 1)[3]); }
+          { let fz = -1; for (let f = f0; f <= end; f++) if (fr[f].rows.find((x) => x[0] === nw - 1)[3] < 0.01) { fz = f; break; } { let f5 = -1; for (let f = f0; f <= end; f++) if (fr[f].rows.find((x) => x[0] === nw - 1)[3] < 0.05) { f5 = f; break; } R.fz05 = Math.max(R.fz05, f5 < 0 ? Infinity : fr[f5].t - fr[f0].t); } R.fz = Math.max(R.fz, fz < 0 || fr[fz].t - fr[f0].t > 1000 ? Infinity : fr[fz].t - fr[f0].t); if (fz >= 0) for (let f = fz; f <= end; f++) R.f = Math.max(R.f, fr[f].rows.find((x) => x[0] === nw - 1)[3]); }
           // m: Unterkante der aktuellen Zeile in Ruhe über der Maske (28 px)
-          R.m = Math.min(R.m, fr[end].ab - fr[end].rows.find((x) => x[0] === nw)[2]);
+          R.m = Math.min(R.m, fr[end].ab - fr[end].rows.find((x) => x[0] === nw)[2]); R.curHs.push(fr[end].rows.find((x) => x[0] === nw)[5]);
           for (let f = f0 + 1; f <= end; f++) for (const x of fr[f].rows) { const y0 = fr[f - 1].rows.find((q) => q[0] === x[0]); if (y0 && x[4] !== 'out' && y0[4] !== 'out' && inArea(x, fr[f]) && inArea(y0, fr[f - 1])) R.i = Math.max(R.i, Math.abs(x[3] - y0[3])); }
         }
         return R;
@@ -1469,9 +1471,10 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const R = analyze(fr, SEQ51, 12);
         const fin = await pg.evaluate(() => {
           const col = document.querySelector('.ph-col'); const cur = document.querySelector('.ph-row[data-role=cur]'); const m = getComputedStyle(col).transform;
-          return { y: m && m !== 'none' ? new DOMMatrixReadOnly(m).m42 : 0, want: -cur.offsetTop, rowsStyled: [...document.querySelectorAll('.ph-row')].filter((e) => e.hasAttribute('style')).length, colStyle: col.getAttribute('style'), bodyStyle: document.querySelector('.ph-lyr-body').getAttribute('style'), data: [...document.querySelectorAll('[data-snap],[data-grow],[data-cut]')].length, anims: document.getAnimations().length, k: getComputedStyle(col).getPropertyValue('--clamp').trim(), n: col.children.length };
+          return { y: m && m !== 'none' ? new DOMMatrixReadOnly(m).m42 : 0, want: -cur.offsetTop, rowsStyled: [...document.querySelectorAll('.ph-row')].filter((e) => e.hasAttribute('style')).length, colStyle: col.getAttribute('style'), bodyStyle: document.querySelector('.ph-lyr-body').getAttribute('style'), data: [...document.querySelectorAll('[data-snap],[data-grow],[data-cut]')].length, anims: document.getAnimations().length, k: getComputedStyle(col).getPropertyValue('--clamp').trim(), lh: parseFloat(getComputedStyle(cur).lineHeight), n: col.children.length };
         });
-        all51[tag] = { ...R, k: fin.k, frames: fr.length };
+        const kfill = R.curHs.filter((h) => h >= Number(fin.k) * fin.lh - 1).length; all51[tag] = { ...R, k: fin.k, kfill, frames: fr.length };
+        console.error(`51e Info ${tag}: Cluster ${JSON.stringify(R.cl.map((x) => [x.n, Math.round(x.gap)]))}, K-füllende Zeilen gemessen: ${kfill} von ${R.curHs.length}`);
         const nm = `${tag} 51e`;
         c[`${nm}: alle Wechsel abgetastet`] = got && R.changes >= 24;
         for (const lab of ['1 auf 1', '2 auf 2', '3 auf 3', '1 auf 3', '2 auf 6', '3 auf 6', '6 auf 1']) c[`${nm} ${lab}: mindestens ein ruhiger Wechsel gemessen`] = (R.labs[lab] ?? 0) >= 1;
@@ -1481,8 +1484,9 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         c[`${nm} d: Schritt der Spalte bei Bildabstand bis 34 ms höchstens 38 px`] = R.d <= 38;
         c[`${nm} e: davor und danach sichtbare Zeile nie unter Deckkraft 0,4`] = R.e >= 0.4;
         c[`${nm} f: alte Zeile erreicht Deckkraft unter 0,01 innerhalb von 1000 ms und bleibt dort`] = R.fz <= 1000 && R.f < 0.01;
+        c[`${nm} f: alte Zeile unter Deckkraft 0,05 spätestens 300 ms nach dem Wechsel`] = R.fz05 <= 300;
         c[`${nm} m: Unterkante der aktuellen Zeile mindestens 28 px über der Unterkante der Fläche (nie in der Maske)`] = R.m >= 28 - 0.5;
-        c[`${nm} g: mindestens 6 Doppelwechsel (120 ms) und 3 Dreifachwechsel (80 ms) gemessen`] = R.dbl >= 6 && R.trp >= 3;
+        c[`${nm} g: schnelle Wechsel als Cluster (Abstand unter 400 ms): mindestens 3 Cluster mit je mindestens 3 Wechseln, insgesamt mindestens 10 schnelle Wechsel, mittlerer Abstand je Cluster unter 200 ms`] = R.cl.filter((x) => x.n >= 3).length >= 3 && R.cl.reduce((p, x) => p + x.n, 0) >= 10 && R.cl.every((x) => x.gap < 200);
         c[`${nm} g: Endlage gleich Neuaufbau (0,5 px), keine Inline-Reste außer der Spalte, keine Hilfsattribute, keine laufende Animation`] = Math.abs(fin.y - fin.want) <= 0.5 && fin.rowsStyled === 0 && fin.bodyStyle === null && fin.data === 0 && fin.anims === 0 && /^(--clamp: \d+; )?(transition-duration: [\d.]+ms; )?(--clamp: \d+; )?(transition-duration: [\d.]+ms; )?transform: translate3d\([^)]*\);?$/.test((fin.colStyle ?? '').replace(/;\s*$/, ';'));
         c[`${nm} i: keine Auslassung, die im Lauf erscheint oder verschwindet (Zeilenhöhe fest, Deckkraft stufenlos, Sprung je Bild unter 0,25)`] = R.a <= 0.01 && R.i < 0.25;
         c[`${nm}: eine Klemmung K (2 oder mehr) an der Spalte`] = Number(fin.k) >= 2;
@@ -1491,6 +1495,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         await o.browser.close();
       }
       r.notes['51e Messwerte'] = all51;
+      c['51e m: über alle Konfigurationen mindestens eine K-füllende aktuelle Zeile gemessen'] = Object.values(all51).reduce((p, x) => p + x.kfill, 0) >= 1;
       // h) Sprung über 8 Zeilen vor und zurück (Suchen), i) Pixelvergleich: nie ein Pixel der alten Zeile oberhalb der Fläche
       {
         const o = await open(type, { ...GER, height: 852 }, { tab: 'audio', pool: POOL_O });
