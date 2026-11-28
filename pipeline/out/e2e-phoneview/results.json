@@ -1,5 +1,5 @@
 {
- "at": "2026-11-28T03:11:28.975Z",
+ "at": "2026-11-28T04:16:01.506Z",
  "runs": [
   {
    "browser": "chromium",
@@ -540,9 +540,9 @@
     "393x852 lateinisch ohne Titelbild 51e 3 auf 6: mindestens ein ruhiger Wechsel gemessen": true,
     "393x852 lateinisch ohne Titelbild 51e 6 auf 1: mindestens ein ruhiger Wechsel gemessen": true,
     "393x852 lateinisch ohne Titelbild 51e a: Höhe jeder Zeile in jedem Bild gleich ihrer Ruhehöhe (0)": true,
-    "393x852 lateinisch ohne Titelbild 51e b: Abstände benachbarter Zeilen in jedem Bild gleich (Abweichung höchstens 0,5 px), Überlappung höchstens 0,5 px (auch Doppel- und Dreifachwechsel)": true,
+    "393x852 lateinisch ohne Titelbild 51e b: Layoutabstände benachbarter Zeilen in jedem Bild 12 px (höchstens 1 px Abweichung), Überlappung 0, keine Zeile mit eigener Transformation (auch Doppel- und Dreifachwechsel)": true,
     "393x852 lateinisch ohne Titelbild 51e c: Anker in Ruhe vor und nach dem Wechsel gleich (0,5 px)": true,
-    "393x852 lateinisch ohne Titelbild 51e d: Schritt der Spalte bei Bildabstand bis 34 ms höchstens 38 px": true,
+    "393x852 lateinisch ohne Titelbild 51e d: Tempo der Spalte höchstens 2,3 px je ms (38 px je Bild bei 60 Hz), Bildabstand 8 bis 50 ms": true,
     "393x852 lateinisch ohne Titelbild 51e e: davor und danach sichtbare Zeile nie unter Deckkraft 0,4": true,
     "393x852 lateinisch ohne Titelbild 51e f: alte Zeile erreicht Deckkraft unter 0,01 innerhalb von 1000 ms und bleibt dort": true,
     "393x852 lateinisch ohne Titelbild 51e f: alte Zeile unter Deckkraft 0,05 spätestens 300 ms nach dem Wechsel": true,
@@ -561,9 +561,9 @@
     "393x852 lateinisch mit Titelbild 51e 3 auf 6: mindestens ein ruhiger Wechsel gemessen": true,
     "393x852 lateinisch mit Titelbild 51e 6 auf 1: mindestens ein ruhiger Wechsel gemessen": true,
     "393x852 lateinisch mit Titelbild 51e a: Höhe jeder Zeile in jedem Bild gleich ihrer Ruhehöhe (0)": true,
-    "393x852 lateinisch mit Titelbild 51e b: Abstände benachbarter Zeilen in jedem Bild gleich (Abweichung höchstens 0,5 px), Überlappung höchstens 0,5 px (auch Doppel- und Dreifachwechsel)": true,
+    "393x852 lateinisch mit Titelbild 51e b: Layoutabstände benachbarter Zeilen in jedem Bild 12 px (höchstens 1 px Abweichung), Überlappung 0, keine Zeile mit eigener Transformation (auch Doppel- und Dreifachwechsel)": true,
     "393x852 lateinisch mit Titelbild 51e c: Anker in Ruhe vor und nach dem Wechsel gleich (0,5 px)": true,
-    "393x852 lateinisch mit Titelbild 51e d: Schritt der Spalte bei Bildabstand bis 34 ms höchstens 38 px": true,
+    "393x852 lateinisch mit Titelbild 51e d: Tempo der Spalte höchstens 2,3 px je ms (38 px je Bild bei 60 Hz), Bildabstand 8 bis 50 ms": true,
     "393x852 lateinisch mit Titelbild 51e e: davor und danach sichtbare Zeile nie unter Deckkraft 0,4": true,
     "393x852 lateinisch mit Titelbild 51e f: alte Zeile erreicht Deckkraft unter 0,01 innerhalb von 1000 ms und bleibt dort": true,
     "393x852 lateinisch mit Titelbild 51e f: alte Zeile unter Deckkraft 0,05 spätestens 300 ms nach dem Wechsel": true,
@@ -582,9 +582,9 @@
     "393x852 arabisch ohne Titelbild 51e 3 auf 6: mindestens ein ruhiger Wechsel gemessen": true,
     "393x852 arabisch ohne Titelbild 51e 6 auf 1: mindestens ein ruhiger Wechsel gemessen": true,
     "393x852 arabisch ohne Titelbild 51e a: Höhe jeder Zeile in jedem Bild gleich ihrer Ruhehöhe (0)": true,
-    "393x852 arabisch ohne Titelbild 51e b: Abstände benachbarter Zeilen in jedem Bild gleich (Abweichung höchstens 0,5 px), Überlappung höchstens 0,5 px (auch Doppel- und Dreifachwechsel)": true,
+    "393x852 arabisch ohne Titelbild 51e b: Layoutabstände benachbarter Zeilen in jedem Bild 12 px (höchstens 1 px Abweichung), Überlappung 0, keine Zeile mit eigener Transformation (auch Doppel- und Dreifachwechsel)": true,
     "393x852 arabisch ohne Titelbild 51e c: Anker in Ruhe vor und nach dem Wechsel gleich (0,5 px)": true,
-    "393x852 arabisch ohne Titelbild 51e d: Schritt der Spalte bei Bildabstand bis 34 ms höchstens 38 px": true,
+    "393x852 arabisch ohne Titelbild 51e d: Tempo der Spalte höchstens 2,3 px je ms (38 px je Bild bei 60 Hz), Bildabstand 8 bis 50 ms": true,
     "393x852 arabisch ohne Titelbild 51e e: davor und danach sichtbare Zeile nie unter Deckkraft 0,4": true,
     "393x852 arabisch ohne Titelbild 51e f: alte Zeile erreicht Deckkraft unter 0,01 innerhalb von 1000 ms und bleibt dort": true,
     "393x852 arabisch ohne Titelbild 51e f: alte Zeile unter Deckkraft 0,05 spätestens 300 ms nach dem Wechsel": true,
@@ -603,9 +603,9 @@
     "393x852 arabisch mit Titelbild 51e 3 auf 6: mindestens ein ruhiger Wechsel gemessen": true,
     "393x852 arabisch mit Titelbild 51e 6 auf 1: mindestens ein ruhiger Wechsel gemessen": true,
     "393x852 arabisch mit Titelbild 51e a: Höhe jeder Zeile in jedem Bild gleich ihrer Ruhehöhe (0)": true,
-    "393x852 arabisch mit Titelbild 51e b: Abstände benachbarter Zeilen in jedem Bild gleich (Abweichung höchstens 0,5 px), Überlappung höchstens 0,5 px (auch Doppel- und Dreifachwechsel)": true,
+    "393x852 arabisch mit Titelbild 51e b: Layoutabstände benachbarter Zeilen in jedem Bild 12 px (höchstens 1 px Abweichung), Überlappung 0, keine Zeile mit eigener Transformation (auch Doppel- und Dreifachwechsel)": true,
     "393x852 arabisch mit Titelbild 51e c: Anker in Ruhe vor und nach dem Wechsel gleich (0,5 px)": true,
-    "393x852 arabisch mit Titelbild 51e d: Schritt der Spalte bei Bildabstand bis 34 ms höchstens 38 px": true,
+    "393x852 arabisch mit Titelbild 51e d: Tempo der Spalte höchstens 2,3 px je ms (38 px je Bild bei 60 Hz), Bildabstand 8 bis 50 ms": true,
     "393x852 arabisch mit Titelbild 51e e: davor und danach sichtbare Zeile nie unter Deckkraft 0,4": true,
     "393x852 arabisch mit Titelbild 51e f: alte Zeile erreicht Deckkraft unter 0,01 innerhalb von 1000 ms und bleibt dort": true,
     "393x852 arabisch mit Titelbild 51e f: alte Zeile unter Deckkraft 0,05 spätestens 300 ms nach dem Wechsel": true,
@@ -624,9 +624,9 @@
     "393x793 lateinisch mit Titelbild 51e 3 auf 6: mindestens ein ruhiger Wechsel gemessen": true,
     "393x793 lateinisch mit Titelbild 51e 6 auf 1: mindestens ein ruhiger Wechsel gemessen": true,
     "393x793 lateinisch mit Titelbild 51e a: Höhe jeder Zeile in jedem Bild gleich ihrer Ruhehöhe (0)": true,
-    "393x793 lateinisch mit Titelbild 51e b: Abstände benachbarter Zeilen in jedem Bild gleich (Abweichung höchstens 0,5 px), Überlappung höchstens 0,5 px (auch Doppel- und Dreifachwechsel)": true,
+    "393x793 lateinisch mit Titelbild 51e b: Layoutabstände benachbarter Zeilen in jedem Bild 12 px (höchstens 1 px Abweichung), Überlappung 0, keine Zeile mit eigener Transformation (auch Doppel- und Dreifachwechsel)": true,
     "393x793 lateinisch mit Titelbild 51e c: Anker in Ruhe vor und nach dem Wechsel gleich (0,5 px)": true,
-    "393x793 lateinisch mit Titelbild 51e d: Schritt der Spalte bei Bildabstand bis 34 ms höchstens 38 px": true,
+    "393x793 lateinisch mit Titelbild 51e d: Tempo der Spalte höchstens 2,3 px je ms (38 px je Bild bei 60 Hz), Bildabstand 8 bis 50 ms": true,
     "393x793 lateinisch mit Titelbild 51e e: davor und danach sichtbare Zeile nie unter Deckkraft 0,4": true,
     "393x793 lateinisch mit Titelbild 51e f: alte Zeile erreicht Deckkraft unter 0,01 innerhalb von 1000 ms und bleibt dort": true,
     "393x793 lateinisch mit Titelbild 51e f: alte Zeile unter Deckkraft 0,05 spätestens 300 ms nach dem Wechsel": true,
@@ -645,9 +645,9 @@
     "375x667 lateinisch ohne Titelbild 51e 3 auf 6: mindestens ein ruhiger Wechsel gemessen": true,
     "375x667 lateinisch ohne Titelbild 51e 6 auf 1: mindestens ein ruhiger Wechsel gemessen": true,
     "375x667 lateinisch ohne Titelbild 51e a: Höhe jeder Zeile in jedem Bild gleich ihrer Ruhehöhe (0)": true,
-    "375x667 lateinisch ohne Titelbild 51e b: Abstände benachbarter Zeilen in jedem Bild gleich (Abweichung höchstens 0,5 px), Überlappung höchstens 0,5 px (auch Doppel- und Dreifachwechsel)": true,
+    "375x667 lateinisch ohne Titelbild 51e b: Layoutabstände benachbarter Zeilen in jedem Bild 12 px (höchstens 1 px Abweichung), Überlappung 0, keine Zeile mit eigener Transformation (auch Doppel- und Dreifachwechsel)": true,
     "375x667 lateinisch ohne Titelbild 51e c: Anker in Ruhe vor und nach dem Wechsel gleich (0,5 px)": true,
-    "375x667 lateinisch ohne Titelbild 51e d: Schritt der Spalte bei Bildabstand bis 34 ms höchstens 38 px": true,
+    "375x667 lateinisch ohne Titelbild 51e d: Tempo der Spalte höchstens 2,3 px je ms (38 px je Bild bei 60 Hz), Bildabstand 8 bis 50 ms": true,
     "375x667 lateinisch ohne Titelbild 51e e: davor und danach sichtbare Zeile nie unter Deckkraft 0,4": true,
     "375x667 lateinisch ohne Titelbild 51e f: alte Zeile erreicht Deckkraft unter 0,01 innerhalb von 1000 ms und bleibt dort": true,
     "375x667 lateinisch ohne Titelbild 51e f: alte Zeile unter Deckkraft 0,05 spätestens 300 ms nach dem Wechsel": true,
@@ -666,9 +666,9 @@
     "375x667 arabisch ohne Titelbild 51e 3 auf 6: mindestens ein ruhiger Wechsel gemessen": true,
     "375x667 arabisch ohne Titelbild 51e 6 auf 1: mindestens ein ruhiger Wechsel gemessen": true,
     "375x667 arabisch ohne Titelbild 51e a: Höhe jeder Zeile in jedem Bild gleich ihrer Ruhehöhe (0)": true,
-    "375x667 arabisch ohne Titelbild 51e b: Abstände benachbarter Zeilen in jedem Bild gleich (Abweichung höchstens 0,5 px), Überlappung höchstens 0,5 px (auch Doppel- und Dreifachwechsel)": true,
+    "375x667 arabisch ohne Titelbild 51e b: Layoutabstände benachbarter Zeilen in jedem Bild 12 px (höchstens 1 px Abweichung), Überlappung 0, keine Zeile mit eigener Transformation (auch Doppel- und Dreifachwechsel)": true,
     "375x667 arabisch ohne Titelbild 51e c: Anker in Ruhe vor und nach dem Wechsel gleich (0,5 px)": true,
-    "375x667 arabisch ohne Titelbild 51e d: Schritt der Spalte bei Bildabstand bis 34 ms höchstens 38 px": true,
+    "375x667 arabisch ohne Titelbild 51e d: Tempo der Spalte höchstens 2,3 px je ms (38 px je Bild bei 60 Hz), Bildabstand 8 bis 50 ms": true,
     "375x667 arabisch ohne Titelbild 51e e: davor und danach sichtbare Zeile nie unter Deckkraft 0,4": true,
     "375x667 arabisch ohne Titelbild 51e f: alte Zeile erreicht Deckkraft unter 0,01 innerhalb von 1000 ms und bleibt dort": true,
     "375x667 arabisch ohne Titelbild 51e f: alte Zeile unter Deckkraft 0,05 spätestens 300 ms nach dem Wechsel": true,
@@ -6787,7 +6787,7 @@
      "jump": 9
     },
     "393x852 Verlauf Zeilenwechsel 4x": {
-     "frames": 333,
+     "frames": 332,
      "maxDt": 16.800000000000182,
      "changes": [
       {
@@ -6810,7 +6810,7 @@
        "cue": 4,
        "frames": 15,
        "durMs": 250,
-       "animsSeen": 16,
+       "animsSeen": 15,
        "fromTop": 346,
        "toTop": 274
       },
@@ -6818,7 +6818,7 @@
        "cue": 5,
        "frames": 15,
        "durMs": 250,
-       "animsSeen": 16,
+       "animsSeen": 15,
        "fromTop": 346,
        "toTop": 274
       },
@@ -6826,7 +6826,7 @@
        "cue": 6,
        "frames": 15,
        "durMs": 250,
-       "animsSeen": 15,
+       "animsSeen": 16,
        "fromTop": 346,
        "toTop": 274
       },
@@ -6834,7 +6834,7 @@
        "cue": 7,
        "frames": 15,
        "durMs": 250,
-       "animsSeen": 16,
+       "animsSeen": 15,
        "fromTop": 346,
        "toTop": 274
       },
@@ -6850,7 +6850,7 @@
        "cue": 9,
        "frames": 15,
        "durMs": 250,
-       "animsSeen": 16,
+       "animsSeen": 15,
        "fromTop": 346,
        "toTop": 274
       },
@@ -6858,7 +6858,7 @@
        "cue": 10,
        "frames": 15,
        "durMs": 250,
-       "animsSeen": 16,
+       "animsSeen": 15,
        "fromTop": 346,
        "toTop": 274
       },
@@ -6866,7 +6866,7 @@
        "cue": 11,
        "frames": 15,
        "durMs": 250,
-       "animsSeen": 15,
+       "animsSeen": 16,
        "fromTop": 346,
        "toTop": 274
       }
@@ -6875,15 +6875,104 @@
     "51e Messwerte": {
      "393x852 lateinisch ohne Titelbild": {
       "changes": 25,
+      "v": 1.374251497005931,
       "a": 0.00048828125,
       "b": 0.0001220703125,
       "c": 0,
-      "d": 22.86999999999989,
-      "dRaw": 22.86999999999989,
+      "d": 22.950000000000045,
+      "dRaw": 22.950000000000045,
       "e": 0.6,
       "f": 0,
-      "fz": 133.40000000000146,
+      "fz": 133.39999999999964,
       "m": 180,
+      "fz05": 116.70000000000073,
+      "curHs": [
+       30,
+       60,
+       60,
+       90,
+       90,
+       30,
+       90,
+       60,
+       150,
+       90,
+       150,
+       30,
+       30
+      ],
+      "i": 0.04593899999999995,
+      "labs": {
+       "1 auf 1": 1,
+       "1 auf 2": 1,
+       "2 auf 2": 1,
+       "2 auf 3": 1,
+       "3 auf 3": 1,
+       "3 auf 1": 2,
+       "1 auf 3": 1,
+       "3 auf 2": 1,
+       "2 auf 6": 1,
+       "6 auf 3": 1,
+       "3 auf 6": 1,
+       "6 auf 1": 1
+      },
+      "cl": [
+       {
+        "n": 4,
+        "gap": 122.23333333333358
+       },
+       {
+        "n": 4,
+        "gap": 116.66666666666667
+       },
+       {
+        "n": 4,
+        "gap": 77.80000000000048
+       }
+      ],
+      "minGap": 11.9998779296875,
+      "overlap": 0,
+      "bw": {
+       "dev": 0.0001,
+       "gap": 12.0001,
+       "pair": [
+        11,
+        12
+       ],
+       "sinceChangeMs": 233,
+       "frame": 51
+      },
+      "bl": 0,
+      "ol": 0,
+      "rowTr": 0,
+      "vw": {
+       "step": 22.95,
+       "dtMs": 16.7,
+       "frame": 991
+      },
+      "dw": {
+       "step": 22.95,
+       "dtMs": 16.7,
+       "frame": 991,
+       "y0": -1966.55,
+       "y1": -1989.5
+      },
+      "k": "10",
+      "kfill": 0,
+      "frames": 1108
+     },
+     "393x852 lateinisch mit Titelbild": {
+      "changes": 25,
+      "v": 1.1167664670659332,
+      "a": 0.0003662109375,
+      "b": 0.000244140625,
+      "c": 0,
+      "d": 18.649999999999864,
+      "dRaw": 18.649999999999864,
+      "e": 0.6,
+      "f": 0,
+      "fz": 133.39999999999986,
+      "m": 36,
       "fz05": 116.80000000000018,
       "curHs": [
        30,
@@ -6918,68 +7007,77 @@
       "cl": [
        {
         "n": 4,
-        "gap": 122.23333333333296
+        "gap": 122.23333333333358
        },
        {
         "n": 4,
-        "gap": 122.20000000000012
+        "gap": 116.66666666666667
        },
        {
         "n": 4,
         "gap": 77.76666666666642
        }
       ],
-      "minGap": 11.9998779296875,
+      "minGap": 11.999755859375,
       "overlap": 0,
       "bw": {
-       "dev": 0.0001,
-       "gap": 11.9999,
+       "dev": 0.0002,
+       "gap": 11.9998,
        "pair": [
-        20,
-        21
+        22,
+        23
        ],
-       "sinceChangeMs": 167,
-       "frame": 48
+       "sinceChangeMs": 117,
+       "frame": 31
+      },
+      "bl": 0,
+      "ol": 0,
+      "rowTr": 0,
+      "vw": {
+       "step": 18.65,
+       "dtMs": 16.7,
+       "frame": 864
       },
       "dw": {
-       "step": 22.87,
-       "dtMs": 16.8,
-       "frame": 993,
-       "y0": -1989.5,
-       "y1": -2012.37
+       "step": 18.65,
+       "dtMs": 16.7,
+       "frame": 864,
+       "y0": -1499.89,
+       "y1": -1518.54
       },
-      "k": "10",
-      "kfill": 0,
-      "frames": 1107
+      "k": "5",
+      "kfill": 2,
+      "frames": 1095
      },
-     "393x852 lateinisch mit Titelbild": {
+     "393x852 arabisch ohne Titelbild": {
       "changes": 25,
+      "v": 1.822155688622891,
       "a": 0.00048828125,
       "b": 0.000244140625,
       "c": 0,
-      "d": 18.919999999999845,
-      "dRaw": 18.919999999999845,
+      "d": 30.43000000000029,
+      "dRaw": 30.43000000000029,
       "e": 0.6,
       "f": 0,
-      "fz": 133.4000000000001,
-      "m": 36,
+      "fz": 133.40000000000055,
+      "m": 71.203125,
       "fz05": 116.70000000000073,
       "curHs": [
-       30,
-       60,
-       60,
-       90,
-       90,
-       30,
-       90,
-       60,
-       150,
-       90,
-       150,
-       30,
-       30
+       46,
+       92,
+       92,
+       138,
+       138,
+       46,
+       138,
+       92,
+       276,
+       138,
+       276,
+       46,
+       46
       ],
-      "i": 0.045938000000000034,
+      "i": 0.04593899999999995,
       "labs": {
        "1 auf 1": 1,
        "1 auf 2": 1,
@@ -6997,51 +7095,60 @@
       "cl": [
        {
         "n": 4,
-        "gap": 122.20000000000012
+        "gap": 122.26666666666704
        },
        {
         "n": 4,
-        "gap": 122.20000000000012
+        "gap": 116.66666666666667
        },
        {
         "n": 4,
-        "gap": 77.80000000000048
+        "gap": 77.76666666666642
        }
       ],
-      "minGap": 11.999755859375,
+      "minGap": 11.9998779296875,
       "overlap": 0,
       "bw": {
        "dev": 0.0002,
-       "gap": 11.9998,
+       "gap": 12.0002,
        "pair": [
-        22,
-        23
+        16,
+        17
        ],
        "sinceChangeMs": 117,
-       "frame": 29
+       "frame": 192
+      },
+      "bl": 0,
+      "ol": 0,
+      "rowTr": 0,
+      "vw": {
+       "step": 30.43,
+       "dtMs": 16.7,
+       "frame": 863
       },
       "dw": {
-       "step": 18.92,
+       "step": 30.43,
        "dtMs": 16.7,
        "frame": 863,
-       "y0": -1518.44,
-       "y1": -1537.36
+       "y0": -2299.6,
+       "y1": -2330.03
       },
-      "k": "5",
+      "k": "6",
       "kfill": 2,
       "frames": 1094
      },
-     "393x852 arabisch ohne Titelbild": {
+     "393x852 arabisch mit Titelbild": {
       "changes": 25,
+      "v": 1.0903614457831032,
       "a": 0.00048828125,
-      "b": 0.0001220703125,
+      "b": 0.000244140625,
       "c": 0,
-      "d": 30.440000000000055,
-      "dRaw": 30.440000000000055,
+      "d": 18.09999999999991,
+      "dRaw": 18.09999999999991,
       "e": 0.6,
       "f": 0,
-      "fz": 133.5,
-      "m": 71.203125,
+      "fz": 133.4000000000001,
+      "m": 65.203125,
       "fz05": 116.70000000000073,
       "curHs": [
        46,
@@ -7052,9 +7159,9 @@
        46,
        138,
        92,
-       276,
        138,
-       276,
+       138,
+       138,
        46,
        46
       ],
@@ -7080,7 +7187,7 @@
        },
        {
         "n": 4,
-        "gap": 116.63333333333321
+        "gap": 122.23333333333296
        },
        {
         "n": 4,
@@ -7090,100 +7197,29 @@
       "minGap": 11.9998779296875,
       "overlap": 0,
       "bw": {
-       "dev": 0.0001,
-       "gap": 12.0001,
+       "dev": 0.0002,
+       "gap": 12.0002,
        "pair": [
-        17,
-        18
+        18,
+        19
        ],
-       "sinceChangeMs": 50,
-       "frame": 350
+       "sinceChangeMs": 200,
+       "frame": 89
       },
-      "dw": {
-       "step": 30.44,
-       "dtMs": 16.7,
-       "frame": 863,
-       "y0": -2299.6,
-       "y1": -2330.04
-      },
-      "k": "6",
-      "kfill": 2,
-      "frames": 1094
-     },
-     "393x852 arabisch mit Titelbild": {
-      "changes": 25,
-      "a": 0.00048828125,
-      "b": 0.0001220703125,
-      "c": 0,
-      "d": 18.04000000000019,
-      "dRaw": 18.04000000000019,
-      "e": 0.6,
-      "f": 0,
-      "fz": 133.40000000000146,
-      "m": 65.203125,
-      "fz05": 116.79999999999927,
-      "curHs": [
-       46,
-       92,
-       92,
-       138,
-       138,
-       46,
-       138,
-       92,
-       138,
-       138,
-       138,
-       46,
-       46
-      ],
-      "i": 0.04593900000000006,
-      "labs": {
-       "1 auf 1": 1,
-       "1 auf 2": 1,
-       "2 auf 2": 1,
-       "2 auf 3": 1,
-       "3 auf 3": 1,
-       "3 auf 1": 2,
-       "1 auf 3": 1,
-       "3 auf 2": 1,
-       "2 auf 6": 1,
-       "6 auf 3": 1,
-       "3 auf 6": 1,
-       "6 auf 1": 1
-      },
-      "cl": [
-       {
-        "n": 4,
-        "gap": 122.20000000000012
-       },
-       {
-        "n": 4,
-        "gap": 116.66666666666667
-       },
-       {
-        "n": 4,
-        "gap": 77.76666666666642
-       }
-      ],
-      "minGap": 11.9998779296875,
-      "overlap": 0,
-      "bw": {
-       "dev": 0.0001,
-       "gap": 12.0001,
-       "pair": [
-        14,
-        15
-       ],
-       "sinceChangeMs": 33,
-       "frame": 26
-      },
-      "dw": {
-       "step": 18.04,
+      "bl": 0,
+      "ol": 0,
+      "rowTr": 0,
+      "vw": {
+       "step": 18.1,
        "dtMs": 16.6,
-       "frame": 760,
-       "y0": -1612.6,
-       "y1": -1630.64
+       "frame": 759
+      },
+      "dw": {
+       "step": 18.1,
+       "dtMs": 16.6,
+       "frame": 759,
+       "y0": -1612.24,
+       "y1": -1630.34
       },
       "k": "3",
       "kfill": 6,
@@ -7191,11 +7227,12 @@
      },
      "393x793 lateinisch mit Titelbild": {
       "changes": 25,
+      "v": 0.8102409638554067,
       "a": 0.000244140625,
       "b": 0.0001220703125,
       "c": 0,
-      "d": 13.720000000000027,
-      "dRaw": 13.720000000000027,
+      "d": 13.450000000000045,
+      "dRaw": 13.450000000000045,
       "e": 0.6,
       "f": 0,
       "fz": 133.40000000000055,
@@ -7213,85 +7250,6 @@
        90,
        90,
        90,
-       30,
-       30
-      ],
-      "i": 0.046211,
-      "labs": {
-       "1 auf 1": 1,
-       "1 auf 2": 1,
-       "2 auf 2": 1,
-       "2 auf 3": 1,
-       "3 auf 3": 1,
-       "3 auf 1": 2,
-       "1 auf 3": 1,
-       "3 auf 2": 1,
-       "2 auf 6": 1,
-       "6 auf 3": 1,
-       "3 auf 6": 1,
-       "6 auf 1": 1
-      },
-      "cl": [
-       {
-        "n": 4,
-        "gap": 122.20000000000012
-       },
-       {
-        "n": 4,
-        "gap": 122.23333333333296
-       },
-       {
-        "n": 4,
-        "gap": 77.76666666666642
-       }
-      ],
-      "minGap": 11.9998779296875,
-      "overlap": 0,
-      "bw": {
-       "dev": 0.0001,
-       "gap": 11.9999,
-       "pair": [
-        13,
-        14
-       ],
-       "sinceChangeMs": 50,
-       "frame": 27
-      },
-      "dw": {
-       "step": 13.72,
-       "dtMs": 16.7,
-       "frame": 865,
-       "y0": -1379.59,
-       "y1": -1393.31
-      },
-      "k": "3",
-      "kfill": 6,
-      "frames": 1094
-     },
-     "375x667 lateinisch ohne Titelbild": {
-      "changes": 25,
-      "a": 0.00048828125,
-      "b": 0.0001220703125,
-      "c": 0,
-      "d": 20.86999999999989,
-      "dRaw": 20.86999999999989,
-      "e": 0.6,
-      "f": 0,
-      "fz": 133.40000000000055,
-      "m": 36,
-      "fz05": 116.80000000000018,
-      "curHs": [
-       30,
-       60,
-       60,
-       90,
-       90,
-       30,
-       90,
-       60,
-       180,
-       90,
-       180,
        30,
        30
       ],
@@ -7317,7 +7275,7 @@
        },
        {
         "n": 4,
-        "gap": 122.23333333333358
+        "gap": 116.66666666666667
        },
        {
         "n": 4,
@@ -7330,51 +7288,60 @@
        "dev": 0.0001,
        "gap": 11.9999,
        "pair": [
-        19,
-        20
+        13,
+        14
        ],
-       "sinceChangeMs": 183,
-       "frame": 49
+       "sinceChangeMs": 67,
+       "frame": 28
+      },
+      "bl": 0,
+      "ol": 0,
+      "rowTr": 0,
+      "vw": {
+       "step": 13.45,
+       "dtMs": 16.6,
+       "frame": 864
       },
       "dw": {
-       "step": 20.87,
-       "dtMs": 16.7,
-       "frame": 879,
-       "y0": -1592.98,
-       "y1": -1613.85
+       "step": 13.45,
+       "dtMs": 16.6,
+       "frame": 864,
+       "y0": -1366.12,
+       "y1": -1379.57
       },
-      "k": "6",
-      "kfill": 2,
-      "frames": 1106
+      "k": "3",
+      "kfill": 6,
+      "frames": 1096
      },
-     "375x667 arabisch ohne Titelbild": {
+     "375x667 lateinisch ohne Titelbild": {
       "changes": 25,
+      "v": 1.1832335329342085,
       "a": 0.00048828125,
       "b": 0.000244140625,
       "c": 0,
-      "d": 18.850000000000136,
-      "dRaw": 18.850000000000136,
+      "d": 19.75999999999999,
+      "dRaw": 19.75999999999999,
       "e": 0.6,
       "f": 0,
-      "fz": 150,
-      "m": 49.203125,
-      "fz05": 133.30000000000018,
+      "fz": 133.40000000000055,
+      "m": 36,
+      "fz05": 116.70000000000073,
       "curHs": [
-       46,
-       92,
-       92,
-       138,
-       138,
-       46,
-       138,
-       92,
-       184,
-       138,
-       184,
-       46,
-       46
+       30,
+       60,
+       60,
+       90,
+       90,
+       30,
+       90,
+       60,
+       180,
+       90,
+       180,
+       30,
+       30
       ],
-      "i": 0.04621200000000003,
+      "i": 0.04593900000000006,
       "labs": {
        "1 auf 1": 1,
        "1 auf 2": 1,
@@ -7392,15 +7359,103 @@
       "cl": [
        {
         "n": 4,
-        "gap": 116.66666666666667
+        "gap": 122.23333333333296
        },
        {
         "n": 4,
-        "gap": 116.66666666666667
+        "gap": 122.26666666666704
        },
        {
         "n": 4,
-        "gap": 77.80000000000048
+        "gap": 77.76666666666642
+       }
+      ],
+      "minGap": 11.9998779296875,
+      "overlap": 0,
+      "bw": {
+       "dev": 0.0002,
+       "gap": 12.0002,
+       "pair": [
+        23,
+        24
+       ],
+       "sinceChangeMs": 183,
+       "frame": 204
+      },
+      "bl": 0,
+      "ol": 0,
+      "rowTr": 0,
+      "vw": {
+       "step": 19.76,
+       "dtMs": 16.7,
+       "frame": 872
+      },
+      "dw": {
+       "step": 19.76,
+       "dtMs": 16.7,
+       "frame": 872,
+       "y0": -1579.85,
+       "y1": -1599.61
+      },
+      "k": "6",
+      "kfill": 2,
+      "frames": 1102
+     },
+     "375x667 arabisch ohne Titelbild": {
+      "changes": 25,
+      "v": 1.1197604790418565,
+      "a": 0.00048828125,
+      "b": 0.000244140625,
+      "c": 0,
+      "d": 18.699999999999818,
+      "dRaw": 18.699999999999818,
+      "e": 0.6,
+      "f": 0,
+      "fz": 133.40000000000146,
+      "m": 49.203125,
+      "fz05": 116.70000000000073,
+      "curHs": [
+       46,
+       92,
+       92,
+       138,
+       138,
+       46,
+       138,
+       92,
+       184,
+       138,
+       184,
+       46,
+       46
+      ],
+      "i": 0.04593900000000006,
+      "labs": {
+       "1 auf 1": 1,
+       "1 auf 2": 1,
+       "2 auf 2": 1,
+       "2 auf 3": 1,
+       "3 auf 3": 1,
+       "3 auf 1": 2,
+       "1 auf 3": 1,
+       "3 auf 2": 1,
+       "2 auf 6": 1,
+       "6 auf 3": 1,
+       "3 auf 6": 1,
+       "6 auf 1": 1
+      },
+      "cl": [
+       {
+        "n": 4,
+        "gap": 122.20000000000012
+       },
+       {
+        "n": 4,
+        "gap": 122.23333333333296
+       },
+       {
+        "n": 4,
+        "gap": 77.76666666666642
        }
       ],
       "minGap": 11.999755859375,
@@ -7409,22 +7464,30 @@
        "dev": 0.0002,
        "gap": 11.9998,
        "pair": [
-        17,
-        18
+        18,
+        19
        ],
-       "sinceChangeMs": 150,
-       "frame": 87
+       "sinceChangeMs": 83,
+       "frame": 190
+      },
+      "bl": 0,
+      "ol": 0,
+      "rowTr": 0,
+      "vw": {
+       "step": 18.7,
+       "dtMs": 16.7,
+       "frame": 856
       },
       "dw": {
-       "step": 18.85,
+       "step": 18.7,
        "dtMs": 16.7,
-       "frame": 759,
-       "y0": -1699.08,
-       "y1": -1717.93
+       "frame": 856,
+       "y0": -1979.39,
+       "y1": -1998.09
       },
       "k": "4",
       "kfill": 2,
-      "frames": 1094
+      "frames": 1095
      }
     },
     "51e Sprung": {
@@ -7444,7 +7507,7 @@
     },
     "51e Pixel oberhalb der Fläche": {
      "groups": 2,
-     "frames": 79,
+     "frames": 78,
      "diffs": [
       {
        "worst": 0,
@@ -7454,7 +7517,7 @@
       {
        "worst": 0,
        "inside": 43.565300546448086,
-       "n": 18
+       "n": 17
       }
      ]
     },
@@ -8856,8 +8919,8 @@
      "pool 2/5 ready",
      "deck: pool load test0000045 src=net",
      "deck: pool fill 4/5 (local 0, net 4)",
-     "load: test0000044 pool ls=- fb=- md=1 cp=- sk=- total=1 conc=2 result=ready",
-     "deck: pool ready test0000044 after 1 ms host=stream.test",
+     "load: test0000044 pool ls=- fb=- md=0 cp=- sk=- total=0 conc=2 result=ready",
+     "deck: pool ready test0000044 after 0 ms host=stream.test",
      "pool 3/5 ready",
      "load: test0000045 pool ls=- fb=- md=0 cp=- sk=- total=0 conc=2 result=ready",
      "deck: pool ready test0000045 after 0 ms host=stream.test",
