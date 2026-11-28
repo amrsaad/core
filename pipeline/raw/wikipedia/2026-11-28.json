@@ -1,0 +1,78 @@
+{
+ "source": "wikipedia",
+ "date": "2026-11-28",
+ "records": [
+  {
+   "sourceId": "wiki:de:Sojus (Rakete)",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Sojus_(Rakete)",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/28",
+    "status": 200
+   },
+   "title": "Sojus (Rakete)",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Sojus [sʌˈjus] ist eine russische Trägerrakete. Mit über 1000 Einsätzen seit ihrem Erstflug im Jahr 1966 ist sie die meistgeflogene Rakete in der Raumfahrtgeschichte. Die Sojus entstand als Weiterentwicklung der ersten Interkontinentalrakete, der R-7. Sie entstand durch leichte Modifizierungen der R7-Variante Woschod, mit der anfänglichen Aufgabe, bemannte Sojus-Raumschiffe zu starten. Dabei waren die Unterschiede zwischen beiden Raketen so gering, dass einige Autoren die Woschod ebenfalls der Sojus-Reihe zurechnen. Von zahlreichen Varianten der Rakete sind heute noch die Sojus-2.1-Typen im Einsatz."
+   },
+   "meta": {
+    "kind": "tfa"
+   },
+   "fetchedAt": "2026-11-28T04:52:32.647Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Sojus_(Rakete)": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Republik China (Taiwan)",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/Republik_China_(Taiwan)",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/28",
+    "status": 200
+   },
+   "title": "Republik China (Taiwan)",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Republik China, weithin bekannt als Taiwan, in Deutschland amtlich Taiwan, in Österreich und der Schweiz Taiwan , ist ein im Zuge der Ein-China-Politik nur von wenigen Staaten diplomatisch anerkannter Inselstaat in Ostasien. Sein Territorium besteht aus der Hauptinsel Taiwan (99 %) und anderen, kleineren Inseln. Der technisch hochentwickelte Industriestaat, aus dem deutlich mehr als die Hälfte aller weltweit hergestellten Halbleiter-Bauteile kommen, hat eine Bevölkerung von rund 23,5 Millionen Menschen."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-28T04:52:32.647Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/Republik_China_(Taiwan)": 200
+   }
+  },
+  {
+   "sourceId": "wiki:de:Ägyptologie",
+   "source": "wikipedia",
+   "area": "brain",
+   "topic": "varia",
+   "url": "https://de.wikipedia.org/wiki/%C3%84gyptologie",
+   "urlStatus": 200,
+   "api": {
+    "url": "https://api.wikimedia.org/feed/v1/wikipedia/de/featured/2026/11/28",
+    "status": 200
+   },
+   "title": "Ägyptologie",
+   "publisher": "Wikipedia",
+   "content": {
+    "extract": "Die Ägyptologie erforscht alle Bereiche der altägyptischen Hochkultur von der Vorgeschichte des 5. Jahrtausends v. Chr. bis zum Ende der Römerherrschaft im 4. Jahrhundert n. Chr. Sie ist in Deutschland sehr sprachenorientiert, während in den angloamerikanischen und in anderen Ländern wie Frankreich, Italien, Polen und den Niederlanden auch die Archäologie selbst einen breiten Raum innerhalb der Lehre und des Fachs einnimmt."
+   },
+   "meta": {
+    "kind": "onthisday"
+   },
+   "fetchedAt": "2026-11-28T04:52:32.647Z",
+   "urlChecks": {
+    "https://de.wikipedia.org/wiki/%C3%84gyptologie": 200
+   }
+  }
+ ]
+}
