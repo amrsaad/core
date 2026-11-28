@@ -334,7 +334,7 @@ html:has(.vfeed[data-phone] .vend[data-testid='end-page']), html:has(.vfeed[data
 .ptx-hook[data-size='m'] { font-size: min(var(--fh), 26px); }
 .ptx-hook[data-size='s'] { font-size: min(var(--fh), 22px); }
 .ptx-hook[lang='ar'], .ptx-hook:dir(rtl) { font-family: var(--font-ar); line-height: 1.5; }
-.vfeed[data-phone] .dtx-quote { margin: 0; padding-left: var(--s-4); border-left: 2px solid color-mix(in srgb, var(--on-media) 22%, transparent); }
+.vfeed[data-phone] .dtx-quote { margin: 0; padding-inline-start: var(--s-4); border-inline-start: 2px solid color-mix(in srgb, var(--on-media) 22%, transparent); }
 .vfeed[data-phone] .vtext-body { overflow: visible; font-family: var(--font-brain); font-size: var(--fq); line-height: var(--fql); color: var(--body); }
 .vfeed[data-phone] .vtext-rtl { font-family: var(--font-ar); font-size: var(--fa); line-height: var(--fal); }
 .vfeed[data-phone] .dtx-origin { margin: 0; }

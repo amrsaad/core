@@ -23,6 +23,9 @@ for (let i = 30; i < 40; i++) moments.push(mk(i, 'body'));
 const LONG = ' und dazu ein langer zweiter Teil, der klar über drei Zeilen der schmalen Warteschlange hinausgeht, damit die Auslassungspunkte nötig werden';
 for (let i = 40; i < 46; i++) moments.push(mk(i, 'brain', { form: 'audio', audio: true, hls: `https://stream.test/${i}.m3u8`, ...(i === 42 || i === 44 ? { hook: `Testmoment ${i} brain, ein Satz${LONG}` } : {}) }));
 for (let i = 46; i < 56; i++) moments.push(mk(i, 'body', { form: 'text', videoId: `texto${String(i).padStart(5, '0')}`, author: `Author ${i}`, ref: `Ref ${i}`, sourceUrl: `https://example.org/s/${i}`, license: 'CC BY 4.0', ...(i === 46 ? { kind: 'takeaway', apply: 'Do the small thing today.', origin: 'Test entry 30' } : {}) }));
+// Runde 53: arabischer Textmoment (eigener Testtext), Doppelpunkt ohne Leerzeichen wie in der Quelle
+const AR_TXT = 'الخسار مراتب متعددة متفاوتة:قد يكون خسارًا مطلقًا، كحال من خسر الدنيا والآخرة. ونمجِّدك بكل صفات:الإيمان والعمل الصالح؛فهذا هو المطلوب في سورة العصر 103:2 عند الساعة 10:30.';
+moments.push(mk(56, 'body', { form: 'text', videoId: 'texto00056', author: 'Author 56', ref: 'Ref 56', sourceUrl: 'https://example.org/s/56', license: 'CC BY 4.0', hook: 'هذا عنوان تجريبي لنص عربي', excerpt: AR_TXT }));
 const raw = crypto.getRandomValues(new Uint8Array(32));
 const key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt']);
 const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -396,6 +399,36 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await press(pg, 'Escape', 150);
       c.noErrors1440 = o.errors.length === 0;
       if (o.errors.length) r.notes.errors = o.errors.slice(0, 3);
+      await browser.close();
+    }
+    // ---------- Runde 53: Mac 1440, Zitatlinie am Zeilenanfang (arabisch rechts), Leerzeichen nach Doppelpunkt ----------
+    {
+      const o = await open(type, { width: 1440, height: 900 });
+      browser = o.browser;
+      const pg = o.pg;
+      await press(pg, '3', 1500);
+      await waitFor(pg, () => !!document.querySelector('[data-testid=text-view]'), undefined, 4000);
+      const QM = () => {
+        const q = document.querySelector('.dtx-quote'); const p = document.querySelector('[data-testid=text-body]');
+        if (!q || !p) return null;
+        const qb = q.getBoundingClientRect(); const qs = getComputedStyle(q); const pb = p.getBoundingClientRect();
+        return { dir: q.getAttribute('dir'), ql: qb.left, qr: qb.right, bl: parseFloat(qs.borderLeftWidth), br: parseFloat(qs.borderRightWidth), pl: parseFloat(qs.paddingLeft), pr: parseFloat(qs.paddingRight), pL: pb.left, pR: pb.right, text: p.textContent };
+      };
+      const toMoment = async (n) => { const id = `test${String(n).padStart(7, '0')}:100`; for (let t = 0; t < 6; t++) { await pg.evaluate((i) => { window.__core.arrange([i]); window.__core.next(); }, id); if (await waitFor(pg, (i) => window.__core.moment()?.id === i, id, 2500)) break; } await pg.waitForTimeout(500); };
+      await toMoment(46);
+      const L = await pg.evaluate(QM);
+      await pg.screenshot({ path: `${out}/${name}-1440-text-latein.png` });
+      await toMoment(56);
+      const A = await pg.evaluate(QM);
+      await pg.screenshot({ path: `${out}/${name}-1440-text-arabisch.png` });
+      const gapL = L ? L.pL - (L.ql + L.bl) : NaN; const gapA = A ? (A.qr - A.br) - A.pR : NaN;
+      console.error(`53 Mac 1440 Latein: dir ${L?.dir}, Linie links ${L?.bl} rechts ${L?.br}, Einzug ${L?.pl}, Zitat ${L?.ql}..${L?.qr}, Text ${L?.pL}..${L?.pR}, Abstand ${gapL}`);
+      console.error(`53 Mac 1440 Arabisch: dir ${A?.dir}, Linie links ${A?.bl} rechts ${A?.br}, Einzug ${A?.pr}, Zitat ${A?.ql}..${A?.qr}, Text ${A?.pL}..${A?.pR}, Abstand ${gapA}`);
+      c.quoteLatinLeft = !!L && L.dir === 'ltr' && L.bl === 2 && L.br === 0 && L.pl > 0 && L.pr === 0;
+      c.quoteArabicRight = !!A && A.dir === 'rtl' && A.br === 2 && A.bl === 0 && A.pr > 0 && A.pl === 0 && Math.abs(A.pR - (A.qr - A.br - A.pr)) <= 0.5;
+      c.quoteGapSame = !!L && !!A && Math.abs(gapL - gapA) <= 0.5 && Math.abs(L.ql - A.ql) <= 0.5 && Math.abs(L.qr - A.qr) <= 0.5;
+      c.arabicColonSpaced = !!A && A.text.includes('متفاوتة: قد') && A.text.includes('صفات: الإيمان') && A.text.includes('103:2') && A.text.includes('10:30') && !/[:؛][ء-ي]/.test(A.text);
+      c.quoteNoErrors = o.errors.length === 0;
       await browser.close();
     }
     // ---------- 1280x800 und 1920x1080: keine Überschneidung ----------

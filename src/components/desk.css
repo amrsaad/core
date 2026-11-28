@@ -176,7 +176,7 @@
 .dtx-hook { margin: 0; font-family: var(--font-brain); font-weight: 600; letter-spacing: var(--tracking-title); font-size: 44px; line-height: 54px; color: var(--text); overflow-wrap: anywhere; }
 .dtx-hook[data-size='m'] { font-size: 34px; line-height: 44px; }
 .dtx-hook[data-size='s'] { font-size: 26px; line-height: 36px; }
-.dtx-quote { margin-top: 28px; padding-left: var(--s-5); border-left: 2px solid color-mix(in srgb, var(--on-media) 22%, transparent); }
+.dtx-quote { margin-top: 28px; padding-inline-start: var(--s-5); border-inline-start: 2px solid color-mix(in srgb, var(--on-media) 22%, transparent); }
 .desk .vtext-body { max-width: none; font-family: var(--font-brain); font-size: 22px; line-height: 34px; color: var(--body); }
 .desk .vtext-rtl { font-family: var(--font-ar); font-size: 21px; line-height: 37px; }
 .dtx-origin { margin: var(--s-5) auto 0; font-size: var(--t-meta); line-height: var(--t-meta-lh); color: var(--muted); }

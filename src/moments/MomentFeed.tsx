@@ -4481,7 +4481,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                 {desk && <DeskTextHead m={m} speaker={speakerLine(m.channel)} />}
                 {ph && <PhoneTextHead m={m} speaker={speakerLine(m.channel)} />}
                 {deskText ? (
-                  <div className="dtx-quote">{body}</div>
+                  <div className="dtx-quote" dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'}>{body}</div>
                 ) : (
                   /* Lesefläche: sichtbarer Text und darunter die unsichtbare Messkopie mit dem ganzen Text (gleiche Fläche, gleiche Stufe) */
                   <div className="vtext-read">

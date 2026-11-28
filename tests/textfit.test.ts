@@ -2,6 +2,28 @@ import { describe, expect, it } from 'vitest';
 import { cleanText, cutText, fitCut, isTruncated, MAX_EMPTY, PHONE_TEXT_STEPS, phoneFitLine, pickCutStep, pickPhoneStep, pickStep, sentenceEnds, TEXT_STEPS, versePieces } from '../src/moments/textfit';
 
 // Brief 18 (Issues 41 und 43): Regeln für Text auf einem Bildschirm und arabische Verse, ohne DOM.
+describe('textfit: Leerzeichen nach Doppelpunkt im arabischen Text (Runde 53)', () => {
+  it('ergänzt das Leerzeichen nach : und ؛ vor einem arabischen Buchstaben (die zwei Beispiele vom Gerät)', () => {
+    expect(cleanText('الخسار مراتب متعددة متفاوتة:قد يكون خسارًا')).toBe('الخسار مراتب متعددة متفاوتة: قد يكون خسارًا');
+    expect(cleanText('ونمجِّدك بكل صفات:الإيمان والعمل')).toBe('ونمجِّدك بكل صفات: الإيمان والعمل');
+    expect(cleanText('قال؛فعل ذلك')).toBe('قال؛ فعل ذلك');
+  });
+  it('gilt auch innerhalb von { } Versklammern, ohne den Wortlaut zu ändern', () => {
+    expect(cleanText('قال:{وَالْعَصْرِ:إِنَّ}')).toBe('قال:{وَالْعَصْرِ: إِنَّ}');
+  });
+  it('lässt Versangaben, Uhrzeiten, vorhandene Leerzeichen und lateinischen Text unberührt', () => {
+    expect(cleanText('سورة العصر 103:2 تفسير')).toBe('سورة العصر 103:2 تفسير');
+    expect(cleanText('في الساعة 10:30 صباحا')).toBe('في الساعة 10:30 صباحا');
+    expect(cleanText('قال: قد')).toBe('قال: قد');
+    expect(cleanText('a:b')).toBe('a:b');
+    expect(cleanText('Time 10:30 and a:b; c')).toBe('Time 10:30 and a:b; c');
+    expect(cleanText('قال:abc')).toBe('قال:abc');
+  });
+  it('ändert nur Leerraum: ohne die ergänzten Leerzeichen ist der Text gleich', () => {
+    const t = 'أ:ب؛ج:د {هـ:و}';
+    expect(cleanText(t).replace(/ /g, '')).toBe(t.replace(/ /g, ''));
+  });
+});
 describe('textfit: Escapes aus der Pipeline', () => {
   it('Backslash-Anführungszeichen werden normale Anführungszeichen', () => {
     expect(cleanText('قال: \\" المشقة تجلب التيسير \\" وهذا')).toBe('قال: " المشقة تجلب التيسير " وهذا');

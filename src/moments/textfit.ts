@@ -13,7 +13,13 @@
 export const TEXT_STEPS = 3;
 
 /** Escape-Reste der Pipeline (\" und \') werden zu normalen Anführungszeichen, bis die Pipeline sie selbst entfernt (Issue 43) */
-export const cleanText = (t: string): string => t.replace(/\\"/g, '"').replace(/\\'/g, "'");
+export const cleanText = (t: string): string => spaceArabic(t.replace(/\\"/g, '"').replace(/\\'/g, "'"));
+
+/**
+ * Arabischer Text: Nach ":" und "؛" fehlt das Leerzeichen, wenn direkt ein arabischer Buchstabe folgt (Quran.com liefert "...متفاوتة:</span>قد", der Textauszug fügt die Elemente ohne Trenner zusammen).
+ * Nur Leerraum wird ergänzt. Versangaben (103:2), Uhrzeiten (10:30) und lateinischer Text bleiben unberührt, ebenso Text ohne arabische Buchstaben.
+ */
+export const spaceArabic = (t: string): string => (/[\u0621-\u064A\u0671-\u06D3]/.test(t) ? t.replace(/([:؛])(?=[\u0621-\u064A\u0671-\u06D3])/g, '$1 ') : t);
 
 export interface Piece {
   text: string;

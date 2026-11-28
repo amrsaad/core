@@ -119,7 +119,10 @@ const M82 = mk(82, 'brain', { form: 'audio', audio: true, hls: 'https://stream.t
 const QL = 'Welche Aussage über die beschriebene Abfolge der Schritte trifft zu, wenn man die Reihenfolge, die Bedingungen und die Ausnahmen aus dem Text gemeinsam berücksichtigt und dabei nichts hinzufügt?';
 const AL = 'Diese Antwort ist absichtlich lang und umbricht auf dem Handy über mehrere Zeilen, damit die Tasten hoch werden';
 const M76 = mk(76, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/76.m3u8', hook: 'Testmoment 76 brain, ein kurzer Satz', thumb: 'https://img.test/cover76.png', recall: { question: QL, options: [AL + ' (A)', AL + ' (richtig)', AL + ' (B)'], correct: 1, why: 'Weil die Reihenfolge zuerst kommt und dann die Bedingung gilt, die im Text genannt wird, und weil keine Ausnahme genannt ist.' } });
-const ALL = [...moments, M76, M78, M79, M80, M81, M82, M58, M59, M60, M61, M62, M63, M64, M65, M66, M67, M72, M73, M68, M69, M70];
+// Runde 53: arabischer Textmoment (eigene Testtexte): Doppelpunkt ohne Leerzeichen vor dem arabischen Wort (wie ihn die Quelle liefert), Versangabe 103:2, Uhrzeit 10:30, lateinisches Wort, Ziffern, Schlusszeichen
+const AR_TXT = 'الخسار مراتب متعددة متفاوتة:قد يكون خسارًا مطلقًا، كحال من خسر الدنيا والآخرة. ونمجِّدك بكل صفات:الإيمان والعمل الصالح؛فهذا هو المطلوب في سورة العصر 103:2 عند الساعة 10:30 مع كلمة Core و2026 في السطر؟ نعم!';
+const M83 = mk(83, 'body', { form: 'text', videoId: 'texto00083', author: 'Author 83', ref: 'Ref 83', sourceUrl: 'https://example.org/s/83', license: 'CC BY 4.0', hook: 'هذا عنوان تجريبي لنص عربي', excerpt: AR_TXT });
+const ALL = [...moments, M83, M76, M78, M79, M80, M81, M82, M58, M59, M60, M61, M62, M63, M64, M65, M66, M67, M72, M73, M68, M69, M70];
 const numOf = (m) => Number(m.id.slice(4, 11));
 const poolOf = async (audio, text = null) => {
   const iv2 = crypto.getRandomValues(new Uint8Array(12));
@@ -135,6 +138,7 @@ const POOL_Q = await poolOf([76, 40]);
 const POOL_C = await poolOf([40, 44, 68, 69, 70]);
 const POOL_G = await poolOf([40, 58, 59]);
 const POOL_T = await poolOf([40], [48, 63, 64]);
+const POOL_AT = await poolOf([40], [48, 83]);
 const k = Buffer.from(raw).toString('base64url');
 const idOf = (i) => `test${String(i).padStart(7, '0')}:100`;
 
@@ -1596,6 +1600,42 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         r.notes[`Bildanfragen ${tab}`] = { n: reqs.length, ytimg: ytimg.length, strays: strays.map((x) => x[0]), allowed: [...allowed], urls: [...new Set(reqs)].slice(0, 20) };
         c[`Bildanfragen ${tab}: keine Anfrage an i.ytimg.com über 5 Momentwechsel`] = ytimg.length === 0;
         if (tab === 'audio') c['Bildanfragen audio: nur Titelbilder des aktiven und des nächsten Moments'] = strays.length === 0;
+        await o.browser.close();
+      }
+    }
+
+    // ---------- Runde 53: Zitatlinie am Zeilenanfang (arabisch rechts), Leerzeichen nach Doppelpunkt im arabischen Text ----------
+    sec('Runde 53: Zitatlinie am Zeilenanfang, Leerzeichen nach Doppelpunkt im arabischen Text');
+    {
+      const QMEASURE = () => {
+        const q = document.querySelector('.dtx-quote'); const p = document.querySelector('[data-testid=text-body]');
+        if (!q || !p) return null;
+        const qb = q.getBoundingClientRect(); const qs = getComputedStyle(q); const pb = p.getBoundingClientRect();
+        const rg = document.createRange(); rg.selectNodeContents(p); const tb = rg.getBoundingClientRect();
+        return { dir: q.getAttribute('dir'), lang: q.getAttribute('lang'), ql: qb.left, qr: qb.right, qt: qb.top, qh: qb.height, bl: parseFloat(qs.borderLeftWidth), br: parseFloat(qs.borderRightWidth), pl: parseFloat(qs.paddingLeft), pr: parseFloat(qs.paddingRight), pL: pb.left, pR: pb.right, tL: tb.left, tR: tb.right, text: p.textContent, ta: getComputedStyle(p).textAlign, pdir: p.getAttribute('dir') };
+      };
+      for (const [pn, size] of [['A 393x852', { ...GER, height: 852 }]]) {
+        const o = await open(type, size, { tab: 'text', pool: POOL_AT });
+        const pg = o.pg;
+        await showMoment(pg, idOf(48)); await pg.waitForTimeout(500);
+        const L = await pg.evaluate(QMEASURE);
+        await pg.screenshot({ path: `${out}/${name}-text-latein-${pn.split(' ')[0]}.png` });
+        await showMoment(pg, idOf(83)); await pg.waitForTimeout(500);
+        const A = await pg.evaluate(QMEASURE);
+        await pg.screenshot({ path: `${out}/${name}-text-arabisch-${pn.split(' ')[0]}.png` });
+        const gapL = L ? L.pL - (L.ql + L.bl) : NaN; const gapA = A ? (A.qr - A.br) - A.pR : NaN;
+        console.error(`53 ${pn} Latein: dir ${L?.dir}, Linie links ${L?.bl} rechts ${L?.br}, Einzug links ${L?.pl}, Zitat ${L?.ql}..${L?.qr}, Text ${L?.pL}..${L?.pR}, Abstand Linie zu Text ${gapL}`);
+        console.error(`53 ${pn} Arabisch: dir ${A?.dir}, Linie links ${A?.bl} rechts ${A?.br}, Einzug rechts ${A?.pr}, Zitat ${A?.ql}..${A?.qr}, Text ${A?.pL}..${A?.pR}, Abstand Linie zu Text ${gapA}, Ausrichtung ${A?.ta}`);
+        c[`53 ${pn} lateinisch: Zitat dir ltr, Linie links (2 px), rechts keine, Einzug links`] = !!L && L.dir === 'ltr' && L.bl === 2 && L.br === 0 && L.pl > 0 && L.pr === 0;
+        c[`53 ${pn} arabisch: Zitat dir rtl, lang ar, Linie rechts (2 px), links keine, Einzug rechts`] = !!A && A.dir === 'rtl' && A.lang === 'ar' && A.br === 2 && A.bl === 0 && A.pr > 0 && A.pl === 0;
+        c[`53 ${pn} arabisch: Linie rechts vom Text, Text links davon mit Einzug (Textfläche endet am Einzug vor der Linie)`] = !!A && Math.abs(A.pR - (A.qr - A.br - A.pr)) <= 0.5 && A.tR <= A.qr - A.br - A.pr + 0.5 && A.tL >= A.ql;
+        c[`53 ${pn} Abstand Linie zu Text gleich wie bei Latein (0,5 px), gleiche Zitatbreite`] = !!L && !!A && Math.abs(gapL - gapA) <= 0.5 && Math.abs(L.ql - A.ql) <= 0.5 && Math.abs(L.qr - A.qr) <= 0.5;
+        const tx = A?.text ?? '';
+        console.error(`53 Arabisch Text: ${JSON.stringify(tx.slice(0, 120))}`);
+        c[`53 ${pn} arabisch: Leerzeichen nach Doppelpunkt und ؛ vor arabischem Buchstaben (beide Beispiele)`] = tx.includes('متفاوتة: قد') && tx.includes('صفات: الإيمان') && tx.includes('الصالح؛ فهذا') && !/[:؛][ء-ي]/.test(tx);
+        c[`53 ${pn} arabisch: 103:2 und 10:30 unverändert`] = tx.includes('103:2') && tx.includes('10:30');
+        c[`53 ${pn} lateinisch: Text unverändert (kein ergänztes Leerzeichen)`] = !!L && !/\s{2}/.test(L.text);
+        c[`53 ${pn} keine Seitenfehler`] = o.errors.length === 0;
         await o.browser.close();
       }
     }
