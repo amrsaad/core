@@ -1,5 +1,5 @@
 {
- "at": "2026-11-28T03:53:59.267Z",
+ "at": "2026-11-28T05:00:01.139Z",
  "runs": [
   {
    "browser": "webkit",
@@ -52,14 +52,14 @@
     "onlyAllowedHosts": true,
     "noPageErrors": true
    },
-   "diagLines": 21,
+   "diagLines": 22,
    "diagSample": [
-    "elog vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 dh=659 sy=0 top=DIV.pad short=no",
-    "elog sync: first upload waits for stable playback",
-    "elog app: hidden",
-    "elog sync: first upload released (app left) after 3.0 s"
+    "i3li vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 dh=659 sy=0 top=DIV.pad short=no",
+    "i3li sync: first upload waits for stable playback",
+    "i3li app: hidden",
+    "i3li sync: first upload released (app left) after 3.0 s"
    ],
-   "writeDelayMs": 10038,
+   "writeDelayMs": 10031,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -121,12 +121,12 @@
    },
    "diagLines": 21,
    "diagSample": [
-    "sf6m sync: first upload waits for stable playback",
-    "sf6m vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 dh=659 sy=0 top=LABEL.grp-row short=no",
-    "sf6m app: hidden",
-    "sf6m sync: first upload released (app left) after 3.0 s"
+    "gw12 sync: first upload waits for stable playback",
+    "gw12 vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 dh=659 sy=0 top=LABEL.grp-row short=no",
+    "gw12 app: hidden",
+    "gw12 sync: first upload released (app left) after 3.0 s"
    ],
-   "writeDelayMs": 10019,
+   "writeDelayMs": 10017,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
