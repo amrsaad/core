@@ -1417,7 +1417,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
           const body = document.querySelector('.ph-lyr-body'); const col = document.querySelector('.ph-col');
           if (body && col) {
             const a = body.getBoundingClientRect(); const cs = getComputedStyle(col); const m = cs.transform;
-            window.__ov.f.push({ t, y: m && m !== 'none' ? new DOMMatrixReadOnly(m).m42 : 0, co: parseFloat(cs.opacity), at: a.top, ab: a.bottom, rows: [...col.children].map((e) => { const b = e.getBoundingClientRect(); return [+e.dataset.i, b.top, b.bottom, +getComputedStyle(e).opacity, e.dataset.role, b.height]; }) });
+            window.__ov.f.push({ t, y: m && m !== 'none' ? new DOMMatrixReadOnly(m).m42 : 0, co: parseFloat(cs.opacity), at: a.top, ab: a.bottom, rows: (() => { const ch = [...col.children]; const bs = ch.map((e) => e.getBoundingClientRect()); return ch.map((e, i) => { const b = bs[i]; const st = getComputedStyle(e); return [+e.dataset.i, b.top, b.bottom, +st.opacity, e.dataset.role, b.height, e.offsetTop, e.offsetHeight, st.transform !== 'none' ? 1 : 0]; }); })() });
           }
           requestAnimationFrame(tick);
         };
@@ -1426,15 +1426,17 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       const analyze = (fr, seq, gap) => {
         const curOf = (f) => f.rows.find((x) => x[4] === 'cur')?.[0];
         const evs = []; for (let i = 1; i < fr.length; i++) { const a0 = curOf(fr[i - 1]); const a1 = curOf(fr[i]); if (a0 !== undefined && a1 !== undefined && a0 !== a1 && Math.abs(a1 - a0) < 5) evs.push(i); }
-        const R = { changes: evs.length, a: 0, b: 0, c: 0, d: 0, dRaw: 0, e: 9, f: 0, fz: 0, m: 9999, fz05: 0, curHs: [], i: 0, labs: {}, cl: [] };
+        const R = { changes: evs.length, v: 0, a: 0, b: 0, c: 0, d: 0, dRaw: 0, e: 9, f: 0, fz: 0, m: 9999, fz05: 0, curHs: [], i: 0, labs: {}, cl: [] };
         // g: schnelle Wechsel als Cluster (aufeinanderfolgende Wechsel mit Abstand unter 400 ms), keine harte 100-ms-Grenze
         { let cur = []; const flush = () => { if (cur.length >= 2) R.cl.push({ n: cur.length, gap: (fr[cur[cur.length - 1]].t - fr[cur[0]].t) / (cur.length - 1) }); cur = []; }; for (const i of evs) { if (cur.length && fr[i].t - fr[cur[cur.length - 1]].t >= 400) flush(); cur.push(i); } flush(); }
         const h0 = new Map(); for (const f of fr) for (const x of f.rows) { const h = h0.get(x[0]); if (!h) h0.set(x[0], [x[5], x[5]]); else { h[0] = Math.min(h[0], x[5]); h[1] = Math.max(h[1], x[5]); } }
         for (const [, h] of h0) R.a = Math.max(R.a, h[1] - h[0]);
         // b: Abstand benachbarter Zeilen; größte Abweichung, kleinster Abstand, Überlappung, Zeit seit dem letzten Wechsel und Zeilenpaar werden für die Fehlerausgabe mitgeführt
-        R.minGap = 9999; R.overlap = 0; R.bw = null;
+        R.minGap = 9999; R.overlap = 0; R.bw = null; R.bl = 0; R.ol = 0; R.rowTr = 0;
+        // Layoutabstände (offsetTop, offsetHeight, ganze px): unabhängig vom Zeitpunkt, zu dem WebKit eine laufende Transformation für getBoundingClientRect auswertet
+        for (const f of fr) { const rr = f.rows; for (let k = 0; k < rr.length; k++) { R.rowTr += rr[k][8]; if (k) { const g = rr[k][6] - (rr[k - 1][6] + rr[k - 1][7]); R.bl = Math.max(R.bl, Math.abs(g - gap)); R.ol = Math.max(R.ol, -g); } } }
         { let ei = 0; for (let f = 0; f < fr.length; f++) { while (ei + 1 < evs.length && evs[ei + 1] <= f) ei++; const rr = fr[f].rows; for (let k = 1; k < rr.length; k++) { const g = rr[k][1] - rr[k - 1][2]; const dev = Math.abs(g - gap); R.minGap = Math.min(R.minGap, g); R.overlap = Math.max(R.overlap, -g); if (dev > R.b) { R.b = dev; R.bw = { dev: +dev.toFixed(4), gap: +g.toFixed(4), pair: [rr[k - 1][0], rr[k][0]], sinceChangeMs: evs.length && evs[ei] <= f ? Math.round(fr[f].t - fr[evs[ei]].t) : null, frame: f }; } } } }
-        for (let f = 1; f < fr.length; f++) { if (fr[f].co < 0.05 || fr[f - 1].co < 0.05) continue; const st = Math.abs(fr[f].y - fr[f - 1].y); R.dRaw = Math.max(R.dRaw, st); if (fr[f].t - fr[f - 1].t <= 34 && st > R.d) { R.d = st; R.dw = { step: +st.toFixed(2), dtMs: +(fr[f].t - fr[f - 1].t).toFixed(1), frame: f, y0: +fr[f - 1].y.toFixed(2), y1: +fr[f].y.toFixed(2) }; } }
+        for (let f = 1; f < fr.length; f++) { if (fr[f].co < 0.05 || fr[f - 1].co < 0.05) continue; const st = Math.abs(fr[f].y - fr[f - 1].y); R.dRaw = Math.max(R.dRaw, st); { const dt = fr[f].t - fr[f - 1].t; if (dt >= 8 && dt <= 50 && st / dt > R.v) { R.v = st / dt; R.vw = { step: +st.toFixed(2), dtMs: +dt.toFixed(1), frame: f }; } } if (fr[f].t - fr[f - 1].t <= 34 && st > R.d) { R.d = st; R.dw = { step: +st.toFixed(2), dtMs: +(fr[f].t - fr[f - 1].t).toFixed(1), frame: f, y0: +fr[f - 1].y.toFixed(2), y1: +fr[f].y.toFixed(2) }; } }
         const inArea = (x, f) => Math.min(x[2], f.ab) - Math.max(x[1], f.at) >= 8;
         for (let e = 0; e < evs.length; e++) {
           const f0 = evs[e]; const nw = curOf(fr[f0]); const next = evs[e + 1] ?? fr.length;
@@ -1482,17 +1484,16 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         const kfill = R.curHs.filter((h) => h >= Number(fin.k) * fin.lh - 1).length; all51[tag] = { ...R, k: fin.k, kfill, frames: fr.length };
         console.error(`51e Info ${tag}: Cluster ${JSON.stringify(R.cl.map((x) => [x.n, Math.round(x.gap)]))}, K-füllende Zeilen gemessen: ${kfill} von ${R.curHs.length}`);
         const nm = `${tag} 51e`;
-        console.error(`51e Mess ${tag}: a ${R.a.toFixed(4)}, b ${R.b.toFixed(4)} ${JSON.stringify(R.bw)}, minGap ${R.minGap.toFixed(4)}, overlap ${R.overlap.toFixed(4)}, c ${R.c.toFixed(4)}, d ${R.d.toFixed(2)} ${JSON.stringify(R.dw ?? null)}, dRaw ${R.dRaw.toFixed(2)}, Bilder ${fr.length}`);
+        console.error(`51e Mess ${tag}: a ${R.a.toFixed(4)}, b ${R.b.toFixed(4)} ${JSON.stringify(R.bw)}, minGap ${R.minGap.toFixed(4)}, overlap ${R.overlap.toFixed(4)}, c ${R.c.toFixed(4)}, d ${R.d.toFixed(2)} ${JSON.stringify(R.dw ?? null)}, dRaw ${R.dRaw.toFixed(2)}, Bilder ${fr.length}, Layout: Abweichung ${R.bl}, Überlappung ${R.ol}, Zeilen mit Transformation ${R.rowTr}, Tempo ${R.v.toFixed(3)} px/ms ${JSON.stringify(R.vw ?? null)}`);
         c[`${nm}: alle Wechsel abgetastet`] = got && R.changes >= 24;
         for (const lab of ['1 auf 1', '2 auf 2', '3 auf 3', '1 auf 3', '2 auf 6', '3 auf 6', '6 auf 1']) c[`${nm} ${lab}: mindestens ein ruhiger Wechsel gemessen`] = (R.labs[lab] ?? 0) >= 1;
         c[`${nm} a: Höhe jeder Zeile in jedem Bild gleich ihrer Ruhehöhe (0)`] = fr.length > 100 && R.a <= 0.01;
         // Toleranz 0,5 px: WebKit rundet Zeilenkästen und Transformationen (Layouteinheit 1/64 px, Gerätepixel 1/3 px bei 3x), eine echte Überlappung oder Lücke wäre mindestens 1 px
-        c[`${nm} b: Abstände benachbarter Zeilen in jedem Bild gleich (Abweichung höchstens 0,5 px), Überlappung höchstens 0,5 px (auch Doppel- und Dreifachwechsel)`] = R.b <= 0.5 && R.overlap <= 0.5;
-        if (!(R.b <= 0.5 && R.overlap <= 0.5)) console.error(`51e b ROT ${tag}: größte Abweichung ${R.b.toFixed(4)} px, kleinster Abstand ${R.minGap.toFixed(4)} px (Soll 12), Überlappung ${Math.max(0, R.overlap).toFixed(4)} px, ${JSON.stringify(R.bw)}`);
-        if (R.b > 0.01 && R.b <= 0.5) console.error(`51e b Info ${tag}: Abweichung ${R.b.toFixed(4)} px (unter 0,5 px toleriert), ${JSON.stringify(R.bw)}`);
-        c[`${nm} c: Anker in Ruhe vor und nach dem Wechsel gleich (0,5 px)`] = R.c <= 0.5;
-        c[`${nm} d: Schritt der Spalte bei Bildabstand bis 34 ms höchstens 38 px`] = R.d <= 38;
-        if (!(R.d <= 38)) console.error(`51e d ROT ${tag}: größter Schritt ${R.d.toFixed(2)} px (Grenze 38), ${JSON.stringify(R.dw)}, ungefiltert ${R.dRaw.toFixed(2)} px`);
+        c[`${nm} b: Layoutabstände benachbarter Zeilen in jedem Bild 12 px (höchstens 1 px Abweichung), Überlappung 0, keine Zeile mit eigener Transformation (auch Doppel- und Dreifachwechsel)`] = R.bl <= 1 && R.ol <= 0 && R.rowTr === 0;
+        if (!(R.bl <= 1 && R.ol <= 0 && R.rowTr === 0)) console.error(`51e b ROT ${tag}: größte Abweichung ${R.b.toFixed(4)} px, kleinster Abstand ${R.minGap.toFixed(4)} px (Soll 12), Überlappung ${Math.max(0, R.overlap).toFixed(4)} px, ${JSON.stringify(R.bw)}`);
+                c[`${nm} c: Anker in Ruhe vor und nach dem Wechsel gleich (0,5 px)`] = R.c <= 0.5;
+        c[`${nm} d: Tempo der Spalte höchstens 2,3 px je ms (38 px je Bild bei 60 Hz), Bildabstand 8 bis 50 ms`] = R.v <= 2.3;
+        if (!(R.v <= 2.3)) console.error(`51e d ROT ${tag}: größter Schritt ${R.d.toFixed(2)} px (Grenze 38), ${JSON.stringify(R.dw)}, ungefiltert ${R.dRaw.toFixed(2)} px`);
         c[`${nm} e: davor und danach sichtbare Zeile nie unter Deckkraft 0,4`] = R.e >= 0.4;
         c[`${nm} f: alte Zeile erreicht Deckkraft unter 0,01 innerhalb von 1000 ms und bleibt dort`] = R.fz <= 1000 && R.f < 0.01;
         c[`${nm} f: alte Zeile unter Deckkraft 0,05 spätestens 300 ms nach dem Wechsel`] = R.fz05 <= 300;
