@@ -68,7 +68,7 @@
 .dq-list > li + li { border-top: 1px solid var(--hairline); }
 .dq-list > li:has([data-current]) + li { border-top-color: transparent; }
 .dq-list > li:has([data-current]) { border-top-color: transparent; }
-.dq-item { width: 100%; display: flex; flex-direction: column; gap: 6px; padding: var(--s-3); text-align: left; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--body); }
+.dq-item { width: 100%; display: flex; flex-direction: column; gap: 6px; padding: var(--s-3); text-align: start; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--body); }
 .dq-item { cursor: pointer; }
 .desk .dq-list .dq-item:hover { box-shadow: none; }
 .desk .dq-list .dq-item:not([data-current]):hover { background: var(--surface-2); }

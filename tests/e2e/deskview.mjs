@@ -415,12 +415,29 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
         return { dir: q.getAttribute('dir'), ql: qb.left, qr: qb.right, bl: parseFloat(qs.borderLeftWidth), br: parseFloat(qs.borderRightWidth), pl: parseFloat(qs.paddingLeft), pr: parseFloat(qs.paddingRight), pL: pb.left, pR: pb.right, text: p.textContent };
       };
       const toMoment = async (n) => { const id = `test${String(n).padStart(7, '0')}:100`; for (let t = 0; t < 6; t++) { await pg.evaluate((i) => { window.__core.arrange([i]); window.__core.next(); }, id); if (await waitFor(pg, (i) => window.__core.moment()?.id === i, id, 2500)) break; } await pg.waitForTimeout(500); };
+      const LS = () => pg.evaluate(() => { const h = document.querySelector('[data-testid=desk-hook]'); const cs = h ? getComputedStyle(h) : null; return cs ? { ls: cs.letterSpacing, lsPx: parseFloat(cs.letterSpacing) || 0, dir: h.matches(':dir(rtl)'), size: parseFloat(cs.fontSize) } : null; });
       await toMoment(46);
       const L = await pg.evaluate(QM);
+      const LSL = await LS();
       await pg.screenshot({ path: `${out}/${name}-1440-text-latein.png` });
       await toMoment(56);
       const A = await pg.evaluate(QM);
       await pg.screenshot({ path: `${out}/${name}-1440-text-arabisch.png` });
+      const LSA = await LS();
+      // Runde 53b: Mac-Warteschlange mit arabischem Eintrag: Text am rechten Rand (dir rtl, lang ar, Ausrichtung am Zeilenanfang), lateinische Einträge links wie bisher
+      const QQ = await pg.evaluate(() => {
+        const items = [...document.querySelectorAll('[data-testid=desk-queue-item]')].filter((e) => !e.parentElement.hidden);
+        const row = (e) => { const h = e.querySelector('.dq-hook'); const hb = h.getBoundingClientRect(); const rg = document.createRange(); rg.selectNodeContents(h); const rr = [...rg.getClientRects()]; const cs = getComputedStyle(h); return { dir: h.getAttribute('dir'), lang: h.getAttribute('lang'), ta: cs.textAlign, ls: parseFloat(cs.letterSpacing) || 0, boxL: hb.left, boxR: hb.right, txtL: Math.min(...rr.map((x) => x.left)), txtR: Math.max(...rr.map((x) => x.right)), itemTA: getComputedStyle(e).textAlign }; };
+        const ar = items.find((e) => e.querySelector('.dq-hook[lang=ar]')); const la = items.find((e) => !e.querySelector('.dq-hook[lang=ar]'));
+        return { ar: ar ? row(ar) : null, la: la ? row(la) : null, n: items.length };
+      });
+      await pg.screenshot({ path: `${out}/${name}-1440-queue-arabisch.png` });
+      console.error(`53b Mac Warteschlange: ${JSON.stringify(QQ)}, Überschrift arabisch ${JSON.stringify(LSA)}, lateinisch ${JSON.stringify(LSL)}`);
+      c.queueArabicRtl = !!QQ.ar && QQ.ar.dir === 'rtl' && QQ.ar.lang === 'ar' && QQ.ar.ta === 'start' && QQ.ar.ls === 0;
+      c.queueArabicRightEdge = !!QQ.ar && Math.abs(QQ.ar.txtR - QQ.ar.boxR) <= 2 && QQ.ar.txtL >= QQ.ar.boxL - 0.5;
+      c.queueLatinLeftEdge = !!QQ.la && QQ.la.ta === 'start' && Math.abs(QQ.la.txtL - QQ.la.boxL) <= 2 && (QQ.la.dir === 'auto' || QQ.la.dir === 'ltr');
+      c.arabicHeadingNoTracking = !!LSA && LSA.dir === true && LSA.lsPx === 0;
+      c.latinHeadingKeepsTracking = !!LSL && LSL.lsPx !== 0;
       const gapL = L ? L.pL - (L.ql + L.bl) : NaN; const gapA = A ? (A.qr - A.br) - A.pR : NaN;
       console.error(`53 Mac 1440 Latein: dir ${L?.dir}, Linie links ${L?.bl} rechts ${L?.br}, Einzug ${L?.pl}, Zitat ${L?.ql}..${L?.qr}, Text ${L?.pL}..${L?.pR}, Abstand ${gapL}`);
       console.error(`53 Mac 1440 Arabisch: dir ${A?.dir}, Linie links ${A?.bl} rechts ${A?.br}, Einzug ${A?.pr}, Zitat ${A?.ql}..${A?.qr}, Text ${A?.pL}..${A?.pR}, Abstand ${gapA}`);

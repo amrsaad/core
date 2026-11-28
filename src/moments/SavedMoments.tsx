@@ -8,6 +8,7 @@ import { DigestCard } from './DigestCard';
 import { thumbOf, type Moment } from './types';
 import { lsKey } from '../lib/ns';
 import { savedView } from './saved';
+import { arAttrs, cleanText } from './textfit';
 
 type View = 'grid' | 'list';
 const VIEW_KEY = lsKey('saved.view');
@@ -95,7 +96,7 @@ export function SavedMoments({ state, update, pool }: { state: AppState; update:
                     </span>
                   ) : null}
                 </span>
-                <p className="sv-hook">{hook}</p>
+                <p className="sv-hook" {...arAttrs(hook)}>{cleanText(hook)}</p>
                 {!m && <p className="sv-for">No longer in the feed</p>}
                 {m?.forYou && <p className="sv-for">{m.forYou}</p>}
                 <span className="sv-acts">

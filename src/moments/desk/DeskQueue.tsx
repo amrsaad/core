@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from 'react';
-import { isArabic } from '../types';
 import { AREA_DK, AREA_LABEL } from './area';
 import type { QueueRow } from './model';
+import { arAttrs, cleanText } from '../textfit';
 
 /**
  * Linke Spalte der Mac-Ansicht (Runde 44): "Up next", der laufende Moment zuerst und hervorgehoben, dahinter die nächsten der echten Warteschlange.
@@ -45,8 +45,8 @@ export function DeskQueue({ rows, queued, nowLabel, todayText, onGo }: { rows: Q
                 {AREA_LABEL[r.area]}
                 {r.current ? ` · ${nowLabel}` : ''}
               </span>
-              <span className="dq-hook" dir="auto" lang={isArabic(r.hook) ? 'ar' : undefined}>
-                {r.hook}
+              <span className="dq-hook" dir="auto" {...arAttrs(r.hook)}>
+                {cleanText(r.hook)}
               </span>
             </button>
           </li>

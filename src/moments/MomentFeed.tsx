@@ -4257,7 +4257,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
   const blockedHere = blockedCount(allPool, form, state.momentSeen, state.mutedChannels, bad.current);
   const waiting = blockedHere > 0 && blockedHere === unseenHere ? blockedHere : 0;
   const endCounts = Object.fromEntries(otherForms(form).map((f) => [f, unseenCount(allPool, f, state.momentSeen, state.mutedChannels)])) as Record<Form, number>;
-  if (!allPool.length) return <Empty text="No moments in the pool yet. The daily run fills it." />;
+  if (!allPool.length) return <Empty text="No moments in the pool yet. The daily run fills it." page />;
   if (!formPool.length)
     return (
       <div className="vfeed" ref={dragEl}>
@@ -4273,7 +4273,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
         <EndPage form={form} counts={endCounts} waiting={waiting} setForm={setForm} focus onClearFocus={() => clearFocus()} />
       </div>
     );
-  if (error) return <Empty text={`${error}. Moments need internet.`} />;
+  if (error) return <Empty text={`${error}. Moments need internet.`} page />;
   if (!queue.current.length)
     return (
       <div className="vfeed" ref={dragEl}>
@@ -4475,7 +4475,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
                 {!deskText && (
                   <>
                     <div className="vkicker">{AREA_LABEL[m.area]} · {topicLabel(m.topic)}</div>
-                    <h2 className="vtext-hook">{m.hook}</h2>
+                    <h2 className="vtext-hook">{cleanText(m.hook)}</h2>
                   </>
                 )}
                 {desk && <DeskTextHead m={m} speaker={speakerLine(m.channel)} />}
@@ -4700,7 +4700,7 @@ export function MomentFeed({ pool: rawPool, state, update, active, onPausedChang
           style={{ ['--area' as string]: AREA_COLOR[forYou.area] }}
         >
           <div className="foryou-label">FOR YOU</div>
-          <p className="foryou-text">{forYou.forYou}</p>
+          <p className="foryou-text">{cleanText(forYou.forYou ?? '')}</p>
           <div className="foryou-foot">
             <span>Tap to continue</span>
             <span>6 s</span>
@@ -4822,6 +4822,7 @@ function EndPage({ form, counts, waiting, setForm, onBack, ghost, focus, onClear
   );
 }
 
-function Empty({ text }: { text: string }) {
-  return <div className="pad flex h-[100dvh] items-center bg-black text-[17px] leading-[25px] text-[#B3B3B3]">{text}</div>;
+/** page: die Seite steht allein (ohne Kopfleiste), das Band an der Oberkante ist dann schwarz (index.html, vblack) */
+function Empty({ text, page }: { text: string; page?: boolean }) {
+  return <div className={`${page ? 'vblack ' : ''}pad flex h-[100dvh] items-center bg-black text-[17px] leading-[25px] text-[#B3B3B3]`}>{text}</div>;
 }

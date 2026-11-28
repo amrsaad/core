@@ -1,6 +1,7 @@
 import { Icon } from './Icon';
 import { Sheet } from './Sheet';
 import { shortLink } from '../share/link';
+import { cleanText } from '../moments/textfit';
 
 export interface ShareInfo {
   hook: string;
@@ -20,7 +21,7 @@ export function ShareSheet({ info, onShare, onCopy, onClose }: { info: ShareInfo
           Share
           <small>{info.channel}</small>
         </h2>
-        <p className="share-hook">{info.hook}</p>
+        <p className="share-hook">{cleanText(info.hook)}</p>
         {/* Der Hash trägt den ganzen Moment, darum steht hier nur der Anfang, der volle Link in data-url (Brief 05) */}
         <p className="share-url" data-testid="share-url" data-url={info.url} title={info.url}>
           {info.url ? shortLink(info.url) : 'The link appears here once sharing is on.'}

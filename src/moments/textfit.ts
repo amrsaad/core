@@ -16,10 +16,16 @@ export const TEXT_STEPS = 3;
 export const cleanText = (t: string): string => spaceArabic(t.replace(/\\"/g, '"').replace(/\\'/g, "'"));
 
 /**
- * Arabischer Text: Nach ":" und "؛" fehlt das Leerzeichen, wenn direkt ein arabischer Buchstabe folgt (Quran.com liefert "...متفاوتة:</span>قد", der Textauszug fügt die Elemente ohne Trenner zusammen).
- * Nur Leerraum wird ergänzt. Versangaben (103:2), Uhrzeiten (10:30) und lateinischer Text bleiben unberührt, ebenso Text ohne arabische Buchstaben.
+ * Arabischer Text: Nach ":" und "؛" fehlt das Leerzeichen (Quran.com liefert "...متفاوتة:</span>قد", der Textauszug fügt die Elemente ohne Trenner zusammen).
+ * Ergänzt wird es nur, wenn VOR dem Zeichen ein arabischer Buchstabe, eine Harakat, eine schließende Klammer oder ein Anführungszeichen steht UND danach ein arabischer Buchstabe oder "{" (Versanfang).
+ * Nur Leerraum wird ergänzt. Links (https://...:قد), Zahlen (12:قد, 103:2, 10:30) und lateinischer Text vor dem Zeichen bleiben unberührt, ebenso Text ohne arabische Buchstaben.
  */
-export const spaceArabic = (t: string): string => (/[\u0621-\u064A\u0671-\u06D3]/.test(t) ? t.replace(/([:؛])(?=[\u0621-\u064A\u0671-\u06D3])/g, '$1 ') : t);
+const AR_LETTER = '\\u0621-\\u064A\\u0671-\\u06D3';
+const AR_BEFORE = new RegExp(`([${AR_LETTER}\\u064B-\\u065F\\u0670)\\]}»"'\u201C\u201D\u2018\u2019\u2039\u203A])([:\u061B])(?=[${AR_LETTER}{])`, 'g');
+export const spaceArabic = (t: string): string => (new RegExp(`[${AR_LETTER}]`).test(t) ? t.replace(AR_BEFORE, '$1$2 ') : t);
+
+/** Runde 53b: Attribute für ein Textelement, dessen Inhalt arabisch sein kann (rechtsläufig, Sprache ar, Ausrichtung am Zeilenanfang). Lateinischer Text bekommt nichts, bleibt also unverändert. */
+export const arAttrs = (t: string): { dir?: 'rtl'; lang?: 'ar' } => (/[\u0600-\u06FF]/.test(t) ? { dir: 'rtl', lang: 'ar' } : {});
 
 export interface Piece {
   text: string;

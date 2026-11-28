@@ -6,6 +6,7 @@ import { atTime } from '../hook';
 import { isArabic, type Moment } from '../types';
 import { AREA_DK, AREA_LABEL } from './area';
 import { clipLen, fracAtPointer, groupTop, hookSize } from './model';
+import { cleanText } from '../textfit';
 
 /**
  * Mitte der Mac-Ansicht (Runde 44, Desktop ab 1181 px). Chip, Kanal, Hook, Untertitelfeld, Zeitleiste und Abspielleiste.
@@ -187,7 +188,7 @@ export function DeskCenter(p: DeskCenterProps) {
     <div className="dc-meta">
       <AreaChip m={m} speaker={p.speaker} />
       <h1 className="dc-hook" data-testid="desk-hook" data-size={hookSize(m.hook)} dir="auto">
-        {m.hook}
+        {cleanText(m.hook)}
       </h1>
     </div>
   );
@@ -272,7 +273,7 @@ export function DeskTextHead({ m, speaker }: { m: Moment; speaker: string }) {
     <header className="dtx-head" data-testid="desk-textmeta">
       <AreaChip m={m} speaker={speaker} />
       <h1 className="dtx-hook" data-testid="desk-hook" data-size={hookSize(m.hook)} dir="auto">
-        {m.hook}
+        {cleanText(m.hook)}
       </h1>
     </header>
   );
@@ -287,13 +288,13 @@ export function DeskTextFoot({ m }: { m: Moment }) {
     <>
       {origin && (
         <p className="dtx-origin" data-testid="desk-origin" dir="auto">
-          {origin}
+          {cleanText(origin)}
         </p>
       )}
       {apply && (
         <section className="dtx-apply" data-testid="desk-apply" style={{ ['--ad' as string]: AREA_DK[m.area] }}>
           <h2>Apply today</h2>
-          <p dir="auto">{apply}</p>
+          <p dir="auto">{cleanText(apply)}</p>
         </section>
       )}
     </>

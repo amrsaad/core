@@ -5,11 +5,12 @@ import { recallTag, shuffleOrder } from './recall';
 import { isArabic, thumbOf, type Moment } from './types';
 import { sourceLine } from './source';
 import { FIT_LEVELS, RECALL_TOP_MIN, RECALL_TOP_MIN_DONE, pickRecallFit, recallSwipe, recallTop, recallTopDone } from './recallfit';
+import { cleanText } from './textfit';
 
 /** Bezug oben auf der Abrufkarte (Issue 42): Hook und Quelle des Ursprungs-Moments, Sprache und Richtung folgen dem Moment */
 export function originOf(m: Moment): { hook: string; dir: 'rtl' | 'ltr'; source: string } {
   const src = sourceLine(m);
-  return { hook: m.hook, dir: isArabic(m.hook) ? 'rtl' : 'ltr', source: src ? `${src.prefix}${src.text}` : '' };
+  return { hook: cleanText(m.hook), dir: isArabic(m.hook) ? 'rtl' : 'ltr', source: src ? `${src.prefix}${src.text}` : '' };
 }
 
 /** Kennzeichnungszeile: macht klar, dass die Karte eine Wiederholungsfrage zu früher Gelesenem ist */
@@ -231,13 +232,13 @@ export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, on
           {originOf(m).source && <p className="recall-hooksrc" dir="auto">{originOf(m).source}</p>}
         </div>
       )}
-      <h2 className="recall-q" data-testid="recall-question">{r.question}</h2>
+      <h2 className="recall-q" data-testid="recall-question">{cleanText(r.question)}</h2>
       <div className="recall-options">
         {order.map((i, shown) => {
           const state = chosen === null ? '' : i === r.correct ? 'right' : i === chosen ? 'wrong' : 'rest';
           return (
             <button key={i} className={`recall-option ${state}`} data-testid="recall-option" data-correct={i === r.correct ? '1' : '0'} data-state={state} disabled={chosen !== null && state === 'rest' ? true : undefined} aria-pressed={chosen === i} onClick={() => pick(i)}>
-              <span>{r.options[i]}</span>
+              <span>{cleanText(r.options[i])}</span>
               {/* Runde 24: jede Option hält den Platz des Hakens frei, damit der Text nach der Antwort nicht anders umbricht und die Antworten nicht springen */}
               {state === 'right' ? <Icon name="check" size="var(--icon-sm)" /> : !keys && <span className="recall-tick" aria-hidden="true" />}
               {keys && <kbd className="recall-key" aria-hidden="true">{shown + 1}</kbd>}
@@ -248,7 +249,7 @@ export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, on
       {/* Runde 28: kein Platzhalter im Fluss. Die Messkopie hat keine Höhe und liegt nicht im Fluss, sie dient nur der Stufenwahl (Erklärung und "Next" nach der Antwort). */}
       {chosen === null && !keys && (
         <div className="recall-probe" aria-hidden="true">
-          <p className="recall-why">{r.why}</p>
+          <p className="recall-why">{cleanText(r.why)}</p>
           <div className="recall-primary">Next</div>
         </div>
       )}
@@ -259,7 +260,7 @@ export function RecallCard({ m, review, read, rng, onAnswer, onClose, onSkip, on
       )}
       {chosen !== null && (
         <>
-          <p className="recall-why" data-testid="recall-why">{r.why}</p>
+          <p className="recall-why" data-testid="recall-why">{cleanText(r.why)}</p>
           <button className="recall-primary" data-testid="recall-next" onClick={onClose}>
             Next
             {keys && <kbd className="recall-key" aria-hidden="true">Enter</kbd>}

@@ -74,6 +74,7 @@
   --media-shade: rgba(0, 0, 0, 0.6);
   --media-shade-strong: rgba(0, 0, 0, 0.75);
   --media-caption: rgba(0, 0, 0, 0.72);
+  --scrim-pct: 55%; /* Deckkraft von --scrim, das Band an der Oberkante (index.html) mischt damit */
   --scrim: rgba(0, 0, 0, 0.55);
   --scrim-soft: rgba(0, 0, 0, 0.35);
   --glass: rgba(20, 26, 32, 0.78);

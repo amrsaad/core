@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPlayer, loadYT, STATE, type YTPlayer } from '../video/ytApi';
 import { thumbOf, type Moment } from './types';
+import { cleanText } from './textfit';
 
 /** Gespeicherten Moment im Vollbild abspielen. Am Ende schließt er sich, damit kein YouTube-Endscreen erscheint. */
 export function MomentModal({ moment, onClose }: { moment: Moment; onClose: () => void }) {
@@ -44,7 +45,7 @@ export function MomentModal({ moment, onClose }: { moment: Moment; onClose: () =
   }, [moment]);
 
   return (
-    <div className="fixed inset-0 z-[70] bg-black">
+    <div className="vblack fixed inset-0 z-[70] bg-black">
       <div className="vframe">
         <div ref={host} />
       </div>
@@ -64,7 +65,7 @@ export function MomentModal({ moment, onClose }: { moment: Moment; onClose: () =
       </button>
       <div className="vinfo pointer-events-none">
         <div className="vchannel text-[#B3B3B3]">{moment.channel}</div>
-        <div className="vtitle text-white">{moment.hook}</div>
+        <div className="vtitle text-white">{cleanText(moment.hook)}</div>
       </div>
     </div>
   );

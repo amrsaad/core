@@ -1,4 +1,5 @@
 import type { AppState } from '../lib/state';
+import { arAttrs, cleanText } from './textfit';
 import { actionTap, contradictionTap, countList, dueDate, setTap, tapKey, type TapChoice } from './digest';
 
 /**
@@ -38,7 +39,7 @@ export function DigestCard({ state, update }: { state: AppState; update: (fn: (s
             const c = actionTap(taps, a.id);
             return (
               <div key={a.id} className="wk-item" data-testid={`digest-action-${i}`}>
-                <span className="wk-item-title">{a.title}</span>
+                <span className="wk-item-title" {...arAttrs(a.title)}>{cleanText(a.title)}</span>
                 <span className="wk-item-meta">
                   {a.metric} · due {dueDate(a.due)}
                   {a.url && (
@@ -70,15 +71,15 @@ export function DigestCard({ state, update }: { state: AppState; update: (fn: (s
             const c = contradictionTap(taps, x.id);
             return (
               <div key={x.id} className="wk-item" data-testid={`digest-contra-${i}`}>
-                <span className="wk-item-title">{x.question}</span>
+                <span className="wk-item-title" {...arAttrs(x.question)}>{cleanText(x.question)}</span>
                 <span className="wk-choices col">
                   <button className="wk-choice" aria-pressed={c === 'a'} data-testid={`digest-a-${i}`} onClick={() => tap(tapKey.contradiction(x.id), 'a')}>
                     <small>Option A</small>
-                    {x.a}
+                    <span className="wk-opt" {...arAttrs(x.a)}>{cleanText(x.a)}</span>
                   </button>
                   <button className="wk-choice" aria-pressed={c === 'b'} data-testid={`digest-b-${i}`} onClick={() => tap(tapKey.contradiction(x.id), 'b')}>
                     <small>Option B</small>
-                    {x.b}
+                    <span className="wk-opt" {...arAttrs(x.b)}>{cleanText(x.b)}</span>
                   </button>
                 </span>
               </div>

@@ -3,6 +3,7 @@ import { Icon } from '../../components/Icon';
 import { AREA_COLOR, AREA_LABEL } from '../../lib/labels';
 import { isArabic, type Moment } from '../types';
 import { PhoneLyrics } from './PhoneLyrics';
+import { cleanText } from '../textfit';
 
 /**
  * Runde 45: Inhalt der iPhone-Ansicht zwischen Reiterleiste und Aktionsreihe (Audio und Video). Chip, Kanal, Hook, im Audio das Feld mit dem mitlaufenden Text.
@@ -94,7 +95,7 @@ export function PhoneInfo({ m, speaker, info, onSource, hookRef }: { m: Moment; 
       </div>
       <div className="ph-tap ph-hooktap" {...info}>
         <h1 className="ph-hook" data-testid="hook" ref={hookRef} dir="auto">
-          {m.hook}
+          {cleanText(m.hook)}
         </h1>
       </div>
     </>

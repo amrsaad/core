@@ -2,6 +2,7 @@ import { AreaChip } from '../desk/DeskCenter';
 import { AREA_DK } from '../desk/area';
 import { hookSize } from '../desk/model';
 import type { Moment } from '../types';
+import { cleanText } from '../textfit';
 
 /** Runde 45: Kopf des Lesetexts der iPhone-Ansicht (Text-Reiter): Chip, Kanal, Hook als Serifen-Überschrift. Bauweise wie DeskTextHead, Maße in phone.css. */
 export function PhoneTextHead({ m, speaker }: { m: Moment; speaker: string }) {
@@ -9,7 +10,7 @@ export function PhoneTextHead({ m, speaker }: { m: Moment; speaker: string }) {
     <header className="ptx-head" data-testid="ph-textmeta">
       <AreaChip m={m} speaker={speaker} />
       <h1 className="ptx-hook" data-testid="hook" data-size={hookSize(m.hook)} dir="auto">
-        {m.hook}
+        {cleanText(m.hook)}
       </h1>
     </header>
   );
@@ -22,13 +23,13 @@ export function PhoneTextFoot({ meta, apply, area }: { meta: string; apply: stri
     <>
       {meta && (
         <p className="dtx-origin ptx-meta" data-testid="ph-origin" dir="auto">
-          {meta}
+          {cleanText(meta)}
         </p>
       )}
       {apply && (
         <section className="dtx-apply" data-testid="ph-apply" style={{ ['--ad' as string]: AREA_DK[area] }}>
           <h2>Apply today</h2>
-          <p dir="auto">{apply}</p>
+          <p dir="auto">{cleanText(apply)}</p>
         </section>
       )}
     </>

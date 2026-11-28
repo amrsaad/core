@@ -9,7 +9,26 @@ describe('textfit: Leerzeichen nach Doppelpunkt im arabischen Text (Runde 53)', 
     expect(cleanText('قال؛فعل ذلك')).toBe('قال؛ فعل ذلك');
   });
   it('gilt auch innerhalb von { } Versklammern, ohne den Wortlaut zu ändern', () => {
-    expect(cleanText('قال:{وَالْعَصْرِ:إِنَّ}')).toBe('قال:{وَالْعَصْرِ: إِنَّ}');
+    expect(cleanText('قال:{وَالْعَصْرِ:إِنَّ}')).toBe('قال: {وَالْعَصْرِ: إِنَّ}');
+  });
+  it('Runde 53b: Zeichen davor (Buchstabe, Harakat, schließende Klammer, Anführungszeichen) und danach (Buchstabe oder {)', () => {
+    expect(cleanText('قال:{')).toBe('قال: {');
+    expect(cleanText('الْعَصْرِ:إِنَّ')).toBe('الْعَصْرِ: إِنَّ');
+    expect(cleanText('(قال):قد')).toBe('(قال): قد');
+    expect(cleanText('[قال]:قد')).toBe('[قال]: قد');
+    expect(cleanText('{قال}:قد')).toBe('{قال}: قد');
+    expect(cleanText('«قال»:قد')).toBe('«قال»: قد');
+    expect(cleanText('"قال":قد')).toBe('"قال": قد');
+    expect(cleanText('\u201Cقال\u201D:قد')).toBe('\u201Cقال\u201D: قد');
+    expect(cleanText('قال\u061B{ قد }')).toBe('قال\u061B { قد }');
+  });
+  it('Runde 53b: Links, Zahlen und lateinischer Text vor dem Zeichen bleiben unberührt, auch mit arabischem Text im Satz', () => {
+    expect(cleanText('انظر https://example.com/a:قد هنا')).toBe('انظر https://example.com/a:قد هنا');
+    expect(cleanText('انظر 12:قد هنا')).toBe('انظر 12:قد هنا');
+    expect(cleanText('انظر latin:قد هنا')).toBe('انظر latin:قد هنا');
+    expect(cleanText('انظر 103:2 و 10:30 هنا')).toBe('انظر 103:2 و 10:30 هنا');
+    expect(cleanText('قال:123')).toBe('قال:123');
+    expect(cleanText('قال:\nقد')).toBe('قال:\nقد');
   });
   it('lässt Versangaben, Uhrzeiten, vorhandene Leerzeichen und lateinischen Text unberührt', () => {
     expect(cleanText('سورة العصر 103:2 تفسير')).toBe('سورة العصر 103:2 تفسير');

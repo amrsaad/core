@@ -139,7 +139,7 @@ export default function App() {
     if (!desk) setHelp(false);
   }, [desk]);
 
-  if (!state || vault.status === 'loading' || review === null) return <div className="h-[100dvh]" style={{ background: 'var(--stage)' }} />;
+  if (!state || vault.status === 'loading' || review === null) return <div className="vload h-[100dvh]" style={{ background: 'var(--stage)' }} />;
   if (vault.status === 'locked') return <Unlock />;
   if (vault.status === 'error') return <Locked text={`Could not load the pool (${vault.message}). The first start needs internet.`} />;
 

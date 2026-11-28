@@ -5,10 +5,11 @@ import { AREA_COLOR, AREA_LABEL } from '../lib/labels';
 import { atTime, closesCaption } from './hook';
 import { momentText } from './form';
 import { isArabic, type Moment } from './types';
+import { cleanText } from './textfit';
 
 /** Kontext zur Stelle (zwei Sätze), klein und gedämpft unter dem Ausschnitt. Fehlt das Feld oder ist es leer, wird nichts gezeigt. */
 export function ContextLine({ text, testid }: { text?: string; testid: string }) {
-  const t = text?.trim();
+  const t = cleanText(text?.trim() ?? '');
   if (!t) return null;
   const ar = isArabic(t);
   return (
@@ -28,7 +29,7 @@ export function CaptionSheet({ m, speaker, onClose, onEnd }: { m: Moment; speake
   const y = useRef(0);
   const [q, setQ] = useState('');
   const box = useRef<HTMLDivElement>(null);
-  const t = momentText(m);
+  const t = cleanText(momentText(m));
   const ar = isArabic(t);
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
   const atEnd = () => {
@@ -60,7 +61,7 @@ export function CaptionSheet({ m, speaker, onClose, onEnd }: { m: Moment; speake
             <Icon name="x" size="var(--icon)" />
           </button>
         </div>
-        <h2 className="vcap-hook" data-testid="caption-hook">{m.hook}</h2>
+        <h2 className="vcap-hook" data-testid="caption-hook">{cleanText(m.hook)}</h2>
         {t && (
           <p className="vcap-text" data-testid="caption-excerpt" dir={ar ? 'rtl' : 'ltr'} lang={ar ? 'ar' : 'en'} style={ar ? { textAlign: 'right' } : undefined}>{t}</p>
         )}

@@ -74,9 +74,10 @@
   box-shadow: var(--inset-hair);
   font-size: var(--t-row);
   line-height: var(--t-row-lh);
-  text-align: left;
+  text-align: start; /* Runde 53b: arabische Optionen stehen am rechten Rand (dir rtl am Text), lateinische wie bisher links */
 }
 .wk-choices:not(.col) .wk-choice { text-align: center; }
 .wk-choice[aria-pressed='true'] { background: var(--accent); color: var(--on-accent); box-shadow: none; font-weight: var(--w-tab); }
+.wk-opt { display: block; }
 .wk-choice small { display: block; opacity: 0.75; font-size: var(--t-meta); line-height: var(--t-meta-lh); }
 .sv-headr { display: flex; align-items: center; gap: var(--s-3); }

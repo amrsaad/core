@@ -122,7 +122,9 @@ const M76 = mk(76, 'brain', { form: 'audio', audio: true, hls: 'https://stream.t
 // Runde 53: arabischer Textmoment (eigene Testtexte): Doppelpunkt ohne Leerzeichen vor dem arabischen Wort (wie ihn die Quelle liefert), Versangabe 103:2, Uhrzeit 10:30, lateinisches Wort, Ziffern, Schlusszeichen
 const AR_TXT = 'الخسار مراتب متعددة متفاوتة:قد يكون خسارًا مطلقًا، كحال من خسر الدنيا والآخرة. ونمجِّدك بكل صفات:الإيمان والعمل الصالح؛فهذا هو المطلوب في سورة العصر 103:2 عند الساعة 10:30 مع كلمة Core و2026 في السطر؟ نعم!';
 const M83 = mk(83, 'body', { form: 'text', videoId: 'texto00083', author: 'Author 83', ref: 'Ref 83', sourceUrl: 'https://example.org/s/83', license: 'CC BY 4.0', hook: 'هذا عنوان تجريبي لنص عربي', excerpt: AR_TXT });
-const ALL = [...moments, M83, M76, M78, M79, M80, M81, M82, M58, M59, M60, M61, M62, M63, M64, M65, M66, M67, M72, M73, M68, M69, M70];
+// Runde 53b: arabisches Audio-Moment (84) mit Doppelpunkt ohne Leerzeichen in Hook, Auszug, Kontext und Abrufkarte (eigene Testtexte)
+const M84 = mk(84, 'brain', { form: 'audio', audio: true, hls: 'https://stream.test/84.m3u8', hook: 'ونمجِّدك بكل صفات:الإيمان والعمل', excerpt: AR_TXT, context: 'قال:{وَالْعَصْرِ} ثم:قد يكون خسارًا', recall: { question: 'ما الذي يلي:هذا الكلام؟', options: ['خطأ:أولا', 'صحيح:ثانيا', 'خطأ:ثالثا'], correct: 1, why: 'لأن:هذا هو الجواب الصحيح' } });
+const ALL = [...moments, M84, M83, M76, M78, M79, M80, M81, M82, M58, M59, M60, M61, M62, M63, M64, M65, M66, M67, M72, M73, M68, M69, M70];
 const numOf = (m) => Number(m.id.slice(4, 11));
 const poolOf = async (audio, text = null) => {
   const iv2 = crypto.getRandomValues(new Uint8Array(12));
@@ -139,10 +141,11 @@ const POOL_C = await poolOf([40, 44, 68, 69, 70]);
 const POOL_G = await poolOf([40, 58, 59]);
 const POOL_T = await poolOf([40], [48, 63, 64]);
 const POOL_AT = await poolOf([40], [48, 83]);
+const POOL_AR = await poolOf([40, 84]);
 const k = Buffer.from(raw).toString('base64url');
 const idOf = (i) => `test${String(i).padStart(7, '0')}:100`;
 
-// Runde 51 (Ziel 4): Fortschritt auf stderr, jede Wartezeit höchstens 15 s mit benanntem Fehlschlag, Gesamt-Limit je Browser 18 Minuten
+// Runde 51 (Ziel 4): Fortschritt auf stderr, jede Wartezeit höchstens 15 s mit benanntem Fehlschlag, Gesamt-Limit je Browser 25 Minuten
 const T0 = Date.now();
 const prog = { browser: '', section: '', run: null };
 const sec = (name) => { prog.section = name; console.error(`[${prog.browser} ${Math.round((Date.now() - T0) / 1000)} s] ${name}`); };
@@ -178,7 +181,7 @@ async function open(type, size, { init, query = '', pool = POOL, tab = null } = 
   shared.set(type, shared.get(type) ?? await type.launch(process.env.E2E_CHROME && type === chromium ? { executablePath: process.env.E2E_CHROME } : {}));
   const base = shared.get(type);
   const prof = devices[size.device] ?? devices['iPhone 14'];
-  const cx = await base.newContext({ ...prof, viewport: { width: size.width, height: size.height }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, serviceWorkers: 'block', ...(size.reduced ? { reducedMotion: 'reduce' } : {}) });
+  const cx = await base.newContext({ ...prof, viewport: { width: size.width, height: size.height }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, serviceWorkers: 'block', ...(size.reduced ? { reducedMotion: 'reduce' } : {}), ...(size.scheme ? { colorScheme: size.scheme } : {}) });
   await cx.addInitScript(({ t, b }) => {
     const put = () => { if (!document.documentElement) return false; const s = document.createElement('style'); s.textContent = `:root{--safe-top:${t}px;--safe-bottom:${b}px}`; document.documentElement.appendChild(s); return true; };
     if (!put()) document.addEventListener('readystatechange', put, { once: true });
@@ -396,15 +399,263 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
   results.runs.push(r);
   const c = r.checks;
   prog.browser = name; prog.run = r;
-  // Gesamt-Limit je Browser: 18 Minuten, danach Abbruch mit dem letzten Abschnitt (kein stummes Hängen)
+  // Gesamt-Limit je Browser: 25 Minuten (Runde 52b: Bandfarbe in allen Ansichten braucht rund 6 Minuten), danach Abbruch mit dem letzten Abschnitt (kein stummes Hängen)
   const cap = setTimeout(() => {
-    r.error = `Gesamt-Limit 18 Minuten, letzter Abschnitt: ${prog.section}`;
+    r.error = `Gesamt-Limit 25 Minuten, letzter Abschnitt: ${prog.section}`;
     console.error(`[${name}] ${r.error}`);
     try { writeFileSync(`${out}/results.json`, JSON.stringify(results, null, 1)); } catch { /* egal */ }
     console.log(JSON.stringify({ browser: name, ok: false, checks: Object.keys(c).length, fails: Object.entries(c).filter(([, v]) => v !== true).map(([n]) => n), error: r.error }));
     process.exit(1);
-  }, 18 * 60 * 1000);
+  }, 25 * 60 * 1000);
   try {
+    // ---------- Runde 52b: Das Band hat in jeder Ansicht genau die Farbe der Fläche, die ohne Band im Bereich 0 bis Statusleiste zu sehen wäre (auch bei offenem Blatt mit Abdunklung) ----------
+    sec('Runde 52b: Bandfarbe gleich der Fläche darunter in allen Ansichten');
+    {
+      const { readFileSync, existsSync } = await import('node:fs');
+      for (const f of ['index.html', 'dist/index.html']) {
+        if (!existsSync(f)) continue;
+        const h = readFileSync(f, 'utf8');
+        c[`52b ${f}: vor dem ersten Bild von React hat das Band die Seitenfarbe (--edge-base: var(--bg)), Ansichten und Blatt-Abdunklung als Regeln im head`] = /#ios-edge-band\s*\{[^}]*--edge-base:\s*var\(--bg/.test(h) && /html:has\(\.sheet-backdrop\)\s*#ios-edge-band/.test(h) && /html:has\(\.scr\)\s*#ios-edge-band/.test(h) && /html:has\(\.vload\)/.test(h);
+      }
+      const BI_INJECT = (zh) => {
+        let inner = '';
+        for (const ss of document.styleSheets) { let rules; try { rules = ss.cssRules; } catch { continue; } for (const x of rules) if (x.media && /display-mode:\s*standalone/.test(x.media.mediaText)) for (const y of x.cssRules) if (y.conditionText !== undefined && /touch-callout/.test(y.conditionText)) for (const z of y.cssRules) if (/ios-edge-band/.test(z.cssText)) inner += z.cssText + '\n'; }
+        inner += `#ios-edge-band { height: ${zh}px !important; }\n`;
+        const st = document.createElement('style'); st.id = 'band-test'; st.textContent = inner; document.head.appendChild(st);
+        return inner.length;
+      };
+      const BI_TOGGLE = (on) => { const st = document.getElementById('band-test'); if (st) st.disabled = !on; };
+      const BI_DELTA = async ([a, b]) => {
+        const load = (u) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = u; });
+        const [ia, ib] = await Promise.all([load('data:image/png;base64,' + a), load('data:image/png;base64,' + b)]);
+        const cv = (i) => { const k = document.createElement('canvas'); k.width = i.width; k.height = i.height; const x = k.getContext('2d'); x.drawImage(i, 0, 0); return x.getImageData(0, 0, i.width, i.height).data; };
+        const da = cv(ia), db = cv(ib);
+        let max = 0, n = 0, at = null;
+        for (let i = 0; i < da.length; i += 4) for (let ch = 0; ch < 3; ch++) { const d = Math.abs(da[i + ch] - db[i + ch]); if (d > max) { max = d; at = [(i / 4) % ia.width, Math.floor(i / 4 / ia.width), da.slice(i, i + 3).join(','), db.slice(i, i + 3).join(',')]; } if (d > 1) n++; }
+        return { max, n, at, w: ia.width, h: ia.height, same: ia.width === ib.width && ia.height === ib.height };
+      };
+      const MOODS = [null, 'beat', 'body', 'brain'];
+      const setMood = (pg, m) => pg.evaluate((mm) => { if (mm) document.documentElement.setAttribute('data-mood', mm); else document.documentElement.removeAttribute('data-mood'); }, m);
+      const rec = [];
+      /** Zone 0 bis Statusleiste mit und ohne Band: größter Unterschied je Kanal */
+      const pair = async (pg, w, zh) => {
+        const clip = { x: 0, y: 0, width: w, height: zh };
+        await pg.evaluate(BI_TOGGLE, false); await pg.waitForTimeout(40);
+        const off = await pg.screenshot({ clip });
+        await pg.evaluate(BI_TOGGLE, true); await pg.waitForTimeout(40);
+        const on = await pg.screenshot({ clip });
+        const d = await pg.evaluate(BI_DELTA, [off.toString('base64'), on.toString('base64')]);
+        const bandNow = await pg.evaluate(() => { const e = document.getElementById('ios-edge-band'); const cs = getComputedStyle(e); return { display: cs.display, bg: cs.backgroundColor }; });
+        return { ...d, band: bandNow };
+      };
+      /** Eine Ansicht in allen Stimmungen messen */
+      let moodSet = MOODS; // Profil A: alle Stimmungen, B und C: ohne Stimmung und brain (die Farbe hängt nicht vom Profil ab, spart Zeit)
+      const view = async (pg, tag, w, zh, moods = moodSet) => {
+        const per = [];
+        for (const m of moods) {
+          await setMood(pg, m);
+          await pg.waitForTimeout(520);
+          const d = await pair(pg, w, zh);
+          per.push([m ?? 'ohne', d.max, d.band.bg, d.band.display]);
+        }
+        const worst = Math.max(...per.map((x) => x[1]));
+        console.error(`52b ${tag}: Zone ${w}x${zh}, größter Kanalunterschied je Stimmung ${JSON.stringify(per)}`);
+        rec.push([tag, worst]);
+        c[`52b ${tag}: Zone 0 bis Statusleiste mit und ohne Band gleich (höchstens 1 je Kanal, alle Stimmungen)`] = worst <= 1 && per.every((x) => x[3] === 'block');
+        await setMood(pg, null);
+        return worst;
+      };
+      /** Blatt mit Abdunklung: gleich beim Öffnen (höchstens 6) und danach (höchstens 1), das Band transitioniert nicht, die Abdunklung blendet nicht ein */
+      const sheetView = async (pg, tag, w, zh, open, sel, close) => {
+        await open();
+        await waitFor(pg, (q) => !!document.querySelector(q), sel, 3000);
+        const during = await pair(pg, w, zh);
+        const mot = await pg.evaluate((q) => { const b = document.querySelector(q); const e = document.getElementById('ios-edge-band'); const cb = getComputedStyle(b), ce = getComputedStyle(e); return { an: cb.animationName, td: cb.transitionDuration, bandTd: ce.transitionDuration, bandAn: ce.animationName }; }, sel);
+        await pg.waitForTimeout(450);
+        if (/^A 393x852 (light|dark) (More|Share)/.test(tag)) await pg.screenshot({ path: `${out}/${name}-52b-${/More/.test(tag) ? 'more' : 'share'}-${/light/.test(tag) ? 'light' : 'dark'}-band.png` });
+        const worst = await view(pg, tag, w, zh);
+        console.error(`52b ${tag}: beim Öffnen ${during.max} (Grenze 6), Abdunklung ${JSON.stringify(mot)}`);
+        c[`52b ${tag}: beim Öffnen höchstens 6 je Kanal (Band und Abdunklung ohne Überblendung, gleiche Kurve)`] = during.max <= 6 && mot.an === 'none' && /^0s/.test(mot.td) && /^0s/.test(mot.bandTd) && mot.bandAn === 'none';
+        await close();
+        await waitFor(pg, (q) => !document.querySelector(q), sel, 3000);
+        await pg.waitForTimeout(150);
+        return worst;
+      };
+      const RAW = async (size, scheme, { pool, key = true, hold = null, status = 0 }) => {
+        shared.set(type, shared.get(type) ?? await type.launch(process.env.E2E_CHROME && type === chromium ? { executablePath: process.env.E2E_CHROME } : {}));
+        const base = shared.get(type);
+        const prof = devices[size.device] ?? devices['iPhone 14'];
+        const cx = await base.newContext({ ...prof, viewport: { width: size.width, height: size.height }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, serviceWorkers: 'block', colorScheme: scheme });
+        await cx.addInitScript(({ t, b }) => { const put = () => { if (!document.documentElement) return false; const s = document.createElement('style'); s.textContent = `:root{--safe-top:${t}px;--safe-bottom:${b}px}`; document.documentElement.appendChild(s); return true; }; if (!put()) document.addEventListener('readystatechange', put, { once: true }); }, { t: size.safeT, b: size.safeB });
+        await cx.route(/i\.ytimg\.com|fonts\.g/, (x) => x.abort());
+        const pg = await cx.newPage();
+        pg.setDefaultTimeout(15000);
+        const errors = [];
+        pg.on('pageerror', onPageError(errors));
+        if (size.screenH || size.standalone) await pg.addInitScript(({ sh, sa }) => { if (sh) Object.defineProperty(window.screen, 'height', { get: () => sh }); if (sa) Object.defineProperty(navigator, 'standalone', { get: () => true, configurable: true }); }, { sh: size.screenH ?? 0, sa: !!size.standalone });
+        await pg.route(/moments\/pool\.enc/, async (x) => { if (hold) await hold.p; if (status) return x.fulfill({ status, body: 'x' }); return x.fulfill({ contentType: 'application/json', body: pool }); });
+        await pg.goto(`${url}?now=2026-10-23&seed=3${key ? `#k=${k}` : ''}`);
+        return { pg, cx, errors };
+      };
+      const POOL_EMPTY = await (async () => { const iv2 = crypto.getRandomValues(new Uint8Array(12)); const ct2 = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv2 }, key, new TextEncoder().encode(JSON.stringify({ updatedAt: '2026-10-23T00:00:00Z', lastRun: '2026-10-23T00:00:00Z', moments: [] }))); return JSON.stringify({ v: 1, iv: Buffer.from(iv2).toString('base64url'), ct: Buffer.from(ct2).toString('base64url') }); })();
+      const PROF = [['A 393x852', { ...GER, height: 852 }], ['B 393x793', GER], ['C 375x667', SIZES[1]]];
+      for (const scheme of ['light', 'dark']) {
+        for (const [pn, base] of PROF) {
+          const size = { ...base, scheme };
+          const zh = Math.max(size.safeT ?? 0, 12);
+          const w = size.width;
+          const P = `${pn} ${scheme}`;
+          moodSet = pn.startsWith('A') ? MOODS : [null, 'brain'];
+          // Video: Feed, More, Share, Kontext, Settings, Saved
+          {
+            const o = await open(type, size, { tab: null, pool: POOL });
+            const pg = o.pg;
+            await pg.waitForTimeout(300);
+            await pg.evaluate(BI_INJECT, zh);
+            await view(pg, `${P} Feed (Video)`, w, zh);
+            await sheetView(pg, `${P} More-Blatt`, w, zh, () => pg.evaluate(() => window.__core.openNote()), '[data-testid=note-sheet]', () => pg.evaluate(() => document.querySelector('[data-testid=note-sheet-close]')?.click()));
+            await sheetView(pg, `${P} Share-Blatt`, w, zh, () => E(pg, 'share').click(), '[data-testid=share-sheet]', () => pg.evaluate(() => document.querySelector('[data-testid=share-sheet-close]')?.click()));
+            await E(pg, 'info-tap').click();
+            await waitFor(pg, () => !!document.querySelector('[data-testid=caption-sheet]'), undefined, 3000);
+            await pg.waitForTimeout(400);
+            await view(pg, `${P} Untertitel-Blatt (Kontext, ohne Abdunklung)`, w, zh);
+            await pg.evaluate(() => window.__core.closeCaption());
+            await pg.waitForTimeout(300);
+            if (scheme === 'light' || pn.startsWith('A')) {
+              await E(pg, 'today').click();
+              await waitFor(pg, () => !!document.querySelector('[data-testid=sync-card]'), undefined, 3000);
+              await pg.waitForTimeout(400);
+              const st0 = await pg.evaluate(() => { const e = document.querySelector('.scr'); const v = e ? e.scrollTop : null; if (e) e.scrollTop = 0; return v; });
+              console.error(`52b ${P} Settings: scrollTop vor der Messung ${st0}`);
+              await pg.waitForTimeout(100);
+              await view(pg, `${P} Settings`, w, zh);
+              if (pn.startsWith('A')) await pg.screenshot({ path: `${out}/${name}-52b-settings-${scheme}-band.png` });
+              await pg.locator('nav [aria-label=Saved]').click();
+              await waitFor(pg, () => !!document.querySelector('[data-testid=saved-items]') || !!document.querySelector('.scr-empty'), undefined, 3000);
+              await pg.waitForTimeout(400);
+              await pg.evaluate(() => { const e = document.querySelector('.scr'); if (e) e.scrollTop = 0; });
+              await pg.waitForTimeout(100);
+              await view(pg, `${P} Saved`, w, zh);
+              await pg.locator('nav [aria-label=Feed]').click();
+              await pg.waitForTimeout(400);
+            }
+            c[`52b ${P} Video: keine Seitenfehler`] = o.errors.length === 0;
+            await o.browser.close();
+          }
+          // Audio: Feed, Abrufkarte, Endseite
+          {
+            const o = await open(type, size, { tab: 'audio', pool: POOL_G });
+            const pg = o.pg;
+            await showMoment(pg, idOf(40));
+            await pg.waitForTimeout(300);
+            await pg.evaluate(BI_INJECT, zh);
+            await view(pg, `${P} Feed (Audio)`, w, zh);
+            if (pn.startsWith('A') || scheme === 'light') {
+              await pg.evaluate(() => window.__core.showRecall(window.__core.moment().id));
+              await waitFor(pg, () => !!document.querySelector('[data-testid=recall-page]'), undefined, 6000);
+              await pg.waitForTimeout(400);
+              await view(pg, `${P} Abrufkarte`, w, zh);
+              let gotE = false;
+              for (let n = 0; n < 40 && !gotE; n++) {
+                gotE = await pg.evaluate(() => !!document.querySelector('[data-testid=end-page]') && !document.querySelector('[data-testid=recall-card]'));
+                if (gotE) break;
+                if (await pg.locator('[data-testid=recall-card]').count()) { await pg.locator('[data-testid=recall-option][data-correct="1"]').first().click().catch(() => {}); await pg.waitForTimeout(250); await pg.locator('[data-testid=recall-next]').first().click().catch(() => {}); } else await pg.evaluate(() => window.__core.next());
+                await pg.waitForTimeout(450);
+              }
+              c[`52b ${P}: Endseite erreicht`] = gotE;
+              await pg.waitForTimeout(400);
+              await view(pg, `${P} Endseite`, w, zh);
+            }
+            c[`52b ${P} Audio: keine Seitenfehler`] = o.errors.length === 0;
+            await o.browser.close();
+          }
+          // Text
+          {
+            const o = await open(type, size, { tab: 'text', pool: POOL_T });
+            const pg = o.pg;
+            await pg.waitForTimeout(300);
+            await pg.evaluate(BI_INJECT, zh);
+            await view(pg, `${P} Feed (Text)`, w, zh);
+            c[`52b ${P} Text: keine Seitenfehler`] = o.errors.length === 0;
+            await o.browser.close();
+          }
+          // Ohne Feed: Entsperren, Fehlerseite, Ladebild, leerer Pool
+          {
+            let o = await RAW(size, scheme, { pool: POOL, key: false });
+            await waitFor(o.pg, () => !!document.querySelector('[data-testid=unlock-screen]'), undefined, 8000);
+            await o.pg.waitForTimeout(400);
+            await o.pg.evaluate(BI_INJECT, zh);
+            await view(o.pg, `${P} Entsperren`, w, zh);
+            if (pn.startsWith('A')) await o.pg.screenshot({ path: `${out}/${name}-52b-entsperren-${scheme}-band.png` });
+            await o.cx.close();
+            o = await RAW(size, scheme, { pool: POOL, status: 500 });
+            await waitFor(o.pg, () => !!document.querySelector('[data-testid=locked-screen]'), undefined, 9000);
+            await o.pg.waitForTimeout(400);
+            await o.pg.evaluate(BI_INJECT, zh);
+            await view(o.pg, `${P} Fehlerseite`, w, zh);
+            await o.cx.close();
+            const hold = { p: null, go: null }; hold.p = new Promise((res) => { hold.go = res; });
+            o = await RAW(size, scheme, { pool: POOL, hold });
+            await waitFor(o.pg, () => !!document.querySelector('.vload'), undefined, 6000);
+            await o.pg.evaluate(BI_INJECT, zh);
+            await view(o.pg, `${P} Ladebild`, w, zh);
+            hold.go();
+            await o.cx.close();
+            o = await RAW(size, scheme, { pool: POOL_EMPTY });
+            await waitFor(o.pg, () => !!document.querySelector('.vblack'), undefined, 8000);
+            await o.pg.waitForTimeout(400);
+            await o.pg.evaluate(BI_INJECT, zh);
+            await view(o.pg, `${P} leere Pool-Seite (schwarz)`, w, zh);
+            await o.cx.close();
+          }
+        }
+      }
+      r.notes['52b Zonen'] = rec;
+    }
+    // ---------- Runde 53b: arabischer Text läuft überall durch cleanText (Kontextblatt, Hook, Abrufkarte), Saved-Liste rechtsläufig, kein Zeichenabstand ----------
+    sec('Runde 53b: arabischer Text in Blatt, Hook, Abrufkarte und Saved-Liste');
+    {
+      const o = await open(type, { ...GER, height: 852 }, { tab: 'audio', pool: POOL_AR });
+      const pg = o.pg;
+      await showMoment(pg, idOf(84)); await pg.waitForTimeout(500);
+      const TXT = (sel) => pg.evaluate((q) => { const e = document.querySelector(q); if (!e) return null; const cs = getComputedStyle(e); return { text: e.textContent, ls: parseFloat(cs.letterSpacing) || 0, dir: e.getAttribute('dir'), lang: e.getAttribute('lang'), ta: cs.textAlign }; }, sel);
+      const hk = await TXT('[data-testid=hook]');
+      await E(pg, 'info-tap').click();
+      await waitFor(pg, () => !!document.querySelector('[data-testid=caption-sheet]'), undefined, 3000); await pg.waitForTimeout(500);
+      const ch = await TXT('[data-testid=caption-hook]'); const ce = await TXT('[data-testid=caption-excerpt]'); const cc = await TXT('.vcap-ctx-text');
+      await pg.screenshot({ path: `${out}/${name}-53b-untertitel-arabisch.png` });
+      console.error(`53b Blatt: Hook ${JSON.stringify(ch?.text)}, Auszug ${JSON.stringify(ce?.text?.slice(0, 80))}, Kontext ${JSON.stringify(cc?.text)}, Hook im Feed ${JSON.stringify(hk?.text)} ls ${hk?.ls} ${ch?.ls}`);
+      c['53b Kontextblatt: Auszug mit Leerzeichen nach : und ؛ (cleanText), 103:2 und 10:30 unverändert'] = !!ce && ce.text.includes('متفاوتة: قد') && ce.text.includes('صفات: الإيمان') && ce.text.includes('الصالح؛ فهذا') && ce.text.includes('103:2') && ce.text.includes('10:30') && !/[:؛][ء-ي]/.test(ce.text);
+      c['53b Kontextblatt: Kontext mit Leerzeichen (auch "قال:{" wird "قال: {")'] = !!cc && cc.text.includes('قال: {') && cc.text.includes('ثم: قد');
+      c['53b Kontextblatt: Hook mit Leerzeichen'] = !!ch && ch.text.includes('صفات: الإيمان');
+      c['53b Hook im Feed (Audio) mit Leerzeichen'] = !!hk && hk.text.includes('صفات: الإيمان');
+      c['53b Arabisch: kein Zeichenabstand (Hook im Feed, Hook im Blatt, Auszug)'] = !!hk && hk.ls === 0 && !!ch && ch.ls === 0 && !!ce && ce.ls === 0;
+      await pg.evaluate(() => window.__core.closeCaption()); await pg.waitForTimeout(300);
+      await pg.evaluate(() => window.__core.showRecall(window.__core.moment().id));
+      await waitFor(pg, () => !!document.querySelector('[data-testid=recall-card]'), undefined, 4000); await pg.waitForTimeout(400);
+      const rq = await TXT('[data-testid=recall-question]');
+      const ro = await pg.evaluate(() => [...document.querySelectorAll('[data-testid=recall-option]')].map((e) => e.textContent));
+      await pg.locator('[data-testid=recall-option][data-correct="1"]').first().click(); await waitFor(pg, () => !!document.querySelector('[data-testid=recall-why]'), undefined, 3000);
+      const rw = await TXT('[data-testid=recall-why]');
+      console.error(`53b Abrufkarte: Frage ${JSON.stringify(rq?.text)} Optionen ${JSON.stringify(ro)} Erklärung ${JSON.stringify(rw?.text)} ls ${rq?.ls}`);
+      c['53b Abrufkarte: Frage, Optionen und Erklärung mit Leerzeichen nach :'] = !!rq && rq.text.includes('يلي: هذا') && ro.some((t) => t.includes('خطأ: أولا')) && ro.some((t) => t.includes('صحيح: ثانيا')) && !!rw && rw.text.includes('لأن: هذا');
+      c['53b Abrufkarte: Frage ohne Zeichenabstand'] = !!rq && rq.ls === 0;
+      await pg.locator('[data-testid=recall-next]').first().click().catch(() => {}); await pg.waitForTimeout(500);
+      // Saved-Liste: Eintrag mit arabischem Hook
+      await showMoment(pg, idOf(84));
+      await E(pg, 'save').click(); await waitFor(pg, (i) => window.__core.saved(i), idOf(84), 3000);
+      await E(pg, 'today').click(); await waitFor(pg, () => !!document.querySelector('[data-testid=sync-card]'), undefined, 3000);
+      await pg.locator('nav [aria-label=Saved]').click(); await waitFor(pg, () => !!document.querySelector('.sv-hook'), undefined, 3000); await pg.waitForTimeout(500);
+      const SV = await pg.evaluate(() => { const hs = [...document.querySelectorAll('.sv-hook')]; const h = hs.find((e) => e.getAttribute('lang') === 'ar'); if (!h) return { n: hs.length }; const hb = h.getBoundingClientRect(); const rg = document.createRange(); rg.selectNodeContents(h); const rr = [...rg.getClientRects()]; const cs = getComputedStyle(h); return { n: hs.length, dir: h.getAttribute('dir'), ta: cs.textAlign, ls: parseFloat(cs.letterSpacing) || 0, boxL: hb.left, boxR: hb.right, txtL: Math.min(...rr.map((x) => x.left)), txtR: Math.max(...rr.map((x) => x.right)), text: h.textContent }; });
+      await pg.screenshot({ path: `${out}/${name}-53b-saved-arabisch.png` });
+      console.error(`53b Saved: ${JSON.stringify(SV)}`);
+      c['53b Saved-Liste: arabischer Eintrag dir rtl, lang ar, am rechten Rand der Textfläche, Leerzeichen nach :, kein Zeichenabstand'] = !!SV.dir && SV.dir === 'rtl' && SV.ta === 'start' && Math.abs(SV.txtR - SV.boxR) <= 2 && SV.txtL >= SV.boxL - 0.5 && SV.ls === 0 && SV.text.includes('صفات: الإيمان');
+      c['53b keine Seitenfehler'] = o.errors.length === 0;
+      await o.browser.close();
+    }
+
+    if (process.env.PV_ONLY === '52b') throw new Error('PV_ONLY');
+
     // ---------- Aufbau: drei Größen, drei Reiter, sehr langer Hook ----------
     sec('Aufbau: drei Größen, drei Reiter, sehr langer Hook');
     for (const size of SIZES) {
@@ -2075,7 +2326,7 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
       await o.browser.close();
     }
   } catch (e) {
-    r.error = `${String(e && e.stack ? e.stack : e)} (Abschnitt: ${prog.section})`;
+    if (!/PV_ONLY/.test(String(e))) r.error = `${String(e && e.stack ? e.stack : e)} (Abschnitt: ${prog.section})`;
   }
   clearTimeout(cap);
   await shared.get(type)?.close().catch(() => {});

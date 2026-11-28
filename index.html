@@ -15,14 +15,19 @@
     <title>core</title>
     <style>
       /* Runde 52: iOS 26 (WebKit LocalFrameView::fixedContainerEdges) lässt den Rand-Weichzeichner unter der Statusleiste weg, wenn an der Oberkante ein festes, mindestens 90 % breites, über 10 px hohes Element mit einfarbigem Hintergrund steht, und zwar ab dem ersten Bild (Quelle: coder/coder PR 31027).
-         Darum steht das Band hier im HTML und diese Regeln im head, nicht erst im Bündel. Nur in der installierten iPhone-App. Die Farbe ist die der Bühne (--stage), mit festem Rückfall je Stimmung (data-mood am html wie in tokens.css). Keine Berührung, kein Kind, kein Verlauf, keine Transparenz. */
+         Darum steht das Band hier im HTML und diese Regeln im head, nicht erst im Bündel. Nur in der installierten iPhone-App. Keine Berührung, kein Kind, kein Verlauf, keine Transparenz.
+         Runde 52b: das Band hat in jeder Ansicht genau die Farbe der Fläche, die ohne Band im Bereich 0 bis Statusleiste zu sehen wäre (--edge-base). Vor dem ersten Bild von React ist das die Seite (--bg), danach je Ansicht:
+           Feed (Kopfleiste), Ladebild, Abrufkarte, Endseite: --stage; Settings, Saved, Entsperren, Fehlerseite: --bg; Saved-Vollbild und leere Pool-Seite: schwarz.
+         Steht ein Blatt mit Abdunklung (.sheet-backdrop: More, Share, Fokus, Kontext, Notiz), hat das Band die abgedunkelte Mischung (--scrim-pct Schwarz über --edge-base, deckend, ohne Alpha). Die Abdunklung blendet nicht ein (sheets.css), das Band darum auch nicht.
+         Jede Regel nennt #ios-edge-band, denn der Test (phoneview.mjs) holt die Regeln so in Chromium. */
       #ios-edge-band { display: none; }
       @media (display-mode: standalone) {
         @supports (-webkit-touch-callout: none) {
-          #ios-edge-band { display: block; position: fixed; top: 0; left: 0; width: 100%; height: max(12px, env(safe-area-inset-top, 0px)); z-index: 2147483647; pointer-events: none; background-color: var(--stage, #0a0e12); }
-          html[data-mood='beat'] #ios-edge-band { background-color: var(--stage, #0d0b08); }
-          html[data-mood='body'] #ios-edge-band { background-color: var(--stage, #0a0e12); }
-          html[data-mood='brain'] #ios-edge-band { background-color: var(--stage, #0b0d11); }
+          #ios-edge-band { --edge-base: var(--bg, #0a0e12); --edge: var(--edge-base); display: block; position: fixed; top: 0; left: 0; width: 100%; height: max(12px, env(safe-area-inset-top, 0px)); z-index: 2147483647; pointer-events: none; background-color: var(--edge); }
+          html:has(.vfeed) #ios-edge-band, html:has(.vload) #ios-edge-band { --edge-base: var(--stage, #0a0e12); }
+          html:has(.scr) #ios-edge-band, html:has(.unlock) #ios-edge-band { --edge-base: var(--bg, #0a0e12); }
+          html:has(.vblack) #ios-edge-band { --edge-base: #000; }
+          html:has(.sheet-backdrop) #ios-edge-band { --edge: color-mix(in srgb, #000 var(--scrim-pct, 55%), var(--edge-base)); }
         }
       }
     </style>
