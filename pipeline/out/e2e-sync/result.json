@@ -1,5 +1,5 @@
 {
- "at": "2026-11-28T07:33:30.527Z",
+ "at": "2026-11-28T08:41:24.684Z",
  "runs": [
   {
    "browser": "webkit",
@@ -54,12 +54,12 @@
    },
    "diagLines": 21,
    "diagSample": [
-    "6tgp vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 dh=659 sy=0 top=DIV.pad band=none pt=none short=no",
-    "6tgp sync: first upload waits for stable playback",
-    "6tgp app: hidden",
-    "6tgp sync: first upload released (app left) after 3.0 s"
+    "wo7q vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 dh=659 sy=0 top=DIV.pad band=none pt=none short=no",
+    "wo7q sync: first upload waits for stable playback",
+    "wo7q app: hidden",
+    "wo7q sync: first upload released (app left) after 3.0 s"
    ],
-   "writeDelayMs": 10033,
+   "writeDelayMs": 10029,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
@@ -121,12 +121,12 @@
    },
    "diagLines": 21,
    "diagSample": [
-    "j33f vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 dh=659 sy=0 top=LABEL.grp-row band=none pt=none short=no",
-    "j33f sync: first upload waits for stable playback",
-    "j33f app: hidden",
-    "j33f sync: first upload released (app left) after 3.0 s"
+    "zsod sync: first upload waits for stable playback",
+    "zsod vp: iw=393 ih=659 vvh=659 ch=659 sw=393 sh=852 st=0 sb=0 standalone=no ios=17 head=0,0 bar=0,0 feed=0,0 dh=659 sy=0 top=LABEL.grp-row band=none pt=none short=no",
+    "zsod app: hidden",
+    "zsod sync: first upload released (app left) after 3.0 s"
    ],
-   "writeDelayMs": 10022,
+   "writeDelayMs": 10021,
    "hosts": [
     "127.0.0.1:4176",
     "www.youtube.com",
