@@ -1,5 +1,5 @@
 {
- "at": "2026-11-28T00:37:35.448Z",
+ "at": "2026-11-28T01:50:52.931Z",
  "runs": [
   {
    "browser": "webkit",
@@ -64,7 +64,7 @@
     "tempoMediaLimit": true,
     "tempoNoPageErrors": true,
     "cueRate2": true,
-    "cueSamples": false,
+    "cueSamples": true,
     "cueWithin300ms": true,
     "cueNeverLate": true,
     "cueAt2x": true,
@@ -93,7 +93,7 @@
     "openCardNotBackOnReturn": true
    },
    "notes": {
-    "iosTapMs": 6,
+    "iosTapMs": 5,
     "iosGestureLines": [
      "deck: waiting for tap atshort1 (no gesture or sound off)",
      "deck: probe done spare ok=0 dur=600.0 t=0.0",
@@ -108,7 +108,7 @@
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
-     "deck: gesture unlock 5 elements ok=5 rejected=0 timeout=0 after 306 ms",
+     "deck: gesture unlock 5 elements ok=5 rejected=0 timeout=0 after 304 ms",
      "deck: pool start after unlock ok=5/10",
      "deck: gesture pointerup unlocked 6/6"
     ],
@@ -124,7 +124,7 @@
      ],
      "n": 50
     },
-    "rfSwipeMs": 413,
+    "rfSwipeMs": 409,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -164,43 +164,47 @@
      "bg: ended atshort9:0",
      "bg: started atshort2:0",
      "bg: next atshort2:0",
-     "bg: refill atshort13 (pool 1/0, target 2)",
-     "bg: refill ready atshort13 after 31 ms"
+     "bg: refill atshort13 (pool 1/0, target 2)"
     ],
     "tempoWaiting": 0,
-    "tempoPaused": 7,
+    "tempoPaused": 9,
     "cue": {
      "worst": 0,
-     "n": 182,
+     "n": 237,
      "shownLate": 0,
      "shownNow": 0,
      "gaps": [
       [
-       "2.31",
-       24,
-       24
+       "0.46",
+       5,
+       5
       ],
       [
-       "6.04",
-       61,
-       61
+       "3.61",
+       37,
+       37
       ],
       [
-       "10.00",
-       101,
-       101
+       "7.06",
+       71,
+       71
       ],
       [
-       "14.66",
-       147,
-       147
+       "10.44",
+       105,
+       105
+      ],
+      [
+       "13.98",
+       140,
+       140
       ]
      ],
      "rate": 2
     },
     "cueTempo": {
-     "worst": 0,
-     "n": 172,
+     "worst": 1,
+     "n": 208,
      "rates": [
       1,
       1.5,
@@ -213,10 +217,10 @@
      "played": 10,
      "lines": [
       "bg: mediasession none to playing (feed paused=false) hidden=false",
-      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+      "bg: deck page hidden: paused=false ended=false t=0.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
       "bg: left atrecall0:0",
-      "bg: deck page hidden +1 s: paused=false ended=false t=1.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
-      "bg: deck clip end via timeupdate hidden=true pool=5 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+      "bg: deck page hidden +1 s: paused=false ended=false t=1.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
+      "bg: deck clip end via timeupdate hidden=true pool=3 onAdvance=true advance=yes rs=0 muted=false t=4.0",
       "bg: ms playbackState playing (swap)",
       "bg: deck advance atrecall0 to atrecall2: swap and play() in this handler, new element true, next from storage false, readyState 0",
       "bg: ended atrecall0:0",
@@ -224,21 +228,25 @@
       "bg: next atrecall2:0",
       "bg: deck page hidden +5 s: paused=true ended=false t=4.0 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
       "bg: deck advance to atrecall2: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
-      "bg: deck clip end via timeupdate hidden=true pool=4 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+      "bg: deck clip end via timeupdate hidden=true pool=2 onAdvance=true advance=yes rs=0 muted=false t=4.0",
       "bg: deck advance atrecall2 to atrecall8: swap and play() in this handler, new element true, next from storage false, readyState 0",
       "bg: ended atrecall2:0",
       "bg: started atrecall8:0",
       "bg: next atrecall8:0",
+      "bg: refill atrecall10 (pool 1/0, target 2)",
+      "bg: refill ready atrecall10 after 31 ms",
       "bg: deck advance to atrecall8: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
-      "bg: deck clip end via timeupdate hidden=true pool=3 onAdvance=true advance=yes rs=0 muted=false t=4.0",
+      "bg: deck clip end via timeupdate hidden=true pool=2 onAdvance=true advance=yes rs=0 muted=false t=4.0",
       "bg: deck advance atrecall8 to atrecall4: swap and play() in this handler, new element true, next from storage false, readyState 0",
       "bg: ended atrecall8:0",
       "bg: started atrecall4:0",
-      "bg: next atrecall4:0"
+      "bg: next atrecall4:0",
+      "bg: refill atrecall1 (pool 1/0, target 2)",
+      "bg: refill ready atrecall1 after 31 ms"
      ]
     }
    },
-   "ok": false
+   "ok": true
   },
   {
    "browser": "chromium",
@@ -332,7 +340,7 @@
     "openCardNotBackOnReturn": true
    },
    "notes": {
-    "iosTapMs": 2,
+    "iosTapMs": 1,
     "iosGestureLines": [
      "deck: waiting for tap atshort1 (no gesture or sound off)",
      "deck: probe done spare ok=0 dur=600.0 t=0.0",
@@ -347,7 +355,7 @@
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
      "deck: probe done spare ok=1 dur=600.0 t=0.3",
-     "deck: gesture unlock 5 elements ok=5 rejected=0 timeout=0 after 303 ms",
+     "deck: gesture unlock 5 elements ok=5 rejected=0 timeout=0 after 302 ms",
      "deck: pool start after unlock ok=5/10",
      "deck: gesture pointerup unlocked 6/6"
     ],
@@ -363,7 +371,7 @@
      ],
      "n": 48
     },
-    "rfSwipeMs": 506,
+    "rfSwipeMs": 504,
     "bgLines": [
      "bg: mediasession none to playing (feed paused=false) hidden=false",
      "bg: deck page hidden: paused=false ended=false t=0.1 rs=0 rate=1 src=net lane=plain want=true done=false mediaSession=playing",
@@ -396,7 +404,7 @@
      "bg: started atshort9:0",
      "bg: next atshort9:0",
      "bg: refill atshort8 (pool 1/0, target 2)",
-     "bg: refill ready atshort8 after 31 ms",
+     "bg: refill ready atshort8 after 30 ms",
      "bg: deck advance to atshort9: NOT playing after 3 s, rs=0 muted=false t=3.0 error none",
      "bg: deck clip end via timeupdate hidden=true pool=2 onAdvance=true advance=yes rs=0 muted=false t=4.0",
      "bg: deck advance atshort9 to atshort2: swap and play() in this handler, new element true, next from storage false, readyState 0",
@@ -425,52 +433,52 @@
        47
       ],
       [
-       "0.95",
+       "0.94",
        10,
        10
       ],
       [
-       "2.28",
+       "2.27",
        23,
        23
       ],
       [
-       "3.61",
+       "3.60",
        37,
        37
       ],
       [
-       "4.95",
+       "4.94",
        50,
        50
       ],
       [
-       "6.28",
+       "6.27",
        63,
        63
       ],
       [
-       "7.61",
+       "7.60",
        77,
        77
       ],
       [
-       "8.95",
+       "8.94",
        90,
        90
       ],
       [
-       "10.28",
+       "10.27",
        103,
        103
       ],
       [
-       "11.61",
+       "11.60",
        117,
        117
       ],
       [
-       "12.95",
+       "12.94",
        130,
        130
       ]
@@ -565,7 +573,7 @@
     "pillCountedInSignals": true
    },
    "notes": {
-    "firstSoundMs": 2767,
+    "firstSoundMs": 2712,
     "diag": [
      "deck: start order none first=pod-0006:82 heads=6 usable=6 stock=0",
      "deck: src net pod-0006",
@@ -604,9 +612,9 @@
      "want": "https://i.ytimg.com/vi/pod-0013/hqdefault.jpg",
      "id": "pod-0013:82"
     },
-    "lockNextMs": 29,
+    "lockNextMs": 16,
     "lockNextLines": [
-     "deck: swap pod-0013 ready=true pool=0",
+     "deck: swap pod-0013 ready=true pool=1",
      "deck play#3 swap rs=4 muted=false t=82.0",
      "deck play#3 ok"
     ],
