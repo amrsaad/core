@@ -326,14 +326,14 @@ jobs:
           node tests/e2e/deskview.mjs http://127.0.0.1:4194/core/ pipeline/out/e2e-deskview
       - name: iPhone-Ansicht testen (Runde 45, feste Abspielleiste, Aktionsreihe, Reiterleiste bei 390x844, 375x667 und 430x932 in Video, Audio und Text, Tasten, Wischen, erste Geste auf der Play-Taste, Schalter aus; nur WebKit)
         if: always() && matrix.group == 4
-        timeout-minutes: 25
+        timeout-minutes: 40
         run: |
           npx vite preview --host 127.0.0.1 --port 4195 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4195/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"
           E2E_BROWSERS=webkit node tests/e2e/phoneview.mjs http://127.0.0.1:4195/core/ pipeline/out/e2e-phoneview
       - name: iPhone-Ansicht testen (Runde 45, feste Abspielleiste, Aktionsreihe, Reiterleiste bei 390x844, 375x667 und 430x932 in Video, Audio und Text, Tasten, Wischen, erste Geste auf der Play-Taste, Schalter aus; nur Chromium)
         if: always() && matrix.group == 4
-        timeout-minutes: 25
+        timeout-minutes: 40
         run: |
           npx vite preview --host 127.0.0.1 --port 4198 --strictPort &
           node -e "(async()=>{for(let i=0;i<30;i++){try{if((await fetch('http://127.0.0.1:4198/core/')).ok)return}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)})()"

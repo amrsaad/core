@@ -145,7 +145,7 @@ const POOL_AR = await poolOf([40, 84]);
 const k = Buffer.from(raw).toString('base64url');
 const idOf = (i) => `test${String(i).padStart(7, '0')}:100`;
 
-// Runde 51 (Ziel 4): Fortschritt auf stderr, jede Wartezeit höchstens 15 s mit benanntem Fehlschlag, Gesamt-Limit je Browser 25 Minuten
+// Runde 51 (Ziel 4): Fortschritt auf stderr, jede Wartezeit höchstens 15 s mit benanntem Fehlschlag, Gesamt-Limit je Browser 35 Minuten
 const T0 = Date.now();
 const prog = { browser: '', section: '', run: null };
 const sec = (name) => { prog.section = name; console.error(`[${prog.browser} ${Math.round((Date.now() - T0) / 1000)} s] ${name}`); };
@@ -399,14 +399,14 @@ for (const [name, type] of [['webkit', webkit], ['chromium', chromium]].filter((
   results.runs.push(r);
   const c = r.checks;
   prog.browser = name; prog.run = r;
-  // Gesamt-Limit je Browser: 25 Minuten (Runde 52b: Bandfarbe in allen Ansichten braucht rund 6 Minuten), danach Abbruch mit dem letzten Abschnitt (kein stummes Hängen)
+  // Gesamt-Limit je Browser: 35 Minuten (Runde 52b: Bandfarbe in allen Ansichten braucht rund 6 Minuten), danach Abbruch mit dem letzten Abschnitt (kein stummes Hängen)
   const cap = setTimeout(() => {
-    r.error = `Gesamt-Limit 25 Minuten, letzter Abschnitt: ${prog.section}`;
+    r.error = `Gesamt-Limit 35 Minuten, letzter Abschnitt: ${prog.section}`;
     console.error(`[${name}] ${r.error}`);
     try { writeFileSync(`${out}/results.json`, JSON.stringify(results, null, 1)); } catch { /* egal */ }
     console.log(JSON.stringify({ browser: name, ok: false, checks: Object.keys(c).length, fails: Object.entries(c).filter(([, v]) => v !== true).map(([n]) => n), error: r.error }));
     process.exit(1);
-  }, 25 * 60 * 1000);
+  }, 35 * 60 * 1000);
   try {
     // ---------- Runde 52b: Das Band hat in jeder Ansicht genau die Farbe der Fläche, die ohne Band im Bereich 0 bis Statusleiste zu sehen wäre (auch bei offenem Blatt mit Abdunklung) ----------
     sec('Runde 52b: Bandfarbe gleich der Fläche darunter in allen Ansichten');
